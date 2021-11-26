@@ -38,10 +38,10 @@ public class SphereAreaTest {
         assertFalse(area.contains(pos), "Checked " + pos);
 
         pos = new BlockPos(-3, 3,3);
-        assertFalse(area.contains(pos), "Checked " + pos);
+        assertTrue(area.contains(pos), "Checked " + pos);
 
         pos = new BlockPos(-3, 2,4);
-        assertFalse(area.contains(pos), "Checked " + pos);
+        assertTrue(area.contains(pos), "Checked " + pos);
 
     }
 
