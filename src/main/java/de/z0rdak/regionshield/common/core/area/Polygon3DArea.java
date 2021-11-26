@@ -4,6 +4,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.common.util.Constants;
 
 import java.util.ArrayList;
@@ -102,4 +103,8 @@ public class Polygon3DArea extends AbstractArea {
     }
 
 
+    @Override
+    public Vector3d getCenter() {
+        return Vector3d.ZERO;
+    }
 }

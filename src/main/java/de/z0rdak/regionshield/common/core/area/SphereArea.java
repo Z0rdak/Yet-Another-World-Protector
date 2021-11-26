@@ -3,6 +3,9 @@ package de.z0rdak.regionshield.common.core.area;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
+
+import static de.z0rdak.regionshield.common.core.area.AreaUtil.distance;
 
 public class SphereArea extends AbstractArea {
 
@@ -28,15 +31,13 @@ public class SphereArea extends AbstractArea {
         return new BlockPos(this.centerP);
     }
 
-    public int getRadius() {
-        return this.radius;
+    @Override
+    public Vector3d getCenter() {
+        return new Vector3d(this.centerP.getX(), this.centerP.getY(), this.centerP.getZ());
     }
 
-    // TODO: move to block/area util class?
-    public static double distance(BlockPos a, BlockPos b) {
-        return Math.sqrt(Math.pow(b.getX() - a.getX(), 2)
-                + Math.pow(b.getY() - a.getY(), 2)
-                + Math.pow(b.getZ() - a.getZ(), 2));
+    public int getRadius() {
+        return this.radius;
     }
 
     public SphereArea(BlockPos middlePos, int radius){

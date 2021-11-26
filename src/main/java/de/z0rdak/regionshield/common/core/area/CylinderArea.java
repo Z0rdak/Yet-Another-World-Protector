@@ -3,6 +3,7 @@ package de.z0rdak.regionshield.common.core.area;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
 
 import static de.z0rdak.regionshield.common.core.area.AreaUtil.*;
 
@@ -24,8 +25,8 @@ public class CylinderArea extends AbstractArea {
         this.radiusPoint = scopePos;
         int maxDist = Math.max(scopePos.getZ(), scopePos.getX());
         BlockPos radiusPos = new BlockPos(maxDist, scopePos.getY(), maxDist);
-        this.radius = (int) SphereArea.distance(centerPos, radiusPos);
-        this.height = (int) SphereArea.distance(centerPos,
+        this.radius = (int) distance(centerPos, radiusPos);
+        this.height = (int) distance(centerPos,
                 new BlockPos(centerPos.getX(), scopePos.getY(), centerPos.getZ()));
     }
 
@@ -34,8 +35,8 @@ public class CylinderArea extends AbstractArea {
         this.deserializeNBT(nbt);
     }
 
-    public BlockPos getCenter() {
-        return new BlockPos(this.centerP);
+    public Vector3d getCenter() {
+        return new Vector3d(this.centerP.getX(), this.centerP.getY(), this.centerP.getZ());
     }
 
     public BlockPos getScopePoint() {

@@ -4,6 +4,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
 
 /**
  * Represents and wraps a simple AxisAlignedBB.
@@ -67,5 +68,10 @@ public class CuboidArea extends AbstractArea {
     @Override
     public String toString() {
         return "Cuboid " + AreaUtil.toString(this.getAreaP1()) + " -> " + AreaUtil.toString(this.getAreaP1());
+    }
+
+    @Override
+    public Vector3d getCenter() {
+        return this.area.getCenter();
     }
 }
