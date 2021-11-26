@@ -32,6 +32,7 @@ public class SphereArea extends AbstractArea {
         return this.radius;
     }
 
+    // TODO: move to block/area util class?
     public static double distance(BlockPos a, BlockPos b) {
         return Math.sqrt(Math.pow(b.getX() - a.getX(), 2)
                 + Math.pow(b.getY() - a.getY(), 2)
@@ -40,20 +41,12 @@ public class SphereArea extends AbstractArea {
 
     public SphereArea(BlockPos middlePos, int radius){
         this(middlePos, new BlockPos(middlePos)
-                .offset(middlePos.getX(), middlePos.getY() + radius, middlePos.getZ()));
+                .offset(0, radius, 0));
     }
 
     @Override
     public boolean contains(BlockPos pos) {
-        // (x−cx)2+(y−cy)2+(z−cz)2<r2
-        int cx = centerP.getX();
-        int cy = centerP.getY();
-        int cz = centerP.getZ();
-        double xPow = Math.pow((pos.getX() - cx), 2);
-        double yPow = Math.pow((pos.getY() - cy), 2);
-        double zPow = Math.pow((pos.getZ() - cz), 2);
-        double rPow = Math.pow(this.radius, 2);
-        return (xPow + yPow + zPow) < rPow;
+        return distance(this.centerP, pos) < this.radius + 0.5;
     }
 
     @Override
