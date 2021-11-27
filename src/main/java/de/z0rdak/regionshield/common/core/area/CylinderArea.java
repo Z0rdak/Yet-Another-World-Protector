@@ -7,21 +7,19 @@ import net.minecraft.util.math.vector.Vector3d;
 
 import static de.z0rdak.regionshield.common.core.area.AreaUtil.*;
 
-public class CylinderArea extends AbstractArea {
+public class CylinderArea extends CenteredArea {
 
     private CylinderArea() {
         super(AreaType.CYLINDER);
     }
 
-    private BlockPos centerP;
     private BlockPos radiusPoint;
     private int height;
     private int radius;
 
     // TODO: validate
     public CylinderArea(BlockPos centerPos, BlockPos scopePos){
-        this();
-        this.centerP = centerPos;
+        super(centerPos, AreaType.CYLINDER);
         this.radiusPoint = scopePos;
         int maxDist = Math.max(scopePos.getZ(), scopePos.getX());
         BlockPos radiusPos = new BlockPos(maxDist, scopePos.getY(), maxDist);
@@ -36,7 +34,7 @@ public class CylinderArea extends AbstractArea {
     }
 
     public Vector3d getCenter() {
-        return new Vector3d(this.centerP.getX(), this.centerP.getY(), this.centerP.getZ());
+        return new Vector3d(this.center.getX(), this.center.getY(), this.center.getZ());
     }
 
     public BlockPos getScopePoint() {
@@ -63,8 +61,7 @@ public class CylinderArea extends AbstractArea {
 
     @Override
     public CompoundNBT serializeNBT() {
-        CompoundNBT nbt = new CompoundNBT();
-        nbt.put("center", NBTUtil.writeBlockPos(this.centerP));
+        CompoundNBT nbt = super.serializeNBT();
         nbt.putInt("radius", this.radius);
         nbt.putInt("height", this.height);
         return nbt;
@@ -72,7 +69,7 @@ public class CylinderArea extends AbstractArea {
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
-        this.centerP = NBTUtil.readBlockPos(nbt.getCompound("center"));
+        super.deserializeNBT(nbt);
         this.height = nbt.getInt("height");
         this.radius = nbt.getInt("radius");
     }

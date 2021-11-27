@@ -10,16 +10,15 @@ import net.minecraft.util.math.vector.Vector3d;
  * Represents and wraps a simple AxisAlignedBB.
  * This area is marked by two positions and thus spans a cuboid shape
  */
-public class CuboidArea extends AbstractArea {
+public class CuboidArea extends CenteredArea {
 
     private AxisAlignedBB area;
 
     public CuboidArea(AxisAlignedBB area) {
-        this();
-        this.area = area;
+        super(new BlockPos(area.getCenter().x, area.getCenter().y,area.getCenter().z), AreaType.CUBOID);
     }
 
-    private CuboidArea(){
+    private CuboidArea() {
         super(AreaType.CUBOID);
     }
 

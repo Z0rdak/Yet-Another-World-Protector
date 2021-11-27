@@ -7,9 +7,8 @@ import net.minecraft.util.math.vector.Vector3d;
 
 import static de.z0rdak.regionshield.common.core.area.AreaUtil.distance;
 
-public class SphereArea extends AbstractArea {
+public class SphereArea extends CenteredArea {
 
-    private BlockPos centerP;
     private int radius;
 
     private SphereArea() {
@@ -22,18 +21,13 @@ public class SphereArea extends AbstractArea {
     }
 
     public SphereArea(BlockPos centerPos, BlockPos scopePos){
-        this();
-        this.centerP = centerPos;
+        super(centerPos, AreaType.SPHERE);
         this.radius = (int) distance(centerPos, scopePos);
-    }
-
-    public BlockPos getCenterP() {
-        return new BlockPos(this.centerP);
     }
 
     @Override
     public Vector3d getCenter() {
-        return new Vector3d(this.centerP.getX(), this.centerP.getY(), this.centerP.getZ());
+        return new Vector3d(this.center.getX(), this.center.getY(), this.center.getZ());
     }
 
     public int getRadius() {
@@ -47,25 +41,24 @@ public class SphereArea extends AbstractArea {
 
     @Override
     public boolean contains(BlockPos pos) {
-        return distance(this.centerP, pos) < this.radius + 0.5;
+        return distance(this.center, pos) < this.radius + 0.5;
     }
 
     @Override
     public CompoundNBT serializeNBT() {
-        CompoundNBT nbt = new CompoundNBT();
-        nbt.put("center", NBTUtil.writeBlockPos(this.centerP));
+        CompoundNBT nbt = super.serializeNBT();
         nbt.putInt("radius", this.radius);
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
-        this.centerP = NBTUtil.readBlockPos(nbt.getCompound("center"));
+        super.deserializeNBT(nbt);
         this.radius = nbt.getInt("radius");
     }
 
     @Override
     public String toString() {
-        return "SphereArea " + AreaUtil.toString(this.centerP) + ", r=" + radius;
+        return "SphereArea " + AreaUtil.toString(this.center) + ", r=" + radius;
     }
 }
