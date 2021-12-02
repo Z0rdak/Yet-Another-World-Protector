@@ -24,10 +24,4 @@ public class PrismArea extends AbstractArea {
     public void deserializeNBT(CompoundNBT nbt) {
 
     }
-
-    // todo: type for center focused areas?
-    @Override
-    public Vector3d getCenter() {
-        return null;
-    }
 }
