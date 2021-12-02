@@ -4,18 +4,22 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
 
 /**
  * Represents and wraps a simple AxisAlignedBB.
  * This area is marked by two positions and thus spans a cuboid shape
  */
-public class CuboidArea extends CenteredArea {
+public class CuboidArea extends AbstractArea {
 
     private AxisAlignedBB area;
 
     public CuboidArea(AxisAlignedBB area) {
-        super(new BlockPos(area.getCenter().x, area.getCenter().y,area.getCenter().z), AreaType.CUBOID);
+        super(AreaType.CUBOID);
+        this.area = area;
+    }
+
+    public CuboidArea(BlockPos p1, BlockPos p2) {
+        this(new AxisAlignedBB(p1, p2));
     }
 
     private CuboidArea() {
@@ -48,7 +52,6 @@ public class CuboidArea extends CenteredArea {
         return new BlockPos(this.area.maxX, this.area.maxY, this.area.maxZ);
     }
 
-    // TODO: compound p1, p2
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
@@ -66,11 +69,7 @@ public class CuboidArea extends CenteredArea {
 
     @Override
     public String toString() {
-        return "Cuboid " + AreaUtil.toString(this.getAreaP1()) + " -> " + AreaUtil.toString(this.getAreaP1());
+        return "Cuboid " + AreaUtil.toString(this.getAreaP1()) + " -> " + AreaUtil.toString(this.getAreaP2());
     }
 
-    @Override
-    public Vector3d getCenter() {
-        return this.area.getCenter();
-    }
 }

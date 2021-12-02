@@ -15,6 +15,12 @@ public final class AreaUtil {
                 + Math.pow(b.getZ() - a.getZ(), 2));
     }
 
+    public static double length(BlockPos a) {
+        return Math.sqrt(Math.pow(a.getX(), 2)
+                + Math.pow(a.getY(), 2)
+                + Math.pow(a.getZ(), 2));
+    }
+
     public static String toString(BlockPos pos){
         String posStr = new StringJoiner(", ", "[", "]")
                 .add(pos.getX() + "")

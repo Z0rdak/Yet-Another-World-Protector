@@ -1,7 +1,7 @@
 package de.z0rdak.regionshield.common.core.area;
 
+import de.z0rdak.regionshield.RegionShield;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 
@@ -22,7 +22,7 @@ public class SphereArea extends CenteredArea {
 
     public SphereArea(BlockPos centerPos, BlockPos scopePos){
         super(centerPos, AreaType.SPHERE);
-        this.radius = (int) distance(centerPos, scopePos);
+        this.radius = (int) (distance(centerPos, scopePos) + 0.5);
     }
 
     @Override
@@ -34,6 +34,7 @@ public class SphereArea extends CenteredArea {
         return this.radius;
     }
 
+    // TODO: MAX sphere radius
     public SphereArea(BlockPos middlePos, int radius){
         this(middlePos, new BlockPos(middlePos)
                 .offset(0, radius, 0));
