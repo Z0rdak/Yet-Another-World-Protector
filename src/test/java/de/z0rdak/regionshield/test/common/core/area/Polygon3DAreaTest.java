@@ -1,10 +1,9 @@
 package de.z0rdak.regionshield.test.common.core.area;
 
-import de.z0rdak.regionshield.common.core.area.Polygon3DArea;
+import de.z0rdak.regionshield.core.area.Polygon3DArea;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +56,7 @@ public class Polygon3DAreaTest {
     }
 
 
-    @Test
+
     public void testSerialization(){
         CompoundNBT nbt = area.serializeNBT();
         Polygon3DArea polygon3DArea = new Polygon3DArea(nbt);

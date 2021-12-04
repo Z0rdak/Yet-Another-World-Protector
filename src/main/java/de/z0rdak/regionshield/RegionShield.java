@@ -1,8 +1,8 @@
 package de.z0rdak.regionshield;
 
-import de.z0rdak.regionshield.server.command.CommandsRegister;
-import de.z0rdak.regionshield.server.config.ServerConfigBuilder;
-import de.z0rdak.regionshield.server.data.RegionDataManager;
+import de.z0rdak.regionshield.commands.*;
+import de.z0rdak.regionshield.config.*;
+import de.z0rdak.regionshield.managers.data.RegionDataManager;
 import net.minecraft.item.Item;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;

@@ -1,6 +1,6 @@
 package de.z0rdak.regionshield.test.common.core.area;
 
-import de.z0rdak.regionshield.common.core.area.SphereArea;
+import de.z0rdak.regionshield.core.area.SphereArea;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 import org.junit.jupiter.api.BeforeAll;
