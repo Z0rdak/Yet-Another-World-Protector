@@ -78,9 +78,7 @@ public class StickInteractionHandler {
 
 
     /**
-     * MAYBE: Rename only one stick and split stack
-     *
-     * @param event
+     * Handles creation of mod sticks by renaming them in an anvil
      */
     @SubscribeEvent
     public static void onStickRename(AnvilRepairEvent event) {
@@ -99,6 +97,7 @@ public class StickInteractionHandler {
                     inputItem.setCount(outputItem.getCount() - 1);
                     player.addItem(inputItem);
                     // TODO: Send network packet to force inventory sync
+                    player.giveExperienceLevels(1);
                     outputItem.setCount(1);
                     updateStickTag(outputItem, type);
                     setStickNameAndTooltip(outputItem, type);
