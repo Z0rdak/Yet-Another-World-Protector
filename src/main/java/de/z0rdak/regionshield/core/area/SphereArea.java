@@ -1,10 +1,11 @@
 package de.z0rdak.regionshield.core.area;
 
+import de.z0rdak.regionshield.util.AreaUtil;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 
-import static de.z0rdak.regionshield.core.area.AreaUtil.distance;
+import static de.z0rdak.regionshield.util.AreaUtil.distance;
 
 public class SphereArea extends CenteredArea {
 

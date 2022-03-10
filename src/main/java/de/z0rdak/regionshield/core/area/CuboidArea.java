@@ -1,9 +1,12 @@
 package de.z0rdak.regionshield.core.area;
 
+import de.z0rdak.regionshield.util.AreaUtil;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+
+import java.util.List;
 
 /**
  * Represents and wraps a simple AxisAlignedBB.
@@ -20,6 +23,10 @@ public class CuboidArea extends AbstractArea {
 
     public CuboidArea(BlockPos p1, BlockPos p2) {
         this(new AxisAlignedBB(p1, p2));
+    }
+
+    public CuboidArea(List<BlockPos> blocks){
+        this(blocks.get(0), blocks.get(1));
     }
 
     private CuboidArea() {

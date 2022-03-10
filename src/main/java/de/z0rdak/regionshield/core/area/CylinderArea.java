@@ -5,7 +5,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 
-import static de.z0rdak.regionshield.core.area.AreaUtil.*;
+import static de.z0rdak.regionshield.util.AreaUtil.*;
 
 // TODO: how to orientation?
 public class CylinderArea extends CenteredArea {
