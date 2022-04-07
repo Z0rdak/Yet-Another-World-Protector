@@ -22,7 +22,7 @@ public interface IMarkableRegion extends IProtectedRegion {
 
    void setArea(IMarkableArea area);
 
-   boolean containsPosition(BlockPos position);
+   boolean contains(BlockPos position);
 
    BlockPos getTpTarget();
 

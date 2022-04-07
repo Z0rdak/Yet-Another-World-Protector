@@ -1,14 +1,13 @@
 package de.z0rdak.regionshield.core.region;
 
+import de.z0rdak.regionshield.core.affiliation.PlayerContainer;
 import de.z0rdak.regionshield.core.flag.IFlag;
 import de.z0rdak.regionshield.core.flag.RegionFlag;
-import de.z0rdak.regionshield.util.PlayerUtils;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -42,19 +41,19 @@ public interface IProtectedRegion extends INBTSerializable<CompoundNBT> {
 
     Collection<IFlag> getRegionFlags();
 
-    boolean addPlayer(PlayerEntity player);
+    boolean addMember(PlayerEntity player);
 
-    boolean addPlayer(PlayerUtils.MCPlayerInfo playerInfo);
+    boolean addOwner(PlayerEntity player);
 
-    boolean removePlayer(PlayerEntity player);
+    boolean removeMember(UUID uuid);
 
-    boolean removePlayer(String playerName);
+    boolean removeOwner(UUID uuid);
 
     boolean isActive();
 
     void setIsActive(boolean isActive);
 
-    Map<UUID, String> getMembers();
+    PlayerContainer getMembers();
 
     boolean permits(PlayerEntity player);
 
