@@ -2,6 +2,7 @@ package de.z0rdak.regionshield.core.region;
 
 import de.z0rdak.regionshield.core.area.CuboidArea;
 import de.z0rdak.regionshield.util.constants.RegionNBT;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -18,20 +19,17 @@ public final class CuboidRegion extends AbstractMarkableRegion {
 		this.deserializeNBT(nbt);
 	}
 
-	public CuboidRegion(String name, AxisAlignedBB area, RegistryKey<World> dimension) {
-		super(name, new CuboidArea(area), dimension);
-		this.tpTarget = new BlockPos((int) area.getCenter().x,
-				(int) area.getCenter().y,
-				(int) area.getCenter().z);
+	public CuboidRegion(String name, CuboidArea area, PlayerEntity owner, RegistryKey<World> dimension) {
+		this(name, area, new BlockPos(area.getArea().getCenter()), owner, dimension);
 	}
 
-	public CuboidRegion(String name, AxisAlignedBB area, BlockPos tpPos, RegistryKey<World> dimension) {
-		super(name, new CuboidArea(area), dimension);
+	public CuboidRegion(String name, CuboidArea area, BlockPos tpPos, PlayerEntity owner, RegistryKey<World> dimension) {
+		super(name, area, owner, dimension);
 		this.tpTarget = tpPos;
 	}
 
 	@Override
-	public boolean containsPosition(BlockPos position) {
+	public boolean contains(BlockPos position) {
 		return this.area.contains(position);
 	}
 
