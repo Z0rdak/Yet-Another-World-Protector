@@ -1,4 +1,4 @@
-package de.z0rdak.regionshield.core.area;
+package de.z0rdak.regionshield.util;
 
 import net.minecraft.util.math.BlockPos;
 
@@ -21,11 +21,10 @@ public final class AreaUtil {
     }
 
     public static String toString(BlockPos pos){
-        String posStr = new StringJoiner(", ", "[", "]")
+        return new StringJoiner(", ", "[", "]")
                 .add(pos.getX() + "")
                 .add(pos.getY() + "")
                 .add(pos.getZ() + "")
                 .toString();
-        return posStr;
     }
 }
