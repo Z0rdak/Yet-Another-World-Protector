@@ -59,10 +59,10 @@ public class MarkerStick extends AbstractStick implements INBTSerializable<Compo
 
     public void cycleArea(AreaType areaType) {
         setAreaType(areaType);
-        resetArea();
+        reset();
     }
 
-    public void resetArea() {
+    public void reset() {
         this.markedBlocks = new ArrayList<>();
         this.isValidArea = false;
         this.teleportPos = null;
