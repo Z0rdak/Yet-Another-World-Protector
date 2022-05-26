@@ -56,7 +56,8 @@ public class MarkerStickHandler {
                 if (region != null) {
                     // TODO: save region
                     RegionShield.LOGGER.info(region.getName());
-                    // RegionDataManager.get().
+                    // RegionDataManager.get()
+                    // TODO: use dimension where player is in
                     marker.reset();
                     outputItem.getTag().put(STICK, marker.serializeNBT());
                     setStickName(outputItem, type);
@@ -74,10 +75,8 @@ public class MarkerStickHandler {
     public static void onCycleRegionMarker(ItemStack markerStickItem){
         CompoundNBT nbt = markerStickItem.getTag();
         MarkerStick marker = new MarkerStick(nbt.getCompound(STICK));
-        AreaType areaType = marker.getAreaType();
-        AreaType nextType = AreaType.values()[(areaType.ordinal() + 1) % AreaType.values().length];
         // change area nbt, reset marked blocks, set valid to false
-        marker.cycleArea(nextType == AreaType.UNKNOWN ? AreaType.CUBOID : nextType);
+        marker.cycleArea();
         // update stick name
         markerStickItem.getTag().put(STICK, marker.serializeNBT());
         StickUtil.setStickName(markerStickItem, StickType.MARKER);
