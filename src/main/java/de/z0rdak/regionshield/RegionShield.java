@@ -29,6 +29,8 @@ public class RegionShield
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
         // Register the enqueueIMC method for modloading
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, ServerConfigBuilder.CONFIG_SPEC, MODID + "-common.toml" );
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, FlagConfig.CONFIG_SPEC, MODID + "-flags.toml" );
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, ServerRegionConfigBuilder.CONFIG_SPEC, MODID + "-region-defaults.toml" );
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
