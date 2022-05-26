@@ -9,6 +9,7 @@ import net.minecraft.server.management.OpEntry;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 import java.io.IOException;
+import java.util.List;
 
 public final class PlayerUtils {
 
@@ -43,13 +44,22 @@ public final class PlayerUtils {
         ).toString();
     }
 
+    public static boolean hasPermission(PlayerEntity player){
+        return hasNeededOpLevel(player) || hasConfigPermission(player);
+    }
+
+    public static boolean hasConfigPermission(PlayerEntity player){
+        List<String> playersInConfig = (List<String>) ServerConfigBuilder.PLAYERS_WITH_PERMISSION.get();
+        return playersInConfig.contains(player.getStringUUID());
+    }
+
     public static boolean hasNeededOpLevel(PlayerEntity player) {
         OpEntry opPlayerEntry = ServerLifecycleHooks.getCurrentServer()
                 .getPlayerList()
                 .getOps()
                 .get(player.getGameProfile());
         if (opPlayerEntry != null) {
-            return opPlayerEntry.getLevel() >= ServerConfigBuilder.OP_COMMAND_PERMISSION_LEVEL.get();
+            return opPlayerEntry.getLevel() >= ServerConfigBuilder.RS_CMD_OP_LEVEL.get();
         }
         return false;
     }
