@@ -1,10 +1,9 @@
 package de.z0rdak.regionshield.commands;
 
-public enum Command {
-    WP("wp"),
-    W_P("w-p"),
-    WP_LONG("worldprotector"),
+public enum CommandConstants {
+    BASE_CMD("rs"),
     REGION("region"),
+    REGIONS("regions"),
     DIMENSION("dimension"),
     FLAG("flag"),
     HELP("help"),
@@ -21,29 +20,26 @@ public enum Command {
     VERT("vert"),
     DEFAULT_Y("y-default"),
     LIST("list"),
-    DEFINE("define"),
-    START_POS("start-pos"),
-    END_POS("end-pos"),
-    REDEFINE("redefine"),
-    TELEPORT("teleport"),
-    TELEPORT_SHORT("tp"),
+    CREATE("create"),
+    UPDATE("update"),
+    TELEPORT("tp"),
     ACTIVATE("activate"),
     DEACTIVATE("deactivate"),
-    MUTE("mute"),
-    UNMUTE("unmute"),
+    ALERT("alert"),
+    ENABLE("enable"),
     PRIORITY("priority"),
-    SET_PRIORITY("set-priority"),
     FLAG_TYPE("flag-type"),
     TYPE("type"),
     ALLOW("allow"),
     DENY("deny"),
     PLAYER("player"),
+    OWNER("owner"),
     Y1("Y1"),
     Y2("Y2");
 
     private final String cmdString;
 
-    Command(final String cmdString) {
+    CommandConstants(final String cmdString) {
         this.cmdString = cmdString;
     }
 
