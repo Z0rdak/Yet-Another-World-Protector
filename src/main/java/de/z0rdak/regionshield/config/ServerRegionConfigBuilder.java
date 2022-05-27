@@ -15,9 +15,9 @@ public class ServerRegionConfigBuilder {
     //public static final ForgeConfigSpec.ConfigValue<Boolean> DISABLE_FLAG_REGISTER;
     //public static final ForgeConfigSpec.ConfigValue<Boolean> DISABLE_REGION_COLLISION_CHECK;
     public static final ForgeConfigSpec.ConfigValue<Boolean> REGION_DEFAULT_FLAG_TYPE;
+    public static final ForgeConfigSpec.ConfigValue<Integer> DEFAULT_REGION_PRIORITY;
     public static final ForgeConfigSpec.ConfigValue<Integer> REGION_DEFAULT_PRIORITY_INC;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> REGION_DEFAULT_FLAGS;
-
 
     static {
         final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
@@ -26,6 +26,9 @@ public class ServerRegionConfigBuilder {
 
         REGION_COLLISION_CHECK_INTERVAL = BUILDER.comment("Default OP level to use commands.")
                 .defineInRange("command_op_level", 4, 1, 4);
+
+        DEFAULT_REGION_PRIORITY = BUILDER.comment("Default region priority for newly created regions.")
+                .defineInRange("default_region_priority", 2, 0, Integer.MAX_VALUE);
 
         REGION_DEFAULT_PRIORITY_INC = BUILDER.comment("Default region priority increment/decrement.")
                 .defineInRange("default_region_priority_inc", 5, 1, 100);
@@ -38,7 +41,5 @@ public class ServerRegionConfigBuilder {
 
         BUILDER.pop();
         CONFIG_SPEC = BUILDER.build();
-
     }
-
 }
