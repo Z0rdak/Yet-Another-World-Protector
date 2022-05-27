@@ -6,17 +6,17 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 /**
- * A markable region extends the general IProtectedRegion by allowing
+ * A mark-able region extends the general IProtectedRegion by allowing
  * to specify a certain area for the Region.
  * The area of the region is defined by a IMarkableArea instance.
- * Additionally a markable region has a dimension it is located in.
+ * Additionally, a mark-able region has a dimension it is located in.
  * <p>
- * A markable region also can be muted, has a priority to manage overlapping regions
+ * A mark-able region also can be muted, has a priority to manage overlapping regions
  * and has a teleportation target.
  */
 public interface IMarkableRegion extends IProtectedRegion {
 
-   RegistryKey<World> getDimension();
+   RegistryKey<World> getDim();
 
    IMarkableArea getArea();
 
