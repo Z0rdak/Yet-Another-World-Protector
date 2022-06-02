@@ -12,8 +12,14 @@ public abstract class AbstractFlag extends ForgeRegistryEntry<AbstractFlag> impl
     private String flagType;
     private boolean isActive;
 
-    public AbstractFlag(String flag, String flagType){
-        this.flagName = flag;
+    public AbstractFlag(String flagIdentifier, String flagType){
+        this.flagName = flagIdentifier;
+        this.flagType = flagType;
+        this.isActive = true;
+    }
+
+    public AbstractFlag(String modName, String flagName, String flagType){
+        this.flagName = modName + ":" + flagName;
         this.flagType = flagType;
         this.isActive = true;
     }
