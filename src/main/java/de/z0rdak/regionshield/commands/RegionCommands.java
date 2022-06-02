@@ -9,12 +9,10 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.regionshield.core.region.AbstractMarkableRegion;
 import de.z0rdak.regionshield.core.region.IMarkableRegion;
+import de.z0rdak.regionshield.core.stick.AbstractStick;
 import de.z0rdak.regionshield.core.stick.MarkerStick;
 import de.z0rdak.regionshield.managers.data.RegionDataManager;
-import de.z0rdak.regionshield.util.MessageUtil;
-import de.z0rdak.regionshield.util.RegionUtil;
-import de.z0rdak.regionshield.util.StickType;
-import de.z0rdak.regionshield.util.StickUtil;
+import de.z0rdak.regionshield.util.*;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.DimensionArgument;
@@ -286,16 +284,16 @@ public class RegionCommands {
             PlayerEntity player = source.getPlayerOrException();
             ItemStack maybeStick = player.getMainHandItem();
             if (StickUtil.isVanillaStick(maybeStick)) {
-                StickType stickType = StickUtil.getStickType(maybeStick);
-                if (stickType == StickType.MARKER) {
-                    CompoundNBT stickNBT = StickUtil.getStickNBT(maybeStick);
-                    if (stickNBT != null) {
-                        // TODO: get region and update area
-
+                try {
+                    AbstractStick abstractStick = StickUtil.getStick(maybeStick);
+                    if (abstractStick.getStickType() == StickType.MARKER){
+                        MarkerStick marker = (MarkerStick) abstractStick;
+                        RegionUtil.update(regionName, source.getPlayerOrException(), marker);
                     }
+                } catch (StickException e) {
+                    e.printStackTrace();
                 }
             }
-            RegionUtil.update(regionName, source.getPlayerOrException(), source.getPlayerOrException().getMainHandItem());
         } catch (CommandSyntaxException e) {
             e.printStackTrace();
         }
