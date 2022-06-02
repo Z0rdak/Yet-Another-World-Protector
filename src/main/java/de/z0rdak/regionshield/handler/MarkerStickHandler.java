@@ -76,7 +76,7 @@ public class MarkerStickHandler {
         CompoundNBT nbt = markerStickItem.getTag();
         MarkerStick marker = new MarkerStick(nbt.getCompound(STICK));
         // change area nbt, reset marked blocks, set valid to false
-        marker.cycleArea();
+        marker.cycleMode();
         // update stick name
         markerStickItem.getTag().put(STICK, marker.serializeNBT());
         StickUtil.setStickName(markerStickItem, StickType.MARKER);
