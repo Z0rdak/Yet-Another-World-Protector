@@ -1,5 +1,6 @@
 package de.z0rdak.regionshield.util;
 
+import de.z0rdak.regionshield.core.stick.AbstractStick;
 import de.z0rdak.regionshield.core.stick.FlagStick;
 import de.z0rdak.regionshield.core.stick.MarkerStick;
 import de.z0rdak.regionshield.core.stick.RegionStick;
@@ -61,20 +62,50 @@ public final class StickUtil {
         }
     }
 
-    public static boolean isStick(ItemStack itemStack) {
-        return itemStack.getItem().getDescriptionId().equals(Items.STICK.getDescriptionId());
+    public static boolean isVanillaStick(ItemStack itemStack) {
+        return itemStack.getItem().getDefaultInstance().getDescriptionId().equals(Items.STICK.getDescriptionId());
     }
 
-    // TODO: fixme
+    public static AbstractStick getStick(ItemStack stick) throws StickException {
+        if (stick.getTag() != null && stick.hasTag()) {
+            if (stick.getTag().contains(STICK)) {
+                CompoundNBT stickNbt = stick.getTag().getCompound(STICK);
+                StickType type = StickType.of(stickNbt.getString(STICK_TYPE));
+                switch (type) {
+                    case MARKER:
+                        return new MarkerStick(stickNbt);
+                    case FLAG_STICK:
+                        return new FlagStick(stickNbt);
+                    case REGION_STICK:
+                        return new RegionStick(stickNbt);
+                    case UNKNOWN:
+                    default:
+                        throw new StickException();
+                }
+            }
+        }
+        throw new StickException();
+    }
+
     public static StickType getStickType(ItemStack stick) {
         if (stick.getTag() != null && stick.hasTag()) {
             if (stick.getTag().contains(STICK)) {
-                return StickType.of(stick.getTag().getCompound(STICK).getString(STICK_TYPE));
+                CompoundNBT stickNbt = stick.getTag().getCompound(STICK);
+                if (stickNbt.contains(STICK_TYPE)) {
+                    return StickType.of(stickNbt.getString(STICK_TYPE));
+                }
             }
-        } else {
-            return StickType.UNKNOWN;
         }
         return StickType.UNKNOWN;
+    }
+
+    public static CompoundNBT getStickNBT(ItemStack stick) {
+        if (stick.getTag() != null && stick.hasTag()
+                && stick.getTag().contains(STICK)) {
+            return stick.getTag().getCompound(STICK);
+        } else {
+            return null;
+        }
     }
 
     public static void setStickName(ItemStack stick, StickType type) {
