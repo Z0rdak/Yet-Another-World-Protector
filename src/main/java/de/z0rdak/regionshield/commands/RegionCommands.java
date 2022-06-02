@@ -26,12 +26,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 import static de.z0rdak.regionshield.commands.CommandUtils.*;
 import static de.z0rdak.regionshield.commands.CommandUtils.buildLiteralFor;
@@ -266,7 +264,7 @@ public class RegionCommands {
             PlayerEntity player = source.getPlayerOrException();
             ItemStack maybeStick = player.getMainHandItem();
             // TODO: create a method which trhows exception on trying to get stick
-            if (StickUtil.isStick(maybeStick)) {
+            if (StickUtil.isVanillaStick(maybeStick)) {
                 StickType stickType = StickUtil.getStickType(maybeStick);
                 if (stickType == StickType.MARKER) {
                     CompoundNBT stickNBT = StickUtil.getStickNBT(maybeStick);
@@ -287,7 +285,7 @@ public class RegionCommands {
         try {
             PlayerEntity player = source.getPlayerOrException();
             ItemStack maybeStick = player.getMainHandItem();
-            if (StickUtil.isStick(maybeStick)) {
+            if (StickUtil.isVanillaStick(maybeStick)) {
                 StickType stickType = StickUtil.getStickType(maybeStick);
                 if (stickType == StickType.MARKER) {
                     CompoundNBT stickNBT = StickUtil.getStickNBT(maybeStick);
