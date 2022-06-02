@@ -6,7 +6,7 @@ import net.minecraftforge.common.util.INBTSerializable;
 
 import static de.z0rdak.regionshield.util.StickUtil.STICK_TYPE;
 
-public class AbstractStick implements INBTSerializable<CompoundNBT> {
+public abstract class AbstractStick implements INBTSerializable<CompoundNBT> {
 
     private StickType stickType;
 
@@ -29,4 +29,6 @@ public class AbstractStick implements INBTSerializable<CompoundNBT> {
     public StickType getStickType() {
         return stickType;
     }
+
+    public abstract void cycleMode();
 }

@@ -44,12 +44,13 @@ public class MarkerStick extends AbstractStick implements INBTSerializable<Compo
         this.teleportPos = tpPos;
     }
 
-    public MarkerStick(AreaType areaType, RegistryKey<World> dim) {
-        this(areaType, false, new ArrayList<>(), dim);
-    }
-
-    public MarkerStick(RegistryKey<World> dim) {
-        this(AreaType.CUBOID, dim);
+    public MarkerStick(RegistryKey<World> dim){
+        super(StickType.MARKER);
+        this.areaType = AreaType.CUBOID;
+        this.isValidArea = false;
+        this.markedBlocks = new ArrayList<>();
+        this.dimension = dim;
+        this.teleportPos = null;
     }
 
     public MarkerStick(CompoundNBT nbt) {
@@ -57,8 +58,8 @@ public class MarkerStick extends AbstractStick implements INBTSerializable<Compo
         this.deserializeNBT(nbt);
     }
 
-    public void cycleArea(AreaType areaType) {
-        setAreaType(areaType);
+    public void cycleMode() {
+        this.areaType = AreaType.values()[(this.areaType.ordinal() + 1) % AreaType.values().length];
         reset();
     }
 

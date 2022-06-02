@@ -18,6 +18,15 @@ public class FlagStick extends AbstractStick implements INBTSerializable<Compoun
         this.selectedFlag = "";
     }
 
+    public FlagStick(CompoundNBT nbt){
+        this();
+        deserializeNBT(nbt);
+    }
+
+    public void cycleMode(){
+        this.action = StickAction.values()[(this.action.ordinal() + 1) % StickAction.values().length];
+    }
+
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = super.serializeNBT();

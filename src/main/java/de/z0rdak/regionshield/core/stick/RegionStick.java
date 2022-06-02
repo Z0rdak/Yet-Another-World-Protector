@@ -5,6 +5,8 @@ import de.z0rdak.regionshield.util.StickType;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.common.util.INBTSerializable;
 
+import javax.swing.plaf.synth.Region;
+
 public class RegionStick extends AbstractStick implements INBTSerializable<CompoundNBT> {
 
     private String selectedRegion;
@@ -12,9 +14,15 @@ public class RegionStick extends AbstractStick implements INBTSerializable<Compo
 
     public RegionStick() {
         super(StickType.REGION_STICK);
-        this.action = StickAction.ADD;
-        // TODO: ?
-        this.selectedRegion = "";
+    }
+
+    public RegionStick(CompoundNBT nbt){
+        this();
+        deserializeNBT(nbt);
+    }
+
+    public void cycleMode(){
+        this.action = this.action == StickAction.ADD ? StickAction.REMOVE : StickAction.ADD;
     }
 
     @Override
