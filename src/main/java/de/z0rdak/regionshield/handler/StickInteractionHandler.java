@@ -28,7 +28,7 @@ public class StickInteractionHandler {
         if (!event.getWorld().isClientSide) {
             PlayerEntity player = event.getPlayer();
             ItemStack involvedItemStack = event.getItemStack();
-            if (!involvedItemStack.equals(ItemStack.EMPTY) && isStick(involvedItemStack)) {
+            if (!involvedItemStack.equals(ItemStack.EMPTY) && isVanillaStick(involvedItemStack)) {
                 StickType stickType = getStickType(involvedItemStack);
 
                 boolean isShiftPressed = player.isShiftKeyDown();
