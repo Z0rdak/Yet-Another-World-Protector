@@ -15,24 +15,11 @@ public class SphericalRegion extends AbstractMarkableRegion {
     }
 
     public SphericalRegion(String name, SphereArea area, PlayerEntity player, RegistryKey<World> dimension) {
-        this(name, area, player, new BlockPos(area.getCenter()), dimension);
-    }
-
-    public SphericalRegion(String name, SphereArea area, PlayerEntity player, BlockPos tpPos, RegistryKey<World> dimension) {
         super(name, area, player, dimension);
-        this.tpTarget = tpPos;
     }
 
-    @Override
-    public boolean contains(BlockPos position) {
-        return this.area.contains(position);
-    }
-
-    @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT nbt = super.serializeNBT();
-        nbt.put(RegionNBT.AREA, this.area.serializeNBT());
-        return nbt;
+    public SphericalRegion(String name, SphereArea area, BlockPos tpPos, PlayerEntity player, RegistryKey<World> dimension) {
+        super(name, area, tpPos, player, dimension);
     }
 
     @Override
