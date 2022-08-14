@@ -1,6 +1,7 @@
 package de.z0rdak.regionshield.core.region;
 
-import de.z0rdak.regionshield.core.flag.Flag;
+import de.z0rdak.regionshield.core.affiliation.PlayerContainer;
+import de.z0rdak.regionshield.core.flag.FlagContainer;
 import de.z0rdak.regionshield.core.flag.IFlag;
 import de.z0rdak.regionshield.core.flag.RegionFlag;
 import de.z0rdak.regionshield.util.PlayerUtils;
@@ -10,8 +11,8 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraftforge.common.util.Constants;
 
-import java.beans.PropertyChangeSupport;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * A abstract region represents the basic implementation of a IProtectedRegion.
@@ -20,92 +21,58 @@ import java.util.*;
  */
 public abstract class AbstractRegion implements IProtectedRegion {
 
-    protected Map<String, IFlag> regionFlags;
-    protected Map<UUID, String> members;
-    protected boolean isActive;
-    protected PropertyChangeSupport propertyChange;
+    public static final Pattern VALID_NAME_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z0-9\\-+]+$");
+    private String name;
+    private FlagContainer flags;
+    private PlayerContainer owners;
+    private PlayerContainer members;
+    private boolean isActive;
 
     // TODO: (command) define region with members/owners
-    public AbstractRegion() {
-        this.propertyChange = new PropertyChangeSupport(this);
-        this.regionFlags = new HashMap<>(0);
-        this.members = new HashMap<>(0);
+    protected AbstractRegion(String name) {
+        this.name = name;
+        this.flags = new FlagContainer();
+        this.members = new PlayerContainer();
+        this.owners = new PlayerContainer();
         this.isActive = true;
+    }
+
+    /**
+     * Minimal constructor to create a abstract region by supplying a name and an owner.
+     * @param name name of the region
+     * @param owner region owner
+     */
+    protected AbstractRegion(String name, PlayerEntity owner) {
+        this(name);
+        this.owners.players.put(owner.getUUID(), owner.getScoreboardName());
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     @Override
     public boolean addFlag(IFlag flag){
-        return this.regionFlags.put(flag.getFlagName(), flag) == null;
+        return this.flags.put(flag.getFlagName(), flag) == null;
     }
 
-    public boolean addFlag(String flag, boolean allow) {
-        // TODO:
-        return this.regionFlags.put(flag, new Flag(flag, allow)) == null;
-    }
-
-    public boolean containsFlag(String flag) {
-        return this.regionFlags.containsKey(flag);
-    }
-
-    // make sure to check contains before
-    public boolean denies(String flag){
-        return this.regionFlags.get(flag).isDefaultValue();
-    }
-
-    public boolean denies(RegionFlag flag){
-        return this.denies(flag.toString());
-    }
+    public boolean containsFlag(IFlag flag) {
+        return this.flags.containsKey(flag.getFlagName());
+}
 
     @Override
-    public boolean removeFlag(String flag) {
-        return this.regionFlags.remove(flag) != null;
+    public boolean removeFlag(IFlag flag) {
+        return this.flags.remove(flag.getFlagName()) != null;
     }
 
     public boolean containsFlag(RegionFlag flag) {
-        return this.containsFlag(flag.toString());
+        return this.flags.containsKey(flag.flagname);
     }
 
     @Override
-    public Set<String> getFlags() {
-        return Collections.unmodifiableSet(this.regionFlags.keySet());
-    }
-
-    @Override
-    public Collection<IFlag> getRegionFlags() {
-        return Collections.unmodifiableList(new ArrayList<>(this.regionFlags.values()));
-    }
-
-    @Override
-    public boolean addPlayer(PlayerEntity player) {
-        if (this.members.containsKey(player.getUUID())) {
-            return false;
-        } else {
-            this.members.put(player.getUUID(), player.getDisplayName().getString());
-            return true;
-        }
-    }
-
-    @Override
-    public boolean addPlayer(PlayerUtils.MCPlayerInfo playerInfo) {
-        String oldPlayer = this.members.put(UUID.fromString(playerInfo.playerUUID), playerInfo.playerName);
-        return !playerInfo.playerName.equals(oldPlayer);
-    }
-
-    @Override
-    public boolean removePlayer(String playerName) {
-        Optional<UUID> playerUUID = this.members.entrySet().stream()
-                .filter((entry) -> entry.getValue().equals(playerName))
-                .findFirst().map(Map.Entry::getKey);
-        if (playerUUID.isPresent()) {
-            String oldPlayer = this.members.remove(playerUUID.get());
-            return oldPlayer != null;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean removePlayer(PlayerEntity player) {
-        return this.members.remove(player.getUUID()) != null;
+    public Collection<IFlag> getFlags() {
+        return Collections.unmodifiableList(new ArrayList<>(this.flags.values()));
     }
 
     @Override
@@ -119,8 +86,35 @@ public abstract class AbstractRegion implements IProtectedRegion {
     }
 
     @Override
-    public Map<UUID, String> getMembers() {
-        return Collections.unmodifiableMap(this.members);
+    public boolean addMember(PlayerEntity player) {
+        return false;
+    }
+
+    @Override
+    public boolean addOwner(PlayerEntity player) {
+        return false;
+    }
+
+    // TODO: rethink return values - are they needed? they complicate things even more
+    @Override
+    public boolean removeMember(UUID uuid) {
+        this.members.players.remove(uuid);
+        return true;
+    }
+
+    @Override
+    public boolean removeOwner(UUID uuid) {
+        return false;
+    }
+
+    @Override
+    public PlayerContainer getMembers() {
+        return this.members;
+    }
+
+    @Override
+    public PlayerContainer getOwners() {
+        return owners;
     }
 
     /**
@@ -131,63 +125,32 @@ public abstract class AbstractRegion implements IProtectedRegion {
      * @param player to be checked
      * @return true if player is in region list or is an operator, false otherwise
      */
+    // TODO: check
     @Override
     public boolean permits(PlayerEntity player) {
-        if (PlayerUtils.hasNeededOpLevel(player)) {
+        if (PlayerUtils.hasPermission(player) || this.owners.containsPlayer(player.getUUID()) || this.owners.containsPlayer(player.getUUID())) {
             return true;
         }
-        return members.containsKey(player.getUUID());
-    }
-
-    @Override
-    public boolean forbids(PlayerEntity player) {
-        return !this.permits(player);
+        return members.containsPlayer(player.getUUID());
     }
 
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
-        nbt.putBoolean(RegionNBT.ACTIVE, isActive);
-
-        // flag data
-        ListNBT flagListNBT = new ListNBT();
-        this.regionFlags.forEach((flagName, flag) -> {
-            flagListNBT.add(flag.serializeNBT());
-        });
-        nbt.put(RegionNBT.FLAGS, flagListNBT);
-
-        // serialize player data
-        ListNBT l = new ListNBT();
-        ListNBT playerList = new ListNBT();
-        members.forEach((uuid, name) -> {
-            CompoundNBT playerNBT = new CompoundNBT();
-            playerNBT.putUUID(RegionNBT.UUID, uuid);
-            playerNBT.putString(RegionNBT.NAME, name);
-            playerList.add(playerNBT);
-        });
-        nbt.put(RegionNBT.PLAYERS, playerList);
+        nbt.putString(RegionNBT.NAME, this.name);
+        nbt.putBoolean(RegionNBT.ACTIVE, this.isActive);
+        nbt.put(RegionNBT.FLAGS, this.flags.serializeNBT());
+        nbt.put(RegionNBT.OWNERS, this.owners.serializeNBT());
+        nbt.put(RegionNBT.MEMBERS, this.members.serializeNBT());
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
+        this.name = nbt.getString(RegionNBT.NAME);
         this.isActive = nbt.getBoolean(RegionNBT.ACTIVE);
-
-        // deserialize flag data
-        this.regionFlags.clear();
-        ListNBT flagsList = nbt.getList(RegionNBT.FLAGS, Constants.NBT.TAG_COMPOUND);
-        for (int i = 0; i < flagsList.size(); i++) {
-            Flag flag = new Flag(flagsList.getCompound(i));
-            this.regionFlags.put(flag.getFlagName(), flag);
-        }
-
-        // deserialize player data
-        this.members.clear();
-        ListNBT playerLists = nbt.getList(RegionNBT.PLAYERS, Constants.NBT.TAG_COMPOUND);
-        for (int i = 0; i < playerLists.size(); i++) {
-            CompoundNBT playerMapping = playerLists.getCompound(i);
-            members.put(playerMapping.getUUID(RegionNBT.UUID),
-                    playerMapping.getString(RegionNBT.NAME));
-        }
+        this.flags = new FlagContainer(nbt.getCompound(RegionNBT.FLAGS));
+        this.owners = new PlayerContainer(nbt.getCompound(RegionNBT.OWNERS));
+        this.members = new PlayerContainer(nbt.getCompound(RegionNBT.MEMBERS));
     }
 }
