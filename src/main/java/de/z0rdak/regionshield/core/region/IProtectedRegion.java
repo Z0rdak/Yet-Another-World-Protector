@@ -51,5 +51,7 @@ public interface IProtectedRegion extends INBTSerializable<CompoundNBT> {
 
     PlayerContainer getMembers();
 
+    PlayerContainer getOwners();
+
     boolean permits(PlayerEntity player);
 }

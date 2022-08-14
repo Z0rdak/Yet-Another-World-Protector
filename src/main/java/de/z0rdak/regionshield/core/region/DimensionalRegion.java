@@ -1,5 +1,6 @@
 package de.z0rdak.regionshield.core.region;
 
+import de.z0rdak.regionshield.core.flag.RegionFlag;
 import de.z0rdak.regionshield.util.constants.RegionNBT;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.RegistryKey;
@@ -18,22 +19,18 @@ public final class DimensionalRegion extends AbstractRegion {
     private RegistryKey<World> dimensionKey;
 
     public DimensionalRegion(RegistryKey<World> dimensionKey) {
-        super();
+        super(dimensionKey.location().toString());
         this.dimensionKey = dimensionKey;
     }
 
     public DimensionalRegion(CompoundNBT nbt) {
-        super();
+        super("");
         this.deserializeNBT(nbt);
     }
 
     public DimensionalRegion(String dimensionKey) {
         this(RegistryKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(dimensionKey)));
     }
-
-    public final static DimensionalRegion OVERWORLD = new DimensionalRegion(World.OVERWORLD);
-    public final static DimensionalRegion THE_NETHER = new DimensionalRegion(World.NETHER);
-    public final static DimensionalRegion THE_END = new DimensionalRegion(World.END);
 
     public RegistryKey<World> getDimensionKey() {
         return dimensionKey;
