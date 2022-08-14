@@ -3,10 +3,25 @@ package de.z0rdak.regionshield.core.area;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PrismArea extends AbstractArea {
     // TODO: implementation
-    private PrismArea() {
+    public List<BlockPos> blockNodes;
+
+    public PrismArea(CompoundNBT nbt) {
+        this();
+        this.deserializeNBT(nbt);
+    }
+    public PrismArea() {
         super(AreaType.PRISM);
+        this.blockNodes = new ArrayList<>();
+    }
+
+    public PrismArea(List<BlockPos> blockNodes){
+        this();
+        this.blockNodes = blockNodes;
     }
 
     @Override
