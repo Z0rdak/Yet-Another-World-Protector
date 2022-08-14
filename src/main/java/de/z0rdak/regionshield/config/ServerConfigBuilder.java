@@ -14,11 +14,16 @@ public class ServerConfigBuilder {
     public static final ForgeConfigSpec CONFIG_SPEC;
     public static final ForgeConfigSpec.ConfigValue<Integer> RS_CMD_OP_LEVEL;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> PLAYERS_WITH_PERMISSION;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> ALLOW_COMMAND_BLOCK_EXECUTION;
+
 
     static {
         final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
         BUILDER.push("RegionShield mod server configuration").build();
+
+        ALLOW_COMMAND_BLOCK_EXECUTION = BUILDER.comment("Allows command blocks to execute mod commands")
+                .define("command_block_execution", true);
 
         RS_CMD_OP_LEVEL = BUILDER.comment("Default OP level to use mod commands.")
                 .defineInRange("command_op_level", 4, 1, 4);
