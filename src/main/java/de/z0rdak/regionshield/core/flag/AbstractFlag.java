@@ -3,6 +3,7 @@ package de.z0rdak.regionshield.core.flag;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.registries.ForgeRegistryEntry;
+import org.apache.commons.lang3.NotImplementedException;
 
 import static de.z0rdak.regionshield.util.constants.RegionNBT.*;
 
@@ -11,11 +12,13 @@ public abstract class AbstractFlag extends ForgeRegistryEntry<AbstractFlag> impl
     private String flagName;
     private String flagType;
     private boolean isActive;
+    private boolean isAllowed;
 
-    public AbstractFlag(String flagIdentifier, String flagType){
+    public AbstractFlag(String flagIdentifier, String flagType, boolean isAllowed){
         this.flagName = flagIdentifier;
         this.flagType = flagType;
         this.isActive = true;
+        this.isAllowed = isAllowed;
     }
 
     public AbstractFlag(String modName, String flagName, String flagType){
@@ -45,10 +48,27 @@ public abstract class AbstractFlag extends ForgeRegistryEntry<AbstractFlag> impl
     }
 
     @Override
+    public boolean isAllowed() {
+        return this.isAllowed;
+    }
+
+    @Override
+    public void setAllowed(boolean allowed) {
+        this.isAllowed = allowed;
+    }
+
+    // TODO:
+    @Override
+    public String getFlagDescription() {
+        throw new NotImplementedException("");
+    }
+
+    @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putString(FLAG_NAME, this.flagName);
         nbt.putBoolean(FLAG_ACTIVE, this.isActive);
+        nbt.putBoolean(IS_ALLOWED, this.isAllowed);
         nbt.putString(FLAG_REGISTRY_NAME, this.flagType);
         return nbt;
     }
@@ -57,6 +77,7 @@ public abstract class AbstractFlag extends ForgeRegistryEntry<AbstractFlag> impl
     public void deserializeNBT(CompoundNBT nbt) {
         this.flagName = nbt.getString(FLAG_NAME);
         this.isActive = nbt.getBoolean(FLAG_ACTIVE);
+        this.isAllowed = nbt.getBoolean(IS_ALLOWED);
         this.flagType = nbt.getString(FLAG_REGISTRY_NAME);
     }
 }
