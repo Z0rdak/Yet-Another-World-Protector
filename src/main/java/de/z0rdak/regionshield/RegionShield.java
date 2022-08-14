@@ -2,7 +2,8 @@ package de.z0rdak.regionshield;
 
 import de.z0rdak.regionshield.commands.*;
 import de.z0rdak.regionshield.config.*;
-import de.z0rdak.regionshield.managers.data.RegionDataManager;
+import de.z0rdak.regionshield.managers.data.player.PlayerTrackingManager;
+import de.z0rdak.regionshield.managers.data.region.RegionDataManager;
 import net.minecraft.item.Item;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -20,7 +21,13 @@ import org.apache.logging.log4j.Logger;
 @Mod(RegionShield.MODID)
 public class RegionShield
 {
+    /**
+     * Yet Another Region Protector - YAPR
+     * Yet Another Protection Mod - YAPM
+     * Yet Another World Protector - YAWP
+     */
     public static final String MODID = "regionshield";
+    public static final String MODID_SHORT = "rs";
     public static final Logger LOGGER = LogManager.getLogger();
 
 
@@ -42,12 +49,13 @@ public class RegionShield
 
     @SubscribeEvent
     public void onServerStarting(FMLServerStartingEvent event) {
-        RegionDataManager.onServerStarting(event);
+        RegionDataManager.loadRegionData(event);
+        PlayerTrackingManager.loadPlayerData(event);
     }
 
     @SubscribeEvent
     public void onServerStarting(RegisterCommandsEvent event) {
-        CommandsRegister.init(event.getDispatcher());
+        CommandRegionShield.init(event.getDispatcher());
     }
 
     @Mod.EventBusSubscriber(bus=Mod.EventBusSubscriber.Bus.MOD)
