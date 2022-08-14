@@ -1,6 +1,8 @@
 package de.z0rdak.regionshield.core.area;
 
 import de.z0rdak.regionshield.RegionShield;
+import de.z0rdak.regionshield.util.AreaUtil;
+import de.z0rdak.regionshield.util.constants.AreaNBT;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
@@ -75,24 +77,21 @@ public class CylinderArea extends CenteredArea {
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = super.serializeNBT();
-        nbt.putInt("radius", this.radius);
-        nbt.putInt("height", this.distance);
+        nbt.putInt(AreaNBT.RADIUS, this.radius);
+        nbt.putInt(AreaNBT.HEIGHT, this.distance);
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
         super.deserializeNBT(nbt);
-        this.distance = nbt.getInt("height");
-        this.radius = nbt.getInt("radius");
+        this.distance = nbt.getInt(AreaNBT.RADIUS);
+        this.radius = nbt.getInt(AreaNBT.HEIGHT);
     }
 
+    // Cylinder [x,y,z] with radius r and height h
     @Override
     public String toString() {
-        return "CylinderArea: [" +
-                "bottomCenter=" + center.toShortString() +
-                ", distance=" + distance +
-                ", radius=" + radius +
-                ']';
+        return "Cylinder " + AreaUtil.blockPosStr(this.center) + " with radius " + this.radius + " and height " + this.distance + ".";
     }
 }

@@ -9,4 +9,10 @@ public class AreaNBT {
     public static final String MAX_X = "maxX";
     public static final String MAX_Y = "maxY";
     public static final String MAX_Z = "maxZ";
+
+    public static final String HEIGHT = "height";
+    public static final String RADIUS = "radius";
+
+    public static final String P1 = "p1";
+    public static final String P2 = "p2";
 }

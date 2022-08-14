@@ -1,6 +1,7 @@
 package de.z0rdak.regionshield.core.area;
 
 import de.z0rdak.regionshield.util.AreaUtil;
+import de.z0rdak.regionshield.util.constants.AreaNBT;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -62,21 +63,21 @@ public class CuboidArea extends AbstractArea {
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
-        nbt.put("p1", NBTUtil.writeBlockPos(this.getAreaP1()));
-        nbt.put("p2", NBTUtil.writeBlockPos(this.getAreaP2()));
+        nbt.put(AreaNBT.P1, NBTUtil.writeBlockPos(this.getAreaP1()));
+        nbt.put(AreaNBT.P2, NBTUtil.writeBlockPos(this.getAreaP2()));
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
-        BlockPos p1 = NBTUtil.readBlockPos(nbt.getCompound("p1"));
-        BlockPos p2 = NBTUtil.readBlockPos(nbt.getCompound("p2"));
+        BlockPos p1 = NBTUtil.readBlockPos(nbt.getCompound(AreaNBT.P1));
+        BlockPos p2 = NBTUtil.readBlockPos(nbt.getCompound(AreaNBT.P2));
         this.area = new AxisAlignedBB(p1, p2);
     }
 
     @Override
     public String toString() {
-        return "Cuboid " + AreaUtil.toString(this.getAreaP1()) + " -> " + AreaUtil.toString(this.getAreaP2());
+        return "Cuboid " + AreaUtil.blockPosStr(this.getAreaP1()) + " -> " + AreaUtil.blockPosStr(this.getAreaP2());
     }
 
 }
