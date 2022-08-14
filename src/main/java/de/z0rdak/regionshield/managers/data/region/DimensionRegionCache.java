@@ -1,4 +1,4 @@
-package de.z0rdak.regionshield.managers.data;
+package de.z0rdak.regionshield.managers.data.region;
 
 import de.z0rdak.regionshield.RegionShield;
 import de.z0rdak.regionshield.core.area.AreaType;

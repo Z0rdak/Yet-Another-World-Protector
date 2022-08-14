@@ -1,8 +1,6 @@
 package de.z0rdak.regionshield.handler;
 
 import de.z0rdak.regionshield.RegionShield;
-import de.z0rdak.regionshield.managers.data.PlayerTrackingManager;
-import de.z0rdak.regionshield.managers.data.RegionDataManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.event.TickEvent;
@@ -10,7 +8,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

@@ -1,4 +1,4 @@
-package de.z0rdak.regionshield.managers.data;
+package de.z0rdak.regionshield.managers.data.player;
 
 import de.z0rdak.regionshield.RegionShield;
 import net.minecraft.entity.player.PlayerEntity;
