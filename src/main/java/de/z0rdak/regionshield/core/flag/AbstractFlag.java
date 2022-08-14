@@ -6,7 +6,7 @@ import net.minecraftforge.registries.ForgeRegistryEntry;
 
 import static de.z0rdak.regionshield.util.constants.RegionNBT.*;
 
-public abstract class AbstractFlag extends ForgeRegistryEntry<AbstractFlag> implements IFlag, INBTSerializable<CompoundNBT> {
+public abstract class AbstractFlag extends ForgeRegistryEntry<AbstractFlag> implements IFlag {
 
     private String flagName;
     private String flagType;
