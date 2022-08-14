@@ -1,5 +1,6 @@
 package de.z0rdak.regionshield.core.area;
 
+// TODO: registry or datapack for area with their area types
 public enum AreaType {
 
     /**
