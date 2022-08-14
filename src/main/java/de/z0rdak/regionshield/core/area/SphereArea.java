@@ -1,6 +1,7 @@
 package de.z0rdak.regionshield.core.area;
 
 import de.z0rdak.regionshield.util.AreaUtil;
+import de.z0rdak.regionshield.util.constants.AreaNBT;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
@@ -48,18 +49,18 @@ public class SphereArea extends CenteredArea {
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = super.serializeNBT();
-        nbt.putInt("radius", this.radius);
+        nbt.putInt(AreaNBT.RADIUS, this.radius);
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
         super.deserializeNBT(nbt);
-        this.radius = nbt.getInt("radius");
+        this.radius = nbt.getInt(AreaNBT.RADIUS);
     }
 
     @Override
     public String toString() {
-        return "SphereArea " + AreaUtil.toString(this.center) + ", r=" + radius;
+        return "Sphere " + AreaUtil.blockPosStr(this.center) + ", r=" + radius;
     }
 }
