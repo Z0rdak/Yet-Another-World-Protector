@@ -1,0 +1,50 @@
+{
+  "help.tooltip.stick.marker.simple.1": "Used to mark a new region.",
+  "help.tooltip.stick.marker.simple.2": "Keep the Region Marker in your hand while defining a region!",
+
+  "help.tooltip.stick.marker.optional.1": "2a. [Optional] Expand the region from Y 0 to 255 with the \"/wp expand vert\" command or by holding down the right mouse button.",
+  "help.tooltip.stick.marker.optional.2": "2b. [Optional] SHIFT + Right-click allows you to mark a block as the regions teleportation target.",
+  "help.tooltip.stick.marker.detail.1": "A region is marked by two blocks.\nThe Region Marker toggles between the 1st and 2nd block after clicking.",
+  "help.tooltip.stick.marker.detail.2": "1. Left-click on the 1st block to start marking a region.\n2. Left-click on the 2nd block to finish marking a region.",
+  "help.tooltip.stick.marker.detail.3": "3. Define the region with the \"/wp region define <name>\" command or by renaming the Region Marker in an anvil.",
+  "help.tooltip.stick.marker.detail.4": "Keep the Region Marker in your hand while defining a region!",
+
+  "help.tooltip.stick.flag-stick.simple.1": "Use the Flag Stick to simply modify flags for a region.",
+  "help.tooltip.stick.flag-stick.simple.2": "Keep the Region Stick in your offhand!",
+  "help.tooltip.stick.flag-stick.detail.1": "1. Select a flag by right clicking.",
+  "help.tooltip.stick.flag-stick.detail.2": "2. Switch modes by SHIFT right clicking.",
+  "help.tooltip.stick.flag-stick.detail.3": "3. Hold down the right mouse button to add/remove the selected flag.",
+  "help.tooltip.stick.flag-stick.detail.4": "[Secondary use] SHIFT right click on a container with name tags, named after flags, to add/remove all the corresponding flags!",
+  "help.tooltip.stick.flag-stick.detail.5": "Keep the Region Stick with the selected region in your off hand!",
+
+  "help.tooltip.stick.region-stick.simple.1": "Use the Region Stick to simply add/remove players to/from a region.",
+  "help.tooltip.stick.region-stick.detail.1": "1. Select an existing region by right clicking.",
+  "help.tooltip.stick.region-stick.detail.2": "2. Switch modes by SHIFT right clicking.",
+  "help.tooltip.stick.region-stick.detail.3": "3. Hit the player you want to add/remove (don't worry it wont hurt).",
+  "help.tooltip.stick.region-stick.detail.4": "[Secondary use] Keep the Region Stick in your offhand and read the Flag Stick tooltip.",
+
+
+
+
+
+  "flag.deny.message.break": "You are not allowed to break blocks here!",
+  "flag.deny.message.place": "You are not allowed to place blocks here!",
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  "console.logger.info.data.load.success": "Loaded %s regions for %s different dimensions",
+  "console.logger.error.data.load.failure": "Loading regions failed!"
+}
