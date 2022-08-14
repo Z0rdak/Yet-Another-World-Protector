@@ -58,12 +58,4 @@ public class RegionShield
         CommandRegionShield.init(event.getDispatcher());
     }
 
-    @Mod.EventBusSubscriber(bus=Mod.EventBusSubscriber.Bus.MOD)
-    public static class RegistryEvents {
-        @SubscribeEvent
-        public static void onItemRegistry(final RegistryEvent.Register<Item> itemRegistryEvent){
-            // register a new item here
-            // TODO: patchouli
-        }
-    }
 }
