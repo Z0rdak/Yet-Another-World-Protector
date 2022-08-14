@@ -15,4 +15,6 @@ public class AreaNBT {
 
     public static final String P1 = "p1";
     public static final String P2 = "p2";
+
+    public static final String BLOCK_NODES = "block_nodes";
 }

@@ -1,10 +1,12 @@
 package de.z0rdak.regionshield.core.area;
 
+import de.z0rdak.regionshield.util.constants.AreaNBT;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.util.Constants;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -77,17 +79,22 @@ public class Polygon3DArea extends AbstractArea {
             CompoundNBT pointNbt = NBTUtil.writeBlockPos(point);
             pointList.add(pointNbt);
         });
-        nbt.put("points", pointList);
+        nbt.put(AreaNBT.BLOCK_NODES, pointList);
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
         this.positions.clear();
-        ListNBT pointList = nbt.getList("points", Constants.NBT.TAG_COMPOUND);
+        ListNBT pointList = nbt.getList(AreaNBT.BLOCK_NODES, Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < pointList.size(); i++) {
             BlockPos pos = NBTUtil.readBlockPos(pointList.getCompound(i));
             this.positions.add(pos);
         }
+    }
+
+    @Override
+    public String toString() {
+        throw new NotImplementedException("Missing toString");
     }
 }
