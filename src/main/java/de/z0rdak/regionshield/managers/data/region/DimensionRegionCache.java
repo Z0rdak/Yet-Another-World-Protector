@@ -96,8 +96,9 @@ public class DimensionRegionCache extends WorldSavedData {
         return dimensionalRegion;
     }
 
-    private void addRegion(IMarkableRegion region) {
+    public void addRegion(IMarkableRegion region) {
         this.regionsInDimension.put(region.getName(), region);
+        this.setDirty();
     }
 
     public Collection<String> getRegionNames() {

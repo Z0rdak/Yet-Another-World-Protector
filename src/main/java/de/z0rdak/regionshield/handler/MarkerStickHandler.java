@@ -4,6 +4,7 @@ import de.z0rdak.regionshield.RegionShield;
 import de.z0rdak.regionshield.core.area.AreaType;
 import de.z0rdak.regionshield.core.region.AbstractMarkableRegion;
 import de.z0rdak.regionshield.core.stick.MarkerStick;
+import de.z0rdak.regionshield.managers.data.region.RegionDataManager;
 import de.z0rdak.regionshield.util.RegionUtil;
 import de.z0rdak.regionshield.util.StickType;
 import de.z0rdak.regionshield.util.StickUtil;
@@ -13,6 +14,8 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.event.entity.player.AnvilRepairEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+
+import javax.swing.plaf.synth.Region;
 
 import static de.z0rdak.regionshield.util.StickUtil.*;
 
@@ -54,10 +57,8 @@ public class MarkerStickHandler {
             if (marker.isValidArea()) {
                 AbstractMarkableRegion region = RegionUtil.regionFrom(player, marker, regionName);
                 if (region != null) {
-                    // TODO: save region
-                    RegionShield.LOGGER.info(region.getName());
-                    // RegionDataManager.get()
-                    // TODO: use dimension where player is in
+                    RegionDataManager.get().cacheFor(player.getCommandSenderWorld().dimension())
+                            .addRegion(region);
                     marker.reset();
                     outputItem.getTag().put(STICK, marker.serializeNBT());
                     setStickName(outputItem, type);
