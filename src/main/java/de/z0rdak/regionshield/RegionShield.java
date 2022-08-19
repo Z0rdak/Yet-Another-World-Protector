@@ -4,12 +4,9 @@ import de.z0rdak.regionshield.commands.*;
 import de.z0rdak.regionshield.config.*;
 import de.z0rdak.regionshield.managers.data.player.PlayerTrackingManager;
 import de.z0rdak.regionshield.managers.data.region.RegionDataManager;
-import net.minecraft.item.Item;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -38,18 +35,18 @@ public class RegionShield
 
     public RegionShield() {
         DistExecutor.unsafeRunWhenOn(Dist.DEDICATED_SERVER, () -> () -> {
-            // Register the setup method for modloading
             FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
-            // Register the enqueueIMC method for modloading
+
             ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, ServerConfigBuilder.CONFIG_SPEC, MODID + "-common.toml" );
             ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, FlagConfig.CONFIG_SPEC, MODID + "-flags.toml" );
             ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, ServerRegionConfigBuilder.CONFIG_SPEC, MODID + "-region-defaults.toml" );
 
-            // Register ourselves for server and other game events we are interested in
             MinecraftForge.EVENT_BUS.register(this);
 
         });
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> LOGGER.info("You are loading " + MODID_LONG + " on a client. " + MODID_LONG + " is a server only mod!"));
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+            LOGGER.info("You are loading " + MODID_LONG + " on a client. " + MODID_LONG + " is a server only mod!");
+        });
 
     }
 
