@@ -5,6 +5,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
+import net.minecraft.scoreboard.Team;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.INBTSerializable;
 
@@ -13,8 +14,8 @@ import java.util.stream.Collectors;
 
 public class PlayerContainer implements IMemberContainer, INBTSerializable<CompoundNBT> {
 
-    public Set<String> teams;
-    public Map<UUID, String> players;
+    private Set<String> teams;
+    private Map<UUID, String> players;
 
     public PlayerContainer(CompoundNBT nbt){
         this();
@@ -24,6 +25,24 @@ public class PlayerContainer implements IMemberContainer, INBTSerializable<Compo
     public PlayerContainer(){
         this.teams = new HashSet<>(0);
         this.players = new HashMap<>(0);
+    }
+
+    public Set<String> getTeams() {
+        return teams;
+    }
+
+    public Map<UUID, String> getPlayers() {
+        return players;
+    }
+
+    @Override
+    public boolean hasTeams() {
+        return !this.teams.isEmpty();
+    }
+
+    @Override
+    public boolean hasPlayers() {
+        return !this.players.isEmpty();
     }
 
     @Override
@@ -47,13 +66,28 @@ public class PlayerContainer implements IMemberContainer, INBTSerializable<Compo
     }
 
     @Override
+    public void addTeam(Team team) {
+        this.teams.add(team.getName());
+    }
+
+    @Override
     public void removePlayer(PlayerEntity player) {
         this.players.remove(player.getUUID());
     }
 
     @Override
+    public void removePlayer(UUID playerUUID) {
+        this.players.remove(playerUUID);
+    }
+
+    @Override
     public void removeTeam(String team) {
         this.teams.remove(team);
+    }
+
+    @Override
+    public void removeTeam(Team team) {
+        this.teams.remove(team.getName());
     }
 
     @Override

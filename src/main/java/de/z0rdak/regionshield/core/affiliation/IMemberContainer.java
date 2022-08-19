@@ -1,6 +1,7 @@
 package de.z0rdak.regionshield.core.affiliation;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.scoreboard.Team;
 
 import java.util.UUID;
 
@@ -17,7 +18,17 @@ public interface IMemberContainer {
 
     void addTeam(String team);
 
+    void addTeam(Team team);
+
+    boolean hasTeams();
+
+    boolean hasPlayers();
+
     void removePlayer(PlayerEntity player);
 
+    void removePlayer(UUID playerUUID);
+
     void removeTeam(String team);
+
+    void removeTeam(Team team);
 }
