@@ -20,7 +20,7 @@ public class FlagConfig {
 
         BREAK_FLAG_ENTITIES = BUILDER
                 .comment("Entities included/protected by the break block flag. Includes entities like armor stands and pictures by default")
-                .defineListAllowEmpty(Arrays.asList("break_flag_entities"), () -> Arrays.asList("minecraft:armor_stand", "minecraft:picture"), s -> true);
+                .defineListAllowEmpty(Arrays.asList("break_flag_entities"), () -> Arrays.asList("minecraft:armor_stand", "minecraft:painting", "minecraft:item_frame", "minecraft:glow_item_frame"), s -> true);
 
         BREAK_FLAG_ENTITY_TAGS = BUILDER
                 .comment("Entity tags included/protected by the break block flag.")
