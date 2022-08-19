@@ -20,7 +20,7 @@ public final class AreaUtil {
                 + Math.pow(a.getZ(), 2));
     }
 
-    public static String toString(BlockPos pos){
+    public static String blockPosStr(BlockPos pos){
         return new StringJoiner(", ", "[", "]")
                 .add(pos.getX() + "")
                 .add(pos.getY() + "")
