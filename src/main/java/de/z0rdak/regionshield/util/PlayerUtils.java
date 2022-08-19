@@ -45,7 +45,7 @@ public final class PlayerUtils {
     }
 
     public static boolean hasPermission(PlayerEntity player){
-        return hasNeededOpLevel(player) || hasConfigPermission(player);
+        return hasConfigPermission(player);
     }
 
     public static boolean hasConfigPermission(PlayerEntity player){
