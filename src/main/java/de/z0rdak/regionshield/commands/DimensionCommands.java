@@ -176,9 +176,8 @@ public class DimensionCommands {
         // TODO: lang key
         sendCmdFeedback(src, new TranslationTextComponent(TextFormatting.BOLD + "== Flags in dimension '" + dim.location() + "' ==="));
         flags.forEach(flag -> {
-            IFormattableTextComponent removeFlagLink = new TranslationTextComponent(" - ", dim.location().toString())
-                    .append(new StringTextComponent(" - "))
-                    .append(MessageUtil.buildDimensionRemoveFlagLink(flag, dim))
+            IFormattableTextComponent removeFlagLink = new StringTextComponent(" - ")
+                    .append(buildDimensionRemoveFlagLink(flag, dim))
                     .append(new StringTextComponent(" '" + flag.getFlagName() + "' "));
 
             sendCmdFeedback(src, removeFlagLink);
@@ -215,9 +214,8 @@ public class DimensionCommands {
         // TODO: lang key
         sendCmdFeedback(src, new TranslationTextComponent(TextFormatting.BOLD + "== Players(" + playerLangKeyPart + ") in dimension '" + dim.location() + "' ==="));
         playerNames.forEach(playerName -> {
-            IFormattableTextComponent removePlayerLink = new TranslationTextComponent(" - ", dim.location().toString())
-                    .append(new StringTextComponent(" - "))
-                    .append(MessageUtil.buildDimensionRemovePlayerLink(playerName, dim, memberOrOwner))
+            IFormattableTextComponent removePlayerLink = new StringTextComponent(" - ")
+                    .append(buildDimensionRemovePlayerLink(playerName, dim, memberOrOwner))
                     .append(new StringTextComponent(" '" + playerName + "'"));;
             sendCmdFeedback(src, removePlayerLink);
         });
@@ -236,13 +234,13 @@ public class DimensionCommands {
     // TODO: If needed hardcoded at first
     private static int promptHelp(CommandSource source) {
         RegistryKey<World> dim = source.getLevel().dimension();
-        sendCmdFeedback(source, MessageUtil.buildHelpHeader("cli.msg.dim.help.header"));
-        sendCmdFeedback(source,MessageUtil.buildDimHelpLink("cli.msg.dim.help.1", CommandConstants.DIMENSION, new ArrayList<>(Arrays.asList(dim.location().toString(), CommandConstants.HELP.toString()))));
-        sendCmdFeedback(source,MessageUtil.buildDimHelpLink("cli.msg.dim.help.2", CommandConstants.DIMENSION, new ArrayList<>(Arrays.asList(dim.location().toString(), CommandConstants.LIST.toString()))));
-        sendCmdFeedback(source,MessageUtil.buildDimHelpLink("cli.msg.dim.help.3", CommandConstants.DIMENSION, new ArrayList<>(Arrays.asList(dim.location().toString(), CommandConstants.ADD.toString(), CommandConstants.PLAYER.toString()))));
-        sendCmdFeedback(source,MessageUtil.buildDimHelpLink("cli.msg.dim.help.4", CommandConstants.DIMENSION, new ArrayList<>(Arrays.asList(dim.location().toString(), CommandConstants.ADD.toString(), CommandConstants.FLAG.toString()))));
-        sendCmdFeedback(source,MessageUtil.buildDimHelpLink("cli.msg.dim.help.5", CommandConstants.DIMENSION, new ArrayList<>(Arrays.asList(dim.location().toString(), CommandConstants.INFO.toString()))));
-        sendCmdFeedback(source,MessageUtil.buildDimHelpLink("cli.msg.dim.help.6", CommandConstants.DIMENSION, new ArrayList<>(Arrays.asList(dim.location().toString(), CommandConstants.ACTIVATE.toString()))));
+        sendCmdFeedback(source, buildHelpHeader("cli.msg.dim.help.header"));
+        sendCmdFeedback(source, buildDimHelpLink("cli.msg.dim.help.1", CommandConstants.DIMENSION, new ArrayList<>(Arrays.asList(dim.location().toString(), CommandConstants.HELP.toString()))));
+        sendCmdFeedback(source, buildDimHelpLink("cli.msg.dim.help.2", CommandConstants.DIMENSION, new ArrayList<>(Arrays.asList(dim.location().toString(), CommandConstants.LIST.toString()))));
+        sendCmdFeedback(source, buildDimHelpLink("cli.msg.dim.help.3", CommandConstants.DIMENSION, new ArrayList<>(Arrays.asList(dim.location().toString(), CommandConstants.ADD.toString(), CommandConstants.PLAYER.toString()))));
+        sendCmdFeedback(source, buildDimHelpLink("cli.msg.dim.help.4", CommandConstants.DIMENSION, new ArrayList<>(Arrays.asList(dim.location().toString(), CommandConstants.ADD.toString(), CommandConstants.FLAG.toString()))));
+        sendCmdFeedback(source, buildDimHelpLink("cli.msg.dim.help.5", CommandConstants.DIMENSION, new ArrayList<>(Arrays.asList(dim.location().toString(), CommandConstants.INFO.toString()))));
+        sendCmdFeedback(source, buildDimHelpLink("cli.msg.dim.help.6", CommandConstants.DIMENSION, new ArrayList<>(Arrays.asList(dim.location().toString(), CommandConstants.ACTIVATE.toString()))));
         return 0;
     }
 
@@ -259,8 +257,9 @@ public class DimensionCommands {
         }
         sendCmdFeedback(source, new TranslationTextComponent(TextFormatting.BOLD + "== Regions in dimension '" + dim.location() + "' ==="));
         regionsForDim.forEach(region -> {
-            sendCmdFeedback(source,  MessageUtil.buildDimSuggestRegionRemovalLink(dim, region.getName())
-                    .append(MessageUtil.buildDimensionRegionInfoLink(dim, region)));
+            sendCmdFeedback(source, new StringTextComponent(" - ")
+                    .append(buildDimSuggestRegionRemovalLink(dim, region.getName())
+                    .append(buildDimensionRegionInfoLink(dim, region))));
         });
         return 0;
     }
@@ -336,8 +335,11 @@ public class DimensionCommands {
      */
     private static void promptDimensionFlags(CommandSource src, DimensionalRegion dimRegion){
         IFormattableTextComponent dimFlagMessage = new TranslationTextComponent("cli.msg.dim.info.flags", buildDimFlagListLink(dimRegion));
+        IFormattableTextComponent flags = dimRegion.getFlags().isEmpty()
+                ? new StringTextComponent(dimRegion.getFlags().size() + " flags(s)")
+                : buildDimFlagListLink(dimRegion);
         dimFlagMessage.append(new StringTextComponent(": "))
-                .append(dimRegion.getFlags().size() + " flag(s) ")
+                .append(flags)
                 .append(buildAddDimFlagLink(dimRegion));
         sendCmdFeedback(src, dimFlagMessage);
     }
