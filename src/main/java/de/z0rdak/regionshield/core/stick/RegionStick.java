@@ -2,10 +2,9 @@ package de.z0rdak.regionshield.core.stick;
 
 import de.z0rdak.regionshield.util.StickAction;
 import de.z0rdak.regionshield.util.StickType;
+import de.z0rdak.regionshield.util.constants.NBTConstants;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.common.util.INBTSerializable;
-
-import javax.swing.plaf.synth.Region;
 
 public class RegionStick extends AbstractStick implements INBTSerializable<CompoundNBT> {
 
@@ -14,6 +13,8 @@ public class RegionStick extends AbstractStick implements INBTSerializable<Compo
 
     public RegionStick() {
         super(StickType.REGION_STICK);
+        this.action = StickAction.ADD;
+        this.selectedRegion = "";
     }
 
     public RegionStick(CompoundNBT nbt){
@@ -28,15 +29,15 @@ public class RegionStick extends AbstractStick implements INBTSerializable<Compo
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = super.serializeNBT();
-        nbt.putString("selected_region", this.selectedRegion);
-        nbt.putString("flag_action", this.action.toString());
+        nbt.putString(NBTConstants.SELECTED_REGION, this.selectedRegion);
+        nbt.putString(NBTConstants.FLAG_ACTION, this.action.toString());
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
         super.deserializeNBT(nbt);
-        this.action = StickAction.valueOf(nbt.getString("flag_action"));
-        this.selectedRegion = nbt.getString("selected_region");
+        this.action = StickAction.valueOf(nbt.getString(NBTConstants.FLAG_ACTION));
+        this.selectedRegion = nbt.getString(NBTConstants.SELECTED_REGION);
     }
 }
