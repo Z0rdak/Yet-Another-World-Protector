@@ -13,19 +13,21 @@ import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.DimensionArgument;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.command.arguments.EntitySelector;
+import net.minecraft.command.arguments.TeamArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.List;
 
 public class CommandUtil {
 
     public static RequiredArgumentBuilder<CommandSource, ResourceLocation> dimensionArgument = Commands.argument(CommandConstants.DIMENSION.toString(), DimensionArgument.dimension());
     public static RequiredArgumentBuilder<CommandSource, String> regionNameArgument = Commands.argument(CommandConstants.REGION.toString(), StringArgumentType.string());
     public static RequiredArgumentBuilder<CommandSource, EntitySelector> ownerArgument = Commands.argument(CommandConstants.OWNER.toString(), EntityArgument.player());
+    public static RequiredArgumentBuilder<CommandSource, String> teamArgument = Commands.argument(CommandConstants.TEAM.toString(), TeamArgument.team());
     public static RequiredArgumentBuilder<CommandSource, Boolean> activateArgument = Commands.argument(CommandConstants.ACTIVATE.toString(), BoolArgumentType.bool());
     public static RequiredArgumentBuilder<CommandSource, Integer> priorityArgument = Commands.argument(CommandConstants.PRIORITY.toString(), IntegerArgumentType.integer(1, Integer.MAX_VALUE));
     public static RequiredArgumentBuilder<CommandSource, EntitySelector> playerArgument = Commands.argument(CommandConstants.PLAYER.toString(), EntityArgument.player());
@@ -34,6 +36,9 @@ public class CommandUtil {
     public static LiteralArgumentBuilder<CommandSource> regionsLiteral = literal(CommandConstants.REGIONS);
     public static LiteralArgumentBuilder<CommandSource> flagLiteral = literal(CommandConstants.FLAG);
     public static LiteralArgumentBuilder<CommandSource> playerLiteral = literal(CommandConstants.PLAYER);
+    public static LiteralArgumentBuilder<CommandSource> teamLiteral = literal(CommandConstants.TEAM);
+    public static LiteralArgumentBuilder<CommandSource> ownerLiteral = literal(CommandConstants.OWNER);
+    public static LiteralArgumentBuilder<CommandSource> memberLiteral = literal(CommandConstants.MEMBER);
     public static LiteralArgumentBuilder<CommandSource> removeLiteral = literal(CommandConstants.REMOVE);
     public static LiteralArgumentBuilder<CommandSource> addLiteral = literal(CommandConstants.ADD);
     public static LiteralArgumentBuilder<CommandSource> updateLiteral = literal(CommandConstants.UPDATE);
@@ -48,20 +53,16 @@ public class CommandUtil {
     public static LiteralArgumentBuilder<CommandSource> dimensionLiteral = literal(CommandConstants.DIMENSION);
     public static LiteralArgumentBuilder<CommandSource> helpLiteral = literal(CommandConstants.HELP);
     public static LiteralArgumentBuilder<CommandSource> dimFlagLiteral = literal(CommandConstants.DIM_FLAG);
+    public static LiteralArgumentBuilder<CommandSource> baseCmdLiteral = literal(CommandConstants.BASE_CMD);
+    public static LiteralArgumentBuilder<CommandSource> expandLiteral = literal(CommandConstants.EXPAND);
 
 
     public static LiteralArgumentBuilder<CommandSource> literal(CommandConstants constant) {
         return Commands.literal(constant.toString());
     }
 
-    public static RegistryKey<World> getDimensionFromArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
+    public static RegistryKey<World> getDimensionArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
         return DimensionArgument.getDimension(ctx, CommandConstants.DIMENSION.toString()).dimension();
-    }
-
-    public static Collection<String> getQuotedDimensionList() {
-        return RegionUtil.getDimensionList().stream()
-                .map(dim -> "'" + dim + "'")
-                .collect(Collectors.toList());
     }
 
     public static ServerPlayerEntity getPlayerArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
@@ -81,6 +82,10 @@ public class CommandUtil {
         return EntityArgument.getPlayer(ctx, CommandConstants.OWNER.toString());
     }
 
+    public static ScorePlayerTeam getTeamArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
+        return TeamArgument.getTeam(ctx, CommandConstants.TEAM.toString());
+    }
+
     public static boolean getActivateArgument(CommandContext<CommandSource> ctx) {
         return BoolArgumentType.getBool(ctx, CommandConstants.ACTIVATE.toString());
     }
@@ -91,5 +96,11 @@ public class CommandUtil {
 
     public static int getPriorityArgument(CommandContext<CommandSource> ctx) {
         return IntegerArgumentType.getInteger(ctx, CommandConstants.PRIORITY.toString());
+    }
+
+    public static String buildCommandStr(String... cmdTokens){
+        String preamble = "/" + CommandConstants.BASE_CMD;
+        String cmdStr = String.join(" ", cmdTokens);
+        return preamble + " " + cmdStr;
     }
 }
