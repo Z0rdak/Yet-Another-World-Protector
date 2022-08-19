@@ -29,7 +29,7 @@ public class CommandRegionShield {
 
     private static LiteralArgumentBuilder<CommandSource> withSubCommands(LiteralArgumentBuilder<CommandSource> baseCommand) {
         return baseCommand
-                .requires(CommandRegionShield::hasPermission)
+                .requires(source -> source.hasPermission(ServerConfigBuilder.RS_CMD_OP_LEVEL.get()))
                 .executes(ctx -> giveHelp(ctx.getSource()))
                 .then(helpLiteral
                         .executes(ctx -> giveHelp(ctx.getSource())))
