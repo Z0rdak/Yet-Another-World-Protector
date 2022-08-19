@@ -5,6 +5,7 @@ import de.z0rdak.regionshield.core.flag.IFlag;
 import de.z0rdak.regionshield.core.flag.RegionFlag;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.scoreboard.Team;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import java.util.Collection;
@@ -27,9 +28,10 @@ public interface IProtectedRegion extends INBTSerializable<CompoundNBT> {
 
     String getName();
 
-    boolean addFlag(IFlag flag);
+    void addFlag(IFlag flag);
+    void addFlag(String flag);
 
-    boolean removeFlag(IFlag flag);
+    void removeFlag(String flag);
 
     boolean containsFlag(IFlag flag);
 
@@ -37,13 +39,21 @@ public interface IProtectedRegion extends INBTSerializable<CompoundNBT> {
 
     Collection<IFlag> getFlags();
 
-    boolean addMember(PlayerEntity player);
+    void addMember(PlayerEntity player);
 
-    boolean addOwner(PlayerEntity player);
+    void addMember(Team team);
 
-    boolean removeMember(UUID uuid);
+    void addOwner(PlayerEntity player);
 
-    boolean removeOwner(UUID uuid);
+    void addOwner(Team team);
+
+    void removeMember(PlayerEntity player);
+
+    void removeOwner(PlayerEntity player);
+
+    void removeMember(Team team);
+
+    void removeOwner(Team team);
 
     boolean isActive();
 
