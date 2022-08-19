@@ -5,7 +5,9 @@ public enum CommandConstants {
     REGION("region"),
     REGIONS("regions"),
     DIMENSION("dimension"),
+    DIM_FLAG("dim-flag"),
     FLAG("flag"),
+    FLAGS("flags"),
     HELP("help"),
     ADD("add"),
     ADD_OFFLINE("add-offline"),
@@ -33,7 +35,11 @@ public enum CommandConstants {
     ALLOW("allow"),
     DENY("deny"),
     PLAYER("player"),
+    TEAM("team"),
+    TEAMS("teams"),
+    PLAYERS("players"),
     OWNER("owner"),
+    MEMBER("member"),
     Y1("Y1"),
     Y2("Y2");
 
