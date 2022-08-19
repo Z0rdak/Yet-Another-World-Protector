@@ -11,6 +11,7 @@ import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.lang.reflect.InvocationTargetException;
@@ -30,8 +31,18 @@ public class PlayerTrackingManager {
     private static final PlayerTrackingManager playerTrackingManager = new PlayerTrackingManager();
 
     private PlayerTrackingManager(){
+        playerTrackingPerDim.put(World.OVERWORLD, new PlayerTrackingCache(World.OVERWORLD));
+        playerTrackingPerDim.put(World.NETHER, new PlayerTrackingCache(World.NETHER));
+        playerTrackingPerDim.put(World.END, new PlayerTrackingCache(World.END));
     }
 
+    public static PlayerTrackingManager get(){
+        return playerTrackingManager;
+    }
+
+    public PlayerTrackingCache trackingCacheFor(RegistryKey<World> dim){
+        return playerTrackingPerDim.get(dim);
+    }
 
     /*
     Keep track of the chunk the player is in and the regions in and surround this chunk to
@@ -74,7 +85,7 @@ public class PlayerTrackingManager {
                 // is player pos here the old or new chunkpos?
                 // either way we don't have the new or old Y pos - how to fix this?
                 // just ignore and 1.16 works only for x,z ?
-
+/*
                 try {
                     Method getChunksMethod = ChunkManager.class.getDeclaredMethod("getChunks");
                     ServerWorld world = (ServerWorld) event.getEntity().getCommandSenderWorld();
@@ -85,11 +96,17 @@ public class PlayerTrackingManager {
                 } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
                     RegionShield.LOGGER.error(e.getMessage());
                 }
+
+ */
             }
         }
     }
 
     public static List<PlayerEntity> getPlayersInRegionVicinity() {
         throw new NotImplementedException("getPlayersInRegionVicinity");
+    }
+
+    public static void loadPlayerData(FMLServerStartingEvent event) {
+
     }
 }
