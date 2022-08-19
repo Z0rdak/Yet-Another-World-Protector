@@ -1,6 +1,7 @@
 package de.z0rdak.regionshield.core.region;
 
 import de.z0rdak.regionshield.core.affiliation.PlayerContainer;
+import de.z0rdak.regionshield.core.flag.ConditionFlag;
 import de.z0rdak.regionshield.core.flag.FlagContainer;
 import de.z0rdak.regionshield.core.flag.IFlag;
 import de.z0rdak.regionshield.core.flag.RegionFlag;
@@ -8,8 +9,7 @@ import de.z0rdak.regionshield.util.PlayerUtils;
 import de.z0rdak.regionshield.util.constants.RegionNBT;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.scoreboard.Team;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -44,7 +44,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
      */
     protected AbstractRegion(String name, PlayerEntity owner) {
         this(name);
-        this.owners.players.put(owner.getUUID(), owner.getScoreboardName());
+        this.owners.addPlayer(owner);
     }
 
     @Override
@@ -53,8 +53,13 @@ public abstract class AbstractRegion implements IProtectedRegion {
     }
 
     @Override
-    public boolean addFlag(IFlag flag){
-        return this.flags.put(flag.getFlagName(), flag) == null;
+    public void addFlag(IFlag flag){
+        this.flags.put(flag.getFlagName(), flag);
+    }
+
+    @Override
+    public void addFlag(String flag){
+        this.flags.put(flag, new ConditionFlag(flag, false));
     }
 
     public boolean containsFlag(IFlag flag) {
@@ -62,8 +67,8 @@ public abstract class AbstractRegion implements IProtectedRegion {
 }
 
     @Override
-    public boolean removeFlag(IFlag flag) {
-        return this.flags.remove(flag.getFlagName()) != null;
+    public void removeFlag(String flag) {
+        this.flags.remove(flag);
     }
 
     public boolean containsFlag(RegionFlag flag) {
@@ -86,25 +91,47 @@ public abstract class AbstractRegion implements IProtectedRegion {
     }
 
     @Override
-    public boolean addMember(PlayerEntity player) {
-        return false;
+    public void addMember(PlayerEntity player) {
+        this.members.addPlayer(player);
     }
 
     @Override
-    public boolean addOwner(PlayerEntity player) {
-        return false;
+    public void addMember(Team team) {
+        this.members.addTeam(team);
     }
 
-    // TODO: rethink return values - are they needed? they complicate things even more
+
     @Override
-    public boolean removeMember(UUID uuid) {
-        this.members.players.remove(uuid);
-        return true;
+    public void addOwner(PlayerEntity player) {
+        this.owners.addPlayer(player);
     }
 
     @Override
-    public boolean removeOwner(UUID uuid) {
-        return false;
+    public void addOwner(Team team) {
+        this.owners.addTeam(team);
+    }
+
+    @Override
+    public void removeMember(PlayerEntity player) {
+        this.members.removePlayer(player);
+
+    }
+
+    @Override
+    public void removeMember(Team team) {
+        this.members.removeTeam(team.getName());
+
+    }
+
+    @Override
+    public void removeOwner(PlayerEntity player) {
+        this.owners.removePlayer(player);
+    }
+
+    @Override
+    public void removeOwner(Team team) {
+        this.owners.removeTeam(team);
+
     }
 
     @Override
