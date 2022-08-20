@@ -172,8 +172,8 @@ public class MessageUtil {
 
     // TODO: generalize with Supplier<String> (regionName) -> build....(regionName)
     public static IFormattableTextComponent buildDimAddTeamLink(DimensionalRegion dimRegion, String hoverTextLangKey, CommandConstants memberOrOwner) {
-        return buildExecuteCmdComponent("+", buildDimAddTeamCmdStr(dimRegion.getName(), OWNER),
-                GREEN, hoverTextLangKey + " '" + dimRegion.getName() + "'", SUGGEST_COMMAND);
+        return buildExecuteCmdComponent("+", buildDimAddTeamCmdStr(dimRegion.getName(), memberOrOwner),
+                GREEN, hoverTextLangKey, SUGGEST_COMMAND);
     }
 
     public static IFormattableTextComponent buildDimStateActiveLink(AbstractRegion region){
@@ -193,7 +193,7 @@ public class MessageUtil {
     public static IFormattableTextComponent buildDimensionalInfoLink(RegistryKey<World> dim) {
         String command = "/" + BASE_CMD + " " + DIMENSION + " " + dim.location() + " " + INFO;
         String hoverText = "cli.msg.dim.info";
-        return buildExecuteCmdComponent(dim.location().toString(), command, UNDERLINE, hoverText, RUN_COMMAND);
+        return buildExecuteCmdComponent(dim.location().toString(), command, GREEN, hoverText, RUN_COMMAND);
     }
 
     public static IFormattableTextComponent buildPlayerListLink(DimensionalRegion dimRegion, PlayerContainer players, CommandConstants memberOrOwner) {
@@ -253,7 +253,7 @@ public class MessageUtil {
     }
 
     public static IFormattableTextComponent buildDimensionRemoveFlagLink(IFlag flag, RegistryKey<World> dim) {
-        String command =  "/" + BASE_CMD + " " + DIMENSION + " " + dim.location() + " " + REMOVE + " " + FLAG + " " + flag;
+        String command =  "/" + BASE_CMD + " " + DIMENSION + " " + dim.location() + " " + REMOVE + " " + FLAG + " " + flag.getFlagName();
         String hoverText =" Remove flag '" + flag.getFlagName() + "' from dimension " + "'" + dim.location() + "'";
         String linkText = "x";
         return buildExecuteCmdComponent(linkText, command, RED, hoverText, SUGGEST_COMMAND);
