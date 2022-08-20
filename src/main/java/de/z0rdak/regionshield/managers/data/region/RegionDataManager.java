@@ -31,7 +31,7 @@ public class RegionDataManager extends WorldSavedData {
 
     private static final String DATA_NAME = RegionShield.MODID_SHORT + "-dimensions";
 
-    private static Map<RegistryKey<World>, DimensionRegionCache> regionsMap = new HashMap<>();
+    private static Map<RegistryKey<World>, DimensionRegionCache> dimCacheMap = new HashMap<>();
     private List<String> dimensionDataNames;
 
     // TODO: Needed with server-side only?
@@ -78,7 +78,7 @@ public class RegionDataManager extends WorldSavedData {
                 regionDataCache = data;
                 regionDataCache.getDimensionDataNames().forEach( dimDataName -> {
                     DimensionRegionCache cache = storage.computeIfAbsent( () -> new DimensionRegionCache(dimDataName), DimensionRegionCache.getDataName(dimDataName));
-                    RegionDataManager.regionsMap.put(cache.getDimensionalRegion().getDimensionKey(), cache);
+                    RegionDataManager.dimCacheMap.put(cache.getDimensionalRegion().getDimensionKey(), cache);
                     cache.setDirty();
                 });
                 RegionShield.LOGGER.info(new TranslationTextComponent("console.logger.info.data.load.success", data.getAllRegionNames().size(), data.getDimensionList().size()).getString());
@@ -90,37 +90,28 @@ public class RegionDataManager extends WorldSavedData {
 
     @Override
     public void load(CompoundNBT nbt) {
-        regionsMap.clear();
-        RegionShield.LOGGER.debug("##################");
-        RegionShield.LOGGER.debug("Loading world data");
-        RegionShield.LOGGER.debug("##################");
+        dimCacheMap.clear();
+        RegionShield.LOGGER.debug("Loading mod data...");
         CompoundNBT dimensionRegions = nbt.getCompound(NBTConstants.DIMENSIONS);
         for (String dimKey : dimensionRegions.getAllKeys()) {
             this.dimensionDataNames.add(dimKey);
-            /*
-            CompoundNBT dimRegionMap = dimensionRegions.getCompound(dimKey);
-            wDimensionalRegionCache dimCache = new DimensionalRegionCache(dimRegionMap);
-            TODO: build entry later
-             */
             RegistryKey<World> dimension = RegistryKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(dimKey));
-            regionsMap.put(dimension, new DimensionRegionCache(dimension));
-
+            dimCacheMap.put(dimension, new DimensionRegionCache(dimension));
         }
     }
 
     @Override
     public CompoundNBT save(CompoundNBT compound) {
-        RegionShield.LOGGER.debug("##################");
-        RegionShield.LOGGER.debug("Saving world data");
-        RegionShield.LOGGER.debug("##################");
+        RegionShield.LOGGER.debug("Saving mod data..");
         CompoundNBT dimRegionNbtData = new CompoundNBT();
-        for (Map.Entry<RegistryKey<World>, DimensionRegionCache> entry : regionsMap.entrySet()) {
+        for (Map.Entry<RegistryKey<World>, DimensionRegionCache> entry : dimCacheMap.entrySet()) {
             String dimensionName = entry.getValue().getDimensionalRegion().getName();
             dimRegionNbtData.put(dimensionName, new CompoundNBT());
+        }
+        compound.put(NBTConstants.DIMENSIONS, dimRegionNbtData);
+        for (Map.Entry<RegistryKey<World>, DimensionRegionCache> entry : dimCacheMap.entrySet()) {
             entry.getValue().setDirty();
         }
-
-        compound.put(NBTConstants.DIMENSIONS, dimRegionNbtData);
         return compound;
     }
 
@@ -128,16 +119,16 @@ public class RegionDataManager extends WorldSavedData {
     public static void addDimKeyOnDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event){
         // if region map does not contain an entry for the dimension traveled to, add it to the map
         if (!event.getPlayer().getCommandSenderWorld().isClientSide) {
-            if (regionsMap == null) {
-                regionsMap = new HashMap<>();
+            if (dimCacheMap == null) {
+                dimCacheMap = new HashMap<>();
             }
-            if (!regionsMap.containsKey(event.getTo())) {
+            if (!dimCacheMap.containsKey(event.getTo())) {
                 DimensionSavedDataManager dataManager;
                 try (ServerWorld serverWorld = ServerLifecycleHooks.getCurrentServer().overworld()) {
                     dataManager = serverWorld.getDataStorage();
                     DimensionRegionCache cache = dataManager.computeIfAbsent( () -> new DimensionRegionCache(event.getTo()), DimensionRegionCache.getDataName(event.getTo().location().toString()));
-                    RegionDataManager.regionsMap.put(cache.getDimensionalRegion().getDimensionKey(), cache);
-                    RegionDataManager.get().getDimensionDataNames().add(regionsMap.get(event.getTo()).getDimensionalRegion().getName());
+                    RegionDataManager.dimCacheMap.put(cache.getDimensionalRegion().getDimensionKey(), cache);
+                    RegionDataManager.get().getDimensionDataNames().add(dimCacheMap.get(event.getTo()).getDimensionalRegion().getName());
                     save();
                     cache.setDirty();
                 } catch (IOException e) {
@@ -152,14 +143,14 @@ public class RegionDataManager extends WorldSavedData {
         // if region map does not contain an entry for the dimension traveled to, add it to the map
         if (!event.getPlayer().getCommandSenderWorld().isClientSide) {
             RegistryKey<World> dim = event.getPlayer().getCommandSenderWorld().dimension();
-            if (regionsMap == null) {
-                regionsMap = new HashMap<>();
+            if (dimCacheMap == null) {
+                dimCacheMap = new HashMap<>();
             }
-            if (!regionsMap.containsKey(dim)) {
+            if (!dimCacheMap.containsKey(dim)) {
                 DimensionSavedDataManager dataManager = event.getPlayer().getServer().overworld().getDataStorage();
                 DimensionRegionCache cache = dataManager.computeIfAbsent( () -> new DimensionRegionCache(dim), DimensionRegionCache.getDataName(dim.location().toString()));
-                RegionDataManager.regionsMap.put(cache.getDimensionalRegion().getDimensionKey(), cache);
-                RegionDataManager.get().getDimensionDataNames().add(regionsMap.get(dim).getDimensionalRegion().getName());
+                RegionDataManager.dimCacheMap.put(cache.getDimensionalRegion().getDimensionKey(), cache);
+                RegionDataManager.get().getDimensionDataNames().add(dimCacheMap.get(dim).getDimensionalRegion().getName());
                 save();
                 cache.setDirty();
             }
@@ -169,13 +160,13 @@ public class RegionDataManager extends WorldSavedData {
     /* ########################## CRUD FUNCTIONS  ########################## */
 
     public Collection<String> getAllRegionNames() {
-        return regionsMap.values().stream()
+        return dimCacheMap.values().stream()
                 .flatMap(regionCache -> regionCache.getRegionNames().stream())
                 .collect(Collectors.toList());
     }
 
     public Collection<String> getDimensionList() {
-        return regionsMap.keySet().stream()
+        return dimCacheMap.keySet().stream()
                 .map(entry -> entry.location().toString())
                 .collect(Collectors.toList());
     }
@@ -190,8 +181,8 @@ public class RegionDataManager extends WorldSavedData {
 
     @Nullable
     public IMarkableRegion getRegionIn(String regionName, RegistryKey<World> dim) {
-        if (regionsMap.containsKey(dim)) {
-            DimensionRegionCache cache = regionsMap.get(dim);
+        if (dimCacheMap.containsKey(dim)) {
+            DimensionRegionCache cache = dimCacheMap.get(dim);
             if (cache.contains(regionName)) {
                 return cache.get(regionName);
             }
@@ -208,17 +199,14 @@ public class RegionDataManager extends WorldSavedData {
     }
 
     public DimensionRegionCache cacheFor(RegistryKey<World> dim) {
-        return regionsMap.get(dim);
+        return dimCacheMap.get(dim);
     }
 
-    private DimensionalRegion dimFor(RegistryKey<World> dim) {
-        return regionsMap.get(dim).getDimensionalRegion();
+    public DimensionalRegion dimFor(RegistryKey<World> dim) {
+        return dimCacheMap.get(dim).getDimensionalRegion();
     }
 
-    public void activateDim(RegistryKey<World> dim, boolean activate){
-        dimFor(dim).setIsActive(activate);
-    }
-
+    /* hash for checking manipulated world data?*/
     public class DimensionDataEntry {
         private RegistryKey<World> dim;
         private boolean load;
