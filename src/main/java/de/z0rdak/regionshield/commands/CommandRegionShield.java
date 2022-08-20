@@ -33,9 +33,9 @@ public class CommandRegionShield {
                 .executes(ctx -> giveHelp(ctx.getSource()))
                 .then(helpLiteral
                         .executes(ctx -> giveHelp(ctx.getSource())))
+                .then(DimensionCommands.DIMENSION_COMMAND)
                 //.then(RegionCommands.REGION_COMMAND)
                 //.then(RegionCommands.REGIONS_COMMAND)
-                .then(DimensionCommands.DIMENSION_COMMAND)
                 //.then(DimensionFlagCommands.DIMENSION_FLAGS_COMMAND);
                 //.then(CommandExpand.EXPAND_COMMAND)
                 //.then(CommandFlag.FLAG_COMMAND)
