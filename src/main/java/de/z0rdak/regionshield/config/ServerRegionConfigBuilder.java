@@ -33,8 +33,9 @@ public class ServerRegionConfigBuilder {
         REGION_DEFAULT_PRIORITY_INC = BUILDER.comment("Default region priority increment/decrement.")
                 .defineInRange("default_region_priority_inc", 5, 1, 100);
 
+        // fixme
         REGION_DEFAULT_FLAGS = BUILDER.comment("Default flags for new regions.")
-                .defineList("default_flags", new ArrayList<>(Arrays.asList("break", "place")),s -> false);
+                .defineList("default_flags", new ArrayList<>(Arrays.asList("break", "place")), /* TODO */s -> true);
 
         REGION_DEFAULT_FLAG_TYPE = BUILDER.comment("Default flag tyoe for new flags.\n true -> Whitelist\n false -> Blacklist")
                 .define("default_flag_type", false);
