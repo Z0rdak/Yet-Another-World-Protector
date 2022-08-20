@@ -1,4 +1,50 @@
 {
+  "cli.msg.dim.help.header": "RegionShield dimension command help",
+  "cli.msg.dim.help.1": "/rs dim help",
+  "cli.msg.dim.help.2": "/rs dim <dim> list regions|owners|members|flags",
+  "cli.msg.dim.help.3": "/rs dim <dim> add|remove player|team member|owner <team|player>",
+  "cli.msg.dim.help.4": "/rs dim <dim> add|remove flag <flag>",
+  "cli.msg.dim.help.5": "/rs dim <dim> info",
+  "cli.msg.dim.help.6": "/rs dim <dim> activate <true|false>",
+
+  "cli.msg.dim.info": "Prompt region info",
+  "cli.msg.dim.info.owners": "Owners",
+  "cli.msg.dim.info.owners.players": "Player-owners",
+  "cli.msg.dim.info.owners.players.empty": "No player-owners defined",
+  "cli.msg.dim.info.owners.teams": "Team-owners",
+  "cli.msg.dim.info.owners.teams.empty": "No team-owners defined",
+  "cli.msg.dim.info.members": "Members",
+  "cli.msg.dim.info.members.players": "Player members",
+  "cli.msg.dim.info.members.players.empty": "No player-members defined",
+  "cli.msg.dim.info.members.teams": "Team members",
+  "cli.msg.dim.info.members.teams.empty": "No team-members defined",
+  "cli.msg.dim.info.owner.player.added": "Added player(owner) to region '%s'",
+  "cli.msg.dim.info.owner.team.added": "Added team(owner) to region '%s'",
+  "cli.msg.dim.info.member.player.added": "Added player(member) to region '%s'",
+  "cli.msg.dim.info.member.team.added": "Added team(member) to region '%s'",
+
+  "cli.msg.dim.info.flags": "Flags",
+  "cli.msg.dim.info.flags.empty": "No flags defined",
+
+
+  "cli.msg.region.info.link.hover": "Show region info ",
+  "cli.msg.region.info.tp.link.hover": "Teleport to region",
+  "cli.msg.dim.region.remove.link.hover": "Remove region",
+  "cli.msg.dim.flag.add.link.hover": "Add flag to region",
+
+  "cli.msg.flags.added": "Added flag '%s' to region '%s'",
+  "cli.msg.flags.removed": "Removed flag '%s' from region '%s'",
+
+  "cli.msg.info.state": "State",
+  "cli.msg.info.state.activate": "Activate region",
+  "cli.msg.info.state.deactivate": "Deactivate region",
+  "cli.msg.info.state.link.activate": "active",
+  "cli.msg.info.state.link.deactivate": "inactive",
+  "cli.msg.info.state.activated": "Activated region '%s'",
+  "cli.msg.info.state.deactivated": "Deactivated region '%s'",
+
+
+
   "help.tooltip.stick.marker.simple.1": "Used to mark a new region.",
   "help.tooltip.stick.marker.simple.2": "Keep the Region Marker in your hand while defining a region!",
 
@@ -46,5 +92,16 @@
 
 
   "console.logger.info.data.load.success": "Loaded %s regions for %s different dimensions",
-  "console.logger.error.data.load.failure": "Loading regions failed!"
+  "console.logger.error.data.load.failure": "Loading regions failed!",
+
+
+
+
+
+
+
+
+
+  "rs.flags.player.break-blocks.description": "Prevents players from breaking blocks",
+  "rs.flags.player.place-blocks.description": "Prevents players from placing blocks"
 }
