@@ -4,7 +4,7 @@ public enum CommandConstants {
     BASE_CMD("rs"),
     REGION("region"),
     REGIONS("regions"),
-    DIMENSION("dimension"),
+    DIMENSION("dim"),
     DIM_FLAG("dim-flag"),
     FLAG("flag"),
     FLAGS("flags"),
