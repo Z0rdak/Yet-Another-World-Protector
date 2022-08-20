@@ -20,8 +20,6 @@ import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
-import java.util.List;
-
 public class CommandUtil {
 
     public static RequiredArgumentBuilder<CommandSource, ResourceLocation> dimensionArgument = Commands.argument(CommandConstants.DIMENSION.toString(), DimensionArgument.dimension());
@@ -41,6 +39,12 @@ public class CommandUtil {
     public static LiteralArgumentBuilder<CommandSource> memberLiteral = literal(CommandConstants.MEMBER);
     public static LiteralArgumentBuilder<CommandSource> removeLiteral = literal(CommandConstants.REMOVE);
     public static LiteralArgumentBuilder<CommandSource> addLiteral = literal(CommandConstants.ADD);
+    public static LiteralArgumentBuilder<CommandSource> addFlagLiteral = literal(CommandConstants.ADD_FLAG);
+    public static LiteralArgumentBuilder<CommandSource> addTeamLiteral = literal(CommandConstants.ADD_TEAM);
+    public static LiteralArgumentBuilder<CommandSource> addPlayerLiteral = literal(CommandConstants.ADD_PLAYER);
+    public static LiteralArgumentBuilder<CommandSource> removeFlagLiteral = literal(CommandConstants.REMOVE_FLAG);
+    public static LiteralArgumentBuilder<CommandSource> removePlayerLiteral = literal(CommandConstants.REMOVE_PLAYER);
+    public static LiteralArgumentBuilder<CommandSource> removeTeamLiteral = literal(CommandConstants.REMOVE_TEAM);
     public static LiteralArgumentBuilder<CommandSource> updateLiteral = literal(CommandConstants.UPDATE);
     public static LiteralArgumentBuilder<CommandSource> teleportLiteral = literal(CommandConstants.TELEPORT);
     public static LiteralArgumentBuilder<CommandSource> alertLiteral = literal(CommandConstants.ALERT);
