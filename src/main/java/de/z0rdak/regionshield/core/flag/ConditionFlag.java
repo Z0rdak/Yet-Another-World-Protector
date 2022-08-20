@@ -9,6 +9,11 @@ public class ConditionFlag extends AbstractFlag {
 
     public static final String FLAG_REGISTRY_NAME = "ConditionFlag";
 
+    public ConditionFlag(CompoundNBT nbt){
+        this("", false);
+        this.deserializeNBT(nbt);
+    }
+
     public ConditionFlag(String flag, boolean isAllowed) {
         super(flag, FLAG_REGISTRY_NAME, isAllowed);
     }
