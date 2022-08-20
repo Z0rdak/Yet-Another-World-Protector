@@ -167,7 +167,8 @@ public class DimensionCommands {
     private static int promptDimensionFlagList(CommandSource src, RegistryKey<World> dim) {
         List<IFlag> flags = RegionDataManager.get().dimFor(dim).getFlags()
                 .stream()
-                .sorted()
+                // TODO: implement comarable for flags
+                // .sorted()
                 .collect(Collectors.toList());
         if (flags.isEmpty()) {
             sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.flags.empty", dim));
