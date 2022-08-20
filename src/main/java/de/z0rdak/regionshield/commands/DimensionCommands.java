@@ -35,6 +35,7 @@ public class DimensionCommands {
 
     public static final LiteralArgumentBuilder<CommandSource> DIMENSION_COMMAND = register();
 
+    // FIXME: Some commands are ignored/overwritten by others
     public static LiteralArgumentBuilder<CommandSource> register() {
         return dimensionLiteral
                 /* /wp dimension help */
