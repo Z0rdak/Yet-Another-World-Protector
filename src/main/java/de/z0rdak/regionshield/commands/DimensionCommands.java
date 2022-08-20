@@ -346,8 +346,8 @@ public class DimensionCommands {
 
     private static void promptDimensionState(CommandSource src, AbstractRegion region, String command){
         String onClickAction = region.isActive() ? "deactivate" : "activate";
-        String hoverText = "cli.msg.info.state." + (!region.isActive() ? "deactivate" : "activate");
-        String linkText = "cli.msg.info.state.link." + onClickAction;
+        String hoverText = "cli.msg.info.state." + onClickAction;
+        String linkText = "cli.msg.info.state.link." + (region.isActive() ? "activate" : "deactivate");
         TextFormatting color = region.isActive() ? TextFormatting.GREEN : TextFormatting.RED;
         IFormattableTextComponent stateLink = buildExecuteCmdComponent(linkText, command, color, hoverText, ClickEvent.Action.RUN_COMMAND);
         sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.state")
@@ -374,7 +374,7 @@ public class DimensionCommands {
         promptDimensionFlags(src, dimRegion);
 
         // State: [activated]
-        String command = "/" + CommandConstants.BASE_CMD + " " + CommandConstants.DIMENSION + " " + dimRegion.getName() + " " + CommandConstants.ACTIVATE + " " + dimRegion.isActive();
+        String command = "/" + CommandConstants.BASE_CMD + " " + CommandConstants.DIMENSION + " " + dimRegion.getName() + " " + CommandConstants.ACTIVATE + " " + !dimRegion.isActive();
         promptDimensionState(src, dimRegion, command);
         return 0;
     }
