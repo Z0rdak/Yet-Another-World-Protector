@@ -160,7 +160,8 @@ public class MessageUtil {
 
     public static IFormattableTextComponent buildDimAddPlayerLink(DimensionalRegion dimRegion, String hoverTextLangKey, CommandConstants memberOrOwner) {
         String command = buildDimAddPlayerCmdStr(dimRegion.getName(), memberOrOwner);
-        String hoverText = hoverTextLangKey + " '" + dimRegion.getName() + "'";
+        //String hoverText = hoverTextLangKey + " '" + dimRegion.getName() + "'";
+        String hoverText = hoverTextLangKey;
         String linkText = "+";
         return buildExecuteCmdComponent(linkText, command, GREEN, hoverText, SUGGEST_COMMAND);
     }
@@ -243,21 +244,24 @@ public class MessageUtil {
 
     public static IFormattableTextComponent buildDimRemovePlayerLink(String playerName, RegistryKey<World> dim, CommandConstants memberOrOwner) {
         String command = buildCommandStr(DIMENSION.toString(), dim.location().toString(), REMOVE.toString(), PLAYER.toString(), memberOrOwner.toString(), playerName);
-        String hoverText = "Remove player '" + playerName + "' from dimension " + "'" + dim.location() + "'";
+        //String hoverText = "Remove player '" + playerName + "' from dimension " + "'" + dim.location() + "'";
+        String hoverText = "Remove player";
         String linkText = "x";
         return buildExecuteCmdComponent(linkText, command, RED, hoverText, SUGGEST_COMMAND);
     }
 
     public static IFormattableTextComponent buildDimRemoveTeamLink(String teamName, RegistryKey<World> dim, CommandConstants memberOrOwner) {
         String command = buildCommandStr(DIMENSION.toString(), dim.location().toString(), REMOVE.toString(), TEAM.toString(), memberOrOwner.toString(), teamName);
-        String hoverText = "Remove team '" + teamName + "' from dimension " + "'" + dim.location() + "'";
+        //String hoverText = "Remove team '" + teamName + "' from dimension " + "'" + dim.location() + "'";
+        String hoverText = "Remove team";
         String linkText = "x";
         return buildExecuteCmdComponent(linkText, command, RED, hoverText, SUGGEST_COMMAND);
     }
 
     public static IFormattableTextComponent buildDimensionRemoveFlagLink(IFlag flag, RegistryKey<World> dim) {
         String command =  "/" + BASE_CMD + " " + DIMENSION + " " + dim.location() + " " + REMOVE + " " + FLAG + " " + flag.getFlagName();
-        String hoverText =" Remove flag '" + flag.getFlagName() + "' from dimension " + "'" + dim.location() + "'";
+        //String hoverText =" Remove flag '" + flag.getFlagName() + "' from dimension " + "'" + dim.location() + "'";
+        String hoverText ="Remove flag";
         String linkText = "x";
         return buildExecuteCmdComponent(linkText, command, RED, hoverText, SUGGEST_COMMAND);
     }
