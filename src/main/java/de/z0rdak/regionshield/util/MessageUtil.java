@@ -9,7 +9,6 @@ import de.z0rdak.regionshield.core.region.AbstractMarkableRegion;
 import de.z0rdak.regionshield.core.region.AbstractRegion;
 import de.z0rdak.regionshield.core.region.DimensionalRegion;
 import de.z0rdak.regionshield.core.region.IMarkableRegion;
-import de.z0rdak.regionshield.managers.data.region.RegionDataManager;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.RegistryKey;
@@ -18,15 +17,12 @@ import net.minecraft.util.text.*;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.World;
-import org.apache.commons.lang3.NotImplementedException;
 
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import static de.z0rdak.regionshield.commands.CommandConstants.*;
-import static de.z0rdak.regionshield.config.ServerRegionConfigBuilder.REGION_DEFAULT_PRIORITY_INC;
 import static de.z0rdak.regionshield.util.CommandUtil.*;
 import static net.minecraft.util.text.TextFormatting.*;
 import static net.minecraft.util.text.event.ClickEvent.Action.*;
@@ -245,9 +241,16 @@ public class MessageUtil {
         return buildExecuteCmdComponent(linkText, command, AQUA, hoverText, RUN_COMMAND);
     }
 
-    public static IFormattableTextComponent buildDimensionRemovePlayerLink(String playerName, RegistryKey<World> dim, CommandConstants memberOrOwner) {
+    public static IFormattableTextComponent buildDimRemovePlayerLink(String playerName, RegistryKey<World> dim, CommandConstants memberOrOwner) {
         String command = buildCommandStr(DIMENSION.toString(), dim.location().toString(), REMOVE.toString(), PLAYER.toString(), memberOrOwner.toString(), playerName);
         String hoverText = "Remove player '" + playerName + "' from dimension " + "'" + dim.location() + "'";
+        String linkText = "x";
+        return buildExecuteCmdComponent(linkText, command, RED, hoverText, SUGGEST_COMMAND);
+    }
+
+    public static IFormattableTextComponent buildDimRemoveTeamLink(String teamName, RegistryKey<World> dim, CommandConstants memberOrOwner) {
+        String command = buildCommandStr(DIMENSION.toString(), dim.location().toString(), REMOVE.toString(), TEAM.toString(), memberOrOwner.toString(), teamName);
+        String hoverText = "Remove team '" + teamName + "' from dimension " + "'" + dim.location() + "'";
         String linkText = "x";
         return buildExecuteCmdComponent(linkText, command, RED, hoverText, SUGGEST_COMMAND);
     }
@@ -257,5 +260,68 @@ public class MessageUtil {
         String hoverText =" Remove flag '" + flag.getFlagName() + "' from dimension " + "'" + dim.location() + "'";
         String linkText = "x";
         return buildExecuteCmdComponent(linkText, command, RED, hoverText, SUGGEST_COMMAND);
+    }
+
+    public static IFormattableTextComponent buildTeamList(DimensionalRegion dimCache, CommandConstants memberOrOwner) {
+        Set<String> teamNames = getAssociateList(dimCache, memberOrOwner, TEAM);
+        String playerLangKeyPart = memberOrOwner == CommandConstants.OWNER ? "owner" : "member";
+        IFormattableTextComponent teamList = new StringTextComponent("Teams: ");
+        if (teamNames.isEmpty()) {
+            teamList.append(new TranslationTextComponent("cli.msg.dim.info." + playerLangKeyPart + ".teams.empty", dimCache.getDimensionKey().location()));
+        }
+        teamList.append(new StringTextComponent("\n"));
+        teamNames.forEach(teamName -> {
+            IFormattableTextComponent removeTeamLink = new StringTextComponent(" - ")
+                    .append(buildDimRemoveTeamLink(teamName, dimCache.getDimensionKey(), memberOrOwner))
+                    .append(new StringTextComponent(" '" + teamName + "'\n"));
+            teamList.append(removeTeamLink);
+        });
+        return teamList;
+    }
+
+    private static Set<String> getAssociateList(DimensionalRegion dimRegion, CommandConstants memberOrOwner, CommandConstants playerOrTeam){
+        Set<String> associateNames = new HashSet<>();
+        switch (memberOrOwner) {
+            case OWNER:
+                switch (playerOrTeam){
+                    case PLAYER:
+                        associateNames = new HashSet<>(dimRegion.getOwners().getPlayers().values());
+                        break;
+                    case TEAM:
+                        associateNames = new HashSet<>(dimRegion.getOwners().getTeams());
+                        break;
+                }
+                break;
+            case MEMBER:
+                switch (playerOrTeam){
+                    case PLAYER:
+                        associateNames = new HashSet<>(dimRegion.getMembers().getPlayers().values());
+                        break;
+                    case TEAM:
+                        associateNames = new HashSet<>(dimRegion.getMembers().getTeams());
+                        break;
+                }
+                break;
+            default:
+                break;
+        }
+        return associateNames;
+    }
+
+    public static IFormattableTextComponent buildPlayerList(DimensionalRegion dimCache, CommandConstants memberOrOwner) {
+        Set<String> playerNames = getAssociateList(dimCache, memberOrOwner, PLAYER);
+        IFormattableTextComponent playerList = new StringTextComponent("Players: ");
+        String playerLangKeyPart = memberOrOwner == CommandConstants.OWNER ? "owner" : "member";
+        if (playerNames.isEmpty()) {
+            return playerList.append(new TranslationTextComponent("cli.msg.dim.info." + playerLangKeyPart + ".players.empty", dimCache.getDimensionKey().location()));
+        }
+        playerList.append(new StringTextComponent("\n"));
+        playerNames.forEach(playerName -> {
+            IFormattableTextComponent removePlayerLink = new StringTextComponent(" - ")
+                    .append(buildDimRemovePlayerLink(playerName, dimCache.getDimensionKey(), memberOrOwner))
+                    .append(new StringTextComponent(" '" + playerName + "'\n"));
+            playerList.append(removePlayerLink);
+        });
+        return playerList;
     }
 }
