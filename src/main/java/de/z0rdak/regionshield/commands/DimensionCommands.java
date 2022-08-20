@@ -26,10 +26,7 @@ import net.minecraft.util.text.*;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.world.World;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.regionshield.util.CommandUtil.*;
@@ -117,6 +114,7 @@ public class DimensionCommands {
         sendCmdFeedback(src, new TranslationTextComponent("cli.msg.flags.added", dim.location().toString()));
         return 0;
     }
+
     private static int removePlayer(CommandSource src, ServerPlayerEntity player, RegistryKey<World> dim, CommandConstants memberOrOwner) {
         if (memberOrOwner == CommandConstants.MEMBER) {
             RegionDataManager.get().cacheFor(dim).removeMember(player);
@@ -186,23 +184,27 @@ public class DimensionCommands {
         return 0;
     }
 
-    // TODO: Check
+    // TODO: Add method (in utils) for player and members separate
     private static int promptDimensionPlayerList(CommandSource src, RegistryKey<World> dim, CommandConstants memberOrOwner) {
         List<String> playerNames = new ArrayList<>();
+        Set<String> teamNames = new HashSet<>();
+        DimensionalRegion dimCache = RegionDataManager.get().dimFor(dim);
         switch (memberOrOwner) {
             case OWNER:
-                playerNames = RegionDataManager.get().dimFor(dim).getOwners().getPlayers()
+                playerNames = dimCache.getOwners().getPlayers()
                         .values()
                         .stream()
                         .sorted()
                         .collect(Collectors.toList());
+                teamNames = new HashSet<>(dimCache.getOwners().getTeams());
                 break;
             case MEMBER:
-                playerNames = RegionDataManager.get().dimFor(dim).getMembers().getPlayers()
+                playerNames = dimCache.getMembers().getPlayers()
                         .values()
                         .stream()
                         .sorted()
                         .collect(Collectors.toList());
+                teamNames = new HashSet<>(dimCache.getMembers().getTeams());
                 break;
             default:
                 break;
@@ -212,14 +214,24 @@ public class DimensionCommands {
             sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info." + playerLangKeyPart + ".players.empty", dim));
             return -1;
         }
-        // TODO: lang key
-        sendCmdFeedback(src, new TranslationTextComponent(TextFormatting.BOLD + "== Players(" + playerLangKeyPart + ") in dimension '" + dim.location() + "' ==="));
+        String associateText = playerLangKeyPart.substring(0, 1).toUpperCase() + playerLangKeyPart.substring(1) + "s";
+        sendCmdFeedback(src, new TranslationTextComponent(TextFormatting.BOLD + "== " + associateText + " in dimension '" + dim.location() + "' ==="));
+        IFormattableTextComponent playerList = new StringTextComponent("Players: \n");
         playerNames.forEach(playerName -> {
             IFormattableTextComponent removePlayerLink = new StringTextComponent(" - ")
                     .append(buildDimensionRemovePlayerLink(playerName, dim, memberOrOwner))
-                    .append(new StringTextComponent(" '" + playerName + "'"));;
-            sendCmdFeedback(src, removePlayerLink);
+                    .append(new StringTextComponent(" '" + playerName + "'\n"));
+            playerList.append(removePlayerLink);
         });
+        sendCmdFeedback(src, playerList);
+        IFormattableTextComponent teamList = new StringTextComponent("Teams: \n");
+        teamNames.forEach(teamName -> {
+            IFormattableTextComponent removeTeamLink = new StringTextComponent(" - ")
+                    .append(buildDimRemoveTeamLink(teamName, dim, memberOrOwner))
+                    .append(new StringTextComponent(" '" + teamName + "'\n"));
+            teamList.append(removeTeamLink);
+        });
+        sendCmdFeedback(src, teamList);
         return 0;
     }
 
@@ -277,7 +289,7 @@ public class DimensionCommands {
                 CommandConstants.OWNER);
         IFormattableTextComponent players = owners.hasPlayers()
                 ? buildPlayerListLink(dimRegion, owners, CommandConstants.OWNER)
-                : new TranslationTextComponent( owners.getPlayers().size() + " player(s)");
+                : new TranslationTextComponent(owners.getPlayers().size() + " player(s)");
         players.append(playersAddLink);
 
         // [n team(s)] [+]
@@ -285,19 +297,20 @@ public class DimensionCommands {
                 CommandConstants.OWNER);
         IFormattableTextComponent teams = owners.hasTeams()
                 ? buildTeamListLink(dimRegion, owners, CommandConstants.OWNER)
-                : new TranslationTextComponent( owners.getTeams().size() + " teams(s)");
+                : new TranslationTextComponent(owners.getTeams().size() + " teams(s)");
         teams.append(teamAddLink);
 
         // Owners: [n player(s)] [+], [n team(s)] [+]
         IFormattableTextComponent dimOwners = new TranslationTextComponent("cli.msg.dim.info.owners")
                 .append(new StringTextComponent(": "))
-                        .append(players).append(new StringTextComponent(", "))
-                        .append(teams);
+                .append(players).append(new StringTextComponent(", "))
+                .append(teams);
         sendCmdFeedback(src, dimOwners);
     }
 
     /**
-     *  Region members: [n player(s)] [+], [n team(s)] [+]
+     * Region members: [n player(s)] [+], [n team(s)] [+]
+     *
      * @param src
      * @param dimRegion
      */
@@ -308,7 +321,7 @@ public class DimensionCommands {
                 CommandConstants.MEMBER);
         IFormattableTextComponent players = members.hasPlayers() ?
                 buildPlayerListLink(dimRegion, members, CommandConstants.MEMBER)
-                : new TranslationTextComponent( members.getPlayers().size() + " player(s)");
+                : new TranslationTextComponent(members.getPlayers().size() + " player(s)");
         players.append(playersAddLink);
 
         // [n team(s)] [+]
@@ -316,7 +329,7 @@ public class DimensionCommands {
                 CommandConstants.MEMBER);
         IFormattableTextComponent teams = members.hasTeams()
                 ? buildTeamListLink(dimRegion, members, CommandConstants.MEMBER)
-                : new TranslationTextComponent( members.getTeams().size() + " teams(s)");
+                : new TranslationTextComponent(members.getTeams().size() + " teams(s)");
         teams.append(teamAddLink);
 
         // Members: [n player(s)] [+], [n team(s)] [+]
@@ -331,10 +344,11 @@ public class DimensionCommands {
 
     /**
      * Dimension flags: [n flag(s)] [+]
+     *
      * @param src
      * @param dimRegion
      */
-    private static void promptDimensionFlags(CommandSource src, DimensionalRegion dimRegion){
+    private static void promptDimensionFlags(CommandSource src, DimensionalRegion dimRegion) {
         IFormattableTextComponent dimFlagMessage = new TranslationTextComponent("cli.msg.dim.info.flags", buildDimFlagListLink(dimRegion));
         IFormattableTextComponent flags = dimRegion.getFlags().isEmpty()
                 ? new StringTextComponent(dimRegion.getFlags().size() + " flags(s)")
@@ -345,7 +359,7 @@ public class DimensionCommands {
         sendCmdFeedback(src, dimFlagMessage);
     }
 
-    private static void promptDimensionState(CommandSource src, AbstractRegion region, String command){
+    private static void promptDimensionState(CommandSource src, AbstractRegion region, String command) {
         String onClickAction = region.isActive() ? "deactivate" : "activate";
         String hoverText = "cli.msg.info.state." + onClickAction;
         String linkText = "cli.msg.info.state.link." + (region.isActive() ? "activate" : "deactivate");
