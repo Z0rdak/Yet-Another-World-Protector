@@ -19,21 +19,23 @@
   "cli.msg.dim.info.members.teams": "Team members",
   "cli.msg.dim.info.members.teams.empty": "No team-members defined",
   "cli.msg.dim.info.owner.player.added": "Added player(owner) to region '%s'",
+  "cli.msg.dim.info.players.add": "Add player to region",
+  "cli.msg.dim.info.teams.add": "Add team to region",
   "cli.msg.dim.info.owner.team.added": "Added team(owner) to region '%s'",
   "cli.msg.dim.info.member.player.added": "Added player(member) to region '%s'",
   "cli.msg.dim.info.member.team.added": "Added team(member) to region '%s'",
 
   "cli.msg.dim.info.flags": "Flags",
   "cli.msg.dim.info.flags.empty": "No flags defined",
-
+  "cli.msg.dim.info.flags.add": "Add flag to region",
+  "cli.msg.flags.added": "Added flag '%s' to region '%s'",
+  "cli.msg.flags.removed": "Removed flag '%s' from region '%s'",
 
   "cli.msg.region.info.link.hover": "Show region info ",
   "cli.msg.region.info.tp.link.hover": "Teleport to region",
   "cli.msg.dim.region.remove.link.hover": "Remove region",
   "cli.msg.dim.flag.add.link.hover": "Add flag to region",
 
-  "cli.msg.flags.added": "Added flag '%s' to region '%s'",
-  "cli.msg.flags.removed": "Removed flag '%s' from region '%s'",
 
   "cli.msg.info.state": "State",
   "cli.msg.info.state.activate": "Activate region",
