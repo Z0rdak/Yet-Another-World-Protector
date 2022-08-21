@@ -1,21 +1,22 @@
 package de.z0rdak.regionshield.core.region;
 
-import de.z0rdak.regionshield.RegionShield;
+import de.z0rdak.regionshield.config.server.RegionConfig;
 import de.z0rdak.regionshield.core.area.AreaType;
 import de.z0rdak.regionshield.core.area.IMarkableArea;
+import de.z0rdak.regionshield.core.flag.IFlag;
 import de.z0rdak.regionshield.util.constants.RegionNBT;
-import de.z0rdak.regionshield.managers.data.RegionDataManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
+import org.apache.commons.lang3.NotImplementedException;
 
-import java.beans.PropertyChangeSupport;
+import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * The AbstractMarkableRegion represents a abstract implementation for a markable region.
@@ -30,109 +31,125 @@ import java.util.stream.Collectors;
  *   With other words: A region can only have one parent region
  *
  */
-public abstract class AbstractMarkableRegion extends AbstractRegion implements IMarkableRegion {
+public abstract class AbstractMarkableRegion extends AbstractRegion implements IMarkableRegion, Serializable {
 
-    public final static int DEFAULT_PRIORITY = 1;
-    private final PropertyChangeSupport pcs;
-    protected String name;
-    protected Map<UUID, String> owners;
-    protected String parent;
-    protected IMarkableRegion parentRegion;
-    protected Set<String> childs;
+    protected AbstractRegion parentRegion;
+    private boolean inheritFromParent; // if (inheritFromParent && parent == null) inheritFromDimension()
     protected Map<String, IMarkableRegion> childRegions;
     protected int priority;
+    protected boolean isMuted;
     protected RegistryKey<World> dimension;
     protected IMarkableArea area;
-    protected boolean isMuted;
     protected AreaType areaType;
     protected BlockPos tpTarget;
 
-    public AbstractMarkableRegion(String name, IMarkableArea area, RegistryKey<World> dimension) {
-        this();
-        this.name = name;
+    public AbstractMarkableRegion(String name, IMarkableArea area, PlayerEntity owner, RegistryKey<World> dimension) {
+        super(name, owner);
         this.dimension = dimension;
         this.area = area;
         this.areaType = area.getAreaType();
+        this.priority = RegionConfig.DEFAULT_REGION_PRIORITY.get();
+        this.inheritFromParent = false;
     }
 
-    /***
-     *
-     * @param name
-     * @param area
-     * @param parent
-     */
-    public AbstractMarkableRegion(String name, IMarkableArea area, IMarkableRegion parent) {
-        this();
-        this.name = name;
-        this.area = area;
-        this.areaType = area.getAreaType();
-        this.setParent(parent);
-    }
-
-    public void setParent(IMarkableRegion parent){
-        this.assertInvariant();
-        this.parent = parent.getName();
-        this.dimension = parent.getDimension();
-        this.parentRegion = parent;
-        this.isMuted = parent.isMuted();
-        this.priority = Math.max(parent.getPriority(), this.priority);
-    }
-
-    public void assertInvariant(){
-        List<UUID> res = this.members.keySet()
-                .stream()
-                .filter( uuid -> !this.parentRegion.getMembers().containsKey(uuid))
-                .collect(Collectors.toList());
-
-        boolean memberAssertion = res.size() == 0;
-        assert memberAssertion
-                && this.dimension.equals(this.parentRegion.getDimension())
-                && this.priority >= this.parentRegion.getPriority()
-                && !this.childRegions.containsKey(this.parentRegion.getName());
-        // TODO: Method to get list op area positions to check containment
-        // && this.parentRegion.getArea().contains(this.area);
-    }
-
-    public AbstractMarkableRegion(String name, IMarkableArea area, RegistryKey<World> dimension, PlayerEntity owner) {
-        this();
-        this.name = name;
+    // TODO: rework Constructor chain
+    public AbstractMarkableRegion(String name, IMarkableArea area, BlockPos tpTarget, PlayerEntity owner, RegistryKey<World> dimension) {
+        super(name, owner);
+        this.tpTarget = tpTarget;
         this.dimension = dimension;
         this.area = area;
         this.areaType = area.getAreaType();
-        this.owners.put(owner.getUUID(), owner.getDisplayName().getString());
-    }
-
-    public AbstractMarkableRegion(String name, IMarkableArea area, RegistryKey<World> dimension, List<PlayerEntity> owners) {
-        this();
-        this.name = name;
-        this.dimension = dimension;
-        this.area = area;
-        this.areaType = area.getAreaType();
-        owners.forEach(owner -> this.owners.put(owner.getUUID(), owner.getDisplayName().getString()));
+        this.priority = RegionConfig.DEFAULT_REGION_PRIORITY.get();
+        this.inheritFromParent = false;
     }
 
     protected AbstractMarkableRegion() {
-        this.pcs = new PropertyChangeSupport(this);
-        this.pcs.addPropertyChangeListener( e -> {
-            RegionDataManager.save();
-            RegionShield.LOGGER.debug("Property '" + e.getPropertyName() + "' changed: oldvalue=" + e.getOldValue() + ", newvalue=" + e.getNewValue());
-        } );
+        super("");
         this.parentRegion = null;
-        this.owners = new HashMap<>(0);
-        this.parent = null;
         this.childRegions = new HashMap<>(0);
-        this.childs = new HashSet<>(0);
-        this.priority = DEFAULT_PRIORITY;
-        this.isMuted = true;
+        this.priority = RegionConfig.DEFAULT_REGION_PRIORITY.get();
+        this.isMuted = false;
+        this.inheritFromParent = false;
     }
 
-    public IMarkableArea getArea(){
-        return this.area;
+    protected AbstractMarkableRegion(String name) {
+        super(name);
+        this.parentRegion = null;
+        this.childRegions = new HashMap<>(0);
+        this.priority = RegionConfig.DEFAULT_REGION_PRIORITY.get();
+        this.isMuted = false;
+        this.inheritFromParent = false;
     }
 
     @Override
-    public String getName() {
-        return name;
+    public void addFlag(IFlag flag) {
+
+    }
+
+    public void setParent(AbstractRegion parent){
+        if (parent instanceof DimensionalRegion) {
+            DimensionalRegion dimensionalRegion = (DimensionalRegion) parent;
+            dimensionalRegion.getName();
+            this.parentRegion = dimensionalRegion;
+            this.dimension = dimensionalRegion.getDimensionKey();
+            return;
+        }
+        if (parent instanceof AbstractMarkableRegion) {
+            AbstractMarkableRegion markableRegion = (AbstractMarkableRegion) parent;
+            this.dimension = markableRegion.getDim();
+            this.parentRegion = markableRegion;
+            this.isMuted = markableRegion.isMuted();
+            this.priority = Math.max(markableRegion.getPriority(), this.priority);
+        }
+    }
+
+    public void removeParent() {
+        throw new NotImplementedException("");
+    }
+
+    @Override
+    public boolean contains(BlockPos position) {
+        return this.area.contains(position);
+    }
+
+    @Override
+    public CompoundNBT serializeNBT() {
+        CompoundNBT nbt = super.serializeNBT();
+        nbt.put(RegionNBT.TP_POS, NBTUtil.writeBlockPos(this.tpTarget));
+        nbt.putInt(RegionNBT.PRIORITY, priority);
+        nbt.putString(RegionNBT.DIM, dimension.location().toString());
+        nbt.putBoolean(RegionNBT.MUTED, isMuted);
+        nbt.putString(RegionNBT.AREA_TYPE, this.areaType.areaType);
+        nbt.put(RegionNBT.AREA, this.area.serializeNBT());
+        return nbt;
+    }
+
+    @Override
+    public void deserializeNBT(CompoundNBT nbt) {
+        super.deserializeNBT(nbt);
+        this.tpTarget = NBTUtil.readBlockPos(nbt.getCompound(RegionNBT.TP_POS));
+        this.priority = nbt.getInt(RegionNBT.PRIORITY);
+        this.dimension = RegistryKey.create(Registry.DIMENSION_REGISTRY,
+                new ResourceLocation(nbt.getString(RegionNBT.DIM)));
+        this.isMuted = nbt.getBoolean(RegionNBT.MUTED);
+        this.areaType = AreaType.valueOf(nbt.getString(RegionNBT.AREA_TYPE));
+    }
+
+    @Override
+    public IMarkableArea getArea() {
+        return area;
+    }
+
+    public AbstractRegion getParentRegion() {
+        return parentRegion;
+    }
+
+    public boolean isInheritFromParent() {
+        return inheritFromParent;
+    }
+
+    public Map<String, IMarkableRegion> getChildRegions() {
+        return Collections.unmodifiableMap(childRegions);
     }
 
     @Override
@@ -141,68 +158,41 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     }
 
     @Override
-    public RegistryKey<World> getDimension() {
-        return dimension;
+    public boolean isMuted() {
+        return isMuted;
     }
 
     @Override
-    public boolean isMuted() {
-        return this.isMuted;
+    public RegistryKey<World> getDim() {
+        return dimension;
+    }
+
+    public AreaType getAreaType() {
+        return areaType;
     }
 
     @Override
     public BlockPos getTpTarget() {
-        return new BlockPos(this.tpTarget);
-    }
-
-    @Override
-    public void setIsMuted(boolean isMuted) {
-        this.pcs.firePropertyChange("isMuted", this.isMuted, isMuted);
-        this.isMuted = isMuted;
+        return tpTarget;
     }
 
     @Override
     public void setPriority(int priority) {
-        pcs.firePropertyChange("priority", this.priority, priority);
         this.priority = priority;
     }
 
-    public void setArea(IMarkableArea area){
-        pcs.firePropertyChange("area", getArea(), area);
+    @Override
+    public void setIsMuted(boolean isMuted) {
+        this.isMuted = isMuted;
+    }
+
+    @Override
+    public void setArea(IMarkableArea area) {
         this.area = area;
     }
 
     @Override
-    public void setTpTarget(BlockPos tpPos) {
-        this.pcs.firePropertyChange("tpTarget", this.tpTarget, tpPos);
-        this.tpTarget = tpPos;
-    }
-
-    @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT nbt = super.serializeNBT();
-        nbt.putString(RegionNBT.NAME, name);
-        nbt.putInt(RegionNBT.TP_X, this.tpTarget.getX());
-        nbt.putInt(RegionNBT.TP_Y, this.tpTarget.getY());
-        nbt.putInt(RegionNBT.TP_Z, this.tpTarget.getZ());
-        nbt.putInt(RegionNBT.PRIORITY, priority);
-        nbt.putString(RegionNBT.DIM, dimension.location().toString());
-        nbt.putBoolean(RegionNBT.MUTED, isMuted);
-        nbt.putString(RegionNBT.AREA_TYPE, this.areaType.toString());
-        return nbt;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundNBT nbt) {
-        super.deserializeNBT(nbt);
-        this.name = nbt.getString(RegionNBT.NAME);
-        this.tpTarget = new BlockPos(nbt.getInt(RegionNBT.TP_X),
-                nbt.getInt(RegionNBT.TP_Y),
-                nbt.getInt(RegionNBT.TP_Z));
-        this.priority = nbt.getInt(RegionNBT.PRIORITY);
-        this.dimension = RegistryKey.create(Registry.DIMENSION_REGISTRY,
-                new ResourceLocation(nbt.getString(RegionNBT.DIM)));
-        this.isMuted = nbt.getBoolean(RegionNBT.MUTED);
-        this.areaType = AreaType.valueOf(nbt.getString(RegionNBT.AREA_TYPE));
+    public void setTpTarget(BlockPos tpTarget) {
+        this.tpTarget = tpTarget;
     }
 }
