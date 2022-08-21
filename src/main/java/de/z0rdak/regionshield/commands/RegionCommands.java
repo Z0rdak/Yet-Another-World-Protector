@@ -1,36 +1,26 @@
 package de.z0rdak.regionshield.commands;
 
 import com.mojang.brigadier.arguments.BoolArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.regionshield.core.region.AbstractMarkableRegion;
 import de.z0rdak.regionshield.core.region.IMarkableRegion;
 import de.z0rdak.regionshield.core.stick.AbstractStick;
 import de.z0rdak.regionshield.core.stick.MarkerStick;
-import de.z0rdak.regionshield.managers.data.RegionDataManager;
+import de.z0rdak.regionshield.managers.data.region.RegionDataManager;
 import de.z0rdak.regionshield.util.*;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.DimensionArgument;
-import net.minecraft.command.arguments.EntityArgument;
-import net.minecraft.command.arguments.EntitySelector;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static de.z0rdak.regionshield.commands.CommandUtils.*;
-import static de.z0rdak.regionshield.commands.CommandUtils.buildLiteralFor;
+import static de.z0rdak.regionshield.util.CommandUtil.*;
 import static net.minecraft.command.ISuggestionProvider.suggest;
 
 public class RegionCommands {
@@ -41,38 +31,7 @@ public class RegionCommands {
     private RegionCommands() {
     }
 
-
-
-    private static String getRegionNameArgument(CommandContext<CommandSource> ctx) {
-        return StringArgumentType.getString(ctx, CommandConstants.REGION.toString());
-    }
-
-
-
-    private static ServerPlayerEntity getPlayerArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
-        return EntityArgument.getPlayer(ctx, CommandConstants.PLAYER.toString());
-    }
-
-    private static ServerPlayerEntity getOwnerArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
-        return EntityArgument.getPlayer(ctx, CommandConstants.OWNER.toString());
-    }
-
-    private static boolean getActivateArgument(CommandContext<CommandSource> ctx) {
-        return BoolArgumentType.getBool(ctx, CommandConstants.ACTIVATE.toString());
-    }
-
-    private static boolean getEnableArgument(CommandContext<CommandSource> ctx) {
-        return BoolArgumentType.getBool(ctx, CommandConstants.ENABLE.toString());
-    }
-
-    private static int getPriorityArgument(CommandContext<CommandSource> ctx) {
-        return IntegerArgumentType.getInteger(ctx, CommandConstants.PRIORITY.toString());
-    }
-
     public static LiteralArgumentBuilder<CommandSource> registerRegionsCommands(){
-        LiteralArgumentBuilder<CommandSource> regionsLiteral = buildLiteralFor(CommandConstants.REGIONS);
-        RequiredArgumentBuilder<CommandSource, ResourceLocation> dimensionArgument = Commands.argument(CommandConstants.DIMENSION.toString(), DimensionArgument.dimension());
-        RequiredArgumentBuilder<CommandSource, Boolean> activateArgument = Commands.argument(CommandConstants.ACTIVATE.toString(), BoolArgumentType.bool());
 
         return regionsLiteral
                 .then(Commands.literal(CommandConstants.ACTIVATE.toString())
@@ -81,39 +40,32 @@ public class RegionCommands {
                                 .executes(ctx -> setActiveStates(ctx.getSource(), ctx.getSource().getLevel().dimension(), getActivateArgument(ctx))))
                         .then(dimensionArgument
                                 // set active state of given region in given dimension
-                                .executes(ctx -> setActiveStates(ctx.getSource(), getDimensionFromArgument(ctx), getActivateArgument(ctx)))))
-                .then(Commands.literal(CommandConstants.REMOVE.toString())
+                                .executes(ctx -> setActiveStates(ctx.getSource(), getDimensionArgument(ctx), getActivateArgument(ctx)))))
+                .then(removeLiteral
                         .executes(ctx -> removeRegions(ctx.getSource(), ctx.getSource().getLevel().dimension()))
                         .then(dimensionArgument
-                                .executes(ctx -> removeRegions(ctx.getSource(), getDimensionFromArgument(ctx)))));
+                                .executes(ctx -> removeRegions(ctx.getSource(), getDimensionArgument(ctx)))));
     }
 
     // IDEA: Expand command for all area types
     // circle - expand radius
     // ...
+
+    /**
+     *
+     */
     public static LiteralArgumentBuilder<CommandSource> registerRegionCommands() {
-        LiteralArgumentBuilder<CommandSource> helpLiteral = buildLiteralFor(CommandConstants.HELP);
-        RequiredArgumentBuilder<CommandSource, ResourceLocation> dimensionArgument = Commands.argument(CommandConstants.DIMENSION.toString(), DimensionArgument.dimension());
-        LiteralArgumentBuilder<CommandSource> listLiteral = buildLiteralFor(CommandConstants.LIST);
-        LiteralArgumentBuilder<CommandSource> infoLiteral = buildLiteralFor(CommandConstants.INFO);
-        LiteralArgumentBuilder<CommandSource> createLiteral = buildLiteralFor(CommandConstants.CREATE);
-        LiteralArgumentBuilder<CommandSource> regionLiteral = buildLiteralFor(CommandConstants.REGION);
-        RequiredArgumentBuilder<CommandSource, String> regionNameArgument = Commands.argument(CommandConstants.REGION.toString(), StringArgumentType.string());
-        RequiredArgumentBuilder<CommandSource, EntitySelector> ownerArgument =  Commands.argument(CommandConstants.OWNER.toString(), EntityArgument.player());
-        RequiredArgumentBuilder<CommandSource, Boolean> activateArgument = Commands.argument(CommandConstants.ACTIVATE.toString(), BoolArgumentType.bool());
-        RequiredArgumentBuilder<CommandSource, Integer> priorityArgument = Commands.argument(CommandConstants.PRIORITY.toString(), IntegerArgumentType.integer(1, Integer.MAX_VALUE));
 
         LiteralArgumentBuilder<CommandSource> createRegionCommand = createLiteral
                 .then(regionNameArgument
                         .executes(ctx -> createRegion(ctx.getSource(), getRegionNameArgument(ctx),  ctx.getSource().getLevel().dimension()))
                         .then(dimensionArgument
-                                .suggests((ctx, builder) -> suggest(getQuotedDimensionList(), builder))
-                                .executes(ctx -> createRegion(ctx.getSource(), getRegionNameArgument(ctx), getDimensionFromArgument(ctx))))
+                                .executes(ctx -> createRegion(ctx.getSource(), getRegionNameArgument(ctx), getDimensionArgument(ctx))))
                         .then(ownerArgument
                                 .then(dimensionArgument
-                                        .executes(ctx -> createRegion(ctx.getSource(), getRegionNameArgument(ctx), getDimensionFromArgument(ctx), getOwnerArgument(ctx))))));
+                                        .executes(ctx -> createRegion(ctx.getSource(), getRegionNameArgument(ctx), getDimensionArgument(ctx), getOwnerArgument(ctx))))));
 
-        LiteralArgumentBuilder<CommandSource> setActiveStateCommand = Commands.literal(CommandConstants.ACTIVATE.toString())
+        LiteralArgumentBuilder<CommandSource> setActiveStateCommand = activateLiteral
                 .then(regionNameArgument
                         .suggests((ctx, builder) -> suggest(RegionDataManager.get().getAllRegionNames(), builder))
                         .then(activateArgument
@@ -121,7 +73,7 @@ public class RegionCommands {
                                 .executes(ctx -> setActiveState(ctx.getSource(), getRegionNameArgument(ctx), ctx.getSource().getLevel().dimension(), getActivateArgument(ctx))))
                         .then(dimensionArgument
                                 // set active state of given region in given dimension
-                                .executes(ctx -> setActiveState(ctx.getSource(), getRegionNameArgument(ctx), getDimensionFromArgument(ctx), getActivateArgument(ctx)))));
+                                .executes(ctx -> setActiveState(ctx.getSource(), getRegionNameArgument(ctx), getDimensionArgument(ctx), getActivateArgument(ctx)))));
 
         return regionLiteral
                 .executes(ctx -> promptHelp(ctx.getSource()))
@@ -130,8 +82,7 @@ public class RegionCommands {
                 .then(listLiteral
                         .executes(ctx -> promptRegionList(ctx.getSource()))
                         .then(dimensionArgument
-                                .suggests((ctx, builder) -> suggest(getQuotedDimensionList(), builder))
-                                .executes(ctx -> promptRegionListForDim(ctx.getSource(), getDimensionFromArgument(ctx)))))
+                                .executes(ctx -> promptRegionListForDim(ctx.getSource(), getDimensionArgument(ctx)))))
                 .then(infoLiteral
                         .executes(ctx -> listRegionsAround(ctx.getSource()))
                         .then(regionNameArgument
@@ -139,32 +90,35 @@ public class RegionCommands {
                                 .executes(ctx -> info(ctx.getSource(), getRegionNameArgument(ctx)))))
                 .then(createRegionCommand)
                 // UPDATE AREA
-                .then(Commands.literal(CommandConstants.UPDATE.toString())
+                .then(updateLiteral
                         .then(regionNameArgument
                                 .suggests((ctx, builder) -> suggest(RegionDataManager.get().getAllRegionNames(), builder))
                                 .executes(ctx -> updateRegion(ctx.getSource(), getRegionNameArgument(ctx)))))
                 // REMOVE REGION
-                .then(Commands.literal(CommandConstants.REMOVE.toString())
+                .then(removeLiteral
                         .then(regionNameArgument
                                 .suggests((ctx, builder) -> suggest(RegionDataManager.get().getAllRegionNames(), builder))
                                 .executes(ctx -> removeRegion(ctx.getSource(), getRegionNameArgument(ctx), ctx.getSource().getLevel().dimension())))
                         .then(dimensionArgument
-                                .executes(ctx -> removeRegion(ctx.getSource(), getRegionNameArgument(ctx), getDimensionFromArgument(ctx)))))
-                // TP TO REGION
-                .then(Commands.literal(CommandConstants.TELEPORT.toString())
+                                .executes(ctx -> removeRegion(ctx.getSource(), getRegionNameArgument(ctx), getDimensionArgument(ctx)))))
+                // tp <player> <region> [<dim>]
+                .then(teleportLiteral
+                        .then(playerArgument)
                         .then(regionNameArgument
                                 .suggests((ctx, builder) -> suggest(RegionDataManager.get().getAllRegionNames(), builder))
-                                .executes(ctx -> teleport(ctx.getSource(), getRegionNameArgument(ctx)))))
-
+                                .executes(ctx -> teleport(ctx.getSource(), getRegionNameArgument(ctx), ctx.getSource().getLevel().dimension())))
+                        .then(dimensionArgument
+                                .then(regionNameArgument
+                                        .executes(ctx -> teleport(ctx.getSource(), getRegionNameArgument(ctx), ctx.getSource().getLevel().dimension())))))
                 .then(setActiveStateCommand)
                 // ALERT
-                .then(Commands.literal(CommandConstants.ALERT.toString())
+                .then(alertLiteral
                         .then(regionNameArgument
                                 .suggests((ctx, builder) -> suggest(RegionDataManager.get().getAllRegionNames(), builder))
                                 .then(Commands.argument(CommandConstants.ENABLE.toString(), BoolArgumentType.bool())
                                         .executes(ctx -> setAlertState(ctx.getSource(), getRegionNameArgument(ctx), getEnableArgument(ctx))))))
                 // PRIORITY
-                .then(Commands.literal(CommandConstants.PRIORITY.toString())
+                .then(priorityLiteral
                         .then(regionNameArgument
                                 .suggests((ctx, builder) -> suggest(RegionDataManager.get().getAllRegionNames(), builder))
                                 .then(priorityArgument
@@ -176,11 +130,7 @@ public class RegionCommands {
     }
 
     private static int info(CommandSource source, String regionName) {
-        try {
-            RegionUtil.promptInteractiveRegionInfo(source.getPlayerOrException(), regionName);
-        } catch (CommandSyntaxException e) {
-            e.printStackTrace();
-        }
+
         return 0;
     }
 
@@ -213,20 +163,21 @@ public class RegionCommands {
     }
 
     private static int setAlertState(CommandSource source, String regionName, boolean mute) {
-        try {
-            RegionUtil.muteRegion(regionName, source.getPlayerOrException(), mute);
-        } catch (CommandSyntaxException e) {
-            e.printStackTrace();
-        }
+
         return 0;
     }
 
-    private static int promptHelp(CommandSource source) {
-        try {
-            MessageUtil.promptRegionHelp(source.getPlayerOrException());
-        } catch (CommandSyntaxException e) {
-            e.printStackTrace();
-        }
+    private static int promptHelp(CommandSource src) {
+        MessageUtil.sendCmdFeedback(src, MessageUtil.buildHelpHeader("help.region.header"));
+        MessageUtil.sendCmdFeedback(src, MessageUtil.buildHelpSuggestionLink("help.region.1", CommandConstants.REGION, CommandConstants.CREATE));
+        MessageUtil.sendCmdFeedback(src, MessageUtil.buildHelpSuggestionLink("help.region.2", CommandConstants.REGION, CommandConstants.UPDATE));
+        MessageUtil.sendCmdFeedback(src, MessageUtil.buildHelpSuggestionLink("help.region.3", CommandConstants.REGION, CommandConstants.REMOVE));
+        MessageUtil.sendCmdFeedback(src, MessageUtil.buildHelpSuggestionLink("help.region.4", CommandConstants.REGION, CommandConstants.LIST));
+        MessageUtil.sendCmdFeedback(src, MessageUtil.buildHelpSuggestionLink("help.region.5", CommandConstants.REGION, CommandConstants.INFO));
+        MessageUtil.sendCmdFeedback(src, MessageUtil.buildHelpSuggestionLink("help.region.6", CommandConstants.REGION, CommandConstants.PRIORITY));
+        MessageUtil.sendCmdFeedback(src, MessageUtil.buildHelpSuggestionLink("help.region.7", CommandConstants.REGION, CommandConstants.TELEPORT));
+        MessageUtil.sendCmdFeedback(src, MessageUtil.buildHelpSuggestionLink("help.region.8", CommandConstants.REGION, CommandConstants.DEACTIVATE));
+        MessageUtil.sendCmdFeedback(src, MessageUtil.buildHelpSuggestionLink("help.region.9", CommandConstants.REGION,  CommandConstants.ALERT));
         return 0;
     }
 
@@ -240,11 +191,7 @@ public class RegionCommands {
     }
 
     private static int promptRegionListForDim(CommandSource source, RegistryKey<World> dim) {
-        try {
-            RegionUtil.giveRegionListForDim(source.getPlayerOrException(), dim.location().toString());
-        } catch (CommandSyntaxException e) {
-            e.printStackTrace();
-        }
+
         return 0;
     }
 
@@ -273,7 +220,7 @@ public class RegionCommands {
                 }
             }
         } catch (CommandSyntaxException e) {
-            handleCommonWithoutPlayer(e);
+            CommandUtil.handleCommandWithoutPlayer(e);
         }
         return 0;
     }
@@ -288,7 +235,8 @@ public class RegionCommands {
                     AbstractStick abstractStick = StickUtil.getStick(maybeStick);
                     if (abstractStick.getStickType() == StickType.MARKER){
                         MarkerStick marker = (MarkerStick) abstractStick;
-                        RegionUtil.update(regionName, source.getPlayerOrException(), marker);
+                        // TODO:
+                        //RegionDataManager.get().update(regionName, marker);
                     }
                 } catch (StickException e) {
                     e.printStackTrace();
@@ -298,10 +246,6 @@ public class RegionCommands {
             e.printStackTrace();
         }
         return 0;
-    }
-
-    private static void handleCommonWithoutPlayer(CommandSyntaxException e) {
-        e.printStackTrace();
     }
 
     private static int removeRegions(CommandSource source, RegistryKey<World> dim) {
@@ -315,29 +259,17 @@ public class RegionCommands {
     }
 
     private static int listRegionsAround(CommandSource source) {
-        try {
-            RegionUtil.listRegionsAroundPlayer(source.getPlayerOrException());
-        } catch (CommandSyntaxException e) {
-            e.printStackTrace();
-        }
+
         return 0;
     }
 
-    private static int teleport(CommandSource source, String regionName) {
-        try {
-            RegionUtil.teleportToRegion(regionName, source.getPlayerOrException(), source);
-        } catch (CommandSyntaxException e) {
-            e.printStackTrace();
-        }
+    private static int teleport(CommandSource source, String regionName, RegistryKey<World> dim) {
+        // use execute in dim for tp because of different dimensions
         return 0;
     }
 
     private static int setPriority(CommandSource source, String region, int priority) {
-        try {
-            RegionUtil.setRegionPriority(region, priority, source.getPlayerOrException());
-        } catch (CommandSyntaxException e) {
-            e.printStackTrace();
-        }
+
         return 0;
     }
 }
