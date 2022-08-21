@@ -1,6 +1,6 @@
-package de.z0rdak.regionshield.core.affiliation;
+package de.z0rdak.regionshield.core.permissions;
 
-public enum EditPermissions {
+public enum EditPermission {
     CREATE, // 1
     READ,   // 2
     UPDATE, // 4
