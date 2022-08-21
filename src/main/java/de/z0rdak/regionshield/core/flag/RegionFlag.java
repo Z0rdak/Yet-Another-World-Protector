@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 
 public enum RegionFlag {
 
-    BREAK("break", true, "flag.deny.message.break"),
-    PLACE("place", true,  "flag.deny.message.place");
+    BREAK_BLOCKS(new ConditionFlag("break_blocks", false)),
+    PLACE_BLOCKS(new ConditionFlag("place_blocks", false));
     /*
     ENTITY_PLACE("entity-place"), // TODO: needs testing
     //
@@ -112,20 +112,22 @@ public enum RegionFlag {
     SPAWN_PORTAL("spawn-portal");
     */
 
-    public final String flag;
+    public final String flagname;
+    public final IFlag flag;
     public final String langKey;
-    public final boolean defaultValue;
+    // public final boolean defaultValue;
     public final Function<List<String>, IFormattableTextComponent> denyMessageBuilder;
 
-    RegionFlag(final String flag, boolean defaultValue, String langKey) {
+    RegionFlag(IFlag flag) {
         this.flag = flag;
-        this.langKey = langKey;
+        this.flagname = flag.getFlagName();
+        this.langKey = "rs.flag.deny.message." + flag.getFlagName();
         this.denyMessageBuilder = (args) -> new TranslationTextComponent(this.langKey, args == null ? new ArrayList<>() : args);
-        this.defaultValue = defaultValue;
+        //this.defaultValue = defaultValue;
     }
     @Override
     public String toString() {
-        return flag;
+        return flagname;
     }
 
     /**
@@ -151,7 +153,7 @@ public enum RegionFlag {
 
     public static Optional<RegionFlag> fromString(String flagIdentifier){
         return Arrays.stream(values())
-                .filter(flag -> flag.flag.equals(flagIdentifier))
+                .filter(flag -> flag.flagname.equals(flagIdentifier))
                 .findFirst();
     }
 }
