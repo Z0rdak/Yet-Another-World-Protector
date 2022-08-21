@@ -1,1 +1,8 @@
-# 0.0.1.0
+# 0.0.1.0 - First beta release
+This is the first beta release of this mod. Please be so kind and report any bugs you encounter on the github issue page: https://github.com/Z0rdak/RegionShield/issues.
+If you have suggestions feel free to post them, too.
+* Add online wiki as a guide on how to use to mod: https://github.com/Z0rdak/RegionShield/wiki
+* Add dimensional regions
+* Add configuration for default region flags, CLI permission,
+* Add the following flags: break_blocks, place_blocks
+* Add online wiki as a guide on how to use to mod: https://github.com/Z0rdak/RegionShield/wiki
