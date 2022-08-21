@@ -1,7 +1,9 @@
 package de.z0rdak.regionshield;
 
 import de.z0rdak.regionshield.commands.*;
-import de.z0rdak.regionshield.config.*;
+import de.z0rdak.regionshield.config.server.CommandPermissionConfig;
+import de.z0rdak.regionshield.config.server.FlagConfig;
+import de.z0rdak.regionshield.config.server.RegionConfig;
 import de.z0rdak.regionshield.managers.data.player.PlayerTrackingManager;
 import de.z0rdak.regionshield.managers.data.region.RegionDataManager;
 import net.minecraftforge.api.distmarker.Dist;
@@ -37,9 +39,9 @@ public class RegionShield
         DistExecutor.unsafeRunWhenOn(Dist.DEDICATED_SERVER, () -> () -> {
             FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
 
-            ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, ServerConfigBuilder.CONFIG_SPEC, MODID + "-common.toml" );
+            ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, CommandPermissionConfig.CONFIG_SPEC, MODID + "-common.toml" );
             ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, FlagConfig.CONFIG_SPEC, MODID + "-flags.toml" );
-            ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, ServerRegionConfigBuilder.CONFIG_SPEC, MODID + "-region-defaults.toml" );
+            ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, RegionConfig.CONFIG_SPEC, MODID + "-region-defaults.toml" );
 
             MinecraftForge.EVENT_BUS.register(this);
 
