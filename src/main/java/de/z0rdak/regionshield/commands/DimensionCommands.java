@@ -39,7 +39,7 @@ public class DimensionCommands {
     public static LiteralArgumentBuilder<CommandSource> register() {
         return dimensionLiteral
                 /* /wp dimension help */
-                .then(helpLiteral.executes(ctx -> promptHelp(ctx.getSource())))
+                // .then(helpLiteral.executes(ctx -> promptHelp(ctx.getSource())))
                 /* /wp dimension <dim> list region */
                 .then(dimensionArgument
                         /* /wp dimension <dim> [info] */
