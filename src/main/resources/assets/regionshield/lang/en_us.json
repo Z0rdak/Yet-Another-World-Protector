@@ -1,4 +1,15 @@
 {
+  "cli.msg.help.header": "RegionShield help",
+  "cli.msg.help.1": "Use '/rs dim info | list | add | remove | activate' to manage dimensional regions.",
+  "cli.msg.help.2": "/rs region",
+  "cli.msg.help.3": "/rs player",
+  "cli.msg.help.4": "/rs template",
+  "cli.msg.help.5": "/rs permission",
+  "cli.msg.help.6": "/rs config",
+
+
+
+
   "cli.msg.dim.help.header": "RegionShield dimension command help",
   "cli.msg.dim.help.1": "/rs dim help",
   "cli.msg.dim.help.2": "/rs dim <dim> list regions|owners|members|flags",
