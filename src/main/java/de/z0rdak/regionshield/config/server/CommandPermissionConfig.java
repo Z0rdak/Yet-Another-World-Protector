@@ -1,20 +1,19 @@
-package de.z0rdak.regionshield.config;
+package de.z0rdak.regionshield.config.server;
 
 import de.z0rdak.regionshield.RegionShield;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.ModList;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-public class ServerConfigBuilder {
+public class CommandPermissionConfig {
 
     public static final ForgeConfigSpec CONFIG_SPEC;
-    public static final ForgeConfigSpec.ConfigValue<Integer> RS_CMD_OP_LEVEL;
+    public static final ForgeConfigSpec.ConfigValue<Integer> REQUIRED_OP_LEVEL;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> PLAYERS_WITH_PERMISSION;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> ALLOW_COMMAND_BLOCK_EXECUTION;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> COMMAND_BLOCK_EXECUTION;
 
 
     static {
@@ -22,13 +21,13 @@ public class ServerConfigBuilder {
 
         BUILDER.push("RegionShield mod server configuration").build();
 
-        ALLOW_COMMAND_BLOCK_EXECUTION = BUILDER.comment("Allows command blocks to execute mod commands")
+        COMMAND_BLOCK_EXECUTION = BUILDER.comment("Permission for command blocks to execute mod commands")
                 .define("command_block_execution", true);
 
-        RS_CMD_OP_LEVEL = BUILDER.comment("Default OP level to use mod commands.")
+        REQUIRED_OP_LEVEL = BUILDER.comment("Minimum OP level to use mod commands.\n")
                 .defineInRange("command_op_level", 4, 1, 4);
 
-        PLAYERS_WITH_PERMISSION = BUILDER.comment("Player UUIDs with permission to use RS commands")
+        PLAYERS_WITH_PERMISSION = BUILDER.comment("Player UUIDs with permission to use mod commands")
                 .defineListAllowEmpty(Collections.singletonList("players_with_permission"), ArrayList::new, (uuid) -> {
                     if (uuid instanceof String) {
                         try {
