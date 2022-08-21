@@ -2,15 +2,12 @@ package de.z0rdak.regionshield.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.regionshield.RegionShield;
-import de.z0rdak.regionshield.config.ServerConfigBuilder;
+import de.z0rdak.regionshield.config.server.CommandPermissionConfig;
 import de.z0rdak.regionshield.util.CommandUtil;
 import de.z0rdak.regionshield.util.MessageUtil;
-import de.z0rdak.regionshield.util.PlayerUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -35,7 +32,7 @@ public class CommandRegionShield {
 
     private static LiteralArgumentBuilder<CommandSource> withSubCommands(LiteralArgumentBuilder<CommandSource> baseCommand) {
         return baseCommand
-                .requires(source -> source.hasPermission(ServerConfigBuilder.RS_CMD_OP_LEVEL.get()))
+                .requires(CommandPermissionConfig::hasPermission)
                 .executes(ctx -> promptHelp(ctx.getSource()))
                 .then(helpLiteral
                         .executes(ctx -> promptHelp(ctx.getSource())))
@@ -47,16 +44,6 @@ public class CommandRegionShield {
                 //.then(CommandFlag.FLAG_COMMAND)
         //.then(CommandPlayer.PLAYER_COMMAND);
         ;
-    }
-
-    private static boolean hasPermission(CommandSource source) {
-        try {
-            PlayerEntity player = source.getPlayerOrException();
-            return PlayerUtils.hasPermission(player) || source.hasPermission(ServerConfigBuilder.RS_CMD_OP_LEVEL.get());
-        } catch (CommandSyntaxException e) {
-            e.printStackTrace();
-        }
-        return false;
     }
 
     private static int promptHelp(CommandSource src) {
