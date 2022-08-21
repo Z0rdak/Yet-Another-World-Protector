@@ -13,6 +13,7 @@ public interface IMemberContainer {
     boolean containsPlayer(UUID playerUUID);
 
     boolean containsTeam(String team);
+    boolean containsTeam(Team team);
 
     void addPlayer(PlayerEntity player);
 

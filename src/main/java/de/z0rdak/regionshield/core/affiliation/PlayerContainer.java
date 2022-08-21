@@ -56,6 +56,11 @@ public class PlayerContainer implements IMemberContainer, INBTSerializable<Compo
     }
 
     @Override
+    public boolean containsTeam(Team team) {
+        return this.teams.contains(team.getName());
+    }
+
+    @Override
     public void addPlayer(PlayerEntity player) {
         this.players.put(player.getUUID(), player.getScoreboardName());
     }
