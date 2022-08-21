@@ -1,5 +1,6 @@
 package de.z0rdak.regionshield.core.region;
 
+import de.z0rdak.regionshield.config.server.CommandPermissionConfig;
 import de.z0rdak.regionshield.core.affiliation.PlayerContainer;
 import de.z0rdak.regionshield.core.flag.ConditionFlag;
 import de.z0rdak.regionshield.core.flag.FlagContainer;
@@ -153,9 +154,10 @@ public abstract class AbstractRegion implements IProtectedRegion {
      * @return true if player is in region list or is an operator, false otherwise
      */
     // TODO: check
+    // TODO: Differentiate between owner and member permission
     @Override
     public boolean permits(PlayerEntity player) {
-        if (PlayerUtils.hasPermission(player) || this.owners.containsPlayer(player.getUUID()) || this.owners.containsPlayer(player.getUUID())) {
+        if (this.owners.containsPlayer(player.getUUID()) || this.owners.containsTeam(player.getTeam().getName())) {
             return true;
         }
         return members.containsPlayer(player.getUUID());

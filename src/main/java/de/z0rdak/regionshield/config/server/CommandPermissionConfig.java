@@ -1,18 +1,21 @@
 package de.z0rdak.regionshield.config.server;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.regionshield.RegionShield;
+import net.minecraft.command.CommandSource;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.management.OpEntry;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class CommandPermissionConfig {
 
     public static final ForgeConfigSpec CONFIG_SPEC;
     public static final ForgeConfigSpec.ConfigValue<Integer> REQUIRED_OP_LEVEL;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> PLAYERS_WITH_PERMISSION;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> PLAYERS_WITH_PERMISSION;
     public static final ForgeConfigSpec.ConfigValue<Boolean> COMMAND_BLOCK_EXECUTION;
 
 
@@ -43,5 +46,50 @@ public class CommandPermissionConfig {
                 });
         BUILDER.pop();
         CONFIG_SPEC = BUILDER.build();
+    }
+
+    public static Set<String> UUIDsWithPermission(){
+        return PLAYERS_WITH_PERMISSION.get()
+                .stream()
+                .filter(Objects::nonNull)
+                .map(s -> (String)s)
+                .collect(Collectors.toSet());
+    }
+
+
+    public static boolean hasPermission(CommandSource source) {
+        try {
+            PlayerEntity player = source.getPlayerOrException();
+            return hasPermission(player);
+        } catch (CommandSyntaxException e) {
+            boolean isServerConsole = false;
+            // TODO: How to determine server console as source?
+
+            if (isServerConsole) {
+                return true;
+            } else {
+                return COMMAND_BLOCK_EXECUTION.get();
+            }
+        }
+    }
+
+    public static boolean hasPermission(PlayerEntity player) {
+        return hasUUIDConfigEntry(player) || hasNeededOpLevel(player) || player.hasPermissions(REQUIRED_OP_LEVEL.get());
+    }
+
+    public static boolean hasUUIDConfigEntry(PlayerEntity player) {
+        Set<String> playersInConfig = UUIDsWithPermission();
+        return playersInConfig.contains(player.getStringUUID());
+    }
+
+    public static boolean hasNeededOpLevel(PlayerEntity player) {
+        OpEntry opPlayerEntry = ServerLifecycleHooks.getCurrentServer()
+                .getPlayerList()
+                .getOps()
+                .get(player.getGameProfile());
+        if (opPlayerEntry != null) {
+            return opPlayerEntry.getLevel() >= REQUIRED_OP_LEVEL.get();
+        }
+        return false;
     }
 }
