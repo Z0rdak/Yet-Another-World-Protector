@@ -1,7 +1,7 @@
-package de.z0rdak.regionshield.commands;
+package de.z0rdak.yawp.commands;
 
 public enum CommandConstants {
-    BASE_CMD("rs"),
+    BASE_CMD("wp"),
     REGION("region"),
     REGIONS("regions"),
     DIMENSION("dim"),
