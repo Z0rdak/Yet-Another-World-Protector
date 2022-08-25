@@ -48,7 +48,7 @@ public class CommandRegistry {
 
     private static int promptHelp(CommandSource src) {
         MessageUtil.sendCmdFeedback(src, buildHelpHeader("cli.msg.help.header"));
-        String command = CommandUtil.buildCommandStr(CommandConstants.DIMENSION.toString(), " ");
+        String command = CommandUtil.buildCommandStr(CommandConstants.DIMENSION.toString());
         IFormattableTextComponent cmdStr = new TranslationTextComponent("cli.msg.help.1", CommandPermissionConfig.BASE_CMD);
         MessageUtil.sendCmdFeedback(src, buildExecuteCmdComponent("=>", command, TextFormatting.GREEN, "Manage dimensional regions", ClickEvent.Action.SUGGEST_COMMAND).append(cmdStr));
         String wikiLink = "https://github.com/Z0rdak/RegionShield/wiki";
