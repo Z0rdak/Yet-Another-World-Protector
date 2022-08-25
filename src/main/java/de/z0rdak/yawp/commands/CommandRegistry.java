@@ -32,7 +32,7 @@ public class CommandRegistry {
 
     private static LiteralArgumentBuilder<CommandSource> withSubCommands(LiteralArgumentBuilder<CommandSource> baseCommand) {
         return baseCommand
-                .requires(CommandPermissionConfig::hasPermission)
+                //.requires(CommandPermissionConfig::hasPermission)
                 .executes(ctx -> promptHelp(ctx.getSource()))
                 .then(CommandUtil.literal(CommandConstants.HELP)
                         .executes(ctx -> promptHelp(ctx.getSource())))
