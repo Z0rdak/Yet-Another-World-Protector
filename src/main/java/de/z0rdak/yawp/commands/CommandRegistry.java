@@ -51,7 +51,7 @@ public class CommandRegistry {
         String command = CommandUtil.buildCommandStr(CommandConstants.DIMENSION.toString());
         IFormattableTextComponent cmdStr = new TranslationTextComponent("cli.msg.help.1", CommandPermissionConfig.BASE_CMD);
         MessageUtil.sendCmdFeedback(src, buildExecuteCmdComponent("=>", command, TextFormatting.GREEN, "Manage dimensional regions", ClickEvent.Action.SUGGEST_COMMAND).append(cmdStr));
-        String wikiLink = "https://github.com/Z0rdak/RegionShield/wiki";
+        String wikiLink = "https://github.com/Z0rdak/Yet-Another-World-Protector";
         StringTextComponent wikiInfo = new StringTextComponent("The in-game help is under construction.\nVisit the online wiki for a guide on how to use the mod.\nOnline-Wiki: ");
         MessageUtil.sendCmdFeedback(src, wikiInfo.append(buildExecuteCmdComponent(YetAnotherWorldProtector.MODID_LONG + " online wiki", wikiLink,
                 TextFormatting.AQUA, "Open online wiki in your browser", ClickEvent.Action.OPEN_URL)));
