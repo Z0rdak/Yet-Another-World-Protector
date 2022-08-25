@@ -3,6 +3,7 @@ package de.z0rdak.yawp.util;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.CommandConstants;
+import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.core.affiliation.PlayerContainer;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.AbstractMarkableRegion;
@@ -33,7 +34,7 @@ public class MessageUtil {
     }
 
     public static IFormattableTextComponent buildHelpLink(String translationKey, CommandConstants cmd) {
-        String command =  "/" + BASE_CMD + " " + cmd.toString() + " " + HELP;
+        String command =  "/" + CommandPermissionConfig.BASE_CMD + " " + cmd.toString() + " " + HELP;
         return new StringTextComponent(" ")
                 .append(buildExecuteCmdComponent("=>", command, GREEN, "Show detailed help for the " + cmd.toString() + " commands",  RUN_COMMAND))
                 .append(new StringTextComponent(" "))
@@ -120,7 +121,7 @@ public class MessageUtil {
     }
 
     public static IFormattableTextComponent buildHelpSuggestionLink(String translationKey, CommandConstants baseCmd, CommandConstants cmd) {
-        String command = "/" + BASE_CMD + " " + baseCmd + " " + cmd + " ";
+        String command = "/" + CommandPermissionConfig.BASE_CMD + " " + baseCmd + " " + cmd + " ";
         return new StringTextComponent(" ")
                 .append(buildExecuteCmdComponent("=>", command, GREEN, "chat.link.hover.command.copy", SUGGEST_COMMAND))
                 .append(new StringTextComponent(" "))
@@ -129,7 +130,7 @@ public class MessageUtil {
 
     public static IFormattableTextComponent buildDimHelpLink(String translationKey, CommandConstants baseCmd, List<String> cmds) {
         String cmdStr = String.join(" ", cmds);
-        String command = "/" + BASE_CMD + " " + baseCmd + " " + cmdStr;
+        String command = "/" + CommandPermissionConfig.BASE_CMD + " " + baseCmd + " " + cmdStr;
         return new StringTextComponent(" ")
                 .append(buildExecuteCmdComponent("=>", command, GREEN, "chat.link.hover.command.copy", SUGGEST_COMMAND))
                 .append(new StringTextComponent(" "))
@@ -139,7 +140,7 @@ public class MessageUtil {
     public static IFormattableTextComponent buildInteractiveDimHelpLink(String translationKey, CommandConstants baseCmd, List<String> cmds) {
         String cmdStr = String.join(" ", cmds);
         // TODO
-        String command = "/" + BASE_CMD + " " + baseCmd + " " + cmdStr;
+        String command = "/" + CommandPermissionConfig.BASE_CMD + " " + baseCmd + " " + cmdStr;
         return new StringTextComponent(" ")
                 .append(buildExecuteCmdComponent("=>", command, GREEN, "chat.link.hover.command.copy", SUGGEST_COMMAND))
                 .append(new StringTextComponent(" "))
@@ -147,15 +148,15 @@ public class MessageUtil {
     }
 
     public static String buildDimAddPlayerCmdStr(String region, CommandConstants memberOrOwner){
-        return buildDimAddCmdStr(region) + " " + PLAYER + " " + memberOrOwner;
+        return buildDimAddCmdStr(region) + " " + PLAYER + " " + memberOrOwner + " ";
     }
 
     public static String buildDimAddTeamCmdStr(String region, CommandConstants memberOrOwner){
-        return buildDimAddCmdStr(region) + " " + TEAM + " " + memberOrOwner;
+        return buildDimAddCmdStr(region) + " " + TEAM + " " + memberOrOwner + " ";
     }
 
     public static String buildDimAddCmdStr(String region){
-        return "/" + BASE_CMD + " " + DIMENSION + " " + region + " " + ADD;
+        return "/" + CommandPermissionConfig.BASE_CMD + " " + DIMENSION + " " + region + " " + ADD;
     }
 
     public static IFormattableTextComponent buildDimAddPlayerLink(DimensionalRegion dimRegion, String hoverTextLangKey, CommandConstants memberOrOwner) {
@@ -182,26 +183,26 @@ public class MessageUtil {
                 ? GREEN
                 : RED;
         String onClickAction = isActive ? "deactivate" : "activate";
-        String command = "/" + BASE_CMD + " " + REGION + " " + onClickAction + " " + region.getName();
+        String command = "/" + CommandPermissionConfig.BASE_CMD + " " + REGION + " " + onClickAction + " " + region.getName();
         // TODO: translatable overload (linkText) ?
         return buildExecuteCmdComponent(activeText.getString(), command, color, onClickAction + " " + REGION + " '" + region.getName() + "'", RUN_COMMAND);
     }
 
     public static IFormattableTextComponent buildDimensionalInfoLink(RegistryKey<World> dim) {
-        String command = "/" + BASE_CMD + " " + DIMENSION + " " + dim.location() + " " + INFO;
+        String command = "/" + CommandPermissionConfig.BASE_CMD + " " + DIMENSION + " " + dim.location() + " " + INFO;
         String hoverText = "cli.msg.dim.info";
         return buildExecuteCmdComponent(dim.location().toString(), command, GREEN, hoverText, RUN_COMMAND);
     }
 
     public static IFormattableTextComponent buildPlayerListLink(DimensionalRegion dimRegion, PlayerContainer players, CommandConstants memberOrOwner) {
-        String command = "/" + BASE_CMD + " " + DIMENSION + " " + dimRegion.getName() + " " + LIST + " " + memberOrOwner;
+        String command = "/" + CommandPermissionConfig.BASE_CMD + " " + DIMENSION + " " + dimRegion.getName() + " " + LIST + " " + memberOrOwner;
         String hoverText = "List players(" + memberOrOwner.toString() + ") in dimension '" + dimRegion.getName() + "'";
         String linkText = players.getPlayers().size() + " player(s)";
         return buildExecuteCmdComponent(linkText, command, AQUA, hoverText, RUN_COMMAND);
     }
 
     public static IFormattableTextComponent buildTeamListLink(DimensionalRegion dimRegion, PlayerContainer teams, CommandConstants memberOrOwner) {
-        String command = "/" + BASE_CMD + " " + DIMENSION + " " + dimRegion.getName() + " " + LIST + " " + memberOrOwner;
+        String command = "/" + CommandPermissionConfig.BASE_CMD + " " + DIMENSION + " " + dimRegion.getName() + " " + LIST + " " + memberOrOwner;
         String hoverText = "List teams(" + memberOrOwner.toString() + ") in dimension '" + dimRegion.getName() + "'";
         String linkText = teams.getTeams().size() + " teams(s)";
         return buildExecuteCmdComponent(linkText, command, AQUA, hoverText, RUN_COMMAND);
@@ -221,7 +222,7 @@ public class MessageUtil {
     }
 
     public static IFormattableTextComponent buildDimSuggestRegionRemovalLink(RegistryKey<World> dim, String regionName) {
-        String command = "/" + BASE_CMD + " " + REGION + " " + dim.location() + " " + REMOVE + " " + regionName;
+        String command = "/" + CommandPermissionConfig.BASE_CMD + " " + REGION + " " + dim.location() + " " + REMOVE + " " + regionName;
         String hoverText = "cli.msg.dim.region.remove.link.hover";
         String linkText = "x";
         return buildExecuteCmdComponent(linkText, command, RED,hoverText, SUGGEST_COMMAND);
@@ -259,7 +260,7 @@ public class MessageUtil {
     }
 
     public static IFormattableTextComponent buildDimensionRemoveFlagLink(IFlag flag, RegistryKey<World> dim) {
-        String command =  "/" + BASE_CMD + " " + DIMENSION + " " + dim.location() + " " + REMOVE + " " + FLAG + " " + flag.getFlagName();
+        String command =  "/" + CommandPermissionConfig.BASE_CMD + " " + DIMENSION + " " + dim.location() + " " + REMOVE + " " + FLAG + " " + flag.getFlagName();
         //String hoverText =" Remove flag '" + flag.getFlagName() + "' from dimension " + "'" + dim.location() + "'";
         String hoverText ="Remove flag";
         String linkText = "x";
