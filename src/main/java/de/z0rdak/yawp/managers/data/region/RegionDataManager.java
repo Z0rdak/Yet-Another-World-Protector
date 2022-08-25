@@ -179,13 +179,16 @@ public class RegionDataManager extends WorldSavedData {
     }
 
     public DimensionRegionCache cacheFor(RegistryKey<World> dim) {
+        if (!dimCacheMap.containsKey(dim)){
+            dimCacheMap.put(dim, new DimensionRegionCache(dim));
+        }
         return dimCacheMap.get(dim);
     }
 
-    // TODO: remove method to avoid not marking changes as dirty
+    // TODO: remove or make private method to avoid not marking changes as dirty
     // OR: implement observable data structures to automatically mark changes as dirty
     public DimensionalRegion dimFor(RegistryKey<World> dim) {
-        return dimCacheMap.get(dim).getDimensionalRegion();
+        return cacheFor(dim).getDimensionalRegion();
     }
 
     public List<IFlag> getFlagsForDim(RegistryKey<World> dim){
