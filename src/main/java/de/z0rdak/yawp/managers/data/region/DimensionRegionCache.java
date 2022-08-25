@@ -199,4 +199,10 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
         return owners.containsPlayer(player.getUUID())
                 || (player.getTeam() != null && owners.containsTeam(player.getTeam()));
     }
+
+    public boolean hasMember(PlayerEntity player) {
+        PlayerContainer members = this.dimensionalRegion.getMembers();
+        return members.containsPlayer(player.getUUID())
+                || (player.getTeam() != null && members.containsTeam(player.getTeam()));
+    }
 }
