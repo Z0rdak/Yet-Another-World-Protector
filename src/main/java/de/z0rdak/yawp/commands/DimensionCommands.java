@@ -176,7 +176,7 @@ public class DimensionCommands {
 
     // TODO: Check
     private static int promptDimensionFlagList(CommandSource src, RegistryKey<World> dim) {
-        List<IFlag> flags = RegionDataManager.get().dimFor(dim).getFlags()
+        List<IFlag> flags = RegionDataManager.get().getFlagsForDim(dim)
                 .stream()
                 // TODO: implement comparable for flags
                 // .sorted()
@@ -208,7 +208,7 @@ public class DimensionCommands {
     }
 
     private static int setActiveState(CommandSource src, RegistryKey<World> dim, boolean activate) {
-        RegionDataManager.get().dimFor(dim).setIsActive(activate);
+        RegionDataManager.get().cacheFor(dim).setDimState(activate);
         String langKey = "cli.msg.info.state." + (activate ? "activated" : "deactivated");
         sendCmdFeedback(src, new TranslationTextComponent(langKey, dim.location().toString()));
         return 0;
