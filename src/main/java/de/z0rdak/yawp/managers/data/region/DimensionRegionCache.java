@@ -11,7 +11,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.world.World;
-import net.minecraft.world.storage.WorldSavedData;
+import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.Collection;
@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID)
-public class DimensionRegionCache extends WorldSavedData {
+public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
 
     public Map<String, IMarkableRegion> regionsInDimension;
     private DimensionalRegion dimensionalRegion;
@@ -29,14 +29,11 @@ public class DimensionRegionCache extends WorldSavedData {
         this(new DimensionalRegion(dim));
     }
 
-    public DimensionRegionCache(String dimKey){
-        super(getDataName(dimKey));
-        this.regionsInDimension = new HashMap<>();
-        this.dimensionalRegion = new DimensionalRegion(dimKey);
+    public DimensionRegionCache(CompoundNBT nbt){
+        this.deserializeNBT(nbt);
     }
 
     public DimensionRegionCache(DimensionalRegion dimensionalRegion){
-        super(getDataName(dimensionalRegion));
         this.dimensionalRegion = dimensionalRegion;
         this.regionsInDimension = new HashMap<>();
     }
@@ -49,12 +46,11 @@ public class DimensionRegionCache extends WorldSavedData {
         return YetAnotherWorldProtector.MODID + "-" + dim.replace(':', '-');
     }
 
-    @Override
     public void load(CompoundNBT nbt) {
         CompoundNBT regionsNbt = nbt.getCompound(NBTConstants.REGIONS);
         CompoundNBT dimRegionNbt = nbt.getCompound(NBTConstants.DIM_REGION);
         this.dimensionalRegion = new DimensionalRegion(dimRegionNbt);
-        YetAnotherWorldProtector.LOGGER.debug("Loading dim data for '" + this.dimensionalRegion.getName() +"'");
+        YetAnotherWorldProtector.LOGGER.info("Loading dim data for '" + this.dimensionalRegion.getName() +"'");
         this.regionsInDimension = new HashMap<>();
         regionsNbt.getAllKeys().forEach( regionName -> {
             CompoundNBT regionNbt = regionsNbt.getCompound(regionName);
@@ -80,9 +76,8 @@ public class DimensionRegionCache extends WorldSavedData {
         });
     }
 
-    @Override
     public CompoundNBT save(CompoundNBT nbt) {
-        YetAnotherWorldProtector.LOGGER.debug("Saving dim data for '" + this.dimensionalRegion.getName() +"'");
+        YetAnotherWorldProtector.LOGGER.info("Saving dim data for '" + this.dimensionalRegion.getName() +"'");
         nbt.put(NBTConstants.DIM_REGION, this.dimensionalRegion.serializeNBT());
         CompoundNBT regions = new CompoundNBT();
         this.regionsInDimension.forEach( (name, region) -> {
@@ -98,57 +93,62 @@ public class DimensionRegionCache extends WorldSavedData {
 
     public void addRegion(IMarkableRegion region) {
         this.regionsInDimension.put(region.getName(), region);
-        this.setDirty();
+        RegionDataManager.save();
     }
 
     public void addOwner(ServerPlayerEntity player) {
         this.dimensionalRegion.addOwner(player);
-        this.setDirty();
+        RegionDataManager.save();
     }
 
     public void addOwner(Team team) {
         this.dimensionalRegion.addOwner(team);
-        this.setDirty();
+        RegionDataManager.save();
     }
 
     public void addMember(ServerPlayerEntity player) {
         this.dimensionalRegion.addMember(player);
-        this.setDirty();
+        RegionDataManager.save();
     }
 
     public void addMember(Team team) {
         this.dimensionalRegion.addMember(team);
-        this.setDirty();
+        RegionDataManager.save();
     }
 
     public void removeOwner(ServerPlayerEntity player) {
         this.dimensionalRegion.removeOwner(player);
-        this.setDirty();
+        RegionDataManager.save();
     }
 
     public void removeOwner(Team team) {
         this.dimensionalRegion.removeOwner(team);
-        this.setDirty();
+        RegionDataManager.save();
     }
 
     public void removeMember(ServerPlayerEntity player) {
         this.dimensionalRegion.removeMember(player);
-        this.setDirty();
+        RegionDataManager.save();
+    }
+
+    public void setDimState(boolean active){
+        this.dimensionalRegion.setIsActive(active);
+        RegionDataManager.save();
     }
 
     public void removeMember(Team team) {
         this.dimensionalRegion.removeMember(team);
-        this.setDirty();
+        RegionDataManager.save();
     }
 
     public void addFlag(IFlag flag){
         this.dimensionalRegion.addFlag(flag);
-        this.setDirty();
+        RegionDataManager.save();
     }
 
     public void removeFlag(String flag){
         this.dimensionalRegion.removeFlag(flag);
-        this.setDirty();
+        RegionDataManager.save();
     }
 
     public Collection<String> getRegionNames() {
@@ -158,11 +158,13 @@ public class DimensionRegionCache extends WorldSavedData {
     public void removeRegion(String regionName){
         if (this.contains(regionName)){
             this.regionsInDimension.remove(regionName);
+            RegionDataManager.save();
         }
     }
 
     public void clearRegions() {
         this.regionsInDimension.clear();
+        RegionDataManager.save();
     }
 
     public boolean contains(String regionName) {
@@ -178,5 +180,15 @@ public class DimensionRegionCache extends WorldSavedData {
                 .stream()
                 .map(IFlag::getFlagName)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public CompoundNBT serializeNBT() {
+        return this.save(new CompoundNBT());
+    }
+
+    @Override
+    public void deserializeNBT(CompoundNBT nbt) {
+        this.load(nbt);
     }
 }
