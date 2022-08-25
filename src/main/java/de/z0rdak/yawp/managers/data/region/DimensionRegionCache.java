@@ -1,11 +1,13 @@
 package de.z0rdak.yawp.managers.data.region;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.core.affiliation.PlayerContainer;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.util.constants.NBTConstants;
 import de.z0rdak.yawp.util.constants.RegionNBT;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.scoreboard.Team;
@@ -190,5 +192,11 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
         this.load(nbt);
+    }
+
+    public boolean hasOwner(PlayerEntity player) {
+        PlayerContainer owners = this.dimensionalRegion.getOwners();
+        return owners.containsPlayer(player.getUUID())
+                || (player.getTeam() != null && owners.containsTeam(player.getTeam()));
     }
 }
