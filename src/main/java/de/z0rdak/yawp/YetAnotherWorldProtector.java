@@ -11,6 +11,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -31,8 +32,10 @@ public class YetAnotherWorldProtector
     public YetAnotherWorldProtector() {
         DistExecutor.unsafeRunWhenOn(Dist.DEDICATED_SERVER, () -> () -> {
             FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
+            FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onConfigLoading);
+            FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onConfigReloading);
 
-            ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, CommandPermissionConfig.CONFIG_SPEC, MODID + "-common.toml" );
+            ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, CommandPermissionConfig.CONFIG_SPEC, CommandPermissionConfig.CONFIG_NAME);
             ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, FlagConfig.CONFIG_SPEC, MODID + "-flags.toml" );
             ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, RegionConfig.CONFIG_SPEC, MODID + "-region-defaults.toml" );
 
@@ -46,7 +49,14 @@ public class YetAnotherWorldProtector
     }
 
     private void setup(final FMLCommonSetupEvent event) {
+        if (isInModList("JourneyMap")) {
+            YetAnotherWorldProtector.LOGGER.warn("Detected JourneyMap mod. Setting base command to '" + CommandPermissionConfig.WP_CMDS[2] + "'");
+            CommandPermissionConfig.BASE_CMD = CommandPermissionConfig.WP_CMDS[2];
+        }
+    }
 
+    private static boolean isInModList(String modid) {
+        return ModList.get().isLoaded(modid);
     }
 
     @SubscribeEvent
@@ -56,7 +66,19 @@ public class YetAnotherWorldProtector
     }
 
     @SubscribeEvent
-    public void onServerStarting(RegisterCommandsEvent event) {
+    public void onConfigLoading(ModConfig.Loading event) {
+        if (event.getConfig().getFileName().equals(CommandPermissionConfig.CONFIG_NAME)){
+            CommandPermissionConfig.setBaseCmd();
+        }
+    }
+
+    @SubscribeEvent
+    public void onConfigReloading(ModConfig.Reloading event) {
+        // reset player uuids?
+    }
+
+    @SubscribeEvent
+    public void onServerStartingRegisterCommands(RegisterCommandsEvent event) {
         CommandRegistry.init(event.getDispatcher());
     }
 
