@@ -46,7 +46,7 @@ public class CommandUtil {
     }
 
     public static String getAssociateArgument(CommandContext<CommandSource> ctx) {
-        return StringArgumentType.getString(ctx, "associate");
+        return StringArgumentType.getString(ctx, CommandConstants.AFFILIATION.toString());
     }
 
     public static ServerPlayerEntity getOwnerArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {

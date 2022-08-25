@@ -41,6 +41,7 @@ public enum CommandConstants {
     ALLOW("allow"),
     DENY("deny"),
     PLAYER("player"),
+    AFFILIATION("affiliation"),
     TEAM("team"),
     TEAMS("teams"),
     PLAYERS("players"),
