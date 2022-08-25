@@ -11,6 +11,7 @@ import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.*;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
+import net.minecraft.command.arguments.DimensionArgument;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -33,18 +34,7 @@ public class RegionCommands {
 
     public static LiteralArgumentBuilder<CommandSource> registerRegionsCommands(){
 
-        return regionsLiteral
-                .then(Commands.literal(CommandConstants.ACTIVATE.toString())
-                        .then(activateArgument
-                                // set active state of given region in current dimension
-                                .executes(ctx -> setActiveStates(ctx.getSource(), ctx.getSource().getLevel().dimension(), getActivateArgument(ctx))))
-                        .then(dimensionArgument
-                                // set active state of given region in given dimension
-                                .executes(ctx -> setActiveStates(ctx.getSource(), getDimensionArgument(ctx), getActivateArgument(ctx)))))
-                .then(removeLiteral
-                        .executes(ctx -> removeRegions(ctx.getSource(), ctx.getSource().getLevel().dimension()))
-                        .then(dimensionArgument
-                                .executes(ctx -> removeRegions(ctx.getSource(), getDimensionArgument(ctx)))));
+        return CommandUtil.literal(CommandConstants.REGIONS);
     }
 
     // IDEA: Expand command for all area types
@@ -55,74 +45,10 @@ public class RegionCommands {
      *
      */
     public static LiteralArgumentBuilder<CommandSource> registerRegionCommands() {
-
-        LiteralArgumentBuilder<CommandSource> createRegionCommand = createLiteral
-                .then(regionNameArgument
-                        .executes(ctx -> createRegion(ctx.getSource(), getRegionNameArgument(ctx),  ctx.getSource().getLevel().dimension()))
-                        .then(dimensionArgument
-                                .executes(ctx -> createRegion(ctx.getSource(), getRegionNameArgument(ctx), getDimensionArgument(ctx))))
-                        .then(ownerArgument
-                                .then(dimensionArgument
-                                        .executes(ctx -> createRegion(ctx.getSource(), getRegionNameArgument(ctx), getDimensionArgument(ctx), getOwnerArgument(ctx))))));
-
-        LiteralArgumentBuilder<CommandSource> setActiveStateCommand = activateLiteral
-                .then(regionNameArgument
-                        .suggests((ctx, builder) -> suggest(RegionDataManager.get().getAllRegionNames(), builder))
-                        .then(activateArgument
-                                // set active state of given region in current dimension
-                                .executes(ctx -> setActiveState(ctx.getSource(), getRegionNameArgument(ctx), ctx.getSource().getLevel().dimension(), getActivateArgument(ctx))))
-                        .then(dimensionArgument
-                                // set active state of given region in given dimension
-                                .executes(ctx -> setActiveState(ctx.getSource(), getRegionNameArgument(ctx), getDimensionArgument(ctx), getActivateArgument(ctx)))));
-
-        return regionLiteral
+        return CommandUtil.literal(CommandConstants.REGION)
                 .executes(ctx -> promptHelp(ctx.getSource()))
-                .then(helpLiteral
-                        .executes(ctx -> promptHelp(ctx.getSource())))
-                .then(listLiteral
-                        .executes(ctx -> promptRegionList(ctx.getSource()))
-                        .then(dimensionArgument
-                                .executes(ctx -> promptRegionListForDim(ctx.getSource(), getDimensionArgument(ctx)))))
-                .then(infoLiteral
-                        .executes(ctx -> listRegionsAround(ctx.getSource()))
-                        .then(regionNameArgument
-                                .suggests((ctx, builder) -> suggest(RegionDataManager.get().getAllRegionNames(), builder))
-                                .executes(ctx -> info(ctx.getSource(), getRegionNameArgument(ctx)))))
-                .then(createRegionCommand)
-                // UPDATE AREA
-                .then(updateLiteral
-                        .then(regionNameArgument
-                                .suggests((ctx, builder) -> suggest(RegionDataManager.get().getAllRegionNames(), builder))
-                                .executes(ctx -> updateRegion(ctx.getSource(), getRegionNameArgument(ctx)))))
-                // REMOVE REGION
-                .then(removeLiteral
-                        .then(regionNameArgument
-                                .suggests((ctx, builder) -> suggest(RegionDataManager.get().getAllRegionNames(), builder))
-                                .executes(ctx -> removeRegion(ctx.getSource(), getRegionNameArgument(ctx), ctx.getSource().getLevel().dimension())))
-                        .then(dimensionArgument
-                                .executes(ctx -> removeRegion(ctx.getSource(), getRegionNameArgument(ctx), getDimensionArgument(ctx)))))
-                // tp <player> <region> [<dim>]
-                .then(teleportLiteral
-                        .then(playerArgument)
-                        .then(regionNameArgument
-                                .suggests((ctx, builder) -> suggest(RegionDataManager.get().getAllRegionNames(), builder))
-                                .executes(ctx -> teleport(ctx.getSource(), getRegionNameArgument(ctx), ctx.getSource().getLevel().dimension())))
-                        .then(dimensionArgument
-                                .then(regionNameArgument
-                                        .executes(ctx -> teleport(ctx.getSource(), getRegionNameArgument(ctx), ctx.getSource().getLevel().dimension())))))
-                .then(setActiveStateCommand)
-                // ALERT
-                .then(alertLiteral
-                        .then(regionNameArgument
-                                .suggests((ctx, builder) -> suggest(RegionDataManager.get().getAllRegionNames(), builder))
-                                .then(Commands.argument(CommandConstants.ENABLE.toString(), BoolArgumentType.bool())
-                                        .executes(ctx -> setAlertState(ctx.getSource(), getRegionNameArgument(ctx), getEnableArgument(ctx))))))
-                // PRIORITY
-                .then(priorityLiteral
-                        .then(regionNameArgument
-                                .suggests((ctx, builder) -> suggest(RegionDataManager.get().getAllRegionNames(), builder))
-                                .then(priorityArgument
-                                        .executes(ctx -> setPriority(ctx.getSource(), getRegionNameArgument(ctx), getPriorityArgument(ctx))))));
+                .then(CommandUtil.literal(CommandConstants.HELP)
+                        .executes(ctx -> promptHelp(ctx.getSource())));
     }
 
     private static int removeRegion(CommandSource source, String regionName, RegistryKey<World> dim) {
