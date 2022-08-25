@@ -1,6 +1,6 @@
 modLoader = "javafml" #mandatory
 loaderVersion = "${loader_version_range}" #mandatory
-license = "MIT" #
+license = "LGPLv3" #
 logoFile = "logo.png" #optional
 credits = "${mod_credits}"
 authors = "${mod_authors}"  #optional
