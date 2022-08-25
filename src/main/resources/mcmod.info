@@ -10,7 +10,7 @@
   "authorList": [
     "Z0rdak"
   ],
-  "credits": "TBD",
+  "credits": "${mod_credits}",
   "logoFile": "logo.png",
   "screenshots": [],
   "dependencies": []
