@@ -1,4 +1,4 @@
-package de.z0rdak.yawp.handler;
+package de.z0rdak.yawp.handler.stick;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.util.StickType;
@@ -10,14 +10,16 @@ import net.minecraft.item.Items;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.player.AnvilRepairEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import static de.z0rdak.yawp.util.StickUtil.*;
+import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 
-@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID)
+@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER, bus = FORGE)
 public class StickInteractionHandler {
 
     private StickInteractionHandler() {

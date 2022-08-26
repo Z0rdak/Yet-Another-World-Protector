@@ -1,4 +1,4 @@
-package de.z0rdak.yawp.handler;
+package de.z0rdak.yawp.handler.stick;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.core.area.AreaType;

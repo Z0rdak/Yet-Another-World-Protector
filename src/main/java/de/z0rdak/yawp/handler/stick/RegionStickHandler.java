@@ -1,4 +1,4 @@
-package de.z0rdak.yawp.handler;
+package de.z0rdak.yawp.handler.stick;
 
 import de.z0rdak.yawp.core.stick.RegionStick;
 import de.z0rdak.yawp.util.StickType;
