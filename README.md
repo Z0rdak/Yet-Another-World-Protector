@@ -1,6 +1,6 @@
 # Introduction
 
-Yet Another World Protector, or YAWP for short, is a server-side only mod which allows you to protect your creations against various different events/actions of players, mobs and the environment. It was inspired by the forge mod [WorldProtector](https://www.curseforge.com/minecraft/mc-mods/worldprotector) and the [WorldGuard](https://dev.bukkit.org/projects/worldguard) plugin.
+Yet Another World Protector, or YAWP for short, is a server-side mod which allows you to protect your creations against various different events/actions of players, mobs and the environment. It was inspired by the forge mod [WorldProtector](https://www.curseforge.com/minecraft/mc-mods/worldprotector) and the [WorldGuard](https://dev.bukkit.org/projects/worldguard) plugin.
 
 ***The mod is currently in its beta state, with many features not yet implemented but to come. These features will include most of the things you know from WorldProtector and WorldGuard.***
 
