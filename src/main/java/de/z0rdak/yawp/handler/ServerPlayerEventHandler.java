@@ -3,6 +3,7 @@ package de.z0rdak.yawp.handler;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -10,10 +11,12 @@ import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 
 import java.util.List;
 
+import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
+
 /**
  * Eventhandler to track players near regions to handle entering and leaving regions without much overhead.
  */
-@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID)
+@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER, bus = FORGE)
 public class ServerPlayerEventHandler {
 
     private static MinecraftServer server;
