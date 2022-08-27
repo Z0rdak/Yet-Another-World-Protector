@@ -25,6 +25,8 @@ import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
 
 public class GrievingFlagHandler {
 
+    private GrievingFlagHandler() {}
+
     @SubscribeEvent
     public static void onFarmLandTrampled(BlockEvent.FarmlandTrampleEvent event) {
         if (isServerSide(event.getEntity())) {

@@ -25,7 +25,6 @@ import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import static de.z0rdak.yawp.handler.events.WorldProtectionHandler.*;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 
