@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.handler.flags;
 
+import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
@@ -9,12 +10,15 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
+import net.minecraft.entity.monster.CreeperEntity;
+import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.entity.monster.ZombieEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.event.entity.living.LivingDestroyBlockEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
 import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.event.world.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
@@ -126,5 +130,65 @@ public class GrievingFlagHandler {
         }
     }
 
+    @SubscribeEvent
+    public static void onEndermanPlacingBlock(BlockEvent.EntityPlaceEvent event) {
+        if (isServerSide(event)) {
+            if (event.getEntity() != null && event.getEntity() instanceof EndermanEntity) {
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
+                DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
+                if (dimRegion.containsFlag(RegionFlag.ENTITY_PLACE)) {
+                    event.setCanceled(true);
+                    YetAnotherWorldProtector.LOGGER.debug("Block placed by enderman denied!");
+                }
+            }
+        }
+    }
+
+
+    /**
+     *
+     * Removes affected entities and/or blocks from the event list to protect them
+     * @param event -
+     */
+    @SubscribeEvent
+    public static void onExplosion(ExplosionEvent.Detonate event) {
+        if (!event.getWorld().isClientSide) {
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(event.getWorld().dimension());
+            DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
+            if (dimRegion.containsFlag(RegionFlag.EXPLOSION_BLOCK)){
+                event.getAffectedBlocks().clear();
+            }
+            if (dimRegion.containsFlag(RegionFlag.EXPLOSION_ENTITY)) {
+                event.getAffectedEntities().clear();
+            }
+            //event.getAffectedBlocks().removeAll(filterExplosionAffectedBlocks(event, RegionFlag.EXPLOSION_BLOCK.flag));
+            //event.getAffectedEntities().removeAll(filterAffectedEntities(event, RegionFlag.EXPLOSION_ENTITY.flag));
+
+            if (event.getExplosion().getSourceMob() != null) {
+                boolean explosionTriggeredByCreeper = (event.getExplosion().getSourceMob() instanceof CreeperEntity);
+                if (!explosionTriggeredByCreeper) {
+                    if (dimRegion.containsFlag(RegionFlag.EXPLOSION_OTHER_BLOCKS)){
+                        event.getAffectedBlocks().clear();
+                    }
+                    if (dimRegion.containsFlag(RegionFlag.EXPLOSION_OTHER_ENTITY)) {
+                        event.getAffectedEntities().clear();
+                    }
+                    //event.getAffectedBlocks().removeAll(filterExplosionAffectedBlocks(event, RegionFlag.EXPLOSION_OTHER_BLOCKS.flag));
+                    //event.getAffectedEntities().removeAll(filterAffectedEntities(event, RegionFlag.EXPLOSION_OTHER_ENTITY.flag));
+
+                }
+                if (explosionTriggeredByCreeper) {
+                    if (dimRegion.containsFlag(RegionFlag.EXPLOSION_CREEPER_BLOCK)){
+                        event.getAffectedBlocks().clear();
+                    }
+                    if (dimRegion.containsFlag(RegionFlag.EXPLOSION_CREEPER_ENTITY)) {
+                        event.getAffectedEntities().clear();
+                    }
+                    //event.getAffectedBlocks().removeAll(filterExplosionAffectedBlocks(event, RegionFlag.EXPLOSION_CREEPER_BLOCK.flag));
+                    //event.getAffectedEntities().removeAll(filterAffectedEntities(event, RegionFlag.EXPLOSION_CREEPER_ENTITY.flag));
+                }
+            }
+        }
+    }
 
 }
