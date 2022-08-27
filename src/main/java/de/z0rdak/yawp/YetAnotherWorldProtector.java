@@ -55,14 +55,15 @@ public class YetAnotherWorldProtector
         }
     }
 
-    private static boolean isInModList(String modid) {
-        return ModList.get().isLoaded(modid);
-    }
-
     @SubscribeEvent
     public void onServerStarting(FMLServerStartingEvent event) {
         RegionDataManager.loadRegionData(event);
         PlayerTrackingManager.loadPlayerData(event);
+    }
+
+    @SubscribeEvent
+    public void onServerStartingRegisterCommands(RegisterCommandsEvent event) {
+        CommandRegistry.init(event.getDispatcher());
     }
 
     @SubscribeEvent
@@ -77,9 +78,9 @@ public class YetAnotherWorldProtector
         // reset player uuids?
     }
 
-    @SubscribeEvent
-    public void onServerStartingRegisterCommands(RegisterCommandsEvent event) {
-        CommandRegistry.init(event.getDispatcher());
+
+    private static boolean isInModList(String modid) {
+        return ModList.get().isLoaded(modid);
     }
 
 }
