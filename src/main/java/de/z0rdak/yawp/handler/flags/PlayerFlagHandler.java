@@ -8,23 +8,29 @@ import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.MessageUtil;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.IWaterLoggable;
+import net.minecraft.block.*;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.item.minecart.ContainerMinecartEntity;
 import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.merchant.villager.WanderingTraderEntity;
-import net.minecraft.entity.monster.CreeperEntity;
-import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.fluid.Fluid;
+import net.minecraft.item.Items;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ITag;
-import net.minecraft.util.RegistryKey;
+import net.minecraft.tileentity.EnderChestTileEntity;
+import net.minecraft.tileentity.LecternTileEntity;
+import net.minecraft.tileentity.LockableTileEntity;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -109,26 +115,19 @@ public final class PlayerFlagHandler {
         }
     }
 
-/*
+
     // unrelated: mobs pickup logic => MobEntity#livingTick
     @SubscribeEvent
     public static void onPickupItem(EntityItemPickupEvent event) {
-        if (!event.getPlayer().getCommandSenderWorld().isClientSide) {
-            List<IRegion> regions = RegionUtils.getHandlingRegionsFor(event.getPlayer().getPosition(), event.getPlayer().world);
-            for (IRegion region : regions) {
-                if (region.containsFlag(RegionFlag.ITEM_PICKUP.toString()) && region.forbids(event.getPlayer())) {
-                    if (!region.isMuted()) {
-                        sendStatusMessage(event.getPlayer(), "message.event.player.pickup_item");
-                    }
+        if (isServerSide(event)) {
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
+            DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
+                if (dimRegion.containsFlag(RegionFlag.ITEM_PICKUP) && !dimRegion.permits(event.getPlayer())) {
+                    MessageUtil.sendMessage(event.getPlayer(), "message.event.player.pickup_item");
                     event.setCanceled(true);
                 }
-            }
         }
     }
-
-
-
- */
 
     @SubscribeEvent
     public static void onBreedingAttempt(BabyEntitySpawnEvent event) {
@@ -375,7 +374,7 @@ public final class PlayerFlagHandler {
                 EntityTeleportEvent.EnderPearl enderPearlEvent = (EntityTeleportEvent.EnderPearl) event;
                 ServerPlayerEntity player = enderPearlEvent.getPlayer();
                 if ((dimRegion.containsFlag(RegionFlag.USE_ENDERPEARL_FROM_REGION)
-                        || dimRegion.containsFlag(RegionFlag.ENDERMAN_TELEPORT_TO_REGION))
+                        || dimRegion.containsFlag(RegionFlag.USE_ENDERPEARL_TO_REGION))
                         && !dimRegion.permits(player)) {
                     event.setCanceled(true);
                     MessageUtil.sendMessage(player, "message.event.teleport.ender_pearl.from_region");
@@ -428,8 +427,107 @@ public final class PlayerFlagHandler {
 
     }
 
+    @SubscribeEvent
+    public static void onPlayerRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
+        if (isServerSide(event)) {
+            PlayerEntity player = event.getPlayer();
+            TileEntity targetEntity = event.getWorld().getBlockEntity(event.getPos());
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
+            DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
+            boolean isLockableTileEntity = targetEntity instanceof LockableTileEntity;
+            boolean isEnderChest = targetEntity instanceof EnderChestTileEntity;
+            boolean isContainer = targetEntity instanceof LecternTileEntity || isLockableTileEntity;
+            boolean isPlayerProhibited = !dimRegion.permits(player);
+
+            // used to allow player to place blocks when shift clicking container or usable bock
+            boolean playerHasNoBlocksToPlaceInHands = player.getItemInHand(Hand.MAIN_HAND).getItem().equals(Items.AIR)
+                    && player.getItemInHand(Hand.OFF_HAND).getItem().equals(Items.AIR);
+
+            BlockRayTraceResult pos = event.getHitVec();
+            if (pos != null && pos.getType() == RayTraceResult.Type.BLOCK) {
+                BlockPos bPos = pos.getBlockPos();
+                Block target = event.getWorld().getBlockState(bPos).getBlock();
+                boolean isUsableBlock = target instanceof AbstractButtonBlock ||
+                        target instanceof DoorBlock ||
+                        target instanceof TrapDoorBlock ||
+                        target instanceof LeverBlock ||
+                        target instanceof NoteBlock ||
+                        target instanceof FenceGateBlock ||
+                        target instanceof DaylightDetectorBlock ||
+                        target instanceof RedstoneDiodeBlock ||
+                        target instanceof LecternBlock ||
+                        target instanceof BeaconBlock ||
+                        target instanceof BrewingStandBlock;
+
+                if (dimRegion.containsFlag(RegionFlag.USE) && isPlayerProhibited && isUsableBlock) {
+                    if (player.isShiftKeyDown() && playerHasNoBlocksToPlaceInHands || !player.isShiftKeyDown()) {
+                        event.setCanceled(true);
+                        MessageUtil.sendMessage(player, "message.event.interact.use");
+                        return;
+                    }
+                }
+            }
+            // check for ender chest access
+            if (dimRegion.containsFlag(RegionFlag.ENDER_CHEST_ACCESS) && isEnderChest && isPlayerProhibited) {
+                if (player.isShiftKeyDown() && playerHasNoBlocksToPlaceInHands || !player.isShiftKeyDown()) {
+                    event.setCanceled(true);
+                    MessageUtil.sendMessage(player, "message.event.interact.access_ender_chest");
+                    return;
+                }
+            }
+            // check for container access
+            if (dimRegion.containsFlag(RegionFlag.CONTAINER_ACCESS) && isContainer && isPlayerProhibited) {
+                if (player.isShiftKeyDown() && playerHasNoBlocksToPlaceInHands || !player.isShiftKeyDown()) {
+                    event.setCanceled(true);
+                    MessageUtil.sendMessage(player, "message.event.interact.access_container");
+                    return;
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onAccessMinecartChest(PlayerInteractEvent.EntityInteract event) {
+        if (isServerSide(event)) {
+            PlayerEntity player = event.getPlayer();
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
+            DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
+            boolean containsChestAccess = dimRegion.containsFlag(RegionFlag.CONTAINER_ACCESS);
+            boolean playerHasPermission = dimRegion.permits(player);
+            boolean isMinecartContainer = event.getTarget() instanceof ContainerMinecartEntity;
+
+            if (containsChestAccess && !playerHasPermission && isMinecartContainer) {
+                event.setCanceled(true);
+                MessageUtil.sendMessage(player, "message.event.interact.access_container");
+                return;
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onSteppedOnActivator(BlockEvent.NeighborNotifyEvent event) {
+        if (isServerSide(event)) {
+            World world = (World) event.getWorld();
+            Block block = event.getWorld().getBlockState(event.getPos()).getBlock();
+            BlockPos pos = event.getPos();
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.dimension());
+            DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
+            boolean cancelEvent = false;
+            if (block instanceof AbstractPressurePlateBlock) {
+                if (dimRegion.containsFlag(RegionFlag.USE)) {
+                    AxisAlignedBB areaAbovePressurePlate = new AxisAlignedBB(pos.getX() - 1, pos.getY(), pos.getZ() - 1, pos.getX() + 1, pos.getY() + 2, pos.getZ() + 1);
+                    List<PlayerEntity> players = ((World) event.getWorld()).getEntities(EntityType.PLAYER, areaAbovePressurePlate, (player) -> true);
+                    for (PlayerEntity player : players) {
+                        cancelEvent = cancelEvent || !dimRegion.permits(player);
+                        MessageUtil.sendMessage(player, "message.event.interact.use");
+                        event.setCanceled(cancelEvent);
+                    }
+                }
+            }
+        }
+    }
+
     /**
-     * TODO: USe FillBucketEvent for buckets
      * Note: Does not prevent from fluids generate additional blocks (cobble generator). Use BlockEvent.FluidPlaceBlockEvent for this
      *
      * @param event
@@ -447,7 +545,7 @@ public final class PlayerFlagHandler {
 
                 // placing fluid
                 if (bucketItemMaxStackCount == 1) {
-                    if (dimRegion.containsFlag(RegionFlag.PLACE_BLOCKS) && !dimRegion.permits(player)) {
+                    if (dimRegion.containsFlag(RegionFlag.PLACE_FLUIDS) && !dimRegion.permits(player)) {
                         MessageUtil.sendMessage(player, new TranslationTextComponent("message.event.protection.place_fluid"));
                         event.setCanceled(true);
                         return;
@@ -475,7 +573,7 @@ public final class PlayerFlagHandler {
                             }
                         }
                         if (isWaterlogged || isFluid) {
-                            if (dimRegion.containsFlag(RegionFlag.BREAK_BLOCKS) && !dimRegion.permits(player)) {
+                            if (dimRegion.containsFlag(RegionFlag.SCOOP_FLUIDS) && !dimRegion.permits(player)) {
                                 MessageUtil.sendMessage(player, new TranslationTextComponent("message.event.protection.scoop_fluid"));
                                 event.setCanceled(true);
                                 return;
@@ -610,13 +708,14 @@ public final class PlayerFlagHandler {
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
             if (playerAttemptsMounting) {
                 PlayerEntity player = (PlayerEntity) event.getEntityMounting();
-					/*
-					TODO: Wait for 1.17: https://bugs.mojang.com/browse/MC-202202
-					if (event.isDismounting() && region.containsFlag(RegionFlag.ANIMAL_UNMOUNTING) && region.forbids(player)) {
-						event.setCanceled(true); // Does not correctly unmount player
-						MessageUtil.sendMessage(player, "message.event.player.unmount");
-					}
-                    */
+
+                // TODO: Wait for 1.17: https://bugs.mojang.com/browse/MC-202202
+                /*
+                if (event.isDismounting() && dimRegion.containsFlag(RegionFlag.ANIMAL_UNMOUNTING) && !dimRegion.permits(player)) {
+                    event.setCanceled(true); // Does not correctly unmount player
+                    MessageUtil.sendMessage(player, "message.event.player.unmount");
+                }
+                */
                 if (event.isMounting() && dimRegion.containsFlag(RegionFlag.ANIMAL_MOUNTING) && !dimRegion.permits(player)) {
                     event.setCanceled(true);
                     MessageUtil.sendMessage(player, "message.event.player.mount");
