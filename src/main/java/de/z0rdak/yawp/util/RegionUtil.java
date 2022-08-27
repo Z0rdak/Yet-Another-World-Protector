@@ -3,12 +3,14 @@ package de.z0rdak.yawp.util;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.region.AbstractMarkableRegion;
 import de.z0rdak.yawp.core.region.CuboidRegion;
+import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.SphereRegion;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.List;
 
@@ -52,5 +54,9 @@ public final class RegionUtil {
             return new CuboidRegion(regionName, cuboidArea, marker.getTeleportPos(), player, dim);
         }
         return new CuboidRegion(regionName, cuboidArea, player, dim);
+    }
+
+    public static List<IMarkableRegion> getHandlingRegionsFor(BlockPos blockPos, World world) {
+        throw new NotImplementedException("");
     }
 }
