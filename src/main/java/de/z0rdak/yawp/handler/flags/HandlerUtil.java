@@ -20,6 +20,7 @@ import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.EntityEvent;
+import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
 
 import java.util.List;
@@ -48,6 +49,10 @@ public final class HandlerUtil {
      */
     public static boolean isServerSide(EntityEvent event){
         return isServerSide(event.getEntity());
+    }
+
+    public static boolean isServerSide(BlockEvent event){
+        return event.getWorld().isClientSide();
     }
 
     public static boolean isServerSide(Entity entity){
