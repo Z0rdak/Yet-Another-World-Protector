@@ -45,40 +45,33 @@ public class WorldFlagHandler {
      */
     @SubscribeEvent
     public static void onLightningStrikeOccur(EntityStruckByLightningEvent event){
-        Entity poorBastard = event.getEntity();
-        if (!poorBastard.getCommandSenderWorld().isClientSide) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(poorBastard));
-            DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
+        if (isServerSide(event)) {
+            Entity poorBastard = event.getEntity();
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(poorBastard));
+                DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
+                // TODO: Implement
+                if (poorBastard instanceof PlayerEntity) {
 
-            // TODO:
-            if (poorBastard instanceof PlayerEntity) {
+                }
+                if (poorBastard instanceof PigEntity) {
 
-            }
+                }
+                if (poorBastard instanceof CreeperEntity) {
 
-            if (poorBastard instanceof PigEntity) {
+                }
+                if (poorBastard instanceof MooshroomEntity) {
+                    // Check for entity data Type == red
+                }
+                if (poorBastard instanceof VillagerEntity) {
 
-            }
+                }
+                if (poorBastard instanceof SkeletonHorseEntity) {
 
-            if (poorBastard instanceof CreeperEntity) {
-
-            }
-
-            if (poorBastard instanceof MooshroomEntity) {
-                // Check for entity data Type == red
-            }
-
-            if (poorBastard instanceof VillagerEntity) {
-
-            }
-
-            if (poorBastard instanceof SkeletonHorseEntity) {
-
-            }
-
-            if (dimRegion.containsFlag(RegionFlag.LIGHTNING_PROT)){
-                event.setCanceled(true);
-                event.getLightning().remove();
-            }
+                }
+                if (dimRegion.containsFlag(RegionFlag.LIGHTNING_PROT)){
+                    event.setCanceled(true);
+                    event.getLightning().remove();
+                }
         }
     }
 
@@ -108,30 +101,32 @@ public class WorldFlagHandler {
     // TODO: FROM and TO dim
     @SubscribeEvent
     public static void onUsePortal(EntityTravelToDimensionEvent event) {
-        Entity entity = event.getEntity();
-        RegistryKey<World> dim = getEntityDim(entity);
-        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
-        DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-        boolean prohibitsPortalUsage = dimRegion.containsFlag(RegionFlag.USE_PORTAL);
-        if (prohibitsPortalUsage) {
-            event.setCanceled(true);
-        }
-        if (entity instanceof PlayerEntity) {
-            if (containsFlagAndHasNoAffiliationFor(dimCache, RegionFlag.USE_PORTAL_PLAYERS, (PlayerEntity) entity)) {
+        if (isServerSide(event.getEntity())) {
+            Entity entity = event.getEntity();
+            RegistryKey<World> dim = getEntityDim(entity);
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
+            DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
+            boolean prohibitsPortalUsage = dimRegion.containsFlag(RegionFlag.USE_PORTAL);
+            if (prohibitsPortalUsage) {
                 event.setCanceled(true);
-                MessageUtil.sendMessage((PlayerEntity) entity, "flag.msg.event.player.change_dim");
-                return;
-            } else {
-                event.setCanceled(false);
             }
-        }
-        if (dimRegion.containsFlag(RegionFlag.USE_PORTAL_ITEMS) && entity instanceof ItemEntity
-                || dimRegion.containsFlag(RegionFlag.USE_PORTAL_ANIMALS) && isAnimal(entity)
-                || dimRegion.containsFlag(RegionFlag.USE_PORTAL_MONSTERS) && isMonster(entity)
-                || dimRegion.containsFlag(RegionFlag.USE_PORTAL_VILLAGERS) && entity instanceof AbstractVillagerEntity
-                || dimRegion.containsFlag(RegionFlag.USE_PORTAL_MINECARTS) && entity instanceof AbstractMinecartEntity) {
-            event.setCanceled(true);
-            return;
+            if (entity instanceof PlayerEntity) {
+                if (containsFlagAndHasNoAffiliationFor(dimCache, RegionFlag.USE_PORTAL_PLAYERS, (PlayerEntity) entity)) {
+                    event.setCanceled(true);
+                    MessageUtil.sendMessage((PlayerEntity) entity, "flag.msg.event.player.change_dim");
+                    return;
+                } else {
+                    event.setCanceled(false);
+                }
+            }
+            if (dimRegion.containsFlag(RegionFlag.USE_PORTAL_ITEMS) && entity instanceof ItemEntity
+                    || dimRegion.containsFlag(RegionFlag.USE_PORTAL_ANIMALS) && isAnimal(entity)
+                    || dimRegion.containsFlag(RegionFlag.USE_PORTAL_MONSTERS) && isMonster(entity)
+                    || dimRegion.containsFlag(RegionFlag.USE_PORTAL_VILLAGERS) && entity instanceof AbstractVillagerEntity
+                    || dimRegion.containsFlag(RegionFlag.USE_PORTAL_MINECARTS) && entity instanceof AbstractMinecartEntity) {
+                event.setCanceled(true);
+                return;
+            }
         }
     }
 }

@@ -17,14 +17,13 @@ import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.getEntityDim;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.isMonster;
+import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
 
 public class GrievingFlagHandler {
 
     @SubscribeEvent
     public static void onFarmLandTrampled(BlockEvent.FarmlandTrampleEvent event) {
-        if (!event.getWorld().isClientSide()) {
+        if (isServerSide(event.getEntity())) {
             Entity trampler = event.getEntity();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(trampler));
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
@@ -52,7 +51,7 @@ public class GrievingFlagHandler {
 
     @SubscribeEvent
     public static void onEntityDestroyBlock(LivingDestroyBlockEvent event){
-        if (!event.getEntityLiving().level.isClientSide) {
+        if (isServerSide(event)) {
             LivingEntity destroyer = event.getEntityLiving();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(destroyer));
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
@@ -78,8 +77,8 @@ public class GrievingFlagHandler {
      */
     @SubscribeEvent
     public static void onEntityDropLoot(LivingDropsEvent event){
-        LivingEntity lootEntity = event.getEntityLiving();
-        if (!lootEntity.level.isClientSide()) {
+        if (isServerSide(event)) {
+            LivingEntity lootEntity = event.getEntityLiving();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(lootEntity));
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
             if (dimRegion.containsFlag(RegionFlag.LOOT_DROP)) {
@@ -91,7 +90,7 @@ public class GrievingFlagHandler {
 
     @SubscribeEvent
     public static void onEntityXpDrop(LivingExperienceDropEvent event){
-        if (!event.getEntityLiving().level.isClientSide()) {
+        if (isServerSide(event)) {
             PlayerEntity player = event.getAttackingPlayer();
             Entity entity = event.getEntity();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
