@@ -85,7 +85,9 @@ public class WorldFlagHandler {
     public static void onNetherPortalSpawn(BlockEvent.PortalSpawnEvent event) {
         World world = (World) event.getWorld();
         if (!world.isClientSide) {
-            if (RegionDataManager.get().prohibitsFlag(world.dimension(), RegionFlag.SPAWN_PORTAL.flag)){
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.dimension());
+            DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
+            if (dimRegion.containsFlag(RegionFlag.SPAWN_PORTAL)){
                 event.setCanceled(true);
             }
         }
