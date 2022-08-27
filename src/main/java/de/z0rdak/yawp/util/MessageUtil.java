@@ -86,6 +86,10 @@ public class MessageUtil {
         player.sendMessage(new TranslationTextComponent(translationKey), player.getUUID());
     }
 
+    public static void sendStatusMessage(PlayerEntity player, TranslationTextComponent text) {
+        player.displayClientMessage(text, true);
+    }
+
     private static String format(double value) {
         return String.format("%.2f", value);
     }
@@ -329,4 +333,5 @@ public class MessageUtil {
         });
         return playerList;
     }
+
 }
