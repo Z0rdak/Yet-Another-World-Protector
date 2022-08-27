@@ -26,12 +26,19 @@ import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 
 @Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER, bus = FORGE)
 public class CommandInterceptor {
 
-    // TODO: Check permissions different for commands
+    /**
+     * Handler for managing different command permissions.
+     * Sketchy as hell. If CLI format changes, this breaks easily.
+     * @param event
+     */
     @SubscribeEvent
     public static void handleModCommandPermission(CommandEvent event) {
         CommandContextBuilder<CommandSource> cmdContext = event.getParseResults().getContext();
@@ -41,6 +48,10 @@ public class CommandInterceptor {
             if (baseCmd.equals(CommandPermissionConfig.BASE_CMD)) {
                 YetAnotherWorldProtector.LOGGER.info("Executed command: '" + event.getParseResults().getReader().getString() + "' by '" + src.getTextName() + "'.");
                 if (cmdContext.getArguments().containsKey(CommandConstants.DIMENSION.toString())) {
+                    List<String> nodeNames = cmdContext.getNodes().stream().map(node -> node.getNode().getName()).collect(Collectors.toList());
+                    if (nodeNames.contains(CommandConstants.INFO.toString()) || nodeNames.contains(CommandConstants.LIST.toString())) {
+                        return;
+                    }
                     ParsedArgument<CommandSource, ?> dimParsedArgument = cmdContext.getArguments().get(CommandConstants.DIMENSION.toString());
                     if (dimParsedArgument.getResult() instanceof ResourceLocation) {
                         ResourceLocation dimResLoc = ((ResourceLocation) dimParsedArgument.getResult());
@@ -62,7 +73,7 @@ public class CommandInterceptor {
                             }
                         } else {
                             if (!CommandPermissionConfig.hasPermission(src)) {
-                                YetAnotherWorldProtector.LOGGER.info("Command block not allowed to manage dim");
+                                YetAnotherWorldProtector.LOGGER.info("' " + src.getTextName() + "' is not allowed to manage dim");
                                 event.setCanceled(true);
                                 MessageUtil.sendCmdFeedback(src, new StringTextComponent("You are not allowed to manage this dimensional region!"));
                             }
