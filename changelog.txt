@@ -1,7 +1,7 @@
 # 0.0.1.0-beta1 - First beta release
-This is the first beta release of this mod. Please be so kind and report any bugs you encounter on the github issue page: https://github.com/Z0rdak/RegionShield/issues.
-If you have suggestions feel free to post them, too.
-* Add online wiki as a guide on how to use to mod: https://github.com/Z0rdak/Yet-Another-World-Protector/wiki
+This is the first beta release of this mod. Please be so kind and report any bugs you encounter on the GitHub issue page: https://github.com/Z0rdak/Yet-Another-World-Protector/issues.
+If you have suggestions, feel free to post them, too.
+* Add online wiki as a guide on how to use the mod: https://github.com/Z0rdak/Yet-Another-World-Protector/wiki
 * Add dimensional regions
 * Add configuration for default region flags, CLI permission,
-* Add the following flags: break_blocks, place_blocks
+* Add many flags to protect your server (visit the wiki for more info)
