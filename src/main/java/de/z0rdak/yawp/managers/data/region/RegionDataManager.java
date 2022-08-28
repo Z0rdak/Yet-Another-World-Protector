@@ -1,7 +1,9 @@
 package de.z0rdak.yawp.managers.data.region;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.flag.IFlag;
+import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.AbstractMarkableRegion;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
@@ -113,6 +115,10 @@ public class RegionDataManager extends WorldSavedData {
             }
             if (!dimCacheMap.containsKey(event.getTo())) {
                 DimensionRegionCache cache = new DimensionRegionCache(event.getTo());
+                RegionConfig.getDefaultFlags()
+                        .stream() // get is fine here, because the config is validated beforehand
+                        .map(flag -> RegionFlag.fromString(flag).get().flag)
+                        .forEach(cache::addFlag);
                 RegionDataManager.dimCacheMap.put(event.getTo(), cache);
                 RegionDataManager.get().getDimensionDataNames().add(cache.getDimensionalRegion().getName());
                 YetAnotherWorldProtector.LOGGER.info("Player traveling to dimension without region data. Init region data for dimension '" + event.getTo().location() + "'..");
@@ -131,6 +137,10 @@ public class RegionDataManager extends WorldSavedData {
             }
             if (!dimCacheMap.containsKey(dim)) {
                 DimensionRegionCache cache = new DimensionRegionCache(dim);
+                RegionConfig.getDefaultFlags()
+                        .stream() // get is fine here, because the config is validated beforehand
+                        .map(flag -> RegionFlag.fromString(flag).get().flag)
+                        .forEach(cache::addFlag);
                 RegionDataManager.dimCacheMap.put(cache.getDimensionalRegion().getDimensionKey(), cache);
                 RegionDataManager.get().getDimensionDataNames().add(dimCacheMap.get(dim).getDimensionalRegion().getName());
                 save();
@@ -178,21 +188,28 @@ public class RegionDataManager extends WorldSavedData {
 
     }
 
+    @Nullable
     public DimensionRegionCache cacheFor(RegistryKey<World> dim) {
-        if (!dimCacheMap.containsKey(dim)){
-            dimCacheMap.put(dim, new DimensionRegionCache(dim));
-        }
         return dimCacheMap.get(dim);
     }
 
-    // TODO: remove or make private method to avoid not marking changes as dirty
-    // OR: implement observable data structures to automatically mark changes as dirty
-    public DimensionalRegion dimFor(RegistryKey<World> dim) {
-        return cacheFor(dim).getDimensionalRegion();
+    public List<IFlag> getFlagsForDim(RegistryKey<World> dim){
+        DimensionRegionCache dimCache = cacheFor(dim);
+        if (dimCache != null) {
+            return new ArrayList<>(dimCache.getDimensionalRegion().getFlags());
+        }
+        return new ArrayList<>();
     }
 
-    public List<IFlag> getFlagsForDim(RegistryKey<World> dim){
-        return new ArrayList<>(cacheFor(dim).getDimensionalRegion().getFlags());
+    public List<String> getFlagsIdsForDim(RegistryKey<World> dim){
+        DimensionRegionCache dimCache = cacheFor(dim);
+        if (dimCache != null) {
+            return dimCache.getDimensionalRegion().getFlags()
+                    .stream()
+                    .map(IFlag::getFlagName)
+                    .collect(Collectors.toList());
+        }
+        return new ArrayList<>();
     }
 
     /* hash for checking manipulated world data?*/
