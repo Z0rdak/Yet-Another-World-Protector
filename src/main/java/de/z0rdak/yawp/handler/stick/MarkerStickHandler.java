@@ -4,6 +4,7 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.region.AbstractMarkableRegion;
 import de.z0rdak.yawp.core.stick.MarkerStick;
+import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.RegionUtil;
 import de.z0rdak.yawp.util.StickType;
@@ -15,6 +16,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.event.entity.player.AnvilRepairEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 
+import static de.z0rdak.yawp.util.MessageUtil.sendMessage;
 import static de.z0rdak.yawp.util.StickUtil.*;
 
 public class MarkerStickHandler {
@@ -55,11 +57,16 @@ public class MarkerStickHandler {
             if (marker.isValidArea()) {
                 AbstractMarkableRegion region = RegionUtil.regionFrom(player, marker, regionName);
                 if (region != null) {
-                    RegionDataManager.get().cacheFor(player.getCommandSenderWorld().dimension())
-                            .addRegion(region);
-                    marker.reset();
-                    outputItem.getTag().put(STICK, marker.serializeNBT());
-                    setStickName(outputItem, type);
+                    DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.getCommandSenderWorld().dimension());
+                    if (dimCache != null){
+                        dimCache.addRegion(region);
+                        marker.reset();
+                        outputItem.getTag().put(STICK, marker.serializeNBT());
+                        setStickName(outputItem, type);
+                        // TODO: Reset marker on dimChange?
+                    } else {
+                        sendMessage(player, new TranslationTextComponent("Player dimension not matching marker data"));
+                    }
                 } else {
                     player.sendMessage(new TranslationTextComponent("Invalid region type"), player.getUUID());
                 }
