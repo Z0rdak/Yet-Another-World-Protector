@@ -320,7 +320,7 @@ public class MessageUtil {
     public static IFormattableTextComponent buildPlayerList(DimensionalRegion dimCache, CommandConstants memberOrOwner) {
         Set<String> playerNames = getAssociateList(dimCache, memberOrOwner, PLAYER);
         IFormattableTextComponent playerList = new StringTextComponent("Players: ");
-        String playerLangKeyPart = memberOrOwner == CommandConstants.OWNER ? "owner" : "member";
+        String playerLangKeyPart = memberOrOwner == CommandConstants.OWNER ? "owners" : "members";
         if (playerNames.isEmpty()) {
             return playerList.append(new TranslationTextComponent("cli.msg.dim.info." + playerLangKeyPart + ".players.empty", dimCache.getDimensionKey().location()));
         }
