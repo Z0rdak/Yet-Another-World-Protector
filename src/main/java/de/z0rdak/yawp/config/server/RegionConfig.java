@@ -3,9 +3,8 @@ package de.z0rdak.yawp.config.server;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import net.minecraftforge.common.ForgeConfigSpec;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class RegionConfig {
 
@@ -35,6 +34,12 @@ public class RegionConfig {
         */
         BUILDER.pop();
         CONFIG_SPEC = BUILDER.build();
+    }
+
+    public static Set<String> getDefaultFlags(){
+        return  RegionConfig.REGION_DEFAULT_FLAGS.get().stream()
+                .filter(Objects::nonNull)
+                .map(String::toString).collect(Collectors.toSet());
     }
 
     private static boolean isValidFlag(Object flag) {
