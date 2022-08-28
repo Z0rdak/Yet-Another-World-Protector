@@ -273,7 +273,7 @@ public class MessageUtil {
 
     public static IFormattableTextComponent buildTeamList(DimensionalRegion dimCache, CommandConstants memberOrOwner) {
         Set<String> teamNames = getAssociateList(dimCache, memberOrOwner, TEAM);
-        String playerLangKeyPart = memberOrOwner == CommandConstants.OWNER ? "owner" : "member";
+        String playerLangKeyPart = memberOrOwner == CommandConstants.OWNER ? "owners" : "members";
         IFormattableTextComponent teamList = new StringTextComponent("Teams: ");
         if (teamNames.isEmpty()) {
             teamList.append(new TranslationTextComponent("cli.msg.dim.info." + playerLangKeyPart + ".teams.empty", dimCache.getDimensionKey().location()));
