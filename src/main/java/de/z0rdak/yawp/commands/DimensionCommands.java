@@ -88,7 +88,7 @@ public class DimensionCommands {
                                                         .executes(ctx -> removeTeam(ctx.getSource(), getTeamArgument(ctx), getDimensionArgument(ctx), getAssociateArgument(ctx))))))
                                 .then(literal(CommandConstants.FLAG)
                                         .then(Commands.argument(CommandConstants.FLAG.toString(), StringArgumentType.string())
-                                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(RegionDataManager.get().cacheFor(getDimensionArgument(ctx)).getDimFlags(), builder))
+                                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(RegionDataManager.get().getFlagsIdsForDim(getDimensionArgument(ctx)), builder))
                                                 .executes(ctx -> removeFlag(ctx.getSource(), CommandUtil.getDimensionArgument(ctx), StringArgumentType.getString(ctx, CommandConstants.FLAG.toString()))))))
 
                         .then(literal(CommandConstants.ADD)
@@ -119,7 +119,11 @@ public class DimensionCommands {
     }
 
     private static int removeFlag(CommandSource src, RegistryKey<World> dim, String flag) {
-        RegionDataManager.get().cacheFor(dim).removeFlag(flag);
+        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
+        if (dimCache != null) {
+            dimCache.removeFlag(flag);
+        }
+
         sendCmdFeedback(src, new TranslationTextComponent("cli.msg.flags.removed", flag, dim.location().toString()));
         return 0;
     }
@@ -127,54 +131,72 @@ public class DimensionCommands {
     private static int addFlag(CommandSource src, RegistryKey<World> dim, String flag) {
         // TODO: For now this works because we only have condition flags and no black/whitelist feature
         IFlag iflag = new ConditionFlag(flag, false);
-        RegionDataManager.get().cacheFor(dim).addFlag(iflag);
+        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
+        if (dimCache != null) {
+            dimCache.addFlag(iflag);
+        }
         sendCmdFeedback(src, new TranslationTextComponent("cli.msg.flags.added", flag, dim.location().toString()));
         return 0;
     }
 
     private static int removePlayer(CommandSource src, ServerPlayerEntity player, RegistryKey<World> dim, String affiliationType) {
-        if (affiliationType.equals(CommandConstants.MEMBER.toString())) {
-            RegionDataManager.get().cacheFor(dim).removeMember(player);
+        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
+        if (dimCache != null) {
+            if (affiliationType.equals(CommandConstants.MEMBER.toString())) {
+                dimCache.removeMember(player);
+            }
+            if (affiliationType.equals(CommandConstants.OWNER.toString())) {
+                dimCache.removeOwner(player);
+            }
+            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.player.removed", affiliationType, player.getScoreboardName(), dim.location().toString()));
         }
-        if (affiliationType.equals(CommandConstants.OWNER.toString())) {
-            RegionDataManager.get().cacheFor(dim).removeOwner(player);
-        }
-        sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.player.removed", affiliationType, player.getScoreboardName(), dim.location().toString()));
         return 0;
     }
 
     private static int removeTeam(CommandSource src, ScorePlayerTeam team, RegistryKey<World> dim, String affiliationType) {
-        if (affiliationType.equals(CommandConstants.MEMBER.toString())) {
-            RegionDataManager.get().cacheFor(dim).removeMember(team);
+        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
+        if (dimCache != null) {
+            if (affiliationType.equals(CommandConstants.MEMBER.toString())) {
+                dimCache.removeMember(team);
+            }
+            if (affiliationType.equals(CommandConstants.OWNER.toString())) {
+                dimCache.removeOwner(team);
+            }
+            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.player.removed", affiliationType, team.getName(), dim.location().toString()));
+            return 0;
         }
-        if (affiliationType.equals(CommandConstants.OWNER.toString())) {
-            RegionDataManager.get().cacheFor(dim).removeOwner(team);
-        }
-        sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.player.removed", affiliationType, team.getName(), dim.location().toString()));
-        return 0;
+        return 1;
     }
 
     // TODO: If works replace with switch and catch error
     private static int addPlayer(CommandSource src, ServerPlayerEntity player, RegistryKey<World> dim, String affiliationType) {
-        if (affiliationType.equals(CommandConstants.MEMBER.toString())) {
-            RegionDataManager.get().cacheFor(dim).addMember(player);
+        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
+        if (dimCache != null) {
+            if (affiliationType.equals(CommandConstants.MEMBER.toString())) {
+                dimCache.addMember(player);
+            }
+            if (affiliationType.equals(CommandConstants.OWNER.toString())) {
+                dimCache.addOwner(player);
+            }
+            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.player.added", player.getScoreboardName(), dim.location().toString(), affiliationType));
+            return 0;
         }
-        if (affiliationType.equals(CommandConstants.OWNER.toString())) {
-            RegionDataManager.get().cacheFor(dim).addOwner(player);
-        }
-        sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.player.added", player.getScoreboardName(), dim.location().toString(), affiliationType));
-        return 0;
+        return 1;
     }
 
     private static int addTeam(CommandSource src, ScorePlayerTeam team, RegistryKey<World> dim, String affiliationType) {
-        if (affiliationType.equals(CommandConstants.MEMBER.toString())) {
-            RegionDataManager.get().cacheFor(dim).addMember(team);
+        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
+        if (dimCache != null) {
+            if (affiliationType.equals(CommandConstants.MEMBER.toString())) {
+                dimCache.addMember(team);
+            }
+            if (affiliationType.equals(CommandConstants.OWNER.toString())) {
+                dimCache.addOwner(team);
+            }
+            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.team.added", team.getName(), dim.location().toString(), affiliationType));
+            return 0;
         }
-        if (affiliationType.equals(CommandConstants.OWNER.toString())) {
-            RegionDataManager.get().cacheFor(dim).addOwner(team);
-        }
-        sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.team.added", team.getName(), dim.location().toString(), affiliationType));
-        return 0;
+        return 1;
     }
 
 
@@ -202,20 +224,29 @@ public class DimensionCommands {
     }
 
     private static int promptDimensionPlayerList(CommandSource src, RegistryKey<World> dim, CommandConstants memberOrOwner) {
-        DimensionalRegion dimRegion = RegionDataManager.get().dimFor(dim);
-        String playerLangKeyPart = memberOrOwner == CommandConstants.OWNER ? "owner" : "member";
-        String affiliationText = playerLangKeyPart.substring(0, 1).toUpperCase() + playerLangKeyPart.substring(1) + "s";
-        sendCmdFeedback(src, new TranslationTextComponent(TextFormatting.BOLD + "== " + affiliationText + " in dimension '" + dim.location() + "' ==="));
-        sendCmdFeedback(src, buildTeamList(dimRegion, memberOrOwner));
-        sendCmdFeedback(src, buildPlayerList(dimRegion, memberOrOwner));
-        return 0;
+        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
+        if (dimCache != null) {
+            DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
+            String playerLangKeyPart = memberOrOwner == CommandConstants.OWNER ? "owner" : "member";
+            String affiliationText = playerLangKeyPart.substring(0, 1).toUpperCase() + playerLangKeyPart.substring(1) + "s";
+            sendCmdFeedback(src, new TranslationTextComponent(TextFormatting.BOLD + "== " + affiliationText + " in dimension '" + dim.location() + "' ==="));
+            sendCmdFeedback(src, buildTeamList(dimRegion, memberOrOwner));
+            sendCmdFeedback(src, buildPlayerList(dimRegion, memberOrOwner));
+            return 0;
+        }
+        return 1;
     }
 
     private static int setActiveState(CommandSource src, RegistryKey<World> dim, boolean activate) {
-        RegionDataManager.get().cacheFor(dim).setDimState(activate);
-        String langKey = "cli.msg.info.state." + (activate ? "activated" : "deactivated");
-        sendCmdFeedback(src, new TranslationTextComponent(langKey, dim.location().toString()));
-        return 0;
+        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
+        if (dimCache != null) {
+            dimCache.setDimState(activate);
+
+            String langKey = "cli.msg.info.state." + (activate ? "activated" : "deactivated");
+            sendCmdFeedback(src, new TranslationTextComponent(langKey, dim.location().toString()));
+            return 0;
+        }
+        return 1;
     }
 
     // TODO: Rework help to be more interactive (each command clickable
@@ -234,22 +265,26 @@ public class DimensionCommands {
 
     // TODO: Check and extract to own method -> dimInfo uses this, too
     private static int promptDimensionRegionList(CommandSource source, RegistryKey<World> dim) {
-        List<IMarkableRegion> regionsForDim = RegionDataManager.get().cacheFor(dim).regionsInDimension
-                .values()
-                .stream()
-                .sorted(Comparator.comparing(IMarkableRegion::getName))
-                .collect(Collectors.toList());
-        if (regionsForDim.isEmpty()) {
-            sendCmdFeedback(source, new TranslationTextComponent("cli.msg.dim.info.regions.empty", dim.location().toString()));
-            return -1;
+        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
+        if (dimCache != null) {
+            List<IMarkableRegion> regionsForDim = dimCache.regionsInDimension
+                    .values()
+                    .stream()
+                    .sorted(Comparator.comparing(IMarkableRegion::getName))
+                    .collect(Collectors.toList());
+            if (regionsForDim.isEmpty()) {
+                sendCmdFeedback(source, new TranslationTextComponent("cli.msg.dim.info.regions.empty", dim.location().toString()));
+                return -1;
+            }
+            sendCmdFeedback(source, new TranslationTextComponent(TextFormatting.BOLD + "== Regions in dimension '" + dim.location() + "' ==="));
+            regionsForDim.forEach(region -> {
+                sendCmdFeedback(source, new StringTextComponent(" - ")
+                        .append(buildDimSuggestRegionRemovalLink(dim, region.getName())
+                                .append(buildDimensionRegionInfoLink(dim, region))));
+            });
+            return 0;
         }
-        sendCmdFeedback(source, new TranslationTextComponent(TextFormatting.BOLD + "== Regions in dimension '" + dim.location() + "' ==="));
-        regionsForDim.forEach(region -> {
-            sendCmdFeedback(source, new StringTextComponent(" - ")
-                    .append(buildDimSuggestRegionRemovalLink(dim, region.getName())
-                            .append(buildDimensionRegionInfoLink(dim, region))));
-        });
-        return 0;
+        return 1;
     }
 
     /* Used for dimension info */
