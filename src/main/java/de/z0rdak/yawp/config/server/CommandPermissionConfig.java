@@ -87,9 +87,9 @@ public class CommandPermissionConfig {
 
     public static boolean hasPermission(CommandSource source) {
         try {
-            PlayerEntity player = source.getPlayerOrException();
-            return hasPermission(player);
+            return hasPlayerPermission(source.getPlayerOrException());
         } catch (CommandSyntaxException e) {
+            // FIXME: How to identify server console
             boolean isServerConsole = source.getTextName().equals("Server");
             if (isServerConsole) {
                 return true;
@@ -99,8 +99,9 @@ public class CommandPermissionConfig {
         }
     }
 
-    public static boolean hasPermission(PlayerEntity player) {
-        return hasUUIDConfigEntry(player) || hasNeededOpLevel(player) || player.hasPermissions(REQUIRED_OP_LEVEL.get());
+    public static boolean hasPlayerPermission(PlayerEntity player) {
+        return hasUUIDConfigEntry(player) || hasNeededOpLevel(player) ||
+                player.hasPermissions(REQUIRED_OP_LEVEL.get());
     }
 
     public static boolean hasUUIDConfigEntry(PlayerEntity player) {
