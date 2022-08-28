@@ -35,10 +35,6 @@ public final class HandlerUtil {
         return entity.getCommandSenderWorld().dimension();
     }
 
-    public static DimensionalRegion getResponsibleDimRegion(Entity entity){
-        return RegionDataManager.get().cacheFor(entity.getCommandSenderWorld().dimension()).getDimensionalRegion();
-    }
-
     public static boolean isAnimal(Entity entity){
         return entity instanceof AnimalEntity || entity instanceof WaterMobEntity;
     }
