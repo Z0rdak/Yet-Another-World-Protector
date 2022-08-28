@@ -151,14 +151,13 @@ public abstract class AbstractRegion implements IProtectedRegion {
      * @param player to be checked
      * @return true if player is in region list or is an operator, false otherwise
      */
-    // TODO: check
-    // TODO: Differentiate between owner and member permission
     @Override
     public boolean permits(PlayerEntity player) {
-        if (this.owners.containsPlayer(player.getUUID()) || this.owners.containsTeam(player.getTeam().getName())) {
-            return true;
-        }
-        return members.containsPlayer(player.getUUID());
+        boolean isOwner = this.owners.containsPlayer(player.getUUID())
+                || (player.getTeam() != null && this.owners.containsTeam(player.getTeam().getName()));
+        boolean isMember = this.members.containsPlayer(player.getUUID())
+                || (player.getTeam() != null && this.members.containsTeam(player.getTeam().getName()));
+        return isOwner || isMember;
     }
 
     @Override
