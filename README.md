@@ -23,10 +23,11 @@ This mod is released under the GNU LESSER GENERAL PUBLIC LICENSE Version 3.
 
 # Links
 
-* [Yet Another World Protector - Discord](https://discord.gg/X3mjQwTMBV)
+* [Yet Another World Protector - Discord]( https://discord.gg/u7d7xskp)
 * [Yet Another World Protector - Github](https://github.com/Z0rdak/Yet-Another-World-Protector)
-* [Yet Another World Protector - Curseforge](https://www.curseforge.com/minecraft/mc-mods/yet-another-world-protector)
+* [Yet Another World Protector - Curseforge](https://www.curseforge.com/minecraft/mc-mods/yawp)
+* [Yet Another World Protector - Modrinth](https://modrinth.com/mod/yawp)
 
 # Development roadmap
 
-See Wiki
+See [Wiki](https://github.com/Z0rdak/Yet-Another-World-Protector/wiki)
