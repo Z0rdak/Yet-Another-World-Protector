@@ -90,6 +90,10 @@ public class MessageUtil {
         player.displayClientMessage(text, true);
     }
 
+    public static void sendStatusMessage(PlayerEntity player, String langKey) {
+        player.displayClientMessage(new TranslationTextComponent(langKey), true);
+    }
+
     private static String format(double value) {
         return String.format("%.2f", value);
     }
