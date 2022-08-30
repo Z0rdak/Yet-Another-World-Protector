@@ -92,6 +92,10 @@ public class MessageUtil {
         player.displayClientMessage(text, true);
     }
 
+    public static void sendStatusMessage(Player player, String langKey) {
+        player.displayClientMessage(new TranslatableComponent(langKey), true);
+    }
+
     private static String format(double value) {
         return String.format("%.2f", value);
     }

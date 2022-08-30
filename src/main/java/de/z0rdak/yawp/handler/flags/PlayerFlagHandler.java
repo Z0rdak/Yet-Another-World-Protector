@@ -80,7 +80,7 @@ public final class PlayerFlagHandler {
                     DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                     if (dimRegion.containsFlag(RegionFlag.ATTACK_PLAYERS) && !dimCache.hasMember(event.getPlayer())) {
                         event.setCanceled(true);
-                        MessageUtil.sendMessage(event.getPlayer(), "flag.msg.event.player.pvp");
+                        MessageUtil.sendStatusMessage(event.getPlayer(), "flag.msg.event.player.pvp");
                     }
 
                 }
@@ -103,25 +103,25 @@ public final class PlayerFlagHandler {
             if (!event.getTarget().getCommandSenderWorld().isClientSide) {
                 if (isAnimal(eventEntity)) {
                     if (dimRegion.containsFlag(RegionFlag.ATTACK_ANIMALS) && !dimRegion.permits(player)) {
-                        MessageUtil.sendMessage(player, new TranslatableComponent("message.event.mobs.hurt_animal"));
+                        MessageUtil.sendStatusMessage(player, new TranslatableComponent("message.event.mobs.hurt_animal"));
                         event.setCanceled(true);
                     }
                 }
                 if (isMonster(eventEntity)) {
                     if (dimRegion.containsFlag(RegionFlag.ATTACK_MONSTERS) && !dimRegion.permits(player)) {
-                        MessageUtil.sendMessage(player, new TranslatableComponent("message.event.mobs.hurt_monster"));
+                        MessageUtil.sendStatusMessage(player, new TranslatableComponent("message.event.mobs.hurt_monster"));
                         event.setCanceled(true);
                     }
                 }
                 if (event.getTarget() instanceof Villager) {
                     if (dimRegion.containsFlag(RegionFlag.ATTACK_VILLAGERS) && !dimRegion.permits(player)) {
-                        MessageUtil.sendMessage(player, new TranslatableComponent("message.event.mobs.hurt_villager"));
+                        MessageUtil.sendStatusMessage(player, new TranslatableComponent("message.event.mobs.hurt_villager"));
                         event.setCanceled(true);
                     }
                 }
                 if (event.getTarget() instanceof WanderingTrader) {
                     if (dimRegion.containsFlag(RegionFlag.ATTACK_WANDERING_TRADER) && !dimRegion.permits(player)) {
-                        MessageUtil.sendMessage(player, new TranslatableComponent("message.event.mobs.hurt_villager"));
+                        MessageUtil.sendStatusMessage(player, new TranslatableComponent("message.event.mobs.hurt_villager"));
                         event.setCanceled(true);
                     }
                 }
@@ -138,7 +138,7 @@ public final class PlayerFlagHandler {
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                 if (dimRegion.containsFlag(RegionFlag.ITEM_PICKUP) && !dimRegion.permits(event.getPlayer())) {
-                    MessageUtil.sendMessage(event.getPlayer(), "message.event.player.pickup_item");
+                    MessageUtil.sendStatusMessage(event.getPlayer(), "message.event.player.pickup_item");
                     event.setCanceled(true);
                 }
             }
@@ -154,7 +154,7 @@ public final class PlayerFlagHandler {
                 if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                     DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                     if (dimRegion.containsFlag(RegionFlag.ANIMAL_BREEDING) && !dimRegion.permits(player)) {
-                        MessageUtil.sendMessage(player, "message.event.mobs.breed_animals");
+                        MessageUtil.sendStatusMessage(player, "message.event.mobs.breed_animals");
                         event.setCanceled(true);
                         return;
                     }
@@ -184,7 +184,7 @@ public final class PlayerFlagHandler {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                 if (dimRegion.containsFlag(RegionFlag.ANIMAL_TAMING) && !dimRegion.permits(player)) {
                     event.setCanceled(true);
-                    MessageUtil.sendMessage(player, "message.event.mobs.tame_animal");
+                    MessageUtil.sendStatusMessage(player, "message.event.mobs.tame_animal");
                 }
             }
         }
@@ -198,7 +198,7 @@ public final class PlayerFlagHandler {
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                 if (dimRegion.containsFlag(RegionFlag.LEVEL_FREEZE) && !dimRegion.permits(player)) {
-                    MessageUtil.sendMessage(player, "message.event.player.level_freeze");
+                    MessageUtil.sendStatusMessage(player, "message.event.player.level_freeze");
                     event.setCanceled(true);
                 }
             }
@@ -213,7 +213,7 @@ public final class PlayerFlagHandler {
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                 if (dimRegion.containsFlag(RegionFlag.XP_FREEZE) && !dimRegion.permits(player)) {
-                    MessageUtil.sendMessage(player, "message.protection.player.xp_freeze");
+                    MessageUtil.sendStatusMessage(player, "message.protection.player.xp_freeze");
                     event.setCanceled(true);
                     event.setAmount(0);
                 }
@@ -229,7 +229,7 @@ public final class PlayerFlagHandler {
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                 if (dimRegion.containsFlag(RegionFlag.XP_PICKUP) && !dimRegion.permits(player)) {
-                    MessageUtil.sendMessage(player, "message.protection.player.xp_pickup");
+                    MessageUtil.sendStatusMessage(player, "message.protection.player.xp_pickup");
                     event.setCanceled(true);
                     event.getOrb().remove(Entity.RemovalReason.DISCARDED);
                 }
@@ -319,7 +319,7 @@ public final class PlayerFlagHandler {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                 if (dimRegion.containsFlag(RegionFlag.BREAK_BLOCKS) && !dimRegion.permits(player)) {
                     event.setCanceled(true);
-                    MessageUtil.sendMessage(player, new TranslatableComponent("message.event.protection.break_block"));
+                    MessageUtil.sendStatusMessage(player, new TranslatableComponent("message.event.protection.break_block"));
                     return;
                 }
             }
@@ -336,7 +336,7 @@ public final class PlayerFlagHandler {
                     DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                     if (dimRegion.containsFlag(RegionFlag.PLACE_BLOCKS) && !dimRegion.permits(player)) {
                         event.setCanceled(true);
-                        MessageUtil.sendMessage(player, new TranslatableComponent("message.event.protection.place_block"));
+                        MessageUtil.sendStatusMessage(player, new TranslatableComponent("message.event.protection.place_block"));
                     }
                 }
             }
@@ -379,7 +379,7 @@ public final class PlayerFlagHandler {
                     DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                     if (dimRegion.containsFlag(RegionFlag.IGNITE_EXPLOSIVES) && !dimRegion.permits(player)) {
                         event.setCanceled(true);
-                        MessageUtil.sendMessage(player, "message.event.protection.ignite_tnt");
+                        MessageUtil.sendStatusMessage(player, "message.event.protection.ignite_tnt");
                     }
                 }
             } else {
@@ -401,7 +401,7 @@ public final class PlayerFlagHandler {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                 if (dimRegion.containsFlag(RegionFlag.USE_BONEMEAL) && !dimRegion.permits(player)) {
                     event.setCanceled(true);
-                    MessageUtil.sendMessage(player, "message.event.world.use_bone_meal");
+                    MessageUtil.sendStatusMessage(player, "message.event.world.use_bone_meal");
                     return;
                 }
             }
@@ -423,7 +423,7 @@ public final class PlayerFlagHandler {
                             || dimRegion.containsFlag(RegionFlag.USE_ENDERPEARL_TO_REGION))
                             && !dimRegion.permits(player)) {
                         event.setCanceled(true);
-                        MessageUtil.sendMessage(player, "message.event.teleport.ender_pearl.from_region");
+                        MessageUtil.sendStatusMessage(player, "message.event.teleport.ender_pearl.from_region");
                     /*
                     // refund pearl - duplication danger with e.g. origins mod
                     int count = player.getHeldItem(player.getActiveHand()).getCount();
@@ -452,23 +452,23 @@ public final class PlayerFlagHandler {
                         boolean playerNotPermitted = !dimRegion.permits(player);
                         if (dimRegion.containsFlag(RegionFlag.TOOL_SECONDARY_USE) && playerNotPermitted) {
                             event.setCanceled(true);
-                            MessageUtil.sendMessage(player, "message.event.protection.tool_secondary_use");
+                            MessageUtil.sendStatusMessage(player, "message.event.protection.tool_secondary_use");
                             return;
                         }
                         if (event.getToolAction().equals(ToolActions.AXE_STRIP) && dimRegion.containsFlag(RegionFlag.AXE_STRIP) && playerNotPermitted)
                         {
                             event.setCanceled(true);
-                            MessageUtil.sendMessage(player, "message.event.protection.strip_wood");
+                            MessageUtil.sendStatusMessage(player, "message.event.protection.strip_wood");
                             return;
                         }
                         if (event.getToolAction().equals(ToolActions.HOE_TILL) && dimRegion.containsFlag(RegionFlag.HOE_TILL) && playerNotPermitted) {
                             event.setCanceled(true);
-                            MessageUtil.sendMessage(player, "message.event.protection.till_farmland");
+                            MessageUtil.sendStatusMessage(player, "message.event.protection.till_farmland");
                             return;
                         }
                         if (event.getToolAction().equals(ToolActions.SHOVEL_FLATTEN) && dimRegion.containsFlag(RegionFlag.SHOVEL_PATH) && playerNotPermitted) {
                             event.setCanceled(true);
-                            MessageUtil.sendMessage(player, "message.event.protection.shovel_path");
+                            MessageUtil.sendStatusMessage(player, "message.event.protection.shovel_path");
                             return;
                         }
                     }
@@ -517,7 +517,7 @@ public final class PlayerFlagHandler {
                     if (dimRegion.containsFlag(RegionFlag.USE) && isPlayerProhibited && isUsableBlock) {
                         if (player.isShiftKeyDown() && playerHasNoBlocksToPlaceInHands || !player.isShiftKeyDown()) {
                             event.setCanceled(true);
-                            MessageUtil.sendMessage(player, "message.event.interact.use");
+                            MessageUtil.sendStatusMessage(player, "message.event.interact.use");
                             return;
                         }
                     }
@@ -526,7 +526,7 @@ public final class PlayerFlagHandler {
                 if (dimRegion.containsFlag(RegionFlag.ENDER_CHEST_ACCESS) && isEnderChest && isPlayerProhibited) {
                     if (player.isShiftKeyDown() && playerHasNoBlocksToPlaceInHands || !player.isShiftKeyDown()) {
                         event.setCanceled(true);
-                        MessageUtil.sendMessage(player, "message.event.interact.access_ender_chest");
+                        MessageUtil.sendStatusMessage(player, "message.event.interact.access_ender_chest");
                         return;
                     }
                 }
@@ -534,7 +534,7 @@ public final class PlayerFlagHandler {
                 if (dimRegion.containsFlag(RegionFlag.CONTAINER_ACCESS) && isContainer && isPlayerProhibited) {
                     if (player.isShiftKeyDown() && playerHasNoBlocksToPlaceInHands || !player.isShiftKeyDown()) {
                         event.setCanceled(true);
-                        MessageUtil.sendMessage(player, "message.event.interact.access_container");
+                        MessageUtil.sendStatusMessage(player, "message.event.interact.access_container");
                         return;
                     }
                 }
@@ -555,7 +555,7 @@ public final class PlayerFlagHandler {
 
                 if (containsChestAccess && !playerHasPermission && isMinecartContainer) {
                     event.setCanceled(true);
-                    MessageUtil.sendMessage(player, "message.event.interact.access_container");
+                    MessageUtil.sendStatusMessage(player, "message.event.interact.access_container");
                     return;
                 }
             }
@@ -578,7 +578,7 @@ public final class PlayerFlagHandler {
                         List<Player> players = ((Level) event.getWorld()).getEntities(EntityType.PLAYER, areaAbovePressurePlate, (player) -> true);
                         for (Player player : players) {
                             cancelEvent = cancelEvent || !dimRegion.permits(player);
-                            MessageUtil.sendMessage(player, "message.event.interact.use");
+                            MessageUtil.sendStatusMessage(player, "message.event.interact.use");
                             event.setCanceled(cancelEvent);
                         }
                     }
@@ -606,7 +606,7 @@ public final class PlayerFlagHandler {
                     // placing fluid
                     if (bucketItemMaxStackCount == 1) {
                         if (dimRegion.containsFlag(RegionFlag.PLACE_FLUIDS) && !dimRegion.permits(player)) {
-                            MessageUtil.sendMessage(player, new TranslatableComponent("message.event.protection.place_fluid"));
+                            MessageUtil.sendStatusMessage(player, new TranslatableComponent("message.event.protection.place_fluid"));
                             event.setCanceled(true);
                             return;
                         }
@@ -632,7 +632,7 @@ public final class PlayerFlagHandler {
                             }
                             if (isWaterlogged || isFluid) {
                                 if (dimRegion.containsFlag(RegionFlag.SCOOP_FLUIDS) && !dimRegion.permits(player)) {
-                                    MessageUtil.sendMessage(player, new TranslatableComponent("message.event.protection.scoop_fluid"));
+                                    MessageUtil.sendStatusMessage(player, new TranslatableComponent("message.event.protection.scoop_fluid"));
                                     event.setCanceled(true);
                                     return;
                                 }
@@ -659,7 +659,7 @@ public final class PlayerFlagHandler {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                 if (dimRegion.containsFlag(RegionFlag.SEND_MESSAGE) && !dimRegion.permits(player)) {
                     event.setCanceled(true);
-                    MessageUtil.sendMessage(player, new TranslatableComponent("message.event.player.speak"));
+                    MessageUtil.sendStatusMessage(player, new TranslatableComponent("message.event.player.speak"));
                 }
             }
         }
@@ -675,7 +675,7 @@ public final class PlayerFlagHandler {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                 if (dimRegion.containsFlag(RegionFlag.EXECUTE_COMMAND) && !dimRegion.permits(player)) {
                     event.setCanceled(true);
-                    MessageUtil.sendMessage(player, "message.event.player.execute-commands");
+                    MessageUtil.sendStatusMessage(player, "message.event.player.execute-commands");
                     return;
                 }
             }
@@ -695,7 +695,7 @@ public final class PlayerFlagHandler {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                 Player player = event.getPlayer();
                 if (dimRegion.containsFlag(RegionFlag.SLEEP) && !dimRegion.permits(player)) {
-                    MessageUtil.sendMessage(player, "message.event.player.sleep");
+                    MessageUtil.sendStatusMessage(player, "message.event.player.sleep");
                     event.setResult(Event.Result.DENY);
                     return;
                 }
@@ -715,7 +715,7 @@ public final class PlayerFlagHandler {
                     // attempt to set spawn
                     if (dimRegion.containsFlag(RegionFlag.SET_SPAWN) && !dimRegion.permits(player)) {
                         event.setCanceled(true);
-                        MessageUtil.sendMessage(player, "message.event.player.set_spawn");
+                        MessageUtil.sendStatusMessage(player, "message.event.player.set_spawn");
                         return;
                     }
                 }
@@ -755,7 +755,7 @@ public final class PlayerFlagHandler {
                 if (dimRegion.containsFlag(RegionFlag.ITEM_DROP) && !dimRegion.permits(player)) {
                     event.setCanceled(true);
                     player.getInventory().add(event.getEntityItem().getItem());
-                    MessageUtil.sendMessage(player, "message.event.player.drop_item");
+                    MessageUtil.sendStatusMessage(player, "message.event.player.drop_item");
                     return;
                 }
             }
@@ -780,11 +780,11 @@ public final class PlayerFlagHandler {
                     Player player = (Player) event.getEntityMounting();
                     if (event.isDismounting() && dimRegion.containsFlag(RegionFlag.ANIMAL_UNMOUNTING) && !dimRegion.permits(player)) {
                         event.setCanceled(true); // Does not correctly unmount player
-                        MessageUtil.sendMessage(player, "message.event.player.unmount");
+                        MessageUtil.sendStatusMessage(player, "message.event.player.unmount");
                     }
                     if (event.isMounting() && dimRegion.containsFlag(RegionFlag.ANIMAL_MOUNTING) && !dimRegion.permits(player)) {
                         event.setCanceled(true);
-                        MessageUtil.sendMessage(player, "message.event.player.mount");
+                        MessageUtil.sendStatusMessage(player, "message.event.player.mount");
                     }
                 }
             }
