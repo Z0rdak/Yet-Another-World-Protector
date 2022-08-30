@@ -6,9 +6,9 @@ import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.util.constants.RegionNBT;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.scoreboard.Team;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.scores.Team;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -41,7 +41,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
      * @param name name of the region
      * @param owner region owner
      */
-    protected AbstractRegion(String name, PlayerEntity owner) {
+    protected AbstractRegion(String name, Player owner) {
         this(name);
         this.owners.addPlayer(owner);
     }
@@ -90,7 +90,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
     }
 
     @Override
-    public void addMember(PlayerEntity player) {
+    public void addMember(Player player) {
         this.members.addPlayer(player);
     }
 
@@ -101,7 +101,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
 
 
     @Override
-    public void addOwner(PlayerEntity player) {
+    public void addOwner(Player player) {
         this.owners.addPlayer(player);
     }
 
@@ -111,7 +111,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
     }
 
     @Override
-    public void removeMember(PlayerEntity player) {
+    public void removeMember(Player player) {
         this.members.removePlayer(player);
 
     }
@@ -123,7 +123,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
     }
 
     @Override
-    public void removeOwner(PlayerEntity player) {
+    public void removeOwner(Player player) {
         this.owners.removePlayer(player);
     }
 
@@ -152,7 +152,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
      * @return true if player is in region list or is an operator, false otherwise
      */
     @Override
-    public boolean permits(PlayerEntity player) {
+    public boolean permits(Player player) {
         boolean isOwner = this.owners.containsPlayer(player.getUUID())
                 || (player.getTeam() != null && this.owners.containsTeam(player.getTeam().getName()));
         boolean isMember = this.members.containsPlayer(player.getUUID())
@@ -161,8 +161,8 @@ public abstract class AbstractRegion implements IProtectedRegion {
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT nbt = new CompoundNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = new CompoundTag();
         nbt.putString(RegionNBT.NAME, this.name);
         nbt.putBoolean(RegionNBT.ACTIVE, this.isActive);
         nbt.put(RegionNBT.FLAGS, this.flags.serializeNBT());
@@ -172,7 +172,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         this.name = nbt.getString(RegionNBT.NAME);
         this.isActive = nbt.getBoolean(RegionNBT.ACTIVE);
         this.flags = new FlagContainer(nbt.getCompound(RegionNBT.FLAGS));

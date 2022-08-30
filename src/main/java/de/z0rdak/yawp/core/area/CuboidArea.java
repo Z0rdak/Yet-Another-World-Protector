@@ -2,10 +2,10 @@ package de.z0rdak.yawp.core.area;
 
 import de.z0rdak.yawp.util.AreaUtil;
 import de.z0rdak.yawp.util.constants.AreaNBT;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.world.phys.AABB;
 
 import java.util.List;
 
@@ -15,15 +15,15 @@ import java.util.List;
  */
 public class CuboidArea extends AbstractArea {
 
-    private AxisAlignedBB area;
+    private AABB area;
 
-    public CuboidArea(AxisAlignedBB area) {
+    public CuboidArea(AABB area) {
         super(AreaType.CUBOID);
         this.area = area;
     }
 
     public CuboidArea(BlockPos p1, BlockPos p2) {
-        this(new AxisAlignedBB(p1, p2));
+        this(new AABB(p1, p2));
     }
 
     public CuboidArea(List<BlockPos> blocks){
@@ -34,7 +34,7 @@ public class CuboidArea extends AbstractArea {
         super(AreaType.CUBOID);
     }
 
-    public CuboidArea(CompoundNBT nbt) {
+    public CuboidArea(CompoundTag nbt) {
         this();
         this.deserializeNBT(nbt);
     }
@@ -48,7 +48,7 @@ public class CuboidArea extends AbstractArea {
                 && pos.getZ() >= this.area.minZ && pos.getZ() <= this.area.maxZ;
     }
 
-    public AxisAlignedBB getArea() {
+    public AABB getArea() {
         return area;
     }
 
@@ -61,18 +61,18 @@ public class CuboidArea extends AbstractArea {
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT nbt = new CompoundNBT();
-        nbt.put(AreaNBT.P1, NBTUtil.writeBlockPos(this.getAreaP1()));
-        nbt.put(AreaNBT.P2, NBTUtil.writeBlockPos(this.getAreaP2()));
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = new CompoundTag();
+        nbt.put(AreaNBT.P1, NbtUtils.writeBlockPos(this.getAreaP1()));
+        nbt.put(AreaNBT.P2, NbtUtils.writeBlockPos(this.getAreaP2()));
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
-        BlockPos p1 = NBTUtil.readBlockPos(nbt.getCompound(AreaNBT.P1));
-        BlockPos p2 = NBTUtil.readBlockPos(nbt.getCompound(AreaNBT.P2));
-        this.area = new AxisAlignedBB(p1, p2);
+    public void deserializeNBT(CompoundTag nbt) {
+        BlockPos p1 = NbtUtils.readBlockPos(nbt.getCompound(AreaNBT.P1));
+        BlockPos p2 = NbtUtils.readBlockPos(nbt.getCompound(AreaNBT.P2));
+        this.area = new AABB(p1, p2);
     }
 
     @Override

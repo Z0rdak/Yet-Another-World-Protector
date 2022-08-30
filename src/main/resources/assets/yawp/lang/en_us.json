@@ -36,7 +36,7 @@
   "cli.msg.dim.info.player.added": "Added player '%s' to region '%s' as %s",
 
   "cli.msg.dim.info.flags": "Flags",
-  "cli.msg.dim.info.flags.empty": "No flags defined",
+  "cli.msg.dim.info.flags.empty": "No flags defined in region '%s'",
   "cli.msg.dim.info.flags.add": "Add flag to region",
   "cli.msg.flags.added": "Added flag '%s' to region '%s'",
   "cli.msg.flags.removed": "Removed flag '%s' from region '%s'",
@@ -115,5 +115,16 @@
 
 
   "rs.flags.player.break-blocks.description": "Prevents players from breaking blocks",
-  "rs.flags.player.place-blocks.description": "Prevents players from placing blocks"
+  "rs.flags.player.place-blocks.description": "Prevents players from placing blocks",
+  "message.region.info.active.true": "active",
+  "message.region.info.active.false": "inactive",
+  "message.event.mobs.hurt_animal": "You are not allowed to attack animals here",
+  "message.event.mobs.hurt_monster": "You are not allowed to attack mobs here",
+  "message.event.mobs.hurt_villager": "You are not allowed to attack villagers here",
+  "message.event.protection.break_block": "You are not allowed to break blocks here",
+  "message.event.protection.place_block": "You are not allowed to place blocks here",
+  "message.event.protection.place_fluid": "You are not allowed to place fluids here",
+  "message.event.player.speak": "You are not allowed to send messages here",
+  "message.event.protection.scoop_fluid": "You are not allowed to scoop up fluids here",
+  "cli.msg.dim.info.regions.empty": "No regions defined in region '%s'"
 }

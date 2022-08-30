@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.core.area;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
 
 /**
@@ -9,7 +9,7 @@ import net.minecraftforge.common.util.INBTSerializable;
  * The most basic area would be a simple AxisAlignedBB.
  * This type of mark-able area is already implemented in the class CuboidArea.
  */
-public interface IMarkableArea extends INBTSerializable<CompoundNBT> {
+public interface IMarkableArea extends INBTSerializable<CompoundTag> {
 
     boolean contains(BlockPos pos);
 

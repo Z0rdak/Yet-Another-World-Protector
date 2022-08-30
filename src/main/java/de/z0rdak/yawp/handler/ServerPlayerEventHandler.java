@@ -1,13 +1,13 @@
 package de.z0rdak.yawp.handler;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 
 import java.util.List;
 
@@ -22,15 +22,15 @@ public class ServerPlayerEventHandler {
     private static MinecraftServer server;
 
     @SubscribeEvent
-    public static void onServerStarted(FMLServerStartedEvent event){
+    public static void onServerStarted(ServerStartedEvent event){
         server = event.getServer();
     }
 
     // TODO: configurable to be adjustable for player count
     private static final int checkPlayerMovementInterval = 20;
 
-    public static List<PlayerEntity> prevPlayerPos;
-    public static List<PlayerEntity> currentPlayerPos;
+    public static List<Player> prevPlayerPos;
+    public static List<Player> currentPlayerPos;
 
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent event){

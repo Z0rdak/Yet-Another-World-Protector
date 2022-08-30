@@ -9,10 +9,10 @@ import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.RegionUtil;
 import de.z0rdak.yawp.util.StickType;
 import de.z0rdak.yawp.util.StickUtil;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.player.AnvilRepairEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 
@@ -48,8 +48,8 @@ public class MarkerStickHandler {
      */
     public static void onCreateRegion(AnvilRepairEvent event) {
         ItemStack outputItem = event.getItemResult();
-        PlayerEntity player = event.getPlayer();
-        CompoundNBT stickNBT = outputItem.getTag().getCompound(STICK);
+        Player player = event.getPlayer();
+        CompoundTag stickNBT = outputItem.getTag().getCompound(STICK);
         StickType type = StickType.of(stickNBT.getString(STICK_TYPE));
         if (type == StickType.MARKER) {
             String regionName = outputItem.getHoverName().getString();
@@ -65,21 +65,21 @@ public class MarkerStickHandler {
                         setStickName(outputItem, type);
                         // TODO: Reset marker on dimChange?
                     } else {
-                        sendMessage(player, new TranslationTextComponent("Player dimension not matching marker data"));
+                        sendMessage(player, new TranslatableComponent("Player dimension not matching marker data"));
                     }
                 } else {
-                    player.sendMessage(new TranslationTextComponent("Invalid region type"), player.getUUID());
+                    player.sendMessage(new TranslatableComponent("Invalid region type"), player.getUUID());
                 }
             } else {
-                player.sendMessage(new TranslationTextComponent("Could not create region"), player.getUUID());
+                player.sendMessage(new TranslatableComponent("Could not create region"), player.getUUID());
             }
         } else {
-            player.sendMessage(new TranslationTextComponent("Invalid stick type / NBT data"), player.getUUID());
+            player.sendMessage(new TranslatableComponent("Invalid stick type / NBT data"), player.getUUID());
         }
     }
 
     public static void onCycleRegionMarker(ItemStack markerStickItem){
-        CompoundNBT nbt = markerStickItem.getTag();
+        CompoundTag nbt = markerStickItem.getTag();
         MarkerStick marker = new MarkerStick(nbt.getCompound(STICK));
         // change area nbt, reset marked blocks, set valid to false
         marker.cycleMode();

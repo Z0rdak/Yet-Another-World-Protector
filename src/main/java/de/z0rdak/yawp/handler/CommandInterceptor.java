@@ -9,14 +9,15 @@ import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.MessageUtil;
-import net.minecraft.command.CommandSource;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.commands.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -38,8 +39,8 @@ public class CommandInterceptor {
      */
     @SubscribeEvent
     public static void handleModCommandPermission(CommandEvent event) {
-        CommandContextBuilder<CommandSource> cmdContext = event.getParseResults().getContext();
-        CommandSource src = cmdContext.getSource();
+        CommandContextBuilder<CommandSourceStack> cmdContext = event.getParseResults().getContext();
+        CommandSourceStack src = cmdContext.getSource();
         if (cmdContext.getNodes().size() > 2) {
             String baseCmd = cmdContext.getNodes().get(0).getNode().getName();
             if (baseCmd.equals(CommandPermissionConfig.BASE_CMD)) {
@@ -49,20 +50,20 @@ public class CommandInterceptor {
                     if (nodeNames.contains(CommandConstants.INFO.toString()) || nodeNames.contains(CommandConstants.LIST.toString())) {
                         return;
                     }
-                    ParsedArgument<CommandSource, ?> dimParsedArgument = cmdContext.getArguments().get(CommandConstants.DIMENSION.toString());
+                    ParsedArgument<CommandSourceStack, ?> dimParsedArgument = cmdContext.getArguments().get(CommandConstants.DIMENSION.toString());
                     if (dimParsedArgument.getResult() instanceof ResourceLocation) {
                         ResourceLocation dimResLoc = ((ResourceLocation) dimParsedArgument.getResult());
-                        RegistryKey<World> dim = RegistryKey.create(Registry.DIMENSION_REGISTRY, dimResLoc);
+                        ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, dimResLoc);
                         DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
                         if (dimCache != null) {
                             if (src.getEntity() != null) {
                                 try {
-                                    if (src.getEntity() instanceof PlayerEntity) {
-                                        ServerPlayerEntity player = src.getPlayerOrException();
+                                    if (src.getEntity() instanceof Player) {
+                                        ServerPlayer player = src.getPlayerOrException();
                                         boolean hasConfigPermission = CommandPermissionConfig.hasPlayerPermission(player);
                                         if (!dimCache.hasOwner(player) && !hasConfigPermission) {
                                             YetAnotherWorldProtector.LOGGER.info("Player not allowed to manage dim");
-                                            MessageUtil.sendCmdFeedback(src, new StringTextComponent("You are not allowed to manage this dimensional region!"));
+                                            MessageUtil.sendCmdFeedback(src, new TextComponent("You are not allowed to manage this dimensional region!"));
                                             event.setCanceled(true);
                                         }
                                     }
@@ -73,11 +74,11 @@ public class CommandInterceptor {
                                 if (!CommandPermissionConfig.hasPermission(src)) {
                                     YetAnotherWorldProtector.LOGGER.info("' " + src.getTextName() + "' is not allowed to manage dim");
                                     event.setCanceled(true);
-                                    MessageUtil.sendCmdFeedback(src, new StringTextComponent("You are not allowed to manage this dimensional region!"));
+                                    MessageUtil.sendCmdFeedback(src, new TextComponent("You are not allowed to manage this dimensional region!"));
                                 }
                             }
                         } else {
-                            MessageUtil.sendCmdFeedback(src, new StringTextComponent("Dimension not found in region data"));
+                            MessageUtil.sendCmdFeedback(src, new TextComponent("Dimension not found in region data"));
                         }
                     }
                 }

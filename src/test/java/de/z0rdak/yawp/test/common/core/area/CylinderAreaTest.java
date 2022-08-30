@@ -1,8 +1,8 @@
 package de.z0rdak.yawp.test.common.core.area;
 
 import de.z0rdak.yawp.core.area.CylinderArea;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -75,7 +75,7 @@ public class CylinderAreaTest {
     @Test
     public void testSerialization(){
         cylindersToTest.forEach( cylinderArea -> {
-            CompoundNBT area = cylinderArea.serializeNBT();
+            CompoundTag area = cylinderArea.serializeNBT();
             CylinderArea clone = new CylinderArea(area);
 
             assertEquals(cylinderArea.getCenter(), clone.getCenter(), "Center '" + cylinderArea.getCenter() + "' not equal to '" + clone.getCenter().toString() + "'");

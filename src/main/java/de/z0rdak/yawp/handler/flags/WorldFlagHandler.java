@@ -6,18 +6,18 @@ import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.MessageUtil;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
-import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
-import net.minecraft.entity.merchant.villager.VillagerEntity;
-import net.minecraft.entity.monster.CreeperEntity;
-import net.minecraft.entity.passive.MooshroomEntity;
-import net.minecraft.entity.passive.PigEntity;
-import net.minecraft.entity.passive.horse.SkeletonHorseEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.animal.MushroomCow;
+import net.minecraft.world.entity.animal.Pig;
+import net.minecraft.world.entity.animal.horse.SkeletonHorse;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
@@ -49,27 +49,27 @@ public class WorldFlagHandler {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(poorBastard));
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                 // TODO: Implement
-                if (poorBastard instanceof PlayerEntity) {
+                if (poorBastard instanceof Player) {
 
                 }
-                if (poorBastard instanceof PigEntity) {
+                if (poorBastard instanceof Pig) {
 
                 }
-                if (poorBastard instanceof CreeperEntity) {
+                if (poorBastard instanceof Creeper) {
 
                 }
-                if (poorBastard instanceof MooshroomEntity) {
+                if (poorBastard instanceof MushroomCow) {
                     // Check for entity data Type == red
                 }
-                if (poorBastard instanceof VillagerEntity) {
+                if (poorBastard instanceof Villager) {
 
                 }
-                if (poorBastard instanceof SkeletonHorseEntity) {
+                if (poorBastard instanceof SkeletonHorse) {
 
                 }
                 if (dimRegion.containsFlag(RegionFlag.LIGHTNING_PROT)){
                     event.setCanceled(true);
-                    event.getLightning().remove();
+                    event.getLightning().remove(Entity.RemovalReason.DISCARDED);
                 }
         }
     }
@@ -82,9 +82,9 @@ public class WorldFlagHandler {
      */
     @SubscribeEvent
     public static void onNetherPortalSpawn(BlockEvent.PortalSpawnEvent event) {
-        World world = (World) event.getWorld();
-        if (!world.isClientSide) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.dimension());
+        Level world = (Level) event.getWorld();
+        if (!world.isClientSide()) {
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(((Level) event.getWorld()).dimension());
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
             if (dimRegion.containsFlag(RegionFlag.SPAWN_PORTAL)){
                 event.setCanceled(true);
@@ -96,7 +96,7 @@ public class WorldFlagHandler {
     /**
      * Handler prevents entities from using portals to travel between dimensions.
      * This has its uses for markable regions but limited use for dimensional regions.
-     * Note: This event is only fired for PlayerEntity (1.16.5), See mixins for other entities.
+     * Note: This event is only fired for Player (1.16.5), See mixins for other entities.
      * @param event holding info about the entity traveling from one to another dimension.
      */
     // TODO: FROM and TO dim
@@ -104,17 +104,17 @@ public class WorldFlagHandler {
     public static void onUsePortal(EntityTravelToDimensionEvent event) {
         if (isServerSide(event.getEntity())) {
             Entity entity = event.getEntity();
-            RegistryKey<World> dim = getEntityDim(entity);
+            ResourceKey<Level> dim = getEntityDim(entity);
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
             boolean prohibitsPortalUsage = dimRegion.containsFlag(RegionFlag.USE_PORTAL);
             if (prohibitsPortalUsage) {
                 event.setCanceled(true);
             }
-            if (entity instanceof PlayerEntity) {
-                if (containsFlagAndHasNoAffiliationFor(dimCache, RegionFlag.USE_PORTAL_PLAYERS, (PlayerEntity) entity)) {
+            if (entity instanceof Player) {
+                if (containsFlagAndHasNoAffiliationFor(dimCache, RegionFlag.USE_PORTAL_PLAYERS, (Player) entity)) {
                     event.setCanceled(true);
-                    MessageUtil.sendMessage((PlayerEntity) entity, "flag.msg.event.player.change_dim");
+                    MessageUtil.sendMessage((Player) entity, "flag.msg.event.player.change_dim");
                     return;
                 } else {
                     event.setCanceled(false);
@@ -123,8 +123,8 @@ public class WorldFlagHandler {
             if (dimRegion.containsFlag(RegionFlag.USE_PORTAL_ITEMS) && entity instanceof ItemEntity
                     || dimRegion.containsFlag(RegionFlag.USE_PORTAL_ANIMALS) && isAnimal(entity)
                     || dimRegion.containsFlag(RegionFlag.USE_PORTAL_MONSTERS) && isMonster(entity)
-                    || dimRegion.containsFlag(RegionFlag.USE_PORTAL_VILLAGERS) && entity instanceof AbstractVillagerEntity
-                    || dimRegion.containsFlag(RegionFlag.USE_PORTAL_MINECARTS) && entity instanceof AbstractMinecartEntity) {
+                    || dimRegion.containsFlag(RegionFlag.USE_PORTAL_VILLAGERS) && entity instanceof AbstractVillager
+                    || dimRegion.containsFlag(RegionFlag.USE_PORTAL_MINECARTS) && entity instanceof AbstractMinecart) {
                 event.setCanceled(true);
                 return;
             }

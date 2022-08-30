@@ -1,7 +1,6 @@
 package de.z0rdak.yawp.core.flag;
 
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +39,7 @@ public enum RegionFlag {
     ANIMAL_TAMING(new ConditionFlag("animal-taming", false)),
     ANIMAL_BREEDING(new ConditionFlag("animal-breeding", false)),
     ANIMAL_MOUNTING(new ConditionFlag("animal-mounting", false)),
-    // ANIMAL_UNMOUNTING(new ConditionFlag("animal-unmounting", false)), // FIXME: Minecraft vanilla bug fixed in 21w03a
+    ANIMAL_UNMOUNTING(new ConditionFlag("animal-unmounting", false)),
     SPAWNING_MONSTERS(new ConditionFlag("spawning-monsters", false)),
     SPAWNING_GOLEM(new ConditionFlag("spawning-irongolem", false)),
     SPAWNING_ANIMAL(new ConditionFlag("spawning-animal", false)),
@@ -99,13 +98,13 @@ public enum RegionFlag {
     public final IFlag flag;
     public final String langKey;
     // public final boolean defaultValue;
-    public final Function<List<String>, IFormattableTextComponent> denyMessageBuilder;
+    public final Function<List<String>, TranslatableComponent> denyMessageBuilder;
 
     RegionFlag(IFlag flag) {
         this.flag = flag;
         this.flagname = flag.getFlagName();
         this.langKey = "rs.flag.deny.message." + flag.getFlagName();
-        this.denyMessageBuilder = (args) -> new TranslationTextComponent(this.langKey, args == null ? new ArrayList<>() : args);
+        this.denyMessageBuilder = (args) -> new TranslatableComponent(this.langKey, args == null ? new ArrayList<>() : args);
         //this.defaultValue = defaultValue;
     }
     @Override

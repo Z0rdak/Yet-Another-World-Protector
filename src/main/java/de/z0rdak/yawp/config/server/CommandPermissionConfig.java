@@ -2,11 +2,11 @@ package de.z0rdak.yawp.config.server;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import net.minecraft.command.CommandSource;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.management.OpEntry;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.players.ServerOpListEntry;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -85,7 +85,7 @@ public class CommandPermissionConfig {
     }
 
 
-    public static boolean hasPermission(CommandSource source) {
+    public static boolean hasPermission(CommandSourceStack source) {
         try {
             return hasPlayerPermission(source.getPlayerOrException());
         } catch (CommandSyntaxException e) {
@@ -99,18 +99,18 @@ public class CommandPermissionConfig {
         }
     }
 
-    public static boolean hasPlayerPermission(PlayerEntity player) {
+    public static boolean hasPlayerPermission(Player player) {
         return hasUUIDConfigEntry(player) || hasNeededOpLevel(player) ||
                 player.hasPermissions(REQUIRED_OP_LEVEL.get());
     }
 
-    public static boolean hasUUIDConfigEntry(PlayerEntity player) {
+    public static boolean hasUUIDConfigEntry(Player player) {
         Set<String> playersInConfig = UUIDsWithPermission();
         return playersInConfig.contains(player.getStringUUID());
     }
 
-    public static boolean hasNeededOpLevel(PlayerEntity player) {
-        OpEntry opPlayerEntry = ServerLifecycleHooks.getCurrentServer()
+    public static boolean hasNeededOpLevel(Player player) {
+        ServerOpListEntry opPlayerEntry = ServerLifecycleHooks.getCurrentServer()
                 .getPlayerList()
                 .getOps()
                 .get(player.getGameProfile());

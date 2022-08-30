@@ -1,11 +1,11 @@
 package de.z0rdak.yawp.core.region;
 
 import de.z0rdak.yawp.util.constants.RegionNBT;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.World;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 
 /**
  * The DimensionalRegion represents the only direct implementation of an Abstract region.
@@ -15,38 +15,38 @@ public final class DimensionalRegion extends AbstractRegion {
 
     public static final int DEFAULT_PRIORITY = Integer.MIN_VALUE;
 
-    private RegistryKey<World> dimensionKey;
+    private ResourceKey<Level> dimensionKey;
 
-    public DimensionalRegion(RegistryKey<World> dimensionKey) {
+    public DimensionalRegion(ResourceKey<Level> dimensionKey) {
         super(dimensionKey.location().toString());
         this.dimensionKey = dimensionKey;
     }
 
-    public DimensionalRegion(CompoundNBT nbt) {
+    public DimensionalRegion(CompoundTag nbt) {
         super("");
         this.deserializeNBT(nbt);
     }
 
     public DimensionalRegion(String dimensionKey) {
-        this(RegistryKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(dimensionKey)));
+        this(ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(dimensionKey)));
     }
 
-    public RegistryKey<World> getDimensionKey() {
+    public ResourceKey<Level> getDimensionKey() {
         return dimensionKey;
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT nbt = super.serializeNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = super.serializeNBT();
         nbt.putString(RegionNBT.DIM, this.dimensionKey.location().toString());
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
         String dim = nbt.getString(RegionNBT.DIM);
-        this.dimensionKey = RegistryKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(dim));
+        this.dimensionKey = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(dim));
     }
 
     @Override

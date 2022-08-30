@@ -6,13 +6,12 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.util.CommandUtil;
 import de.z0rdak.yawp.util.MessageUtil;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 import static de.z0rdak.yawp.util.MessageUtil.buildExecuteCmdComponent;
 import static de.z0rdak.yawp.util.MessageUtil.buildHelpHeader;
@@ -22,15 +21,15 @@ public class CommandRegistry {
     private CommandRegistry() {
     }
 
-    public static void init(CommandDispatcher<CommandSource> commandDispatcher) {
+    public static void init(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         commandDispatcher.register(register());
     }
 
-    public static LiteralArgumentBuilder<CommandSource> register() {
+    public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return withSubCommands(Commands.literal(CommandPermissionConfig.BASE_CMD));
     }
 
-    private static LiteralArgumentBuilder<CommandSource> withSubCommands(LiteralArgumentBuilder<CommandSource> baseCommand) {
+    private static LiteralArgumentBuilder<CommandSourceStack> withSubCommands(LiteralArgumentBuilder<CommandSourceStack> baseCommand) {
         return baseCommand
                 //.requires(CommandPermissionConfig::hasPermission)
                 .executes(ctx -> promptHelp(ctx.getSource()))
@@ -46,15 +45,15 @@ public class CommandRegistry {
         ;
     }
 
-    private static int promptHelp(CommandSource src) {
+    private static int promptHelp(CommandSourceStack src) {
         MessageUtil.sendCmdFeedback(src, buildHelpHeader("cli.msg.help.header"));
         String command = CommandUtil.buildCommandStr(CommandConstants.DIMENSION.toString());
-        IFormattableTextComponent cmdStr = new TranslationTextComponent("cli.msg.help.1", CommandPermissionConfig.BASE_CMD);
-        MessageUtil.sendCmdFeedback(src, buildExecuteCmdComponent("=>", command, TextFormatting.GREEN, "Manage dimensional regions", ClickEvent.Action.SUGGEST_COMMAND).append(cmdStr));
+        TranslatableComponent cmdStr = new TranslatableComponent("cli.msg.help.1", CommandPermissionConfig.BASE_CMD);
+        MessageUtil.sendCmdFeedback(src, buildExecuteCmdComponent("=>", command, ChatFormatting.GREEN, "Manage dimensional regions", ClickEvent.Action.SUGGEST_COMMAND).append(cmdStr));
         String wikiLink = "https://github.com/Z0rdak/Yet-Another-World-Protector";
-        StringTextComponent wikiInfo = new StringTextComponent("The in-game help is under construction.\nVisit the online wiki for a guide on how to use the mod.\nOnline-Wiki: ");
+        TextComponent wikiInfo = new TextComponent("The in-game help is under construction.\nVisit the online wiki for a guide on how to use the mod.\nOnline-Wiki: ");
         MessageUtil.sendCmdFeedback(src, wikiInfo.append(buildExecuteCmdComponent(YetAnotherWorldProtector.MODID_LONG + " online wiki", wikiLink,
-                TextFormatting.AQUA, "Open online wiki in your browser", ClickEvent.Action.OPEN_URL)));
+                ChatFormatting.AQUA, "Open online wiki in your browser", ClickEvent.Action.OPEN_URL)));
         return 0;
     }
 }

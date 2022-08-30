@@ -1,8 +1,8 @@
 package de.z0rdak.yawp.test.common.core.area;
 
 import de.z0rdak.yawp.core.area.SphereArea;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -70,7 +70,7 @@ public class SphereAreaTest {
     @Test
     public void testSerialization(){
         spheresToTest.forEach( sphereArea -> {
-            CompoundNBT area = sphereArea.serializeNBT();
+            CompoundTag area = sphereArea.serializeNBT();
             SphereArea clone = new SphereArea(area);
 
             assertEquals(sphereArea.getCenter(), clone.getCenter(), "Center '" + sphereArea.getCenter() + "' not equal to '" + clone.getCenter().toString() + "'");

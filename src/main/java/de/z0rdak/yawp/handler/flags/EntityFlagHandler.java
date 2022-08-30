@@ -5,18 +5,18 @@ import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.item.ExperienceOrbEntity;
-import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
-import net.minecraft.entity.monster.EndermanEntity;
-import net.minecraft.entity.monster.ShulkerEntity;
-import net.minecraft.entity.passive.IronGolemEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Shulker;
+import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.living.EntityTeleportEvent;
+import net.minecraftforge.event.entity.EntityTeleportEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -43,7 +43,7 @@ public class EntityFlagHandler {
                 if (event instanceof EntityTeleportEvent.EnderEntity) {
                     EntityTeleportEvent.EnderEntity enderEntityEvent = (EntityTeleportEvent.EnderEntity) event;
                     // handle enderman teleportation
-                    if (enderEntityEvent.getEntityLiving() instanceof EndermanEntity) {
+                    if (enderEntityEvent.getEntityLiving() instanceof EnderMan) {
                         if (dimRegion.containsFlag(RegionFlag.ENDERMAN_TELEPORT_FROM_REGION)
                                 || dimRegion.containsFlag(RegionFlag.ENDERMAN_TELEPORT_TO_REGION)) {
                             event.setCanceled(true);
@@ -51,7 +51,7 @@ public class EntityFlagHandler {
                         }
                     }
                     // handle shulker teleportation
-                    if (enderEntityEvent.getEntityLiving() instanceof ShulkerEntity) {
+                    if (enderEntityEvent.getEntityLiving() instanceof Shulker) {
                         if (dimRegion.containsFlag(RegionFlag.SHULKER_TELEPORT_TO_REGION)
                                 || dimRegion.containsFlag(RegionFlag.SHULKER_TELEPORT_FROM_REGION)) {
                             event.setCanceled(true);
@@ -79,12 +79,12 @@ public class EntityFlagHandler {
                     return;
                 }
                 // prevents fall damage only for affiliated players
-                if (entity instanceof PlayerEntity && dimRegion.containsFlag(RegionFlag.FALL_DAMAGE_PLAYERS)
-                        && dimRegion.permits((PlayerEntity) entity)) {
+                if (entity instanceof Player && dimRegion.containsFlag(RegionFlag.FALL_DAMAGE_PLAYERS)
+                        && dimRegion.permits((Player) entity)) {
                     event.setDamageMultiplier(0.0f);
                     return;
                 }
-                if (entity instanceof AbstractVillagerEntity && dimRegion.containsFlag(RegionFlag.FALL_DAMAGE_VILLAGERS)) {
+                if (entity instanceof AbstractVillager && dimRegion.containsFlag(RegionFlag.FALL_DAMAGE_VILLAGERS)) {
                     event.setDamageMultiplier(0.0f);
                     return;
                 }
@@ -110,7 +110,7 @@ public class EntityFlagHandler {
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                 Entity eventEntity = event.getEntity();
-                if (dimRegion.containsFlag(RegionFlag.SPAWNING_ALL) && eventEntity instanceof MobEntity) {
+                if (dimRegion.containsFlag(RegionFlag.SPAWNING_ALL) && eventEntity instanceof Mob) {
                     event.setCanceled(true);
                     return;
                 }
@@ -118,7 +118,7 @@ public class EntityFlagHandler {
                     event.setCanceled(true);
                     return;
                 }
-                if (dimRegion.containsFlag(RegionFlag.SPAWNING_GOLEM) && eventEntity instanceof IronGolemEntity) {
+                if (dimRegion.containsFlag(RegionFlag.SPAWNING_GOLEM) && eventEntity instanceof IronGolem) {
                     event.setCanceled(true);
                     return;
                 }
@@ -126,7 +126,7 @@ public class EntityFlagHandler {
                     event.setCanceled(true);
                     return;
                 }
-                if (dimRegion.containsFlag(RegionFlag.SPAWNING_XP) && eventEntity instanceof ExperienceOrbEntity) {
+                if (dimRegion.containsFlag(RegionFlag.SPAWNING_XP) && eventEntity instanceof ExperienceOrb) {
                     event.setCanceled(true);
                     return;
                 }

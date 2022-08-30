@@ -9,15 +9,19 @@ import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.network.NetworkConstants;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,7 +44,8 @@ public class YetAnotherWorldProtector
             ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, RegionConfig.CONFIG_SPEC, MODID + "-region-defaults.toml" );
 
             MinecraftForge.EVENT_BUS.register(this);
-
+            // Prevent message about missing mod on client in server list
+            ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (s, b) -> true));
         });
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
             LOGGER.info("You are loading " + MODID_LONG + " on a client. " + MODID_LONG + " is a server only mod!");
@@ -49,14 +54,14 @@ public class YetAnotherWorldProtector
     }
 
     private void setup(final FMLCommonSetupEvent event) {
-        if (isInModList("JourneyMap")) {
+        if (ModList.get().isLoaded("JourneyMap")) {
             YetAnotherWorldProtector.LOGGER.warn("Detected JourneyMap mod. Setting base command to '" + CommandPermissionConfig.WP_CMDS[2] + "'");
             CommandPermissionConfig.BASE_CMD = CommandPermissionConfig.WP_CMDS[2];
         }
     }
 
     @SubscribeEvent
-    public void onServerStarting(FMLServerStartingEvent event) {
+    public void onServerStarting(ServerStartingEvent event) {
         RegionDataManager.loadRegionData(event);
         PlayerTrackingManager.loadPlayerData(event);
     }
@@ -67,20 +72,14 @@ public class YetAnotherWorldProtector
     }
 
     @SubscribeEvent
-    public void onConfigLoading(ModConfig.Loading event) {
+    public void onConfigLoading(ModConfigEvent.Loading event) {
         if (event.getConfig().getFileName().equals(CommandPermissionConfig.CONFIG_NAME)){
             CommandPermissionConfig.setBaseCmd();
         }
     }
 
     @SubscribeEvent
-    public void onConfigReloading(ModConfig.Reloading event) {
+    public void onConfigReloading(ModConfigEvent.Reloading event) {
         // reset player uuids?
     }
-
-
-    private static boolean isInModList(String modid) {
-        return ModList.get().isLoaded(modid);
-    }
-
 }

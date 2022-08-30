@@ -5,14 +5,17 @@ import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.util.constants.RegionNBT;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.World;
+import net.minecraft.commands.arguments.ResourceKeyArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.io.Serializable;
@@ -38,12 +41,12 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     protected Map<String, IMarkableRegion> childRegions;
     protected int priority;
     protected boolean isMuted;
-    protected RegistryKey<World> dimension;
+    protected ResourceKey<Level> dimension;
     protected IMarkableArea area;
     protected AreaType areaType;
     protected BlockPos tpTarget;
 
-    public AbstractMarkableRegion(String name, IMarkableArea area, PlayerEntity owner, RegistryKey<World> dimension) {
+    public AbstractMarkableRegion(String name, IMarkableArea area, Player owner, ResourceKey<Level> dimension) {
         super(name, owner);
         this.dimension = dimension;
         this.area = area;
@@ -53,7 +56,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     }
 
     // TODO: rework Constructor chain
-    public AbstractMarkableRegion(String name, IMarkableArea area, BlockPos tpTarget, PlayerEntity owner, RegistryKey<World> dimension) {
+    public AbstractMarkableRegion(String name, IMarkableArea area, BlockPos tpTarget, Player owner, ResourceKey<Level> dimension) {
         super(name, owner);
         this.tpTarget = tpTarget;
         this.dimension = dimension;
@@ -113,9 +116,9 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT nbt = super.serializeNBT();
-        nbt.put(RegionNBT.TP_POS, NBTUtil.writeBlockPos(this.tpTarget));
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = super.serializeNBT();
+        nbt.put(RegionNBT.TP_POS, NbtUtils.writeBlockPos(this.tpTarget));
         nbt.putInt(RegionNBT.PRIORITY, priority);
         nbt.putString(RegionNBT.DIM, dimension.location().toString());
         nbt.putBoolean(RegionNBT.MUTED, isMuted);
@@ -125,12 +128,11 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-        this.tpTarget = NBTUtil.readBlockPos(nbt.getCompound(RegionNBT.TP_POS));
+        this.tpTarget = NbtUtils.readBlockPos(nbt.getCompound(RegionNBT.TP_POS));
         this.priority = nbt.getInt(RegionNBT.PRIORITY);
-        this.dimension = RegistryKey.create(Registry.DIMENSION_REGISTRY,
-                new ResourceLocation(nbt.getString(RegionNBT.DIM)));
+        this.dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(nbt.getString(RegionNBT.DIM)));
         this.isMuted = nbt.getBoolean(RegionNBT.MUTED);
         this.areaType = AreaType.valueOf(nbt.getString(RegionNBT.AREA_TYPE));
     }
@@ -163,7 +165,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     }
 
     @Override
-    public RegistryKey<World> getDim() {
+    public ResourceKey<Level> getDim() {
         return dimension;
     }
 

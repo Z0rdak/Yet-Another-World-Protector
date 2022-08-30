@@ -1,15 +1,15 @@
 package de.z0rdak.yawp.managers.data.player;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.EntityEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.HashMap;
@@ -19,24 +19,24 @@ import java.util.Map;
 /**
  * Data manger to save player tracking data for players entering and leaving regions
  */
-@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID)
+//@EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER)
 public class PlayerTrackingManager {
 
-    public final static Map<RegistryKey<World>, PlayerTrackingCache> playerTrackingPerDim  = new HashMap<>(3); // amount of dims
+    public final static Map<ResourceKey<Level>, PlayerTrackingCache> playerTrackingPerDim  = new HashMap<>(3); // amount of dims
 
     private static final PlayerTrackingManager playerTrackingManager = new PlayerTrackingManager();
 
     private PlayerTrackingManager(){
-        playerTrackingPerDim.put(World.OVERWORLD, new PlayerTrackingCache(World.OVERWORLD));
-        playerTrackingPerDim.put(World.NETHER, new PlayerTrackingCache(World.NETHER));
-        playerTrackingPerDim.put(World.END, new PlayerTrackingCache(World.END));
+        playerTrackingPerDim.put(Level.OVERWORLD, new PlayerTrackingCache(Level.OVERWORLD));
+        playerTrackingPerDim.put(Level.NETHER, new PlayerTrackingCache(Level.NETHER));
+        playerTrackingPerDim.put(Level.END, new PlayerTrackingCache(Level.END));
     }
 
     public static PlayerTrackingManager get(){
         return playerTrackingManager;
     }
 
-    public PlayerTrackingCache trackingCacheFor(RegistryKey<World> dim){
+    public PlayerTrackingCache trackingCacheFor(ResourceKey<Level> dim){
         return playerTrackingPerDim.get(dim);
     }
 
@@ -51,8 +51,8 @@ public class PlayerTrackingManager {
     @SubscribeEvent
     public static void onChunkLoad(ChunkEvent.Load event) {
         if (!event.getWorld().isClientSide()) {
-            if (event.getChunk().getWorldForge() instanceof ServerWorld) {
-                ServerWorld world = (ServerWorld) event.getChunk().getWorldForge();
+            if (event.getChunk().getWorldForge() instanceof ServerLevel) {
+                ServerLevel world = (ServerLevel) event.getChunk().getWorldForge();
                 /*
                 PlayerTrackingManager managerForDim = DimensionalRegionCache.regionChunkCachePerDim.get(world.dimension());
                 if (!managerForDim.regionsOffLoadedChunks.containsKey(event.getChunk().getPos())) {
@@ -73,11 +73,11 @@ public class PlayerTrackingManager {
     }
 
     @SubscribeEvent
-    public static void onChunkChange(EntityEvent.EnteringChunk event) {
+    public static void onChunkChange(EntityEvent.EnteringSection event) {
         if (!event.getEntity().getCommandSenderWorld().isClientSide) {
 
-            if (event.getEntity() instanceof PlayerEntity) {
-                PlayerEntity player = (PlayerEntity) event.getEntity();
+            if (event.getEntity() instanceof Player) {
+                Player player = (Player) event.getEntity();
                 // is player pos here the old or new chunkpos?
                 // either way we don't have the new or old Y pos - how to fix this?
                 // just ignore and 1.16 works only for x,z ?
@@ -98,11 +98,12 @@ public class PlayerTrackingManager {
         }
     }
 
-    public static List<PlayerEntity> getPlayersInRegionVicinity() {
+    public static List<Player> getPlayersInRegionVicinity() {
         throw new NotImplementedException("getPlayersInRegionVicinity");
     }
 
-    public static void loadPlayerData(FMLServerStartingEvent event) {
+    @SubscribeEvent
+    public static void loadPlayerData(ServerStartingEvent event) {
 
     }
 }

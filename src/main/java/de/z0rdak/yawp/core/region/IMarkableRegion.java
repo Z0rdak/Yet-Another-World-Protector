@@ -1,9 +1,9 @@
 package de.z0rdak.yawp.core.region;
 
 import de.z0rdak.yawp.core.area.IMarkableArea;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 
 /**
  * A mark-able region extends the general IProtectedRegion by allowing
@@ -16,7 +16,7 @@ import net.minecraft.world.World;
  */
 public interface IMarkableRegion extends IProtectedRegion {
 
-   RegistryKey<World> getDim();
+   ResourceKey<Level> getDim();
 
    IMarkableArea getArea();
 

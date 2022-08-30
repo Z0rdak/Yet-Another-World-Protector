@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.core.affiliation;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.scoreboard.Team;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.scores.Team;
 
 import java.util.UUID;
 
@@ -15,7 +15,7 @@ public interface IMemberContainer {
     boolean containsTeam(String team);
     boolean containsTeam(Team team);
 
-    void addPlayer(PlayerEntity player);
+    void addPlayer(Player player);
 
     void addTeam(String team);
 
@@ -25,7 +25,7 @@ public interface IMemberContainer {
 
     boolean hasPlayers();
 
-    void removePlayer(PlayerEntity player);
+    void removePlayer(Player player);
 
     void removePlayer(UUID playerUUID);
 

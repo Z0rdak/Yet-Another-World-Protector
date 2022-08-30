@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.api.events;
 
 import de.z0rdak.yawp.core.region.IMarkableRegion;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 
@@ -11,9 +11,9 @@ public abstract class RegionEvent extends Event {
 
     private final IMarkableRegion region;
     @Nullable
-    private final PlayerEntity player;
+    private final Player player;
 
-    private RegionEvent(IMarkableRegion region, PlayerEntity player) {
+    private RegionEvent(IMarkableRegion region, Player player) {
         this.region = region;
         this.player = player;
     }
@@ -22,7 +22,7 @@ public abstract class RegionEvent extends Event {
         return region;
     }
 
-    public PlayerEntity getPlayer() {
+    public Player getPlayer() {
         return player;
     }
 
@@ -34,7 +34,7 @@ public abstract class RegionEvent extends Event {
     @Cancelable
     public static class CreateRegionEvent extends RegionEvent {
 
-        public CreateRegionEvent(IMarkableRegion region, PlayerEntity player) {
+        public CreateRegionEvent(IMarkableRegion region, Player player) {
             super(region, player);
         }
 
@@ -47,7 +47,7 @@ public abstract class RegionEvent extends Event {
     @Cancelable
     public static class RemoveRegionEvent extends RegionEvent {
 
-        public RemoveRegionEvent(IMarkableRegion region, PlayerEntity player) {
+        public RemoveRegionEvent(IMarkableRegion region, Player player) {
             super(region, player);
         }
     }
@@ -59,7 +59,7 @@ public abstract class RegionEvent extends Event {
     @Cancelable
     public static class UpdateRegionEvent extends RegionEvent {
 
-        public UpdateRegionEvent(IMarkableRegion region, PlayerEntity player) {
+        public UpdateRegionEvent(IMarkableRegion region, Player player) {
             super(region, player);
         }
     }

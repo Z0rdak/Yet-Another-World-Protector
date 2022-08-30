@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.core.area;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,7 @@ public class PrismArea extends AbstractArea {
     // TODO: implementation
     public List<BlockPos> blockNodes;
 
-    public PrismArea(CompoundNBT nbt) {
+    public PrismArea(CompoundTag nbt) {
         this();
         this.deserializeNBT(nbt);
     }
@@ -30,12 +30,12 @@ public class PrismArea extends AbstractArea {
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
+    public CompoundTag serializeNBT() {
         return null;
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
 
     }
 }

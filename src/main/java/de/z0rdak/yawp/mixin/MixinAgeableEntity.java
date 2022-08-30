@@ -1,26 +1,23 @@
 package de.z0rdak.yawp.mixin;
 
-import net.minecraft.entity.AgeableEntity;
-import net.minecraft.entity.CreatureEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeHooks;
 import org.spongepowered.asm.mixin.Mixin;
 
 import javax.annotation.Nullable;
 
-@Mixin(AgeableEntity.class)
-public abstract class MixinAgeableEntity extends CreatureEntity {
+@Mixin(AgeableMob.class)
+public abstract class MixinAgeableEntity extends PathfinderMob {
 
-    protected MixinAgeableEntity(EntityType<? extends CreatureEntity> type, World worldIn) {
+    protected MixinAgeableEntity(EntityType<? extends PathfinderMob> type, Level worldIn) {
         super(type, worldIn);
     }
 
     @Nullable
     @Override
-    public Entity changeDimension(ServerWorld server) {
+    public Entity changeDimension(ServerLevel server) {
         if (!ForgeHooks.onTravelToDimension(this, server.dimension())) {
             return null;
         }

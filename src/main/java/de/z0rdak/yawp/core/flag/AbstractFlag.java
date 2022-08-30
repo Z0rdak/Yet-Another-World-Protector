@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.core.flag;
 
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -63,8 +63,8 @@ public abstract class AbstractFlag extends ForgeRegistryEntry<AbstractFlag> impl
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT nbt = new CompoundNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = new CompoundTag();
         nbt.putString(FLAG_NAME, this.flagName);
         nbt.putBoolean(FLAG_ACTIVE, this.isActive);
         nbt.putBoolean(IS_ALLOWED, this.isAllowed);
@@ -73,7 +73,7 @@ public abstract class AbstractFlag extends ForgeRegistryEntry<AbstractFlag> impl
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         this.flagName = nbt.getString(FLAG_NAME);
         this.isActive = nbt.getBoolean(FLAG_ACTIVE);
         this.isAllowed = nbt.getBoolean(IS_ALLOWED);

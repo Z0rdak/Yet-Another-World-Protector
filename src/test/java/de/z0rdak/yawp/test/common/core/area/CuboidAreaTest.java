@@ -1,8 +1,8 @@
 package de.z0rdak.yawp.test.common.core.area;
 
 import de.z0rdak.yawp.core.area.CuboidArea;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -72,7 +72,7 @@ public class CuboidAreaTest {
     @Test
     public void testSerialization(){
         cuboidsToTest.forEach( (k,cuboidArea) -> {
-            CompoundNBT area = cuboidArea.serializeNBT();
+            CompoundTag area = cuboidArea.serializeNBT();
             CuboidArea clone = new CuboidArea(area);
 
             assertEquals(cuboidArea.getArea(), clone.getArea(), "Area '" + cuboidArea.getArea().toString() + "' not equal to '" + clone.getArea().toString() + "'");

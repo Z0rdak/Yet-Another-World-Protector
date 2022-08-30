@@ -1,11 +1,11 @@
 package de.z0rdak.yawp.core.area;
 
+import com.mojang.math.Vector3d;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.util.AreaUtil;
 import de.z0rdak.yawp.util.constants.AreaNBT;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 
 import static de.z0rdak.yawp.util.AreaUtil.*;
 
@@ -36,7 +36,7 @@ public class CylinderArea extends CenteredArea {
         YetAnotherWorldProtector.LOGGER.debug(this.toString());
     }
 
-    public CylinderArea(CompoundNBT nbt){
+    public CylinderArea(CompoundTag nbt){
         this();
         this.deserializeNBT(nbt);
     }
@@ -75,15 +75,15 @@ public class CylinderArea extends CenteredArea {
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT nbt = super.serializeNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = super.serializeNBT();
         nbt.putInt(AreaNBT.RADIUS, this.radius);
         nbt.putInt(AreaNBT.HEIGHT, this.distance);
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
         this.distance = nbt.getInt(AreaNBT.RADIUS);
         this.radius = nbt.getInt(AreaNBT.HEIGHT);

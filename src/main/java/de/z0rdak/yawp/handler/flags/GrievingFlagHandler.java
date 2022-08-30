@@ -6,14 +6,14 @@ import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.MessageUtil;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.boss.WitherEntity;
-import net.minecraft.entity.boss.dragon.EnderDragonEntity;
-import net.minecraft.entity.monster.CreeperEntity;
-import net.minecraft.entity.monster.EndermanEntity;
-import net.minecraft.entity.monster.ZombieEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.entity.boss.wither.WitherBoss;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.living.LivingDestroyBlockEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
@@ -38,18 +38,15 @@ public class GrievingFlagHandler {
             Entity trampler = event.getEntity();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(trampler));
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
-
-
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-
                 // cancel all trampling
                 if (dimRegion.containsFlag(RegionFlag.TRAMPLE_FARMLAND)) {
                     event.setCanceled(true);
                     return;
                 }
                 // cancel only player trampling
-                if (trampler instanceof PlayerEntity) {
-                    PlayerEntity player = (PlayerEntity) trampler;
+                if (trampler instanceof Player) {
+                    Player player = (Player) trampler;
                     if (dimRegion.containsFlag(RegionFlag.TRAMPLE_FARMLAND_PLAYER) && !dimRegion.permits(player)) {
                         event.setCanceled(true);
                         MessageUtil.sendMessage(player, "message.event.world.trample_farmland");
@@ -73,15 +70,15 @@ public class GrievingFlagHandler {
 
 
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                if (dimRegion.containsFlag(RegionFlag.DRAGON_BLOCK_PROT) && destroyer instanceof EnderDragonEntity) {
+                if (dimRegion.containsFlag(RegionFlag.DRAGON_BLOCK_PROT) && destroyer instanceof EnderDragon) {
                     event.setCanceled(true);
                     return;
                 }
-                if (dimRegion.containsFlag(RegionFlag.WITHER_BLOCK_PROT) && destroyer instanceof WitherEntity) {
+                if (dimRegion.containsFlag(RegionFlag.WITHER_BLOCK_PROT) && destroyer instanceof WitherBoss) {
                     event.setCanceled(true);
                     return;
                 }
-                if (dimRegion.containsFlag(RegionFlag.ZOMBIE_DOOR_PROT) && destroyer instanceof ZombieEntity) {
+                if (dimRegion.containsFlag(RegionFlag.ZOMBIE_DOOR_PROT) && destroyer instanceof Zombie) {
                     event.setCanceled(true);
                     return;
                 }
@@ -115,7 +112,7 @@ public class GrievingFlagHandler {
     @SubscribeEvent
     public static void onEntityXpDrop(LivingExperienceDropEvent event) {
         if (isServerSide(event)) {
-            PlayerEntity player = event.getAttackingPlayer();
+            Player player = event.getAttackingPlayer();
             Entity entity = event.getEntity();
             if (player != null) {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
@@ -123,7 +120,7 @@ public class GrievingFlagHandler {
 
 
                     DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                    boolean entityDroppingXpIsPlayer = event.getEntityLiving() instanceof PlayerEntity;
+                    boolean entityDroppingXpIsPlayer = event.getEntityLiving() instanceof Player;
 
                     // prevent all xp drops
                     if (dimRegion.containsFlag(RegionFlag.XP_DROP_ALL)) {
@@ -159,7 +156,7 @@ public class GrievingFlagHandler {
     @SubscribeEvent
     public static void onEndermanPlacingBlock(BlockEvent.EntityPlaceEvent event) {
         if (isServerSide(event)) {
-            if (event.getEntity() != null && event.getEntity() instanceof EndermanEntity) {
+            if (event.getEntity() != null && event.getEntity() instanceof EnderMan) {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
                 if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
 
@@ -198,7 +195,7 @@ public class GrievingFlagHandler {
                 //event.getAffectedEntities().removeAll(filterAffectedEntities(event, RegionFlag.EXPLOSION_ENTITY.flag));
 
                 if (event.getExplosion().getSourceMob() != null) {
-                    boolean explosionTriggeredByCreeper = (event.getExplosion().getSourceMob() instanceof CreeperEntity);
+                    boolean explosionTriggeredByCreeper = (event.getExplosion().getSourceMob() instanceof Creeper);
                     if (!explosionTriggeredByCreeper) {
                         if (dimRegion.containsFlag(RegionFlag.EXPLOSION_OTHER_BLOCKS)) {
                             event.getAffectedBlocks().clear();

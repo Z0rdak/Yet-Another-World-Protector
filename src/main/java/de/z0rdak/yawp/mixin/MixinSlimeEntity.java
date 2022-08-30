@@ -1,27 +1,27 @@
 package de.z0rdak.yawp.mixin;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.entity.monster.SlimeEntity;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.monster.Slime;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeHooks;
 import org.spongepowered.asm.mixin.Mixin;
 
 import javax.annotation.Nullable;
 
-@Mixin(SlimeEntity.class)
-public abstract class MixinSlimeEntity extends MobEntity implements IMob {
+@Mixin(Slime.class)
+public abstract class MixinSlimeEntity extends Mob implements Enemy {
 
-    protected MixinSlimeEntity(EntityType<? extends MobEntity> type, World worldIn) {
+    protected MixinSlimeEntity(EntityType<? extends Mob> type, Level worldIn) {
         super(type, worldIn);
     }
 
     @Nullable
     @Override
-    public Entity changeDimension(ServerWorld server) {
+    public Entity changeDimension(ServerLevel server) {
         if (!ForgeHooks.onTravelToDimension(this, server.dimension())) {
             return null;
         }

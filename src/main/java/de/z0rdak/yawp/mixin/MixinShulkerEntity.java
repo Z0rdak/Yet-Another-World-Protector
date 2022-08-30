@@ -1,27 +1,27 @@
 package de.z0rdak.yawp.mixin;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.entity.monster.ShulkerEntity;
-import net.minecraft.entity.passive.GolemEntity;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.AbstractGolem;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.monster.Shulker;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeHooks;
 import org.spongepowered.asm.mixin.Mixin;
 
 import javax.annotation.Nullable;
 
-@Mixin(ShulkerEntity.class)
-public abstract class MixinShulkerEntity  extends GolemEntity implements IMob {
+@Mixin(Shulker.class)
+public abstract class MixinShulkerEntity  extends AbstractGolem implements Enemy {
 
-    protected MixinShulkerEntity(EntityType<? extends GolemEntity> type, World worldIn) {
+    protected MixinShulkerEntity(EntityType<? extends AbstractGolem> type, Level worldIn) {
         super(type, worldIn);
     }
 
     @Nullable
     @Override
-    public Entity changeDimension(ServerWorld server) {
+    public Entity changeDimension(ServerLevel server) {
         if (!ForgeHooks.onTravelToDimension(this, server.dimension())) {
             return null;
         }

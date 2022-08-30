@@ -1,11 +1,11 @@
 package de.z0rdak.yawp.core.area;
 
 import de.z0rdak.yawp.util.constants.AreaNBT;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ public class Polygon3DArea extends AbstractArea {
         this.positions = positions;
     }
 
-    public Polygon3DArea(CompoundNBT nbt) {
+    public Polygon3DArea(CompoundTag nbt) {
         this();
         this.deserializeNBT(nbt);
     }
@@ -72,11 +72,11 @@ public class Polygon3DArea extends AbstractArea {
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT nbt = new CompoundNBT();
-        ListNBT pointList = new ListNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = new CompoundTag();
+        ListTag pointList = new ListTag();
         this.positions.forEach((point) -> {
-            CompoundNBT pointNbt = NBTUtil.writeBlockPos(point);
+            CompoundTag pointNbt = NbtUtils.writeBlockPos(point);
             pointList.add(pointNbt);
         });
         nbt.put(AreaNBT.BLOCK_NODES, pointList);
@@ -84,11 +84,11 @@ public class Polygon3DArea extends AbstractArea {
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         this.positions.clear();
-        ListNBT pointList = nbt.getList(AreaNBT.BLOCK_NODES, Constants.NBT.TAG_COMPOUND);
+        ListTag pointList = nbt.getList(AreaNBT.BLOCK_NODES, Tag.TAG_COMPOUND);
         for (int i = 0; i < pointList.size(); i++) {
-            BlockPos pos = NBTUtil.readBlockPos(pointList.getCompound(i));
+            BlockPos pos = NbtUtils.readBlockPos(pointList.getCompound(i));
             this.positions.add(pos);
         }
     }

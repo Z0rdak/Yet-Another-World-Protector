@@ -2,28 +2,29 @@ package de.z0rdak.yawp.core.region;
 
 import de.z0rdak.yawp.core.area.CylinderArea;
 import de.z0rdak.yawp.util.constants.RegionNBT;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 public class CylinderRegion extends AbstractMarkableRegion {
 
-    public CylinderRegion(CompoundNBT nbt) {
+    public CylinderRegion(CompoundTag nbt) {
         this.deserializeNBT(nbt);
     }
 
-    public CylinderRegion(String name, CylinderArea area, PlayerEntity owner, RegistryKey<World> dimension) {
-        this(name, area, new BlockPos(area.getCenter()), owner, dimension);
+    public CylinderRegion(String name, CylinderArea area, Player owner, ResourceKey<Level> dimension) {
+        this(name, area, new BlockPos(area.getCenter().x, area.getCenter().y, area.getCenter().z), owner, dimension);
     }
 
-    public CylinderRegion(String name, CylinderArea area, BlockPos tpPos, PlayerEntity owner, RegistryKey<World> dimension) {
+    public CylinderRegion(String name, CylinderArea area, BlockPos tpPos, Player owner, ResourceKey<Level> dimension) {
         super(name, area, tpPos, owner, dimension);
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
         this.area = new CylinderArea(nbt.getCompound(RegionNBT.AREA));
     }

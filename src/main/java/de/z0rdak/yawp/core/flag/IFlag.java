@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.core.flag;
 
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
 
 /**
@@ -37,7 +37,7 @@ import net.minecraftforge.common.util.INBTSerializable;
  * /rs trigger <region> on-leave clear-xp
  *
  */
-public interface IFlag extends INBTSerializable<CompoundNBT> {
+public interface IFlag extends INBTSerializable<CompoundTag> {
 
     /**
      * Mod:Name -> ResourceLocation in future

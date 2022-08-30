@@ -9,30 +9,25 @@ import de.z0rdak.yawp.core.stick.AbstractStick;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.*;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.DimensionArgument;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.world.World;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static de.z0rdak.yawp.util.CommandUtil.*;
-import static net.minecraft.command.ISuggestionProvider.suggest;
-
 public class RegionCommands {
 
-    public static final LiteralArgumentBuilder<CommandSource> REGION_COMMAND = registerRegionCommands();
-    public static final LiteralArgumentBuilder<CommandSource> REGIONS_COMMAND = registerRegionsCommands();
+    public static final LiteralArgumentBuilder<CommandSourceStack> REGION_COMMAND = registerRegionCommands();
+    public static final LiteralArgumentBuilder<CommandSourceStack> REGIONS_COMMAND = registerRegionsCommands();
 
     private RegionCommands() {
     }
 
-    public static LiteralArgumentBuilder<CommandSource> registerRegionsCommands(){
+    public static LiteralArgumentBuilder<CommandSourceStack> registerRegionsCommands(){
 
         return CommandUtil.literal(CommandConstants.REGIONS);
     }
@@ -44,26 +39,26 @@ public class RegionCommands {
     /**
      *
      */
-    public static LiteralArgumentBuilder<CommandSource> registerRegionCommands() {
+    public static LiteralArgumentBuilder<CommandSourceStack> registerRegionCommands() {
         return CommandUtil.literal(CommandConstants.REGION)
                 .executes(ctx -> promptHelp(ctx.getSource()))
                 .then(CommandUtil.literal(CommandConstants.HELP)
                         .executes(ctx -> promptHelp(ctx.getSource())));
     }
 
-    private static int removeRegion(CommandSource source, String regionName, RegistryKey<World> dim) {
+    private static int removeRegion(CommandSourceStack source, String regionName, ResourceKey<Level> dim) {
         return 0;
     }
 
-    private static int info(CommandSource source, String regionName) {
+    private static int info(CommandSourceStack source, String regionName) {
 
         return 0;
     }
 
-    private static int setActiveStates(CommandSource source, RegistryKey<World> dim, boolean activate) {
+    private static int setActiveStates(CommandSourceStack source, ResourceKey<Level> dim, boolean activate) {
         try {
             // TODO: Handle errors and give feedback to player
-            PlayerEntity player = source.getPlayerOrException();
+            Player player = source.getPlayerOrException();
             Collection<IMarkableRegion> regionsToProcess = RegionDataManager.get().getRegionsFor(dim);
             RegionDataManager.get().setActiveState(regionsToProcess, activate);
         } catch (CommandSyntaxException e) {
@@ -72,10 +67,10 @@ public class RegionCommands {
         return 0;
     }
 
-    private static int setActiveState(CommandSource source, String regionName, RegistryKey<World> dim, boolean activate) {
+    private static int setActiveState(CommandSourceStack source, String regionName, ResourceKey<Level> dim, boolean activate) {
         try {
             // TODO: Handle errors and give feedback to player
-            PlayerEntity player = source.getPlayerOrException();
+            Player player = source.getPlayerOrException();
             Collection<IMarkableRegion> regionsToProcess = new ArrayList<>();
             IMarkableRegion region = RegionDataManager.get().getRegionIn(regionName, dim);
             if (region != null) {
@@ -88,12 +83,12 @@ public class RegionCommands {
         return 0;
     }
 
-    private static int setAlertState(CommandSource source, String regionName, boolean mute) {
+    private static int setAlertState(CommandSourceStack source, String regionName, boolean mute) {
 
         return 0;
     }
 
-    private static int promptHelp(CommandSource src) {
+    private static int promptHelp(CommandSourceStack src) {
         MessageUtil.sendCmdFeedback(src, MessageUtil.buildHelpHeader("help.region.header"));
         MessageUtil.sendCmdFeedback(src, MessageUtil.buildHelpSuggestionLink("help.region.1", CommandConstants.REGION, CommandConstants.CREATE));
         MessageUtil.sendCmdFeedback(src, MessageUtil.buildHelpSuggestionLink("help.region.2", CommandConstants.REGION, CommandConstants.UPDATE));
@@ -107,7 +102,7 @@ public class RegionCommands {
         return 0;
     }
 
-    private static int promptRegionList(CommandSource source) {
+    private static int promptRegionList(CommandSourceStack source) {
         try {
             promptRegionListForDim(source, source.getPlayerOrException().getCommandSenderWorld().dimension());
         } catch (CommandSyntaxException e) {
@@ -116,12 +111,12 @@ public class RegionCommands {
         return 0;
     }
 
-    private static int promptRegionListForDim(CommandSource source, RegistryKey<World> dim) {
+    private static int promptRegionListForDim(CommandSourceStack source, ResourceKey<Level> dim) {
 
         return 0;
     }
 
-    private static int createRegion(CommandSource source, String regionName, RegistryKey<World> dim) {
+    private static int createRegion(CommandSourceStack source, String regionName, ResourceKey<Level> dim) {
         try {
             createRegion(source, regionName, dim, source.getPlayerOrException());
         } catch (CommandSyntaxException e) {
@@ -130,15 +125,15 @@ public class RegionCommands {
         return 0;
     }
 
-    private static int createRegion(CommandSource source, String regionName, RegistryKey<World> dim, PlayerEntity owner) {
+    private static int createRegion(CommandSourceStack source, String regionName, ResourceKey<Level> dim, Player owner) {
         try {
-            PlayerEntity player = source.getPlayerOrException();
+            Player player = source.getPlayerOrException();
             ItemStack maybeStick = player.getMainHandItem();
             // TODO: create a method which trhows exception on trying to get stick
             if (StickUtil.isVanillaStick(maybeStick)) {
                 StickType stickType = StickUtil.getStickType(maybeStick);
                 if (stickType == StickType.MARKER) {
-                    CompoundNBT stickNBT = StickUtil.getStickNBT(maybeStick);
+                    CompoundTag stickNBT = StickUtil.getStickNBT(maybeStick);
                     if (stickNBT != null) {
                         AbstractMarkableRegion region = RegionUtil.regionFrom(source.getPlayerOrException(), new MarkerStick(stickNBT), regionName);
                         // TODO
@@ -152,9 +147,9 @@ public class RegionCommands {
     }
 
     // assumption: regions are only updated with the region marker when in the same dimension
-    private static int updateRegion(CommandSource source, String regionName) {
+    private static int updateRegion(CommandSourceStack source, String regionName) {
         try {
-            PlayerEntity player = source.getPlayerOrException();
+            Player player = source.getPlayerOrException();
             ItemStack maybeStick = player.getMainHandItem();
             if (StickUtil.isVanillaStick(maybeStick)) {
                 try {
@@ -174,27 +169,27 @@ public class RegionCommands {
         return 0;
     }
 
-    private static int removeRegions(CommandSource source, RegistryKey<World> dim) {
+    private static int removeRegions(CommandSourceStack source, ResourceKey<Level> dim) {
         try {
             //
-            PlayerEntity player = source.getPlayerOrException();
+            Player player = source.getPlayerOrException();
         } catch (CommandSyntaxException e) {
             e.printStackTrace();
         }
         return 0;
     }
 
-    private static int listRegionsAround(CommandSource source) {
+    private static int listRegionsAround(CommandSourceStack source) {
 
         return 0;
     }
 
-    private static int teleport(CommandSource source, String regionName, RegistryKey<World> dim) {
+    private static int teleport(CommandSourceStack source, String regionName, ResourceKey<Level> dim) {
         // use execute in dim for tp because of different dimensions
         return 0;
     }
 
-    private static int setPriority(CommandSource source, String region, int priority) {
+    private static int setPriority(CommandSourceStack source, String region, int priority) {
 
         return 0;
     }

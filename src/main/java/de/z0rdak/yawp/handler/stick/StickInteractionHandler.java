@@ -2,14 +2,14 @@ package de.z0rdak.yawp.handler.stick;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.util.StickType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.player.AnvilRepairEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -28,15 +28,15 @@ public class StickInteractionHandler {
     @SubscribeEvent
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (!event.getWorld().isClientSide) {
-            PlayerEntity player = event.getPlayer();
+            Player player = event.getPlayer();
             ItemStack involvedItemStack = event.getItemStack();
             if (!involvedItemStack.equals(ItemStack.EMPTY) && isVanillaStick(involvedItemStack)) {
                 StickType stickType = getStickType(involvedItemStack);
 
                 boolean isShiftPressed = player.isShiftKeyDown();
-                BlockRayTraceResult blockRayTraceResult = event.getHitVec();
+                BlockHitResult blockRayTraceResult = event.getHitVec();
                 BlockPos pos = blockRayTraceResult.getBlockPos();
-                RayTraceResult.Type traceResultType = blockRayTraceResult.getType();
+                HitResult.Type traceResultType = blockRayTraceResult.getType();
 
                 switch (stickType) {
                     case MARKER:
@@ -67,14 +67,14 @@ public class StickInteractionHandler {
             if (!involvedItemStack.equals(ItemStack.EMPTY)
                     && hasNonNullTag(involvedItemStack)
                     && involvedItemStack.getTag().contains(STICK)) {
-                RayTraceResult blockLookingAt = event.getPlayer().pick(20.0d, 0.0f, false);
+                HitResult blockLookingAt = event.getPlayer().pick(20.0d, 0.0f, false);
                 boolean targetIsAir;
-                if (blockLookingAt.getType() == RayTraceResult.Type.BLOCK) {
-                    BlockPos blockpos = ((BlockRayTraceResult) blockLookingAt).getBlockPos();
+                if (blockLookingAt.getType() == HitResult.Type.BLOCK) {
+                    BlockPos blockpos = ((BlockHitResult) blockLookingAt).getBlockPos();
                     BlockState blockstate = event.getWorld().getBlockState(blockpos);
                     targetIsAir = blockstate.getBlock().equals(Blocks.AIR);
                 } else {
-                    targetIsAir = blockLookingAt.getType() == RayTraceResult.Type.MISS;
+                    targetIsAir = blockLookingAt.getType() == HitResult.Type.MISS;
                 }
 
                 if (event.getPlayer().isShiftKeyDown() && targetIsAir) {
@@ -104,7 +104,7 @@ public class StickInteractionHandler {
      */
     @SubscribeEvent
     public static void onStickRename(AnvilRepairEvent event) {
-        PlayerEntity player = event.getPlayer();
+        Player player = event.getPlayer();
         if (!player.getCommandSenderWorld().isClientSide) {
             ItemStack outputItem = event.getItemResult();
             ItemStack inputItem = event.getItemInput();
@@ -126,7 +126,7 @@ public class StickInteractionHandler {
      * @param event the event data from renaming the stick item
      */
     private static void onCreateStick(AnvilRepairEvent event) {
-        PlayerEntity player = event.getPlayer();
+        Player player = event.getPlayer();
         ItemStack outputItem = event.getItemResult();
         ItemStack inputItem = event.getItemInput();
         StickType type = StickType.of(outputItem.getHoverName().getString());

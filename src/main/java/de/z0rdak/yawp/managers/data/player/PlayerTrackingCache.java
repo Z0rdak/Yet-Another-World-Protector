@@ -1,10 +1,10 @@
 package de.z0rdak.yawp.managers.data.player;
 
 import de.z0rdak.yawp.core.region.IMarkableRegion;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.world.World;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import java.util.HashMap;
@@ -22,11 +22,11 @@ Related:
 /**
  * Cache for player tracking near regions to handle enter and leaving events
  */
-public class PlayerTrackingCache extends HashMap<PlayerEntity, List<IMarkableRegion>> implements INBTSerializable<CompoundNBT> {
+public class PlayerTrackingCache extends HashMap<Player, List<IMarkableRegion>> implements INBTSerializable<CompoundTag> {
 
-    public final RegistryKey<World> dimKey;
+    public final ResourceKey<Level> dimKey;
 
-    public PlayerTrackingCache(RegistryKey<World> dim){
+    public PlayerTrackingCache(ResourceKey<Level> dim){
         this.dimKey = dim;
     }
     
@@ -46,12 +46,12 @@ public class PlayerTrackingCache extends HashMap<PlayerEntity, List<IMarkableReg
 */
 
     @Override
-    public CompoundNBT serializeNBT() {
+    public CompoundTag serializeNBT() {
         return null;
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
 
     }
 }

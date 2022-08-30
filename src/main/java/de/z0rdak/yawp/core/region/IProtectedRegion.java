@@ -3,9 +3,9 @@ package de.z0rdak.yawp.core.region;
 import de.z0rdak.yawp.core.affiliation.PlayerContainer;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.scoreboard.Team;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.scores.Team;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import java.util.Collection;
@@ -21,9 +21,9 @@ import java.util.Collection;
  * active or not.
  * <p>
  * Classes which implement this interface must also provide a way
- * to serialize the region data into a CompoundNBT.
+ * to serialize the region data into a CompoundTag.
  */
-public interface IProtectedRegion extends INBTSerializable<CompoundNBT> {
+public interface IProtectedRegion extends INBTSerializable<CompoundTag> {
 
     String getName();
 
@@ -38,17 +38,17 @@ public interface IProtectedRegion extends INBTSerializable<CompoundNBT> {
 
     Collection<IFlag> getFlags();
 
-    void addMember(PlayerEntity player);
+    void addMember(Player player);
 
     void addMember(Team team);
 
-    void addOwner(PlayerEntity player);
+    void addOwner(Player player);
 
     void addOwner(Team team);
 
-    void removeMember(PlayerEntity player);
+    void removeMember(Player player);
 
-    void removeOwner(PlayerEntity player);
+    void removeOwner(Player player);
 
     void removeMember(Team team);
 
@@ -62,5 +62,5 @@ public interface IProtectedRegion extends INBTSerializable<CompoundNBT> {
 
     PlayerContainer getOwners();
 
-    boolean permits(PlayerEntity player);
+    boolean permits(Player player);
 }

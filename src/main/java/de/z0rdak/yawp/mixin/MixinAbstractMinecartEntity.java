@@ -1,26 +1,27 @@
 package de.z0rdak.yawp.mixin;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.extensions.IForgeEntityMinecart;
+import net.minecraftforge.common.extensions.IForgeAbstractMinecart;
+import net.minecraftforge.common.extensions.IForgeEntity;
 import org.spongepowered.asm.mixin.Mixin;
 
 import javax.annotation.Nullable;
 
-@Mixin(AbstractMinecartEntity.class)
-public abstract class MixinAbstractMinecartEntity extends Entity implements IForgeEntityMinecart {
+@Mixin(AbstractMinecart.class)
+public abstract class MixinAbstractMinecartEntity extends Entity implements IForgeAbstractMinecart {
 
-    public MixinAbstractMinecartEntity(EntityType<?> entityTypeIn, World worldIn) {
+    public MixinAbstractMinecartEntity(EntityType<?> entityTypeIn, Level worldIn) {
         super(entityTypeIn, worldIn);
     }
 
     @Nullable
     @Override
-    public Entity changeDimension(ServerWorld server) {
+    public Entity changeDimension(ServerLevel server) {
         if (!ForgeHooks.onTravelToDimension(this, server.dimension())) {
             return null;
         }

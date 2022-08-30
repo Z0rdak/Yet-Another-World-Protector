@@ -8,27 +8,28 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.commands.CommandConstants;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.DimensionArgument;
-import net.minecraft.command.arguments.EntityArgument;
-import net.minecraft.command.arguments.TeamArgument;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.scoreboard.ScorePlayerTeam;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.world.World;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.DimensionArgument;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.TeamArgument;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.scores.PlayerTeam;
+import net.minecraftforge.registries.RegistryObject;
 
 public class CommandUtil {
 
-    public static LiteralArgumentBuilder<CommandSource> literal(CommandConstants constant) {
+    public static LiteralArgumentBuilder<CommandSourceStack> literal(CommandConstants constant) {
         return Commands.literal(constant.toString());
     }
 
-    public static RegistryKey<World> getDimensionArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
+    public static ResourceKey<Level> getDimensionArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         return DimensionArgument.getDimension(ctx, CommandConstants.DIMENSION.toString()).dimension();
     }
 
-    public static ServerPlayerEntity getPlayerArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
+    public static ServerPlayer getPlayerArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         return EntityArgument.getPlayer(ctx, CommandConstants.PLAYER.toString());
     }
 
@@ -37,35 +38,35 @@ public class CommandUtil {
     }
 
 
-    public static String getRegionNameArgument(CommandContext<CommandSource> ctx) {
+    public static String getRegionNameArgument(CommandContext<CommandSourceStack> ctx) {
         return StringArgumentType.getString(ctx, CommandConstants.REGION.toString());
     }
 
-    public static String getFlagNameArgument(CommandContext<CommandSource> ctx) {
+    public static String getFlagNameArgument(CommandContext<CommandSourceStack> ctx) {
         return StringArgumentType.getString(ctx, CommandConstants.FLAG.toString());
     }
 
-    public static String getAssociateArgument(CommandContext<CommandSource> ctx) {
+    public static String getAssociateArgument(CommandContext<CommandSourceStack> ctx) {
         return StringArgumentType.getString(ctx, CommandConstants.AFFILIATION.toString());
     }
 
-    public static ServerPlayerEntity getOwnerArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
+    public static ServerPlayer getOwnerArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         return EntityArgument.getPlayer(ctx, CommandConstants.OWNER.toString());
     }
 
-    public static ScorePlayerTeam getTeamArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
+    public static PlayerTeam getTeamArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         return TeamArgument.getTeam(ctx, CommandConstants.TEAM.toString());
     }
 
-    public static boolean getActivateArgument(CommandContext<CommandSource> ctx) {
+    public static boolean getActivateArgument(CommandContext<CommandSourceStack> ctx) {
         return BoolArgumentType.getBool(ctx, CommandConstants.ACTIVATE.toString());
     }
 
-    public static boolean getEnableArgument(CommandContext<CommandSource> ctx) {
+    public static boolean getEnableArgument(CommandContext<CommandSourceStack> ctx) {
         return BoolArgumentType.getBool(ctx, CommandConstants.ENABLE.toString());
     }
 
-    public static int getPriorityArgument(CommandContext<CommandSource> ctx) {
+    public static int getPriorityArgument(CommandContext<CommandSourceStack> ctx) {
         return IntegerArgumentType.getInteger(ctx, CommandConstants.PRIORITY.toString());
     }
 

@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.handler.flags;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.math.Vector3d;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.core.flag.RegionFlag;
@@ -8,39 +9,41 @@ import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.MessageUtil;
-import net.minecraft.block.*;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.item.minecart.ContainerMinecartEntity;
-import net.minecraft.entity.merchant.villager.VillagerEntity;
-import net.minecraft.entity.merchant.villager.WanderingTraderEntity;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.Items;
-import net.minecraft.state.properties.BlockStateProperties;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.ITag;
-import net.minecraft.tileentity.EnderChestTileEntity;
-import net.minecraft.tileentity.LecternTileEntity;
-import net.minecraft.tileentity.LockableTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.World;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.WanderingTrader;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ShovelItem;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.entity.*;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.ToolType;
+import net.minecraftforge.common.ToolAction;
+import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
+import net.minecraftforge.event.entity.EntityTeleportEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.*;
@@ -50,8 +53,10 @@ import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.tags.ITag;
 
 import java.util.List;
+import java.util.spi.ToolProvider;
 
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.getEntityDim;
@@ -69,8 +74,7 @@ public final class PlayerFlagHandler {
     @SubscribeEvent
     public static void onAttackPlayer(AttackEntityEvent event) {
         if (!event.getPlayer().getCommandSenderWorld().isClientSide) {
-            if (event.getTarget() instanceof PlayerEntity) {
-                PlayerEntity target = (PlayerEntity) event.getTarget();
+            if (event.getTarget() instanceof Player target) {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
                 if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                     DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
@@ -91,7 +95,7 @@ public final class PlayerFlagHandler {
      */
     @SubscribeEvent
     public static void onAttackEntity(AttackEntityEvent event) {
-        PlayerEntity player = event.getPlayer();
+        Player player = event.getPlayer();
         Entity eventEntity = event.getTarget();
         DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
         if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
@@ -99,25 +103,25 @@ public final class PlayerFlagHandler {
             if (!event.getTarget().getCommandSenderWorld().isClientSide) {
                 if (isAnimal(eventEntity)) {
                     if (dimRegion.containsFlag(RegionFlag.ATTACK_ANIMALS) && !dimRegion.permits(player)) {
-                        MessageUtil.sendMessage(player, new TranslationTextComponent("message.event.mobs.hurt_animal"));
+                        MessageUtil.sendMessage(player, new TranslatableComponent("message.event.mobs.hurt_animal"));
                         event.setCanceled(true);
                     }
                 }
                 if (isMonster(eventEntity)) {
                     if (dimRegion.containsFlag(RegionFlag.ATTACK_MONSTERS) && !dimRegion.permits(player)) {
-                        MessageUtil.sendMessage(player, new TranslationTextComponent("message.event.mobs.hurt_monster"));
+                        MessageUtil.sendMessage(player, new TranslatableComponent("message.event.mobs.hurt_monster"));
                         event.setCanceled(true);
                     }
                 }
-                if (event.getTarget() instanceof VillagerEntity) {
+                if (event.getTarget() instanceof Villager) {
                     if (dimRegion.containsFlag(RegionFlag.ATTACK_VILLAGERS) && !dimRegion.permits(player)) {
-                        MessageUtil.sendMessage(player, new TranslationTextComponent("message.event.mobs.hurt_villager"));
+                        MessageUtil.sendMessage(player, new TranslatableComponent("message.event.mobs.hurt_villager"));
                         event.setCanceled(true);
                     }
                 }
-                if (event.getTarget() instanceof WanderingTraderEntity) {
+                if (event.getTarget() instanceof WanderingTrader) {
                     if (dimRegion.containsFlag(RegionFlag.ATTACK_WANDERING_TRADER) && !dimRegion.permits(player)) {
-                        MessageUtil.sendMessage(player, new TranslationTextComponent("message.event.mobs.hurt_villager"));
+                        MessageUtil.sendMessage(player, new TranslatableComponent("message.event.mobs.hurt_villager"));
                         event.setCanceled(true);
                     }
                 }
@@ -143,7 +147,7 @@ public final class PlayerFlagHandler {
 
     @SubscribeEvent
     public static void onBreedingAttempt(BabyEntitySpawnEvent event) {
-        PlayerEntity player = event.getCausedByPlayer();
+        Player player = event.getCausedByPlayer();
         if (player != null) {
             if (!player.getCommandSenderWorld().isClientSide) {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
@@ -155,7 +159,7 @@ public final class PlayerFlagHandler {
                         return;
                     }
 
-                    if (event.getParentA() instanceof VillagerEntity) {
+                    if (event.getParentA() instanceof Villager) {
                         // TODO: Test on Villagers and add extra flag
                     }
                 }
@@ -172,9 +176,9 @@ public final class PlayerFlagHandler {
      */
     @SubscribeEvent
     public static void onAnimalTameAttempt(AnimalTameEvent event) {
-        PlayerEntity player = event.getTamer();
+        Player player = event.getTamer();
         if (!player.getCommandSenderWorld().isClientSide) {
-            AnimalEntity animal = event.getAnimal();
+            Animal animal = event.getAnimal();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
@@ -189,7 +193,7 @@ public final class PlayerFlagHandler {
     @SubscribeEvent
     public static void onPlayerLevelChange(PlayerXpEvent.LevelChange event) {
         if (!event.getPlayer().getCommandSenderWorld().isClientSide) {
-            PlayerEntity player = event.getPlayer();
+            Player player = event.getPlayer();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
@@ -204,7 +208,7 @@ public final class PlayerFlagHandler {
     @SubscribeEvent
     public static void onPlayerXPChange(PlayerXpEvent.XpChange event) {
         if (!event.getPlayer().getCommandSenderWorld().isClientSide) {
-            PlayerEntity player = event.getPlayer();
+            Player player = event.getPlayer();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
@@ -220,14 +224,14 @@ public final class PlayerFlagHandler {
     @SubscribeEvent
     public static void onPlayerXpPickup(PlayerXpEvent.PickupXp event) {
         if (!event.getPlayer().getCommandSenderWorld().isClientSide) {
-            PlayerEntity player = event.getPlayer();
+            Player player = event.getPlayer();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                 if (dimRegion.containsFlag(RegionFlag.XP_PICKUP) && !dimRegion.permits(player)) {
                     MessageUtil.sendMessage(player, "message.protection.player.xp_pickup");
                     event.setCanceled(true);
-                    event.getOrb().remove();
+                    event.getOrb().remove(Entity.RemovalReason.DISCARDED);
                 }
             }
         }
@@ -244,9 +248,9 @@ public final class PlayerFlagHandler {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(dmgSourceEntity));
                 if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                     DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                    if (hurtEntity instanceof PlayerEntity && dmgSourceEntity instanceof PlayerEntity) {
-                        PlayerEntity playerTarget = (PlayerEntity) hurtEntity;
-                        PlayerEntity playerSource = (PlayerEntity) dmgSourceEntity;
+                    if (hurtEntity instanceof Player && dmgSourceEntity instanceof Player) {
+                        Player playerTarget = (Player) hurtEntity;
+                        Player playerSource = (Player) dmgSourceEntity;
                         // another check for PVP - this does not prevent knochback? but prevents dmg
                         if (!dimRegion.permits(playerSource) && dimRegion.containsFlag(RegionFlag.ATTACK_PLAYERS)) {
                             event.setCanceled(true);
@@ -270,10 +274,10 @@ public final class PlayerFlagHandler {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(dmgSourceEntity));
                 if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                     DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                    if (event.getEntityLiving() instanceof PlayerEntity) {
-                        PlayerEntity player = (PlayerEntity) event.getEntityLiving();
+                    if (event.getEntityLiving() instanceof Player) {
+                        Player player = (Player) event.getEntityLiving();
                         // another check for PVP - this does not prevent knochback? but prevents dmg
-                        if (dmgSourceEntity instanceof PlayerEntity && dimRegion.containsFlag(RegionFlag.ATTACK_PLAYERS)) {
+                        if (dmgSourceEntity instanceof Player && dimRegion.containsFlag(RegionFlag.ATTACK_PLAYERS)) {
                             event.setCanceled(true);
                             return;
                         }
@@ -293,8 +297,8 @@ public final class PlayerFlagHandler {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                if (event.getEntityLiving() instanceof PlayerEntity) {
-                    PlayerEntity dmgTargetEntity = (PlayerEntity) event.getEntityLiving();
+                if (event.getEntityLiving() instanceof Player) {
+                    Player dmgTargetEntity = (Player) event.getEntityLiving();
                     // another check for PVP - Prevents knockback
                     if (dimRegion.containsFlag(RegionFlag.ATTACK_PLAYERS)) {
                         event.setCanceled(true);
@@ -309,13 +313,13 @@ public final class PlayerFlagHandler {
     @SubscribeEvent
     public static void onPlayerBreakBlock(BlockEvent.BreakEvent event) {
         if (isServerSide(event)) {
-            PlayerEntity player = event.getPlayer();
+            Player player = event.getPlayer();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                 if (dimRegion.containsFlag(RegionFlag.BREAK_BLOCKS) && !dimRegion.permits(player)) {
                     event.setCanceled(true);
-                    MessageUtil.sendMessage(player, new TranslationTextComponent("message.event.protection.break_block"));
+                    MessageUtil.sendMessage(player, new TranslatableComponent("message.event.protection.break_block"));
                     return;
                 }
             }
@@ -325,14 +329,14 @@ public final class PlayerFlagHandler {
     @SubscribeEvent
     public static void onPlayerPlaceBlock(BlockEvent.EntityPlaceEvent event) {
         if (isServerSide(event)) {
-            if (event.getEntity() != null && event.getEntity() instanceof PlayerEntity) {
-                PlayerEntity player = (PlayerEntity) event.getEntity();
+            if (event.getEntity() != null && event.getEntity() instanceof Player) {
+                Player player = (Player) event.getEntity();
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
                 if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                     DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                     if (dimRegion.containsFlag(RegionFlag.PLACE_BLOCKS) && !dimRegion.permits(player)) {
                         event.setCanceled(true);
-                        MessageUtil.sendMessage(player, new TranslationTextComponent("message.event.protection.place_block"));
+                        MessageUtil.sendMessage(player, new TranslatableComponent("message.event.protection.place_block"));
                     }
                 }
             }
@@ -365,11 +369,11 @@ public final class PlayerFlagHandler {
     public static void onExplosionStarted(ExplosionEvent.Start event) {
         if (!event.getWorld().isClientSide) {
             Explosion explosion = event.getExplosion();
-            if (explosion.getExploder() instanceof PlayerEntity) {
+            if (explosion.getExploder() instanceof Player) {
                 YetAnotherWorldProtector.LOGGER.info("@@@@@  @@@@@");
                 YetAnotherWorldProtector.LOGGER.info(explosion.getSourceMob());
                 YetAnotherWorldProtector.LOGGER.info("@@@@@  @@@@@");
-                PlayerEntity player = (PlayerEntity) explosion.getExploder();
+                Player player = (Player) explosion.getExploder();
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
                 if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                     DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
@@ -391,7 +395,7 @@ public final class PlayerFlagHandler {
     @SubscribeEvent
     public static void onBonemealUse(BonemealEvent event) {
         if (!event.getWorld().isClientSide) {
-            PlayerEntity player = (PlayerEntity) event.getEntity();
+            Player player = (Player) event.getEntity();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
@@ -406,7 +410,7 @@ public final class PlayerFlagHandler {
 
     @SubscribeEvent
     public static void onPlayerUseEnderPearl(EntityTeleportEvent event) {
-        World world = event.getEntity().level;
+        Level world = event.getEntity().level;
         if (!world.isClientSide) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.dimension());
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
@@ -414,7 +418,7 @@ public final class PlayerFlagHandler {
                 // handle player teleportation using ender pearls
                 if (event instanceof EntityTeleportEvent.EnderPearl) {
                     EntityTeleportEvent.EnderPearl enderPearlEvent = (EntityTeleportEvent.EnderPearl) event;
-                    ServerPlayerEntity player = enderPearlEvent.getPlayer();
+                    ServerPlayer player = enderPearlEvent.getPlayer();
                     if ((dimRegion.containsFlag(RegionFlag.USE_ENDERPEARL_FROM_REGION)
                             || dimRegion.containsFlag(RegionFlag.USE_ENDERPEARL_TO_REGION))
                             && !dimRegion.permits(player)) {
@@ -437,32 +441,37 @@ public final class PlayerFlagHandler {
      * @param event
      */
     @SubscribeEvent
-    public static void onPlayerUseToolSecondary(BlockEvent.BlockToolInteractEvent event) {
+    public static void onPlayerUseToolSecondary(BlockEvent.BlockToolModificationEvent event) {
         if (!event.getWorld().isClientSide()) {
-            PlayerEntity player = event.getPlayer();
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
-            if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
-                DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                boolean playerNotPermitted = !dimRegion.permits(player);
-                if (dimRegion.containsFlag(RegionFlag.TOOL_SECONDARY_USE) && playerNotPermitted) {
-                    event.setCanceled(true);
-                    MessageUtil.sendMessage(player, "message.event.protection.tool_secondary_use");
-                    return;
-                }
-                if (event.getToolType() == ToolType.AXE && dimRegion.containsFlag(RegionFlag.AXE_STRIP) && playerNotPermitted) {
-                    event.setCanceled(true);
-                    MessageUtil.sendMessage(player, "message.event.protection.strip_wood");
-                    return;
-                }
-                if (event.getToolType() == ToolType.HOE && dimRegion.containsFlag(RegionFlag.HOE_TILL) && playerNotPermitted) {
-                    event.setCanceled(true);
-                    MessageUtil.sendMessage(player, "message.event.protection.till_farmland");
-                    return;
-                }
-                if (event.getToolType() == ToolType.SHOVEL && dimRegion.containsFlag(RegionFlag.SHOVEL_PATH) && playerNotPermitted) {
-                    event.setCanceled(true);
-                    MessageUtil.sendMessage(player, "message.event.protection.shovel_path");
-                    return;
+            if (!event.isSimulated()) {
+                Player player = event.getPlayer();
+                if (player != null) {
+                    DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
+                    if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
+                        DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
+                        boolean playerNotPermitted = !dimRegion.permits(player);
+                        if (dimRegion.containsFlag(RegionFlag.TOOL_SECONDARY_USE) && playerNotPermitted) {
+                            event.setCanceled(true);
+                            MessageUtil.sendMessage(player, "message.event.protection.tool_secondary_use");
+                            return;
+                        }
+                        if (event.getToolAction().equals(ToolActions.AXE_STRIP) && dimRegion.containsFlag(RegionFlag.AXE_STRIP) && playerNotPermitted)
+                        {
+                            event.setCanceled(true);
+                            MessageUtil.sendMessage(player, "message.event.protection.strip_wood");
+                            return;
+                        }
+                        if (event.getToolAction().equals(ToolActions.HOE_TILL) && dimRegion.containsFlag(RegionFlag.HOE_TILL) && playerNotPermitted) {
+                            event.setCanceled(true);
+                            MessageUtil.sendMessage(player, "message.event.protection.till_farmland");
+                            return;
+                        }
+                        if (event.getToolAction().equals(ToolActions.SHOVEL_FLATTEN) && dimRegion.containsFlag(RegionFlag.SHOVEL_PATH) && playerNotPermitted) {
+                            event.setCanceled(true);
+                            MessageUtil.sendMessage(player, "message.event.protection.shovel_path");
+                            return;
+                        }
+                    }
                 }
             }
         }
@@ -475,32 +484,32 @@ public final class PlayerFlagHandler {
     @SubscribeEvent
     public static void onPlayerRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (isServerSide(event)) {
-            PlayerEntity player = event.getPlayer();
-            TileEntity targetEntity = event.getWorld().getBlockEntity(event.getPos());
+            Player player = event.getPlayer();
+            BlockEntity targetEntity = event.getWorld().getBlockEntity(event.getPos());
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                boolean isLockableTileEntity = targetEntity instanceof LockableTileEntity;
-                boolean isEnderChest = targetEntity instanceof EnderChestTileEntity;
-                boolean isContainer = targetEntity instanceof LecternTileEntity || isLockableTileEntity;
+                boolean isLockableTileEntity = targetEntity instanceof BaseContainerBlockEntity;
+                boolean isEnderChest = targetEntity instanceof EnderChestBlockEntity;
+                boolean isContainer = targetEntity instanceof LecternBlockEntity || isLockableTileEntity;
                 boolean isPlayerProhibited = !dimRegion.permits(player);
 
                 // used to allow player to place blocks when shift clicking container or usable bock
-                boolean playerHasNoBlocksToPlaceInHands = player.getItemInHand(Hand.MAIN_HAND).getItem().equals(Items.AIR)
-                        && player.getItemInHand(Hand.OFF_HAND).getItem().equals(Items.AIR);
+                boolean playerHasNoBlocksToPlaceInHands = player.getItemInHand(InteractionHand.MAIN_HAND).getItem().equals(Items.AIR)
+                        && player.getItemInHand(InteractionHand.OFF_HAND).getItem().equals(Items.AIR);
 
-                BlockRayTraceResult pos = event.getHitVec();
-                if (pos != null && pos.getType() == RayTraceResult.Type.BLOCK) {
+                BlockHitResult pos = event.getHitVec();
+                if (pos != null && pos.getType() == HitResult.Type.BLOCK) {
                     BlockPos bPos = pos.getBlockPos();
                     Block target = event.getWorld().getBlockState(bPos).getBlock();
-                    boolean isUsableBlock = target instanceof AbstractButtonBlock ||
+                    boolean isUsableBlock = target instanceof ButtonBlock ||
                             target instanceof DoorBlock ||
                             target instanceof TrapDoorBlock ||
                             target instanceof LeverBlock ||
                             target instanceof NoteBlock ||
                             target instanceof FenceGateBlock ||
                             target instanceof DaylightDetectorBlock ||
-                            target instanceof RedstoneDiodeBlock ||
+                            target instanceof DiodeBlock ||
                             target instanceof LecternBlock ||
                             target instanceof BeaconBlock ||
                             target instanceof BrewingStandBlock;
@@ -536,13 +545,13 @@ public final class PlayerFlagHandler {
     @SubscribeEvent
     public static void onAccessMinecartChest(PlayerInteractEvent.EntityInteract event) {
         if (isServerSide(event)) {
-            PlayerEntity player = event.getPlayer();
+            Player player = event.getPlayer();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                 boolean containsChestAccess = dimRegion.containsFlag(RegionFlag.CONTAINER_ACCESS);
                 boolean playerHasPermission = dimRegion.permits(player);
-                boolean isMinecartContainer = event.getTarget() instanceof ContainerMinecartEntity;
+                boolean isMinecartContainer = event.getTarget() instanceof AbstractMinecartContainer;
 
                 if (containsChestAccess && !playerHasPermission && isMinecartContainer) {
                     event.setCanceled(true);
@@ -556,18 +565,18 @@ public final class PlayerFlagHandler {
     @SubscribeEvent
     public static void onSteppedOnActivator(BlockEvent.NeighborNotifyEvent event) {
         if (isServerSide(event)) {
-            World world = (World) event.getWorld();
+            Level world = (Level) event.getWorld();
             Block block = event.getWorld().getBlockState(event.getPos()).getBlock();
             BlockPos pos = event.getPos();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.dimension());
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                 boolean cancelEvent = false;
-                if (block instanceof AbstractPressurePlateBlock) {
+                if (block instanceof BasePressurePlateBlock) {
                     if (dimRegion.containsFlag(RegionFlag.USE)) {
-                        AxisAlignedBB areaAbovePressurePlate = new AxisAlignedBB(pos.getX() - 1, pos.getY(), pos.getZ() - 1, pos.getX() + 1, pos.getY() + 2, pos.getZ() + 1);
-                        List<PlayerEntity> players = ((World) event.getWorld()).getEntities(EntityType.PLAYER, areaAbovePressurePlate, (player) -> true);
-                        for (PlayerEntity player : players) {
+                        AABB areaAbovePressurePlate = new AABB(pos.getX() - 1, pos.getY(), pos.getZ() - 1, pos.getX() + 1, pos.getY() + 2, pos.getZ() + 1);
+                        List<Player> players = ((Level) event.getWorld()).getEntities(EntityType.PLAYER, areaAbovePressurePlate, (player) -> true);
+                        for (Player player : players) {
                             cancelEvent = cancelEvent || !dimRegion.permits(player);
                             MessageUtil.sendMessage(player, "message.event.interact.use");
                             event.setCanceled(cancelEvent);
@@ -582,11 +591,11 @@ public final class PlayerFlagHandler {
      * Note: Does not prevent from fluids generate additional blocks (cobble generator). Use BlockEvent.FluidPlaceBlockEvent for this
      *
      * @param event
-     */
+
     @SubscribeEvent
     public static void onBucketFill(FillBucketEvent event) {
         // Note: FilledBucket seems to always be null. use maxStackSize to determine bucket state (empty or filled)
-        PlayerEntity player = event.getPlayer();
+        Player player = event.getPlayer();
         if (!event.getWorld().isClientSide) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
@@ -597,7 +606,7 @@ public final class PlayerFlagHandler {
                     // placing fluid
                     if (bucketItemMaxStackCount == 1) {
                         if (dimRegion.containsFlag(RegionFlag.PLACE_FLUIDS) && !dimRegion.permits(player)) {
-                            MessageUtil.sendMessage(player, new TranslationTextComponent("message.event.protection.place_fluid"));
+                            MessageUtil.sendMessage(player, new TranslatableComponent("message.event.protection.place_fluid"));
                             event.setCanceled(true);
                             return;
                         }
@@ -606,16 +615,15 @@ public final class PlayerFlagHandler {
                     if (bucketItemMaxStackCount > 1) {
                         boolean isWaterlogged = false;
                         boolean isFluid = false;
-                        RayTraceResult pos = event.getTarget();
-                        if (pos != null && pos.getType() == RayTraceResult.Type.BLOCK) {
-                            Vector3d absPos = pos.getLocation();
+                        HitResult pos = event.getTarget();
+                        if (pos != null && pos.getType() == HitResult.Type.BLOCK) {
+                            Vec3 absPos = pos.getLocation();
                             BlockState blockState = event.getWorld().getBlockState(new BlockPos(absPos));
                             // check for waterlogged block
-                            if (blockState.getBlock() instanceof IWaterLoggable) {
+                            if (blockState.getBlock() instanceof SimpleWaterloggedBlock) {
                                 isWaterlogged = blockState.getValue(BlockStateProperties.WATERLOGGED);
                             }
                             // check if target has a fluid tag
-
                             for (ITag.INamedTag<Fluid> tag : FluidTags.getWrappers()) {
                                 if (blockState.getFluidState().getFluidState().is(tag)) {
                                     isFluid = true;
@@ -624,7 +632,7 @@ public final class PlayerFlagHandler {
                             }
                             if (isWaterlogged || isFluid) {
                                 if (dimRegion.containsFlag(RegionFlag.SCOOP_FLUIDS) && !dimRegion.permits(player)) {
-                                    MessageUtil.sendMessage(player, new TranslationTextComponent("message.event.protection.scoop_fluid"));
+                                    MessageUtil.sendMessage(player, new TranslatableComponent("message.event.protection.scoop_fluid"));
                                     event.setCanceled(true);
                                     return;
                                 }
@@ -645,13 +653,13 @@ public final class PlayerFlagHandler {
     @SubscribeEvent
     public static void onSendChat(ServerChatEvent event) {
         if (event.getPlayer() != null) {
-            ServerPlayerEntity player = event.getPlayer();
+            ServerPlayer player = event.getPlayer();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                 if (dimRegion.containsFlag(RegionFlag.SEND_MESSAGE) && !dimRegion.permits(player)) {
                     event.setCanceled(true);
-                    MessageUtil.sendMessage(player, new TranslationTextComponent("message.event.player.speak"));
+                    MessageUtil.sendMessage(player, new TranslatableComponent("message.event.player.speak"));
                 }
             }
         }
@@ -661,7 +669,7 @@ public final class PlayerFlagHandler {
     @SubscribeEvent
     public static void onCommandSend(CommandEvent event) {
         try {
-            PlayerEntity player = event.getParseResults().getContext().getSource().getPlayerOrException();
+            Player player = event.getParseResults().getContext().getSource().getPlayerOrException();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
@@ -685,7 +693,7 @@ public final class PlayerFlagHandler {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                PlayerEntity player = event.getPlayer();
+                Player player = event.getPlayer();
                 if (dimRegion.containsFlag(RegionFlag.SLEEP) && !dimRegion.permits(player)) {
                     MessageUtil.sendMessage(player, "message.event.player.sleep");
                     event.setResult(Event.Result.DENY);
@@ -702,7 +710,7 @@ public final class PlayerFlagHandler {
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                 BlockPos newSpawn = event.getNewSpawn();
-                PlayerEntity player = event.getPlayer();
+                Player player = event.getPlayer();
                 if (newSpawn != null) {
                     // attempt to set spawn
                     if (dimRegion.containsFlag(RegionFlag.SET_SPAWN) && !dimRegion.permits(player)) {
@@ -743,10 +751,10 @@ public final class PlayerFlagHandler {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                PlayerEntity player = event.getPlayer();
+                Player player = event.getPlayer();
                 if (dimRegion.containsFlag(RegionFlag.ITEM_DROP) && !dimRegion.permits(player)) {
                     event.setCanceled(true);
-                    player.inventory.add(event.getEntityItem().getItem());
+                    player.getInventory().add(event.getEntityItem().getItem());
                     MessageUtil.sendMessage(player, "message.event.player.drop_item");
                     return;
                 }
@@ -764,20 +772,16 @@ public final class PlayerFlagHandler {
         if (!event.getWorldObj().isClientSide) {
             Entity entityBeingMounted = event.getEntityBeingMounted();
             // could be mob that dismounts because entity being mounted dies?
-            boolean playerAttemptsMounting = event.getEntityMounting() instanceof PlayerEntity;
+            boolean playerAttemptsMounting = event.getEntityMounting() instanceof Player;
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntityMounting()));
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                 if (playerAttemptsMounting) {
-                    PlayerEntity player = (PlayerEntity) event.getEntityMounting();
-
-                    // TODO: Wait for 1.17: https://bugs.mojang.com/browse/MC-202202
-                /*
-                if (event.isDismounting() && dimRegion.containsFlag(RegionFlag.ANIMAL_UNMOUNTING) && !dimRegion.permits(player)) {
-                    event.setCanceled(true); // Does not correctly unmount player
-                    MessageUtil.sendMessage(player, "message.event.player.unmount");
-                }
-                */
+                    Player player = (Player) event.getEntityMounting();
+                    if (event.isDismounting() && dimRegion.containsFlag(RegionFlag.ANIMAL_UNMOUNTING) && !dimRegion.permits(player)) {
+                        event.setCanceled(true); // Does not correctly unmount player
+                        MessageUtil.sendMessage(player, "message.event.player.unmount");
+                    }
                     if (event.isMounting() && dimRegion.containsFlag(RegionFlag.ANIMAL_MOUNTING) && !dimRegion.permits(player)) {
                         event.setCanceled(true);
                         MessageUtil.sendMessage(player, "message.event.player.mount");

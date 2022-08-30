@@ -1,8 +1,8 @@
 package de.z0rdak.yawp.test.common.core.area;
 
 import de.z0rdak.yawp.core.area.Polygon3DArea;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import org.junit.jupiter.api.BeforeAll;
 
 import java.util.ArrayList;
@@ -58,7 +58,7 @@ public class Polygon3DAreaTest {
 
 
     public void testSerialization(){
-        CompoundNBT nbt = area.serializeNBT();
+        CompoundTag nbt = area.serializeNBT();
         Polygon3DArea polygon3DArea = new Polygon3DArea(nbt);
 
         assertEquals(polygon3DArea.getAreaType(), area.getAreaType());
