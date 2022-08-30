@@ -19,7 +19,6 @@ import java.util.Map;
 /**
  * Data manger to save player tracking data for players entering and leaving regions
  */
-@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID)
 public class PlayerTrackingManager {
 
     public final static Map<RegistryKey<World>, PlayerTrackingCache> playerTrackingPerDim  = new HashMap<>(3); // amount of dims
@@ -48,7 +47,7 @@ public class PlayerTrackingManager {
 
 
 
-    @SubscribeEvent
+    //@SubscribeEvent
     public static void onChunkLoad(ChunkEvent.Load event) {
         if (!event.getWorld().isClientSide()) {
             if (event.getChunk().getWorldForge() instanceof ServerWorld) {
@@ -67,12 +66,12 @@ public class PlayerTrackingManager {
         }
     }
 
-    @SubscribeEvent
+    //@SubscribeEvent
     public static void onChunkUnload(ChunkEvent.Unload event) {
 
     }
 
-    @SubscribeEvent
+    //@SubscribeEvent
     public static void onChunkChange(EntityEvent.EnteringChunk event) {
         if (!event.getEntity().getCommandSenderWorld().isClientSide) {
 
