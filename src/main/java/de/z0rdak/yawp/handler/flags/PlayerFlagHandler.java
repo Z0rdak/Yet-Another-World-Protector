@@ -315,7 +315,7 @@ public final class PlayerFlagHandler {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                 if (dimRegion.containsFlag(RegionFlag.BREAK_BLOCKS) && !dimRegion.permits(player)) {
                     event.setCanceled(true);
-                    MessageUtil.sendMessage(player, new TranslationTextComponent("message.event.protection.break_block"));
+                    MessageUtil.sendStatusMessage(player, new TranslationTextComponent("message.event.protection.break_block"));
                     return;
                 }
             }
@@ -332,7 +332,7 @@ public final class PlayerFlagHandler {
                     DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                     if (dimRegion.containsFlag(RegionFlag.PLACE_BLOCKS) && !dimRegion.permits(player)) {
                         event.setCanceled(true);
-                        MessageUtil.sendMessage(player, new TranslationTextComponent("message.event.protection.place_block"));
+                        MessageUtil.sendStatusMessage(player, new TranslationTextComponent("message.event.protection.place_block"));
                     }
                 }
             }
