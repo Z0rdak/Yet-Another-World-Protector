@@ -11,6 +11,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -18,6 +19,8 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.network.FMLNetworkConstants;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,6 +43,8 @@ public class YetAnotherWorldProtector
             ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, RegionConfig.CONFIG_SPEC, MODID + "-region-defaults.toml" );
 
             MinecraftForge.EVENT_BUS.register(this);
+            // Prevent message about missing mod on client in server list
+            ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, ()-> Pair.of(()-> FMLNetworkConstants.IGNORESERVERONLY, (version, network) -> true));
 
         });
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
@@ -49,7 +54,7 @@ public class YetAnotherWorldProtector
     }
 
     private void setup(final FMLCommonSetupEvent event) {
-        if (isInModList("JourneyMap")) {
+        if (ModList.get().isLoaded("JourneyMap")) {
             YetAnotherWorldProtector.LOGGER.warn("Detected JourneyMap mod. Setting base command to '" + CommandPermissionConfig.WP_CMDS[2] + "'");
             CommandPermissionConfig.BASE_CMD = CommandPermissionConfig.WP_CMDS[2];
         }
@@ -76,11 +81,6 @@ public class YetAnotherWorldProtector
     @SubscribeEvent
     public void onConfigReloading(ModConfig.Reloading event) {
         // reset player uuids?
-    }
-
-
-    private static boolean isInModList(String modid) {
-        return ModList.get().isLoaded(modid);
     }
 
 }
