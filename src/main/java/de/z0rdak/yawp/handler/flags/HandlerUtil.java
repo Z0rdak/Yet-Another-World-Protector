@@ -49,7 +49,7 @@ public final class HandlerUtil {
     }
 
     public static boolean isServerSide(BlockEvent event){
-        return event.getWorld().isClientSide();
+        return !event.getWorld().isClientSide();
     }
 
     public static boolean isServerSide(Entity entity){
