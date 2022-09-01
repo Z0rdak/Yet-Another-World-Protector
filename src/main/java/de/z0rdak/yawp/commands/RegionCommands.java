@@ -18,11 +18,14 @@ import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.regex.Pattern;
 
 public class RegionCommands {
 
     public static final LiteralArgumentBuilder<CommandSourceStack> REGION_COMMAND = registerRegionCommands();
     public static final LiteralArgumentBuilder<CommandSourceStack> REGIONS_COMMAND = registerRegionsCommands();
+
+    public static final Pattern VALID_NAME_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z0-9\\-+]+$");
 
     private RegionCommands() {
     }
