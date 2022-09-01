@@ -7,15 +7,14 @@ import net.minecraft.nbt.CompoundTag;
  */
 public class ConditionFlag extends AbstractFlag {
 
-    public static final String FLAG_REGISTRY_NAME = "ConditionFlag";
+    public static final String CONDITION_FLAG = "ConditionFlag";
 
     public ConditionFlag(CompoundTag nbt){
-        this("", false);
-        this.deserializeNBT(nbt);
+        super(nbt);
     }
 
     public ConditionFlag(String flag, boolean isAllowed) {
-        super(flag, FLAG_REGISTRY_NAME, isAllowed);
+        super(flag, CONDITION_FLAG, isAllowed);
     }
 
     @Override

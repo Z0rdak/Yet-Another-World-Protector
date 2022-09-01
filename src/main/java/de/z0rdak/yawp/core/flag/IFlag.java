@@ -43,7 +43,7 @@ public interface IFlag extends INBTSerializable<CompoundTag> {
      * Mod:Name -> ResourceLocation in future
      * @return unique name for flag
      */
-    String getFlagName();
+    String getFlagIdentifier();
 
     /**
      * Lang key for a short concise description of the flag.
