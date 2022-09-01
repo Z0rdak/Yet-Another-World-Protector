@@ -28,7 +28,6 @@ public interface IProtectedRegion extends INBTSerializable<CompoundNBT> {
     String getName();
 
     void addFlag(IFlag flag);
-    void addFlag(String flag);
 
     void removeFlag(String flag);
 
