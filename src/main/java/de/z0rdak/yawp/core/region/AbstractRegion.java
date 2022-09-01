@@ -19,15 +19,12 @@ import java.util.regex.Pattern;
  * an area (dimensions).
  */
 public abstract class AbstractRegion implements IProtectedRegion {
-
-    public static final Pattern VALID_NAME_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z0-9\\-+]+$");
     private String name;
     private FlagContainer flags;
     private PlayerContainer owners;
     private PlayerContainer members;
     private boolean isActive;
 
-    // TODO: (command) define region with members/owners
     protected AbstractRegion(String name) {
         this.name = name;
         this.flags = new FlagContainer();
@@ -53,16 +50,11 @@ public abstract class AbstractRegion implements IProtectedRegion {
 
     @Override
     public void addFlag(IFlag flag){
-        this.flags.put(flag.getFlagName(), flag);
-    }
-
-    @Override
-    public void addFlag(String flag){
-        this.flags.put(flag, new ConditionFlag(flag, false));
+        this.flags.put(flag);
     }
 
     public boolean containsFlag(IFlag flag) {
-        return this.flags.containsKey(flag.getFlagName());
+        return this.flags.contains(flag);
 }
 
     @Override
@@ -71,12 +63,12 @@ public abstract class AbstractRegion implements IProtectedRegion {
     }
 
     public boolean containsFlag(RegionFlag flag) {
-        return this.flags.containsKey(flag.flagname);
+        return this.flags.contains(flag.flag);
     }
 
     @Override
     public Collection<IFlag> getFlags() {
-        return Collections.unmodifiableList(new ArrayList<>(this.flags.values()));
+        return List.copyOf(this.flags.values());
     }
 
     @Override
