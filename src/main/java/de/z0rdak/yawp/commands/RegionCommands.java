@@ -20,6 +20,7 @@ import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.regex.Pattern;
 
 import static de.z0rdak.yawp.util.CommandUtil.*;
 import static net.minecraft.command.ISuggestionProvider.suggest;
@@ -28,6 +29,8 @@ public class RegionCommands {
 
     public static final LiteralArgumentBuilder<CommandSource> REGION_COMMAND = registerRegionCommands();
     public static final LiteralArgumentBuilder<CommandSource> REGIONS_COMMAND = registerRegionsCommands();
+
+    public static final Pattern VALID_NAME_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z0-9\\-+]+$");
 
     private RegionCommands() {
     }
