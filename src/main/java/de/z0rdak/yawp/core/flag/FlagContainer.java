@@ -20,12 +20,12 @@ public class FlagContainer extends HashMap<String, IFlag> implements INBTSeriali
 
     public FlagContainer(IFlag flag) {
         this();
-        this.put(flag.getFlagName(), flag);
+        this.put(flag);
     }
 
     public FlagContainer(Set<IFlag> flags) {
         this();
-        flags.forEach( flag -> this.put(flag.getFlagName(), flag));
+        flags.forEach(this::put);
     }
 
     @Override
@@ -42,5 +42,13 @@ public class FlagContainer extends HashMap<String, IFlag> implements INBTSeriali
             CompoundNBT flag = nbt.getCompound(key);
             this.put(key, new ConditionFlag(flag));
         });
+    }
+
+    public void put(IFlag flag){
+        this.put(flag.getFlagIdentifier(), flag);
+    }
+
+    public boolean contains(IFlag flag){
+        return this.containsKey(flag.getFlagIdentifier());
     }
 }
