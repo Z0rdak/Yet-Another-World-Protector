@@ -43,13 +43,7 @@ public interface IFlag extends INBTSerializable<CompoundNBT> {
      * Mod:Name -> ResourceLocation in future
      * @return unique name for flag
      */
-    String getFlagName();
-
-    /**
-     * Lang key for a short concise description of the flag.
-     * @return lang key for a description
-     */
-    String getFlagDescription();
+    String getFlagIdentifier();
 
     String getFlagType();
 
