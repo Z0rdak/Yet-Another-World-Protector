@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.core.flag;
 
+import de.z0rdak.yawp.util.constants.RegionNBT;
 import net.minecraft.nbt.CompoundNBT;
 
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
@@ -7,24 +8,24 @@ import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 public abstract class AbstractFlag implements IFlag {
 
     protected String flagIdentifier;
-    protected String flagType;
+    protected FlagType flagType;
 
     protected boolean isActive;
-    protected boolean isAllowed;
+    protected boolean inverted;
 
-    public AbstractFlag(String flagIdentifier, String flagType){
+    public AbstractFlag(String flagIdentifier, FlagType flagType){
         this(flagIdentifier, flagType, false, true);
     }
 
-    public AbstractFlag(String flagIdentifier, String flagType, boolean isAllowed){
-        this(flagIdentifier, flagType, isAllowed, true);
+    public AbstractFlag(String flagIdentifier, FlagType flagType, boolean inverted){
+        this(flagIdentifier, flagType, inverted, true);
     }
 
-    public AbstractFlag(String flagIdentifier, String flagType, boolean isAllowed, boolean isActive){
+    public AbstractFlag(String flagIdentifier, FlagType flagType, boolean inverted, boolean isActive){
         this.flagIdentifier = flagIdentifier;
         this.flagType = flagType;
         this.isActive = isActive;
-        this.isAllowed = isAllowed;
+        this.inverted = inverted;
     }
 
     public AbstractFlag(CompoundNBT nbt){
@@ -32,7 +33,7 @@ public abstract class AbstractFlag implements IFlag {
     }
 
     @Override
-    public String getFlagType() {
+    public FlagType getFlagType() {
         return this.flagType;
     }
 
@@ -52,13 +53,13 @@ public abstract class AbstractFlag implements IFlag {
     }
 
     @Override
-    public boolean isAllowed() {
-        return this.isAllowed;
+    public boolean isInverted() {
+        return this.inverted;
     }
 
     @Override
-    public void setAllowed(boolean allowed) {
-        this.isAllowed = allowed;
+    public void setInverted(boolean inverted) {
+        this.inverted = inverted;
     }
 
     @Override
@@ -66,8 +67,8 @@ public abstract class AbstractFlag implements IFlag {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putString(FLAG_NAME, this.flagIdentifier);
         nbt.putBoolean(FLAG_ACTIVE, this.isActive);
-        nbt.putBoolean(IS_ALLOWED, this.isAllowed);
-        nbt.putString(FLAG_REGISTRY_NAME, this.flagType);
+        nbt.putBoolean(IS_INVERTED, this.inverted);
+        nbt.putString(RegionNBT.FLAG_TYPE, this.flagType.flagType);
         return nbt;
     }
 
@@ -75,7 +76,7 @@ public abstract class AbstractFlag implements IFlag {
     public void deserializeNBT(CompoundNBT nbt) {
         this.flagIdentifier = nbt.getString(FLAG_NAME);
         this.isActive = nbt.getBoolean(FLAG_ACTIVE);
-        this.isAllowed = nbt.getBoolean(IS_ALLOWED);
-        this.flagType = nbt.getString(FLAG_REGISTRY_NAME);
+        this.inverted = nbt.getBoolean(IS_INVERTED);
+        this.flagType = FlagType.of(nbt.getString(RegionNBT.FLAG_TYPE));
     }
 }

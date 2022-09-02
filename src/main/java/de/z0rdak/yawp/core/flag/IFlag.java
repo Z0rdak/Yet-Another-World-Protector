@@ -45,11 +45,11 @@ public interface IFlag extends INBTSerializable<CompoundNBT> {
      */
     String getFlagIdentifier();
 
-    String getFlagType();
+    FlagType getFlagType();
 
-    boolean isAllowed();
+    boolean isInverted();
 
-    void setAllowed(boolean allowed);
+    void setInverted(boolean inverted);
 
     boolean isActive();
 

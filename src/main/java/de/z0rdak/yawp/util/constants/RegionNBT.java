@@ -24,8 +24,8 @@ public final class RegionNBT {
     public static final String FLAG = "flag";
     public static final String FLAG_NAME = "flag_name";
     public static final String FLAG_ACTIVE = "is_active";
-    public static final String IS_ALLOWED = "is_allowed";
-    public static final String FLAG_REGISTRY_NAME = "flag_type";
+    public static final String IS_INVERTED = "inverted";
+    public static final String FLAG_VALUE = "value";
     public static final String IS_DENIED = "isDenied";
     public static final String OWNERS = "owners";
     public static final String MEMBERS = "members";
