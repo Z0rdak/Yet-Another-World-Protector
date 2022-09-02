@@ -30,12 +30,8 @@ public class CuboidArea extends AbstractArea {
         this(blocks.get(0), blocks.get(1));
     }
 
-    private CuboidArea() {
-        super(AreaType.CUBOID);
-    }
-
     public CuboidArea(CompoundNBT nbt) {
-        this();
+        super(nbt);
         this.deserializeNBT(nbt);
     }
 
@@ -62,7 +58,7 @@ public class CuboidArea extends AbstractArea {
 
     @Override
     public CompoundNBT serializeNBT() {
-        CompoundNBT nbt = new CompoundNBT();
+        CompoundNBT nbt = super.serializeNBT();
         nbt.put(AreaNBT.P1, NBTUtil.writeBlockPos(this.getAreaP1()));
         nbt.put(AreaNBT.P2, NBTUtil.writeBlockPos(this.getAreaP2()));
         return nbt;
@@ -70,6 +66,7 @@ public class CuboidArea extends AbstractArea {
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
+        super.deserializeNBT(nbt);
         BlockPos p1 = NBTUtil.readBlockPos(nbt.getCompound(AreaNBT.P1));
         BlockPos p2 = NBTUtil.readBlockPos(nbt.getCompound(AreaNBT.P2));
         this.area = new AxisAlignedBB(p1, p2);

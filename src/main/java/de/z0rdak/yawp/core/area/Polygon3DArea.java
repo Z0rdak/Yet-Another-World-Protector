@@ -27,7 +27,7 @@ public class Polygon3DArea extends AbstractArea {
     }
 
     public Polygon3DArea(CompoundNBT nbt) {
-        this();
+        super(nbt);
         this.deserializeNBT(nbt);
     }
 
@@ -42,7 +42,7 @@ public class Polygon3DArea extends AbstractArea {
     }
 
     /**
-     * https://www.eecs.umich.edu/courses/eecs380/HANDOUTS/PROJ2/InsidePoly.html
+     * <a href="https://www.eecs.umich.edu/courses/eecs380/HANDOUTS/PROJ2/InsidePoly.html">...</a>
      * @param q
      * @param posList
      * @param n
@@ -73,7 +73,7 @@ public class Polygon3DArea extends AbstractArea {
 
     @Override
     public CompoundNBT serializeNBT() {
-        CompoundNBT nbt = new CompoundNBT();
+        CompoundNBT nbt = super.serializeNBT();
         ListNBT pointList = new ListNBT();
         this.positions.forEach((point) -> {
             CompoundNBT pointNbt = NBTUtil.writeBlockPos(point);
@@ -86,6 +86,7 @@ public class Polygon3DArea extends AbstractArea {
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
         this.positions.clear();
+        this.deserializeNBT(nbt);
         ListNBT pointList = nbt.getList(AreaNBT.BLOCK_NODES, Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < pointList.size(); i++) {
             BlockPos pos = NBTUtil.readBlockPos(pointList.getCompound(i));

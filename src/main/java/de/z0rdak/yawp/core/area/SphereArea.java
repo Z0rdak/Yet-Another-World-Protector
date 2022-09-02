@@ -12,12 +12,8 @@ public class SphereArea extends CenteredArea {
 
     private int radius;
 
-    private SphereArea() {
-        super(AreaType.SPHERE);
-    }
-
     public SphereArea(CompoundNBT nbt) {
-        this();
+        super(nbt);
         this.deserializeNBT(nbt);
     }
 

@@ -13,6 +13,11 @@ public abstract class CenteredArea extends AbstractArea {
         super(areaType);
     }
 
+    public CenteredArea(CompoundNBT nbt){
+        super(nbt);
+        this.deserializeNBT(nbt);
+    }
+
     public CenteredArea(BlockPos center, AreaType areaType){
         super(areaType);
         this.center = center;
@@ -23,19 +28,15 @@ public abstract class CenteredArea extends AbstractArea {
     }
 
     @Override
-    public boolean contains(BlockPos pos) {
-        return false;
-    }
-
-    @Override
     public CompoundNBT serializeNBT() {
-        CompoundNBT nbt = new CompoundNBT();
+        CompoundNBT nbt = super.serializeNBT();
         nbt.put("center", NBTUtil.writeBlockPos(this.center));
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
+        super.deserializeNBT(nbt);
         this.center = NBTUtil.readBlockPos(nbt.getCompound("center"));
     }
 }

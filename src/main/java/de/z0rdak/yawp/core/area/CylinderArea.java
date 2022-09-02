@@ -16,10 +16,6 @@ public class CylinderArea extends CenteredArea {
     private int distance;
     private int radius;
 
-    private CylinderArea() {
-        super(AreaType.CYLINDER);
-    }
-
     public CylinderArea(BlockPos centerBottomPos, BlockPos scopePos){
         super(centerBottomPos, AreaType.CYLINDER);
         this.centerTopPos = new BlockPos(centerBottomPos.getX(), scopePos.getY(), centerBottomPos.getZ());
@@ -37,7 +33,7 @@ public class CylinderArea extends CenteredArea {
     }
 
     public CylinderArea(CompoundNBT nbt){
-        this();
+        super(nbt);
         this.deserializeNBT(nbt);
     }
 
@@ -46,7 +42,7 @@ public class CylinderArea extends CenteredArea {
     }
 
     /***
-     * https://stackoverflow.com/questions/47932955/how-to-check-if-a-3d-point-is-inside-a-cylinder
+     * <a href="https://stackoverflow.com/questions/47932955/how-to-check-if-a-3d-point-is-inside-a-cylinder">...</a>
      * @param pos
      * @return
      */
