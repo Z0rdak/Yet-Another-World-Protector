@@ -1,38 +1,39 @@
 package de.z0rdak.yawp.core.flag;
 
+import de.z0rdak.yawp.util.constants.RegionNBT;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.registries.ForgeRegistryEntry;
-import org.apache.commons.lang3.NotImplementedException;
 
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
-public abstract class AbstractFlag extends ForgeRegistryEntry<AbstractFlag> implements IFlag {
+public abstract class AbstractFlag implements IFlag {
 
-    private String flagIdentifier;
-    private String flagType;
-    private boolean isActive;
-    private boolean isAllowed;
+    protected String flagIdentifier;
+    protected FlagType flagType;
 
-    public AbstractFlag(String flagIdentifier, String flagType){
+    protected boolean isActive;
+    protected boolean inverted;
+
+    public AbstractFlag(String flagIdentifier, FlagType flagType){
         this(flagIdentifier, flagType, false, true);
     }
 
-    public AbstractFlag(String flagIdentifier, String flagType, boolean isAllowed){
-        this(flagIdentifier, flagType, isAllowed, true);
+    public AbstractFlag(String flagIdentifier, FlagType flagType, boolean inverted){
+        this(flagIdentifier, flagType, inverted, true);
     }
 
-    public AbstractFlag(String flagIdentifier, String flagType, boolean isAllowed, boolean isActive){
+    public AbstractFlag(String flagIdentifier, FlagType flagType, boolean inverted, boolean isActive){
         this.flagIdentifier = flagIdentifier;
         this.flagType = flagType;
         this.isActive = isActive;
-        this.isAllowed = isAllowed;
+        this.inverted = inverted;
     }
 
     public AbstractFlag(CompoundTag nbt){
         this.deserializeNBT(nbt);
     }
+
     @Override
-    public String getFlagType() {
+    public FlagType getFlagType() {
         return this.flagType;
     }
 
@@ -52,19 +53,13 @@ public abstract class AbstractFlag extends ForgeRegistryEntry<AbstractFlag> impl
     }
 
     @Override
-    public boolean isAllowed() {
-        return this.isAllowed;
+    public boolean isInverted() {
+        return this.inverted;
     }
 
     @Override
-    public void setAllowed(boolean allowed) {
-        this.isAllowed = allowed;
-    }
-
-    // TODO:
-    @Override
-    public String getFlagDescription() {
-        throw new NotImplementedException("");
+    public void setInverted(boolean inverted) {
+        this.inverted = inverted;
     }
 
     @Override
@@ -72,8 +67,8 @@ public abstract class AbstractFlag extends ForgeRegistryEntry<AbstractFlag> impl
         CompoundTag nbt = new CompoundTag();
         nbt.putString(FLAG_NAME, this.flagIdentifier);
         nbt.putBoolean(FLAG_ACTIVE, this.isActive);
-        nbt.putBoolean(IS_ALLOWED, this.isAllowed);
-        nbt.putString(FLAG_REGISTRY_NAME, this.flagType);
+        nbt.putBoolean(IS_INVERTED, this.inverted);
+        nbt.putString(RegionNBT.FLAG_TYPE, this.flagType.flagType);
         return nbt;
     }
 
@@ -81,7 +76,7 @@ public abstract class AbstractFlag extends ForgeRegistryEntry<AbstractFlag> impl
     public void deserializeNBT(CompoundTag nbt) {
         this.flagIdentifier = nbt.getString(FLAG_NAME);
         this.isActive = nbt.getBoolean(FLAG_ACTIVE);
-        this.isAllowed = nbt.getBoolean(IS_ALLOWED);
-        this.flagType = nbt.getString(FLAG_REGISTRY_NAME);
+        this.inverted = nbt.getBoolean(IS_INVERTED);
+        this.flagType = FlagType.of(nbt.getString(RegionNBT.FLAG_TYPE));
     }
 }

@@ -45,17 +45,11 @@ public interface IFlag extends INBTSerializable<CompoundTag> {
      */
     String getFlagIdentifier();
 
-    /**
-     * Lang key for a short concise description of the flag.
-     * @return lang key for a description
-     */
-    String getFlagDescription();
+    FlagType getFlagType();
 
-    String getFlagType();
+    boolean isInverted();
 
-    boolean isAllowed();
-
-    void setAllowed(boolean allowed);
+    void setInverted(boolean inverted);
 
     boolean isActive();
 
