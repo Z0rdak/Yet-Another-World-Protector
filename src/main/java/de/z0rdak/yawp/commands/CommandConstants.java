@@ -48,7 +48,10 @@ public enum CommandConstants {
     OWNER("owner"),
     MEMBER("member"),
     Y1("Y1"),
-    Y2("Y2");
+    Y2("Y2"),
+
+    TEMPLATE("template"),
+    TRIGGER("trigger");
 
     private final String cmdString;
 
