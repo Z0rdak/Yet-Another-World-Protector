@@ -8,9 +8,10 @@ import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class PolygonRegion extends AbstractMarkableRegion {
+public final class PolygonRegion extends AbstractMarkableRegion {
 
     public PolygonRegion(CompoundNBT nbt) {
+        super(nbt);
         this.deserializeNBT(nbt);
     }
 

@@ -8,9 +8,10 @@ import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class CylinderRegion extends AbstractMarkableRegion {
+public final class CylinderRegion extends AbstractMarkableRegion {
 
     public CylinderRegion(CompoundNBT nbt) {
+        super(nbt);
         this.deserializeNBT(nbt);
     }
 

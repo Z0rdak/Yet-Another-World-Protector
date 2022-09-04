@@ -8,9 +8,10 @@ import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class SphereRegion extends AbstractMarkableRegion {
+public final class SphereRegion extends AbstractMarkableRegion {
 
     public SphereRegion(CompoundNBT nbt) {
+        super(nbt);
         this.deserializeNBT(nbt);
     }
 

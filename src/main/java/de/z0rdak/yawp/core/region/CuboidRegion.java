@@ -15,6 +15,7 @@ import net.minecraft.world.World;
 public final class CuboidRegion extends AbstractMarkableRegion {
 
 	public CuboidRegion(CompoundNBT nbt) {
+		super(nbt);
 		this.deserializeNBT(nbt);
 	}
 
