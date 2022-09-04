@@ -9,9 +9,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-public class CylinderRegion extends AbstractMarkableRegion {
+public final class CylinderRegion extends AbstractMarkableRegion {
 
     public CylinderRegion(CompoundTag nbt) {
+        super(nbt);
         this.deserializeNBT(nbt);
     }
 

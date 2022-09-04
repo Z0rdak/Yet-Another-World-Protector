@@ -1,17 +1,16 @@
 package de.z0rdak.yawp.core.region;
 
 import de.z0rdak.yawp.core.affiliation.PlayerContainer;
-import de.z0rdak.yawp.core.flag.ConditionFlag;
 import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.util.constants.RegionNBT;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.scores.Team;
 
 import java.util.*;
-import java.util.regex.Pattern;
+
+import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
 /**
  * A abstract region represents the basic implementation of a IProtectedRegion.
@@ -19,14 +18,20 @@ import java.util.regex.Pattern;
  * an area (dimensions).
  */
 public abstract class AbstractRegion implements IProtectedRegion {
-    private String name;
-    private FlagContainer flags;
-    private PlayerContainer owners;
-    private PlayerContainer members;
-    private boolean isActive;
+    protected String name;
+    protected RegionType regionType;
+    protected FlagContainer flags;
+    protected PlayerContainer owners;
+    protected PlayerContainer members;
+    protected boolean isActive;
 
-    protected AbstractRegion(String name) {
+    protected AbstractRegion(CompoundTag nbt) {
+        this.deserializeNBT(nbt);
+    }
+
+    protected AbstractRegion(String name, RegionType type) {
         this.name = name;
+        this.regionType = type;
         this.flags = new FlagContainer();
         this.members = new PlayerContainer();
         this.owners = new PlayerContainer();
@@ -34,12 +39,12 @@ public abstract class AbstractRegion implements IProtectedRegion {
     }
 
     /**
-     * Minimal constructor to create a abstract region by supplying a name and an owner.
+     * Minimal constructor to create a abstract region by supplying a name, type and an owner.
      * @param name name of the region
      * @param owner region owner
      */
-    protected AbstractRegion(String name, Player owner) {
-        this(name);
+    protected AbstractRegion(String name, RegionType regionType, Player owner) {
+        this(name, regionType);
         this.owners.addPlayer(owner);
     }
 
@@ -155,20 +160,22 @@ public abstract class AbstractRegion implements IProtectedRegion {
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag nbt = new CompoundTag();
-        nbt.putString(RegionNBT.NAME, this.name);
-        nbt.putBoolean(RegionNBT.ACTIVE, this.isActive);
-        nbt.put(RegionNBT.FLAGS, this.flags.serializeNBT());
-        nbt.put(RegionNBT.OWNERS, this.owners.serializeNBT());
-        nbt.put(RegionNBT.MEMBERS, this.members.serializeNBT());
+        nbt.putString(NAME, this.name);
+        nbt.putBoolean(ACTIVE, this.isActive);
+        nbt.putString(REGION_TYPE, this.regionType.type);
+        nbt.put(FLAGS, this.flags.serializeNBT());
+        nbt.put(OWNERS, this.owners.serializeNBT());
+        nbt.put(MEMBERS, this.members.serializeNBT());
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
-        this.name = nbt.getString(RegionNBT.NAME);
-        this.isActive = nbt.getBoolean(RegionNBT.ACTIVE);
-        this.flags = new FlagContainer(nbt.getCompound(RegionNBT.FLAGS));
-        this.owners = new PlayerContainer(nbt.getCompound(RegionNBT.OWNERS));
-        this.members = new PlayerContainer(nbt.getCompound(RegionNBT.MEMBERS));
+        this.name = nbt.getString(NAME);
+        this.isActive = nbt.getBoolean(ACTIVE);
+        this.regionType = RegionType.of(nbt.getString(REGION_TYPE));
+        this.flags = new FlagContainer(nbt.getCompound(FLAGS));
+        this.owners = new PlayerContainer(nbt.getCompound(OWNERS));
+        this.members = new PlayerContainer(nbt.getCompound(MEMBERS));
     }
 }

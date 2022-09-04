@@ -18,12 +18,12 @@ public final class DimensionalRegion extends AbstractRegion {
     private ResourceKey<Level> dimensionKey;
 
     public DimensionalRegion(ResourceKey<Level> dimensionKey) {
-        super(dimensionKey.location().toString());
+        super(dimensionKey.location().toString(), RegionType.DIMENSION);
         this.dimensionKey = dimensionKey;
     }
 
     public DimensionalRegion(CompoundTag nbt) {
-        super("");
+        super(nbt);
         this.deserializeNBT(nbt);
     }
 

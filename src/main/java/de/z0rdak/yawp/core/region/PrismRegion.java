@@ -8,9 +8,10 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
-public class PrismRegion extends AbstractMarkableRegion {
+public final class PrismRegion extends AbstractMarkableRegion {
 
     public PrismRegion(CompoundTag nbt){
+        super(nbt);
         this.deserializeNBT(nbt);
     }
 
