@@ -19,6 +19,10 @@ public final class RegionNBT {
     public static final String DIM_REGION = "dim_region";
     public static final String REGIONS = "regions";
 
+    public static final String PARENT = "parent";
+    public static final String REGION_TYPE = "region_type";
+    public static final String CHILDREN = "children";
+
     /* AbstractFlag NBT constants */
 
     public static final String FLAG = "flag";
