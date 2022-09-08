@@ -14,7 +14,7 @@ public enum FlagType {
 
     public static FlagType of(String name) {
         switch (name) {
-            case "BooleanType":
+            case "BooleanFlag":
                 return BOOLEAN_FLAG;
             case "ListFlag":
                 return LIST_FLAG;
