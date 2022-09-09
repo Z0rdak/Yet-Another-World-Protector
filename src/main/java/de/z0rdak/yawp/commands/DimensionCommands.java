@@ -1,12 +1,11 @@
 package de.z0rdak.yawp.commands;
 
-import com.mojang.brigadier.RedirectModifier;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.core.affiliation.PlayerContainer;
-import de.z0rdak.yawp.core.flag.ConditionFlag;
+import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.AbstractRegion;
@@ -14,7 +13,7 @@ import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import de.z0rdak.yawp.util.CommandUtil;
+import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
@@ -32,7 +31,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.util.CommandUtil.*;
-import static de.z0rdak.yawp.util.CommandUtil.getDimensionArgument;
+import static de.z0rdak.yawp.util.CommandUtil.getDimRegionArgument;
 import static de.z0rdak.yawp.util.MessageUtil.*;
 
 public class DimensionCommands {
@@ -46,102 +45,111 @@ public class DimensionCommands {
         // TODO: Command for managing affiliations and data handling
         List<String> affiliationList = Arrays.asList("member", "owner");
         return literal(CommandConstants.DIMENSION)
+
                 /* /wp dimension help */
                 // .then(helpLiteral.executes(ctx -> promptHelp(ctx.getSource())))
                 /* /wp dimension <dim> list region */
                 .then(Commands.argument(CommandConstants.DIMENSION.toString(), DimensionArgument.dimension())
                         /* /wp dimension <dim> [info] */
-                        .executes(ctx -> promptDimensionInfo(ctx.getSource(), CommandUtil.getDimensionArgument(ctx)))
-                        .then(literal(CommandConstants.INFO).executes(ctx -> promptDimensionInfo(ctx.getSource(), CommandUtil.getDimensionArgument(ctx))))
+                        .executes(ctx -> promptDimensionInfo(ctx.getSource(), getDimCacheArgument(ctx)))
+                        .then(literal(CommandConstants.INFO).executes(ctx -> promptDimensionInfo(ctx.getSource(), getDimCacheArgument(ctx))))
                         /* /wp dimension <dim> activate */
-                        .then(literal(CommandConstants.ACTIVATE).executes(ctx -> setActiveState(ctx.getSource(), getDimensionArgument(ctx), getActivateArgument(ctx)))
-                                .then(Commands.argument(CommandConstants.ACTIVATE.toString(), BoolArgumentType.bool()).executes(ctx -> setActiveState(ctx.getSource(), getDimensionArgument(ctx), getActivateArgument(ctx)))))
+                        .then(literal(CommandConstants.ACTIVATE).executes(ctx -> setActiveState(ctx.getSource(), getDimCacheArgument(ctx), getActivateArgument(ctx)))
+                                .then(Commands.argument(CommandConstants.ACTIVATE.toString(), BoolArgumentType.bool()).executes(ctx -> setActiveState(ctx.getSource(), getDimCacheArgument(ctx), getActivateArgument(ctx)))))
                         .then(literal(CommandConstants.LIST)
-                                .then(literal(CommandConstants.REGION).executes(ctx -> promptDimensionRegionList(ctx.getSource(), getDimensionArgument(ctx))))
+                                .then(literal(CommandConstants.REGION).executes(ctx -> promptDimensionRegionList(ctx.getSource(), getDimCacheArgument(ctx))))
                                 /* /wp dimension <dim> list owner */
-                                .then(literal(CommandConstants.OWNER).executes(ctx -> promptDimensionPlayerList(ctx.getSource(), getDimensionArgument(ctx), CommandConstants.OWNER)))
+                                .then(literal(CommandConstants.OWNER).executes(ctx -> promptDimensionPlayerList(ctx.getSource(), getDimCacheArgument(ctx), CommandConstants.OWNER)))
                                 /* /wp dimension <dim> list member */
-                                .then(literal(CommandConstants.MEMBER).executes(ctx -> promptDimensionPlayerList(ctx.getSource(), getDimensionArgument(ctx), CommandConstants.MEMBER)))
+                                .then(literal(CommandConstants.MEMBER).executes(ctx -> promptDimensionPlayerList(ctx.getSource(), getDimCacheArgument(ctx), CommandConstants.MEMBER)))
                                 /* /wp dimension <dim> list flag */
-                                .then(literal(CommandConstants.FLAG).executes(ctx -> promptDimensionFlagList(ctx.getSource(), getDimensionArgument(ctx)))))
+                                .then(literal(CommandConstants.FLAG).executes(ctx -> promptDimensionFlagList(ctx.getSource(), getDimCacheArgument(ctx)))))
 
                         .then(literal(CommandConstants.REMOVE)
                                 .then(literal(CommandConstants.PLAYER)
                                         .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.string())
                                                 .suggests((ctx, builder) -> ISuggestionProvider.suggest(affiliationList, builder))
                                                 .then(Commands.argument(CommandConstants.PLAYER.toString(), EntityArgument.player())
-                                                        .executes(ctx -> removePlayer(ctx.getSource(), getPlayerArgument(ctx), getDimensionArgument(ctx), getAssociateArgument(ctx)))))
+                                                        .executes(ctx -> removePlayer(ctx.getSource(), getPlayerArgument(ctx), getDimCacheArgument(ctx), getAssociateArgument(ctx)))))
 
                                         .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.string())
                                                 .suggests((ctx, builder) -> ISuggestionProvider.suggest(affiliationList, builder))
                                                 .then(Commands.argument(CommandConstants.PLAYER.toString(), EntityArgument.player())
-                                                        .executes(ctx -> removePlayer(ctx.getSource(), getPlayerArgument(ctx), getDimensionArgument(ctx), getAssociateArgument(ctx))))))
+                                                        .executes(ctx -> removePlayer(ctx.getSource(), getPlayerArgument(ctx), getDimCacheArgument(ctx), getAssociateArgument(ctx))))))
                                 .then(literal(CommandConstants.TEAM)
                                         .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.string())
                                                 .suggests((ctx, builder) -> ISuggestionProvider.suggest(affiliationList, builder))
                                                 .then(Commands.argument(CommandConstants.TEAM.toString(), TeamArgument.team())
-                                                        .executes(ctx -> removeTeam(ctx.getSource(), getTeamArgument(ctx), getDimensionArgument(ctx), getAssociateArgument(ctx)))))
+                                                        .executes(ctx -> removeTeam(ctx.getSource(), getTeamArgument(ctx), getDimCacheArgument(ctx), getAssociateArgument(ctx)))))
 
                                         .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.string())
                                                 .suggests((ctx, builder) -> ISuggestionProvider.suggest(affiliationList, builder))
                                                 .then(Commands.argument(CommandConstants.TEAM.toString(), TeamArgument.team())
-                                                        .executes(ctx -> removeTeam(ctx.getSource(), getTeamArgument(ctx), getDimensionArgument(ctx), getAssociateArgument(ctx))))))
+                                                        .executes(ctx -> removeTeam(ctx.getSource(), getTeamArgument(ctx), getDimCacheArgument(ctx), getAssociateArgument(ctx))))))
                                 .then(literal(CommandConstants.FLAG)
                                         .then(Commands.argument(CommandConstants.FLAG.toString(), StringArgumentType.string())
-                                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(RegionDataManager.get().getFlagsIdsForDim(getDimensionArgument(ctx)), builder))
-                                                .executes(ctx -> removeFlag(ctx.getSource(), CommandUtil.getDimensionArgument(ctx), StringArgumentType.getString(ctx, CommandConstants.FLAG.toString()))))))
+                                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(RegionDataManager.get().getFlagsIdsForDim(getDimCacheArgument(ctx)), builder))
+                                                .executes(ctx -> removeFlag(ctx.getSource(), getDimCacheArgument(ctx), StringArgumentType.getString(ctx, CommandConstants.FLAG.toString()))))))
 
                         .then(literal(CommandConstants.ADD)
                                 .then(literal(CommandConstants.PLAYER)
                                         .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.string())
                                                 .suggests((ctx, builder) -> ISuggestionProvider.suggest(affiliationList, builder))
                                                 .then(Commands.argument(CommandConstants.PLAYER.toString(), EntityArgument.player())
-                                                        .executes(ctx -> addPlayer(ctx.getSource(), getPlayerArgument(ctx), getDimensionArgument(ctx), getAssociateArgument(ctx)))))
+                                                        .executes(ctx -> addPlayer(ctx.getSource(), getPlayerArgument(ctx), getDimCacheArgument(ctx), getAssociateArgument(ctx)))))
 
                                         .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.string())
                                                 .suggests((ctx, builder) -> ISuggestionProvider.suggest(affiliationList, builder))
                                                 .then(Commands.argument(CommandConstants.PLAYER.toString(), EntityArgument.player())
-                                                        .executes(ctx -> addPlayer(ctx.getSource(), getPlayerArgument(ctx), getDimensionArgument(ctx), getAssociateArgument(ctx))))))
+                                                        .executes(ctx -> addPlayer(ctx.getSource(), getPlayerArgument(ctx), getDimCacheArgument(ctx), getAssociateArgument(ctx))))))
                                 .then(literal(CommandConstants.TEAM)
                                         .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.string())
                                                 .suggests((ctx, builder) -> ISuggestionProvider.suggest(affiliationList, builder))
                                                 .then(Commands.argument(CommandConstants.TEAM.toString(), TeamArgument.team())
-                                                        .executes(ctx -> addTeam(ctx.getSource(), getTeamArgument(ctx), getDimensionArgument(ctx), getAssociateArgument(ctx)))))
+                                                        .executes(ctx -> addTeam(ctx.getSource(), getTeamArgument(ctx), getDimCacheArgument(ctx), getAssociateArgument(ctx)))))
 
                                         .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.string())
                                                 .suggests((ctx, builder) -> ISuggestionProvider.suggest(affiliationList, builder))
                                                 .then(Commands.argument(CommandConstants.TEAM.toString(), TeamArgument.team())
-                                                        .executes(ctx -> addTeam(ctx.getSource(), getTeamArgument(ctx), getDimensionArgument(ctx), getAssociateArgument(ctx))))))
+                                                        .executes(ctx -> addTeam(ctx.getSource(), getTeamArgument(ctx), getDimCacheArgument(ctx), getAssociateArgument(ctx))))))
                                 .then(literal(CommandConstants.FLAG)
                                         .then(Commands.argument(CommandConstants.FLAG.toString(), StringArgumentType.string())
                                                 .suggests((ctx, builder) -> ISuggestionProvider.suggest(RegionFlag.getFlags(), builder))
-                                                .executes(ctx -> addFlag(ctx.getSource(), CommandUtil.getDimensionArgument(ctx), StringArgumentType.getString(ctx, CommandConstants.FLAG.toString())))))));
+                                                .executes(ctx -> addFlag(ctx.getSource(), getDimCacheArgument(ctx), StringArgumentType.getString(ctx, CommandConstants.FLAG.toString())))))));
     }
 
-    private static int removeFlag(CommandSource src, RegistryKey<World> dim, String flag) {
-        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
+    public static int selectReferenceDim(CommandSource src, DimensionalRegion dim) {
+        RegionCommands.CommandSourceReferenceDims.put(src, dim.getDimensionKey());
+        // TODO: Init dim-cache
+        MessageUtil.sendCmdFeedback(src, new StringTextComponent("Selected dim '" + dim.getDimensionKey().location().toString() + "' as reference for region commands for '" + src.getTextName() + "'."));
+        return 0;
+    }
+
+    private static int removeFlag(CommandSource src,  DimensionRegionCache dimCache, String flag) {
         if (dimCache != null) {
+            RegistryKey<World> dim = dimCache.dimensionKey();
             dimCache.removeFlag(flag);
+            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.flags.removed", flag, dim.location().toString()));
+            return 0;
         }
-
-        sendCmdFeedback(src, new TranslationTextComponent("cli.msg.flags.removed", flag, dim.location().toString()));
-        return 0;
+        return 1;
     }
 
-    private static int addFlag(CommandSource src, RegistryKey<World> dim, String flag) {
+    private static int addFlag(CommandSource src, DimensionRegionCache dimCache, String flag) {
         // TODO: For now this works because we only have condition flags and no black/whitelist feature
-        IFlag iflag = new ConditionFlag(flag, false);
-        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
+        IFlag iflag = new BooleanFlag(flag, false);
         if (dimCache != null) {
+            RegistryKey<World> dim = dimCache.dimensionKey();
             dimCache.addFlag(iflag);
+            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.flags.added", flag, dim.location().toString()));
+            return 0;
         }
-        sendCmdFeedback(src, new TranslationTextComponent("cli.msg.flags.added", flag, dim.location().toString()));
-        return 0;
+        return 1;
     }
 
-    private static int removePlayer(CommandSource src, ServerPlayerEntity player, RegistryKey<World> dim, String affiliationType) {
-        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
+    private static int removePlayer(CommandSource src, ServerPlayerEntity player, DimensionRegionCache dimCache, String affiliationType) {
         if (dimCache != null) {
+            RegistryKey<World> dim = dimCache.dimensionKey();
             if (affiliationType.equals(CommandConstants.MEMBER.toString())) {
                 dimCache.removeMember(player);
             }
@@ -153,9 +161,9 @@ public class DimensionCommands {
         return 0;
     }
 
-    private static int removeTeam(CommandSource src, ScorePlayerTeam team, RegistryKey<World> dim, String affiliationType) {
-        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
+    private static int removeTeam(CommandSource src, ScorePlayerTeam team, DimensionRegionCache dimCache, String affiliationType) {
         if (dimCache != null) {
+            RegistryKey<World> dim = dimCache.dimensionKey();
             if (affiliationType.equals(CommandConstants.MEMBER.toString())) {
                 dimCache.removeMember(team);
             }
@@ -169,9 +177,9 @@ public class DimensionCommands {
     }
 
     // TODO: If works replace with switch and catch error
-    private static int addPlayer(CommandSource src, ServerPlayerEntity player, RegistryKey<World> dim, String affiliationType) {
-        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
+    private static int addPlayer(CommandSource src, ServerPlayerEntity player, DimensionRegionCache dimCache, String affiliationType) {
         if (dimCache != null) {
+            RegistryKey<World> dim = dimCache.dimensionKey();
             if (affiliationType.equals(CommandConstants.MEMBER.toString())) {
                 dimCache.addMember(player);
             }
@@ -184,9 +192,9 @@ public class DimensionCommands {
         return 1;
     }
 
-    private static int addTeam(CommandSource src, ScorePlayerTeam team, RegistryKey<World> dim, String affiliationType) {
-        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
+    private static int addTeam(CommandSource src, ScorePlayerTeam team, DimensionRegionCache dimCache, String affiliationType) {
         if (dimCache != null) {
+            RegistryKey<World> dim = dimCache.dimensionKey();
             if (affiliationType.equals(CommandConstants.MEMBER.toString())) {
                 dimCache.addMember(team);
             }
@@ -201,12 +209,13 @@ public class DimensionCommands {
 
 
     // TODO: Check
-    private static int promptDimensionFlagList(CommandSource src, RegistryKey<World> dim) {
-        List<IFlag> flags = RegionDataManager.get().getFlagsForDim(dim)
+    private static int promptDimensionFlagList(CommandSource src,  DimensionRegionCache dimCache) {
+        List<IFlag> flags = dimCache.getDimensionalRegion().getFlags()
                 .stream()
                 // TODO: implement comparable for flags
                 // .sorted()
                 .collect(Collectors.toList());
+        RegistryKey<World> dim = dimCache.dimensionKey();
         if (flags.isEmpty()) {
             sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.flags.empty", dim));
             return 1;
@@ -216,20 +225,19 @@ public class DimensionCommands {
         flags.forEach(flag -> {
             IFormattableTextComponent removeFlagLink = new StringTextComponent(" - ")
                     .append(buildDimensionRemoveFlagLink(flag, dim))
-                    .append(new StringTextComponent(" '" + flag.getFlagName() + "' "));
+                    .append(new StringTextComponent(" '" + flag.getFlagIdentifier() + "' "));
 
             sendCmdFeedback(src, removeFlagLink);
         });
         return 0;
     }
 
-    private static int promptDimensionPlayerList(CommandSource src, RegistryKey<World> dim, CommandConstants memberOrOwner) {
-        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
+    private static int promptDimensionPlayerList(CommandSource src,  DimensionRegionCache dimCache, CommandConstants memberOrOwner) {
         if (dimCache != null) {
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
             String playerLangKeyPart = memberOrOwner == CommandConstants.OWNER ? "owner" : "member";
             String affiliationText = playerLangKeyPart.substring(0, 1).toUpperCase() + playerLangKeyPart.substring(1) + "s";
-            sendCmdFeedback(src, new TranslationTextComponent(TextFormatting.BOLD + "== " + affiliationText + " in dimension '" + dim.location() + "' ==="));
+            sendCmdFeedback(src, new TranslationTextComponent(TextFormatting.BOLD + "== " + affiliationText + " in dimension '" + dimRegion.getDimensionKey().location() + "' ==="));
             sendCmdFeedback(src, buildTeamList(dimRegion, memberOrOwner));
             sendCmdFeedback(src, buildPlayerList(dimRegion, memberOrOwner));
             return 0;
@@ -237,13 +245,12 @@ public class DimensionCommands {
         return 1;
     }
 
-    private static int setActiveState(CommandSource src, RegistryKey<World> dim, boolean activate) {
-        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
+    private static int setActiveState(CommandSource src, DimensionRegionCache dimCache, boolean activate) {
         if (dimCache != null) {
             dimCache.setDimState(activate);
 
             String langKey = "cli.msg.info.state." + (activate ? "activated" : "deactivated");
-            sendCmdFeedback(src, new TranslationTextComponent(langKey, dim.location().toString()));
+            sendCmdFeedback(src, new TranslationTextComponent(langKey, dimCache.getDimensionalRegion().getDimensionKey().location().toString()));
             return 0;
         }
         return 1;
@@ -264,9 +271,9 @@ public class DimensionCommands {
     }
 
     // TODO: Check and extract to own method -> dimInfo uses this, too
-    private static int promptDimensionRegionList(CommandSource source, RegistryKey<World> dim) {
-        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
+    private static int promptDimensionRegionList(CommandSource source, DimensionRegionCache dimCache) {
         if (dimCache != null) {
+            RegistryKey<World> dim =  dimCache.getDimensionalRegion().getDimensionKey();
             List<IMarkableRegion> regionsForDim = dimCache.regionsInDimension
                     .values()
                     .stream()
@@ -367,13 +374,11 @@ public class DimensionCommands {
                 .append(stateLink));
     }
 
-    private static int promptDimensionInfo(CommandSource src, RegistryKey<World> dim) {
-        DimensionRegionCache cache = RegionDataManager.get().cacheFor(dim);
-        DimensionalRegion dimRegion = cache.getDimensionalRegion();
-
+    private static int promptDimensionInfo(CommandSource src, DimensionRegionCache dimCache) {
         // Dimension info header
+        DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
         IFormattableTextComponent dimInfoHeader = new StringTextComponent(TextFormatting.BOLD + "== Dimension ")
-                .append(buildDimensionalInfoLink(dim))
+                .append(buildDimensionalInfoLink(dimRegion.getDimensionKey()))
                 .append(new StringTextComponent(TextFormatting.BOLD + " information =="));
         sendCmdFeedback(src, dimInfoHeader);
 
