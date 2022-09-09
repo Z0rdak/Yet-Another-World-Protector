@@ -154,6 +154,10 @@ public class RegionDataManager extends WorldSavedData {
                 .collect(Collectors.toList());
     }
 
+    public Collection<String> getRegionNamesFor(RegistryKey<World> dim) {
+        return dimCacheMap.get(dim).getRegionNames();
+    }
+
     public Collection<String> getDimensionList() {
         return dimCacheMap.keySet().stream()
                 .map(entry -> entry.location().toString())
@@ -188,6 +192,11 @@ public class RegionDataManager extends WorldSavedData {
     }
 
     @Nullable
+    public boolean containsCacheFor(RegistryKey<World> dim) {
+        return dimCacheMap.containsKey(dim);
+    }
+
+    @Nullable
     public DimensionRegionCache cacheFor(RegistryKey<World> dim) {
         return dimCacheMap.get(dim);
     }
@@ -200,15 +209,20 @@ public class RegionDataManager extends WorldSavedData {
         return new ArrayList<>();
     }
 
-    public List<String> getFlagsIdsForDim(RegistryKey<World> dim){
-        DimensionRegionCache dimCache = cacheFor(dim);
+    public List<String> getFlagsIdsForDim(DimensionRegionCache dimCache){
         if (dimCache != null) {
             return dimCache.getDimensionalRegion().getFlags()
                     .stream()
-                    .map(IFlag::getFlagName)
+                    .map(IFlag::getFlagIdentifier)
                     .collect(Collectors.toList());
         }
         return new ArrayList<>();
+    }
+
+    public DimensionRegionCache newCacheFor(RegistryKey<World> dim) {
+        DimensionRegionCache dimCache =  dimCacheMap.put(dim, new DimensionRegionCache(dim));
+        save();
+        return dimCache;
     }
 
     /* hash for checking manipulated world data?*/
