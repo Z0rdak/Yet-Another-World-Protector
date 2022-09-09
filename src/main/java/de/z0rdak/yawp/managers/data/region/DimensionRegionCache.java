@@ -40,6 +40,10 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
         this.regionsInDimension = new HashMap<>();
     }
 
+    public RegistryKey<World> dimensionKey(){
+        return this.dimensionalRegion.getDimensionKey();
+    }
+
     private static String getDataName(DimensionalRegion dim){
         return getDataName(dim.getName());
     }
@@ -69,8 +73,6 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
                 case POLYGON_3D:
                     break;
                 case PRISM:
-                    break;
-                case UNKNOWN:
                     break;
                 default:
                     break;
@@ -180,7 +182,7 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
     public Collection<String> getDimFlags(){
         return this.dimensionalRegion.getFlags()
                 .stream()
-                .map(IFlag::getFlagName)
+                .map(IFlag::getFlagIdentifier)
                 .collect(Collectors.toList());
     }
 
