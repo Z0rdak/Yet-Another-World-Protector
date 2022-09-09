@@ -33,7 +33,7 @@ public class AreaArgumentType implements ArgumentType<AreaType> {
             flag -> new TranslationTextComponent("cli.arg.area.invalid", flag)
     );
 
-    public static final Pattern VALID_AREA_NAME_CHAR_PATTERN = Pattern.compile("^[A-Za-z]$");
+    private static final Pattern VALID_AREA_NAME_CHAR_PATTERN = Pattern.compile("^[A-Za-z]$");
 
     @Override
     public AreaType parse(StringReader reader) throws CommandSyntaxException {
