@@ -8,12 +8,15 @@ import de.z0rdak.yawp.util.CommandUtil;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
+import net.minecraft.command.arguments.DimensionArgument;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.ClickEvent;
 
+import static de.z0rdak.yawp.util.CommandUtil.getDimRegionArgument;
+import static de.z0rdak.yawp.util.CommandUtil.literal;
 import static de.z0rdak.yawp.util.MessageUtil.buildExecuteCmdComponent;
 import static de.z0rdak.yawp.util.MessageUtil.buildHelpHeader;
 
@@ -36,6 +39,9 @@ public class CommandRegistry {
                 .executes(ctx -> promptHelp(ctx.getSource()))
                 .then(CommandUtil.literal(CommandConstants.HELP)
                         .executes(ctx -> promptHelp(ctx.getSource())))
+                .then(literal(CommandConstants.SELECT)
+                        .then(Commands.argument(CommandConstants.DIMENSION.toString(), DimensionArgument.dimension())
+                                .executes(ctx -> DimensionCommands.selectReferenceDim(ctx.getSource(), getDimRegionArgument(ctx)))))
                 .then(DimensionCommands.DIMENSION_COMMAND)
                 //.then(RegionCommands.REGION_COMMAND)
                 //.then(RegionCommands.REGIONS_COMMAND)
