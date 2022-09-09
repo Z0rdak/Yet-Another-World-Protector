@@ -24,6 +24,7 @@ public enum CommandConstants {
     REMOVE_ALL("remove-all"),
     ALL("all"),
     INFO("info"),
+    IN("in"),
     NAME("name"),
     EXPAND("expand"),
     VERT("vert"),
