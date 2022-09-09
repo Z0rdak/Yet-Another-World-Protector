@@ -34,7 +34,8 @@ public class DimensionCacheArgumentType implements ArgumentType<DimensionRegionC
         return getDimensionalRegionCache(resourcelocation);
     }
 
-    private static DimensionRegionCache getDimensionalRegionCache(ResourceLocation resourcelocation) throws CommandSyntaxException {
+    private static DimensionRegionCache getDimensionalRegionCache(ResourceLocation resourcelocation) {
+        // TODO: Check valid dimension key?
         RegistryKey<World> registrykey = RegistryKey.create(Registry.DIMENSION_REGISTRY, resourcelocation);
         if (RegionDataManager.get().containsCacheFor(registrykey)) {
             return RegionDataManager.get().cacheFor(registrykey);
@@ -61,7 +62,7 @@ public class DimensionCacheArgumentType implements ArgumentType<DimensionRegionC
         return new DimensionalRegionArgumentType();
     }
 
-    public static DimensionRegionCache getDimRegion(CommandContext<CommandSource> context, String dim) throws CommandSyntaxException {
+    public static DimensionRegionCache getDimRegion(CommandContext<CommandSource> context, String dim) {
         ResourceLocation resourcelocation = context.getArgument(dim, ResourceLocation.class);
         return getDimensionalRegionCache(resourcelocation);
 
