@@ -16,6 +16,7 @@ import net.minecraft.world.scores.Team;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fml.common.Mod;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,8 +70,6 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
                 case POLYGON_3D:
                     break;
                 case PRISM:
-                    break;
-                case UNKNOWN:
                     break;
                 default:
                     break;
@@ -153,6 +152,11 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
         RegionDataManager.save();
     }
 
+    @Nullable
+    public IMarkableRegion getRegion(String regionName) {
+        return this.regionsInDimension.get(regionName);
+    }
+
     public Collection<String> getRegionNames() {
         return regionsInDimension.keySet();
     }
@@ -180,7 +184,7 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
     public Collection<String> getDimFlags(){
         return this.dimensionalRegion.getFlags()
                 .stream()
-                .map(IFlag::getFlagName)
+                .map(IFlag::getFlagIdentifier)
                 .collect(Collectors.toList());
     }
 

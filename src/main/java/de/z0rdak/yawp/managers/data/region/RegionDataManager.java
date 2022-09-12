@@ -25,7 +25,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -207,7 +206,7 @@ public class RegionDataManager extends SavedData {
         if (dimCache != null) {
             return dimCache.getDimensionalRegion().getFlags()
                     .stream()
-                    .map(IFlag::getFlagName)
+                    .map(IFlag::getFlagIdentifier)
                     .collect(Collectors.toList());
         }
         return new ArrayList<>();
