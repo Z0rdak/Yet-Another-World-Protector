@@ -43,12 +43,12 @@ public class CommandRegistry {
                         .then(Commands.argument(CommandConstants.DIMENSION.toString(), DimensionArgument.dimension())
                                 .executes(ctx -> DimensionCommands.selectReferenceDim(ctx.getSource(), getDimRegionArgument(ctx)))))
                 .then(DimensionCommands.DIMENSION_COMMAND)
-                //.then(RegionCommands.REGION_COMMAND)
+                .then(RegionCommands.REGION_COMMAND)
+                //.then(FlagCommands.FLAG_COMMAND)
                 //.then(RegionCommands.REGIONS_COMMAND)
                 //.then(DimensionFlagCommands.DIMENSION_FLAGS_COMMAND);
                 //.then(CommandExpand.EXPAND_COMMAND)
-                //.then(CommandFlag.FLAG_COMMAND)
-        //.then(CommandPlayer.PLAYER_COMMAND);
+                //.then(CommandPlayer.PLAYER_COMMAND);
         ;
     }
 
@@ -56,11 +56,11 @@ public class CommandRegistry {
         MessageUtil.sendCmdFeedback(src, buildHelpHeader("cli.msg.help.header"));
         String command = CommandUtil.buildCommandStr(CommandConstants.DIMENSION.toString());
         IFormattableTextComponent cmdStr = new TranslationTextComponent("cli.msg.help.1", CommandPermissionConfig.BASE_CMD);
-        MessageUtil.sendCmdFeedback(src, buildExecuteCmdComponent("=>", command, TextFormatting.GREEN, "Manage dimensional regions", ClickEvent.Action.SUGGEST_COMMAND).append(cmdStr));
+        MessageUtil.sendCmdFeedback(src, buildExecuteCmdComponent("=>", "Manage dimensional regions", command, ClickEvent.Action.SUGGEST_COMMAND, TextFormatting.GREEN).append(cmdStr));
         String wikiLink = "https://github.com/Z0rdak/Yet-Another-World-Protector";
         StringTextComponent wikiInfo = new StringTextComponent("The in-game help is under construction.\nVisit the online wiki for a guide on how to use the mod.\nOnline-Wiki: ");
-        MessageUtil.sendCmdFeedback(src, wikiInfo.append(buildExecuteCmdComponent(YetAnotherWorldProtector.MODID_LONG + " online wiki", wikiLink,
-                TextFormatting.AQUA, "Open online wiki in your browser", ClickEvent.Action.OPEN_URL)));
+        MessageUtil.sendCmdFeedback(src, wikiInfo.append(buildExecuteCmdComponent(YetAnotherWorldProtector.MODID_LONG + " online wiki", "Open online wiki in your browser", wikiLink,
+                ClickEvent.Action.OPEN_URL, TextFormatting.AQUA)));
         return 0;
     }
 }
