@@ -16,6 +16,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fml.common.Mod;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -153,6 +154,11 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
     public void removeFlag(String flag){
         this.dimensionalRegion.removeFlag(flag);
         RegionDataManager.save();
+    }
+
+    @Nullable
+    public IMarkableRegion getRegion(String regionName) {
+        return this.regionsInDimension.get(regionName);
     }
 
     public Collection<String> getRegionNames() {
