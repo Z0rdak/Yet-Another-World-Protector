@@ -1,4 +1,4 @@
-package de.z0rdak.yawp.commands.arguments;
+package de.z0rdak.yawp.commands.arguments.region;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -9,21 +9,14 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import de.z0rdak.yawp.core.area.AreaType;
-import de.z0rdak.yawp.core.region.AbstractMarkableRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
-import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.CommandUtil;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
@@ -73,7 +66,6 @@ public class RegionArgumentType implements ArgumentType<String> {
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         if (context.getSource() instanceof CommandSource) {
             CommandSource src = (CommandSource) context.getSource();
-            // FIXME: Crashes if not used with dim argument
             DimensionRegionCache dimCache = CommandUtil.getDimCacheArgument((CommandContext<CommandSource>) context);
             Collection<String> regionNames = dimCache.getRegionNames();
             if (regionNames.isEmpty()) {
@@ -91,6 +83,11 @@ public class RegionArgumentType implements ArgumentType<String> {
         return EXAMPLES;
     }
 
+    /**
+     * Using this as an actual argument does not work on a server-side only mod,
+     * because it needs to be registered in the corresponding registry.
+      * @return
+     */
     public static RegionArgumentType region() {
         return new RegionArgumentType();
     }

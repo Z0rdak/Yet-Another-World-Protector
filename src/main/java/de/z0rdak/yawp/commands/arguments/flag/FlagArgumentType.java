@@ -1,4 +1,4 @@
-package de.z0rdak.yawp.commands.arguments;
+package de.z0rdak.yawp.commands.arguments.flag;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 // TODO: When flag types are implemented there must be different ArgumentTypes for each flag type
 public class FlagArgumentType implements ArgumentType<String> {
 
-    private static final Collection<String> EXAMPLES = RegionFlag.getFlags();
+    private static final Collection<String> EXAMPLES = RegionFlag.getFlagNames();
 
     private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(new TranslationTextComponent("cli.arg.flag.parse.invalid"));
 
@@ -62,7 +62,7 @@ public class FlagArgumentType implements ArgumentType<String> {
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         if (context.getSource() instanceof ISuggestionProvider) {
-            return ISuggestionProvider.suggest(RegionFlag.getFlags(), builder);
+            return ISuggestionProvider.suggest(RegionFlag.getFlagNames(), builder);
         } else {
             return Suggestions.empty();
         }
@@ -73,6 +73,11 @@ public class FlagArgumentType implements ArgumentType<String> {
         return EXAMPLES;
     }
 
+    /**
+     * Using this as an actual argument does not work on a server-side only mod,
+     * because it needs to be registered in the corresponding registry.
+     * @return
+     */
     public static FlagArgumentType flag() {
         return new FlagArgumentType();
     }

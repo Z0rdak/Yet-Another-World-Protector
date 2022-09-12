@@ -26,7 +26,7 @@ public class DimensionalRegionArgumentType implements ArgumentType<DimensionalRe
     private static final Collection<String> EXAMPLES = RegionDataManager.get().getDimensionList();
 
     private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
-            flag -> new TranslationTextComponent("cli.arg.dim.invalid", flag)
+            dim -> new TranslationTextComponent("cli.arg.dim.invalid", dim)
     );
 
     @Override
@@ -63,6 +63,11 @@ public class DimensionalRegionArgumentType implements ArgumentType<DimensionalRe
         return EXAMPLES;
     }
 
+    /**
+     * Using this as an actual argument does not work on a server-side only mod,
+     * because it needs to be registered in the corresponding registry.
+     * @return
+     */
     public static DimensionalRegionArgumentType dimRegion() {
         return new DimensionalRegionArgumentType();
     }

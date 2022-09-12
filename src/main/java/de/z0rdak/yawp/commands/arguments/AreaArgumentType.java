@@ -71,6 +71,11 @@ public class AreaArgumentType implements ArgumentType<AreaType> {
         return EXAMPLES;
     }
 
+    /**
+     * Using this as an actual argument does not work on a server-side only mod,
+     * because it needs to be registered in the corresponding registry.
+     * @return
+     */
     public static AreaArgumentType areaType() {
         return new AreaArgumentType();
     }
