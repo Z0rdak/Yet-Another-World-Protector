@@ -5,6 +5,9 @@ import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * A mark-able region extends the general IProtectedRegion by allowing
  * to specify a certain area for the Region.
@@ -35,4 +38,8 @@ public interface IMarkableRegion extends IProtectedRegion {
    boolean isMuted();
 
    void setIsMuted(boolean isMuted);
+
+   AbstractRegion getParent();
+
+   Map<String, IMarkableRegion> getChildren();
 }
