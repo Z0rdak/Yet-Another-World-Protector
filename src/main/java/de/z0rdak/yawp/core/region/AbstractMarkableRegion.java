@@ -35,7 +35,7 @@ import static de.z0rdak.yawp.util.constants.RegionNBT.*;
  *   C.Area c= B.Area c= A.Area ?
  *   C.Parent == B && C.Parent != A
  *   With other words: A region can only have one parent region
- *
+ *   TODO: Ensure parent is in same dim
  */
 public abstract class AbstractMarkableRegion extends AbstractRegion implements IMarkableRegion {
 
@@ -113,12 +113,16 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         nbt.putBoolean(MUTED, isMuted);
         nbt.putString(AREA_TYPE, this.areaType.areaType);
         nbt.put(AREA, this.area.serializeNBT());
-        nbt.put(PARENT, this.parent.serializeNBT());
-        CompoundTag childrenNbt = new CompoundTag();
-        this.children.forEach( (name, child) -> {
-            childrenNbt.put(name, child.serializeNBT());
-        });
-        nbt.put(CHILDREN, childrenNbt);
+        if (this.parent != null) {
+            nbt.put(PARENT, this.parent.serializeNBT());
+        }
+        if (children != null) {
+            CompoundTag childrenNbt = new CompoundTag();
+            this.children.forEach( (name, child) -> {
+                childrenNbt.put(name, child.serializeNBT());
+            });
+            nbt.put(CHILDREN, childrenNbt);
+        }
         return nbt;
     }
 
@@ -135,8 +139,8 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
                 return new PolygonRegion(childNbt);
             case PRISM:
                 return new PrismRegion(childNbt);
-            case UNKNOWN:
             default:
+                // TODO:
                 YetAnotherWorldProtector.LOGGER.info("");
                 return null;
         }
@@ -150,7 +154,13 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         this.dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY,
                 new ResourceLocation(nbt.getString(DIM)));
         this.isMuted = nbt.getBoolean(MUTED);
-        this.areaType = AreaType.valueOf(nbt.getString(AREA_TYPE));
+
+        AreaType areaType = AreaType.of(nbt.getString(AREA_TYPE));
+        if (areaType == null) {
+            YetAnotherWorldProtector.LOGGER.error("Error loading region data for: '" + this.name + "' in dim '" + this.dimension.location() + "'");
+            throw new IllegalArgumentException("Error loading region data for: '" + this.name + "' in dim '" + this.dimension.location() + "'");
+        }
+        this.areaType = areaType;
         if (nbt.contains(PARENT)) {
             this.deserializeParentRegion(nbt.getCompound(PARENT));
         } else {
@@ -193,11 +203,13 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         return area;
     }
 
-    public AbstractRegion getParentRegion() {
+    @Override
+    public AbstractRegion getParent() {
         return parent;
     }
 
-    public Map<String, IMarkableRegion> getChildRegions() {
+    @Override
+    public Map<String, IMarkableRegion> getChildren() {
         return Collections.unmodifiableMap(this.children);
     }
 
