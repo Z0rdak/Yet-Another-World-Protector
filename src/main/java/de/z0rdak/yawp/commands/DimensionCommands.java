@@ -120,7 +120,6 @@ public class DimensionCommands {
 
     public static int selectReferenceDim(CommandSourceStack src, DimensionalRegion dim) {
         RegionCommands.CommandSourceStackReferenceDims.put(src, dim.getDimensionKey());
-        // TODO: Init dim-cache
         MessageUtil.sendCmdFeedback(src, new TextComponent("Selected dim '" + dim.getDimensionKey().location().toString() + "' as reference for region commands for '" + src.getTextName() + "'."));
         return 0;
     }
@@ -285,9 +284,10 @@ public class DimensionCommands {
             }
             sendCmdFeedback(source, new TranslatableComponent(ChatFormatting.BOLD + "== Regions in dimension '" + dim.location() + "' ==="));
             regionsForDim.forEach(region -> {
-                sendCmdFeedback(source, new TextComponent(" - ")
-                        .append(buildDimSuggestRegionRemovalLink(dim, region.getName())
-                                .append(buildDimensionRegionInfoLink(dim, region))));
+                MutableComponent regionRemoveLink = new TextComponent(" - ")
+                        .append(buildDimSuggestRegionRemovalLink(region))
+                        .append(buildDimensionRegionInfoLink(region));
+                sendCmdFeedback(source, regionRemoveLink);
             });
             return 0;
         }
