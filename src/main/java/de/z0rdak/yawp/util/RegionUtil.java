@@ -29,7 +29,6 @@ public final class RegionUtil {
                 return cuboidRegionFrom(marker, regionName, player, dim);
             case SPHERE:
                 return sphericalRegionFrom(marker, regionName, player, dim);
-            case UNKNOWN:
             default:
                 return null;
         }
