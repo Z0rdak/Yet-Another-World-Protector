@@ -7,7 +7,15 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.commands.CommandConstants;
+import de.z0rdak.yawp.commands.arguments.*;
+import de.z0rdak.yawp.commands.arguments.flag.FlagArgumentType;
+import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
+import de.z0rdak.yawp.core.area.AreaType;
+import de.z0rdak.yawp.core.flag.IFlag;
+import de.z0rdak.yawp.core.region.DimensionalRegion;
+import de.z0rdak.yawp.core.region.IMarkableRegion;
+import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.DimensionArgument;
@@ -17,6 +25,8 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.world.World;
+
+import static de.z0rdak.yawp.commands.CommandConstants.*;
 
 public class CommandUtil {
 
@@ -28,6 +38,35 @@ public class CommandUtil {
         return DimensionArgument.getDimension(ctx, CommandConstants.DIMENSION.toString()).dimension();
     }
 
+    public static DimensionalRegion getDimRegionArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
+        return DimensionalRegionArgumentType.getDimRegion(ctx, CommandConstants.DIMENSION.toString());
+    }
+
+    public static DimensionRegionCache getDimCacheArgument(CommandContext<CommandSource> ctx) {
+        return DimensionCacheArgumentType.getDimRegion(ctx, CommandConstants.DIMENSION.toString());
+    }
+
+    public static AreaType getAreaTypeArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
+        return AreaArgumentType.getAreaType(ctx);
+    }
+
+    public static String getRegionNameArgument(CommandContext<CommandSource> ctx) {
+        return StringArgumentType.getString(ctx, REGION.toString());
+    }
+
+    public static IMarkableRegion getRegionArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
+        return RegionArgumentType.getRegion(ctx, REGION.toString());
+    }
+
+    public static IMarkableRegion getChildRegionArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
+        return RegionArgumentType.getRegion(ctx, CHILD_REGION.toString());
+    }
+
+    public static IMarkableRegion getParentRegionArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
+        return RegionArgumentType.getRegion(ctx, PARENT_REGION.toString());
+    }
+
+
     public static ServerPlayerEntity getPlayerArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
         return EntityArgument.getPlayer(ctx, CommandConstants.PLAYER.toString());
     }
@@ -36,16 +75,15 @@ public class CommandUtil {
         e.printStackTrace();
     }
 
-
-    public static String getRegionNameArgument(CommandContext<CommandSource> ctx) {
-        return StringArgumentType.getString(ctx, CommandConstants.REGION.toString());
-    }
-
     public static String getFlagNameArgument(CommandContext<CommandSource> ctx) {
         return StringArgumentType.getString(ctx, CommandConstants.FLAG.toString());
     }
 
-    public static String getAssociateArgument(CommandContext<CommandSource> ctx) {
+    public static IFlag getFlagArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
+        return FlagArgumentType.getFlag(ctx, CommandConstants.FLAG.toString());
+    }
+
+    public static String getAffiliationArgument(CommandContext<CommandSource> ctx) {
         return StringArgumentType.getString(ctx, CommandConstants.AFFILIATION.toString());
     }
 
@@ -61,6 +99,9 @@ public class CommandUtil {
         return BoolArgumentType.getBool(ctx, CommandConstants.ACTIVATE.toString());
     }
 
+    public static boolean getAlertArgument(CommandContext<CommandSource> ctx) {
+        return BoolArgumentType.getBool(ctx, CommandConstants.ALERT.toString());
+    }
     public static boolean getEnableArgument(CommandContext<CommandSource> ctx) {
         return BoolArgumentType.getBool(ctx, CommandConstants.ENABLE.toString());
     }
