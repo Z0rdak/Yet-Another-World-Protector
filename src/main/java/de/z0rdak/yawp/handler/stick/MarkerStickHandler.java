@@ -24,7 +24,7 @@ public class MarkerStickHandler {
     public static void onMarkBlock(ItemStack involvedItem, PlayerInteractEvent.RightClickBlock event) {
         MarkerStick marker = new MarkerStick(involvedItem.getTag().getCompound(STICK));
         AreaType areaType = marker.getAreaType();
-        if (areaType == AreaType.UNKNOWN) {
+        if (areaType == null) {
             YetAnotherWorldProtector.LOGGER.warn("Unknown area type on marking - should really not happening");
             return;
         }

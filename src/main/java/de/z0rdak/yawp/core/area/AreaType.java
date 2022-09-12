@@ -1,18 +1,26 @@
 package de.z0rdak.yawp.core.area;
 
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import de.z0rdak.yawp.commands.arguments.AreaArgumentType;
+import de.z0rdak.yawp.core.flag.RegionFlag;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.ResourceLocationException;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
 // TODO: registry or datapack for area with their area types
 public enum AreaType {
 
-    /**
-     * UNKNOWN has to be the last value
-     */
     CUBOID("Cuboid", 2),
     CYLINDER("Cylinder", 3),
     SPHERE("Sphere", 2),
     // TODO: config values for polygon and prism
     POLYGON_3D("Polygon", 3, 20),
-    PRISM("Prism", 3, 10),
-    UNKNOWN("Unknown", -1);
+    PRISM("Prism", 3, 10);
 
     public final String areaType;
     public final int neededBlocks;
@@ -24,10 +32,26 @@ public enum AreaType {
         this.maxBlocks = maxBlocks;
     }
 
+    AreaType(String name){
+        this.areaType = name;
+        this.neededBlocks = 0;
+        this.maxBlocks = 0;
+    }
+
     AreaType(String name, int neededBlocks) {
         this.areaType = name;
         this.neededBlocks = neededBlocks;
         this.maxBlocks = neededBlocks;
+    }
+
+    public static Collection<String> getTypes() {
+        return Arrays.stream(AreaType.values())
+                .map(AreaType::toString)
+                .collect(Collectors.toSet());
+    }
+
+    public static boolean isValidAreaType(String type) {
+        return AreaType.of(type) != null;
     }
 
     public static AreaType of(String name) {
@@ -43,7 +67,12 @@ public enum AreaType {
             case "Prism":
                 return PRISM;
             default:
-                return UNKNOWN;
+                return null;
         }
+    }
+
+    @Override
+    public String toString() {
+        return areaType;
     }
 }
