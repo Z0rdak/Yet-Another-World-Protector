@@ -1,14 +1,11 @@
 package de.z0rdak.yawp.commands;
 
-import com.mojang.brigadier.RedirectModifier;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.suggestion.SuggestionProvider;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.core.affiliation.PlayerContainer;
-import de.z0rdak.yawp.core.flag.ConditionFlag;
+import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.AbstractRegion;
@@ -17,6 +14,7 @@ import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.CommandUtil;
+import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -72,22 +70,22 @@ public class DimensionCommands {
                                         .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.string())
                                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(affiliationList, builder))
                                                 .then(Commands.argument(CommandConstants.PLAYER.toString(), EntityArgument.player())
-                                                        .executes(ctx -> removePlayer(ctx.getSource(), getPlayerArgument(ctx), getDimensionArgument(ctx), getAssociateArgument(ctx)))))
+                                                        .executes(ctx -> removePlayer(ctx.getSource(), getPlayerArgument(ctx), getDimensionArgument(ctx), getAffiliationArgument(ctx)))))
 
                                         .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.string())
                                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(affiliationList, builder))
                                                 .then(Commands.argument(CommandConstants.PLAYER.toString(), EntityArgument.player())
-                                                        .executes(ctx -> removePlayer(ctx.getSource(), getPlayerArgument(ctx), getDimensionArgument(ctx), getAssociateArgument(ctx))))))
+                                                        .executes(ctx -> removePlayer(ctx.getSource(), getPlayerArgument(ctx), getDimensionArgument(ctx), getAffiliationArgument(ctx))))))
                                 .then(literal(CommandConstants.TEAM)
                                         .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.string())
                                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(affiliationList, builder))
                                                 .then(Commands.argument(CommandConstants.TEAM.toString(), TeamArgument.team())
-                                                        .executes(ctx -> removeTeam(ctx.getSource(), getTeamArgument(ctx), getDimensionArgument(ctx), getAssociateArgument(ctx)))))
+                                                        .executes(ctx -> removeTeam(ctx.getSource(), getTeamArgument(ctx), getDimensionArgument(ctx), getAffiliationArgument(ctx)))))
 
                                         .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.string())
                                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(affiliationList, builder))
                                                 .then(Commands.argument(CommandConstants.TEAM.toString(), TeamArgument.team())
-                                                        .executes(ctx -> removeTeam(ctx.getSource(), getTeamArgument(ctx), getDimensionArgument(ctx), getAssociateArgument(ctx))))))
+                                                        .executes(ctx -> removeTeam(ctx.getSource(), getTeamArgument(ctx), getDimensionArgument(ctx), getAffiliationArgument(ctx))))))
                                 .then(literal(CommandConstants.FLAG)
                                         .then(Commands.argument(CommandConstants.FLAG.toString(), StringArgumentType.string())
                                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(RegionDataManager.get().getFlagsIdsForDim(getDimensionArgument(ctx)), builder))
@@ -98,26 +96,33 @@ public class DimensionCommands {
                                         .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.string())
                                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(affiliationList, builder))
                                                 .then(Commands.argument(CommandConstants.PLAYER.toString(), EntityArgument.player())
-                                                        .executes(ctx -> addPlayer(ctx.getSource(), getPlayerArgument(ctx), getDimensionArgument(ctx), getAssociateArgument(ctx)))))
+                                                        .executes(ctx -> addPlayer(ctx.getSource(), getPlayerArgument(ctx), getDimensionArgument(ctx), getAffiliationArgument(ctx)))))
 
                                         .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.string())
                                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(affiliationList, builder))
                                                 .then(Commands.argument(CommandConstants.PLAYER.toString(), EntityArgument.player())
-                                                        .executes(ctx -> addPlayer(ctx.getSource(), getPlayerArgument(ctx), getDimensionArgument(ctx), getAssociateArgument(ctx))))))
+                                                        .executes(ctx -> addPlayer(ctx.getSource(), getPlayerArgument(ctx), getDimensionArgument(ctx), getAffiliationArgument(ctx))))))
                                 .then(literal(CommandConstants.TEAM)
                                         .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.string())
                                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(affiliationList, builder))
                                                 .then(Commands.argument(CommandConstants.TEAM.toString(), TeamArgument.team())
-                                                        .executes(ctx -> addTeam(ctx.getSource(), getTeamArgument(ctx), getDimensionArgument(ctx), getAssociateArgument(ctx)))))
+                                                        .executes(ctx -> addTeam(ctx.getSource(), getTeamArgument(ctx), getDimensionArgument(ctx), getAffiliationArgument(ctx)))))
 
                                         .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.string())
                                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(affiliationList, builder))
                                                 .then(Commands.argument(CommandConstants.TEAM.toString(), TeamArgument.team())
-                                                        .executes(ctx -> addTeam(ctx.getSource(), getTeamArgument(ctx), getDimensionArgument(ctx), getAssociateArgument(ctx))))))
+                                                        .executes(ctx -> addTeam(ctx.getSource(), getTeamArgument(ctx), getDimensionArgument(ctx), getAffiliationArgument(ctx))))))
                                 .then(literal(CommandConstants.FLAG)
                                         .then(Commands.argument(CommandConstants.FLAG.toString(), StringArgumentType.string())
-                                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(RegionFlag.getFlags(), builder))
+                                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(RegionFlag.getFlagNames(), builder))
                                                 .executes(ctx -> addFlag(ctx.getSource(), CommandUtil.getDimensionArgument(ctx), StringArgumentType.getString(ctx, CommandConstants.FLAG.toString())))))));
+    }
+
+    public static int selectReferenceDim(CommandSourceStack src, DimensionalRegion dim) {
+        RegionCommands.CommandSourceStackReferenceDims.put(src, dim.getDimensionKey());
+        // TODO: Init dim-cache
+        MessageUtil.sendCmdFeedback(src, new TextComponent("Selected dim '" + dim.getDimensionKey().location().toString() + "' as reference for region commands for '" + src.getTextName() + "'."));
+        return 0;
     }
 
     private static int removeFlag(CommandSourceStack src, ResourceKey<Level> dim, String flag) {
@@ -132,7 +137,7 @@ public class DimensionCommands {
 
     private static int addFlag(CommandSourceStack src, ResourceKey<Level> dim, String flag) {
         // TODO: For now this works because we only have condition flags and no black/whitelist feature
-        IFlag iflag = new ConditionFlag(flag, false);
+        IFlag iflag = new BooleanFlag(flag, false);
         DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
         if (dimCache != null) {
             dimCache.addFlag(iflag);
@@ -218,7 +223,7 @@ public class DimensionCommands {
         flags.forEach(flag -> {
            MutableComponent removeFlagLink = new TextComponent(" - ")
                     .append(buildDimensionRemoveFlagLink(flag, dim))
-                    .append(new TextComponent(" '" + flag.getFlagName() + "' "));
+                    .append(new TextComponent(" '" + flag.getFlagIdentifier() + "' "));
 
             sendCmdFeedback(src, removeFlagLink);
         });
@@ -363,7 +368,7 @@ public class DimensionCommands {
         String hoverText = "cli.msg.info.state." + onClickAction;
         String linkText = "cli.msg.info.state.link." + (region.isActive() ? "activate" : "deactivate");
         ChatFormatting color = region.isActive() ? ChatFormatting.GREEN : ChatFormatting.RED;
-       MutableComponent stateLink = buildExecuteCmdComponent(linkText, command, color, hoverText, ClickEvent.Action.RUN_COMMAND);
+       MutableComponent stateLink = buildExecuteCmdComponent(linkText, hoverText, command, ClickEvent.Action.RUN_COMMAND, color);
         sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.state")
                 .append(new TextComponent(": "))
                 .append(stateLink));
@@ -378,6 +383,9 @@ public class DimensionCommands {
                 .append(buildDimensionalInfoLink(dim))
                 .append(new TextComponent(ChatFormatting.BOLD + " information =="));
         sendCmdFeedback(src, dimInfoHeader);
+
+        // TODO:
+        // Regions in dimension
 
         // Dimension owners & members
         promptDimensionOwners(src, dimRegion);
