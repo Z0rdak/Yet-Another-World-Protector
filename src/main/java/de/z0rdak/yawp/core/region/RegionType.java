@@ -5,9 +5,22 @@ package de.z0rdak.yawp.core.region;
  */
 public enum RegionType {
 
+    /**
+     * Used for a global region, spanning over all dimensional regions. NOT yet used.
+     */
     GLOBAL("global"),
+    /**
+     * Used for dimension regions. Instances of DimensionalRegion.
+     */
     DIMENSION("dimension"),
-    LOCAL("local");
+    /**
+     * Used to for local, markable regions. Instances of IMarkableRegion.
+     */
+    LOCAL("local"),
+    /**
+     * Used to mark a template region. NOT yet used.
+     */
+    TEMPLATE("template");
 
     public final String type;
 

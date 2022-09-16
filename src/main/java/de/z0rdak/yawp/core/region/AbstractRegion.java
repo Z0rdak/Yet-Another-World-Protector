@@ -46,7 +46,9 @@ public abstract class AbstractRegion implements IProtectedRegion {
      */
     protected AbstractRegion(String name, RegionType regionType, PlayerEntity owner) {
         this(name, regionType);
-        this.owners.addPlayer(owner);
+        if (owner != null) {
+            this.owners.addPlayer(owner);
+        }
     }
 
     @Override

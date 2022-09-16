@@ -15,6 +15,7 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.NotImplementedException;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
@@ -40,6 +41,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     protected IMarkableArea area;
     protected AreaType areaType;
     protected BlockPos tpTarget;
+    @Nullable // TODO: not when parent can be also dim
     protected AbstractRegion parent;
     protected Map<String, IMarkableRegion> children;
 
@@ -49,10 +51,10 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         this.area = area;
         this.areaType = area.getAreaType();
         this.priority = RegionConfig.DEFAULT_REGION_PRIORITY.get();
+        this.children = new HashMap<>();
         if (parent != null) {
             this.setParent(parent);
         }
-        this.parent = null;
     }
 
     public AbstractMarkableRegion(String name, IMarkableArea area, PlayerEntity owner, RegistryKey<World> dimension) {
@@ -69,7 +71,12 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         this.deserializeNBT(nbt);
     }
 
-    public void setParent(AbstractRegion parent){
+    @Override
+    public void setParent(IProtectedRegion parent){
+        if (parent == null) {
+            this.parent = null;
+            return;
+        }
         if (parent instanceof DimensionalRegion) {
             DimensionalRegion dimensionalRegion = (DimensionalRegion) parent;
             dimensionalRegion.getName();
@@ -110,13 +117,17 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         nbt.put(AREA, this.area.serializeNBT());
         if (this.parent != null) {
             nbt.put(PARENT, this.parent.serializeNBT());
+        } else {
+            nbt.put(PARENT, new CompoundNBT());
         }
-        if (children != null) {
+        if (this.children != null) {
             CompoundNBT childrenNbt = new CompoundNBT();
             this.children.forEach( (name, child) -> {
                 childrenNbt.put(name, child.serializeNBT());
             });
             nbt.put(CHILDREN, childrenNbt);
+        } else {
+            nbt.put(CHILDREN, new CompoundNBT());
         }
         return nbt;
     }
@@ -163,16 +174,23 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         }
         if (nbt.contains(CHILDREN)){
             CompoundNBT childrenNbt = nbt.getCompound(CHILDREN);
-            this.children = new HashMap<>(childrenNbt.size());
-            childrenNbt.getAllKeys().forEach( key -> {
-                this.children.put(key, this.deserializeLocalRegion(nbt.getCompound(key)));
-            });
+            if (childrenNbt.isEmpty()) {
+                this.children = new HashMap<>();
+            } else {
+                this.children = new HashMap<>(childrenNbt.size());
+                childrenNbt.getAllKeys().forEach(key -> {
+                    this.children.put(key, this.deserializeLocalRegion(nbt.getCompound(key)));
+                });
+            }
         } else {
             this.children = new HashMap<>(0);
         }
     }
 
     private void deserializeParentRegion(CompoundNBT parentNbt) {
+        if (parentNbt.isEmpty()) {
+            this.parent = null;
+        }
         RegionType type = RegionType.of(parentNbt.getString(REGION_TYPE));
         if (type != null) {
             switch (type) {
@@ -188,8 +206,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
             }
         } else {
             this.parent = null;
-            // TODO:
-            YetAnotherWorldProtector.LOGGER.info("Unable to load... ");
+            YetAnotherWorldProtector.LOGGER.warn("Unable to deserialize parent info: " + parentNbt);
         }
     }
 
@@ -199,6 +216,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     }
 
     @Override
+    @Nullable
     public AbstractRegion getParent() {
         return parent;
     }
@@ -208,12 +226,19 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         return Collections.unmodifiableMap(this.children);
     }
 
-    public boolean hasChild(IMarkableRegion maybeChild){
-        throw new NotImplementedException("");
+    @Override
+    public void removeChild(IMarkableRegion child) {
+        this.children.remove(child.getName());
     }
 
-    public boolean isChildOf(AbstractRegion maybeParent){
-        throw new NotImplementedException("");
+    @Override
+    public void addChild(IMarkableRegion child) {
+        this.children.put(child.getName(), child);
+    }
+
+    @Override
+    public boolean hasChild(IMarkableRegion maybeChild){
+        return this.children.containsKey(maybeChild.getName());
     }
 
     @Override

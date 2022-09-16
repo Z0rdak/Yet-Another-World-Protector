@@ -16,7 +16,7 @@ public final class SphereRegion extends AbstractMarkableRegion {
     }
 
     public SphereRegion(String name, SphereArea area, PlayerEntity player, RegistryKey<World> dimension) {
-        super(name, area, player, dimension);
+        super(name, area, new BlockPos(area.getCenter()), player, dimension);
     }
 
     public SphereRegion(String name, SphereArea area, BlockPos tpPos, PlayerEntity player, RegistryKey<World> dimension) {

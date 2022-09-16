@@ -22,6 +22,7 @@ import java.util.Collection;
  * <p>
  * Classes which implement this interface must also provide a way
  * to serialize the region data into a CompoundNBT.
+ *  * TODO: Maybe move getDim to this interface and implement it in AbstractRegion
  */
 public interface IProtectedRegion extends INBTSerializable<CompoundNBT> {
 
@@ -29,6 +30,7 @@ public interface IProtectedRegion extends INBTSerializable<CompoundNBT> {
 
     void addFlag(IFlag flag);
 
+    // TODO: String flag -> IFlag flag?
     void removeFlag(String flag);
 
     boolean containsFlag(IFlag flag);
