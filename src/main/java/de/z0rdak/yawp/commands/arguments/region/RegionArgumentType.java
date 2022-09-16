@@ -35,7 +35,7 @@ public class RegionArgumentType implements ArgumentType<String> {
             flag -> new TranslatableComponent("cli.arg.region.invalid", flag)
     );
 
-    public static final Pattern VALID_NAME_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z\\d\\-][A-Za-z\\d]$");
+    public static final Pattern VALID_NAME_PATTERN = Pattern.compile("^[A-Za-z]+[A-Za-z\\d\\-]+[A-Za-z\\d]+$");
 
     @Override
     public String parse(StringReader reader) throws CommandSyntaxException {
