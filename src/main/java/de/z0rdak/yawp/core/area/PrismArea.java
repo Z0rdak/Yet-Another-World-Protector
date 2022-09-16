@@ -45,4 +45,9 @@ public class PrismArea extends AbstractArea {
         super.deserializeNBT(nbt);
         throw new NotImplementedException("Missing deserializeNBT implementation in PrismArea");
     }
+
+    @Override
+    public List<BlockPos> getMarkedBlocks() {
+        return this.blockNodes;
+    }
 }

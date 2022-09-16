@@ -5,6 +5,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 
+import java.util.Collections;
+import java.util.List;
+
 public abstract class CenteredArea extends AbstractArea {
 
     protected BlockPos center;
@@ -43,5 +46,10 @@ public abstract class CenteredArea extends AbstractArea {
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
         this.center = NbtUtils.readBlockPos(nbt.getCompound("center"));
+    }
+
+    @Override
+    public List<BlockPos> getMarkedBlocks() {
+        return Collections.singletonList(this.center);
     }
 }
