@@ -7,6 +7,9 @@ import net.minecraft.command.CommandSource;
 
 import static de.z0rdak.yawp.util.CommandUtil.literal;
 
+/**
+ * Management for flag values for List and Int Flags as well as default flag values
+ */
 public final class FlagCommands {
 
     public static final LiteralArgumentBuilder<CommandSource> FLAG_COMMAND = register();
