@@ -561,7 +561,7 @@ public class MessageUtil {
     public static IFormattableTextComponent buildRegionRemoveChildLink(IMarkableRegion region, IMarkableRegion child) {
         String command = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), REMOVE.toString(), CHILD.toString(), child.getName());
         TranslationTextComponent linkText = new TranslationTextComponent("cli.msg.info.region.children.remove.link.text");
-        TranslationTextComponent linkHoverText = new TranslationTextComponent("cli.msg.info.region.affiliation.remove.link.hover", child.getName(), region.getName());
+        TranslationTextComponent linkHoverText = new TranslationTextComponent("cli.msg.info.region.children.remove.link.hover", child.getName(), region.getName());
         return buildExecuteCmdComponent(linkText, linkHoverText, command, SUGGEST_COMMAND, RED);
     }
 
