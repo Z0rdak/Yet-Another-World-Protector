@@ -115,7 +115,7 @@ public class RegionDataManager extends SavedData {
             }
             if (!dimCacheMap.containsKey(event.getTo())) {
                 DimensionRegionCache cache = new DimensionRegionCache(event.getTo());
-                RegionConfig.getDefaultFlags()
+                RegionConfig.getDefaultDimFlags()
                         .stream() // get is fine here, because the config is validated beforehand
                         .map(flag -> RegionFlag.fromString(flag).get().flag)
                         .forEach(cache::addFlag);
@@ -137,7 +137,7 @@ public class RegionDataManager extends SavedData {
             }
             if (!dimCacheMap.containsKey(dim)) {
                 DimensionRegionCache cache = new DimensionRegionCache(dim);
-                RegionConfig.getDefaultFlags()
+                RegionConfig.getDefaultDimFlags()
                         .stream() // get is fine here, because the config is validated beforehand
                         .map(flag -> RegionFlag.fromString(flag).get().flag)
                         .forEach(cache::addFlag);
@@ -162,11 +162,7 @@ public class RegionDataManager extends SavedData {
     }
 
     public Collection<IMarkableRegion> getRegionsFor(ResourceKey<Level> dim) {
-        return null;
-    }
-
-    public Optional<AbstractMarkableRegion> getRegion(String regionName) {
-        return null;
+        return dimCacheMap.get(dim).getRegions();
     }
 
     @Nullable
@@ -180,7 +176,10 @@ public class RegionDataManager extends SavedData {
         return null;
     }
 
-    public boolean containsRegion(String regionName) {
+    public boolean containsRegion(ResourceKey<Level> dim, IMarkableRegion region) {
+        if (dimCacheMap.containsKey(dim)) {
+            return dimCacheMap.get(dim).contains(region.getName());
+        }
         return false;
     }
 
@@ -212,6 +211,16 @@ public class RegionDataManager extends SavedData {
         return new ArrayList<>();
     }
 
+    @Nullable
+    public boolean containsCacheFor(ResourceKey<Level> dim) {
+        return dimCacheMap.containsKey(dim);
+    }
+
+    public DimensionRegionCache newCacheFor(ResourceKey<Level> dim) {
+        DimensionRegionCache dimCache =  dimCacheMap.put(dim, new DimensionRegionCache(dim));
+        save();
+        return dimCache;
+    }
     /* hash for checking manipulated world data?*/
     public class DimensionDataEntry {
         private ResourceKey<Level> dim;
