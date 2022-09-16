@@ -2,10 +2,7 @@ package de.z0rdak.yawp.core.flag;
 
 import net.minecraft.network.chat.TranslatableComponent;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -128,15 +125,41 @@ public enum RegionFlag {
      * Returns a set of all flags with their string representation defined within this enum.
      * @return a set of all flagIdentifiers defined within RegionFlag
      */
-    public static List<String> getFlags() {
+    public static List<String> getFlagNames() {
         return Arrays.stream(RegionFlag.values())
                 .map(RegionFlag::toString)
                 .collect(Collectors.toList());
+    }
+
+    public static Set<IFlag> getFlags() {
+        return Arrays.stream(RegionFlag.values())
+                .map(regionFlag -> regionFlag.flag)
+                .collect(Collectors.toSet());
+    }
+
+    public static Set<IFlag> getFlags(FlagType type){
+        return getFlags()
+                .stream()
+                .filter(flag -> flag.getFlagType() == type)
+                .collect(Collectors.toSet());
     }
 
     public static Optional<RegionFlag> fromString(String flagIdentifier){
         return Arrays.stream(values())
                 .filter(flag -> flag.flagname.equals(flagIdentifier))
                 .findFirst();
+    }
+
+    public static Set<BooleanFlag> getBoolFlags(){
+        return getFlags(FlagType.BOOLEAN_FLAG)
+                .stream()
+                .map(flag -> (BooleanFlag) flag)
+                .collect(Collectors.toSet());
+    }
+
+    public static RegionFlag fromId(String flagIdentifier){
+        return Arrays.stream(values())
+                .filter(flag -> flag.flagname.equals(flagIdentifier))
+                .collect(Collectors.toList()).get(0);
     }
 }
