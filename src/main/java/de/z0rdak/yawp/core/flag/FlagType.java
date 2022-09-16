@@ -1,5 +1,9 @@
 package de.z0rdak.yawp.core.flag;
 
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 public enum FlagType {
 
     BOOLEAN_FLAG("BooleanFlag"),
@@ -23,5 +27,11 @@ public enum FlagType {
             default:
                 return null;
         }
+    }
+
+    public static Set<String> getFlagTypes(){
+        return Arrays.stream(FlagType.values())
+                .map(type -> type.flagType)
+                .collect(Collectors.toSet());
     }
 }
