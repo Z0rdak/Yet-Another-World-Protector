@@ -9,6 +9,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.commands.CommandConstants;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.util.CommandUtil;
@@ -24,6 +25,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static de.z0rdak.yawp.commands.CommandConstants.REGION;
+
 public class RegionArgumentType implements ArgumentType<String> {
 
     private static final Collection<String> EXAMPLES = Stream.of(new String[]{"spawn", "arena4pvp", "shop", "nether-hub"})
@@ -35,7 +38,7 @@ public class RegionArgumentType implements ArgumentType<String> {
             flag -> new TranslationTextComponent("cli.arg.region.invalid", flag)
     );
 
-    public static final Pattern VALID_NAME_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z\\d\\-][A-Za-z\\d]$");
+    public static final Pattern VALID_NAME_PATTERN = Pattern.compile("^[A-Za-z]+[A-Za-z\\d\\-]+[A-Za-z\\d]+$");
 
     @Override
     public String parse(StringReader reader) throws CommandSyntaxException {
