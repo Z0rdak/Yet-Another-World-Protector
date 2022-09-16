@@ -40,5 +40,13 @@ public interface IMarkableRegion extends IProtectedRegion {
 
    AbstractRegion getParent();
 
+   void setParent(IProtectedRegion parent);
+
    Map<String, IMarkableRegion> getChildren();
+
+   void addChild(IMarkableRegion child);
+
+   void removeChild(IMarkableRegion child);
+
+   boolean hasChild(IMarkableRegion child);
 }
