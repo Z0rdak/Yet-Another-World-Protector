@@ -13,6 +13,7 @@ public class RegionConfig {
     //public static final ForgeConfigSpec.ConfigValue<Boolean> REGION_DEFAULT_FLAG_TYPE;
     public static final ForgeConfigSpec.ConfigValue<Integer> REGION_DEFAULT_PRIORITY_INC;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> REGION_DEFAULT_FLAGS;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> DIM_REGION_DEFAULT_FLAGS;
     public static final ForgeConfigSpec.ConfigValue<Integer> DEFAULT_REGION_PRIORITY;
 
     static {
@@ -23,8 +24,11 @@ public class RegionConfig {
         DEFAULT_REGION_PRIORITY = BUILDER.comment("Default region priority for newly created regions.")
                 .defineInRange("default_region_priority", 10, 0, Integer.MAX_VALUE);
 
-        REGION_DEFAULT_FLAGS = BUILDER.comment("Default flags for new regions.")
-                .defineList("default_flags", new ArrayList<>(Arrays.asList("break_blocks", "place_blocks", "explosions")), RegionConfig::isValidFlag);
+        REGION_DEFAULT_FLAGS = BUILDER.comment("Default flags for new local regions.")
+                .defineList("default_flags", new ArrayList<>(Arrays.asList("break_blocks", "place_blocks")), RegionConfig::isValidFlag);
+
+        DIM_REGION_DEFAULT_FLAGS = BUILDER.comment("Default flags for new dimensional regions.")
+                .defineList("default_flags", new ArrayList<>(Arrays.asList("break_blocks", "place_blocks")), RegionConfig::isValidFlag);
 
         REGION_DEFAULT_PRIORITY_INC = BUILDER.comment("Default region priority increment/decrement.")
                 .defineInRange("default_region_priority_inc", 5, 1, 1000);
@@ -38,6 +42,12 @@ public class RegionConfig {
 
     public static Set<String> getDefaultFlags(){
         return  RegionConfig.REGION_DEFAULT_FLAGS.get().stream()
+                .filter(Objects::nonNull)
+                .map(String::toString).collect(Collectors.toSet());
+    }
+
+    public static Set<String> getDefaultDimFlags(){
+        return  RegionConfig.DIM_REGION_DEFAULT_FLAGS.get().stream()
                 .filter(Objects::nonNull)
                 .map(String::toString).collect(Collectors.toSet());
     }
