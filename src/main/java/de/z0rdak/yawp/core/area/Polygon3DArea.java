@@ -98,4 +98,9 @@ public class Polygon3DArea extends AbstractArea {
     public String toString() {
         throw new NotImplementedException("Missing toString");
     }
+
+    @Override
+    public List<BlockPos> getMarkedBlocks() {
+        return this.positions;
+    }
 }

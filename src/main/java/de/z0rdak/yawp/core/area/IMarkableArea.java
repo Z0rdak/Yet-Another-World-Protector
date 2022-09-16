@@ -4,6 +4,8 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.util.INBTSerializable;
 
+import java.util.List;
+
 /**
  * IMarkableArea provides an interface for different types of areas.
  * The most basic area would be a simple AxisAlignedBB.
@@ -14,4 +16,6 @@ public interface IMarkableArea extends INBTSerializable<CompoundNBT> {
     boolean contains(BlockPos pos);
 
     AreaType getAreaType();
+
+    List<BlockPos> getMarkedBlocks();
 }

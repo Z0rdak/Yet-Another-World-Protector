@@ -5,6 +5,9 @@ import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 
+import java.util.Collections;
+import java.util.List;
+
 public abstract class CenteredArea extends AbstractArea {
 
     protected BlockPos center;
@@ -38,5 +41,10 @@ public abstract class CenteredArea extends AbstractArea {
     public void deserializeNBT(CompoundNBT nbt) {
         super.deserializeNBT(nbt);
         this.center = NBTUtil.readBlockPos(nbt.getCompound("center"));
+    }
+
+    @Override
+    public List<BlockPos> getMarkedBlocks() {
+        return Collections.singletonList(this.center);
     }
 }

@@ -7,6 +7,7 @@ import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -74,7 +75,15 @@ public class CuboidArea extends AbstractArea {
 
     @Override
     public String toString() {
-        return "Cuboid " + AreaUtil.blockPosStr(this.getAreaP1()) + " -> " + AreaUtil.blockPosStr(this.getAreaP2());
+        StringBuilder strBuilder = new StringBuilder();
+        strBuilder.append(getAreaType().areaType).append(" ").append(AreaUtil.blockPosStr(this.getAreaP1())).append(" <-> ").append(AreaUtil.blockPosStr(this.getAreaP2()))
+                .append("\n").append("Size: ").append("X=").append(this.area.getXsize()).append(", Y=").append( this.area.getYsize()).append(", Z=").append( this.area.getZsize())
+                .append("\n").append("Blocks: ").append(AreaUtil.blockPosStr(this.getAreaP1())).append(", ").append(AreaUtil.blockPosStr(this.getAreaP2()));
+        return strBuilder.toString();
     }
 
+    @Override
+    public List<BlockPos> getMarkedBlocks() {
+        return Arrays.asList(this.getAreaP1(), this.getAreaP2());
+    }
 }

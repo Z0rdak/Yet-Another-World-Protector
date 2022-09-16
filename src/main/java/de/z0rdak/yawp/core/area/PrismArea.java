@@ -7,6 +7,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO: Create abstraction for prism and polygon area with a list of blocks (maybe cuboid fits here too?)
 public class PrismArea extends AbstractArea {
 
     public List<BlockPos> blockNodes;
@@ -44,5 +45,10 @@ public class PrismArea extends AbstractArea {
     public void deserializeNBT(CompoundNBT nbt) {
         super.deserializeNBT(nbt);
         throw new NotImplementedException("Missing deserializeNBT implementation in PrismArea");
+    }
+
+    @Override
+    public List<BlockPos> getMarkedBlocks() {
+        return this.blockNodes;
     }
 }
