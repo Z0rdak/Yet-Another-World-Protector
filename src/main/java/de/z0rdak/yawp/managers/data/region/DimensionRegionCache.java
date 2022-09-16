@@ -17,6 +17,7 @@ import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nullable;
+import java.lang.module.ModuleReference;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +40,10 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
     public DimensionRegionCache(DimensionalRegion dimensionalRegion){
         this.dimensionalRegion = dimensionalRegion;
         this.regionsInDimension = new HashMap<>();
+    }
+
+    public ResourceKey<Level> dimensionKey(){
+        return this.dimensionalRegion.getDimensionKey();
     }
 
     private static String getDataName(DimensionalRegion dim){
@@ -159,6 +164,10 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
 
     public Collection<String> getRegionNames() {
         return regionsInDimension.keySet();
+    }
+
+    public Collection<IMarkableRegion> getRegions() {
+        return regionsInDimension.values();
     }
 
     public void removeRegion(String regionName){
