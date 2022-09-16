@@ -165,6 +165,10 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
         return regionsInDimension.keySet();
     }
 
+    public Collection<IMarkableRegion> getRegions() {
+        return regionsInDimension.values();
+    }
+
     public void removeRegion(String regionName){
         if (this.contains(regionName)){
             this.regionsInDimension.remove(regionName);
