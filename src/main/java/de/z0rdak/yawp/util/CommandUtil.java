@@ -59,7 +59,7 @@ public class CommandUtil {
     }
 
     public static IMarkableRegion getChildRegionArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        return RegionArgumentType.getRegion(ctx, CHILD_REGION.toString());
+        return RegionArgumentType.getRegion(ctx, CHILD.toString());
     }
 
     public static IMarkableRegion getParentRegionArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
@@ -69,10 +69,6 @@ public class CommandUtil {
 
     public static ServerPlayer getPlayerArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         return EntityArgument.getPlayer(ctx, CommandConstants.PLAYER.toString());
-    }
-
-    public static void handleCommandWithoutPlayer(CommandSyntaxException e) {
-        e.printStackTrace();
     }
 
     public static String getFlagNameArgument(CommandContext<CommandSourceStack> ctx) {
@@ -93,10 +89,6 @@ public class CommandUtil {
 
     public static PlayerTeam getTeamArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         return TeamArgument.getTeam(ctx, CommandConstants.TEAM.toString());
-    }
-
-    public static boolean getActivateArgument(CommandContext<CommandSourceStack> ctx) {
-        return BoolArgumentType.getBool(ctx, CommandConstants.ACTIVATE.toString());
     }
 
     public static boolean getAlertArgument(CommandContext<CommandSourceStack> ctx) {
