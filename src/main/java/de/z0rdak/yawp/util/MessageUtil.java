@@ -187,16 +187,16 @@ public class MessageUtil {
     }
 
     public static IFormattableTextComponent buildRegionPriorityComponent(IMarkableRegion region) {
-        String incPriorityCmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), PRIORITY.toString(), INC.toString(), String.valueOf( REGION_DEFAULT_PRIORITY_INC.get()));
+        String incPriorityCmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), INC.toString(), String.valueOf( REGION_DEFAULT_PRIORITY_INC.get()));
         IFormattableTextComponent incLinkText = new TranslationTextComponent("cli.msg.info.region.state.priority.increase.link.text", REGION_DEFAULT_PRIORITY_INC.get());
         IFormattableTextComponent incHoverText = new TranslationTextComponent("cli.msg.info.region.state.priority.increase.link.hover", REGION_DEFAULT_PRIORITY_INC.get());
         IFormattableTextComponent increaseLink = buildExecuteCmdComponent(incLinkText, incHoverText, incPriorityCmd, ClickEvent.Action.RUN_COMMAND, GREEN);
-        String decPriorityCmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), PRIORITY.toString(), DEC.toString(), String.valueOf( REGION_DEFAULT_PRIORITY_INC.get()));
+        String decPriorityCmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), DEC.toString(), String.valueOf( REGION_DEFAULT_PRIORITY_INC.get()));
         IFormattableTextComponent decLinkText = new TranslationTextComponent("cli.msg.info.region.state.priority.decrease.link.text", REGION_DEFAULT_PRIORITY_INC.get());
         IFormattableTextComponent decHoverText = new TranslationTextComponent("cli.msg.info.region.state.priority.decrease.link.hover", REGION_DEFAULT_PRIORITY_INC.get());
         IFormattableTextComponent decreaseLink = buildExecuteCmdComponent(decLinkText, decHoverText, decPriorityCmd, ClickEvent.Action.RUN_COMMAND, RED);
         StringTextComponent priorityValue = new StringTextComponent(String.valueOf(region.getPriority()));
-        String setPriorityCmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), PRIORITY.toString(), "");
+        String setPriorityCmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), "");
         TranslationTextComponent setPriorityLinkText = new TranslationTextComponent("cli.msg.info.region.state.priority.set.link.text");
         TranslationTextComponent setPriorityHoverText = new TranslationTextComponent("cli.msg.info.region.state.priority.set.link.hover");
         IFormattableTextComponent setPriorityLink = buildExecuteCmdComponent(setPriorityLinkText, setPriorityHoverText, setPriorityCmd, SUGGEST_COMMAND, GREEN);
