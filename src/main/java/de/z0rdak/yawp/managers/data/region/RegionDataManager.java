@@ -200,8 +200,7 @@ public class RegionDataManager extends SavedData {
         return new ArrayList<>();
     }
 
-    public List<String> getFlagsIdsForDim(ResourceKey<Level> dim){
-        DimensionRegionCache dimCache = cacheFor(dim);
+    public List<String> getFlagsIdsForDim(DimensionRegionCache dimCache){
         if (dimCache != null) {
             return dimCache.getDimensionalRegion().getFlags()
                     .stream()
