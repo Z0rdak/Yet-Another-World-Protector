@@ -138,22 +138,25 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     }
 
     private AbstractMarkableRegion deserializeLocalRegion(CompoundTag childNbt){
-        AreaType parentArea = AreaType.valueOf(childNbt.getString(AREA_TYPE));
-        switch (parentArea) {
-            case CUBOID:
-                return new CuboidRegion(childNbt);
-            case CYLINDER:
-                return new CylinderRegion(childNbt);
-            case SPHERE:
-                return new SphereRegion(childNbt);
-            case POLYGON_3D:
-                return new PolygonRegion(childNbt);
-            case PRISM:
-                return new PrismRegion(childNbt);
-            default:
-                // TODO:
-                YetAnotherWorldProtector.LOGGER.info("");
-                return null;
+        // FIXME: either workaround with .of or workaround with .toLowercase on de-/serializing
+        AreaType parentArea = AreaType.of(childNbt.getString(AREA_TYPE));
+        if (parentArea != null) {
+            switch (parentArea) {
+                case CUBOID:
+                    return new CuboidRegion(childNbt);
+                case CYLINDER:
+                    return new CylinderRegion(childNbt);
+                case SPHERE:
+                    return new SphereRegion(childNbt);
+                case POLYGON_3D:
+                    return new PolygonRegion(childNbt);
+                case PRISM:
+                    return new PrismRegion(childNbt);
+                default:
+                    throw new IllegalArgumentException("Unable to read area type.");
+            }
+        } else {
+            throw new IllegalArgumentException("Unable to read area type.");
         }
     }
 
