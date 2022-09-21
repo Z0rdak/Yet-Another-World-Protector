@@ -1,4 +1,4 @@
-package de.z0rdak.yawp.api.events;
+package de.z0rdak.yawp.api.events.region;
 
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import net.minecraft.world.entity.player.Player;
