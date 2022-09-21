@@ -6,10 +6,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.EntityEvent;
+import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.HashMap;
@@ -50,7 +49,7 @@ public class PlayerTrackingManager {
 
     @SubscribeEvent
     public static void onChunkLoad(ChunkEvent.Load event) {
-        if (!event.getWorld().isClientSide()) {
+        if (!event.getLevel().isClientSide()) {
             if (event.getChunk().getWorldForge() instanceof ServerLevel) {
                 ServerLevel world = (ServerLevel) event.getChunk().getWorldForge();
                 /*

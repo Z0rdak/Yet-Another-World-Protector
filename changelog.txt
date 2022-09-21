@@ -1,3 +1,13 @@
+# 0.0.1.0-beta2
+## Additions
+* Add first beta implementation of local regions. They come with two different area types: Cuboid and Sphere. More types will come soon!
+* Add CLI to manage local regions. You are able to manage all properties of local regions with commands and with the interactive CLI.
+For a comprehensive command overview take a look at the wiki.
+* Add dedicated default flags config option for local regions
+## Changes
+* Command to activate dimensional regions was changed from activate to enable
+## Fixes
+* Various bug fixes
 # 0.0.1.0-beta1 - First beta release
 This is the first beta release of this mod. Please be so kind and report any bugs you encounter on the GitHub issue page: https://github.com/Z0rdak/Yet-Another-World-Protector/issues.
 If you have suggestions, feel free to post them, too.

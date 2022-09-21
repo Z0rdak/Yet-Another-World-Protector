@@ -30,15 +30,16 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.TeamArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.scores.PlayerTeam;
+import net.minecraftforge.server.command.TextComponentHelper;
 
 
 import java.util.*;
@@ -208,7 +209,7 @@ public class RegionCommands {
     }
 
     private static int updateArea(CommandSourceStack src, IMarkableRegion region, AreaType areaType, BlockPos pos1, BlockPos pos2) {
-        TranslatableComponent updateAreaMsg = new TranslatableComponent("cli.msg.info.region.spatial.area.update", buildRegionSpatialPropLink(region), buildRegionInfoLink(region));
+        MutableComponent updateAreaMsg = Component.translatable("cli.msg.info.region.spatial.area.update", buildRegionSpatialPropLink(region), buildRegionInfoLink(region));
         switch (areaType) {
             case CUBOID:
                 region.setArea(new CuboidArea(pos1, pos2));
@@ -236,14 +237,14 @@ public class RegionCommands {
                 if (!region.getMembers().containsTeam(team)) {
                     region.removeOwner(team);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.affiliation.team.removed", team.getName(), region.getName()));
+                    sendCmdFeedback(src, Component.translatable("cli.msg.info.region.affiliation.team.removed", team.getName(), region.getName()));
                 }
                 break;
             case "owner":
                 if (!region.getOwners().containsTeam(team)) {
                     region.removeOwner(team);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.affiliation.team.removed", team.getName(), region.getName()));
+                    sendCmdFeedback(src, Component.translatable("cli.msg.info.region.affiliation.team.removed", team.getName(), region.getName()));
                 }
                 break;
             default:
@@ -259,14 +260,14 @@ public class RegionCommands {
                 if (!region.getMembers().containsTeam(team)) {
                     region.addMember(team);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.affiliation.team.added", team.getName(), affiliation, region.getName()));
+                    sendCmdFeedback(src, Component.translatable("cli.msg.info.region.affiliation.team.added", team.getName(), affiliation, region.getName()));
                 }
                 break;
             case "owner":
                 if (!region.getOwners().containsTeam(team)) {
                     region.addOwner(team);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.affiliation.team.added", team.getName(), affiliation, region.getName()));
+                    sendCmdFeedback(src, Component.translatable("cli.msg.info.region.affiliation.team.added", team.getName(), affiliation, region.getName()));
                 }
                 break;
             default:
@@ -282,14 +283,14 @@ public class RegionCommands {
                 if (!region.getMembers().containsPlayer(player.getUUID())) {
                     region.removeMember(player);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.affiliation.player.removed", player.getScoreboardName(), region.getName()));
+                    sendCmdFeedback(src, Component.translatable("cli.msg.info.region.affiliation.player.removed", player.getScoreboardName(), region.getName()));
                 }
                 break;
             case "owner":
                 if (!region.getOwners().containsPlayer(player.getUUID())) {
                     region.removeOwner(player);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.affiliation.player.removed", player.getScoreboardName(), region.getName()));
+                    sendCmdFeedback(src, Component.translatable("cli.msg.info.region.affiliation.player.removed", player.getScoreboardName(), region.getName()));
                 }
                 break;
             default:
@@ -305,14 +306,14 @@ public class RegionCommands {
                 if (!region.getMembers().containsPlayer(player.getUUID())) {
                     region.addMember(player);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.affiliation.player.added", player.getScoreboardName(), affiliation, region.getName()));
+                    sendCmdFeedback(src, Component.translatable("cli.msg.info.region.affiliation.player.added", player.getScoreboardName(), affiliation, region.getName()));
                 }
                 break;
             case "owner":
                 if (!region.getOwners().containsPlayer(player.getUUID())) {
                     region.addOwner(player);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.affiliation.player.added", player.getScoreboardName(), affiliation, region.getName()));
+                    sendCmdFeedback(src, Component.translatable("cli.msg.info.region.affiliation.player.added", player.getScoreboardName(), affiliation, region.getName()));
                 }
                 break;
             default:
@@ -326,8 +327,8 @@ public class RegionCommands {
         if (region.hasChild(child)) {
             region.removeChild(child);
             RegionDataManager.save();
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.children.remove", child.getName(), region.getName()));
-            sendCmdFeedback(src, new TranslatableComponent( "cli.msg.info.region.parent.clear", child.getName()));
+            sendCmdFeedback(src, Component.translatable("cli.msg.info.region.children.remove", child.getName(), region.getName()));
+            sendCmdFeedback(src, Component.translatable( "cli.msg.info.region.parent.clear", child.getName()));
             return 0;
         }
         return -1;
@@ -337,7 +338,7 @@ public class RegionCommands {
         if (!region.hasChild(child)) {
             region.addChild(child);
             RegionDataManager.save();
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.children.add", child.getName(), region.getName()));
+            sendCmdFeedback(src, Component.translatable("cli.msg.info.region.children.add", child.getName(), region.getName()));
             return 0;
         }
         return -1;
@@ -347,7 +348,7 @@ public class RegionCommands {
         if (region.getParent() != null) {
             region.setParent(null);
             RegionDataManager.save();
-            sendCmdFeedback(src, new TranslatableComponent( "cli.msg.info.region.parent.clear", region.getName()));
+            sendCmdFeedback(src, Component.translatable( "cli.msg.info.region.parent.clear", region.getName()));
         }
         return 0;
     }
@@ -358,12 +359,12 @@ public class RegionCommands {
             if (!region.getParent().equals(parent)) {
                 region.setParent(parent);
                 RegionDataManager.save();
-                sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.parent.set", region.getName(), parent.getName()));
+                sendCmdFeedback(src, Component.translatable("cli.msg.info.region.parent.set", region.getName(), parent.getName()));
             }
         } else {
             region.setParent(parent);
             RegionDataManager.save();
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.parent.set", region.getName(), parent.getName()));
+            sendCmdFeedback(src, Component.translatable("cli.msg.info.region.parent.set", region.getName(), parent.getName()));
         }
         return 0;
     }
@@ -372,7 +373,7 @@ public class RegionCommands {
         if (!region.containsFlag(flag)) {
             region.addFlag(flag);
             RegionDataManager.save();
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.flags.added", flag.getFlagIdentifier(), region.getName()));
+            sendCmdFeedback(src, Component.translatable("cli.msg.flags.added", flag.getFlagIdentifier(), region.getName()));
             return 0;
         }
         return 1;
@@ -382,7 +383,7 @@ public class RegionCommands {
         if (region.containsFlag(flag)) {
             region.removeFlag(flag.getFlagIdentifier());
             RegionDataManager.save();
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.flags.removed", flag.getFlagIdentifier(), region.getName()));
+            sendCmdFeedback(src, Component.translatable("cli.msg.flags.removed", flag.getFlagIdentifier(), region.getName()));
             return 0;
         }
         return 1;
@@ -393,7 +394,7 @@ public class RegionCommands {
         region.setIsMuted(mute);
         RegionDataManager.save();
         if (oldState != region.isMuted()) {
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.state.alert.set.value", region.getName(), oldState, region.isMuted()));
+            sendCmdFeedback(src, Component.translatable("cli.msg.info.region.state.alert.set.value", region.getName(), oldState, region.isMuted()));
         }
         return 0;
     }
@@ -403,7 +404,7 @@ public class RegionCommands {
         region.setIsActive(enable);
         RegionDataManager.save();
         if (oldState != region.isActive()) {
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.state.enable.set.value", region.getName(), oldState, region.isActive()));
+            sendCmdFeedback(src, Component.translatable("cli.msg.info.region.state.enable.set.value", region.getName(), oldState, region.isActive()));
         }
         return 0;
     }
@@ -413,7 +414,7 @@ public class RegionCommands {
         if (Integer.MAX_VALUE - newValue > 0) {
             return setPriority(src, region, (int) newValue);
         } else {
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.warn.region.state.priority.set.invalid", region.getName(), newValue));
+            sendCmdFeedback(src, Component.translatable("cli.msg.warn.region.state.priority.set.invalid", region.getName(), newValue));
             return -1;
         }
     }
@@ -423,44 +424,44 @@ public class RegionCommands {
         region.setPriority(priority);
         RegionDataManager.save();
         if (oldPriority != region.getPriority()) {
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.state.priority.set.value", region.getName(), oldPriority, region.getPriority()));
+            sendCmdFeedback(src, Component.translatable("cli.msg.info.region.state.priority.set.value", region.getName(), oldPriority, region.getPriority()));
         }
         return 0;
     }
 
     private static int promptRegionInfo(CommandSourceStack src, IMarkableRegion region) {
         // == Region [<name>] overview ==
-        MutableComponent regionInfoHeader = new TextComponent(BOLD + "== Region ")
+        MutableComponent regionInfoHeader = Component.literal(BOLD + "== Region ")
                 .append(buildRegionInfoLink(region))
-                .append(new TextComponent(BOLD + " overview =="));
+                .append(Component.literal(BOLD + " overview =="));
         sendCmdFeedback(src, regionInfoHeader);
 
         // Flags: [n flag(s)][+]
-        MutableComponent regionFlags = new TranslatableComponent("cli.msg.info.region.flag")
+        MutableComponent regionFlags = Component.translatable("cli.msg.info.region.flag")
                 .append(": ")
                 .append(buildFlagListLink(region));
         sendCmdFeedback(src, regionFlags);
 
         // Spatial: [=> Spatial <=]
-        MutableComponent regionSpatialProps = new TranslatableComponent("cli.msg.info.region.spatial")
+        MutableComponent regionSpatialProps = Component.translatable("cli.msg.info.region.spatial")
                 .append(": ")
                 .append(buildRegionSpatialPropLink(region));
         sendCmdFeedback(src, regionSpatialProps);
 
         // Affiliations: [owners], [members], [<listAffiliations>]
-        MutableComponent regionAffiliation = new TranslatableComponent("cli.msg.info.region.affiliation")
+        MutableComponent regionAffiliation = Component.translatable("cli.msg.info.region.affiliation")
                 .append(": ")
                 .append(buildRegionAffiliationLink(region));
         sendCmdFeedback(src, regionAffiliation);
 
         // Hierarchy: [parent][-|+], [children][+]
-        MutableComponent regionHierarchy = new TranslatableComponent("cli.msg.info.region.hierarchy")
+        MutableComponent regionHierarchy = Component.translatable("cli.msg.info.region.hierarchy")
                 .append(": ")
                 .append(buildRegionHierarchyLink(region));
         sendCmdFeedback(src, regionHierarchy);
 
         // State: [=> State <=]
-        MutableComponent regionState = new TranslatableComponent("cli.msg.info.region.state")
+        MutableComponent regionState = Component.translatable("cli.msg.info.region.state")
                 .append(": ")
                 .append(buildRegionStateLink(region));
         sendCmdFeedback(src, regionState);
@@ -470,14 +471,14 @@ public class RegionCommands {
     private static int promptRegionChildren(CommandSourceStack src, IMarkableRegion region) {
         sendCmdFeedback(src, buildRegionChildrenHeader(region));
         Collection<IMarkableRegion> children = region.getChildren().values();
-        MutableComponent childRegionList = new TextComponent("");
+        MutableComponent childRegionList = Component.literal("");
         if (children.isEmpty()) {
-            TranslatableComponent noChildrenText = new TranslatableComponent("cli.msg.info.region.children.empty", region.getName());
+            Component noChildrenText = Component.translatable("cli.msg.info.region.children.empty", region.getName());
             childRegionList.append(noChildrenText);
             sendCmdFeedback(src, childRegionList);
         }
         children.forEach(child -> {
-            TranslatableComponent removeChildLink = new TranslatableComponent("cli.msg.info.region.children.remove.link.text.entry",
+            Component removeChildLink = Component.translatable("cli.msg.info.region.children.remove.link.text.entry",
                     buildRegionRemoveChildLink(region, child), buildRegionInfoLink(child));
             sendCmdFeedback(src, removeChildLink);
         });
@@ -515,16 +516,16 @@ public class RegionCommands {
     }
 
     private static int promptRegionAffiliationPlayerList(CommandSourceStack src, IMarkableRegion region, String affiliation) {
-        sendCmdFeedback(src, new TranslatableComponent(  "cli.msg.info.region.affiliation.player.list", buildRegionInfoLink(region), affiliation));
+        sendCmdFeedback(src, Component.translatable(  "cli.msg.info.region.affiliation.player.list", buildRegionInfoLink(region), affiliation));
         Set<String> playerNames = getAssociateList((AbstractRegion) region, affiliation, "player");
-        MutableComponent playerList = new TextComponent("");
+        MutableComponent playerList = Component.literal("");
         if (playerNames.isEmpty()) {
-            TranslatableComponent noPlayersText = new TranslatableComponent("cli.msg.info.region.affiliation.player.empty", affiliation, region.getName());
+            Component noPlayersText = Component.translatable("cli.msg.info.region.affiliation.player.empty", affiliation, region.getName());
             playerList.append(noPlayersText);
             sendCmdFeedback(src, playerList);
         }
         playerNames.forEach(playerName -> {
-            TranslatableComponent removePlayerLink = new TranslatableComponent("cli.msg.info.region.affiliation.player.remove.link.text.entry",
+            Component removePlayerLink = Component.translatable("cli.msg.info.region.affiliation.player.remove.link.text.entry",
                     buildRegionRemovePlayerLink(region, playerName, affiliation), playerName);
             sendCmdFeedback(src, removePlayerLink);
         });
@@ -532,17 +533,17 @@ public class RegionCommands {
     }
 
     private static int promptRegionAffiliationTeamList(CommandSourceStack src, IMarkableRegion region, String affiliation) {
-        sendCmdFeedback(src, new TranslatableComponent(  "cli.msg.info.region.affiliation.team.list", buildRegionInfoLink(region), affiliation));
+        sendCmdFeedback(src, Component.translatable(  "cli.msg.info.region.affiliation.team.list", buildRegionInfoLink(region), affiliation));
         Set<String> teamNames = getAssociateList((AbstractRegion) region, affiliation, "team");
-        MutableComponent teamList = new TextComponent("");
+        MutableComponent teamList = Component.literal("");
         if (teamNames.isEmpty()) {
-            TranslatableComponent noTeamText = new TranslatableComponent("cli.msg.info.region.affiliation.team.empty",
+            Component noTeamText = Component.translatable("cli.msg.info.region.affiliation.team.empty",
                     affiliation, region.getName());
             teamList.append(noTeamText);
             sendCmdFeedback(src, teamList);
         }
         teamNames.forEach(teamName -> {
-            TranslatableComponent removeTeamLink = new TranslatableComponent("cli.msg.info.region.affiliation.team.remove.link.text.entry",
+            Component removeTeamLink = Component.translatable("cli.msg.info.region.affiliation.team.remove.link.text.entry",
                     buildRegionRemoveTeamLink(region, teamName, affiliation), teamName);
             sendCmdFeedback(src, removeTeamLink);
         });
@@ -586,15 +587,15 @@ public class RegionCommands {
     }
 
     public static int promptRegionFlags(CommandSourceStack src, IMarkableRegion region) {
-        sendCmdFeedback(src, new TranslatableComponent( "cli.msg.info.region.flag.header", buildRegionInfoLink(region)));
+        sendCmdFeedback(src, Component.translatable( "cli.msg.info.region.flag.header", buildRegionInfoLink(region)));
         if (region.getFlags().isEmpty()) {
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.flag.empty", region.getName()));
+            sendCmdFeedback(src, Component.translatable("cli.msg.info.region.flag.empty", region.getName()));
             return 1;
         }
         region.getFlags().forEach(flag -> {
-            MutableComponent removeFlagEntry = new TextComponent(" - ")
+            MutableComponent removeFlagEntry = Component.literal(" - ")
                     .append(buildRemoveFlagLink(flag, region))
-                    .append(new TextComponent(" '" + flag.getFlagIdentifier() + "'"));
+                    .append(Component.literal(" '" + flag.getFlagIdentifier() + "'"));
             sendCmdFeedback(src, removeFlagEntry);
         });
         return 0;
@@ -657,7 +658,7 @@ public class RegionCommands {
             region.setTpTarget(target);
             RegionDataManager.save();
             MutableComponent newTpTargetLink = buildDimensionalBlockTpLink(region.getDim(), target);
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.spatial.location.teleport.set", region.getName(), newTpTargetLink));
+            sendCmdFeedback(src, Component.translatable("cli.msg.info.region.spatial.location.teleport.set", region.getName(), newTpTargetLink));
             return 0;
         }
         return 1;

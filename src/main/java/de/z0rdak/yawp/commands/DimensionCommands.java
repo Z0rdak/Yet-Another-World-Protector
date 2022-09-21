@@ -34,9 +34,8 @@ import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -173,11 +172,11 @@ public class DimensionCommands {
 
     private static int createCuboidRegion(CommandSourceStack src, String regionName, DimensionRegionCache dimCache, BlockPos pos1, BlockPos pos2, @Nullable ServerPlayer owner) {
         if (!regionName.matches(RegionArgumentType.VALID_NAME_PATTERN.pattern())) {
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.name.invalid", regionName));
+            sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.region.create.name.invalid", regionName));
             return -1;
         }
         if (dimCache.contains(regionName)){
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.name.exists", dimCache.dimensionKey(), regionName));
+            sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.region.create.name.exists", dimCache.dimensionKey(), regionName));
             return 1;
         }
         Set<String> defaultFlags = RegionConfig.getDefaultFlags();
@@ -187,17 +186,17 @@ public class DimensionCommands {
                 .map(flagIdentifier -> RegionFlag.fromId(flagIdentifier).flag)
                 .forEach(region::addFlag);
         dimCache.addRegion(region);
-        sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
+        sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
         return 0;
     }
 
     private static int createSphereRegion(CommandSourceStack src, String regionName, DimensionRegionCache dimCache, BlockPos center, BlockPos outerPos, ServerPlayer owner) {
         if (!regionName.matches(RegionArgumentType.VALID_NAME_PATTERN.pattern())) {
-            sendCmdFeedback(src, new TranslatableComponent( "cli.msg.dim.info.region.create.name.invalid", regionName));
+            sendCmdFeedback(src, Component.translatable( "cli.msg.dim.info.region.create.name.invalid", regionName));
             return -1;
         }
         if (dimCache.contains(regionName)){
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.name.exists", dimCache.dimensionKey(), regionName));
+            sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.region.create.name.exists", dimCache.dimensionKey(), regionName));
             return 1;
         }
         Set<String> defaultFlags = RegionConfig.getDefaultFlags();
@@ -207,7 +206,7 @@ public class DimensionCommands {
                 .map(flagIdentifier -> RegionFlag.fromId(flagIdentifier).flag)
                 .forEach(region::addFlag);
         dimCache.addRegion(region);
-        sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
+        sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
         return 0;
     }
 
@@ -246,7 +245,7 @@ public class DimensionCommands {
 
     public static int selectReferenceDim(CommandSourceStack src, DimensionalRegion dim) throws CommandSyntaxException {
         RegionCommands.CommandSourceStackReferenceDims.put(src, dim.getDimensionKey());
-        MessageUtil.sendCmdFeedback(src, new TextComponent("Selected dim '" + dim.getDimensionKey().location().toString() + "' as reference for region commands for '" + src.getTextName() + "'."));
+        MessageUtil.sendCmdFeedback(src, Component.literal("Selected dim '" + dim.getDimensionKey().location().toString() + "' as reference for region commands for '" + src.getTextName() + "'."));
         return 0;
     }
 
@@ -254,7 +253,7 @@ public class DimensionCommands {
         if (dimCache != null) {
             ResourceKey<Level> dim = dimCache.dimensionKey();
             dimCache.removeFlag(flag);
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.flags.removed", flag, dim.location().toString()));
+            sendCmdFeedback(src, Component.translatable("cli.msg.flags.removed", flag, dim.location().toString()));
             return 0;
         }
         return 1;
@@ -266,7 +265,7 @@ public class DimensionCommands {
         if (dimCache != null) {
             ResourceKey<Level> dim = dimCache.dimensionKey();
             dimCache.addFlag(iflag);
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.flags.added", flag, dim.location().toString()));
+            sendCmdFeedback(src, Component.translatable("cli.msg.flags.added", flag, dim.location().toString()));
             return 0;
         }
         return 1;
@@ -281,7 +280,7 @@ public class DimensionCommands {
             if (affiliationType.equals(OWNER.toString())) {
                 dimCache.removeOwner(player);
             }
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.player.removed", affiliationType, player.getScoreboardName(), dim.location().toString()));
+            sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.player.removed", affiliationType, player.getScoreboardName(), dim.location().toString()));
         }
         return 0;
     }
@@ -295,7 +294,7 @@ public class DimensionCommands {
             if (affiliationType.equals(OWNER.toString())) {
                 dimCache.removeOwner(team);
             }
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.player.removed", affiliationType, team.getName(), dim.location().toString()));
+            sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.player.removed", affiliationType, team.getName(), dim.location().toString()));
             return 0;
         }
         return 1;
@@ -311,7 +310,7 @@ public class DimensionCommands {
             if (affiliationType.equals(OWNER.toString())) {
                 dimCache.addOwner(player);
             }
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.player.added", player.getScoreboardName(), dim.location().toString(), affiliationType));
+            sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.player.added", player.getScoreboardName(), dim.location().toString(), affiliationType));
             return 0;
         }
         return 1;
@@ -326,7 +325,7 @@ public class DimensionCommands {
             if (affiliationType.equals(OWNER.toString())) {
                 dimCache.addOwner(team);
             }
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.team.added", team.getName(), dim.location().toString(), affiliationType));
+            sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.team.added", team.getName(), dim.location().toString(), affiliationType));
             return 0;
         }
         return 1;
@@ -342,16 +341,16 @@ public class DimensionCommands {
                 .collect(Collectors.toList());
         ResourceKey<Level> dim = dimCache.dimensionKey();
         if (flags.isEmpty()) {
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.flags.empty", dim.location().toString()));
+            sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.flags.empty", dim.location().toString()));
             return 1;
         }
         // TODO: lang key
         // TODO Dim info link
-        sendCmdFeedback(src, new TranslatableComponent(BOLD + "== Flags in dimension '" + dim.location().toString() + "' =="));
+        sendCmdFeedback(src, Component.translatable(BOLD + "== Flags in dimension '" + dim.location().toString() + "' =="));
         flags.forEach(flag -> {
-            MutableComponent removeFlagLink = new TextComponent(" - ")
+            MutableComponent removeFlagLink = Component.literal(" - ")
                     .append(buildDimensionRemoveFlagLink(flag, dim))
-                    .append(new TextComponent(" '" + flag.getFlagIdentifier() + "' "));
+                    .append(Component.literal(" '" + flag.getFlagIdentifier() + "' "));
 
             sendCmdFeedback(src, removeFlagLink);
         });
@@ -364,7 +363,7 @@ public class DimensionCommands {
             String playerLangKeyPart = memberOrOwner == OWNER ? "owner" : "member";
             String affiliationText = playerLangKeyPart.substring(0, 1).toUpperCase() + playerLangKeyPart.substring(1) + "s";
             // TODO Dim info link
-            sendCmdFeedback(src, new TranslatableComponent(BOLD + "== " + affiliationText + " in dimension '" + dimRegion.getDimensionKey().location() + "' =="));
+            sendCmdFeedback(src, Component.translatable(BOLD + "== " + affiliationText + " in dimension '" + dimRegion.getDimensionKey().location() + "' =="));
             sendCmdFeedback(src, buildTeamList(dimRegion, memberOrOwner));
             sendCmdFeedback(src, buildPlayerList(dimRegion, memberOrOwner));
             return 0;
@@ -377,7 +376,7 @@ public class DimensionCommands {
             dimCache.setDimState(activate);
 
             String langKey = "cli.msg.info.state." + (activate ? "activated" : "deactivated");
-            sendCmdFeedback(src, new TranslatableComponent(langKey, dimCache.getDimensionalRegion().getDimensionKey().location().toString()));
+            sendCmdFeedback(src, Component.translatable(langKey, dimCache.getDimensionalRegion().getDimensionKey().location().toString()));
             return 0;
         }
         return 1;
@@ -393,14 +392,14 @@ public class DimensionCommands {
                     .sorted(Comparator.comparing(IMarkableRegion::getName))
                     .collect(Collectors.toList());
             if (regionsForDim.isEmpty()) {
-                sendCmdFeedback(source, new TranslatableComponent("cli.msg.dim.info.regions.empty", dim.location().toString()));
+                sendCmdFeedback(source, Component.translatable("cli.msg.dim.info.regions.empty", dim.location().toString()));
                 return -1;
             }
             // TODO Dim info link
-            sendCmdFeedback(source, new TranslatableComponent(BOLD + "== Regions in dimension '" + dim.location().toString() + "' =="));
+            sendCmdFeedback(source, Component.translatable(BOLD + "== Regions in dimension '" + dim.location().toString() + "' =="));
             // TODO: Pagination for more than x regions
             regionsForDim.forEach(region -> {
-                MutableComponent regionRemoveLink = new TextComponent(" - ")
+                MutableComponent regionRemoveLink = Component.literal(" - ")
                         .append(buildDimSuggestRegionRemovalLink(region))
                         .append(" ")
                         .append(buildRegionInfoAndTpLink(region));
@@ -419,7 +418,7 @@ public class DimensionCommands {
                 OWNER);
         MutableComponent players = owners.hasPlayers()
                 ? buildDimPlayerListLink(dimRegion, owners, OWNER)
-                : new TranslatableComponent(owners.getPlayers().size() + " player(s)");
+                : Component.translatable(owners.getPlayers().size() + " player(s)");
         players.append(playersAddLink);
 
         // [n team(s)] [+]
@@ -427,13 +426,13 @@ public class DimensionCommands {
                 OWNER);
         MutableComponent teams = owners.hasTeams()
                 ? buildDimTeamListLink(dimRegion, owners, OWNER)
-                : new TranslatableComponent(owners.getTeams().size() + " teams(s)");
+                : Component.translatable(owners.getTeams().size() + " teams(s)");
         teams.append(teamAddLink);
 
         // Owners: [n player(s)] [+], [n team(s)] [+]
-        MutableComponent dimOwners = new TranslatableComponent("cli.msg.dim.info.owners")
-                .append(new TextComponent(": "))
-                .append(players).append(new TextComponent(", "))
+        MutableComponent dimOwners = Component.translatable("cli.msg.dim.info.owners")
+                .append(Component.literal(": "))
+                .append(players).append(Component.literal(", "))
                 .append(teams);
         sendCmdFeedback(src, dimOwners);
     }
@@ -446,7 +445,7 @@ public class DimensionCommands {
         MutableComponent players = members.hasPlayers() ?
                 buildDimPlayerListLink(dimRegion, members, MEMBER)
                 // TODO lang-key
-                : new TranslatableComponent(members.getPlayers().size() + " player(s)");
+                : Component.translatable(members.getPlayers().size() + " player(s)");
         players.append(playersAddLink);
 
         // [n team(s)] [+]
@@ -455,24 +454,24 @@ public class DimensionCommands {
         MutableComponent teams = members.hasTeams()
                 ? buildDimTeamListLink(dimRegion, members, MEMBER)
                 // TODO lang-key
-                : new TranslatableComponent(members.getTeams().size() + " teams(s)");
+                : Component.translatable(members.getTeams().size() + " teams(s)");
         teams.append(teamAddLink);
 
         // Members: [n player(s)] [+], [n team(s)] [+]
-        MutableComponent dimMembers = new TranslatableComponent("cli.msg.dim.info.members")
-                .append(new TextComponent(": "))
-                .append(players).append(new TextComponent(", "))
+        MutableComponent dimMembers = Component.translatable("cli.msg.dim.info.members")
+                .append(Component.literal(": "))
+                .append(players).append(Component.literal(", "))
                 .append(teams);
         sendCmdFeedback(src, dimMembers);
     }
 
     private static void promptDimensionFlags(CommandSourceStack src, DimensionalRegion dimRegion) {
-        MutableComponent dimFlagMessage = new TranslatableComponent("cli.msg.dim.info.flags");
+        MutableComponent dimFlagMessage = Component.translatable("cli.msg.dim.info.flags");
         MutableComponent flags = dimRegion.getFlags().isEmpty()
                 // TODO lang-key
-                ? new TextComponent(dimRegion.getFlags().size() + " flags(s)")
+                ? Component.literal(dimRegion.getFlags().size() + " flags(s)")
                 : buildDimFlagListLink(dimRegion);
-        dimFlagMessage.append(new TextComponent(": "))
+        dimFlagMessage.append(Component.literal(": "))
                 .append(flags)
                 .append(buildAddDimFlagLink(dimRegion));
         sendCmdFeedback(src, dimFlagMessage);
@@ -484,8 +483,8 @@ public class DimensionCommands {
         String linkText = "cli.msg.info.state.link." + (region.isActive() ? "activate" : "deactivate");
         ChatFormatting color = region.isActive() ? GREEN : RED;
         MutableComponent stateLink = buildExecuteCmdComponent(linkText, hoverText, command, ClickEvent.Action.RUN_COMMAND, color);
-        sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.state")
-                .append(new TextComponent(": "))
+        sendCmdFeedback(src, Component.translatable("cli.msg.info.state")
+                .append(Component.literal(": "))
                 .append(stateLink));
     }
 
@@ -493,9 +492,9 @@ public class DimensionCommands {
         // Dimension info header
         DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
         // TODO: header extraction to build uniform header by providing langkey and args
-        MutableComponent dimInfoHeader = new TextComponent(BOLD + "== Dimension ")
+        MutableComponent dimInfoHeader = Component.literal(BOLD + "== Dimension ")
                 .append(buildDimensionalInfoLink(dimRegion.getDimensionKey()))
-                .append(new TextComponent(BOLD + " information =="));
+                .append(Component.literal(BOLD + " information =="));
         sendCmdFeedback(src, dimInfoHeader);
 
         // Regions in dimension

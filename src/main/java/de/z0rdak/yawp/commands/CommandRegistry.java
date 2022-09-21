@@ -9,13 +9,10 @@ import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
-import static de.z0rdak.yawp.util.CommandUtil.getDimRegionArgument;
-import static de.z0rdak.yawp.util.CommandUtil.literal;
 import static de.z0rdak.yawp.util.MessageUtil.buildExecuteCmdComponent;
 import static de.z0rdak.yawp.util.MessageUtil.buildHelpHeader;
 
@@ -29,7 +26,7 @@ public class CommandRegistry {
     }
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
-        return withSubCommands(Commands.literal(CommandPermissionConfig.BASE_CMD));
+        return withSubCommands(Commands.literal("wp"));
     }
 
     private static LiteralArgumentBuilder<CommandSourceStack> withSubCommands(LiteralArgumentBuilder<CommandSourceStack> baseCommand) {
@@ -54,10 +51,10 @@ public class CommandRegistry {
     private static int promptHelp(CommandSourceStack src) {
         MessageUtil.sendCmdFeedback(src, buildHelpHeader("cli.msg.help.header"));
         String command = CommandUtil.buildCommandStr(CommandConstants.DIMENSION.toString());
-        TranslatableComponent cmdStr = new TranslatableComponent("cli.msg.help.1", CommandPermissionConfig.BASE_CMD);
+        MutableComponent cmdStr = Component.translatable("cli.msg.help.1", CommandPermissionConfig.BASE_CMD);
         MessageUtil.sendCmdFeedback(src, buildExecuteCmdComponent("=>", "Manage dimensional regions", command, ClickEvent.Action.SUGGEST_COMMAND, ChatFormatting.GREEN).append(cmdStr));
         String wikiLink = "https://github.com/Z0rdak/Yet-Another-World-Protector";
-        TextComponent wikiInfo = new TextComponent("The in-game help is under construction.\nVisit the online wiki for a guide on how to use the mod.\nOnline-Wiki: ");
+        MutableComponent wikiInfo = Component.literal("The in-game help is under construction.\nVisit the online wiki for a guide on how to use the mod.\nOnline-Wiki: ");
         MessageUtil.sendCmdFeedback(src, wikiInfo.append(buildExecuteCmdComponent(YetAnotherWorldProtector.MODID_LONG + " online wiki", "Open online wiki in your browser", wikiLink,
                 ClickEvent.Action.OPEN_URL, ChatFormatting.AQUA)));
         return 0;

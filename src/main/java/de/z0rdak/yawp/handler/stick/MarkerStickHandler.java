@@ -10,7 +10,8 @@ import de.z0rdak.yawp.util.RegionUtil;
 import de.z0rdak.yawp.util.StickType;
 import de.z0rdak.yawp.util.StickUtil;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.player.AnvilRepairEvent;
@@ -28,7 +29,7 @@ public class MarkerStickHandler {
             YetAnotherWorldProtector.LOGGER.warn("Unknown area type on marking - should really not happening");
             return;
         }
-        if (event.getPlayer().isShiftKeyDown()) {
+        if (event.getEntity().isShiftKeyDown()) {
             marker.setTeleportPos(event.getPos());
             involvedItem.getTag().put(STICK, marker.serializeNBT());
             return;
@@ -47,8 +48,8 @@ public class MarkerStickHandler {
      * @param event
      */
     public static void onCreateRegion(AnvilRepairEvent event) {
-        ItemStack outputItem = event.getItemResult();
-        Player player = event.getPlayer();
+        ItemStack outputItem = event.getOutput();
+        Player player = event.getEntity();
         CompoundTag stickNBT = outputItem.getTag().getCompound(STICK);
         StickType type = StickType.of(stickNBT.getString(STICK_TYPE));
         if (type == StickType.MARKER) {
@@ -65,16 +66,16 @@ public class MarkerStickHandler {
                         setStickName(outputItem, type);
                         // TODO: Reset marker on dimChange?
                     } else {
-                        sendMessage(player, new TranslatableComponent("Player dimension not matching marker data"));
+                        sendMessage(player, MutableComponent.create(new TranslatableContents("Player dimension not matching marker data")));
                     }
                 } else {
-                    player.sendMessage(new TranslatableComponent("Invalid region type"), player.getUUID());
+                    sendMessage(player, MutableComponent.create(new TranslatableContents("Invalid region type")));
                 }
             } else {
-                player.sendMessage(new TranslatableComponent("Could not create region"), player.getUUID());
+                sendMessage(player, MutableComponent.create(new TranslatableContents("Could not create region")));
             }
         } else {
-            player.sendMessage(new TranslatableComponent("Invalid stick type / NBT data"), player.getUUID());
+            sendMessage(player, MutableComponent.create(new TranslatableContents("Invalid stick type / NBT data")));
         }
     }
 

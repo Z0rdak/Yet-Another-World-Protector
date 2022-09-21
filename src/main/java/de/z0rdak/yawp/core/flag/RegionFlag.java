@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.core.flag;
 
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 
 import java.util.*;
 import java.util.function.Function;
@@ -96,13 +96,13 @@ public enum RegionFlag {
     public final IFlag flag;
     public final String langKey;
     // public final boolean defaultValue;
-    public final Function<List<String>, TranslatableComponent> denyMessageBuilder;
+    public final Function<List<String>, TranslatableContents> denyMessageBuilder;
 
     RegionFlag(IFlag flag) {
         this.flag = flag;
         this.flagname = flag.getFlagIdentifier();
         this.langKey = "flag." + flag.getFlagIdentifier() + ".msg.deny";
-        this.denyMessageBuilder = (args) -> new TranslatableComponent(this.langKey, args == null ? new ArrayList<>() : args);
+        this.denyMessageBuilder = (args) -> new TranslatableContents(this.langKey, args == null ? new ArrayList<>() : args);
         //this.defaultValue = defaultValue;
     }
     @Override

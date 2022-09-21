@@ -13,7 +13,7 @@ import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.Registry;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
@@ -26,7 +26,7 @@ public class DimensionalRegionArgumentType implements ArgumentType<DimensionalRe
     private static final Collection<String> EXAMPLES = RegionDataManager.get().getDimensionList();
 
     private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
-            dim -> new TranslatableComponent("cli.arg.dim.invalid", dim)
+            dim -> Component.translatable("cli.arg.dim.invalid", dim)
     );
 
     @Override

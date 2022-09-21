@@ -18,8 +18,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.living.LivingDestroyBlockEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
-import net.minecraftforge.event.world.BlockEvent;
-import net.minecraftforge.event.world.ExplosionEvent;
+import net.minecraftforge.event.level.BlockEvent;
+import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -64,7 +64,7 @@ public class GrievingFlagHandler {
     @SubscribeEvent
     public static void onEntityDestroyBlock(LivingDestroyBlockEvent event) {
         if (isServerSide(event)) {
-            LivingEntity destroyer = event.getEntityLiving();
+            LivingEntity destroyer = event.getEntity();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(destroyer));
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
 
@@ -95,7 +95,7 @@ public class GrievingFlagHandler {
     @SubscribeEvent
     public static void onEntityDropLoot(LivingDropsEvent event) {
         if (isServerSide(event)) {
-            LivingEntity lootEntity = event.getEntityLiving();
+            LivingEntity lootEntity = event.getEntity();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(lootEntity));
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
 
@@ -120,7 +120,7 @@ public class GrievingFlagHandler {
 
 
                     DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                    boolean entityDroppingXpIsPlayer = event.getEntityLiving() instanceof Player;
+                    boolean entityDroppingXpIsPlayer = event.getEntity() instanceof Player;
 
                     // prevent all xp drops
                     if (dimRegion.containsFlag(RegionFlag.XP_DROP_ALL)) {
@@ -179,8 +179,8 @@ public class GrievingFlagHandler {
      */
     @SubscribeEvent
     public static void onExplosion(ExplosionEvent.Detonate event) {
-        if (!event.getWorld().isClientSide) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(event.getWorld().dimension());
+        if (!event.getLevel().isClientSide) {
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(event.getLevel().dimension());
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
 
 

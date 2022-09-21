@@ -8,9 +8,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -125,7 +124,7 @@ public final class StickUtil {
             default:
                 break;
         }
-        stick.setHoverName(new TextComponent(displayName));
+        stick.setHoverName(Component.literal(displayName));
     }
 
     public static void setStickToolTip(ItemStack stick, StickType type) {
@@ -151,8 +150,8 @@ public final class StickUtil {
     // TODO
     private static ListTag getMarkerToolTip() {
         ListTag lore = new ListTag();
-        StringTag simple1 = buildLoreTextLine(new TranslatableComponent("help.tooltip.stick.marker.simple.1"), "#ff0020");
-        StringTag simple2 = buildLoreTextLine(new TranslatableComponent("help.tooltip.stick.marker.simple.2"), "#ff0010");
+        StringTag simple1 = buildLoreTextLine(Component.translatable("help.tooltip.stick.marker.simple.1"), "#ff0020");
+        StringTag simple2 = buildLoreTextLine(Component.translatable("help.tooltip.stick.marker.simple.2"), "#ff0010");
         lore.add(simple1);
         lore.add(simple2);
         return lore;
@@ -161,8 +160,8 @@ public final class StickUtil {
     // TODO
     private static ListTag getFlagStickToolTip() {
         ListTag lore = new ListTag();
-        StringTag simple1 = buildLoreTextLine(new TranslatableComponent("help.tooltip.stick.flag-stick.simple.1"), "#ff0020");
-        StringTag simple2 = buildLoreTextLine(new TranslatableComponent("help.tooltip.stick.flag-stick.simple.2"), "#ff0010");
+        StringTag simple1 = buildLoreTextLine(Component.translatable("help.tooltip.stick.flag-stick.simple.1"), "#ff0020");
+        StringTag simple2 = buildLoreTextLine(Component.translatable("help.tooltip.stick.flag-stick.simple.2"), "#ff0010");
         lore.add(simple1);
         lore.add(simple2);
         return lore;
@@ -171,8 +170,8 @@ public final class StickUtil {
     // TODO
     private static ListTag getRegionStickToolTip() {
         ListTag lore = new ListTag();
-        StringTag simple1 = buildLoreTextLine(new TranslatableComponent("help.tooltip.stick.region-stick.simple.1"), "#ff0020");
-        StringTag simple2 = buildLoreTextLine(new TranslatableComponent("help.tooltip.stick.region-stick.simple.2"), "#ff0010");
+        StringTag simple1 = buildLoreTextLine(Component.translatable("help.tooltip.stick.region-stick.simple.1"), "#ff0020");
+        StringTag simple2 = buildLoreTextLine(Component.translatable("help.tooltip.stick.region-stick.simple.2"), "#ff0010");
         lore.add(simple1);
         lore.add(simple2);
         return lore;

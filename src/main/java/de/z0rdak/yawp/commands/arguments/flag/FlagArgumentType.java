@@ -14,8 +14,7 @@ import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,10 +27,10 @@ public class FlagArgumentType implements ArgumentType<String> {
 
     private static final Collection<String> EXAMPLES = RegionFlag.getFlagNames();
 
-    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(new TranslatableComponent("cli.arg.flag.parse.invalid"));
+    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(Component.translatable("cli.arg.flag.parse.invalid"));
 
     private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
-            flag -> new TranslatableComponent("cli.arg.flag.invalid", flag)
+            flag -> Component.translatable("cli.arg.flag.invalid", flag)
     );
 
     public static final Pattern VALID_FLAG_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z\\-][A-Za-z]$");
@@ -85,7 +84,7 @@ public class FlagArgumentType implements ArgumentType<String> {
                     .map(flag -> flag.flag)
                     .collect(Collectors.toList()).get(0);
         } else {
-            MessageUtil.sendCmdFeedback(context.getSource(), new TextComponent("Invalid flag identifier: '" + flagIdentifier + "'!"));
+            MessageUtil.sendCmdFeedback(context.getSource(), Component.literal("Invalid flag identifier: '" + flagIdentifier + "'!"));
             throw ERROR_INVALID_VALUE.create(flagIdentifier);
         }
     }

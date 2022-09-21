@@ -13,8 +13,7 @@ import de.z0rdak.yawp.commands.CommandConstants;
 import de.z0rdak.yawp.core.area.AreaType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.synchronization.SuggestionProviders;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
@@ -28,10 +27,10 @@ public class AreaArgumentType implements ArgumentType<AreaType> {
             .map(areaType -> areaType.areaType)
             .collect(Collectors.toSet());
 
-    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(new TranslatableComponent("cli.arg.area.parse.invalid"));
+    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(Component.translatable("cli.arg.area.parse.invalid"));
 
     private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
-            flag -> new TranslatableComponent("cli.arg.area.invalid", flag)
+            flag -> Component.translatable("cli.arg.area.invalid", flag)
     );
 
     private static final Pattern VALID_AREA_NAME_CHAR_PATTERN = Pattern.compile("^[A-Za-z]$");

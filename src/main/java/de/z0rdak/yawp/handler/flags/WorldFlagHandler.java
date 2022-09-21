@@ -21,7 +21,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
-import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -82,9 +82,9 @@ public class WorldFlagHandler {
      */
     @SubscribeEvent
     public static void onNetherPortalSpawn(BlockEvent.PortalSpawnEvent event) {
-        Level world = (Level) event.getWorld();
+        Level world = (Level) event.getLevel();
         if (!world.isClientSide()) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(((Level) event.getWorld()).dimension());
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(((Level) event.getLevel()).dimension());
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
             if (dimRegion.containsFlag(RegionFlag.SPAWN_PORTAL)){
                 event.setCanceled(true);

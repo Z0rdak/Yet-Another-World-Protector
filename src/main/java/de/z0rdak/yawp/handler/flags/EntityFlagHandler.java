@@ -15,7 +15,7 @@ import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityTeleportEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -69,7 +69,7 @@ public class EntityFlagHandler {
     @SubscribeEvent
     public static void onFall(LivingFallEvent event) {
         if (isServerSide(event)) {
-            LivingEntity entity = event.getEntityLiving();
+            LivingEntity entity = event.getEntity();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
@@ -104,7 +104,7 @@ public class EntityFlagHandler {
      * @param event
      */
     @SubscribeEvent
-    public static void onEntityJoinWorld(EntityJoinWorldEvent event) {
+    public static void onEntityJoinWorld(EntityJoinLevelEvent event) {
         if (isServerSide(event)) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {

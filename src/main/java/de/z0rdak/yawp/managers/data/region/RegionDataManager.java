@@ -9,7 +9,8 @@ import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.util.constants.*;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -73,10 +74,10 @@ public class RegionDataManager extends SavedData {
                 RegionDataManager data = storage.computeIfAbsent(RegionDataManager::load, RegionDataManager::new, DATA_NAME);
                 storage.set(DATA_NAME, data);
                 regionDataCache = data;
-                YetAnotherWorldProtector.LOGGER.info(new TranslatableComponent("console.logger.info.data.load.success", data.getAllRegionNames().size(), data.getDimensionList().size()).getString());
+                YetAnotherWorldProtector.LOGGER.info(MutableComponent.create(new TranslatableContents("console.logger.info.data.load.success", data.getAllRegionNames().size(), data.getDimensionList().size())).getString());
             }
         } catch (NullPointerException npe) {
-            YetAnotherWorldProtector.LOGGER.error(new TranslatableComponent("console.logger.error.data.load.failure"));
+            YetAnotherWorldProtector.LOGGER.error(MutableComponent.create(new TranslatableContents("console.logger.error.data.load.failure")));
         }
     }
 
@@ -109,7 +110,7 @@ public class RegionDataManager extends SavedData {
     @SubscribeEvent
     public static void addDimKeyOnDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event){
         // if region map does not contain an entry for the dimension traveled to, add it to the map
-        if (!event.getPlayer().getCommandSenderWorld().isClientSide) {
+        if (!event.getEntity().getCommandSenderWorld().isClientSide) {
             if (dimCacheMap == null) {
                 dimCacheMap = new HashMap<>();
             }
@@ -130,8 +131,8 @@ public class RegionDataManager extends SavedData {
     @SubscribeEvent
     public static void addDimKeyOnPlayerLogin(PlayerEvent.PlayerLoggedInEvent event){
         // if region map does not contain an entry for the dimension traveled to, add it to the map
-        if (!event.getPlayer().getCommandSenderWorld().isClientSide) {
-            ResourceKey<Level> dim = event.getPlayer().getCommandSenderWorld().dimension();
+        if (!event.getEntity().getCommandSenderWorld().isClientSide) {
+            ResourceKey<Level> dim = event.getEntity().getCommandSenderWorld().dimension();
             if (dimCacheMap == null) {
                 dimCacheMap = new HashMap<>();
             }
@@ -144,7 +145,7 @@ public class RegionDataManager extends SavedData {
                 RegionDataManager.dimCacheMap.put(cache.getDimensionalRegion().getDimensionKey(), cache);
                 RegionDataManager.get().getDimensionDataNames().add(dimCacheMap.get(dim).getDimensionalRegion().getName());
                 save();
-                YetAnotherWorldProtector.LOGGER.info("Player joining to server in dimension without region data. This should only happen the first time a player is joining. Init region data for dimension '" + event.getPlayer().getCommandSenderWorld().dimension().location() + "'..");
+                YetAnotherWorldProtector.LOGGER.info("Player joining to server in dimension without region data. This should only happen the first time a player is joining. Init region data for dimension '" + event.getEntity().getCommandSenderWorld().dimension().location() + "'..");
             }
         }
     }
@@ -200,8 +201,7 @@ public class RegionDataManager extends SavedData {
         return new ArrayList<>();
     }
 
-    public List<String> getFlagsIdsForDim(ResourceKey<Level> dim){
-        DimensionRegionCache dimCache = cacheFor(dim);
+    public List<String> getFlagsIdsForDim(DimensionRegionCache dimCache){
         if (dimCache != null) {
             return dimCache.getDimensionalRegion().getFlags()
                     .stream()

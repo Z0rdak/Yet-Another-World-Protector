@@ -27,8 +27,8 @@ public class StickInteractionHandler {
 
     @SubscribeEvent
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        if (!event.getWorld().isClientSide) {
-            Player player = event.getPlayer();
+        if (!event.getLevel().isClientSide) {
+            Player player = event.getEntity();
             ItemStack involvedItemStack = event.getItemStack();
             if (!involvedItemStack.equals(ItemStack.EMPTY) && isVanillaStick(involvedItemStack)) {
                 StickType stickType = getStickType(involvedItemStack);
@@ -61,23 +61,23 @@ public class StickInteractionHandler {
 
     @SubscribeEvent
     public static void onCycleMode(PlayerInteractEvent.RightClickItem event) {
-        if (!event.getWorld().isClientSide) {
+        if (!event.getLevel().isClientSide) {
             ItemStack involvedItemStack = event.getItemStack();
             // is some valid mod stick
             if (!involvedItemStack.equals(ItemStack.EMPTY)
                     && hasNonNullTag(involvedItemStack)
                     && involvedItemStack.getTag().contains(STICK)) {
-                HitResult blockLookingAt = event.getPlayer().pick(20.0d, 0.0f, false);
+                HitResult blockLookingAt = event.getEntity().pick(20.0d, 0.0f, false);
                 boolean targetIsAir;
                 if (blockLookingAt.getType() == HitResult.Type.BLOCK) {
                     BlockPos blockpos = ((BlockHitResult) blockLookingAt).getBlockPos();
-                    BlockState blockstate = event.getWorld().getBlockState(blockpos);
+                    BlockState blockstate = event.getLevel().getBlockState(blockpos);
                     targetIsAir = blockstate.getBlock().equals(Blocks.AIR);
                 } else {
                     targetIsAir = blockLookingAt.getType() == HitResult.Type.MISS;
                 }
 
-                if (event.getPlayer().isShiftKeyDown() && targetIsAir) {
+                if (event.getEntity().isShiftKeyDown() && targetIsAir) {
                     StickType stickType = getStickType(involvedItemStack);
                     switch (stickType) {
                         case REGION_STICK:
@@ -104,11 +104,11 @@ public class StickInteractionHandler {
      */
     @SubscribeEvent
     public static void onStickRename(AnvilRepairEvent event) {
-        Player player = event.getPlayer();
+        Player player = event.getEntity();
         if (!player.getCommandSenderWorld().isClientSide) {
-            ItemStack outputItem = event.getItemResult();
-            ItemStack inputItem = event.getItemInput();
-            ItemStack ingredientInput = event.getIngredientInput();
+            ItemStack outputItem = event.getOutput();
+            ItemStack inputItem = event.getLeft();
+            ItemStack ingredientInput = event.getRight();
             boolean hasStickTag = outputItem.hasTag() && outputItem.getTag() != null && outputItem.getTag().contains(STICK);
             if (hasStickTag) {
                 MarkerStickHandler.onCreateRegion(event);
@@ -126,9 +126,9 @@ public class StickInteractionHandler {
      * @param event the event data from renaming the stick item
      */
     private static void onCreateStick(AnvilRepairEvent event) {
-        Player player = event.getPlayer();
-        ItemStack outputItem = event.getItemResult();
-        ItemStack inputItem = event.getItemInput();
+        Player player = event.getEntity();
+        ItemStack outputItem = event.getOutput();
+        ItemStack inputItem = event.getLeft();
         StickType type = StickType.of(outputItem.getHoverName().getString());
         if (type != StickType.UNKNOWN) {
             // split stack and only create one stick, also refund xp
@@ -138,7 +138,7 @@ public class StickInteractionHandler {
             player.giveExperienceLevels(1);
             outputItem.setCount(1);
             // init NBT
-            initStickTag(outputItem, type, event.getPlayer().getCommandSenderWorld().dimension());
+            initStickTag(outputItem, type, event.getEntity().getCommandSenderWorld().dimension());
             setStickName(outputItem, type);
             setStickToolTip(outputItem, type);
             applyEnchantmentGlint(outputItem);

@@ -18,8 +18,8 @@ import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.EntityEvent;
-import net.minecraftforge.event.world.BlockEvent;
-import net.minecraftforge.event.world.ExplosionEvent;
+import net.minecraftforge.event.level.BlockEvent;
+import net.minecraftforge.event.level.ExplosionEvent;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,7 +46,7 @@ public final class HandlerUtil {
     }
 
     public static boolean isServerSide(BlockEvent event){
-        return !event.getWorld().isClientSide();
+        return !event.getLevel().isClientSide();
     }
 
     public static boolean isServerSide(Entity entity){
@@ -90,14 +90,14 @@ public final class HandlerUtil {
     public static List<BlockPos> filterExplosionAffectedBlocks(ExplosionEvent.Detonate event, IFlag flag){
         return event.getAffectedBlocks().stream()
                 .filter(blockPos -> anyRegionContainsFlag(
-                        RegionUtil.getHandlingRegionsFor(blockPos, event.getWorld()), flag))
+                        RegionUtil.getHandlingRegionsFor(blockPos, event.getLevel()), flag))
                 .collect(Collectors.toList());
     }
 
     public static List<Entity> filterAffectedEntities(ExplosionEvent.Detonate event, IFlag flag) {
         return event.getAffectedEntities().stream()
                 .filter(entity -> anyRegionContainsFlag(
-                        RegionUtil.getHandlingRegionsFor(entity.blockPosition(), event.getWorld()), flag))
+                        RegionUtil.getHandlingRegionsFor(entity.blockPosition(), event.getLevel()), flag))
                 .collect(Collectors.toList());
     }
 }
