@@ -28,7 +28,7 @@ public class RegionConfig {
                 .defineList("default_flags", new ArrayList<>(Arrays.asList("break_blocks", "place_blocks")), RegionConfig::isValidFlag);
 
         DIM_REGION_DEFAULT_FLAGS = BUILDER.comment("Default flags for new dimensional regions.")
-                .defineList("default_flags", new ArrayList<>(Arrays.asList("break_blocks", "place_blocks")), RegionConfig::isValidFlag);
+                .defineList("dim_default_flags", new ArrayList<>(Arrays.asList("break_blocks", "place_blocks")), RegionConfig::isValidFlag);
 
         REGION_DEFAULT_PRIORITY_INC = BUILDER.comment("Default region priority increment/decrement.")
                 .defineInRange("default_region_priority_inc", 5, 1, 1000);
