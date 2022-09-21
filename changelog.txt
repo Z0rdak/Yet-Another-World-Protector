@@ -9,8 +9,8 @@ For a comprehensive command overview take a look at the wiki.
 * Add new config `allow_info_cmds` to enable the usage of informative region commands for all players.
 * Add new config `dim_default_flags`, replacing `default_flags` for default flags for new dimensional regions.
 ## Changes
-* Command to activate dimensional regions was changed from activate to enable
-* Config option `default_flags` is now used to define default flags for local regions
+* Command to de-/activate dimensional regions changed from `activate` to `enable`.
+* Config option `default_flags` is now used to define default flags for local regions.
 ## Fixes
 * Some minor bug and typo fixes
 # 0.0.1.0-beta1 - First beta release
