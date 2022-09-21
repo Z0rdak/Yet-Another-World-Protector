@@ -2,7 +2,7 @@
 ## Additions
 * Add first beta implementation of local regions.
 They come with two different area types: Cuboid and Sphere. More types will come soon!
-NOTE: The flag checks for local regions are still missing but you are still able to setup your regions.
+NOTE: The flag checks for local regions are still missing, but you are still able to set up your regions.
 They will be valid and working as soon as the checks are implemented in the next version.
 * Add CLI to manage local regions. You are able to manage all properties of local regions with commands and with the interactive CLI.
 For a comprehensive command overview take a look at the wiki.
