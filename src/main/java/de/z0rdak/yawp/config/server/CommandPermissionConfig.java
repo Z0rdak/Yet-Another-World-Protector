@@ -16,6 +16,9 @@ public class CommandPermissionConfig {
     public static final ForgeConfigSpec CONFIG_SPEC;
 
     public static final String CONFIG_NAME = YetAnotherWorldProtector.MODID + "-common.toml";
+
+    // TODO: Dedicated permission to teleport to region
+    public static final ForgeConfigSpec.ConfigValue<Boolean> ALLOW_READ_ONLY_CMDS;
     public static final ForgeConfigSpec.ConfigValue<Integer> WP_COMMAND_ALTERNATIVE;
     public static final ForgeConfigSpec.ConfigValue<Integer> REQUIRED_OP_LEVEL;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> PLAYERS_WITH_PERMISSION;
@@ -38,6 +41,9 @@ public class CommandPermissionConfig {
 
         REQUIRED_OP_LEVEL = BUILDER.comment("Minimum OP level to use mod commands.\n")
                 .defineInRange("command_op_level", 4, 0, 4);
+
+        ALLOW_READ_ONLY_CMDS = BUILDER.comment("Defines whether info commands for regions can be used by every player.")
+                .define("allow_info_cmds", true);
 
         PLAYERS_WITH_PERMISSION = BUILDER.comment("Player UUIDs with permission to use mod commands")
                 .defineListAllowEmpty(Collections.singletonList("players_with_permission"), ArrayList::new, (uuid) -> {
@@ -74,6 +80,10 @@ public class CommandPermissionConfig {
 
     private static boolean containsBadLength(List<String> tokens, int size) {
         return tokens.stream().anyMatch(t -> t.length() != size);
+    }
+
+    public static boolean AllowInfoCmds(){
+        return ALLOW_READ_ONLY_CMDS.get();
     }
 
     public static Set<String> UUIDsWithPermission(){
