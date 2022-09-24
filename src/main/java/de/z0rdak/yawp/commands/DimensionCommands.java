@@ -40,6 +40,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.*;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.world.World;
+import org.apache.commons.lang3.NotImplementedException;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -183,8 +184,18 @@ public class DimensionCommands {
         CuboidArea area = new CuboidArea(pos1, pos2);
         CuboidRegion region = new CuboidRegion(regionName, area, owner, dimCache.dimensionKey());
         defaultFlags.stream()
-                .map(flagIdentifier -> RegionFlag.fromId(flagIdentifier).flag)
-                .forEach(region::addFlag);
+                .map(RegionFlag::fromId)
+                .forEach(flag -> {
+                    switch (flag.type) {
+                        case BOOLEAN_FLAG:
+                            region.addFlag(new BooleanFlag(flag));
+                            break;
+                        case LIST_FLAG:
+                            throw new NotImplementedException("");
+                        case INT_FLAG:
+                            throw new NotImplementedException("");
+                    }
+                });
         dimCache.addRegion(region);
         sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
         return 0;
@@ -206,8 +217,18 @@ public class DimensionCommands {
         SphereArea area = new SphereArea(center, outerPos);
         SphereRegion region = new SphereRegion(regionName, area, owner, dimCache.dimensionKey());
         defaultFlags.stream()
-                .map(flagIdentifier -> RegionFlag.fromId(flagIdentifier).flag)
-                .forEach(region::addFlag);
+                .map(RegionFlag::fromId)
+                .forEach(flag -> {
+                    switch (flag.type) {
+                        case BOOLEAN_FLAG:
+                            region.addFlag(new BooleanFlag(flag));
+                            break;
+                        case LIST_FLAG:
+                            throw new NotImplementedException("");
+                        case INT_FLAG:
+                            throw new NotImplementedException("");
+                    }
+                });
         dimCache.addRegion(region);
         sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
         return 0;
