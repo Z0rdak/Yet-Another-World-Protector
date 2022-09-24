@@ -8,11 +8,12 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.commands.CommandConstants;
 import de.z0rdak.yawp.commands.arguments.*;
-import de.z0rdak.yawp.commands.arguments.flag.FlagArgumentType;
+import de.z0rdak.yawp.commands.arguments.flag.RegionFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.core.area.AreaType;
-import de.z0rdak.yawp.core.flag.IFlag;
+import de.z0rdak.yawp.core.flag.FlagType;
+import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
@@ -75,8 +76,12 @@ public class CommandUtil {
         return StringArgumentType.getString(ctx, CommandConstants.FLAG.toString());
     }
 
-    public static IFlag getFlagArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
-        return FlagArgumentType.getFlag(ctx, CommandConstants.FLAG.toString());
+    public static RegionFlag getFlagArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
+        return RegionFlagArgumentType.getFlag(ctx, CommandConstants.FLAG.toString());
+    }
+
+    public static FlagType getFlagTypeArgument(CommandContext<CommandSource> ctx) {
+        return FlagType.of(StringArgumentType.getString(ctx, CommandConstants.TYPE.toString()));
     }
 
     public static String getAffiliationArgument(CommandContext<CommandSource> ctx) {
