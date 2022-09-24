@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.core.region;
 
 import de.z0rdak.yawp.core.affiliation.PlayerContainer;
+import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import net.minecraft.entity.player.PlayerEntity;
@@ -30,14 +31,19 @@ public interface IProtectedRegion extends INBTSerializable<CompoundNBT> {
 
     void addFlag(IFlag flag);
 
-    // TODO: String flag -> IFlag flag?
     void removeFlag(String flag);
 
-    boolean containsFlag(IFlag flag);
+    boolean containsFlag(String flag);
 
     boolean containsFlag(RegionFlag flag);
 
     Collection<IFlag> getFlags();
+
+    FlagContainer getFlagContainer();
+
+    IFlag getFlag(String flagName);
+
+    void updateFlag(IFlag flag);
 
     void addMember(PlayerEntity player);
 
