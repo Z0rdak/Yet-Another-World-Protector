@@ -89,7 +89,6 @@ public class RegionArgumentType implements ArgumentType<String> {
     /**
      * Using this as an actual argument does not work on a server-side only mod,
      * because it needs to be registered in the corresponding registry.
-      * @return
      */
     public static RegionArgumentType region() {
         return new RegionArgumentType();
@@ -97,7 +96,6 @@ public class RegionArgumentType implements ArgumentType<String> {
 
     public static IMarkableRegion getRegion(CommandContext<CommandSource> context, String argName) throws CommandSyntaxException {
         String regionName = context.getArgument(argName, String.class);
-        // FIXME: crashes without dim argument
         DimensionRegionCache dimCache = CommandUtil.getDimCacheArgument(context);
         IMarkableRegion region = dimCache.getRegion(regionName);
         if (region != null) {
