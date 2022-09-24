@@ -8,6 +8,7 @@ import de.z0rdak.yawp.core.affiliation.PlayerContainer;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.area.SphereArea;
+import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
@@ -32,6 +33,7 @@ import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.config.server.RegionConfig.REGION_DEFAULT_PRIORITY_INC;
 import static de.z0rdak.yawp.util.CommandUtil.*;
 import static net.minecraft.util.text.TextFormatting.*;
+import static net.minecraft.util.text.TextFormatting.RESET;
 import static net.minecraft.util.text.event.ClickEvent.Action.*;
 
 public class MessageUtil {
@@ -503,7 +505,7 @@ public class MessageUtil {
         String teleportCmd = buildDimTeleportCmd(region.getDim(), "@s", region.getTpTarget());
         IFormattableTextComponent teleportLink = buildExecuteCmdComponent(buildBlockPosTeleportLinkText(region.getTpTarget()),
             "cli.msg.region.info.tp.link.hover", teleportCmd, RUN_COMMAND, AQUA);
-        IFormattableTextComponent separator = new StringTextComponent(" @ ");
+        IFormattableTextComponent separator = new StringTextComponent(Color.fromLegacyFormat(RESET) + " @ " + Color.fromLegacyFormat(RESET));
         return  buildRegionInfoLink(region)
                 .append(separator)
                 .append(teleportLink);
