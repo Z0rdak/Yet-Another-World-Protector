@@ -9,7 +9,6 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandSource;
@@ -17,14 +16,12 @@ import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 // TODO: When flag types are implemented there must be different ArgumentTypes for each flag type
-public class FlagArgumentType implements ArgumentType<String> {
+public class RegionFlagArgumentType implements ArgumentType<String> {
 
     private static final Collection<String> EXAMPLES = RegionFlag.getFlagNames();
 
@@ -76,19 +73,15 @@ public class FlagArgumentType implements ArgumentType<String> {
     /**
      * Using this as an actual argument does not work on a server-side only mod,
      * because it needs to be registered in the corresponding registry.
-     * @return
      */
-    public static FlagArgumentType flag() {
-        return new FlagArgumentType();
+    public static RegionFlagArgumentType flag() {
+        return new RegionFlagArgumentType();
     }
 
-    public static IFlag getFlag(CommandContext<CommandSource> context, String argName) throws CommandSyntaxException {
+    public static RegionFlag getFlag(CommandContext<CommandSource> context, String argName) throws CommandSyntaxException {
         String flagIdentifier = context.getArgument(argName, String.class);
         if (RegionFlag.contains(flagIdentifier)) {
-            return Arrays.stream(RegionFlag.values())
-                    .filter(flag -> flag.flag.getFlagIdentifier().equals(flagIdentifier))
-                    .map(flag -> flag.flag)
-                    .collect(Collectors.toList()).get(0);
+            return RegionFlag.fromId(flagIdentifier);
         } else {
             MessageUtil.sendCmdFeedback(context.getSource(), new StringTextComponent("Invalid flag identifier: '" + flagIdentifier + "'!"));
             throw ERROR_INVALID_VALUE.create(flagIdentifier);
