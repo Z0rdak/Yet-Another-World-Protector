@@ -1,114 +1,104 @@
 package de.z0rdak.yawp.core.flag;
 
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public enum RegionFlag {
 
-    BREAK_BLOCKS(new BooleanFlag("break_blocks", false)),
-    SCOOP_FLUIDS(new BooleanFlag("scoop_fluids", false)),
-    BREAK_ENTITIES(new BooleanFlag("break_entities", false)),
-    PLACE_BLOCKS(new BooleanFlag("place_blocks", false)),
-    PLACE_FLUIDS(new BooleanFlag("place_fluids", false)),
-    ENTITY_PLACE(new BooleanFlag("entity-place", false)),
-    EXPLOSION_ENTITY(new BooleanFlag("explosions-entities", false)),
-    EXPLOSION_BLOCK(new BooleanFlag("explosions-blocks", false)),
-    EXPLOSION_CREEPER_BLOCK(new BooleanFlag("creeper-explosion-entities", false)),
-    EXPLOSION_CREEPER_ENTITY(new BooleanFlag("creeper-explosion-blocks", false)),
-    EXPLOSION_OTHER_BLOCKS(new BooleanFlag("other-explosion-entities", false)),
-    EXPLOSION_OTHER_ENTITY(new BooleanFlag("other-explosion-blocks", false)),
-    IGNITE_EXPLOSIVES(new BooleanFlag("ignite-explosives", false)),
-    TOOL_SECONDARY_USE(new BooleanFlag("tools-secondary", false)),
-    AXE_STRIP(new BooleanFlag("strip-wood", false)),
-    HOE_TILL(new BooleanFlag("till-farmland", false)),
-    SHOVEL_PATH(new BooleanFlag("shovel-path", false)),
-    TRAMPLE_FARMLAND(new BooleanFlag("trample-farmland", false)),
-    TRAMPLE_FARMLAND_PLAYER(new BooleanFlag("trample-farmland-player", false)),
-    TRAMPLE_FARMLAND_OTHER(new BooleanFlag("trample-farmland-other", false)),
-    DRAGON_BLOCK_PROT(new BooleanFlag("dragon-destruction", false)),
-    WITHER_BLOCK_PROT(new BooleanFlag("wither-destruction", false)),
-    ZOMBIE_DOOR_PROT(new BooleanFlag("zombie-destruction", false)),
-    LIGHTNING_PROT(new BooleanFlag("lightning", false)),
+    BREAK_BLOCKS("break_blocks", FlagType.BOOLEAN_FLAG),
+    SCOOP_FLUIDS("scoop_fluids", FlagType.BOOLEAN_FLAG),
+    BREAK_ENTITIES("break_entities", FlagType.BOOLEAN_FLAG),
+    PLACE_BLOCKS("place_blocks", FlagType.BOOLEAN_FLAG),
+    PLACE_FLUIDS("place_fluids", FlagType.BOOLEAN_FLAG),
+    ENTITY_PLACE("entity-place", FlagType.BOOLEAN_FLAG),
+    EXPLOSION_ENTITY("explosions-entities", FlagType.BOOLEAN_FLAG),
+    EXPLOSION_BLOCK("explosions-blocks", FlagType.BOOLEAN_FLAG),
+    EXPLOSION_CREEPER_BLOCK("creeper-explosion-entities", FlagType.BOOLEAN_FLAG),
+    EXPLOSION_CREEPER_ENTITY("creeper-explosion-blocks", FlagType.BOOLEAN_FLAG),
+    EXPLOSION_OTHER_BLOCKS("other-explosion-entities", FlagType.BOOLEAN_FLAG),
+    EXPLOSION_OTHER_ENTITY("other-explosion-blocks", FlagType.BOOLEAN_FLAG),
+    IGNITE_EXPLOSIVES("ignite-explosives", FlagType.BOOLEAN_FLAG),
+    TOOL_SECONDARY_USE("tools-secondary", FlagType.BOOLEAN_FLAG),
+    AXE_STRIP("strip-wood", FlagType.BOOLEAN_FLAG),
+    HOE_TILL("till-farmland", FlagType.BOOLEAN_FLAG),
+    SHOVEL_PATH("shovel-path", FlagType.BOOLEAN_FLAG),
+    TRAMPLE_FARMLAND("trample-farmland", FlagType.BOOLEAN_FLAG),
+    TRAMPLE_FARMLAND_PLAYER("trample-farmland-player", FlagType.BOOLEAN_FLAG),
+    TRAMPLE_FARMLAND_OTHER("trample-farmland-other", FlagType.BOOLEAN_FLAG),
+    DRAGON_BLOCK_PROT("dragon-destruction", FlagType.BOOLEAN_FLAG),
+    WITHER_BLOCK_PROT("wither-destruction", FlagType.BOOLEAN_FLAG),
+    ZOMBIE_DOOR_PROT("zombie-destruction", FlagType.BOOLEAN_FLAG),
+    LIGHTNING_PROT("lightning", FlagType.BOOLEAN_FLAG),
     //
-    ANIMAL_TAMING(new BooleanFlag("animal-taming", false)),
-    ANIMAL_BREEDING(new BooleanFlag("animal-breeding", false)),
-    ANIMAL_MOUNTING(new BooleanFlag("animal-mounting", false)),
-    // ANIMAL_UNMOUNTING(new BooleanFlag("animal-unmounting", false)), // FIXME: Minecraft vanilla bug fixed in 21w03a
-    SPAWNING_MONSTERS(new BooleanFlag("spawning-monsters", false)),
-    SPAWNING_GOLEM(new BooleanFlag("spawning-irongolem", false)),
-    SPAWNING_ANIMAL(new BooleanFlag("spawning-animal", false)),
-    SPAWNING_ALL(new BooleanFlag("spawning-all", false)),
-    SPAWNING_XP(new BooleanFlag("spawning-xp", false)),
-    USE(new BooleanFlag("use", false)), // Buttons, Doors, Lever, e, false), falsetc
-    USE_BONEMEAL(new BooleanFlag("use-bonemeal", false)),
-    CONTAINER_ACCESS(new BooleanFlag("access-container", false)),
-    ENDER_CHEST_ACCESS(new BooleanFlag("access-enderchest", false)),
-    USE_ENDERPEARL_FROM_REGION(new BooleanFlag("enderpearl-from", false)),
-    USE_ENDERPEARL_TO_REGION(new BooleanFlag("enderpearl-to", false)),
-    ENDERMAN_TELEPORT_TO_REGION(new BooleanFlag("enderman-teleport-to", false)),
-    ENDERMAN_TELEPORT_FROM_REGION(new BooleanFlag("enderman-teleport-from", false)),
-    SHULKER_TELEPORT_TO_REGION(new BooleanFlag("shulker-teleport-to", false)),
-    SHULKER_TELEPORT_FROM_REGION(new BooleanFlag("shulker-teleport-from", false)),
-    ITEM_DROP(new BooleanFlag("item-drop", false)),
+    ANIMAL_TAMING("animal-taming", FlagType.BOOLEAN_FLAG),
+    ANIMAL_BREEDING("animal-breeding", FlagType.BOOLEAN_FLAG),
+    ANIMAL_MOUNTING("animal-mounting", FlagType.BOOLEAN_FLAG),
+    // ANIMAL_UNMOUNTING("animal-unmounting", FlagType.BOOLEAN_FLAG)), // FIXME: Minecraft vanilla bug fixed in 1.17 snapshot - mention in wiki
+    SPAWNING_MONSTERS("spawning-monsters", FlagType.BOOLEAN_FLAG),
+    SPAWNING_GOLEM("spawning-irongolem", FlagType.BOOLEAN_FLAG),
+    SPAWNING_ANIMAL("spawning-animal", FlagType.BOOLEAN_FLAG),
+    SPAWNING_ALL("spawning-all", FlagType.BOOLEAN_FLAG),
+    SPAWNING_XP("spawning-xp", FlagType.BOOLEAN_FLAG),
+    USE("use", FlagType.BOOLEAN_FLAG),
+    USE_BONEMEAL("use-bonemeal", FlagType.BOOLEAN_FLAG),
+    CONTAINER_ACCESS("access-container", FlagType.BOOLEAN_FLAG),
+    ENDER_CHEST_ACCESS("access-enderchest", FlagType.BOOLEAN_FLAG),
+    USE_ENDERPEARL_FROM_REGION("enderpearl-from", FlagType.BOOLEAN_FLAG),
+    USE_ENDERPEARL_TO_REGION("enderpearl-to", FlagType.BOOLEAN_FLAG),
+    ENDERMAN_TELEPORT_TO_REGION("enderman-teleport-to", FlagType.BOOLEAN_FLAG),
+    ENDERMAN_TELEPORT_FROM_REGION("enderman-teleport-from", FlagType.BOOLEAN_FLAG),
+    SHULKER_TELEPORT_TO_REGION("shulker-teleport-to", FlagType.BOOLEAN_FLAG),
+    SHULKER_TELEPORT_FROM_REGION("shulker-teleport-from", FlagType.BOOLEAN_FLAG),
+    ITEM_DROP("item-drop", FlagType.BOOLEAN_FLAG),
     // unrelated: mobs pickup logic => MobEntity#livingTick
-    ITEM_PICKUP(new BooleanFlag("item-pickup", false)),
-    LOOT_DROP(new BooleanFlag("loot-drop", false)),
-    XP_DROP_ALL(new BooleanFlag("xp-drop-all", false)), // also includes blocks (furnace for example)
-    XP_DROP_MONSTER(new BooleanFlag("xp-drop-monsters", false)), // only hostile mobs
-    XP_DROP_OTHER(new BooleanFlag("xp-drop-other", false)), // non-hostile: animals, villagers,...
-    XP_PICKUP(new BooleanFlag("xp-pickup", false)),
-    LEVEL_FREEZE(new BooleanFlag("level-freeze", false)),
-    XP_FREEZE(new BooleanFlag("xp-freeze", false)),
-    ATTACK_PLAYERS(new BooleanFlag("attack-players", false)),
-    ATTACK_ANIMALS(new BooleanFlag("attack-animals", false)),
-    ATTACK_MONSTERS(new BooleanFlag("attack-monsters", false)),
-    ATTACK_VILLAGERS(new BooleanFlag("attack-villagers", false)),
-    ATTACK_WANDERING_TRADER(new BooleanFlag("attack-wtrader", false)),
-    INVINCIBLE(new BooleanFlag("invincible", false)),
-    FALL_DAMAGE(new BooleanFlag("fall-damage", false)),
-    FALL_DAMAGE_VILLAGERS(new BooleanFlag("fall-damage-villagers", false)),
-    FALL_DAMAGE_MONSTERS(new BooleanFlag("fall-damage-monsters", false)),
-    FALL_DAMAGE_ANIMALS(new BooleanFlag("fall-damage-animals", false)),
-    FALL_DAMAGE_PLAYERS(new BooleanFlag("fall-damage-players", false)),
-    SEND_MESSAGE(new BooleanFlag("send-chat", false)),
-    EXECUTE_COMMAND(new BooleanFlag("exec-command", false)),
-    SET_SPAWN(new BooleanFlag("set-spawn", false)),
-    // RESET_SPAWN(new BooleanFlag("reset-spawn"), // not working
-    SLEEP(new BooleanFlag("sleep", false)),
-    USE_PORTAL(new BooleanFlag("use-portal", false)),
-    //TRAVEL_TO_DIM(new BooleanFlag("travel-to-dim", false)),
-    //TRAVEL_FROM_DIM(new BooleanFlag("travel-from-dim", false)),
-    USE_PORTAL_PLAYERS(new BooleanFlag("use-portal-players", false)),
-    USE_PORTAL_ITEMS(new BooleanFlag("use-portal-items", false)),
-    USE_PORTAL_ANIMALS(new BooleanFlag("use-portal-animals", false)),
-    USE_PORTAL_MONSTERS(new BooleanFlag("use-portal-monsters", false)),
-    USE_PORTAL_VILLAGERS(new BooleanFlag("use-portal-villagers", false)),
-    USE_PORTAL_MINECARTS(new BooleanFlag("use-portal-minecarts", false)),
-    SPAWN_PORTAL(new BooleanFlag("spawn-portal", false)),
-    //PLAYER_SPAWN_PORTAL(new BooleanFlag("player-spawn-portal", false));
+    ITEM_PICKUP("item-pickup", FlagType.BOOLEAN_FLAG),
+    LOOT_DROP("loot-drop", FlagType.BOOLEAN_FLAG),
+    XP_DROP_ALL("xp-drop-all", FlagType.BOOLEAN_FLAG), // also includes blocks (furnace for FlagType.BOOLEAN_FLAGl)
+    XP_DROP_MONSTER("xp-drop-monsters", FlagType.BOOLEAN_FLAG), // only hostFlagType.BOOLEAN_FLAGos
+    XP_DROP_OTHER("xp-drop-other", FlagType.BOOLEAN_FLAG), // non-hostile: animals, villaFlagType.BOOLEAN_FLAG..
+    XP_PICKUP("xp-pickup", FlagType.BOOLEAN_FLAG),
+    LEVEL_FREEZE("level-freeze", FlagType.BOOLEAN_FLAG),
+    XP_FREEZE("xp-freeze", FlagType.BOOLEAN_FLAG),
+    ATTACK_PLAYERS("attack-players", FlagType.BOOLEAN_FLAG),
+    ATTACK_ANIMALS("attack-animals", FlagType.BOOLEAN_FLAG),
+    ATTACK_MONSTERS("attack-monsters", FlagType.BOOLEAN_FLAG),
+    ATTACK_VILLAGERS("attack-villagers", FlagType.BOOLEAN_FLAG),
+    ATTACK_WANDERING_TRADER("attack-wtrader", FlagType.BOOLEAN_FLAG),
+    INVINCIBLE("invincible", FlagType.BOOLEAN_FLAG),
+    FALL_DAMAGE("fall-damage", FlagType.BOOLEAN_FLAG),
+    FALL_DAMAGE_VILLAGERS("fall-damage-villagers", FlagType.BOOLEAN_FLAG),
+    FALL_DAMAGE_MONSTERS("fall-damage-monsters", FlagType.BOOLEAN_FLAG),
+    FALL_DAMAGE_ANIMALS("fall-damage-animals", FlagType.BOOLEAN_FLAG),
+    FALL_DAMAGE_PLAYERS("fall-damage-players", FlagType.BOOLEAN_FLAG),
+    SEND_MESSAGE("send-chat", FlagType.BOOLEAN_FLAG),
+    EXECUTE_COMMAND("exec-command", FlagType.BOOLEAN_FLAG),
+    SET_SPAWN("set-spawn", FlagType.BOOLEAN_FLAG),
+    // RESET_SPAWN("reset-spawn"), // notFlagType.BOOLEAN_FLAGig
+    SLEEP("sleep", FlagType.BOOLEAN_FLAG),
+    USE_PORTAL("use-portal", FlagType.BOOLEAN_FLAG),
+    //TRAVEL_TO_DIM("travel-to-dim", FlagType.BOOLEAN_FLAG),
+    //TRAVEL_FROM_DIM("travel-from-dim", FlagType.BOOLEAN_FLAG),
+    USE_PORTAL_PLAYERS("use-portal-players", FlagType.BOOLEAN_FLAG),
+    USE_PORTAL_ITEMS("use-portal-items", FlagType.BOOLEAN_FLAG),
+    USE_PORTAL_ANIMALS("use-portal-animals", FlagType.BOOLEAN_FLAG),
+    USE_PORTAL_MONSTERS("use-portal-monsters", FlagType.BOOLEAN_FLAG),
+    USE_PORTAL_VILLAGERS("use-portal-villagers", FlagType.BOOLEAN_FLAG),
+    USE_PORTAL_MINECARTS("use-portal-minecarts", FlagType.BOOLEAN_FLAG),
+    SPAWN_PORTAL("spawn-portal", FlagType.BOOLEAN_FLAG),
+    //PLAYER_SPAWN_PORTAL("player-spawn-portal", FlagType.BOOLEAN_FLAG);
 
-    SPAWN_ENTITLES(new ListFlag("spawn-entities", false));
+    SPAWN_ENTITLES("spawn-entities", FlagType.LIST_FLAG);
 
-    public final String flagname;
-    public final IFlag flag;
-    public final String langKey;
-    // public final boolean defaultValue;
-    public final Function<List<String>, IFormattableTextComponent> denyMessageBuilder;
+    public final String name;
+    public final FlagType type;
 
-    RegionFlag(IFlag flag) {
-        this.flag = flag;
-        this.flagname = flag.getFlagIdentifier();
-        this.langKey = "flag." + flag.getFlagIdentifier() + ".msg.deny";
-        this.denyMessageBuilder = (args) -> new TranslationTextComponent(this.langKey, args == null ? new ArrayList<>() : args);
-        //this.defaultValue = defaultValue;
+    RegionFlag(String name, FlagType type) {
+        this.name = name;
+        this.type = type;
     }
     @Override
     public String toString() {
-        return flagname;
+        return name;
     }
 
     /**
@@ -132,36 +122,36 @@ public enum RegionFlag {
                 .collect(Collectors.toList());
     }
 
-    public static Set<IFlag> getFlags() {
+    public static Set<RegionFlag> getFlags() {
         return Arrays.stream(RegionFlag.values())
-                .map(regionFlag -> regionFlag.flag)
                 .collect(Collectors.toSet());
     }
 
 
-    public static Set<IFlag> getFlags(FlagType type){
+    public static Set<RegionFlag> getFlags(FlagType type){
         return getFlags()
                 .stream()
-                .filter(flag -> flag.getFlagType() == type)
+                .filter(flag -> flag.type.equals(type))
                 .collect(Collectors.toSet());
     }
 
     public static Optional<RegionFlag> fromString(String flagIdentifier){
         return Arrays.stream(values())
-                .filter(flag -> flag.flagname.equals(flagIdentifier))
+                .filter(flag -> flag.name.equals(flagIdentifier))
                 .findFirst();
     }
 
-    public static Set<BooleanFlag> getBoolFlags(){
-        return getFlags(FlagType.BOOLEAN_FLAG)
-                .stream()
-                .map(flag -> (BooleanFlag) flag)
-                .collect(Collectors.toSet());
+    public static Set<RegionFlag> getBoolFlags(){
+        return new HashSet<>(getFlags(FlagType.BOOLEAN_FLAG));
     }
 
-    public static RegionFlag fromId(String flagIdentifier){
-        return Arrays.stream(values())
-                .filter(flag -> flag.flagname.equals(flagIdentifier))
-                .collect(Collectors.toList()).get(0);
+    public static RegionFlag fromId(String flagIdentifier) throws IllegalArgumentException {
+        List<RegionFlag> singleFlag = Arrays.stream(values())
+                .filter(flag -> flag.name.equals(flagIdentifier))
+                .collect(Collectors.toList());
+        if (singleFlag.size() == 0) {
+            throw new IllegalArgumentException("Invalid region flag identifier supplied");
+        }
+        return singleFlag.get(0);
     }
 }
