@@ -2,10 +2,8 @@ package de.z0rdak.yawp.handler.flags;
 
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
-import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.RegionUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.FlyingEntity;
@@ -20,7 +18,6 @@ import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.EntityEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
 
@@ -79,7 +76,7 @@ public final class HandlerUtil {
      * @param flag flag to be checked for
      * @return true if any region contains the specified flag, false otherwise
      */
-    public static boolean anyRegionContainsFlag(List<IMarkableRegion> regions, IFlag flag){
+    public static boolean anyRegionContainsFlag(List<IMarkableRegion> regions, RegionFlag flag){
         return regions.stream()
                 .anyMatch(region -> region.containsFlag(flag));
     }
@@ -90,17 +87,17 @@ public final class HandlerUtil {
      * @param flag flag to be filtered for
      * @return list of block positions which are in a region with the specified flag
      */
-    public static List<BlockPos> filterExplosionAffectedBlocks(ExplosionEvent.Detonate event, IFlag flag){
+    public static List<BlockPos> filterExplosionAffectedBlocks(ExplosionEvent.Detonate event, RegionFlag flag){
         return event.getAffectedBlocks().stream()
                 .filter(blockPos -> anyRegionContainsFlag(
-                        RegionUtil.getHandlingRegionsFor(blockPos, event.getWorld()), flag))
+                        RegionUtil.getInvolvedRegionsFor(blockPos, event.getWorld().dimension()), flag))
                 .collect(Collectors.toList());
     }
 
-    public static List<Entity> filterAffectedEntities(ExplosionEvent.Detonate event, IFlag flag) {
+    public static List<Entity> filterAffectedEntities(ExplosionEvent.Detonate event, RegionFlag flag) {
         return event.getAffectedEntities().stream()
                 .filter(entity -> anyRegionContainsFlag(
-                        RegionUtil.getHandlingRegionsFor(entity.blockPosition(), event.getWorld()), flag))
+                        RegionUtil.getInvolvedRegionsFor(entity.blockPosition(), event.getWorld().dimension()), flag))
                 .collect(Collectors.toList());
     }
 }
