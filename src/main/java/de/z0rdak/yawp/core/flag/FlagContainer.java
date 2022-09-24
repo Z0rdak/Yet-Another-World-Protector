@@ -9,8 +9,13 @@ import java.util.Set;
 
 import static de.z0rdak.yawp.util.constants.RegionNBT.FLAG_TYPE;
 
+/**
+ * Represents a simple map holding the flag values to the corresponding flag names for a region and providing methods handling the flags. <br>
+ * [Key] FlagName -> [Value] IFlag <br>
+ * E.g. "break_blocks" -> BooleanFlag {"value": false, ...}
+ *
+ */
 public class FlagContainer extends HashMap<String, IFlag> implements INBTSerializable<CompoundNBT> {
-
 
     public FlagContainer(CompoundNBT nbt){
         this();
@@ -67,7 +72,11 @@ public class FlagContainer extends HashMap<String, IFlag> implements INBTSeriali
         this.put(flag.getFlagIdentifier(), flag);
     }
 
-    public boolean contains(IFlag flag){
-        return this.containsKey(flag.getFlagIdentifier());
+    public boolean contains(RegionFlag flag){
+        return this.containsKey(flag.name);
+    }
+
+    public boolean contains(String flag){
+        return this.containsKey(flag);
     }
 }
