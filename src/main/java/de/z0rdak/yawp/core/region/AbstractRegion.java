@@ -8,6 +8,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.scoreboard.Team;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
@@ -61,22 +62,54 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.flags.put(flag);
     }
 
-    public boolean containsFlag(IFlag flag) {
-        return this.flags.contains(flag);
-}
-
     @Override
     public void removeFlag(String flag) {
         this.flags.remove(flag);
     }
 
     public boolean containsFlag(RegionFlag flag) {
-        return this.flags.contains(flag.flag);
+        return this.flags.contains(flag);
+    }
+
+    @Override
+    public boolean containsFlag(String flag) {
+        return this.flags.contains(flag);
     }
 
     @Override
     public Collection<IFlag> getFlags() {
         return Collections.unmodifiableList(new ArrayList<>(this.flags.values()));
+    }
+
+    @Override
+    public FlagContainer getFlagContainer() {
+        return flags;
+    }
+
+    @Nullable
+    @Override
+    public IFlag getFlag(String flagName){
+        if (this.flags.contains(flagName)) {
+            return this.flags.get(flagName);
+        } else {
+            return null;
+        }
+    }
+
+    public void updateFlag(IFlag flag) {
+        this.flags.put(flag);
+    }
+
+    public void toggleFlag(String flag, boolean enable){
+        if (this.containsFlag(flag)) {
+            this.flags.get(flag).setIsActive(enable);
+        }
+    }
+
+    public void invertFlag(String flag){
+        if (this.containsFlag(flag)) {
+            this.flags.get(flag).setInverted(this.flags.get(flag).isInverted());
+        }
     }
 
     @Override
