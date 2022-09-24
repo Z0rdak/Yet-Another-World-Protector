@@ -7,14 +7,14 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import de.z0rdak.yawp.commands.arguments.AreaArgumentType;
-import de.z0rdak.yawp.commands.arguments.flag.FlagArgumentType;
+import de.z0rdak.yawp.commands.arguments.flag.RegionFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.core.affiliation.PlayerContainer;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.SphereArea;
-import de.z0rdak.yawp.core.flag.IFlag;
+import de.z0rdak.yawp.core.flag.BooleanFlag;
+import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.AbstractRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.stick.AbstractStick;
@@ -30,8 +30,6 @@ import net.minecraft.command.arguments.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
@@ -150,7 +148,7 @@ public class RegionCommands {
                         .then(literal(FLAG)
                                 .then(Commands.argument(FLAG.toString(), StringArgumentType.word())
                                         // TODO: Suggest only flags not present in the region
-                                        .suggests((ctx, builder) -> FlagArgumentType.flag().listSuggestions(ctx, builder))
+                                        .suggests((ctx, builder) -> RegionFlagArgumentType.flag().listSuggestions(ctx, builder))
                                         .executes(ctx -> addFlag(ctx.getSource(), getRegionArgument(ctx), getFlagArgument(ctx)))))
                         .then(literal(CHILD)
                                 .then(Commands.argument(CHILD.toString(), StringArgumentType.word())
@@ -180,7 +178,7 @@ public class RegionCommands {
                         .then(literal(FLAG)
                                 .then(Commands.argument(FLAG.toString(), StringArgumentType.word())
                                         // TODO: Suggest only flags present in the region
-                                        .suggests((ctx, builder) -> FlagArgumentType.flag().listSuggestions(ctx, builder))
+                                        .suggests((ctx, builder) -> RegionFlagArgumentType.flag().listSuggestions(ctx, builder))
                                         .executes(ctx -> removeFlag(ctx.getSource(), getRegionArgument(ctx), getFlagArgument(ctx)))))
                         .then(literal(CHILD)
                                 .then(Commands.argument(CHILD.toString(), StringArgumentType.word())
@@ -367,21 +365,30 @@ public class RegionCommands {
         return 0;
     }
 
-    private static int addFlag(CommandSource src, IMarkableRegion region, IFlag flag) {
+    // Adds default flag for provided RegionFlag
+    private static int addFlag(CommandSource src, IMarkableRegion region, RegionFlag flag) {
         if (!region.containsFlag(flag)) {
-            region.addFlag(flag);
+            switch (flag.type) {
+                case BOOLEAN_FLAG:
+                    region.addFlag(new BooleanFlag(flag));
+                    break;
+                case LIST_FLAG:
+                    break;
+                case INT_FLAG:
+                    break;
+            }
             RegionDataManager.save();
-            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.flags.added", flag.getFlagIdentifier(), region.getName()));
+            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.flags.added", flag.name, region.getName()));
             return 0;
         }
         return 1;
     }
 
-    private static int removeFlag(CommandSource src, IMarkableRegion region, IFlag flag) {
+    private static int removeFlag(CommandSource src, IMarkableRegion region, RegionFlag flag) {
         if (region.containsFlag(flag)) {
-            region.removeFlag(flag.getFlagIdentifier());
+            region.removeFlag(flag.name);
             RegionDataManager.save();
-            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.flags.removed", flag.getFlagIdentifier(), region.getName()));
+            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.flags.removed", flag.name, region.getName()));
             return 0;
         }
         return 1;
@@ -590,10 +597,14 @@ public class RegionCommands {
             sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.flag.empty", region.getName()));
             return 1;
         }
+        // TODO: Sort flags alphabethical OR sort by active state
         region.getFlags().forEach(flag -> {
             IFormattableTextComponent removeFlagEntry = new StringTextComponent(" - ")
                     .append(buildRemoveFlagLink(flag, region))
-                    .append(new StringTextComponent(" '" + flag.getFlagIdentifier() + "'"));
+                    .append(new StringTextComponent(" ").withStyle(TextFormatting.RESET))
+                    .append(buildFlagInfoLink(flag, region))
+                    .append(new StringTextComponent(" ").withStyle(TextFormatting.RESET))
+                    .append(buildFlagInfoLinkDetail(flag, region));
             sendCmdFeedback(src, removeFlagEntry);
         });
         return 0;
