@@ -2,6 +2,7 @@ package de.z0rdak.yawp.managers.data.region;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.config.server.RegionConfig;
+import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.AbstractMarkableRegion;
@@ -23,10 +24,13 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
+import org.apache.commons.lang3.NotImplementedException;
 
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static de.z0rdak.yawp.core.flag.FlagType.BOOLEAN_FLAG;
 
 @EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER)
 public class RegionDataManager extends WorldSavedData {
@@ -210,10 +214,20 @@ public class RegionDataManager extends WorldSavedData {
         DimensionRegionCache cache = new DimensionRegionCache(dim);
         RegionConfig.getDefaultDimFlags()
                 .stream() // get is fine here, because the config is validated beforehand
-                .map(flag -> RegionFlag.fromString(flag).get().flag)
-                .forEach(cache::addFlag);
+                .map(RegionFlag::fromId)
+                .forEach(flag -> {
+                    switch (flag.type) {
+                        case BOOLEAN_FLAG:
+                            cache.addFlag(new BooleanFlag(flag));
+                            break;
+                        case LIST_FLAG:
+                            throw new NotImplementedException("");
+                        case INT_FLAG:
+                            throw new NotImplementedException("");
+                    }
+                });
         cache.setDimState(RegionConfig.shouldActivateNewDimRegion());
-        RegionDataManager.dimCacheMap.put(cache.getDimensionalRegion().getDimensionKey(), cache);
+        RegionDataManager.dimCacheMap.put(cache.getDimensionalRegion().getDim(), cache);
         RegionDataManager.get().getDimensionDataNames().add(dimCacheMap.get(dim).getDimensionalRegion().getName());
         save();
         return cache;
