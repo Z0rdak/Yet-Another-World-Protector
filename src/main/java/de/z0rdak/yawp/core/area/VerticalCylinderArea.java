@@ -1,6 +1,5 @@
 package de.z0rdak.yawp.core.area;
 
-import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.util.AreaUtil;
 import de.z0rdak.yawp.util.constants.AreaNBT;
 import net.minecraft.nbt.CompoundNBT;
@@ -9,6 +8,10 @@ import net.minecraft.util.math.vector.Vector3d;
 
 import static de.z0rdak.yawp.util.AreaUtil.*;
 
+/**
+ * Vertical, cylindrical area defined by the bottom center position and a perimeter position.
+ * The perimeter position defines both the height and radius of the area.
+ */
 public class VerticalCylinderArea extends CenteredArea {
 
     private BlockPos centerTopPos;
