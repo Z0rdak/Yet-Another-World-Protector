@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.test.common.core.area;
 
-import de.z0rdak.yawp.core.area.CylinderArea;
+import de.z0rdak.yawp.core.area.VerticalCylinderArea;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 import org.junit.jupiter.api.BeforeAll;
@@ -10,9 +10,9 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CylinderAreaTest {
+public class VerticalCylinderAreaTest {
 
-    private static final List<CylinderArea> cylindersToTest = new ArrayList<>();
+    private static final List<VerticalCylinderArea> cylindersToTest = new ArrayList<>();
     private static final BlockPos center = new BlockPos(0,10,0);
     private static Map<Integer, Set<BlockPos>> validPositionsForRadius;
     private static Map<Integer, Set<BlockPos>> invalidPositionsForRadius;
@@ -27,7 +27,7 @@ public class CylinderAreaTest {
         expectedInvalidForRadius = new HashMap<>();
 
         for (int i = 0; i < 6; i++) {
-            cylindersToTest.add(new CylinderArea(center, i, 10));
+            cylindersToTest.add(new VerticalCylinderArea(center, i, 10));
             validPositionsForRadius.put(i, new HashSet<>());
             invalidPositionsForRadius.put(i, new HashSet<>());
         }
@@ -76,7 +76,7 @@ public class CylinderAreaTest {
     public void testSerialization(){
         cylindersToTest.forEach( cylinderArea -> {
             CompoundNBT area = cylinderArea.serializeNBT();
-            CylinderArea clone = new CylinderArea(area);
+            VerticalCylinderArea clone = new VerticalCylinderArea(area);
 
             assertEquals(cylinderArea.getCenter(), clone.getCenter(), "Center '" + cylinderArea.getCenter() + "' not equal to '" + clone.getCenter().toString() + "'");
             assertEquals(cylinderArea.getRadius(), clone.getRadius(), "Radius '" + cylinderArea.getRadius() + "' not equal to '" + clone.getRadius() + "'");
