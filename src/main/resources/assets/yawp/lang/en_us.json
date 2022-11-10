@@ -51,8 +51,8 @@
   "cli.msg.flags.removed": "Removed flag '%s' from region '%s'",
 
   "cli.msg.info.dim.region": "Region(s)",
-  "cli.msg.info.dim.region.remove.attempt": "Attempt to remove region '%s' from dimension '%'. Confirm removal by appending -y",
-  "cli.msg.info.dim.region.remove.confirm": "Removed region '%s' from dimension '%'",
+  "cli.msg.info.dim.region.remove.attempt": "Attempt to remove region '%s' from dimension '%s'. Confirm removal by appending -y",
+  "cli.msg.info.dim.region.remove.confirm": "Removed region '%s' from dimension '%s'",
   "cli.msg.info.dim.region.remove.link.hover" : "Remove region '%s'",
   "cli.msg.info.dim.region.remove.link.text" : "x",
 
@@ -211,41 +211,14 @@
   "flag.deny.message.break": "You are not allowed to break blocks here!",
   "flag.deny.message.place": "You are not allowed to place blocks here!",
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  "console.logger.info.data.load.success": "Loaded %s regions for %s different dimensions",
-  "console.logger.error.data.load.failure": "Loading regions failed!",
-
-
-
-
-
-
-
-
-
-  "rs.flags.player.break-blocks.description": "Prevents players from breaking blocks",
-  "rs.flags.player.place-blocks.description": "Prevents players from placing blocks",
-
   "cli.arg.area.invalid": "Invalid area value provided: '%s'",
   "cli.arg.area.parse.invalid": "Unable to parse provided area value",
   "cli.arg.region.invalid": "Region '%s' does not exist",
   "cli.arg.region.parse.invalid": "Unable to parse region name!",
   "cli.arg.flag.invalid": "Invalid region identifier: '%s'",
   "cli.arg.flag.parse.invalid": "Unable to parse flag identifier!",
-  "cli.arg.dim.invalid": "Dimension '%s' does not exist!"
+  "cli.arg.dim.invalid": "Dimension '%s' does not exist!",
 
+  "data.nbt.dimensions.load.success": "Loaded %s regions for %s different dimensions",
+  "data.nbt.dimensions.load.failure": "Loading regions failed!"
 }
