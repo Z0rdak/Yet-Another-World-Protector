@@ -1,6 +1,12 @@
-# 0.0.1.0-beta3
+# 0.0.1.0-beta3 - Minor fixes
+## Additions
+* Implemented missing command for removing regions
+* Add temporary hint explaining not working local region flags and region hierarchy
+* Add config option to set default de/activate state for dimensional regions upon creation
 ## Fixes
+* Fix dimensional flags not loading correctly causing them to not work in 1.18 and 1.19.
 * Fix new dimensional region created by argument not containing default flags from config.
+* Fix dimensional region info not showing local region info properly
 # 0.0.1.0-beta2 - Local region preview
 ## Additions
 * Add first beta implementation of local regions.
