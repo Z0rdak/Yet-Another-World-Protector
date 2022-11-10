@@ -74,10 +74,11 @@ public class RegionDataManager extends WorldSavedData {
                 RegionDataManager data = storage.computeIfAbsent(RegionDataManager::new, DATA_NAME);
                 storage.set(data);
                 regionDataCache = data;
-                YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("console.logger.info.data.load.success", data.getAllRegionNames().size(), data.getDimensionList().size()).getString());
+                YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.load.success", data.getAllRegionNames().size(), data.getDimensionList().size()).getString());
             }
         } catch (NullPointerException npe) {
-            YetAnotherWorldProtector.LOGGER.error(new TranslationTextComponent("console.logger.error.data.load.failure"));
+
+            YetAnotherWorldProtector.LOGGER.error(new TranslationTextComponent("data.nbt.dimensions.load.failure").getString());
         }
     }
 
@@ -85,7 +86,7 @@ public class RegionDataManager extends WorldSavedData {
     public void load(CompoundNBT nbt) {
         dimCacheMap.clear();
         CompoundNBT dimensionRegions = nbt.getCompound(NBTConstants.DIMENSIONS);
-        YetAnotherWorldProtector.LOGGER.info("Loading region data for " + dimensionRegions.getAllKeys().size() + " different dimensions");
+        YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.load.amount", dimensionRegions.getAllKeys().size()).getString());
         for (String dimKey : dimensionRegions.getAllKeys()) {
             this.dimensionDataNames.add(dimKey);
             RegistryKey<World> dimension = RegistryKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(dimKey));
@@ -95,7 +96,7 @@ public class RegionDataManager extends WorldSavedData {
 
     @Override
     public CompoundNBT save(CompoundNBT compound) {
-        YetAnotherWorldProtector.LOGGER.info("Saving region data for " + dimCacheMap.entrySet().size() + " different dimensions");
+        YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.save.amount", dimCacheMap.entrySet().size()).getString());
         CompoundNBT dimRegionNbtData = new CompoundNBT();
         for (Map.Entry<RegistryKey<World>, DimensionRegionCache> entry : dimCacheMap.entrySet()) {
             String dimensionName = entry.getValue().getDimensionalRegion().getName();
