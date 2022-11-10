@@ -215,7 +215,9 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
             }
         } else {
             this.parent = null;
-            YetAnotherWorldProtector.LOGGER.warn("Unable to deserialize parent info: " + parentNbt);
+            if (parentNbt.size() > 0) {
+                YetAnotherWorldProtector.LOGGER.warn("Unable to deserialize parent info: " + parentNbt);
+            }
         }
     }
 
