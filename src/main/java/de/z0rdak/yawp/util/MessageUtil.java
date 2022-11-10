@@ -10,6 +10,7 @@ import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.area.SphereArea;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.*;
+import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
@@ -470,6 +471,13 @@ public class MessageUtil {
         return buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, AQUA);
     }
 
+    public static MutableComponent buildDimRegionListLink(DimensionRegionCache dimCache, DimensionalRegion dimRegion) {
+        String command = "/" + CommandPermissionConfig.BASE_CMD + " " + DIMENSION + " " + dimRegion.getName() + " " + LIST + " " + REGION;
+        MutableComponent hoverText = Component.translatable("cli.msg.dim.info.region.list.link.hover", dimRegion.getName());
+        MutableComponent linkText = Component.translatable("cli.msg.dim.info.region.list.link.text", dimCache.getRegions().size());
+        return buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, AQUA);
+    }
+
     public static MutableComponent buildDimTeamListLink(DimensionalRegion dimRegion, PlayerContainer teams, CommandConstants memberOrOwner) {
         String command = "/" + CommandPermissionConfig.BASE_CMD + " " + DIMENSION + " " + dimRegion.getName() + " " + LIST + " " + memberOrOwner;
         MutableComponent hoverText = Component.translatable("cli.msg.info.region.affiliation.team.list.link.hover", memberOrOwner.toString(), dimRegion.getName());
@@ -496,7 +504,7 @@ public class MessageUtil {
         String teleportCmd = buildDimTeleportCmd(region.getDim(), "@s", region.getTpTarget());
         MutableComponent teleportLink = buildExecuteCmdComponent(buildBlockPosTeleportLinkText(region.getTpTarget()),
                 "cli.msg.region.info.tp.link.hover", teleportCmd, RUN_COMMAND, AQUA);
-        MutableComponent separator = Component.literal(ChatFormatting.RESET + " @ " + ChatFormatting.RESET);
+        MutableComponent separator = Component.literal(" @ ");
         return  buildRegionInfoLink(region)
                 .append(separator)
                 .append(teleportLink);
@@ -510,9 +518,9 @@ public class MessageUtil {
 
     public static MutableComponent buildDimSuggestRegionRemovalLink(IMarkableRegion region) {
         String cmd = buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), DELETE.toString(), region.getName());
-        String hoverText = "cli.msg.dim.region.remove.link.hover";
-        String linkText = "x";
-        return buildExecuteCmdComponent(linkText, hoverText, cmd, SUGGEST_COMMAND, RED);
+        MutableComponent hover =Component.translatable("cli.msg.info.dim.region.remove.link.hover", region.getName());
+        MutableComponent text = Component.translatable("cli.msg.info.dim.region.remove.link.text");
+        return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, RED);
     }
 
     public static MutableComponent buildAddDimFlagLink(DimensionalRegion dimRegion) {
