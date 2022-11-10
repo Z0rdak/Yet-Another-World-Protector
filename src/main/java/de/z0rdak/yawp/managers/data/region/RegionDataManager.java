@@ -208,6 +208,7 @@ public class RegionDataManager extends SavedData {
                 .stream() // get is fine here, because the config is validated beforehand
                 .map(flag -> RegionFlag.fromString(flag).get().flag)
                 .forEach(cache::addFlag);
+        cache.setDimState(RegionConfig.shouldActivateNewDimRegion());
         RegionDataManager.dimCacheMap.put(cache.getDimensionalRegion().getDimensionKey(), cache);
         RegionDataManager.get().getDimensionDataNames().add(dimCacheMap.get(dim).getDimensionalRegion().getName());
         save();
