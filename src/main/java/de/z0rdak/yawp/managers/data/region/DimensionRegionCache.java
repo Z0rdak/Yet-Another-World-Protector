@@ -177,6 +177,13 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
         }
     }
 
+    public void removeRegion(IMarkableRegion region){
+        if (this.contains(region.getName())){
+            this.regionsInDimension.remove(region.getName());
+            RegionDataManager.save();
+        }
+    }
+
     public void clearRegions() {
         this.regionsInDimension.clear();
         RegionDataManager.save();
