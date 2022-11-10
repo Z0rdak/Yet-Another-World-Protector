@@ -9,6 +9,7 @@ import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.util.constants.*;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceKey;
@@ -74,14 +75,14 @@ public class RegionDataManager extends SavedData {
                 RegionDataManager data = storage.computeIfAbsent(RegionDataManager::load, RegionDataManager::new, DATA_NAME);
                 storage.set(DATA_NAME, data);
                 regionDataCache = data;
-                YetAnotherWorldProtector.LOGGER.info(MutableComponent.create(new TranslatableContents("console.logger.info.data.load.success", data.getAllRegionNames().size(), data.getDimensionList().size())).getString());
+                YetAnotherWorldProtector.LOGGER.info("Loaded " +  data.getAllRegionNames().size() + " regions for " + data.getDimensionList().size() + " dimensions");
             }
         } catch (NullPointerException npe) {
-            YetAnotherWorldProtector.LOGGER.error(MutableComponent.create(new TranslatableContents("console.logger.error.data.load.failure")));
+            // YetAnotherWorldProtector.LOGGER.error(Component.translatable("data.nbt.dimensions.load.failure"));
+            YetAnotherWorldProtector.LOGGER.error("Loading regions failed!");
         }
     }
 
-    // TODO: Check
     public static RegionDataManager load(CompoundTag nbt) {
         dimCacheMap.clear();
         RegionDataManager rdm = new RegionDataManager();
