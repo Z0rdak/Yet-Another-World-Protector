@@ -9,11 +9,9 @@ import java.util.stream.Collectors;
 public class RegionConfig {
 
     public static final ForgeConfigSpec CONFIG_SPEC;
-
-    //public static final ForgeConfigSpec.ConfigValue<Boolean> REGION_DEFAULT_FLAG_TYPE;
     public static final ForgeConfigSpec.ConfigValue<Integer> REGION_DEFAULT_PRIORITY_INC;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> REGION_DEFAULT_FLAGS;
-
+    public static final ForgeConfigSpec.ConfigValue<Boolean> DIM_REGION_DISABLE_ON_CREATION;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> DIM_REGION_DEFAULT_FLAGS;
     public static final ForgeConfigSpec.ConfigValue<Integer> DEFAULT_REGION_PRIORITY;
 
@@ -33,13 +31,17 @@ public class RegionConfig {
 
         REGION_DEFAULT_PRIORITY_INC = BUILDER.comment("Default region priority increment/decrement.")
                 .defineInRange("default_region_priority_inc", 5, 1, 1000);
-        /*
-        REGION_DEFAULT_FLAG_TYPE = BUILDER.comment("Default flag type for new flags.\n true -> Whitelist\n false -> Blacklist")
-                .define("default_flag_type", false);
-        */
+
+        DIM_REGION_DISABLE_ON_CREATION = BUILDER.comment("Enable new dimensional regions on creation.")
+                .define("dim_enable_new", true);
         BUILDER.pop();
         CONFIG_SPEC = BUILDER.build();
     }
+
+    public static boolean shouldActivateNewDimRegion(){
+        return RegionConfig.DIM_REGION_DISABLE_ON_CREATION.get();
+    }
+
 
     public static Set<String> getDefaultFlags(){
         return  RegionConfig.REGION_DEFAULT_FLAGS.get().stream()
