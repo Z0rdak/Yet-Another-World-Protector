@@ -52,6 +52,7 @@ import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.CommandConstants.DELETE;
 import static de.z0rdak.yawp.util.CommandUtil.*;
 import static de.z0rdak.yawp.util.MessageUtil.*;
+import static de.z0rdak.yawp.util.MessageUtil.buildDimRegionListLink;
 import static net.minecraft.ChatFormatting.*;
 
 public class DimensionCommands {
@@ -172,6 +173,9 @@ public class DimensionCommands {
     }
 
     private static int createCuboidRegion(CommandSourceStack src, String regionName, DimensionRegionCache dimCache, BlockPos pos1, BlockPos pos2, @Nullable ServerPlayer owner) {
+        sendCmdFeedback(src, new TextComponent("NOTE: Local regions are implemented, but the flags for local regions are not yet working, sorry!"));
+        sendCmdFeedback(src, new TextComponent("NOTE: Region hierarchy (parents and children regions) is working but there are no checks in place to ensure a proper hierarchy."));
+        sendCmdFeedback(src, new TextComponent("NOTE: These features will come soon in the next update! "));
         if (!regionName.matches(RegionArgumentType.VALID_NAME_PATTERN.pattern())) {
             sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.name.invalid", regionName));
             return -1;
@@ -192,6 +196,9 @@ public class DimensionCommands {
     }
 
     private static int createSphereRegion(CommandSourceStack src, String regionName, DimensionRegionCache dimCache, BlockPos center, BlockPos outerPos, ServerPlayer owner) {
+        sendCmdFeedback(src, new TextComponent("NOTE: Local regions are implemented, but the flags for local regions are not yet working, sorry!"));
+        sendCmdFeedback(src, new TextComponent("NOTE: Region hierarchy (parents and children regions) is working but there are no checks in place to ensure a proper hierarchy."));
+        sendCmdFeedback(src, new TextComponent("NOTE: These features will come soon in the next update! "));
         if (!regionName.matches(RegionArgumentType.VALID_NAME_PATTERN.pattern())) {
             sendCmdFeedback(src, new TranslatableComponent( "cli.msg.dim.info.region.create.name.invalid", regionName));
             return -1;
@@ -235,13 +242,20 @@ public class DimensionCommands {
     }
 
     private static int attemptDeleteRegion(CommandSourceStack src, DimensionRegionCache dim, IMarkableRegion region) {
-        sendCmdFeedback(src, "Not yet implemented");
-        return 0;
+        if (dim.contains(region.getName())) {
+            sendCmdFeedback(src, new TranslatableComponent(  "cli.msg.info.dim.region.remove.attempt", region.getName(), dim.dimensionKey().location()));
+            return 0;
+        }
+        return 1;
     }
 
     private static int deleteRegion(CommandSourceStack src, DimensionRegionCache dim, IMarkableRegion region) {
-        sendCmdFeedback(src, "Not yet implemented");
-        return 0;
+        if (dim.contains(region.getName())) {
+            dim.removeRegion(region);
+            sendCmdFeedback(src, new TranslatableComponent(  "cli.msg.info.dim.region.remove.confirm", region.getName(), dim.dimensionKey().location()));
+            return 0;
+        }
+        return 1;
     }
 
     public static int selectReferenceDim(CommandSourceStack src, DimensionalRegion dim) throws CommandSyntaxException {
@@ -383,6 +397,26 @@ public class DimensionCommands {
         return 1;
     }
 
+    private static int promptDimensionRegions(CommandSourceStack source, DimensionRegionCache dimCache) {
+        if (dimCache != null) {
+            ResourceKey<Level> dim =  dimCache.getDimensionalRegion().getDimensionKey();
+            List<IMarkableRegion> regionsForDim = dimCache.regionsInDimension
+                    .values()
+                    .stream()
+                    .sorted(Comparator.comparing(IMarkableRegion::getName))
+                    .collect(Collectors.toList());
+            MutableComponent regions = new TranslatableComponent("cli.msg.info.dim.region").append(": ");
+            if (regionsForDim.isEmpty()) {
+                regions.append(new TranslatableComponent("cli.msg.dim.info.regions.empty", dim.location().toString()));
+            } else {
+                regions.append(buildDimRegionListLink(dimCache, dimCache.getDimensionalRegion()));
+            }
+            sendCmdFeedback(source, regions);
+            return 0;
+        }
+        return 1;
+    }
+
     // TODO: Check and extract to own method -> dimInfo uses this, too
     private static int promptDimensionRegionList(CommandSourceStack source, DimensionRegionCache dimCache) {
         if (dimCache != null) {
@@ -499,7 +533,7 @@ public class DimensionCommands {
         sendCmdFeedback(src, dimInfoHeader);
 
         // Regions in dimension
-        promptDimensionRegionList(src, dimCache);
+        promptDimensionRegions(src, dimCache);
 
         // Dimension owners & members
         promptDimensionOwners(src, dimRegion);
