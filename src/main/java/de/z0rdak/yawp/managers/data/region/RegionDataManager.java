@@ -73,19 +73,21 @@ public class RegionDataManager extends SavedData {
                 RegionDataManager data = storage.computeIfAbsent(RegionDataManager::load, RegionDataManager::new, DATA_NAME);
                 storage.set(DATA_NAME, data);
                 regionDataCache = data;
-                YetAnotherWorldProtector.LOGGER.info(new TranslatableComponent("console.logger.info.data.load.success", data.getAllRegionNames().size(), data.getDimensionList().size()).getString());
+                // YetAnotherWorldProtector.LOGGER.info(new TranslatableComponent("data.nbt.dimensions.load.success", data.getAllRegionNames().size(), data.getDimensionList().size()).getString());
+                YetAnotherWorldProtector.LOGGER.info("Loaded " +  data.getAllRegionNames().size() + " regions for " + data.getDimensionList().size() + " dimensions");
             }
         } catch (NullPointerException npe) {
-            YetAnotherWorldProtector.LOGGER.error(new TranslatableComponent("console.logger.error.data.load.failure"));
+            // YetAnotherWorldProtector.LOGGER.error(new TranslatableComponent("data.nbt.dimensions.load.failure").getString());
+            YetAnotherWorldProtector.LOGGER.error("Loading regions failed!");
         }
     }
 
-    // TODO: Check
     public static RegionDataManager load(CompoundTag nbt) {
         dimCacheMap.clear();
         RegionDataManager rdm = new RegionDataManager();
         CompoundTag dimensionRegions = nbt.getCompound(NBTConstants.DIMENSIONS);
-        YetAnotherWorldProtector.LOGGER.info("Loading region data for " + dimensionRegions.getAllKeys().size() + " different dimensions");
+        // YetAnotherWorldProtector.LOGGER.info(new TranslatableComponent("data.nbt.dimensions.load.dim.amount", dimensionRegions.getAllKeys().size()).getString());
+        YetAnotherWorldProtector.LOGGER.info("Loading region data for " + dimensionRegions.getAllKeys().size() + " dimensions");
         for (String dimKey : dimensionRegions.getAllKeys()) {
             rdm.dimensionDataNames.add(dimKey);
             ResourceKey<Level> dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(dimKey));
@@ -96,7 +98,8 @@ public class RegionDataManager extends SavedData {
 
     @Override
     public CompoundTag save(CompoundTag compound) {
-        YetAnotherWorldProtector.LOGGER.info("Saving region data for " + dimCacheMap.entrySet().size() + " different dimensions");
+        // YetAnotherWorldProtector.LOGGER.info(new TranslatableComponent("data.nbt.dimensions.save.dim.amount", dimCacheMap.entrySet().size()).getString());
+        YetAnotherWorldProtector.LOGGER.info("Saving region data for " + dimCacheMap.entrySet().size() + " dimensions");
         CompoundTag dimRegionNbtData = new CompoundTag();
         for (Map.Entry<ResourceKey<Level>, DimensionRegionCache> entry : dimCacheMap.entrySet()) {
             String dimensionName = entry.getValue().getDimensionalRegion().getName();
