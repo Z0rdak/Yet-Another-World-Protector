@@ -10,6 +10,7 @@ import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.area.SphereArea;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.*;
+import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.scoreboard.ScorePlayerTeam;
@@ -476,6 +477,13 @@ public class MessageUtil {
         return buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, AQUA);
     }
 
+    public static IFormattableTextComponent buildDimRegionListLink(DimensionRegionCache dimCache, DimensionalRegion dimRegion) {
+        String command = "/" + CommandPermissionConfig.BASE_CMD + " " + DIMENSION + " " + dimRegion.getName() + " " + LIST + " " + REGION;
+        IFormattableTextComponent hoverText = new TranslationTextComponent("cli.msg.dim.info.region.list.link.hover", dimRegion.getName());
+        IFormattableTextComponent linkText = new TranslationTextComponent("cli.msg.dim.info.region.list.link.text", dimCache.getRegions().size());
+        return buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, AQUA);
+    }
+
     public static IFormattableTextComponent buildRegionPlayerListLink(IMarkableRegion region, PlayerContainer players, String affiliation) {
         String cmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), affiliation, PLAYER.toString());
         IFormattableTextComponent hoverText = new TranslationTextComponent("cli.msg.info.region.affiliation.player.list.link.hover", affiliation, region.getName());
@@ -490,12 +498,12 @@ public class MessageUtil {
         return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, AQUA);
     }
 
-
+    // TODO: check who has permission to use region tp command
     public static IFormattableTextComponent buildRegionInfoAndTpLink(IMarkableRegion region){
         String teleportCmd = buildDimTeleportCmd(region.getDim(), "@s", region.getTpTarget());
         IFormattableTextComponent teleportLink = buildExecuteCmdComponent(buildBlockPosTeleportLinkText(region.getTpTarget()),
             "cli.msg.region.info.tp.link.hover", teleportCmd, RUN_COMMAND, AQUA);
-        IFormattableTextComponent separator = new StringTextComponent(Color.fromLegacyFormat(TextFormatting.RESET) + " @ " + Color.fromLegacyFormat(TextFormatting.RESET));
+        IFormattableTextComponent separator = new StringTextComponent(" @ ");
         return  buildRegionInfoLink(region)
                 .append(separator)
                 .append(teleportLink);
@@ -509,9 +517,9 @@ public class MessageUtil {
 
     public static IFormattableTextComponent buildDimSuggestRegionRemovalLink(IMarkableRegion region) {
         String cmd = buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), DELETE.toString(), region.getName());
-        String hoverText = "cli.msg.dim.region.remove.link.hover";
-        String linkText = "x";
-        return buildExecuteCmdComponent(linkText, hoverText, cmd, SUGGEST_COMMAND, RED);
+        IFormattableTextComponent hover = new TranslationTextComponent("cli.msg.info.dim.region.remove.link.hover", region.getName());
+        IFormattableTextComponent text = new TranslationTextComponent("cli.msg.info.dim.region.remove.link.text");
+        return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, RED);
     }
 
     public static IFormattableTextComponent buildAddDimFlagLink(DimensionalRegion dimRegion) {
