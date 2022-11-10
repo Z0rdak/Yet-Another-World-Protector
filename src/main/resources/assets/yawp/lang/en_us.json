@@ -21,6 +21,11 @@
   "cli.msg.dim.info.region.create.success": "Successfully created region %s",
   "cli.msg.dim.info.region.create.name.invalid": "Invalid region name supplied: '%s'",
   "cli.msg.dim.info.region.create.name.exists": "Dimension '%s' already contains region with name '%s'",
+  "cli.msg.dim.info.region": "Regions",
+  "cli.msg.dim.info.region.list.link.text": "%s region(s)",
+  "cli.msg.dim.info.region.list.link.hover": "List regions in '%s'  ",
+  "cli.msg.dim.info.region.remove.link.hover": "Remove region '%s'",
+  "cli.msg.dim.info.region.remove.link.text": "x",
   "cli.msg.dim.info.owners": "Owners",
   "cli.msg.dim.info.owners.players": "Player-owners",
   "cli.msg.dim.info.owners.players.empty": "No players defined",
@@ -45,8 +50,12 @@
   "cli.msg.flags.added": "Added flag '%s' to region '%s'",
   "cli.msg.flags.removed": "Removed flag '%s' from region '%s'",
 
+  "cli.msg.info.dim.region": "Region(s)",
+  "cli.msg.info.dim.region.remove.attempt": "Attempt to remove region '%s' from dimension '%'. Confirm removal by appending -y",
+  "cli.msg.info.dim.region.remove.confirm": "Removed region '%s' from dimension '%'",
+  "cli.msg.info.dim.region.remove.link.hover" : "Remove region '%s'",
+  "cli.msg.info.dim.region.remove.link.text" : "x",
 
-  "cli.msg.info.dim.region.remove": "",
 
   "cli.msg.info.region": "Show region info for region '%s'",
 
@@ -155,7 +164,6 @@
 
   "cli.msg.region.info.link.hover": "Show region info ",
   "cli.msg.region.info.tp.link.hover": "Teleport to region",
-  "cli.msg.dim.region.remove.link.hover": "Remove region",
   "cli.msg.dim.flag.add.link.hover": "Add flag to region",
 
 
@@ -239,4 +247,5 @@
   "cli.arg.flag.invalid": "Invalid region identifier: '%s'",
   "cli.arg.flag.parse.invalid": "Unable to parse flag identifier!",
   "cli.arg.dim.invalid": "Dimension '%s' does not exist!"
+
 }
