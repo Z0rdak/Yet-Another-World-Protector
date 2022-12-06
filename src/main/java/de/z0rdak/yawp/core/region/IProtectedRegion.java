@@ -7,9 +7,13 @@ import de.z0rdak.yawp.core.flag.RegionFlag;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.scoreboard.Team;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * This interface represents a general protected region.
@@ -28,6 +32,8 @@ import java.util.Collection;
 public interface IProtectedRegion extends INBTSerializable<CompoundNBT> {
 
     String getName();
+
+    RegistryKey<World> getDim();
 
     void addFlag(IFlag flag);
 
@@ -70,4 +76,17 @@ public interface IProtectedRegion extends INBTSerializable<CompoundNBT> {
     PlayerContainer getOwners();
 
     boolean permits(PlayerEntity player);
+
+    @Nullable
+    IProtectedRegion getParent();
+
+    void setParent(IProtectedRegion parent);
+
+    Map<String, IProtectedRegion> getChildren();
+
+    void addChild(IProtectedRegion child);
+
+    void removeChild(IProtectedRegion child);
+
+    boolean hasChild(IProtectedRegion child);
 }

@@ -19,8 +19,6 @@ import java.util.Map;
  */
 public interface IMarkableRegion extends IProtectedRegion {
 
-   RegistryKey<World> getDim();
-
    IMarkableArea getArea();
 
    void setArea(IMarkableArea area);
@@ -39,15 +37,4 @@ public interface IMarkableRegion extends IProtectedRegion {
 
    void setIsMuted(boolean isMuted);
 
-   AbstractRegion getParent();
-
-   void setParent(IProtectedRegion parent);
-
-   Map<String, IMarkableRegion> getChildren();
-
-   void addChild(IMarkableRegion child);
-
-   void removeChild(IMarkableRegion child);
-
-   boolean hasChild(IMarkableRegion child);
 }
