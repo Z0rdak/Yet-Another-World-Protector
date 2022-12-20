@@ -418,27 +418,6 @@ public class DimensionCommands {
         return 1;
     }
 
-    private static int promptDimensionRegions(CommandSource source, DimensionRegionCache dimCache) {
-        if (dimCache != null) {
-            RegistryKey<World> dim =  dimCache.getDimensionalRegion().getDimensionKey();
-            List<IMarkableRegion> regionsForDim = dimCache.regionsInDimension
-                    .values()
-                    .stream()
-                    .sorted(Comparator.comparing(IMarkableRegion::getName))
-                    .collect(Collectors.toList());
-            IFormattableTextComponent regions = new TranslationTextComponent("cli.msg.info.dim.region").append(": ");
-            if (regionsForDim.isEmpty()) {
-                regions.append(new TranslationTextComponent("cli.msg.dim.info.regions.empty", dim.location().toString()));
-            } else {
-                regions.append(buildDimRegionListLink(dimCache, dimCache.getDimensionalRegion()));
-            }
-            sendCmdFeedback(source, regions);
-            return 0;
-        }
-        return 1;
-    }
-
-
     // TODO: Check and extract to own method -> dimInfo uses this, too
     private static int promptDimensionRegionList(CommandSource source, DimensionRegionCache dimCache) {
         if (dimCache != null) {
@@ -555,7 +534,7 @@ public class DimensionCommands {
         sendCmdFeedback(src, dimInfoHeader);
 
         // Regions in dimension
-        promptDimensionRegions(src, dimCache);
+        promptDimensionRegionList(src, dimCache);
 
         // Dimension owners & members
         promptDimensionOwners(src, dimRegion);
