@@ -79,7 +79,8 @@ public class DimensionCommands {
                                                                 .then(Commands.argument(OWNER.toString(), EntityArgument.player())
                                                                         .executes(ctx -> createCuboidRegion(ctx.getSource(), getRegionNameArgument(ctx), getDimCacheArgument(ctx),
                                                                                 BlockPosArgument.getOrLoadBlockPos(ctx, "pos1"),
-                                                                                BlockPosArgument.getOrLoadBlockPos(ctx, "pos2"), getOwnerArgument(ctx)))))))
+                                                                                BlockPosArgument.getOrLoadBlockPos(ctx, "pos2"), getOwnerArgument(ctx))))))))
+                                        /* TODO: Sphere areas are disable for now. Will be added back later
                                         .then(Commands.literal(AreaType.SPHERE.areaType)
                                                 .then(Commands.argument("centerPos", BlockPosArgument.blockPos())
                                                         .then(Commands.argument("outerPos", BlockPosArgument.blockPos())
@@ -89,7 +90,11 @@ public class DimensionCommands {
                                                                 .then(Commands.argument(OWNER.toString(), EntityArgument.player())
                                                                         .executes(ctx -> createSphereRegion(ctx.getSource(), getRegionNameArgument(ctx), getDimCacheArgument(ctx),
                                                                                 BlockPosArgument.getOrLoadBlockPos(ctx, "centerPos"),
-                                                                                BlockPosArgument.getOrLoadBlockPos(ctx, "outerPos"), getOwnerArgument(ctx)))))))))
+                                                                                BlockPosArgument.getOrLoadBlockPos(ctx, "outerPos"), getOwnerArgument(ctx)))))))
+
+                                         */
+
+                                )
                         )
                         /* /wp dimension <dim> [info] */
                         .executes(ctx -> promptDimensionInfo(ctx.getSource(), getDimCacheArgument(ctx)))

@@ -114,12 +114,14 @@ public class RegionCommands {
                                                 .executes(ctx -> updateArea(ctx.getSource(), getRegionArgument(ctx), AreaType.CUBOID,
                                                         BlockPosArgument.getOrLoadBlockPos(ctx, "pos1"),
                                                         BlockPosArgument.getOrLoadBlockPos(ctx, "pos2"))))))
+                        /*
                         .then(Commands.literal(AreaType.SPHERE.areaType)
                                 .then(Commands.argument("centerPos", BlockPosArgument.blockPos())
                                         .then(Commands.argument("outerPos", BlockPosArgument.blockPos())
                                                 .executes(ctx -> updateArea(ctx.getSource(), getRegionArgument(ctx), AreaType.SPHERE,
                                                         BlockPosArgument.getOrLoadBlockPos(ctx, "centerPos"),
                                                         BlockPosArgument.getOrLoadBlockPos(ctx, "outerPos"))))))
+                         */
                 )
                 // TODO: Only with marker
                 //.then(literal(UPDATE)
