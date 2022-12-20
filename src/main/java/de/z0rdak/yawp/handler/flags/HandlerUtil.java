@@ -1,10 +1,9 @@
 package de.z0rdak.yawp.handler.flags;
 
-import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
-import de.z0rdak.yawp.util.RegionUtil;
+import de.z0rdak.yawp.util.LocalRegions;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.FlyingEntity;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
@@ -87,17 +86,19 @@ public final class HandlerUtil {
      * @param flag flag to be filtered for
      * @return list of block positions which are in a region with the specified flag
      */
+    // TODO: rework
     public static List<BlockPos> filterExplosionAffectedBlocks(ExplosionEvent.Detonate event, RegionFlag flag){
         return event.getAffectedBlocks().stream()
                 .filter(blockPos -> anyRegionContainsFlag(
-                        RegionUtil.getInvolvedRegionsFor(blockPos, event.getWorld().dimension()), flag))
+                        LocalRegions.getRegionsFor(flag, blockPos, event.getWorld().dimension()), flag))
                 .collect(Collectors.toList());
     }
 
+    // TODO: rework
     public static List<Entity> filterAffectedEntities(ExplosionEvent.Detonate event, RegionFlag flag) {
         return event.getAffectedEntities().stream()
                 .filter(entity -> anyRegionContainsFlag(
-                        RegionUtil.getInvolvedRegionsFor(entity.blockPosition(), event.getWorld().dimension()), flag))
+                        LocalRegions.getRegionsFor(flag, entity.blockPosition(), event.getWorld().dimension()), flag))
                 .collect(Collectors.toList());
     }
 }
