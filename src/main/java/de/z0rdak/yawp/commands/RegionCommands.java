@@ -17,9 +17,11 @@ import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.AbstractRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
+import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.stick.AbstractStick;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
+import de.z0rdak.yawp.util.LocalRegions;
 import de.z0rdak.yawp.util.StickException;
 import de.z0rdak.yawp.util.StickType;
 import de.z0rdak.yawp.util.StickUtil;
@@ -428,6 +430,8 @@ public class RegionCommands {
 
     private static int setPriority(CommandSource src, IMarkableRegion region, int priority) {
         int oldPriority = region.getPriority();
+        // TODO: Check priority of other regions in this area and increment/decrement priority if needed
+
         region.setPriority(priority);
         RegionDataManager.save();
         if (oldPriority != region.getPriority()) {
@@ -477,7 +481,7 @@ public class RegionCommands {
 
     private static int promptRegionChildren(CommandSource src, IMarkableRegion region) {
         sendCmdFeedback(src, buildRegionChildrenHeader(region));
-        Collection<IMarkableRegion> children = region.getChildren().values();
+        Collection<IProtectedRegion> children = region.getChildren().values();
         IFormattableTextComponent childRegionList = new StringTextComponent("");
         if (children.isEmpty()) {
             TranslationTextComponent noChildrenText = new TranslationTextComponent("cli.msg.info.region.children.empty", region.getName());
