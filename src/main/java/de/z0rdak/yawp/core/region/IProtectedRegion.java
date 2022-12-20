@@ -27,7 +27,6 @@ import java.util.Map;
  * <p>
  * Classes which implement this interface must also provide a way
  * to serialize the region data into a CompoundNBT.
- *  * TODO: Maybe move getDim to this interface and implement it in AbstractRegion
  */
 public interface IProtectedRegion extends INBTSerializable<CompoundNBT> {
 
