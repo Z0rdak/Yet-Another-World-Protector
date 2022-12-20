@@ -25,6 +25,7 @@ import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 
@@ -67,7 +68,7 @@ public class WorldFlagHandler {
                 if (poorBastard instanceof SkeletonHorseEntity) {
 
                 }
-                if (dimRegion.containsFlag(RegionFlag.LIGHTNING_PROT)){
+                if (dimRegion.containsFlag(LIGHTNING_PROT)){
                     event.setCanceled(true);
                     event.getLightning().remove();
                 }
@@ -86,7 +87,7 @@ public class WorldFlagHandler {
         if (!world.isClientSide) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.dimension());
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-            if (dimRegion.containsFlag(RegionFlag.SPAWN_PORTAL)){
+            if (dimRegion.containsFlag(SPAWN_PORTAL)){
                 event.setCanceled(true);
             }
         }
@@ -107,12 +108,12 @@ public class WorldFlagHandler {
             RegistryKey<World> dim = getEntityDim(entity);
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-            boolean prohibitsPortalUsage = dimRegion.containsFlag(RegionFlag.USE_PORTAL);
+            boolean prohibitsPortalUsage = dimRegion.containsFlag(USE_PORTAL);
             if (prohibitsPortalUsage) {
                 event.setCanceled(true);
             }
             if (entity instanceof PlayerEntity) {
-                if (containsFlagAndHasNoAffiliationFor(dimCache, RegionFlag.USE_PORTAL_PLAYERS, (PlayerEntity) entity)) {
+                if (containsFlagAndHasNoAffiliationFor(dimCache, USE_PORTAL_PLAYERS, (PlayerEntity) entity)) {
                     event.setCanceled(true);
                     MessageUtil.sendMessage((PlayerEntity) entity, "flag.msg.event.player.change_dim");
                     return;
@@ -120,11 +121,11 @@ public class WorldFlagHandler {
                     event.setCanceled(false);
                 }
             }
-            if (dimRegion.containsFlag(RegionFlag.USE_PORTAL_ITEMS) && entity instanceof ItemEntity
-                    || dimRegion.containsFlag(RegionFlag.USE_PORTAL_ANIMALS) && isAnimal(entity)
-                    || dimRegion.containsFlag(RegionFlag.USE_PORTAL_MONSTERS) && isMonster(entity)
-                    || dimRegion.containsFlag(RegionFlag.USE_PORTAL_VILLAGERS) && entity instanceof AbstractVillagerEntity
-                    || dimRegion.containsFlag(RegionFlag.USE_PORTAL_MINECARTS) && entity instanceof AbstractMinecartEntity) {
+            if (dimRegion.containsFlag(USE_PORTAL_ITEMS) && entity instanceof ItemEntity
+                    || dimRegion.containsFlag(USE_PORTAL_ANIMALS) && isAnimal(entity)
+                    || dimRegion.containsFlag(USE_PORTAL_MONSTERS) && isMonster(entity)
+                    || dimRegion.containsFlag(USE_PORTAL_VILLAGERS) && entity instanceof AbstractVillagerEntity
+                    || dimRegion.containsFlag(USE_PORTAL_MINECARTS) && entity instanceof AbstractMinecartEntity) {
                 event.setCanceled(true);
                 return;
             }
