@@ -7,14 +7,9 @@ import static de.z0rdak.yawp.util.constants.RegionNBT.FLAG_VALUE;
 
 /**
  * A simple boolean state flag.
+ * The inverted flag would suffice and invert the implicit presence of the flag
  */
 public class BooleanFlag extends AbstractFlag {
-
-    /**
-     * true -> allow
-     * false -> deny
-     */
-    private boolean value;
 
     public BooleanFlag(CompoundNBT nbt){
         super(nbt);
@@ -23,32 +18,25 @@ public class BooleanFlag extends AbstractFlag {
 
     public BooleanFlag(String flag, boolean isAllowed) {
         super(flag, BOOLEAN_FLAG, isAllowed);
-        this.value = false;
     }
 
-    public BooleanFlag(String flag, boolean isAllowed, boolean value) {
-        super(flag, BOOLEAN_FLAG, isAllowed);
-        this.value = value;
+    public BooleanFlag(RegionFlag flag) {
+        super(flag.name, flag.type, false, false);
     }
 
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = super.serializeNBT();
-        nbt.putBoolean(FLAG_VALUE, value);
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
         super.deserializeNBT(nbt);
-        this.value = nbt.getBoolean(FLAG_VALUE);
     }
 
-    public boolean isDenied() {
-        return value;
-    }
-
-    public void setValue(boolean value) {
-        this.value = value;
+    @Override
+    public boolean isAllowed(Object... args) {
+        return isActive() && (this.isInverted());
     }
 }
