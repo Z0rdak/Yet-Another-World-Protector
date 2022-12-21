@@ -9,15 +9,13 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.arguments.flag.RegionFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
+import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.affiliation.PlayerContainer;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.CuboidArea;
-import de.z0rdak.yawp.core.area.SphereArea;
 import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.core.region.AbstractRegion;
-import de.z0rdak.yawp.core.region.IMarkableRegion;
-import de.z0rdak.yawp.core.region.IProtectedRegion;
+import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.core.stick.AbstractStick;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -28,7 +26,10 @@ import de.z0rdak.yawp.util.StickUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.command.arguments.*;
+import net.minecraft.command.arguments.BlockPosArgument;
+import net.minecraft.command.arguments.DimensionArgument;
+import net.minecraft.command.arguments.EntityArgument;
+import net.minecraft.command.arguments.TeamArgument;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -204,23 +205,39 @@ public class RegionCommands {
 
     private static int updateArea(CommandSource src, IMarkableRegion region, AreaType areaType, BlockPos pos1, BlockPos pos2) {
         TranslationTextComponent updateAreaMsg = new TranslationTextComponent("cli.msg.info.region.spatial.area.update", buildRegionSpatialPropLink(region), buildRegionInfoLink(region));
+        IProtectedRegion parent = region.getParent();
         switch (areaType) {
             case CUBOID:
-                region.setArea(new CuboidArea(pos1, pos2));
+                CuboidArea newArea = new CuboidArea(pos1, pos2);
+                if (parent instanceof DimensionalRegion) {
+                    CuboidRegion cuboidRegion = (CuboidRegion) region;
+                    List<CuboidRegion> intersectionRegions = LocalRegions.getIntersectingRegionsFor(cuboidRegion, parent);
+                    LocalRegions.calcNewPriorityFor(cuboidRegion, intersectionRegions, RegionConfig.DEFAULT_REGION_PRIORITY.get());
+                }
+                if (parent instanceof IMarkableRegion) {
+                    CuboidRegion cuboidRegion = (CuboidRegion) region;
+                    CuboidArea cuboidArea = (CuboidArea) cuboidRegion.getArea();
+                    IMarkableRegion localParentRegion = (IMarkableRegion) parent;
+                    // FIXME: This only work currently because we only have CuboidAreas
+                    CuboidArea parentArea = (CuboidArea) localParentRegion.getArea();
+                    if(parentArea.contains(cuboidArea)) {
+                        List<CuboidRegion> intersectionRegions = LocalRegions.getIntersectingRegionsFor(cuboidRegion, localParentRegion);
+                        LocalRegions.calcNewPriorityFor(cuboidRegion, intersectionRegions, localParentRegion.getPriority() + 1);
+                    } else {
+                        TranslationTextComponent updateAreaFailMsg = new TranslationTextComponent("cli.msg.info.region.spatial.area.update.fail", buildRegionSpatialPropLink(region), buildRegionInfoLink(region));
+                        sendCmdFeedback(src, updateAreaFailMsg);
+                        return 1;
+                    }
+                }
+                region.setArea(newArea);
                 RegionDataManager.save();
                 sendCmdFeedback(src, updateAreaMsg);
                 break;
             case CYLINDER:
-                break;
             case SPHERE:
-                region.setArea(new SphereArea(pos1, pos2));
-                RegionDataManager.save();
-                sendCmdFeedback(src, updateAreaMsg);
-                break;
             case POLYGON_3D:
-                break;
             case PRISM:
-                break;
+                throw new UnsupportedOperationException("Unsupported region type");
         }
         return 0;
     }
