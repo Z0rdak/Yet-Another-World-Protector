@@ -52,7 +52,8 @@ public class RegionCommands {
     public static final LiteralArgumentBuilder<CommandSource> REGION_COMMAND = registerRegionCommands();
     public static Map<CommandSource, RegistryKey<World>> CommandSourceReferenceDims = new HashMap<>();
 
-    private RegionCommands() {}
+    private RegionCommands() {
+    }
 
     public static LiteralArgumentBuilder<CommandSource> registerRegionCommands() {
         return literal(REGION)
@@ -62,6 +63,7 @@ public class RegionCommands {
 
     /**
      * TODO: Command to invert enable and alert based on region state
+     *
      * @return
      */
     private static RequiredArgumentBuilder<CommandSource, String> regionCommands() {
@@ -115,16 +117,8 @@ public class RegionCommands {
                                         .then(Commands.argument("pos2", BlockPosArgument.blockPos())
                                                 .executes(ctx -> updateArea(ctx.getSource(), getRegionArgument(ctx), AreaType.CUBOID,
                                                         BlockPosArgument.getOrLoadBlockPos(ctx, "pos1"),
-                                                        BlockPosArgument.getOrLoadBlockPos(ctx, "pos2"))))))
-                        /*
-                        .then(Commands.literal(AreaType.SPHERE.areaType)
-                                .then(Commands.argument("centerPos", BlockPosArgument.blockPos())
-                                        .then(Commands.argument("outerPos", BlockPosArgument.blockPos())
-                                                .executes(ctx -> updateArea(ctx.getSource(), getRegionArgument(ctx), AreaType.SPHERE,
-                                                        BlockPosArgument.getOrLoadBlockPos(ctx, "centerPos"),
-                                                        BlockPosArgument.getOrLoadBlockPos(ctx, "outerPos"))))))
-                         */
-                )
+                                                        BlockPosArgument.getOrLoadBlockPos(ctx, "pos2")))))
+                        ))
                 // TODO: Only with marker
                 //.then(literal(UPDATE)
                 //        .then(Commands.argument(AREA.toString(), StringArgumentType.word())
@@ -328,7 +322,7 @@ public class RegionCommands {
             region.removeChild(child);
             RegionDataManager.save();
             sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.children.remove", child.getName(), region.getName()));
-            sendCmdFeedback(src, new TranslationTextComponent( "cli.msg.info.region.parent.clear", child.getName()));
+            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.parent.clear", child.getName()));
             return 0;
         }
         return -1;
@@ -348,7 +342,7 @@ public class RegionCommands {
         if (region.getParent() != null) {
             region.setParent(null);
             RegionDataManager.save();
-            sendCmdFeedback(src, new TranslationTextComponent( "cli.msg.info.region.parent.clear", region.getName()));
+            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.parent.clear", region.getName()));
         }
         return 0;
     }
@@ -527,7 +521,7 @@ public class RegionCommands {
     }
 
     private static int promptRegionAffiliationPlayerList(CommandSource src, IMarkableRegion region, String affiliation) {
-        sendCmdFeedback(src, new TranslationTextComponent(  "cli.msg.info.region.affiliation.player.list", buildRegionInfoLink(region), affiliation));
+        sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.affiliation.player.list", buildRegionInfoLink(region), affiliation));
         Set<String> playerNames = getAssociateList((AbstractRegion) region, affiliation, "player");
         IFormattableTextComponent playerList = new StringTextComponent("");
         if (playerNames.isEmpty()) {
@@ -544,7 +538,7 @@ public class RegionCommands {
     }
 
     private static int promptRegionAffiliationTeamList(CommandSource src, IMarkableRegion region, String affiliation) {
-        sendCmdFeedback(src, new TranslationTextComponent(  "cli.msg.info.region.affiliation.team.list", buildRegionInfoLink(region), affiliation));
+        sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.affiliation.team.list", buildRegionInfoLink(region), affiliation));
         Set<String> teamNames = getAssociateList((AbstractRegion) region, affiliation, "team");
         IFormattableTextComponent teamList = new StringTextComponent("");
         if (teamNames.isEmpty()) {
@@ -598,12 +592,22 @@ public class RegionCommands {
     }
 
     public static int promptRegionFlags(CommandSource src, IMarkableRegion region) {
-        sendCmdFeedback(src, new TranslationTextComponent( "cli.msg.info.region.flag.header", buildRegionInfoLink(region)));
+        sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.flag.header", buildRegionInfoLink(region)));
         if (region.getFlags().isEmpty()) {
             sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.flag.empty", region.getName()));
             return 1;
         }
-        // TODO: Sort flags alphabethical OR sort by active state
+        region.getFlags().stream()
+                .sorted()
+                .sorted((flag, flag1) -> (flag.isActive() && !flag1.isActive()) ? 1 : !flag.isActive() && flag1.isActive() ? -1 : 0)
+                .forEach(flag -> {
+                    IFormattableTextComponent removeFlagEntry = new StringTextComponent(" - ")
+                            .append(buildRemoveFlagLink(flag, region))
+                            .append(new StringTextComponent(" '" + flag.getFlagIdentifier() + "'"));
+                    sendCmdFeedback(src, removeFlagEntry);
+                });
+
+        /*/
         region.getFlags().forEach(flag -> {
             IFormattableTextComponent removeFlagEntry = new StringTextComponent(" - ")
                     .append(buildRemoveFlagLink(flag, region))
@@ -613,6 +617,7 @@ public class RegionCommands {
                     .append(buildFlagInfoLinkDetail(flag, region));
             sendCmdFeedback(src, removeFlagEntry);
         });
+         */
         return 0;
     }
 
@@ -668,7 +673,7 @@ public class RegionCommands {
         }
     }
 
-    private static int setTeleportPos(CommandSource src, IMarkableRegion region, BlockPos target){
+    private static int setTeleportPos(CommandSource src, IMarkableRegion region, BlockPos target) {
         if (!region.getTpTarget().equals(target)) {
             region.setTpTarget(target);
             RegionDataManager.save();
