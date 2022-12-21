@@ -42,7 +42,7 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
     }
 
     public RegistryKey<World> dimensionKey(){
-        return this.dimensionalRegion.getDimensionKey();
+        return this.dimensionalRegion.getDim();
     }
 
     private static String getDataName(DimensionalRegion dim){
