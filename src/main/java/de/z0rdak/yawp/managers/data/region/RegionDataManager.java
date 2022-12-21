@@ -5,7 +5,7 @@ import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.core.region.AbstractMarkableRegion;
+import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.util.constants.*;
 import net.minecraft.nbt.CompoundNBT;
@@ -30,13 +30,14 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static de.z0rdak.yawp.core.flag.FlagType.BOOLEAN_FLAG;
-
 @EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER)
 public class RegionDataManager extends WorldSavedData {
 
     private static final String DATA_NAME = YetAnotherWorldProtector.MODID + "-dimensions";
-    private static Map<RegistryKey<World>, DimensionRegionCache> dimCacheMap = new HashMap<>();
+    private final static Map<RegistryKey<World>, DimensionRegionCache> dimCacheMap = new HashMap<>();
+
+    private final static GlobalRegion globalRegion = new GlobalRegion();
+
     private List<String> dimensionDataNames;
     private static RegionDataManager regionDataCache = new RegionDataManager();
 
@@ -78,11 +79,10 @@ public class RegionDataManager extends WorldSavedData {
                 RegionDataManager data = storage.computeIfAbsent(RegionDataManager::new, DATA_NAME);
                 storage.set(data);
                 regionDataCache = data;
-                YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.load.success", data.getAllRegionNames().size(), data.getDimensionList().size()).getString());
+                YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("console.logger.info.data.load.success", data.getAllRegionNames().size(), data.getDimensionList().size()).getString());
             }
         } catch (NullPointerException npe) {
-
-            YetAnotherWorldProtector.LOGGER.error(new TranslationTextComponent("data.nbt.dimensions.load.failure").getString());
+            YetAnotherWorldProtector.LOGGER.error(new TranslationTextComponent("console.logger.error.data.load.failure"));
         }
     }
 
@@ -90,7 +90,7 @@ public class RegionDataManager extends WorldSavedData {
     public void load(CompoundNBT nbt) {
         dimCacheMap.clear();
         CompoundNBT dimensionRegions = nbt.getCompound(NBTConstants.DIMENSIONS);
-        YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.load.amount", dimensionRegions.getAllKeys().size()).getString());
+        YetAnotherWorldProtector.LOGGER.info("Loading region data for " + dimensionRegions.getAllKeys().size() + " different dimensions");
         for (String dimKey : dimensionRegions.getAllKeys()) {
             this.dimensionDataNames.add(dimKey);
             RegistryKey<World> dimension = RegistryKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(dimKey));
@@ -100,7 +100,7 @@ public class RegionDataManager extends WorldSavedData {
 
     @Override
     public CompoundNBT save(CompoundNBT compound) {
-        YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.save.amount", dimCacheMap.entrySet().size()).getString());
+        YetAnotherWorldProtector.LOGGER.info("Saving region data for " + dimCacheMap.entrySet().size() + " different dimensions");
         CompoundNBT dimRegionNbtData = new CompoundNBT();
         for (Map.Entry<RegistryKey<World>, DimensionRegionCache> entry : dimCacheMap.entrySet()) {
             String dimensionName = entry.getValue().getDimensionalRegion().getName();
@@ -114,9 +114,6 @@ public class RegionDataManager extends WorldSavedData {
     public static void addDimKeyOnDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event){
         // if region map does not contain an entry for the dimension traveled to, add it to the map
         if (!event.getPlayer().getCommandSenderWorld().isClientSide) {
-            if (dimCacheMap == null) {
-                dimCacheMap = new HashMap<>();
-            }
             if (!dimCacheMap.containsKey(event.getTo())) {
                 DimensionRegionCache cache = RegionDataManager.get().newCacheFor(event.getTo());
                 YetAnotherWorldProtector.LOGGER.info("Player traveling to dimension without region data. Init region data for dimension '" + cache.dimensionKey().location() + "'..");
@@ -130,9 +127,6 @@ public class RegionDataManager extends WorldSavedData {
         // if region map does not contain an entry for the dimension traveled to, add it to the map
         if (!event.getPlayer().getCommandSenderWorld().isClientSide) {
             RegistryKey<World> dim = event.getPlayer().getCommandSenderWorld().dimension();
-            if (dimCacheMap == null) {
-                dimCacheMap = new HashMap<>();
-            }
             if (!dimCacheMap.containsKey(dim)) {
                 DimensionRegionCache cache = RegionDataManager.get().newCacheFor(dim);
                 YetAnotherWorldProtector.LOGGER.info("Player joining to server in dimension without region data. This should only happen the first time a player is joining. Init region data for dimension '" + cache.dimensionKey().location() + "'..");
@@ -171,23 +165,11 @@ public class RegionDataManager extends WorldSavedData {
         return null;
     }
 
-    public boolean containsRegion(RegistryKey<World> dim, IMarkableRegion region) {
-        if (dimCacheMap.containsKey(dim)) {
-            return dimCacheMap.get(dim).contains(region.getName());
-        }
-        return false;
-    }
-
-    public void setActiveState(Collection<IMarkableRegion> regionsToProcess, boolean activate) {
-
-    }
-
     @Nullable
     public boolean containsCacheFor(RegistryKey<World> dim) {
         return dimCacheMap.containsKey(dim);
     }
 
-    @Nullable
     public DimensionRegionCache cacheFor(RegistryKey<World> dim) {
         return dimCacheMap.get(dim);
     }
@@ -227,8 +209,9 @@ public class RegionDataManager extends WorldSavedData {
                     }
                 });
         cache.setDimState(RegionConfig.shouldActivateNewDimRegion());
-        RegionDataManager.dimCacheMap.put(cache.getDimensionalRegion().getDim(), cache);
-        RegionDataManager.get().getDimensionDataNames().add(dimCacheMap.get(dim).getDimensionalRegion().getName());
+        cache.getDimensionalRegion().setParent(globalRegion);
+        dimCacheMap.put(dim, cache);
+        dimensionDataNames.add(cache.getDimensionalRegion().getName());
         save();
         return cache;
     }
