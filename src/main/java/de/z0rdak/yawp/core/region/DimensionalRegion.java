@@ -1,11 +1,12 @@
 package de.z0rdak.yawp.core.region;
 
-import de.z0rdak.yawp.util.constants.RegionNBT;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
+
+import javax.annotation.Nonnull;
 
 /**
  * The DimensionalRegion represents the only direct implementation of an Abstract region.
@@ -13,17 +14,23 @@ import net.minecraft.world.World;
  */
 public final class DimensionalRegion extends AbstractRegion {
 
-    public static final int DEFAULT_PRIORITY = Integer.MIN_VALUE;
-
-    private RegistryKey<World> dimensionKey;
-
     public DimensionalRegion(RegistryKey<World> dimensionKey) {
         super(dimensionKey.location().toString(), RegionType.DIMENSION);
-        this.dimensionKey = dimensionKey;
+        this.dimension = dimensionKey;
+    }
+
+    public DimensionalRegion(RegistryKey<World> dimensionKey, IProtectedRegion parent) {
+        super(dimensionKey.location().toString(), RegionType.DIMENSION);
+        this.dimension = dimensionKey;
+        if (! (parent instanceof GlobalRegion)) {
+            throw new IllegalArgumentException("Illegal parent region for dimensional region");
+        }
+        this.setParent(parent);
     }
 
     public DimensionalRegion(CompoundNBT nbt) {
         super(nbt);
+        // TODO: Set global region parent
         this.deserializeNBT(nbt);
     }
 
@@ -31,26 +38,32 @@ public final class DimensionalRegion extends AbstractRegion {
         this(RegistryKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(dimensionKey)));
     }
 
-    public RegistryKey<World> getDimensionKey() {
-        return dimensionKey;
+    /**
+     * A DimensionalRegion can by design only have a global region as its parent.
+     * @param parent the parent to set for this region.
+     */
+    @Override
+    public void setParent(@Nonnull IProtectedRegion parent) {
+        super.setParent(parent);
+        if (!(parent instanceof GlobalRegion)) {
+            throw new IllegalRegionStateException("Cannot set parent for dimensional region");
+        }
+        this.setParent(parent);
+        parent.addChild(this);
     }
 
     @Override
     public CompoundNBT serializeNBT() {
-        CompoundNBT nbt = super.serializeNBT();
-        nbt.putString(RegionNBT.DIM, this.dimensionKey.location().toString());
-        return nbt;
+        return super.serializeNBT();
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
         super.deserializeNBT(nbt);
-        String dim = nbt.getString(RegionNBT.DIM);
-        this.dimensionKey = RegistryKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(dim));
     }
 
     @Override
     public String getName() {
-        return this.dimensionKey.location().toString();
+        return this.dimension.location().toString();
     }
 }
