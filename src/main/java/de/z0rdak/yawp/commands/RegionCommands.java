@@ -332,7 +332,7 @@ public class RegionCommands {
         if (parent.hasChild(child)) {
             parent.removeChild(child);
             child.setParent(dimCache.getDimensionalRegion());
-            LocalRegions.ensureLowerRegionPriorityFor((CuboidRegion) child, RegionConfig.DEFAULT_REGION_PRIORITY.get() - 1);
+            LocalRegions.ensureLowerRegionPriorityFor((CuboidRegion) child, RegionConfig.DEFAULT_REGION_PRIORITY.get());
             RegionDataManager.save();
             // TODO: Msg with link to parent and child
             sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.children.remove", child.getName(), parent.getName()));
