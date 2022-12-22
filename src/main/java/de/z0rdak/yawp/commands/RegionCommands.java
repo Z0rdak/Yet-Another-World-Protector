@@ -208,28 +208,23 @@ public class RegionCommands {
         IProtectedRegion parent = region.getParent();
         switch (areaType) {
             case CUBOID:
-                CuboidArea newArea = new CuboidArea(pos1, pos2);
+                CuboidArea cuboidArea = new CuboidArea(pos1, pos2);
+                CuboidRegion cuboidRegion = (CuboidRegion) region;
                 if (parent instanceof DimensionalRegion) {
-                    CuboidRegion cuboidRegion = (CuboidRegion) region;
-                    List<CuboidRegion> intersectionRegions = LocalRegions.getIntersectingRegionsFor(cuboidRegion, parent);
-                    LocalRegions.calcNewPriorityFor(cuboidRegion, intersectionRegions, RegionConfig.DEFAULT_REGION_PRIORITY.get());
+                    int newPriority = LocalRegions.ensureRegionPriorityFor(cuboidRegion, RegionConfig.DEFAULT_REGION_PRIORITY.get());
                 }
                 if (parent instanceof IMarkableRegion) {
-                    CuboidRegion cuboidRegion = (CuboidRegion) region;
-                    CuboidArea cuboidArea = (CuboidArea) cuboidRegion.getArea();
                     IMarkableRegion localParentRegion = (IMarkableRegion) parent;
-                    // FIXME: This only work currently because we only have CuboidAreas
                     CuboidArea parentArea = (CuboidArea) localParentRegion.getArea();
                     if(parentArea.contains(cuboidArea)) {
-                        List<CuboidRegion> intersectionRegions = LocalRegions.getIntersectingRegionsFor(cuboidRegion, localParentRegion);
-                        LocalRegions.calcNewPriorityFor(cuboidRegion, intersectionRegions, localParentRegion.getPriority() + 1);
+                        int newPriority = LocalRegions.ensureRegionPriorityFor(cuboidRegion, localParentRegion.getPriority() + 1);
                     } else {
                         TranslationTextComponent updateAreaFailMsg = new TranslationTextComponent("cli.msg.info.region.spatial.area.update.fail", buildRegionSpatialPropLink(region), buildRegionInfoLink(region));
                         sendCmdFeedback(src, updateAreaFailMsg);
                         return 1;
                     }
                 }
-                region.setArea(newArea);
+                cuboidRegion.setArea(cuboidArea);
                 RegionDataManager.save();
                 sendCmdFeedback(src, updateAreaMsg);
                 break;
