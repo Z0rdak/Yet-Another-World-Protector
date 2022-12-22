@@ -434,16 +434,36 @@ public class RegionCommands {
         }
     }
 
+    /**
+     * Attempt to set new priority for the given region. <br>
+     * Fails if region priority is used by an overlapping region at same hierarchy level.
+     * @param src
+     * @param region
+     * @param priority
+     * @return
+     */
     private static int setPriority(CommandSource src, IMarkableRegion region, int priority) {
-        int oldPriority = region.getPriority();
-        // TODO: Check priority of other regions in this area and increment/decrement priority if needed
-
-        region.setPriority(priority);
-        RegionDataManager.save();
-        if (oldPriority != region.getPriority()) {
-            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.state.priority.set.value", region.getName(), oldPriority, region.getPriority()));
+        CuboidRegion cuboidRegion = (CuboidRegion) region;
+        boolean existRegionWithSamePriority = LocalRegions.getIntersectingRegionsFor(cuboidRegion)
+                .stream()
+                .anyMatch(r -> r.getPriority() == cuboidRegion.getPriority());
+        if (existRegionWithSamePriority) {
+            TranslationTextComponent updatePriorityFailMsg = new TranslationTextComponent("cli.msg.info.region.###.area.update.fail", buildRegionSpatialPropLink(region), buildRegionInfoLink(region));
+            sendCmdFeedback(src, updatePriorityFailMsg);
+            return 1;
+        } else {
+            int oldPriority = region.getPriority();
+            if (oldPriority != region.getPriority()) {
+                // Priority did not change
+                sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.state.priority.set.value", region.getName(), oldPriority, region.getPriority()));
+            } else {
+                region.setPriority(priority);
+                RegionDataManager.save();
+                TranslationTextComponent updatePriorityMsg = new TranslationTextComponent("cli.msg.info.region.####.area.update.fail", buildRegionSpatialPropLink(region), buildRegionInfoLink(region));
+                sendCmdFeedback(src, updatePriorityMsg);
+            }
+            return 0;
         }
-        return 0;
     }
 
     private static int promptRegionInfo(CommandSource src, IMarkableRegion region) {
