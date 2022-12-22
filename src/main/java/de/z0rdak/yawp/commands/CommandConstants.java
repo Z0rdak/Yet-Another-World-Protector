@@ -25,7 +25,7 @@ public enum CommandConstants {
     DENY("deny"),
     DIMENSION("dim"),
     ENABLE("enable"),
-    TEST_TYPE("test-type"),
+    INVERT("invert"),
     EXPAND("expand"),
     FLAG("flag"),
     FLAGS("flags"),
