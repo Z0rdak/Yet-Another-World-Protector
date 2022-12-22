@@ -7,6 +7,7 @@ import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
+import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.util.constants.*;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.server.MinecraftServer;
@@ -194,13 +195,22 @@ public class RegionDataManager extends WorldSavedData {
 
     public DimensionRegionCache newCacheFor(RegistryKey<World> dim) {
         DimensionRegionCache cache = new DimensionRegionCache(dim);
-        RegionConfig.getDefaultDimFlags()
-                .stream() // get is fine here, because the config is validated beforehand
+        addFlags(RegionConfig.getDefaultDimFlags(), cache.getDimensionalRegion());
+        cache.setDimState(RegionConfig.shouldActivateNewDimRegion());
+        cache.getDimensionalRegion().setParent(globalRegion);
+        dimCacheMap.put(dim, cache);
+        dimensionDataNames.add(cache.getDimensionalRegion().getName());
+        save();
+        return cache;
+    }
+
+    public static void addFlags(Set<String> flags, IProtectedRegion region){
+        flags.stream()
                 .map(RegionFlag::fromId)
                 .forEach(flag -> {
                     switch (flag.type) {
                         case BOOLEAN_FLAG:
-                            cache.addFlag(new BooleanFlag(flag));
+                            region.addFlag(new BooleanFlag(flag));
                             break;
                         case LIST_FLAG:
                             throw new NotImplementedException("");
@@ -208,12 +218,6 @@ public class RegionDataManager extends WorldSavedData {
                             throw new NotImplementedException("");
                     }
                 });
-        cache.setDimState(RegionConfig.shouldActivateNewDimRegion());
-        cache.getDimensionalRegion().setParent(globalRegion);
-        dimCacheMap.put(dim, cache);
-        dimensionDataNames.add(cache.getDimensionalRegion().getName());
-        save();
-        return cache;
     }
 
     /* hash for checking manipulated world data?*/
