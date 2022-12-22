@@ -110,29 +110,28 @@ public final class LocalRegions {
                 .collect(Collectors.toList());
     }
 
-    public static void ensureRegionPriorityFor(CuboidRegion cuboidRegion, List<CuboidRegion> intersectingRegions, int defaultPriority){
-        // intersecting regions have same priority as given one
-        boolean hasRegionWithSamePriority = intersectingRegions.stream().anyMatch(r -> r.getPriority() == cuboidRegion.getPriority());
-        if (hasRegionWithSamePriority){
-            int maxPriority = intersectingRegions.stream().mapToInt(AbstractMarkableRegion::getPriority).max().getAsInt();
-            cuboidRegion.setPriority(maxPriority + 1);
-        } else {
-            cuboidRegion.setPriority(defaultPriority);
-        }
-    }
-
-    public static int ensureRegionPriorityFor(CuboidRegion cuboidRegion, int defaultPriority){
-        // intersecting regions have same priority as given one
+    public static int ensureHigherRegionPriorityFor(CuboidRegion cuboidRegion, int defaultPriority){
         List<CuboidRegion> intersectingRegions = getIntersectingRegionsFor(cuboidRegion);
         boolean hasRegionWithSamePriority = intersectingRegions.stream().anyMatch(r -> r.getPriority() == cuboidRegion.getPriority());
         if (hasRegionWithSamePriority){
             int maxPriority = intersectingRegions.stream().mapToInt(AbstractMarkableRegion::getPriority).max().getAsInt();
             cuboidRegion.setPriority(maxPriority + 1);
-            return maxPriority + 1;
         } else {
             cuboidRegion.setPriority(defaultPriority);
-            return defaultPriority;
         }
+        return cuboidRegion.getPriority();
+    }
+
+    public static int ensureLowerRegionPriorityFor(CuboidRegion cuboidRegion, int defaultPriority){
+        List<CuboidRegion> intersectingRegions = getIntersectingRegionsFor(cuboidRegion);
+        boolean hasRegionWithSamePriority = intersectingRegions.stream().anyMatch(r -> r.getPriority() == cuboidRegion.getPriority());
+        if (hasRegionWithSamePriority){
+            int minPriority = intersectingRegions.stream().mapToInt(AbstractMarkableRegion::getPriority).min().getAsInt();
+            cuboidRegion.setPriority(minPriority - 1);
+        } else {
+            cuboidRegion.setPriority(defaultPriority);
+        }
+        return cuboidRegion.getPriority();
     }
 
     /**
