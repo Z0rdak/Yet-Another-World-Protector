@@ -7,12 +7,14 @@ import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * Represents and wraps a simple AxisAlignedBB.
- * This area is marked by two positions and thus spans a cuboid shape
+ * Represents and wraps a simple AxisAlignedBB.<br>
+ * This area is marked by two diagonal opposite positions and thus span a cuboid shape.
  */
 public class CuboidArea extends AbstractArea {
 
@@ -27,7 +29,7 @@ public class CuboidArea extends AbstractArea {
         this(new AxisAlignedBB(p1, p2));
     }
 
-    public CuboidArea(List<BlockPos> blocks){
+    public CuboidArea(List<BlockPos> blocks) {
         this(blocks.get(0), blocks.get(1));
     }
 
@@ -39,21 +41,31 @@ public class CuboidArea extends AbstractArea {
     @Override
     public boolean contains(BlockPos pos) {
         // INFO: this.area.contains(x,y,z); does not work, because the max checks are exclusive by default.
-        // TODO: Maybe replace with net.minecraft.util.math.MutableBoundingBox::intersectsWith which has inclusive checks
+        // INFO: Maybe replace with net.minecraft.util.math.MutableBoundingBox::intersectsWith which has inclusive checks
         return pos.getX() >= area.minX && pos.getX() <= area.maxX
                 && pos.getY() >= this.area.minY && pos.getY() <= this.area.maxY
                 && pos.getZ() >= this.area.minZ && pos.getZ() <= this.area.maxZ;
+    }
+
+    public boolean contains(CuboidArea inner) {
+        return this.area.minX <= inner.area.minX && this.area.maxX >= inner.area.maxX
+                && this.area.minY <= inner.area.minY && this.area.maxY >= inner.area.maxY
+                && this.area.minZ <= inner.area.minZ && this.area.maxZ >= inner.area.maxZ;
+    }
+
+    public boolean intersects(CuboidArea other) {
+        return this.area.intersects(other.area);
     }
 
     public AxisAlignedBB getArea() {
         return area;
     }
 
-    public BlockPos getAreaP1(){
+    public BlockPos getAreaP1() {
         return new BlockPos(this.area.minX, this.area.minY, this.area.minZ);
     }
 
-    public BlockPos getAreaP2(){
+    public BlockPos getAreaP2() {
         return new BlockPos(this.area.maxX, this.area.maxY, this.area.maxZ);
     }
 
