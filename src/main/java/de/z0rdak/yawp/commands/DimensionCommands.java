@@ -239,6 +239,9 @@ public class DimensionCommands {
 
     private static int deleteRegion(CommandSource src, DimensionRegionCache dim, IMarkableRegion region) {
         if (dim.contains(region.getName())) {
+            if (region.getParent() != null) {
+                region.getParent().removeChild(region);
+            }
             dim.removeRegion(region);
             sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.dim.region.remove.confirm", region.getName(), dim.dimensionKey().location()));
             return 0;
