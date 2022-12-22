@@ -101,6 +101,40 @@ public final class LocalRegions {
         }
     }
 
+    public static List<CuboidRegion> getIntersectingRegionsFor(CuboidRegion cuboidRegion){
+        return cuboidRegion.getParent().getChildren().values()
+                .stream()
+                .filter(r -> !r.equals(cuboidRegion)) // filter input region from the result
+                .map(r -> (CuboidRegion)r)
+                .filter(region -> ((CuboidArea)cuboidRegion.getArea()).intersects((CuboidArea)(region).getArea()))
+                .collect(Collectors.toList());
+    }
+
+    public static void ensureRegionPriorityFor(CuboidRegion cuboidRegion, List<CuboidRegion> intersectingRegions, int defaultPriority){
+        // intersecting regions have same priority as given one
+        boolean hasRegionWithSamePriority = intersectingRegions.stream().anyMatch(r -> r.getPriority() == cuboidRegion.getPriority());
+        if (hasRegionWithSamePriority){
+            int maxPriority = intersectingRegions.stream().mapToInt(AbstractMarkableRegion::getPriority).max().getAsInt();
+            cuboidRegion.setPriority(maxPriority + 1);
+        } else {
+            cuboidRegion.setPriority(defaultPriority);
+        }
+    }
+
+    public static int ensureRegionPriorityFor(CuboidRegion cuboidRegion, int defaultPriority){
+        // intersecting regions have same priority as given one
+        List<CuboidRegion> intersectingRegions = getIntersectingRegionsFor(cuboidRegion);
+        boolean hasRegionWithSamePriority = intersectingRegions.stream().anyMatch(r -> r.getPriority() == cuboidRegion.getPriority());
+        if (hasRegionWithSamePriority){
+            int maxPriority = intersectingRegions.stream().mapToInt(AbstractMarkableRegion::getPriority).max().getAsInt();
+            cuboidRegion.setPriority(maxPriority + 1);
+            return maxPriority + 1;
+        } else {
+            cuboidRegion.setPriority(defaultPriority);
+            return defaultPriority;
+        }
+    }
+
     /**
      * Filter the regions for the ones with the highest priority. <br>
      * This list may contain multiple regions with the same priority. <br>
