@@ -121,13 +121,13 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
             return true;
         }
         if (parent instanceof IMarkableRegion) {
-            IMarkableRegion markableRegion = (IMarkableRegion) parent;
+            IMarkableRegion markableParentRegion = (IMarkableRegion) parent;
             if (fullyContains(((IMarkableRegion) parent).getArea(), this.area)) {
-                this.isMuted = markableRegion.isMuted();
-
-                this.priority =markableRegion.getPriority() - 1;
-                this.parent = markableRegion;
-                markableRegion.addChild(this);
+                this.isMuted = markableParentRegion.isMuted();
+                // region is handled after child and parent hierarchy is set
+                // this.priority = markableParentRegion.getPriority() + 1;
+                this.parent = markableParentRegion;
+                markableParentRegion.addChild(this);
                 YetAnotherWorldProtector.LOGGER.info("Setting parent '" + parent.getName() + "' for region '" + this.getName() + "'");
                 return true;
             } else {
