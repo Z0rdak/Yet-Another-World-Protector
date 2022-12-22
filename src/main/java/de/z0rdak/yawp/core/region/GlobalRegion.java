@@ -32,7 +32,7 @@ public class GlobalRegion extends AbstractRegion {
     }
 
     @Override
-    public void setParent(@Nonnull IProtectedRegion parent) {
+    public boolean setParent(@Nonnull IProtectedRegion parent) {
         throw new IllegalRegionStateException("Attempt to set parent for global region");
     }
 

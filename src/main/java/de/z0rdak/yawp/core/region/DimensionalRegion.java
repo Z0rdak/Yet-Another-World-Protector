@@ -5,6 +5,7 @@ import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
+import org.lwjgl.system.CallbackI;
 
 import javax.annotation.Nonnull;
 
@@ -43,13 +44,14 @@ public final class DimensionalRegion extends AbstractRegion {
      * @param parent the parent to set for this region.
      */
     @Override
-    public void setParent(@Nonnull IProtectedRegion parent) {
-        super.setParent(parent);
+    public boolean setParent(IProtectedRegion parent) {
+        if (super.setParent(parent)){
+            return true;
+        }
         if (!(parent instanceof GlobalRegion)) {
             throw new IllegalRegionStateException("Cannot set parent for dimensional region");
         }
-        this.setParent(parent);
-        parent.addChild(this);
+        return true;
     }
 
     @Override

@@ -79,7 +79,7 @@ public interface IProtectedRegion extends INBTSerializable<CompoundNBT> {
     @Nullable
     IProtectedRegion getParent();
 
-    void setParent(IProtectedRegion parent);
+    boolean setParent(IProtectedRegion parent);
 
     Map<String, IProtectedRegion> getChildren();
 
