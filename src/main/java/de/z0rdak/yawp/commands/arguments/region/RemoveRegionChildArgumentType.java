@@ -104,7 +104,7 @@ public class RemoveRegionChildArgumentType implements ArgumentType<String> {
      * Using this as an actual argument does not work on a server-side only mod,
      * because it needs to be registered in the corresponding registry.
      */
-    public static RemoveRegionChildArgumentType region() {
+    public static RemoveRegionChildArgumentType childRegions() {
         return new RemoveRegionChildArgumentType();
     }
 
