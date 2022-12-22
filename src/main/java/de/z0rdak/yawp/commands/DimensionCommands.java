@@ -40,8 +40,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.*;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.world.World;
-import org.apache.commons.lang3.NotImplementedException;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -174,9 +174,6 @@ public class DimensionCommands {
     }
 
     private static int createCuboidRegion(CommandSource src, String regionName, DimensionRegionCache dimCache, BlockPos pos1, BlockPos pos2, @Nullable ServerPlayerEntity owner) {
-        sendCmdFeedback(src, new StringTextComponent("NOTE: Local regions are implemented, but the flags for local regions are not yet working, sorry!"));
-        sendCmdFeedback(src, new StringTextComponent("NOTE: Region hierarchy (parents and children regions) is working but there are no checks in place to ensure a proper hierarchy."));
-        sendCmdFeedback(src, new StringTextComponent("NOTE: These features will come soon in the next update! "));
         if (!regionName.matches(RegionArgumentType.VALID_NAME_PATTERN.pattern())) {
             sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.name.invalid", regionName));
             return -1;
@@ -185,31 +182,16 @@ public class DimensionCommands {
             sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.name.exists", dimCache.dimensionKey(), regionName));
             return 1;
         }
-        Set<String> defaultFlags = RegionConfig.getDefaultFlags();
-        CuboidArea area = new CuboidArea(pos1, pos2);
-        CuboidRegion region = new CuboidRegion(regionName, area, owner, dimCache.dimensionKey());
-        defaultFlags.stream()
-                .map(RegionFlag::fromId)
-                .forEach(flag -> {
-                    switch (flag.type) {
-                        case BOOLEAN_FLAG:
-                            region.addFlag(new BooleanFlag(flag));
-                            break;
-                        case LIST_FLAG:
-                            throw new NotImplementedException("");
-                        case INT_FLAG:
-                            throw new NotImplementedException("");
-                    }
-                });
+        CuboidRegion region = new CuboidRegion(regionName, new CuboidArea(pos1, pos2), owner, dimCache.dimensionKey());
+        RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
+        LocalRegions.ensureRegionPriorityFor(region, RegionConfig.DEFAULT_REGION_PRIORITY.get());
+
         dimCache.addRegion(region);
         sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
         return 0;
     }
 
-    private static int createSphereRegion(CommandSource src, String regionName, DimensionRegionCache dimCache, BlockPos center, BlockPos outerPos, ServerPlayerEntity owner) {
-        sendCmdFeedback(src, new StringTextComponent("NOTE: Local regions are implemented, but the flags for local regions are not yet working, sorry!"));
-        sendCmdFeedback(src, new StringTextComponent("NOTE: Region hierarchy (parents and children regions) is working but there are no checks in place to ensure a proper hierarchy."));
-        sendCmdFeedback(src, new StringTextComponent("NOTE: These features will come soon in the next update! "));
+    private static int createSphereRegion(CommandSource src, @Nonnull String regionName, DimensionRegionCache dimCache, BlockPos center, BlockPos outerPos, ServerPlayerEntity owner) {
         if (!regionName.matches(RegionArgumentType.VALID_NAME_PATTERN.pattern())) {
             sendCmdFeedback(src, new TranslationTextComponent( "cli.msg.dim.info.region.create.name.invalid", regionName));
             return -1;
@@ -218,28 +200,14 @@ public class DimensionCommands {
             sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.name.exists", dimCache.dimensionKey(), regionName));
             return 1;
         }
-        Set<String> defaultFlags = RegionConfig.getDefaultFlags();
         SphereArea area = new SphereArea(center, outerPos);
         SphereRegion region = new SphereRegion(regionName, area, owner, dimCache.dimensionKey());
-        defaultFlags.stream()
-                .map(RegionFlag::fromId)
-                .forEach(flag -> {
-                    switch (flag.type) {
-                        case BOOLEAN_FLAG:
-                            region.addFlag(new BooleanFlag(flag));
-                            break;
-                        case LIST_FLAG:
-                            throw new NotImplementedException("");
-                        case INT_FLAG:
-                            throw new NotImplementedException("");
-                    }
-                });
+        RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
         dimCache.addRegion(region);
         sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
         return 0;
     }
 
-    // TODO:
     private static int createRegion(CommandSource source, String regionName, DimensionRegionCache dimCache, AreaType area) {
         sendCmdFeedback(source, "Not yet implemented");
         try {
