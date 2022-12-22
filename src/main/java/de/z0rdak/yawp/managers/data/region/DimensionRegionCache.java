@@ -98,6 +98,7 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
 
     public void addRegion(IMarkableRegion region) {
         this.regionsInDimension.put(region.getName(), region);
+        region.setParent(this.dimensionalRegion);
         RegionDataManager.save();
     }
 
