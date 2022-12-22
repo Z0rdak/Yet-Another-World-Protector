@@ -72,6 +72,7 @@ public class RemoveRegionChildArgumentType implements ArgumentType<String> {
      */
     @SuppressWarnings("unchecked")
     @Override
+    // TODO: Don't include self reference
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         if (context.getSource() instanceof CommandSource) {
             CommandSource src = (CommandSource) context.getSource();
@@ -106,17 +107,5 @@ public class RemoveRegionChildArgumentType implements ArgumentType<String> {
      */
     public static RemoveRegionChildArgumentType childRegions() {
         return new RemoveRegionChildArgumentType();
-    }
-
-    public static IMarkableRegion getRegion(CommandContext<CommandSource> context, String argName) throws CommandSyntaxException {
-        String regionName = context.getArgument(argName, String.class);
-        DimensionRegionCache dimCache = CommandUtil.getDimCacheArgument(context);
-        IMarkableRegion region = dimCache.getRegion(regionName);
-        if (region != null) {
-            return region;
-        } else {
-            MessageUtil.sendCmdFeedback(context.getSource(), new StringTextComponent("No regions defined in dim '" + dimCache.dimensionKey().location() + "'"));
-            throw ERROR_INVALID_VALUE.create(regionName);
-        }
     }
 }

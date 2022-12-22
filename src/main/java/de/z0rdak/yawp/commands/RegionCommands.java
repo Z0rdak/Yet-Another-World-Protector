@@ -8,7 +8,9 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.arguments.flag.RegionFlagArgumentType;
+import de.z0rdak.yawp.commands.arguments.region.AddRegionChildArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
+import de.z0rdak.yawp.commands.arguments.region.RemoveRegionChildArgumentType;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.affiliation.PlayerContainer;
 import de.z0rdak.yawp.core.area.AreaType;
@@ -18,6 +20,7 @@ import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.core.stick.AbstractStick;
 import de.z0rdak.yawp.core.stick.MarkerStick;
+import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
 import de.z0rdak.yawp.util.StickException;
@@ -151,9 +154,7 @@ public class RegionCommands {
                                         .executes(ctx -> addFlag(ctx.getSource(), getRegionArgument(ctx), getFlagArgument(ctx)))))
                         .then(literal(CHILD)
                                 .then(Commands.argument(CHILD.toString(), StringArgumentType.word())
-                                        // FIXME: Only list region which are able to be child regions
-                                        // TODO: Introduce dedicated RegionChildArgumentType for this
-                                        .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestions(ctx, builder))
+                                        .suggests((ctx, builder) -> AddRegionChildArgumentType.potentialChildRegions().listSuggestions(ctx, builder))
                                         .executes(ctx -> addChildren(ctx.getSource(), getRegionArgument(ctx), getChildRegionArgument(ctx))))))
                 .then(literal(REMOVE)
                         .then(literal(CommandConstants.PLAYER)
@@ -181,19 +182,17 @@ public class RegionCommands {
                                         .executes(ctx -> removeFlag(ctx.getSource(), getRegionArgument(ctx), getFlagArgument(ctx)))))
                         .then(literal(CHILD)
                                 .then(Commands.argument(CHILD.toString(), StringArgumentType.word())
-                                        // FIXME: Only list region which are able to be child regions
-                                        // TODO: Introduce dedicated RegionChildArgumentType for this
-                                        .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestions(ctx, builder))
-                                        .executes(ctx -> removeChildren(ctx.getSource(), getRegionArgument(ctx), getChildRegionArgument(ctx))))))
+                                        .suggests((ctx, builder) -> RemoveRegionChildArgumentType.childRegions().listSuggestions(ctx, builder))
+                                        .executes(ctx -> removeChildren(ctx.getSource(), getDimCacheArgument(ctx), getRegionArgument(ctx), getChildRegionArgument(ctx))))))
+                /*
                 .then(literal(PARENT)
                         .then(literal(SET)
-                                // FIXME: Only list region which are able to be parent regions
-                                // TODO: Introduce dedicated RegionParentArgumentType for this
                                 .then(Commands.argument(PARENT_REGION.toString(), StringArgumentType.word())
-                                        .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestions(ctx, builder))
+                                        .suggests((ctx, builder) -> SetRegionParentArgumentType.parentRegion().listSuggestions(ctx, builder))
                                         .executes(ctx -> setRegionParent(ctx.getSource(), RegionArgumentType.getRegion(ctx, REGION.toString()), RegionArgumentType.getRegion(ctx, PARENT_REGION.toString())))))
                         .then(literal(CLEAR)
                                 .executes(ctx -> clearRegionParent(ctx.getSource(), RegionArgumentType.getRegion(ctx, REGION.toString())))))
+                 */
                 .then(literal(TELEPORT)
                         .executes(ctx -> teleport(ctx.getSource(), getRegionArgument(ctx)))
                         .then(Commands.argument(PLAYER.toString(), EntityArgument.player())
@@ -350,30 +349,35 @@ public class RegionCommands {
         return -1;
     }
 
+    /*
     private static int clearRegionParent(CommandSource src, IMarkableRegion region) {
         if (region.getParent() != null) {
-            region.setParent(null);
-            RegionDataManager.save();
-            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.parent.clear", region.getName()));
+            if (region.setParent(null)) {
+                RegionDataManager.save();
+            } else {
+                sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.parent.clear.fail", region.getName()));
+                return 1;
+            }
         }
+        sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.parent.clear", region.getName()));
         return 0;
     }
 
-    // FIXME: parent can be DimensionalRegion or AbstractMarkableRegion
+     */
+
+    /*
     private static int setRegionParent(CommandSource src, IMarkableRegion region, IMarkableRegion parent) {
         if (region.getParent() != null) {
-            if (!region.getParent().equals(parent)) {
-                region.setParent(parent);
+            if (region.setParent(parent)) {
                 RegionDataManager.save();
                 sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.parent.set", region.getName(), parent.getName()));
+                return 0;
             }
-        } else {
-            region.setParent(parent);
-            RegionDataManager.save();
-            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.parent.set", region.getName(), parent.getName()));
         }
-        return 0;
+        sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.parent.set.fail", region.getName(), parent.getName()));
+        return 1;
     }
+     */
 
     // Adds default flag for provided RegionFlag
     private static int addFlag(CommandSource src, IMarkableRegion region, RegionFlag flag) {
