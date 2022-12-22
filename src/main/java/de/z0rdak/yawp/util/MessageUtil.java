@@ -8,13 +8,11 @@ import de.z0rdak.yawp.core.affiliation.PlayerContainer;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.area.SphereArea;
-import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.*;
@@ -35,6 +33,8 @@ import static de.z0rdak.yawp.util.CommandUtil.*;
 import static net.minecraft.util.text.TextFormatting.*;
 import static net.minecraft.util.text.TextFormatting.RESET;
 import static net.minecraft.util.text.event.ClickEvent.Action.*;
+
+// TODO: Show parent flag info for local regions
 
 public class MessageUtil {
 
@@ -232,7 +232,7 @@ public class MessageUtil {
         return buildExecuteCmdComponent(regionInfoLinkText, regionInfoLinkHover, cmd, RUN_COMMAND, GREEN);
     }
 
-    public static IFormattableTextComponent buildRegionInfoLink(IMarkableRegion region) {
+    public static IFormattableTextComponent buildRegionInfoLink(IProtectedRegion region) {
         return buildRegionInfoLink(region.getDim(), region.getName());
     }
 
@@ -568,7 +568,7 @@ public class MessageUtil {
         return buildExecuteCmdComponent(linkText, linkHoverText, command, SUGGEST_COMMAND, RED);
     }
 
-    public static IFormattableTextComponent buildRegionRemoveChildLink(IMarkableRegion region, IMarkableRegion child) {
+    public static IFormattableTextComponent buildRegionRemoveChildLink(IProtectedRegion region, IProtectedRegion child) {
         String command = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), REMOVE.toString(), CHILD.toString(), child.getName());
         TranslationTextComponent linkText = new TranslationTextComponent("cli.msg.info.region.children.remove.link.text");
         TranslationTextComponent linkHoverText = new TranslationTextComponent("cli.msg.info.region.children.remove.link.hover", child.getName(), region.getName());
@@ -588,12 +588,12 @@ public class MessageUtil {
         String playerLangKeyPart = memberOrOwner == CommandConstants.OWNER ? "owners" : "members";
         IFormattableTextComponent teamList = new StringTextComponent("Teams: ");
         if (teamNames.isEmpty()) {
-            teamList.append(new TranslationTextComponent("cli.msg.dim.info." + playerLangKeyPart + ".teams.empty", dimCache.getDimensionKey().location()));
+            teamList.append(new TranslationTextComponent("cli.msg.dim.info." + playerLangKeyPart + ".teams.empty", dimCache.getDim().location()));
         }
         teamList.append(new StringTextComponent("\n"));
         teamNames.forEach(teamName -> {
             IFormattableTextComponent removeTeamLink = new StringTextComponent(" - ")
-                    .append(buildDimRemoveTeamLink(teamName, dimCache.getDimensionKey(), memberOrOwner))
+                    .append(buildDimRemoveTeamLink(teamName, dimCache.getDim(), memberOrOwner))
                     .append(new StringTextComponent(" '" + teamName + "'\n"));
             teamList.append(removeTeamLink);
         });
@@ -634,12 +634,12 @@ public class MessageUtil {
         IFormattableTextComponent playerList = new StringTextComponent("Players: ");
         String playerLangKeyPart = memberOrOwner == CommandConstants.OWNER ? "owners" : "members";
         if (playerNames.isEmpty()) {
-            return playerList.append(new TranslationTextComponent("cli.msg.dim.info." + playerLangKeyPart + ".players.empty", dimCache.getDimensionKey().location()));
+            return playerList.append(new TranslationTextComponent("cli.msg.dim.info." + playerLangKeyPart + ".players.empty", dimCache.getDim().location()));
         }
         playerList.append(new StringTextComponent("\n"));
         playerNames.forEach(playerName -> {
             IFormattableTextComponent removePlayerLink = new StringTextComponent(" - ")
-                    .append(buildDimRemovePlayerLink(playerName, dimCache.getDimensionKey(), memberOrOwner))
+                    .append(buildDimRemovePlayerLink(playerName, dimCache.getDim(), memberOrOwner))
                     .append(new StringTextComponent(" '" + playerName + "'\n"));
             playerList.append(removePlayerLink);
         });
