@@ -328,14 +328,14 @@ public class RegionCommands {
         return 0;
     }
 
-    private static int removeChildren(CommandSource src, DimensionRegionCache dimCache, IMarkableRegion region, IMarkableRegion child) {
-        if (region.hasChild(child)) {
-            region.removeChild(child);
+    private static int removeChildren(CommandSource src, DimensionRegionCache dimCache, IMarkableRegion parent, IMarkableRegion child) {
+        if (parent.hasChild(child)) {
+            parent.removeChild(child);
             child.setParent(dimCache.getDimensionalRegion());
             LocalRegions.ensureLowerRegionPriorityFor((CuboidRegion) child, RegionConfig.DEFAULT_REGION_PRIORITY.get() - 1);
             RegionDataManager.save();
             // TODO: Msg with link to parent and child
-            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.children.remove", child.getName(), region.getName()));
+            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.children.remove", child.getName(), parent.getName()));
             sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.parent.clear", child.getName()));
             return 0;
         }
@@ -343,13 +343,13 @@ public class RegionCommands {
         return -1;
     }
 
-    private static int addChildren(CommandSource src, IMarkableRegion region, IMarkableRegion child) {
-        if (!region.hasChild(child)) {
-            region.addChild(child);
-            LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) child, region.getPriority() + 1);
+    private static int addChildren(CommandSource src, IMarkableRegion parent, IMarkableRegion child) {
+        if (!parent.hasChild(child)) {
+            parent.addChild(child);
+            LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) child, parent.getPriority() + 1);
             RegionDataManager.save();
             // TODO: Msg with link to parent and child
-            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.children.add", child.getName(), region.getName()));
+            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.children.add", child.getName(), parent.getName()));
             return 0;
         }
         // should not happen, due to AddRegionChildArgumentType should only provide valid child regions
