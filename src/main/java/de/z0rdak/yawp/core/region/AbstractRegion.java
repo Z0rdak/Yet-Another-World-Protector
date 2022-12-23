@@ -364,52 +364,42 @@ public abstract class AbstractRegion implements IProtectedRegion {
             this.children = new HashMap<>(0);
         }
     }
-
-    private void deserializeParentRegion(CompoundNBT parentNbt) {
-        if (parentNbt.isEmpty()) {
-            this.parent = null;
-        }
-        RegionType type = RegionType.of(parentNbt.getString(REGION_TYPE));
-        if (type != null) {
-            switch (type) {
-                case GLOBAL:
-                    this.parent = new GlobalRegion(parentNbt);
-                    break;
-                case DIMENSION:
-                    this.parent = new DimensionalRegion(parentNbt);
-                    break;
-                case LOCAL:
-                    this.parent = deserializeLocalRegion(parentNbt);
-                    break;
-            }
-        } else {
-            this.parent = null;
-            YetAnotherWorldProtector.LOGGER.warn("Unable to deserialize parent info: " + parentNbt);
+   
+    protected IProtectedRegion deserializeRegion(RegionType regionType, CompoundNBT regionNbt) {
+        switch (regionType) {
+            case GLOBAL:
+                throw new UnsupportedOperationException("Global not supported yet");
+            case DIMENSION:
+                return new DimensionalRegion(regionNbt);
+            case LOCAL:
+                AreaType areaType = AreaType.of(regionNbt.getString(AREA_TYPE));
+                if (areaType == null) {
+                    YetAnotherWorldProtector.LOGGER.error("Unable to read parent region type for region '" + name + "' in dimension '" + this.dimension + "'!");
+                    return null;
+                } else {
+                    return deserializeLocalRegion(areaType, regionNbt);
+                }
+            case TEMPLATE:
+                throw new UnsupportedOperationException("Template not supported yet");
+            default:
+                throw new IllegalArgumentException("");
         }
     }
 
-
-    private AbstractMarkableRegion deserializeLocalRegion(CompoundNBT regionNbt){
-        // FIXME: either workaround with .of or workaround with .toLowercase on de-/serializing
-        AreaType parentArea = AreaType.of(regionNbt.getString(AREA_TYPE));
-        if (parentArea != null) {
-            switch (parentArea) {
-                case CUBOID:
-                    return new CuboidRegion(regionNbt);
-                case CYLINDER:
-                    return new CylinderRegion(regionNbt);
-                case SPHERE:
-                    return new SphereRegion(regionNbt);
-                case POLYGON_3D:
-                    return new PolygonRegion(regionNbt);
-                case PRISM:
-                    return new PrismRegion(regionNbt);
-                default:
-                    throw new IllegalArgumentException("Unable to read area type.");
-            }
-        } else {
-            throw new IllegalArgumentException("Unable to read area type.");
+    private IMarkableRegion deserializeLocalRegion(AreaType areaType, CompoundNBT regionNbt) {
+        switch (areaType) {
+            case CUBOID:
+                return new CuboidRegion(regionNbt);
+            case CYLINDER:
+                return new CylinderRegion(regionNbt);
+            case SPHERE:
+                return new SphereRegion(regionNbt);
+            case POLYGON_3D:
+                return new PolygonRegion(regionNbt);
+            case PRISM:
+                return new PrismRegion(regionNbt);
+            default:
+                throw new IllegalArgumentException("Unable to read area type.");
         }
     }
-
 }
