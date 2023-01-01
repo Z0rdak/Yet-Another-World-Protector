@@ -22,6 +22,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -74,7 +75,7 @@ public class AddRegionChildArgumentType implements ArgumentType<String> {
      */
     @SuppressWarnings("unchecked")
     @Override
-    // TODO: Don't include self reference
+    // TODO: Extend suggestions for any region and check if their parents are dim or local regions
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         if (context.getSource() instanceof CommandSource) {
             CommandSource src = (CommandSource) context.getSource();
@@ -85,6 +86,7 @@ public class AddRegionChildArgumentType implements ArgumentType<String> {
                 List<String> potentialChildrenNames = dimRegion.getChildren().values()
                         .stream()
                         .map(r -> (CuboidRegion)r)
+                        .filter(r -> !r.getName().equals(region.getName()))
                         .filter(r -> ((CuboidArea)region.getArea()).contains((CuboidArea) r.getArea()))
                         .map(AbstractRegion::getName)
                         .collect(Collectors.toList());
