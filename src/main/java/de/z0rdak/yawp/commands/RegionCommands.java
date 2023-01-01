@@ -54,7 +54,6 @@ import static de.z0rdak.yawp.util.MessageUtil.*;
 public class RegionCommands {
 
     public static final LiteralArgumentBuilder<CommandSource> REGION_COMMAND = registerRegionCommands();
-    public static Map<CommandSource, RegistryKey<World>> CommandSourceReferenceDims = new HashMap<>();
 
     private RegionCommands() {
     }
@@ -149,7 +148,6 @@ public class RegionCommands {
                                                 .executes(ctx -> addTeam(ctx.getSource(), getTeamArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx))))))
                         .then(literal(FLAG)
                                 .then(Commands.argument(FLAG.toString(), StringArgumentType.word())
-                                        // TODO: Suggest only flags not present in the region
                                         .suggests((ctx, builder) -> RegionFlagArgumentType.flag().listSuggestions(ctx, builder))
                                         .executes(ctx -> addFlag(ctx.getSource(), getRegionArgument(ctx), getFlagArgument(ctx)))))
                         .then(literal(CHILD)

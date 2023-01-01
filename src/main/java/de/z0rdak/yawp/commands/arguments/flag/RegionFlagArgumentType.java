@@ -10,6 +10,8 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.core.flag.RegionFlag;
+import de.z0rdak.yawp.core.region.CuboidRegion;
+import de.z0rdak.yawp.util.CommandUtil;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
@@ -17,8 +19,10 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 // TODO: When flag types are implemented there must be different ArgumentTypes for each flag type
 public class RegionFlagArgumentType implements ArgumentType<String> {
@@ -57,9 +61,24 @@ public class RegionFlagArgumentType implements ArgumentType<String> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         if (context.getSource() instanceof ISuggestionProvider) {
-            return ISuggestionProvider.suggest(RegionFlag.getFlagNames(), builder);
+            CommandSource src = (CommandSource) context.getSource();
+            try {
+                CuboidRegion region = (CuboidRegion) CommandUtil.getRegionArgument((CommandContext<CommandSource>) context);
+                List<String> flagNames = RegionFlag.getFlagNames()
+                        .stream()
+                        .filter(flagName -> !region.containsFlag(flagName))
+                        .collect(Collectors.toList());
+                if (flagNames.isEmpty()) {
+                    MessageUtil.sendCmdFeedback(src, new StringTextComponent("There are no flag left to add for this region '" + region.getName() + "'."));
+                    return Suggestions.empty();
+                }
+                return ISuggestionProvider.suggest(flagNames, builder);
+            } catch (CommandSyntaxException e) {
+                throw new RuntimeException(e);
+            }
         } else {
             return Suggestions.empty();
         }
