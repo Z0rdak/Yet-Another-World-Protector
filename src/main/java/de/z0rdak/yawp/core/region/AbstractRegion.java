@@ -6,24 +6,27 @@ import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import de.z0rdak.yawp.util.LocalRegions;
+import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
 /**
- * A abstract region represents the basic implementation of a IProtectedRegion.
+ * An abstract region represents the basic implementation of a IProtectedRegion.
  * This abstraction can be used for markable regions as well as regions without
  * an area (dimensions). <br>
  * TODO: Recursive check for membership in parent regions
@@ -40,9 +43,18 @@ public abstract class AbstractRegion implements IProtectedRegion {
 
     @Nullable
     protected IProtectedRegion parent;
+    protected String parentName;
     protected Map<String, IProtectedRegion> children;
+    protected Set<String> childrenNames;
 
     protected AbstractRegion(CompoundNBT nbt) {
+        this.childrenNames = new HashSet<>(0);
+        this.children = new HashMap<>(0);
+        this.parentName = null;
+        this.parent = null;
+        this.flags = new FlagContainer();
+        this.members = new PlayerContainer();
+        this.owners = new PlayerContainer();
         this.deserializeNBT(nbt);
     }
 
@@ -54,6 +66,12 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.owners = new PlayerContainer();
         this.isActive = true;
         this.children = new HashMap<>();
+    }
+
+    @Nullable
+    @Override
+    public String getParentName() {
+        return parentName;
     }
 
     // TODO: Check constructors with new parameter
@@ -254,7 +272,9 @@ public abstract class AbstractRegion implements IProtectedRegion {
     @Override
     public void addChild(@Nonnull IProtectedRegion child) {
         if (child.getParent() != null) {
-            throw new IllegalRegionStateException("");
+            // instead check if parent is dimensional region and remove it from dimensional region
+            // currently only region with parent dim are considered here
+            // throw new IllegalRegionStateException("");
         }
         if (child.equals(this)) {
             throw new IllegalRegionStateException("");
@@ -269,6 +289,11 @@ public abstract class AbstractRegion implements IProtectedRegion {
     @Override
     public Map<String, IProtectedRegion> getChildren() {
         return Collections.unmodifiableMap(this.children);
+    }
+
+    @Override
+    public Set<String> getChildrenNames() {
+        return this.childrenNames;
     }
 
     @Override
