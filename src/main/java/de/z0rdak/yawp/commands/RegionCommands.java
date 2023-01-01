@@ -328,7 +328,6 @@ public class RegionCommands {
     private static int removeChildren(CommandSource src, DimensionRegionCache dimCache, IMarkableRegion parent, IMarkableRegion child) {
         if (parent.hasChild(child)) {
             parent.removeChild(child);
-            child.setParent(dimCache.getDimensionalRegion());
             LocalRegions.ensureLowerRegionPriorityFor((CuboidRegion) child, RegionConfig.DEFAULT_REGION_PRIORITY.get());
             RegionDataManager.save();
             // TODO: Msg with link to parent and child
@@ -341,10 +340,7 @@ public class RegionCommands {
     }
 
     private static int addChildren(CommandSource src, IMarkableRegion parent, IMarkableRegion child) {
-        if (!parent.hasChild(child)) {
-            // TODO: If child has parent and parent is dim, remove child
-            // TODO: If parent has local region parent refuse to add child
-            RegionDataManager.get().cacheFor(parent.getDim()).getDimensionalRegion().removeChild(child);
+        if (!parent.hasChild(child) && child.getParent() != null && child.getParent() instanceof DimensionalRegion) {
             parent.addChild(child);
             LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) child, parent.getPriority() + 1);
             RegionDataManager.save();
