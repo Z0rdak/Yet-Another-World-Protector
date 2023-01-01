@@ -345,6 +345,9 @@ public class RegionCommands {
 
     private static int addChildren(CommandSource src, IMarkableRegion parent, IMarkableRegion child) {
         if (!parent.hasChild(child)) {
+            // TODO: If child has parent and parent is dim, remove child
+            // TODO: If parent has local region parent refuse to add child
+            RegionDataManager.get().cacheFor(parent.getDim()).getDimensionalRegion().removeChild(child);
             parent.addChild(child);
             LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) child, parent.getPriority() + 1);
             RegionDataManager.save();
@@ -502,10 +505,12 @@ public class RegionCommands {
                 .append(buildRegionAffiliationLink(region));
         sendCmdFeedback(src, regionAffiliation);
 
-        // Hierarchy: [parent][-|+], [children][+]
+        // Hierarchy: [parent][-|+], [n children][+]
         IFormattableTextComponent regionHierarchy = new TranslationTextComponent("cli.msg.info.region.hierarchy")
                 .append(": ")
-                .append(buildRegionHierarchyLink(region));
+                .append(buildRegionHierarchyLink(region))
+                .append(new StringTextComponent(TextFormatting.RESET + ", "))
+                .append(buildRegionChildrenLink(region));
         sendCmdFeedback(src, regionHierarchy);
 
         // State: [=> State <=]
