@@ -373,7 +373,7 @@ public class MessageUtil {
     }
 
     public static IFormattableTextComponent buildRegionHierarchyLink(IMarkableRegion region) {
-     return buildRegionParentLink(region).append(", ").append(buildRegionChildrenLink(region));
+     return buildRegionParentLink(region);
     }
 
 
@@ -389,17 +389,26 @@ public class MessageUtil {
     }
 
     public static IFormattableTextComponent buildRegionParentLink(IMarkableRegion region){
-        IFormattableTextComponent parentLink;
-        if (region.getParent() != null) {
+        IFormattableTextComponent parentLink = null;
+        if (region.getParent() != null) { // FIXME: should not happen. it is either a dim or local region as parent
             String regionParentInfoCmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getParent().getName(), INFO.toString());
-            IFormattableTextComponent parentLinkText = new TranslationTextComponent( "cli.msg.info.region.parent.link.text", region.getName());
-            IFormattableTextComponent parentHoverText = new TranslationTextComponent( "cli.msg.info.region.parent.link.hover", region.getName());
-            String clearRegionParentCmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), PARENT.toString(), CLEAR.toString(), region.getParent().getName());
-            IFormattableTextComponent parentClearLinkText = new TranslationTextComponent( "cli.msg.info.region.parent.clear.link.text");
-            IFormattableTextComponent parentClearHoverText = new TranslationTextComponent( "cli.msg.info.region.parent.clear.link.hover", region.getParent().getName());
+            IFormattableTextComponent parentLinkText = new TranslationTextComponent( "cli.msg.info.region.parent.link.text", region.getParent().getName());
+            IFormattableTextComponent parentHoverText = new TranslationTextComponent( "cli.msg.info.region.parent.link.hover", region.getParent().getName());
+            if (region.getParent() instanceof DimensionalRegion){
+                return buildDimensionalInfoLink(region.getDim());
+            }
+            if (region.getParent() instanceof IMarkableRegion){
+                String clearRegionParentCmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), PARENT.toString(), CLEAR.toString(), region.getParent().getName());
+                IFormattableTextComponent parentClearLinkText = new TranslationTextComponent( "cli.msg.info.region.parent.clear.link.text");
+                IFormattableTextComponent parentClearHoverText = new TranslationTextComponent( "cli.msg.info.region.parent.clear.link.hover", region.getParent().getName());
+                parentLink = buildExecuteCmdComponent(parentLinkText, parentHoverText, regionParentInfoCmd, RUN_COMMAND, AQUA)
+                        .append(buildExecuteCmdComponent(parentClearLinkText, parentClearHoverText, clearRegionParentCmd, SUGGEST_COMMAND, RED));
+                return parentLink;
+            }
+            if (region.getParent() instanceof GlobalRegion) { // FIXME: Not needed here
+                // TODO: Hierarchy Info for dimensional Regions
+            }
 
-            parentLink = buildExecuteCmdComponent(parentLinkText, parentHoverText, regionParentInfoCmd, RUN_COMMAND, AQUA)
-                    .append(buildExecuteCmdComponent(parentClearLinkText, parentClearHoverText, clearRegionParentCmd, SUGGEST_COMMAND, RED));
         } else {
             String setRegionParentCmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), PARENT.toString(), SET.toString(), "");
             IFormattableTextComponent setParentLinkText = new TranslationTextComponent( "cli.msg.info.region.parent.set.link.text");
@@ -414,14 +423,15 @@ public class MessageUtil {
     public static IFormattableTextComponent buildRegionChildrenLink(IMarkableRegion region) {
         String regionChildrenListLink = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), CHILDREN.toString());
         IFormattableTextComponent childrenLinkText = new TranslationTextComponent("cli.msg.info.region.children.link.text", region.getChildren().size());
-        IFormattableTextComponent childrenHoverText = new TranslationTextComponent("cli.msg.info.region.children.link.text", region.getName());
-        IFormattableTextComponent regionChildrenLink = region.getChildren().size() == 0 ? childrenLinkText :
-        buildExecuteCmdComponent(childrenLinkText, childrenHoverText, regionChildrenListLink, RUN_COMMAND, AQUA);
+        IFormattableTextComponent childrenHoverText = new TranslationTextComponent("cli.msg.info.region.children.link.hover", region.getName());
+        IFormattableTextComponent regionChildrenLink = buildExecuteCmdComponent(childrenLinkText, childrenHoverText, regionChildrenListLink, RUN_COMMAND, AQUA);
         String addChildrenCmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), ADD.toString(), CHILD.toString(), "");
         IFormattableTextComponent addChildrenLinkText = new TranslationTextComponent("cli.msg.info.region.children.add.link.text");
         IFormattableTextComponent addChildrenHoverText = new TranslationTextComponent("cli.msg.info.region.children.add.link.hover", region.getName());
         IFormattableTextComponent addChildrenLink = buildExecuteCmdComponent(addChildrenLinkText, addChildrenHoverText, addChildrenCmd, SUGGEST_COMMAND, GREEN);
-        return regionChildrenLink.append(addChildrenLink);
+        return (region.getChildren().size() == 0)
+                ? childrenLinkText.append(addChildrenLink)
+                : regionChildrenLink.append(addChildrenLink);
     }
 
     public static IFormattableTextComponent buildFlagListLink(IMarkableRegion region) {
