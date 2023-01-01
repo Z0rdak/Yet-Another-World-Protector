@@ -116,13 +116,39 @@ public class RegionDataManager extends WorldSavedData {
     @Override
     public void load(CompoundNBT nbt) {
         dimCacheMap.clear();
-        CompoundNBT dimensionRegions = nbt.getCompound(NBTConstants.DIMENSIONS);
-        YetAnotherWorldProtector.LOGGER.info("Loading region data for " + dimensionRegions.getAllKeys().size() + " different dimensions");
+        CompoundNBT dimensionRegions = nbt.getCompound(DIMENSIONS);
+        YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.load.amount", dimensionRegions.getAllKeys().size()).getString());
+        // deserialize all region without parent and child references
         for (String dimKey : dimensionRegions.getAllKeys()) {
             this.dimensionDataNames.add(dimKey);
             RegistryKey<World> dimension = RegistryKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(dimKey));
-            dimCacheMap.put(dimension, new DimensionRegionCache(dimensionRegions.getCompound(dimKey)));
+            if (dimensionRegions.contains(dimKey, Constants.NBT.TAG_COMPOUND)) {
+                dimCacheMap.put(dimension, new DimensionRegionCache(dimensionRegions.getCompound(dimKey)));
+            }
+
         }
+        // set parent and child references
+        for (String dimKey : dimensionRegions.getAllKeys()) {
+            RegistryKey<World> dimension = RegistryKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(dimKey));
+            DimensionRegionCache dimCache = dimCacheMap.get(dimension);
+            DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
+            dimCache.regionsInDimension.values().forEach(region -> {
+                // set parent reference
+                String parentName = region.getParentName();
+                boolean hasValidParent = parentName != null && !parentName.equals("");
+                if (hasValidParent) {
+                    boolean hasDimRegionAsParent = parentName.contains(":");
+                    if (hasDimRegionAsParent) { // colons are not allowed in normal region names so this should work fine
+                        region.setParent(dimRegion);
+                    } else {
+                        region.setParent(dimCache.getRegion(parentName));
+                    }
+                }
+                // set child references
+                region.getChildrenNames().forEach(childName -> region.addChild(dimCache.getRegion(childName)));
+            });
+        }
+        save();
     }
 
     /**
@@ -133,13 +159,13 @@ public class RegionDataManager extends WorldSavedData {
      */
     @Override
     public CompoundNBT save(CompoundNBT compound) {
-        YetAnotherWorldProtector.LOGGER.info("Saving region data for " + dimCacheMap.entrySet().size() + " different dimensions");
+        YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.save.amount", dimCacheMap.entrySet().size()).getString());
         CompoundNBT dimRegionNbtData = new CompoundNBT();
         for (Map.Entry<RegistryKey<World>, DimensionRegionCache> entry : dimCacheMap.entrySet()) {
             String dimensionName = entry.getValue().getDimensionalRegion().getName();
             dimRegionNbtData.put(dimensionName, entry.getValue().serializeNBT());
         }
-        compound.put(NBTConstants.DIMENSIONS, dimRegionNbtData);
+        compound.put(DIMENSIONS, dimRegionNbtData);
         return compound;
     }
 
@@ -149,13 +175,12 @@ public class RegionDataManager extends WorldSavedData {
      * @param event the PlayerChangedDimensionEvent which serves as a trigger and provides the information which dimension the player is traveling to.
      */
     @SubscribeEvent
-    public static void addDimKeyOnDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event){
-        // if region map does not contain an entry for the dimension traveled to, add it to the map
+    public static void addDimKeyOnDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (!event.getPlayer().getCommandSenderWorld().isClientSide) {
             if (!dimCacheMap.containsKey(event.getTo())) {
                 DimensionRegionCache cache = RegionDataManager.get().newCacheFor(event.getTo());
-                YetAnotherWorldProtector.LOGGER.info("Player traveling to dimension without region data. Init region data for dimension '" + cache.dimensionKey().location() + "'..");
-                save();
+                YetAnotherWorldProtector.LOGGER.info("Player traveling to dimension without region data.");
+                YetAnotherWorldProtector.LOGGER.info("Init region data for dimension '" + cache.dimensionKey().location() + "'..");
             }
         }
     }
@@ -166,13 +191,13 @@ public class RegionDataManager extends WorldSavedData {
      * @param event PlayerLoggedInEvent which serves as a trigger and provides the information about the dimension the player logged in to.
      */
     @SubscribeEvent
-    public static void addDimKeyOnPlayerLogin(PlayerEvent.PlayerLoggedInEvent event){
-        // if region map does not contain an entry for the dimension traveled to, add it to the map
+    public static void addDimKeyOnPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!event.getPlayer().getCommandSenderWorld().isClientSide) {
             RegistryKey<World> dim = event.getPlayer().getCommandSenderWorld().dimension();
             if (!dimCacheMap.containsKey(dim)) {
                 DimensionRegionCache cache = RegionDataManager.get().newCacheFor(dim);
-                YetAnotherWorldProtector.LOGGER.info("Player joining to server in dimension without region data. This should only happen the first time a player is joining. Init region data for dimension '" + cache.dimensionKey().location() + "'..");
+                YetAnotherWorldProtector.LOGGER.info("Player joining to server in dimension without region data. This should only happen the first time a player is joining.");
+                YetAnotherWorldProtector.LOGGER.info("Init region data for dimension '" + cache.dimensionKey().location() + "'..");
             }
         }
     }
