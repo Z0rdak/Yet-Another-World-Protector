@@ -5,10 +5,10 @@ import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
+import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.util.constants.*;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.RegistryKey;
@@ -20,6 +20,7 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.DimensionSavedDataManager;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -31,31 +32,46 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static de.z0rdak.yawp.util.constants.RegionNBT.DIMENSIONS;
+
 @EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER)
 public class RegionDataManager extends WorldSavedData {
 
+    /**
+     * Name which is used for the file to store the NBT data: yawp-dimensions.dat
+     */
     private static final String DATA_NAME = YetAnotherWorldProtector.MODID + "-dimensions";
+    /**
+     * Map which holds the mod region information. Each dimension has its on DimensionRegionCache.
+     */
     private final static Map<RegistryKey<World>, DimensionRegionCache> dimCacheMap = new HashMap<>();
-
+    /**
+     * The global region of this mod which all sets common rules/flags for all regions.
+     */
     private final static GlobalRegion globalRegion = new GlobalRegion();
+    /**
+     * Singleton used to access methods to manage region data.
+     */
 
-    private List<String> dimensionDataNames;
     private static RegionDataManager regionDataCache = new RegionDataManager();
+
+    private static final Set<String> dimensionDataNames = new HashSet<>();
 
     private RegionDataManager() {
         super(DATA_NAME);
-        this.dimensionDataNames = new ArrayList<>();
     }
 
-    public static void save(){
+    public static void save() {
         RegionDataManager.get().setDirty();
     }
 
-    public List<String> getDimensionDataNames(){
-        if (this.dimensionDataNames == null) {
-            this.dimensionDataNames = new ArrayList<>();
-        }
-        return this.dimensionDataNames;
+    /**
+     * TODO: Should be used in CLI to provide a list of valid dimensions?
+     *
+     * @return
+     */
+    public static Set<String> getDimensionDataNames() {
+        return Collections.unmodifiableSet(dimensionDataNames);
     }
 
     public static RegionDataManager get() {
@@ -72,6 +88,11 @@ public class RegionDataManager extends WorldSavedData {
         return regionDataCache;
     }
 
+    /**
+     * Server startup hook for loading the region data from the yawp-dimension.dat file by creating an instance of RegionDataManager.
+     *
+     * @param event
+     */
     public static void loadRegionData(FMLServerStartingEvent event) {
         try {
             ServerWorld world = Objects.requireNonNull(event.getServer().overworld());
@@ -80,13 +101,18 @@ public class RegionDataManager extends WorldSavedData {
                 RegionDataManager data = storage.computeIfAbsent(RegionDataManager::new, DATA_NAME);
                 storage.set(data);
                 regionDataCache = data;
-                YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("console.logger.info.data.load.success", data.getAllRegionNames().size(), data.getDimensionList().size()).getString());
+                YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.load.success", data.getAllRegionNames().size(), data.getDimensionList().size()).getString());
             }
         } catch (NullPointerException npe) {
-            YetAnotherWorldProtector.LOGGER.error(new TranslationTextComponent("console.logger.error.data.load.failure"));
+            YetAnotherWorldProtector.LOGGER.error(new TranslationTextComponent("data.nbt.dimensions.load.failure").getString());
         }
     }
 
+    /**
+     * Method which gets called when a new RegionDataManager instance is created by loadRegionData.
+     *
+     * @param nbt compound region data read from disk to be deserialized for the region cache.
+     */
     @Override
     public void load(CompoundNBT nbt) {
         dimCacheMap.clear();
@@ -99,6 +125,12 @@ public class RegionDataManager extends WorldSavedData {
         }
     }
 
+    /**
+     * Method which gets called the region data is marked as dirty via the save/markDirty method.
+     *
+     * @param compound nbt data to be filled with the region information.
+     * @return the compound region nbt data to be saved to disk.
+     */
     @Override
     public CompoundNBT save(CompoundNBT compound) {
         YetAnotherWorldProtector.LOGGER.info("Saving region data for " + dimCacheMap.entrySet().size() + " different dimensions");
@@ -111,6 +143,11 @@ public class RegionDataManager extends WorldSavedData {
         return compound;
     }
 
+    /**
+     * Event handler which creates a new DimensionRegionCache when a dimension is created the first time, by a player loading the dimension.
+     *
+     * @param event the PlayerChangedDimensionEvent which serves as a trigger and provides the information which dimension the player is traveling to.
+     */
     @SubscribeEvent
     public static void addDimKeyOnDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event){
         // if region map does not contain an entry for the dimension traveled to, add it to the map
@@ -123,6 +160,11 @@ public class RegionDataManager extends WorldSavedData {
         }
     }
 
+    /**
+     * Event handler which is used to initialize the dimension cache with first dimension entry when a player logs in.
+     *
+     * @param event PlayerLoggedInEvent which serves as a trigger and provides the information about the dimension the player logged in to.
+     */
     @SubscribeEvent
     public static void addDimKeyOnPlayerLogin(PlayerEvent.PlayerLoggedInEvent event){
         // if region map does not contain an entry for the dimension traveled to, add it to the map
@@ -142,7 +184,7 @@ public class RegionDataManager extends WorldSavedData {
     }
 
     public Collection<String> getRegionNamesFor(RegistryKey<World> dim) {
-        return dimCacheMap.get(dim).getRegionNames();
+        return cacheFor(dim).getRegionNames();
     }
 
     public Collection<String> getDimensionList() {
@@ -152,7 +194,7 @@ public class RegionDataManager extends WorldSavedData {
     }
 
     public Collection<IMarkableRegion> getRegionsFor(RegistryKey<World> dim) {
-        return dimCacheMap.get(dim).getRegions();
+        return cacheFor(dim).getRegions();
     }
 
     @Nullable
@@ -166,7 +208,6 @@ public class RegionDataManager extends WorldSavedData {
         return null;
     }
 
-    @Nullable
     public boolean containsCacheFor(RegistryKey<World> dim) {
         return dimCacheMap.containsKey(dim);
     }
@@ -175,15 +216,7 @@ public class RegionDataManager extends WorldSavedData {
         return dimCacheMap.get(dim);
     }
 
-    public List<IFlag> getFlagsForDim(RegistryKey<World> dim){
-        DimensionRegionCache dimCache = cacheFor(dim);
-        if (dimCache != null) {
-            return new ArrayList<>(dimCache.getDimensionalRegion().getFlags());
-        }
-        return new ArrayList<>();
-    }
-
-    public List<String> getFlagsIdsForDim(DimensionRegionCache dimCache){
+    public List<String> getFlagsIdsForDim(DimensionRegionCache dimCache) {
         if (dimCache != null) {
             return dimCache.getDimensionalRegion().getFlags()
                     .stream()
@@ -204,7 +237,7 @@ public class RegionDataManager extends WorldSavedData {
         return cache;
     }
 
-    public static void addFlags(Set<String> flags, IProtectedRegion region){
+    public static void addFlags(Set<String> flags, IProtectedRegion region) {
         flags.stream()
                 .map(RegionFlag::fromId)
                 .forEach(flag -> {
@@ -218,12 +251,5 @@ public class RegionDataManager extends WorldSavedData {
                             throw new NotImplementedException("");
                     }
                 });
-    }
-
-    /* hash for checking manipulated world data?*/
-    public class DimensionDataEntry {
-        private RegistryKey<World> dim;
-        private boolean load;
-        private String hash;
     }
 }
