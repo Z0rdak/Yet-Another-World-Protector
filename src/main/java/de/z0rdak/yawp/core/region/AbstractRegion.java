@@ -322,16 +322,18 @@ public abstract class AbstractRegion implements IProtectedRegion {
         nbt.put(OWNERS, this.owners.serializeNBT());
         nbt.put(MEMBERS, this.members.serializeNBT());
         if (this.parent != null) {
-            nbt.put(PARENT, this.parent.serializeNBT());
+            nbt.putString(PARENT, this.parent.getName());
         } else {
-            nbt.put(PARENT, new CompoundNBT());
+            nbt.putString(PARENT, "");
         }
         if (this.children != null) {
-            CompoundNBT childrenNbt = new CompoundNBT();
-            this.children.forEach( (name, child) -> childrenNbt.put(name, child.serializeNBT()));
-            nbt.put(CHILDREN, childrenNbt);
+            ListNBT childrenList = new ListNBT();
+            childrenList.addAll(this.children.keySet().stream()
+                    .map(StringNBT::valueOf)
+                    .collect(Collectors.toSet()));
+            nbt.put(CHILDREN, childrenList);
         } else {
-            nbt.put(CHILDREN, new CompoundNBT());
+            nbt.put(CHILDREN, new ListNBT());
         }
         return nbt;
     }
@@ -339,67 +341,34 @@ public abstract class AbstractRegion implements IProtectedRegion {
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
         this.name = nbt.getString(NAME);
-        this.dimension = RegistryKey.create(Registry.DIMENSION_REGISTRY,
-                new ResourceLocation(nbt.getString(DIM)));
+        this.dimension = RegistryKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(nbt.getString(DIM)));
         this.isActive = nbt.getBoolean(ACTIVE);
         this.regionType = RegionType.of(nbt.getString(REGION_TYPE));
         this.flags = new FlagContainer(nbt.getCompound(FLAGS));
         this.owners = new PlayerContainer(nbt.getCompound(OWNERS));
         this.members = new PlayerContainer(nbt.getCompound(MEMBERS));
-        // deserialize parent only if present and if this is no instance of GlobalRegion
-        if (nbt.contains(PARENT) && !(this instanceof GlobalRegion)) {
-            this.deserializeParentRegion(nbt.getCompound(PARENT));
-        } else {
-            this.parent = null;
-        }
-        if (nbt.contains(CHILDREN)){
-            CompoundNBT childrenNbt = nbt.getCompound(CHILDREN);
-            if (childrenNbt.isEmpty()) {
-                this.children = new HashMap<>();
-            } else {
-                this.children = new HashMap<>(childrenNbt.size());
-                childrenNbt.getAllKeys().forEach(key -> this.children.put(key, this.deserializeLocalRegion(nbt.getCompound(key))));
-            }
-        } else {
-            this.children = new HashMap<>(0);
-        }
-    }
-   
-    protected IProtectedRegion deserializeRegion(RegionType regionType, CompoundNBT regionNbt) {
-        switch (regionType) {
-            case GLOBAL:
-                throw new UnsupportedOperationException("Global not supported yet");
-            case DIMENSION:
-                return new DimensionalRegion(regionNbt);
-            case LOCAL:
-                AreaType areaType = AreaType.of(regionNbt.getString(AREA_TYPE));
-                if (areaType == null) {
-                    YetAnotherWorldProtector.LOGGER.error("Unable to read parent region type for region '" + name + "' in dimension '" + this.dimension + "'!");
-                    return null;
+        if (this.parent == null) {
+            // deserialize parent only if present and if this is no instance of GlobalRegion
+            if (nbt.contains(PARENT, Constants.NBT.TAG_STRING) && !(this instanceof GlobalRegion)) {
+                String parentName = nbt.getString(PARENT);
+                if (!parentName.equals("")) {
+                    this.parentName = nbt.getString(PARENT);
                 } else {
-                    return deserializeLocalRegion(areaType, regionNbt);
+                    this.parentName = null;
                 }
-            case TEMPLATE:
-                throw new UnsupportedOperationException("Template not supported yet");
-            default:
-                throw new IllegalArgumentException("");
+            }
         }
-    }
-
-    private IMarkableRegion deserializeLocalRegion(AreaType areaType, CompoundNBT regionNbt) {
-        switch (areaType) {
-            case CUBOID:
-                return new CuboidRegion(regionNbt);
-            case CYLINDER:
-                return new CylinderRegion(regionNbt);
-            case SPHERE:
-                return new SphereRegion(regionNbt);
-            case POLYGON_3D:
-                return new PolygonRegion(regionNbt);
-            case PRISM:
-                return new PrismRegion(regionNbt);
-            default:
-                throw new IllegalArgumentException("Unable to read area type.");
+        if (this.children != null && !this.children.isEmpty()) {
+            if (nbt.contains(CHILDREN, Constants.NBT.TAG_LIST )) {
+                ListNBT childrenNbt = nbt.getList(CHILDREN,  Constants.NBT.TAG_LIST);
+                if (!childrenNbt.isEmpty()) {
+                    this.children = new HashMap<>(childrenNbt.size());
+                    this.childrenNames = new HashSet<>(childrenNbt.size());
+                    for (int i = 0; i < childrenNbt.size(); i++) {
+                        this.childrenNames.add(childrenNbt.getString(i));
+                    }
+                }
+            }
         }
     }
 }
