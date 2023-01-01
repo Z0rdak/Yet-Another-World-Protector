@@ -175,7 +175,6 @@ public class RegionCommands {
                                                 .executes(ctx -> removeTeam(ctx.getSource(), getTeamArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx))))))
                         .then(literal(FLAG)
                                 .then(Commands.argument(FLAG.toString(), StringArgumentType.word())
-                                        // TODO: Suggest only flags present in the region
                                         .suggests((ctx, builder) -> RegionFlagArgumentType.flag().listSuggestions(ctx, builder))
                                         .executes(ctx -> removeFlag(ctx.getSource(), getRegionArgument(ctx), getFlagArgument(ctx)))))
                         .then(literal(CHILD)

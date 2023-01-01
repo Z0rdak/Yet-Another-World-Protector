@@ -67,12 +67,26 @@ public class RegionFlagArgumentType implements ArgumentType<String> {
             CommandSource src = (CommandSource) context.getSource();
             try {
                 CuboidRegion region = (CuboidRegion) CommandUtil.getRegionArgument((CommandContext<CommandSource>) context);
-                List<String> flagNames = RegionFlag.getFlagNames()
-                        .stream()
-                        .filter(flagName -> !region.containsFlag(flagName))
-                        .collect(Collectors.toList());
+                List<String> flagNames = RegionFlag.getFlagNames();
+
+                String input = context.getInput();
+                if (input.contains("add")) {
+                    flagNames = flagNames.stream()
+                            .filter(flagName -> !region.containsFlag(flagName))
+                            .collect(Collectors.toList());
+                }
+                if (input.contains("remove")) {
+                    flagNames = flagNames.stream()
+                            .filter(region::containsFlag)
+                            .collect(Collectors.toList());
+                }
                 if (flagNames.isEmpty()) {
-                    MessageUtil.sendCmdFeedback(src, new StringTextComponent("There are no flag left to add for this region '" + region.getName() + "'."));
+                    if (input.contains("add")) {
+                        MessageUtil.sendCmdFeedback(src, new StringTextComponent("There are no flag left to add for this region '" + region.getName() + "'."));
+                    }
+                    if (input.contains("remove")) {
+                        MessageUtil.sendCmdFeedback(src, new StringTextComponent("Region '" + region.getName() + "' does not contain any flags."));
+                    }
                     return Suggestions.empty();
                 }
                 return ISuggestionProvider.suggest(flagNames, builder);
