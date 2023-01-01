@@ -5,22 +5,21 @@ import de.z0rdak.yawp.core.affiliation.PlayerContainer;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.*;
-import de.z0rdak.yawp.util.constants.NBTConstants;
-import de.z0rdak.yawp.util.constants.RegionNBT;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
 @Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID)
 public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
@@ -53,51 +52,13 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
         return YetAnotherWorldProtector.MODID + "-" + dim.replace(':', '-');
     }
 
-    public void load(CompoundNBT nbt) {
-        CompoundNBT regionsNbt = nbt.getCompound(NBTConstants.REGIONS);
-        CompoundNBT dimRegionNbt = nbt.getCompound(NBTConstants.DIM_REGION);
-        this.dimensionalRegion = new DimensionalRegion(dimRegionNbt);
-        YetAnotherWorldProtector.LOGGER.info("Loading dim data for '" + this.dimensionalRegion.getName() +"'");
-        this.regionsInDimension = new HashMap<>();
-        regionsNbt.getAllKeys().forEach( regionName -> {
-            CompoundNBT regionNbt = regionsNbt.getCompound(regionName);
-            AreaType areaType = AreaType.of(regionNbt.getString(RegionNBT.AREA_TYPE));
-            switch (areaType) {
-                case CUBOID:
-                    regionsInDimension.put(regionName, new CuboidRegion(regionNbt));
-                    break;
-                case SPHERE:
-                    regionsInDimension.put(regionName, new SphereRegion(regionNbt));
-                    break;
-                case CYLINDER:
-                    break;
-                case POLYGON_3D:
-                    break;
-                case PRISM:
-                    break;
-                default:
-                    break;
-            }
-        });
-    }
-
-    public CompoundNBT save(CompoundNBT nbt) {
-        YetAnotherWorldProtector.LOGGER.info("Saving dim data for '" + this.dimensionalRegion.getName() +"'");
-        nbt.put(NBTConstants.DIM_REGION, this.dimensionalRegion.serializeNBT());
-        CompoundNBT regions = new CompoundNBT();
-        this.regionsInDimension.forEach( (name, region) -> {
-            regions.put(name, region.serializeNBT());
-        });
-        nbt.put(NBTConstants.REGIONS, regions);
-        return nbt;
-    }
-
     public DimensionalRegion getDimensionalRegion() {
         return dimensionalRegion;
     }
 
     public void addRegion(IMarkableRegion region) {
         this.regionsInDimension.put(region.getName(), region);
+        this.dimensionalRegion.addChild(region);
         region.setParent(this.dimensionalRegion);
         RegionDataManager.save();
     }
@@ -170,13 +131,6 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
         return regionsInDimension.values();
     }
 
-    public void removeRegion(String regionName){
-        if (this.contains(regionName)){
-            this.regionsInDimension.remove(regionName);
-            RegionDataManager.save();
-        }
-    }
-
     public void removeRegion(IMarkableRegion region){
         if (this.contains(region.getName())){
             this.regionsInDimension.remove(region.getName());
@@ -197,21 +151,52 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
         return regionsInDimension.get(regionName);
     }
 
-    public Collection<String> getDimFlags(){
+    public Set<String> getDimFlagNames(){
         return this.dimensionalRegion.getFlags()
                 .stream()
                 .map(IFlag::getFlagIdentifier)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
+    }
+
+    public List<IFlag> getDimFlags(){
+        return new ArrayList<>(this.dimensionalRegion.getFlags());
     }
 
     @Override
     public CompoundNBT serializeNBT() {
-        return this.save(new CompoundNBT());
+        YetAnotherWorldProtector.LOGGER.info("Saving dim data for '" + this.dimensionalRegion.getName() +"'");
+        CompoundNBT nbt = new CompoundNBT();
+        nbt.put(DIM_REGION, this.dimensionalRegion.serializeNBT());
+        CompoundNBT regions = new CompoundNBT();
+        this.regionsInDimension.forEach( (name, region) -> {
+            regions.put(name, region.serializeNBT());
+        });
+        nbt.put(REGIONS, regions);
+        return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
-        this.load(nbt);
+        if (nbt.contains(DIM_REGION, Constants.NBT.TAG_COMPOUND)) {
+            this.dimensionalRegion = new DimensionalRegion(nbt.getCompound(DIM_REGION));
+        } else {
+            // TODO: Add dimKey as property to nbt compound to init new default dimensional region
+            throw new IllegalArgumentException("Unable to load dimensional region data from NBT");
+        }
+        this.regionsInDimension = new HashMap<>();
+        YetAnotherWorldProtector.LOGGER.info("Loading dim data for '" + this.dimensionalRegion.getDim().location() +"'");
+        CompoundNBT regionsNbt = nbt.getCompound(REGIONS);
+        regionsNbt.getAllKeys().forEach(regionName -> {
+            CompoundNBT regionNbt = regionsNbt.getCompound(regionName);
+            AreaType areaType = AreaType.of(regionNbt.getString(AREA_TYPE));
+            if (areaType != null) {
+                IMarkableRegion newRegion = DimensionRegionCache.deserializeLocalRegion(areaType, regionNbt);
+                this.addRegion(newRegion);
+            } else {
+                YetAnotherWorldProtector.LOGGER.error("Unable to read region type for region!");
+            }
+        });
+        RegionDataManager.save();
     }
 
     public boolean hasOwner(PlayerEntity player) {
@@ -224,5 +209,43 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
         PlayerContainer members = this.dimensionalRegion.getMembers();
         return members.containsPlayer(player.getUUID())
                 || (player.getTeam() != null && members.containsTeam(player.getTeam()));
+    }
+
+    public static IProtectedRegion deserializeRegion(RegionType regionType, CompoundNBT regionNbt) {
+        switch (regionType) {
+            case GLOBAL:
+                throw new UnsupportedOperationException("Global not supported yet");
+            case DIMENSION:
+                return new DimensionalRegion(regionNbt);
+            case LOCAL:
+                AreaType areaType = AreaType.of(regionNbt.getString(AREA_TYPE));
+                if (areaType == null) {
+                    YetAnotherWorldProtector.LOGGER.error("Unable to read region type for region!");
+                    return null;
+                } else {
+                    return deserializeLocalRegion(areaType, regionNbt);
+                }
+            case TEMPLATE:
+                throw new UnsupportedOperationException("Template not supported yet");
+            default:
+                throw new IllegalArgumentException("");
+        }
+    }
+
+    public static IMarkableRegion deserializeLocalRegion(AreaType areaType, CompoundNBT regionNbt) {
+        switch (areaType) {
+            case CUBOID:
+                return new CuboidRegion(regionNbt);
+            case CYLINDER:
+                return new CylinderRegion(regionNbt);
+            case SPHERE:
+                return new SphereRegion(regionNbt);
+            case POLYGON_3D:
+                return new PolygonRegion(regionNbt);
+            case PRISM:
+                return new PrismRegion(regionNbt);
+            default:
+                throw new IllegalArgumentException("Unable to read area type.");
+        }
     }
 }

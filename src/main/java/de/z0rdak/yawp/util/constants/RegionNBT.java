@@ -16,9 +16,9 @@ public final class RegionNBT {
     public static final String AREA = "area";
     public static final String AREA_TYPE = "area_type";
     public static final String FLAG_TYPE = "flag_type";
-    public static final String DIM_REGION = "dim_region";
     public static final String REGIONS = "regions";
-
+    public static final String DIMENSIONS = "dimensions";
+    public static final String DIM_REGION = "dimRegion";
     public static final String PARENT = "parent";
     public static final String REGION_TYPE = "region_type";
     public static final String CHILDREN = "children";
