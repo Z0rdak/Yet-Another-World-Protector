@@ -21,6 +21,7 @@ import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.NotImplementedException;
 
+import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -510,15 +511,12 @@ public class MessageUtil {
         return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, AQUA);
     }
 
-    // TODO: check who has permission to use region tp command
-    public static IFormattableTextComponent buildRegionInfoAndTpLink(IMarkableRegion region){
+    @Nonnull
+    public static IFormattableTextComponent buildRegionTeleportLink(IMarkableRegion region) {
         String teleportCmd = buildDimTeleportCmd(region.getDim(), "@s", region.getTpTarget());
         IFormattableTextComponent teleportLink = buildExecuteCmdComponent(buildBlockPosTeleportLinkText(region.getTpTarget()),
             "cli.msg.region.info.tp.link.hover", teleportCmd, RUN_COMMAND, AQUA);
-        IFormattableTextComponent separator = new StringTextComponent(Color.fromLegacyFormat(RESET) + " @ " + Color.fromLegacyFormat(RESET));
-        return  buildRegionInfoLink(region)
-                .append(separator)
-                .append(teleportLink);
+        return teleportLink;
     }
 
     public static IFormattableTextComponent buildDimensionalBlockTpLink(RegistryKey<World> dim, BlockPos target) {

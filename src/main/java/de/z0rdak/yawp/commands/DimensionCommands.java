@@ -50,6 +50,8 @@ import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.CommandConstants.DELETE;
 import static de.z0rdak.yawp.util.CommandUtil.*;
 import static de.z0rdak.yawp.util.MessageUtil.*;
+import static net.minecraft.util.text.TextFormatting.*;
+import static net.minecraft.util.text.TextFormatting.RESET;
 
 public class DimensionCommands {
 
@@ -179,7 +181,7 @@ public class DimensionCommands {
             return -1;
         }
         if (dimCache.contains(regionName)){
-            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.name.exists", dimCache.dimensionKey(), regionName));
+            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.name.exists", dimCache.getDimensionalRegion().getName(), regionName));
             return 1;
         }
         CuboidRegion region = new CuboidRegion(regionName, new CuboidArea(pos1, pos2), owner, dimCache.dimensionKey());
@@ -248,12 +250,6 @@ public class DimensionCommands {
             return 0;
         }
         return 1;
-    }
-
-    public static int selectReferenceDim(CommandSource src, DimensionalRegion dim) throws CommandSyntaxException {
-        RegionCommands.CommandSourceReferenceDims.put(src, dim.getDim());
-        MessageUtil.sendCmdFeedback(src, new StringTextComponent("Selected dim '" + dim.getDim().location().toString() + "' as reference for region commands for '" + src.getTextName() + "'."));
-        return 0;
     }
 
     private static int removeFlag(CommandSource src,  DimensionRegionCache dimCache, String flag) {
@@ -353,7 +349,7 @@ public class DimensionCommands {
         }
         // TODO: lang key
         // TODO Dim info link
-        sendCmdFeedback(src, new TranslationTextComponent(TextFormatting.BOLD + "== Flags in dimension '" + dim.location().toString() + "' =="));
+        sendCmdFeedback(src, new TranslationTextComponent(BOLD + "== Flags in dimension '" + dim.location().toString() + "' =="));
         flags.forEach(flag -> {
             IFormattableTextComponent removeFlagLink = new StringTextComponent(" - ")
                     .append(buildDimensionRemoveFlagLink(flag, dim))
@@ -370,7 +366,7 @@ public class DimensionCommands {
             String playerLangKeyPart = memberOrOwner == OWNER ? "owner" : "member";
             String affiliationText = playerLangKeyPart.substring(0, 1).toUpperCase() + playerLangKeyPart.substring(1) + "s";
             // TODO Dim info link
-            sendCmdFeedback(src, new TranslationTextComponent(TextFormatting.BOLD + "== " + affiliationText + " in dimension '" + dimRegion.getDim().location() + "' =="));
+            sendCmdFeedback(src, new TranslationTextComponent(BOLD + "== " + affiliationText + " in dimension '" + dimRegion.getDim().location() + "' =="));
             sendCmdFeedback(src, buildTeamList(dimRegion, memberOrOwner));
             sendCmdFeedback(src, buildPlayerList(dimRegion, memberOrOwner));
             return 0;
@@ -403,14 +399,19 @@ public class DimensionCommands {
                 sendCmdFeedback(source, new TranslationTextComponent("cli.msg.dim.info.regions.empty", dim.location().toString()));
                 return -1;
             }
-            // TODO Dim info link
-            sendCmdFeedback(source, new TranslationTextComponent(TextFormatting.BOLD + "== Regions in dimension '" + dim.location().toString() + "' =="));
+            IFormattableTextComponent dimInfoLink = buildDimensionalInfoLink(dim);
+            IFormattableTextComponent regionsInDimHeader = new TranslationTextComponent(BOLD + "== Regions in ")
+                    .append(dimInfoLink)
+                    .append(" ==");
+            sendCmdFeedback(source, regionsInDimHeader);
             // TODO: Pagination for more than x regions
             regionsForDim.forEach(region -> {
                 IFormattableTextComponent regionRemoveLink = new StringTextComponent(" - ")
                         .append(buildDimSuggestRegionRemovalLink(region))
                         .append(" ")
-                        .append(buildRegionInfoAndTpLink(region));
+                        .append(buildRegionInfoLink(region))
+                        .append(new StringTextComponent(RESET + " @ " + RESET))
+                        .append(buildRegionTeleportLink(region));
                 sendCmdFeedback(source, regionRemoveLink);
             });
             return 0;
@@ -443,6 +444,26 @@ public class DimensionCommands {
                 .append(players).append(new StringTextComponent(", "))
                 .append(teams);
         sendCmdFeedback(src, dimOwners);
+    }
+
+    private static int promptDimensionRegions(CommandSource source, DimensionRegionCache dimCache) {
+        if (dimCache != null) {
+            RegistryKey<World> dim =  dimCache.getDimensionalRegion().getDim();
+            List<IMarkableRegion> regionsForDim = dimCache.regionsInDimension
+                    .values()
+                    .stream()
+                    .sorted(Comparator.comparing(IMarkableRegion::getName))
+                    .collect(Collectors.toList());
+            IFormattableTextComponent regions = new TranslationTextComponent("cli.msg.info.dim.region").append(": ");
+            if (regionsForDim.isEmpty()) {
+                regions.append(new TranslationTextComponent("cli.msg.dim.info.regions.empty", dim.location().toString()));
+            } else {
+                regions.append(buildDimRegionListLink(dimCache, dimCache.getDimensionalRegion()));
+            }
+            sendCmdFeedback(source, regions);
+            return 0;
+        }
+        return 1;
     }
 
     private static void promptDimensionMembers(CommandSource src, DimensionalRegion dimRegion) {
@@ -500,14 +521,14 @@ public class DimensionCommands {
         // Dimension info header
         DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
         // TODO: header extraction to build uniform header by providing langkey and args
-        IFormattableTextComponent dimInfoHeader = new StringTextComponent(TextFormatting.BOLD + "== Dimension ")
+        IFormattableTextComponent dimInfoHeader = new StringTextComponent(BOLD + "== Dimension ")
                 .append(buildDimensionalInfoLink(dimRegion.getDim()))
-                .append(new StringTextComponent(TextFormatting.BOLD + " information =="));
+                .append(new StringTextComponent(BOLD + " information =="));
         sendCmdFeedback(src, dimInfoHeader);
 
         // Regions in dimension
         // TODO: Change List to Link [n region(s)] [+]s
-        promptDimensionRegionList(src, dimCache);
+        promptDimensionRegions(src, dimCache);
 
         // Dimension owners & members
         promptDimensionOwners(src, dimRegion);
