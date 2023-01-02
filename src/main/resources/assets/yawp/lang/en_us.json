@@ -219,8 +219,11 @@
   "cli.arg.flag.parse.invalid": "Unable to parse flag identifier!",
   "cli.arg.dim.invalid": "Dimension '%s' does not exist!",
 
-  "data.nbt.dimensions.load.success": "Loaded %s regions for %s dimensions",
+  "data.nbt.dimensions.load.success": "Loaded %s regions for %s dimension(s)",
+  "data.nbt.dimensions.load.amount": "Loading regions for %s dimension(s)",
+  "data.nbt.dimensions.save.amount": "Saving %s regions for %s dimensions",
   "data.nbt.dimensions.load.failure": "Loading regions failed!",
-  "data.nbt.dimensions.load.dim.amount" : "Loading region data for %s dimensions",
-  "data.nbt.dimensions.save.dim.amount" : "Saving region data for %s dimensions"
+  "data.nbt.dimensions.load.dim.amount" : "Loading %s regions for dimension '%s'",
+  "data.nbt.dimensions.loaded.dim.amount" : "Loaded %s regions for dimension '%s'",
+  "data.nbt.dimensions.save.dim.amount" : "Saving %s regions for dimension '%s'"
 }

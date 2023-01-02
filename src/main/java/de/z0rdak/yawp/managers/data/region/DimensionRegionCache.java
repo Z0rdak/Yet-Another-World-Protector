@@ -59,8 +59,7 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
     public void addRegion(IMarkableRegion region) {
         this.regionsInDimension.put(region.getName(), region);
         this.dimensionalRegion.addChild(region);
-        region.setParent(this.dimensionalRegion);
-        RegionDataManager.save();
+
     }
 
     public void addOwner(ServerPlayerEntity player) {
@@ -164,7 +163,7 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
 
     @Override
     public CompoundNBT serializeNBT() {
-        YetAnotherWorldProtector.LOGGER.info("Saving dim data for '" + this.dimensionalRegion.getName() +"'");
+        YetAnotherWorldProtector.LOGGER.debug("Saving dim data for '" + this.dimensionalRegion.getName() +"'");
         CompoundNBT nbt = new CompoundNBT();
         nbt.put(DIM_REGION, this.dimensionalRegion.serializeNBT());
         CompoundNBT regions = new CompoundNBT();
@@ -184,19 +183,19 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
             throw new IllegalArgumentException("Unable to load dimensional region data from NBT");
         }
         this.regionsInDimension = new HashMap<>();
-        YetAnotherWorldProtector.LOGGER.info("Loading dim data for '" + this.dimensionalRegion.getDim().location() +"'");
+        YetAnotherWorldProtector.LOGGER.debug("Loading dim data for '" + this.dimensionalRegion.getDim().location() +"'");
         CompoundNBT regionsNbt = nbt.getCompound(REGIONS);
         regionsNbt.getAllKeys().forEach(regionName -> {
             CompoundNBT regionNbt = regionsNbt.getCompound(regionName);
             AreaType areaType = AreaType.of(regionNbt.getString(AREA_TYPE));
             if (areaType != null) {
+                YetAnotherWorldProtector.LOGGER.debug("Loading region data for region '" + regionName + "'");
                 IMarkableRegion newRegion = DimensionRegionCache.deserializeLocalRegion(areaType, regionNbt);
                 this.addRegion(newRegion);
             } else {
-                YetAnotherWorldProtector.LOGGER.error("Unable to read region type for region!");
+                YetAnotherWorldProtector.LOGGER.error("Unable to read region type for region '" + regionName + "'!");
             }
         });
-        RegionDataManager.save();
     }
 
     public boolean hasOwner(PlayerEntity player) {
@@ -245,7 +244,7 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
             case PRISM:
                 return new PrismRegion(regionNbt);
             default:
-                throw new IllegalArgumentException("Unable to read area type.");
+                throw new IllegalArgumentException("Unable to read area type of region '" + regionNbt.getString(NAME) + "'!");
         }
     }
 }

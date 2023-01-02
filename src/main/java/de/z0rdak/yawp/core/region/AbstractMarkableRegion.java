@@ -127,8 +127,8 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
                 // region is handled after child and parent hierarchy is set
                 // this.priority = markableParentRegion.getPriority() + 1;
                 this.parent = markableParentRegion;
-                markableParentRegion.addChild(this);
-                YetAnotherWorldProtector.LOGGER.info("Setting parent '" + parent.getName() + "' for region '" + this.getName() + "'");
+                //markableParentRegion.addChild(this);
+                YetAnotherWorldProtector.LOGGER.debug("Setting parent '" + parent.getName() + "' for region '" + this.getName() + "'");
                 return true;
             } else {
                 return false;

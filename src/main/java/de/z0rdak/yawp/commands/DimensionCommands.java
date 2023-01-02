@@ -185,7 +185,7 @@ public class DimensionCommands {
         CuboidRegion region = new CuboidRegion(regionName, new CuboidArea(pos1, pos2), owner, dimCache.dimensionKey());
         RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
         LocalRegions.ensureHigherRegionPriorityFor(region, RegionConfig.DEFAULT_REGION_PRIORITY.get());
-        dimCache.addRegion(region);
+        RegionDataManager.save();
         sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
         return 0;
     }
@@ -203,6 +203,7 @@ public class DimensionCommands {
         SphereRegion region = new SphereRegion(regionName, area, owner, dimCache.dimensionKey());
         RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
         dimCache.addRegion(region);
+        RegionDataManager.save();
         sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
         return 0;
     }
