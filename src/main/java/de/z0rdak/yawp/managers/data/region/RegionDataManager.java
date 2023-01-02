@@ -28,6 +28,7 @@ import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import org.apache.commons.lang3.NotImplementedException;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -63,15 +64,16 @@ public class RegionDataManager extends WorldSavedData {
     }
 
     public static void save() {
-        YetAnotherWorldProtector.LOGGER.debug(new TranslationTextComponent(   "Called save. Attempting to save region data...").getString());
+        YetAnotherWorldProtector.LOGGER.debug(new TranslationTextComponent("Save for RegionDataManager called. Attempting to save region data...").getString());
         RegionDataManager.get().setDirty();
     }
 
     /**
-     * TODO: Should be used in CLI to provide a list of valid dimensions?
+     * Returns the name of all dimension tracked by the region data manager.
      *
-     * @return
+     * @return the set of dimension names which are tracked by the region data manager.
      */
+    @SuppressWarnings("unused")
     public static Set<String> getDimensionDataNames() {
         return Collections.unmodifiableSet(dimensionDataNames);
     }
@@ -93,7 +95,7 @@ public class RegionDataManager extends WorldSavedData {
     /**
      * Server startup hook for loading the region data from the yawp-dimension.dat file by creating an instance of RegionDataManager.
      *
-     * @param event
+     * @param event which is fired upon server start and acts as trigger to load region data from disk.
      */
     public static void loadRegionData(FMLServerStartingEvent event) {
         try {
@@ -159,9 +161,7 @@ public class RegionDataManager extends WorldSavedData {
                 }
             });
         }
-        dimCacheMap.forEach( (dimKey, cache) -> {
-            YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent(   "data.nbt.dimensions.loaded.dim.amount", cache.getRegions().size(), dimKey.location().toString()).getString());
-        });
+        dimCacheMap.forEach((dimKey, cache) -> YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.loaded.dim.amount", cache.getRegions().size(), dimKey.location().toString()).getString()));
     }
 
     /**
@@ -170,8 +170,9 @@ public class RegionDataManager extends WorldSavedData {
      * @param compound nbt data to be filled with the region information.
      * @return the compound region nbt data to be saved to disk.
      */
+    @Nonnull
     @Override
-    public CompoundNBT save(CompoundNBT compound) {
+    public CompoundNBT save(@Nonnull CompoundNBT compound) {
         CompoundNBT dimRegionNbtData = new CompoundNBT();
         YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.save.amount", this.getTotalRegionAmount(), dimCacheMap.keySet().size()).getString());
         for (Map.Entry<RegistryKey<World>, DimensionRegionCache> entry : dimCacheMap.entrySet()) {
@@ -185,6 +186,7 @@ public class RegionDataManager extends WorldSavedData {
 
     /**
      * Event handler which creates a new DimensionRegionCache when a dimension is created the first time, by a player loading the dimension.     *
+     *
      * @param event the PlayerChangedDimensionEvent which serves as a trigger and provides the information which dimension the player is traveling to.
      */
     @SubscribeEvent
@@ -225,7 +227,7 @@ public class RegionDataManager extends WorldSavedData {
         return cacheFor(dim).getRegions().size();
     }
 
-    public int getDimensionAmount(){
+    public int getDimensionAmount() {
         return dimCacheMap.keySet().size();
     }
 
@@ -287,7 +289,6 @@ public class RegionDataManager extends WorldSavedData {
                             region.addFlag(new BooleanFlag(flag));
                             break;
                         case LIST_FLAG:
-                            throw new NotImplementedException("");
                         case INT_FLAG:
                             throw new NotImplementedException("");
                     }
