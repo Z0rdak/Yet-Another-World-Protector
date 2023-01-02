@@ -129,7 +129,7 @@ public class RegionDataManager extends WorldSavedData {
                 if (dimCacheNbt.contains(REGIONS, Constants.NBT.TAG_COMPOUND)) {
                     YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.load.dim.amount", dimCacheNbt.getCompound(REGIONS).size(), dimKey).getString());
                 } else {
-                    YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("No region data for dim '" + dimKey + "' existing").getString());
+                    YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.load.dim.empty", dimKey).getString());
                 }
                 dimCacheMap.put(dimension, new DimensionRegionCache(dimCacheNbt));
             }
@@ -140,6 +140,12 @@ public class RegionDataManager extends WorldSavedData {
             DimensionRegionCache dimCache = dimCacheMap.get(dimension);
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
             dimCache.regionsInDimension.values().forEach(region -> {
+                // set child references
+                region.getChildrenNames().forEach(childName -> {
+                    IMarkableRegion childRegion = dimCache.getRegion(childName);
+                    region.addChild(childRegion);
+                });
+                // TODO: Replace this and put it into addChild?
                 // set parent reference
                 String parentName = region.getParentName();
                 boolean hasValidParent = parentName != null && !parentName.equals("");
@@ -151,8 +157,6 @@ public class RegionDataManager extends WorldSavedData {
                         region.setParent(dimCache.getRegion(parentName));
                     }
                 }
-                // set child references
-                region.getChildrenNames().forEach(childName -> region.addChild(dimCache.getRegion(childName)));
             });
         }
         dimCacheMap.forEach( (dimKey, cache) -> {

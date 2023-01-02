@@ -2,11 +2,10 @@ package de.z0rdak.yawp.core.region;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.core.affiliation.PlayerContainer;
-import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
+import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -258,12 +257,14 @@ public abstract class AbstractRegion implements IProtectedRegion {
     @Override
     public void removeChild(IProtectedRegion child) {
         this.children.remove(child.getName());
+        child.setParent(RegionDataManager.get().cacheFor(child.getDim()).getDimensionalRegion());
     }
 
     /**
+     * FIXME: do it
      * Try to add a child region to this region. <br>
      * Will throw an exception IllegalRegionStateException if: <br>
-     * 1. The child already has a parent    or <br>
+     * 1. The child already has a parent which is a local region  or <br>
      * 2. The child is the same regions as this or <br>
      * 3. The child is the parent of this region <br>
      * 4. The child area is not completely contained by the parent area.
@@ -271,19 +272,28 @@ public abstract class AbstractRegion implements IProtectedRegion {
      */
     @Override
     public void addChild(@Nonnull IProtectedRegion child) {
-        if (child.getParent() != null) {
-            // instead check if parent is dimensional region and remove it from dimensional region
-            // currently only region with parent dim are considered here
-            // throw new IllegalRegionStateException("");
-        }
+        // TODO: Global region stuff
         if (child.equals(this)) {
             throw new IllegalRegionStateException("");
         }
         if (child.equals(this.parent)) {
             throw new IllegalRegionStateException("");
         }
-        this.children.put(child.getName(), child);
+
+        IProtectedRegion childParent = child.getParent();
+        if (childParent != null) {
+            boolean hasDimRegionParent = childParent instanceof DimensionalRegion;
+            boolean hasLocalRegionParent = childParent instanceof IMarkableRegion;
+            if (hasLocalRegionParent) {
+                // not allowed to "steal" child from other parent than a dimensional region
+                throw new IllegalRegionStateException("");
+            }
+            if (hasDimRegionParent) {
+                childParent.removeChild(child);
+            }
+        }
         child.setParent(this);
+        this.children.put(child.getName(), child);
     }
 
     @Override
@@ -383,10 +393,10 @@ public abstract class AbstractRegion implements IProtectedRegion {
                 }
             }
         }
-        if (this.children != null && !this.children.isEmpty()) {
+        if (this.children != null && this.children.isEmpty()) {
             if (nbt.contains(CHILDREN, Constants.NBT.TAG_LIST )) {
-                ListNBT childrenNbt = nbt.getList(CHILDREN,  Constants.NBT.TAG_LIST);
-                if (!childrenNbt.isEmpty()) {
+                ListNBT childrenNbt = nbt.getList(CHILDREN,  Constants.NBT.TAG_STRING);
+                if (childrenNbt.size() > 0) {
                     this.children = new HashMap<>(childrenNbt.size());
                     this.childrenNames = new HashSet<>(childrenNbt.size());
                     for (int i = 0; i < childrenNbt.size(); i++) {

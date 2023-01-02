@@ -89,7 +89,7 @@
   "cli.msg.info.region.parent.set": "Set parent for region '%s': '%s'",
   "cli.msg.info.region.parent.set.link.text": "+",
   "cli.msg.info.region.parent.set.link.hover": "Set parent for region '%s'",
-  "cli.msg.info.region.parent.clear": "Cleared parent of region '%s'",
+  "cli.msg.info.region.parent.clear": "Setting default parent '%s' for '%s'",
   "cli.msg.info.region.parent.clear.link.text": "-",
   "cli.msg.info.region.parent.clear.link.hover": "Clear '%s' as parent region",
 
@@ -224,6 +224,7 @@
   "data.nbt.dimensions.save.amount": "Saving %s regions for %s dimensions",
   "data.nbt.dimensions.load.failure": "Loading regions failed!",
   "data.nbt.dimensions.load.dim.amount" : "Loading %s regions for dimension '%s'",
+  "data.nbt.dimensions.load.dim.empty" : "No region data for dimension '%s' found",
   "data.nbt.dimensions.loaded.dim.amount" : "Loaded %s regions for dimension '%s'",
   "data.nbt.dimensions.save.dim.amount" : "Saving %s regions for dimension '%s'"
 }
