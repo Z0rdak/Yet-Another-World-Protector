@@ -285,8 +285,10 @@ public abstract class AbstractRegion implements IProtectedRegion {
             boolean hasDimRegionParent = childParent instanceof DimensionalRegion;
             boolean hasLocalRegionParent = childParent instanceof IMarkableRegion;
             if (hasLocalRegionParent) {
-                // not allowed to "steal" child from other parent than a dimensional region
-                throw new IllegalRegionStateException("");
+                if (!childParent.equals(this)) {
+                    // not allowed to "steal" child from other parent than a dimensional region
+                    throw new IllegalRegionStateException("");
+                }
             }
             if (hasDimRegionParent) {
                 childParent.removeChild(child);

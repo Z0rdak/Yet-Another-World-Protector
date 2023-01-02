@@ -173,7 +173,7 @@ public class RegionDataManager extends WorldSavedData {
     @Override
     public CompoundNBT save(CompoundNBT compound) {
         CompoundNBT dimRegionNbtData = new CompoundNBT();
-        YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.save.amount", dimCacheMap.entrySet().size()).getString());
+        YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.save.amount", this.getTotalRegionAmount(), dimCacheMap.keySet().size()).getString());
         for (Map.Entry<RegistryKey<World>, DimensionRegionCache> entry : dimCacheMap.entrySet()) {
             YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.save.dim.amount", this.getRegionAmount(entry.getKey()), entry.getKey().location().toString()).getString());
             String dimensionName = entry.getValue().getDimensionalRegion().getName();
@@ -184,8 +184,7 @@ public class RegionDataManager extends WorldSavedData {
     }
 
     /**
-     * Event handler which creates a new DimensionRegionCache when a dimension is created the first time, by a player loading the dimension.
-     *
+     * Event handler which creates a new DimensionRegionCache when a dimension is created the first time, by a player loading the dimension.     *
      * @param event the PlayerChangedDimensionEvent which serves as a trigger and provides the information which dimension the player is traveling to.
      */
     @SubscribeEvent
@@ -193,8 +192,8 @@ public class RegionDataManager extends WorldSavedData {
         if (!event.getPlayer().getCommandSenderWorld().isClientSide) {
             if (!dimCacheMap.containsKey(event.getTo())) {
                 DimensionRegionCache cache = RegionDataManager.get().newCacheFor(event.getTo());
-                YetAnotherWorldProtector.LOGGER.info("Player traveling to dimension without region data.");
                 YetAnotherWorldProtector.LOGGER.info("Init region data for dimension '" + cache.dimensionKey().location() + "'..");
+                save();
             }
         }
     }
@@ -212,6 +211,7 @@ public class RegionDataManager extends WorldSavedData {
                 DimensionRegionCache cache = RegionDataManager.get().newCacheFor(dim);
                 YetAnotherWorldProtector.LOGGER.info("Player joining to server in dimension without region data. This should only happen the first time a player is joining.");
                 YetAnotherWorldProtector.LOGGER.info("Init region data for dimension '" + cache.dimensionKey().location() + "'..");
+                save();
             }
         }
     }
@@ -275,7 +275,6 @@ public class RegionDataManager extends WorldSavedData {
         cache.getDimensionalRegion().setParent(globalRegion);
         dimCacheMap.put(dim, cache);
         dimensionDataNames.add(cache.getDimensionalRegion().getName());
-        save();
         return cache;
     }
 
