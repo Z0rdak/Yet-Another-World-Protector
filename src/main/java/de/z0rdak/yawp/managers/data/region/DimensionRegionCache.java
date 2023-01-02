@@ -163,7 +163,6 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
 
     @Override
     public CompoundNBT serializeNBT() {
-        YetAnotherWorldProtector.LOGGER.debug("Saving dim data for '" + this.dimensionalRegion.getName() +"'");
         CompoundNBT nbt = new CompoundNBT();
         nbt.put(DIM_REGION, this.dimensionalRegion.serializeNBT());
         CompoundNBT regions = new CompoundNBT();
