@@ -136,10 +136,15 @@ public class RegionDataManager extends WorldSavedData {
                 dimCacheMap.put(dimension, new DimensionRegionCache(dimCacheNbt));
             }
         }
+        dimCacheMap.forEach((dimKey, cache) -> YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.loaded.dim.amount", cache.getRegions().size(), dimKey.location().toString()).getString()));
+
         // set parent and child references
         for (String dimKey : dimensionRegions.getAllKeys()) {
             RegistryKey<World> dimension = RegistryKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(dimKey));
             DimensionRegionCache dimCache = dimCacheMap.get(dimension);
+            if (dimCache.getRegions().size() > 0) {
+                YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent(  "data.nbt.dimensions.load.dim.restore", dimKey).getString());
+            }
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
             dimCache.regionsInDimension.values().forEach(region -> {
                 // set child references
@@ -161,7 +166,6 @@ public class RegionDataManager extends WorldSavedData {
                 }
             });
         }
-        dimCacheMap.forEach((dimKey, cache) -> YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.loaded.dim.amount", cache.getRegions().size(), dimKey.location().toString()).getString()));
     }
 
     /**

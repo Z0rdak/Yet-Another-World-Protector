@@ -47,9 +47,7 @@ public class YetAnotherWorldProtector
             ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, ()-> Pair.of(()-> FMLNetworkConstants.IGNORESERVERONLY, (version, network) -> true));
 
         });
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-            LOGGER.info("You are loading " + MODID_LONG + " on a client. " + MODID_LONG + " is a server only mod!");
-        });
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> LOGGER.info("You are loading " + MODID_LONG + " on a client. " + MODID_LONG + " is a server only mod!"));
 
     }
 

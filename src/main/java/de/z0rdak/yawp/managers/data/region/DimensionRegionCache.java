@@ -182,7 +182,6 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
             throw new IllegalArgumentException("Unable to load dimensional region data from NBT");
         }
         this.regionsInDimension = new HashMap<>();
-        YetAnotherWorldProtector.LOGGER.debug("Loading dim data for '" + this.dimensionalRegion.getDim().location() +"'");
         CompoundNBT regionsNbt = nbt.getCompound(REGIONS);
         regionsNbt.getAllKeys().forEach(regionName -> {
             CompoundNBT regionNbt = regionsNbt.getCompound(regionName);
