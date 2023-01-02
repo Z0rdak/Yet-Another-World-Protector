@@ -20,7 +20,6 @@ import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.core.stick.AbstractStick;
 import de.z0rdak.yawp.core.stick.MarkerStick;
-import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
 import de.z0rdak.yawp.util.StickException;
@@ -37,15 +36,16 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.scoreboard.ScorePlayerTeam;
-import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.util.CommandUtil.*;
@@ -66,6 +66,7 @@ public class RegionCommands {
 
     /**
      * TODO: Command to invert enable and alert based on region state
+     * TODO: Renaming a region
      *
      * @return
      */
@@ -180,7 +181,7 @@ public class RegionCommands {
                         .then(literal(CHILD)
                                 .then(Commands.argument(CHILD.toString(), StringArgumentType.word())
                                         .suggests((ctx, builder) -> RemoveRegionChildArgumentType.childRegions().listSuggestions(ctx, builder))
-                                        .executes(ctx -> removeChildren(ctx.getSource(), getDimCacheArgument(ctx), getRegionArgument(ctx), getChildRegionArgument(ctx))))))
+                                        .executes(ctx -> removeChildren(ctx.getSource(), getRegionArgument(ctx), getChildRegionArgument(ctx))))))
                 /*
                 .then(literal(PARENT)
                         .then(literal(SET)
@@ -211,7 +212,7 @@ public class RegionCommands {
                 if (parent instanceof IMarkableRegion) {
                     IMarkableRegion localParentRegion = (IMarkableRegion) parent;
                     CuboidArea parentArea = (CuboidArea) localParentRegion.getArea();
-                    if(parentArea.contains(cuboidArea)) {
+                    if (parentArea.contains(cuboidArea)) {
                         int newPriority = LocalRegions.ensureHigherRegionPriorityFor(cuboidRegion, localParentRegion.getPriority() + 1);
                     } else {
                         TranslationTextComponent updateAreaFailMsg = new TranslationTextComponent("cli.msg.info.region.spatial.area.update.fail", buildRegionSpatialPropLink(region), buildRegionInfoLink(region));
@@ -325,14 +326,17 @@ public class RegionCommands {
         return 0;
     }
 
-    private static int removeChildren(CommandSource src, DimensionRegionCache dimCache, IMarkableRegion parent, IMarkableRegion child) {
+    private static int removeChildren(CommandSource src, IMarkableRegion parent, IMarkableRegion child) {
         if (parent.hasChild(child)) {
             parent.removeChild(child);
             LocalRegions.ensureLowerRegionPriorityFor((CuboidRegion) child, RegionConfig.DEFAULT_REGION_PRIORITY.get());
             RegionDataManager.save();
-            // TODO: Msg with link to parent and child
-            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.children.remove", child.getName(), parent.getName()));
-            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.parent.clear", child.getName()));
+
+            IFormattableTextComponent parentLink = buildRegionInfoLink(parent);
+            IFormattableTextComponent notLongerChildLink = buildRegionInfoLink(child);
+            IFormattableTextComponent dimensionalLink = buildDimensionalInfoLink(child.getDim());
+            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.children.remove", notLongerChildLink, parentLink));
+            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.parent.clear", notLongerChildLink, dimensionalLink));
             return 0;
         }
         // should not happen, due to RemoveRegionChildArgumentType should only provide valid child regions
@@ -344,8 +348,10 @@ public class RegionCommands {
             parent.addChild(child);
             LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) child, parent.getPriority() + 1);
             RegionDataManager.save();
-            // TODO: Msg with link to parent and child
-            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.children.add", child.getName(), parent.getName()));
+
+            IFormattableTextComponent parentLink = buildRegionInfoLink(parent);
+            IFormattableTextComponent childLink = buildRegionInfoLink(child);
+            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.children.add", childLink, parentLink));
             return 0;
         }
         // should not happen, due to AddRegionChildArgumentType should only provide valid child regions
@@ -390,7 +396,6 @@ public class RegionCommands {
                     region.addFlag(new BooleanFlag(flag));
                     break;
                 case LIST_FLAG:
-                    break;
                 case INT_FLAG:
                     break;
             }
@@ -444,6 +449,7 @@ public class RegionCommands {
     /**
      * Attempt to set new priority for the given region. <br>
      * Fails if region priority is used by an overlapping region at same hierarchy level.
+     *
      * @param src
      * @param region
      * @param priority
@@ -599,7 +605,7 @@ public class RegionCommands {
     /**
      * Prompt region spatial properties like teleport location and area.
      * == Region [<name>] spatial properties ==
-     * Location: [dimInfo]@[tpCoords]
+     * Location: [dimInfo]@[tpCoordinates]
      * Area: [spatialProperties]
      *
      * @param src
@@ -673,8 +679,7 @@ public class RegionCommands {
                     AbstractStick abstractStick = StickUtil.getStick(maybeStick);
                     if (abstractStick.getStickType() == StickType.MARKER) {
                         MarkerStick marker = (MarkerStick) abstractStick;
-                        // TODO:
-                        //RegionDataManager.get().update(regionName, marker);
+                        // TODO: RegionDataManager.get().update(regionName, marker);
                     }
                 } catch (StickException e) {
                     sendCmdFeedback(src, "CommandSource is not player. Aborting.. Needs RegionMarker with Block-NBT data in player hand");
