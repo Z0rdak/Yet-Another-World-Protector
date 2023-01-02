@@ -337,7 +337,6 @@ public abstract class AbstractRegion implements IProtectedRegion {
             throw new IllegalRegionStateException("Parent '" + parent.getName() + "' is already set as child for region '" + this.getName() + "'!");
         }
         if (parent.hasChild(this)) {
-            YetAnotherWorldProtector.LOGGER.debug("Already set parent for region");
             return true;
         }
         return false;

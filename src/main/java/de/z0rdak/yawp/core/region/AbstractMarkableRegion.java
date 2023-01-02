@@ -17,7 +17,7 @@ import java.util.*;
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
 /**
- * The AbstractMarkableRegion represents a abstract implementation for a markable region.
+ * The AbstractMarkableRegion represents an abstract implementation for a markable region.
  * This can be used to implement different types of regions which define their area in a different way.
  */
 public abstract class AbstractMarkableRegion extends AbstractRegion implements IMarkableRegion {
