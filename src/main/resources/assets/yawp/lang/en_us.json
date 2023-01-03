@@ -89,7 +89,7 @@
   "cli.msg.info.region.parent.set": "Set parent for region '%s': '%s'",
   "cli.msg.info.region.parent.set.link.text": "+",
   "cli.msg.info.region.parent.set.link.hover": "Set parent for region '%s'",
-  "cli.msg.info.region.parent.clear": "Setting default parent '%s' for '%s'",
+  "cli.msg.info.region.parent.clear": "Reset default parent for '%s' back to '%s'",
   "cli.msg.info.region.parent.clear.link.text": "-",
   "cli.msg.info.region.parent.clear.link.hover": "Clear '%s' as parent region",
 

@@ -20,6 +20,7 @@ import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.core.stick.AbstractStick;
 import de.z0rdak.yawp.core.stick.MarkerStick;
+import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
 import de.z0rdak.yawp.util.StickException;
@@ -181,8 +182,8 @@ public class RegionCommands {
                         .then(literal(CHILD)
                                 .then(Commands.argument(CHILD.toString(), StringArgumentType.word())
                                         .suggests((ctx, builder) -> RemoveRegionChildArgumentType.childRegions().listSuggestions(ctx, builder))
-                                        .executes(ctx -> removeChildren(ctx.getSource(), getRegionArgument(ctx), getChildRegionArgument(ctx))))))
-                /*
+                                        .executes(ctx -> removeChildren(ctx.getSource(), getDimRegionArgument(ctx), getRegionArgument(ctx), getChildRegionArgument(ctx))))))
+                /* TODO: Facade for reverse child setting ?
                 .then(literal(PARENT)
                         .then(literal(SET)
                                 .then(Commands.argument(PARENT_REGION.toString(), StringArgumentType.word())
@@ -326,12 +327,12 @@ public class RegionCommands {
         return 0;
     }
 
-    private static int removeChildren(CommandSource src, IMarkableRegion parent, IMarkableRegion child) {
+    private static int removeChildren(CommandSource src, DimensionalRegion dimRegion, IMarkableRegion parent, IMarkableRegion child) {
         if (parent.hasChild(child)) {
-            parent.removeChild(child);
+            // FIXME: Removing child does not set priority correct with overlapping regions
+            dimRegion.addChild(child); // this also removes the child from the local parent
             LocalRegions.ensureLowerRegionPriorityFor((CuboidRegion) child, RegionConfig.DEFAULT_REGION_PRIORITY.get());
             RegionDataManager.save();
-
             IFormattableTextComponent parentLink = buildRegionInfoLink(parent);
             IFormattableTextComponent notLongerChildLink = buildRegionInfoLink(child);
             IFormattableTextComponent dimensionalLink = buildDimensionalInfoLink(child.getDim());

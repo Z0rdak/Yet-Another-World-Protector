@@ -257,37 +257,32 @@ public abstract class AbstractRegion implements IProtectedRegion {
     @Override
     public void removeChild(IProtectedRegion child) {
         this.children.remove(child.getName());
-        child.setParent(RegionDataManager.get().cacheFor(child.getDim()).getDimensionalRegion());
     }
 
     /**
-     * FIXME: do it
+     * TODO: Global region stuff
+     * Most error handling and consistency checks are done beforehand by the ArgumentTypes for add and removing children.
      * Try to add a child region to this region. <br>
-     * Will throw an exception IllegalRegionStateException if: <br>
      * 1. The child already has a parent which is a local region  or <br>
      * 2. The child is the same regions as this or <br>
      * 3. The child is the parent of this region <br>
-     * 4. The child area is not completely contained by the parent area.
+     * 4. The child area is not completely contained by the parent area. (done beforehand)
+     * Also removes child from dimension region
+     * FIXME: since this method does manage more than adding children, it should be renamed
      * @param child child to add to this region.
      */
     @Override
     public void addChild(@Nonnull IProtectedRegion child) {
-        // TODO: Global region stuff
-        if (child.equals(this)) {
-            throw new IllegalRegionStateException("");
-        }
-        if (child.equals(this.parent)) {
-            throw new IllegalRegionStateException("");
-        }
-
         IProtectedRegion childParent = child.getParent();
         if (childParent != null) {
             boolean hasDimRegionParent = childParent instanceof DimensionalRegion;
             boolean hasLocalRegionParent = childParent instanceof IMarkableRegion;
             if (hasLocalRegionParent) {
-                if (!childParent.equals(this)) {
-                    // not allowed to "steal" child from other parent than a dimensional region
-                    throw new IllegalRegionStateException("");
+                if (!childParent.equals(this) && this instanceof IMarkableRegion) {
+                    throw new IllegalRegionStateException("Not allowed to \"steal\" child from other parent than a dimensional region");
+                }
+                if (this instanceof DimensionalRegion) {
+                    childParent.removeChild(child);
                 }
             }
             if (hasDimRegionParent) {
