@@ -5,15 +5,11 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.core.region.AbstractRegion;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
-import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import de.z0rdak.yawp.util.DimensionalRegions;
 import de.z0rdak.yawp.util.MessageUtil;
-import de.z0rdak.yawp.util.LocalRegions;
 import net.minecraft.block.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -33,6 +29,7 @@ import net.minecraft.tileentity.LecternTileEntity;
 import net.minecraft.tileentity.LockableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Hand;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -43,7 +40,6 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.ToolType;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
@@ -57,12 +53,12 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.getEntityDim;
+import static de.z0rdak.yawp.util.LocalRegions.getInvolvedRegionFor;
+import static net.minecraftforge.common.ToolType.*;
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 
 /**
@@ -74,6 +70,68 @@ public final class PlayerFlagHandler {
     private PlayerFlagHandler() {
     }
 
+    private static void checkPlayerFlagForEvent(RegionFlag flag, BlockPos targetPos, PlayerEntity player, DimensionalRegion dimRegion, Event event) {
+        IMarkableRegion region = getInvolvedRegionFor(flag, targetPos, player, dimRegion.getDim());
+        if (dimRegion.containsFlag(flag) && !dimRegion.permits(player)) {
+            if (region != null) {
+                MessageUtil.sendFlagNotification(player, region, flag);
+                event.setCanceled(true);
+            } else {
+                MessageUtil.sendDimFlagNotification(player, flag);
+                event.setCanceled(true);
+            }
+        }
+    }
+
+    public static void handleAndSendMsg(Event event, FlagCheckEvent.PlayerFlagEvent flagCheck) {
+        if (flagCheck.getLocalRegion() == null && flagCheck.isDeniedInDim()) {
+            MessageUtil.sendDimFlagNotification(flagCheck.getPlayer(), flagCheck.getFlag());
+        }
+        if (flagCheck.isDeniedLocal()) {
+            MessageUtil.sendFlagNotification(flagCheck.getPlayer(), flagCheck.getLocalRegion(), flagCheck.getFlag());
+        }
+        event.setCanceled(flagCheck.isDenied());
+    }
+
+    public static FlagCheckEvent.PlayerFlagEvent checkPlayerEvent(PlayerEntity player, BlockPos target, RegionFlag regionFlag, DimensionalRegion dimRegion) {
+        IMarkableRegion involvedRegion = getInvolvedRegionFor(regionFlag, target, player.level.dimension());
+        FlagCheckEvent.PlayerFlagEvent flagCheck = new FlagCheckEvent.PlayerFlagEvent(player, dimRegion, involvedRegion, regionFlag);
+        if (involvedRegion == null) {
+            flagCheck.setDeniedLocal(false);
+        } else {
+            IFlag flag = involvedRegion.getFlag(regionFlag.name);
+            // TODO: Check state with allowed
+            flagCheck.setDeniedLocal(flag.isActive());
+        }
+        if (dimRegion.isActive()) {
+            if (dimRegion.containsFlag(regionFlag) && !dimRegion.permits(player)) {
+                IFlag flag = dimRegion.getFlag(regionFlag.name);
+                // TODO: Check state with allowed
+                flagCheck.setDeniedInDim(flag.isActive());
+            } else {
+                flagCheck.setDeniedInDim(false);
+            }
+        } else {
+            flagCheck.setDeniedInDim(false);
+        }
+
+        if (flagCheck.getLocalRegion() == null) {
+            flagCheck.setDenied(flagCheck.isDeniedInDim());
+            return flagCheck;
+        } else {
+            boolean deniedResult = flagCheck.isDeniedInDim() && flagCheck.isDeniedLocal() ? true
+                    : flagCheck.isDeniedInDim() && !flagCheck.isDeniedLocal() ? false
+                    : !flagCheck.isDeniedInDim() && (flagCheck.isDeniedLocal()) ? true
+                    : !flagCheck.isDeniedInDim() && !flagCheck.isDeniedLocal();
+            flagCheck.setDenied(deniedResult);
+            return flagCheck;
+        }
+    }
+
+    /**
+     *
+     * Prevents traditional attacks from players which use EntityPlayer.attackTargetEntityWithCurrentItem(Entity).
+     */
     @SubscribeEvent
     public static void onAttackPlayer(AttackEntityEvent event) {
         if (!event.getPlayer().getCommandSenderWorld().isClientSide) {
@@ -132,7 +190,6 @@ public final class PlayerFlagHandler {
             }
         }
     }
-
 
     // unrelated: mobs pickup logic => MobEntity#livingTick
     @SubscribeEvent
@@ -241,7 +298,6 @@ public final class PlayerFlagHandler {
         }
     }
 
-
     // TODO: handle flags for Villagers, Animals, Monsters, Player separate
     @SubscribeEvent
     public static void onHurt(LivingHurtEvent event) {
@@ -314,27 +370,14 @@ public final class PlayerFlagHandler {
         }
     }
 
-    class RegionCheckResult{
-        public boolean isAllowedInDim;
-        public boolean isAllowedLocal;
-        public RegionFlag flag;
-        public String playerMsg;
-        @Nullable
-        PlayerEntity player;
-    }
-
     @SubscribeEvent
     public static void onPlayerBreakBlock(BlockEvent.BreakEvent event) {
         if (isServerSide(event)) {
             PlayerEntity player = event.getPlayer();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
-            if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
-                DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                if (dimRegion.containsFlag(RegionFlag.BREAK_BLOCKS) && !dimRegion.permits(player)) {
-                    event.setCanceled(true);
-                    MessageUtil.sendStatusMessage(player, new TranslationTextComponent("message.event.protection.break_block"));
-                    return;
-                }
+            if (dimCache != null) {
+                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getPos(), BREAK_BLOCKS, dimCache.getDimensionalRegion());
+                handleAndSendMsg(event, flagCheckEvent);
             }
         }
     }
@@ -412,12 +455,9 @@ public final class PlayerFlagHandler {
             if (event.getEntity() != null && event.getEntity() instanceof PlayerEntity) {
                 PlayerEntity player = (PlayerEntity) event.getEntity();
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
-                if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
-                    DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                    if (dimRegion.containsFlag(PLACE_BLOCKS) && !dimRegion.permits(player)) {
-                        event.setCanceled(true);
-                        MessageUtil.sendStatusMessage(player, new TranslationTextComponent("message.event.protection.place_block"));
-                    }
+                if (dimCache != null) {
+                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getPos(), PLACE_BLOCKS, dimCache.getDimensionalRegion());
+                    handleAndSendMsg(event, flagCheckEvent);
                 }
             }
         }
