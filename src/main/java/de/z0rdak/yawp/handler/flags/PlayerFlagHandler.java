@@ -73,7 +73,9 @@ public final class PlayerFlagHandler {
             MessageUtil.sendDimFlagNotification(flagCheck.getPlayer(), flagCheck.getFlag());
         }
         if (flagCheck.isDeniedLocal()) {
-            MessageUtil.sendFlagNotification(flagCheck.getPlayer(), flagCheck.getLocalRegion(), flagCheck.getFlag());
+            if (!flagCheck.getLocalRegion().isMuted()) {
+                MessageUtil.sendFlagNotification(flagCheck.getPlayer(), flagCheck.getLocalRegion(), flagCheck.getFlag());
+            }
         }
         event.setCanceled(flagCheck.isDenied());
         return flagCheck.isDenied();
@@ -81,20 +83,13 @@ public final class PlayerFlagHandler {
 
     public static boolean sendFlagDeniedMsg(FlagCheckEvent.PlayerFlagEvent flagCheck) {
         if (flagCheck.getLocalRegion() == null && flagCheck.isDeniedInDim()) {
+            // TODO: Muted property for dimensions | config option | don't display ?
             MessageUtil.sendDimFlagNotification(flagCheck.getPlayer(), flagCheck.getFlag());
         }
         if (flagCheck.isDeniedLocal()) {
-            MessageUtil.sendFlagNotification(flagCheck.getPlayer(), flagCheck.getLocalRegion(), flagCheck.getFlag());
-        }
-        return flagCheck.isDenied();
-    }
-
-    public static boolean sendFlagDeniedChatMsg(FlagCheckEvent.PlayerFlagEvent flagCheck) {
-        if (flagCheck.getLocalRegion() == null && flagCheck.isDeniedInDim()) {
-            MessageUtil.sendDimFlagNotification(flagCheck.getPlayer(), flagCheck.getFlag());
-        }
-        if (flagCheck.isDeniedLocal()) {
-            MessageUtil.sendFlagNotification(flagCheck.getPlayer(), flagCheck.getLocalRegion(), flagCheck.getFlag());
+            if (!flagCheck.getLocalRegion().isMuted()) {
+                MessageUtil.sendFlagNotification(flagCheck.getPlayer(), flagCheck.getLocalRegion(), flagCheck.getFlag());
+            }
         }
         return flagCheck.isDenied();
     }

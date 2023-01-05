@@ -417,12 +417,13 @@ public class RegionCommands {
         return 1;
     }
 
-    private static int setAlertState(CommandSource src, IMarkableRegion region, boolean mute) {
-        boolean oldState = region.isMuted();
-        region.setIsMuted(mute);
+    private static int setAlertState(CommandSource src, IMarkableRegion region, boolean showAlert) {
+        boolean wasEnabled = !region.isMuted();
+        region.setIsMuted(showAlert);
         RegionDataManager.save();
-        if (oldState != region.isMuted()) {
-            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.state.alert.set.value", region.getName(), oldState, region.isMuted()));
+        if (wasEnabled == region.isMuted()) {
+            boolean isEnabled = !region.isMuted();
+            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.state.alert.set.value", region.getName(), wasEnabled, isEnabled));
         }
         return 0;
     }

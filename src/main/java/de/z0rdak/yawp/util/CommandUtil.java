@@ -97,7 +97,7 @@ public class CommandUtil {
     }
 
     public static boolean getAlertArgument(CommandContext<CommandSource> ctx) {
-        return BoolArgumentType.getBool(ctx, CommandConstants.ALERT.toString());
+        return !BoolArgumentType.getBool(ctx, CommandConstants.ALERT.toString());
     }
     public static boolean getEnableArgument(CommandContext<CommandSource> ctx) {
         return BoolArgumentType.getBool(ctx, CommandConstants.ENABLE.toString());
