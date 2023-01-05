@@ -51,8 +51,10 @@
   "cli.msg.flags.removed": "Removed flag '%s' from region '%s'",
 
   "cli.msg.info.dim.region": "Region(s)",
+  "cli.msg.info.dim.region.child.hover": "Marks this region as a direct child region",
   "cli.msg.info.dim.region.remove.attempt": "Attempt to remove region '%s' from dimension '%s'. Confirm removal by appending -y",
   "cli.msg.info.dim.region.remove.confirm": "Removed region '%s' from dimension '%s'",
+  "cli.msg.info.dim.region.remove.fail.hasChildren": "Region '%s' can't be deleted because it has child regions.",
   "cli.msg.info.dim.region.remove.link.hover" : "Remove region '%s'",
   "cli.msg.info.dim.region.remove.link.text" : "x",
 
@@ -219,12 +221,20 @@
   "cli.arg.flag.parse.invalid": "Unable to parse flag identifier!",
   "cli.arg.dim.invalid": "Dimension '%s' does not exist!",
 
-  "data.nbt.dimensions.load.success": "Loaded %s regions for %s dimension(s)",
-  "data.nbt.dimensions.load.amount": "Loading regions for %s dimension(s)",
-  "data.nbt.dimensions.save.amount": "Saving %s regions for %s dimensions",
+  "data.nbt.dimensions.load.success": "Loaded %s region(s) for %s dimension(s)",
+  "data.nbt.dimensions.load.amount": "Loading region(s) for %s dimension(s)",
+  "data.nbt.dimensions.save.amount": "Saving %s region(s) for %s dimensions",
   "data.nbt.dimensions.load.failure": "Loading regions failed!",
-  "data.nbt.dimensions.load.dim.amount" : "Loading %s regions for dimension '%s'",
+  "data.nbt.dimensions.load.dim.amount" : "Loading %s region(s) for dimension '%s'",
+  "data.nbt.dimensions.load.dim.restore" : "Restoring region hierarchy for regions in dimension '%s'",
   "data.nbt.dimensions.load.dim.empty" : "No region data for dimension '%s' found",
-  "data.nbt.dimensions.loaded.dim.amount" : "Loaded %s regions for dimension '%s'",
-  "data.nbt.dimensions.save.dim.amount" : "Saving %s regions for dimension '%s'"
+  "data.nbt.dimensions.loaded.dim.amount" : "Loaded %s region(s) for dimension '%s'",
+  "data.nbt.dimensions.save.dim.amount" : "Saving %s region(s) for dimension '%s'",
+
+
+  "flag.dim.player.msg.push.deny": "The '%s' flag denies this action in this dimension!",
+  "flag.dim.player.msg.push.allow": "",
+  "flag.local.player.msg.push.deny": "[%s]: The '%s' flag denies this action here!",
+  "flag.local.player.msg.push.allow": ""
+
 }
