@@ -4,8 +4,6 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
-import de.z0rdak.yawp.core.flag.BooleanFlag;
-import de.z0rdak.yawp.core.flag.FlagType;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
@@ -22,6 +20,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
+import static de.z0rdak.yawp.core.flag.FlagType.BOOLEAN_FLAG;
+import static de.z0rdak.yawp.core.flag.FlagType.getFlagTypes;
 import static de.z0rdak.yawp.util.CommandUtil.*;
 
 /**
@@ -48,7 +48,39 @@ public final class FlagCommands {
      * @return
      */
     private static LiteralArgumentBuilder<CommandSource> register() {
-        return literal(CommandConstants.FLAG).executes(ctx -> promptHelp(ctx.getSource()));
+        Set<String> flagTypes = getFlagTypes();
+        return literal(FLAG)
+                .then(Commands.argument(DIMENSION.toString(), DimensionArgument.dimension())
+                        .then(Commands.argument(REGION.toString(), StringArgumentType.word())
+                                .then(literal(ENABLE)
+                                        .then(Commands.argument(ENABLE.toString(), BoolArgumentType.bool())
+                                                .executes(ctx -> setActiveState(ctx.getSource(), getRegionArgument(ctx), getFlagArgument(ctx), BoolArgumentType.getBool(ctx, ENABLE.toString())))))
+                                .then(literal(INVERT)
+                                        .then(Commands.argument(INVERT.toString(), BoolArgumentType.bool())
+                                                .executes(ctx -> setInvertState(ctx.getSource(), getRegionArgument(ctx), getFlagArgument(ctx), BoolArgumentType.getBool(ctx, INVERT.toString())))))
+
+                                .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestions(ctx, builder))
+                                .then(Commands.argument(TYPE.toString(), StringArgumentType.word())
+                                        .suggests((ctx, builder) -> ISuggestionProvider.suggest(Collections.singleton(BOOLEAN_FLAG.flagType), builder))
+                                        .then(Commands.argument(FLAG.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> ISuggestionProvider.suggest(
+                                                                RegionFlag.getFlags(getFlagTypeArgument(ctx))
+                                                                        .stream()
+                                                                        .map(flag -> flag.name)
+                                                                        .collect(Collectors.toSet()), builder)
+                                                        )
+                                                // .then(literal(ADD)
+                                                //        .then(Commands.argument("entry", StringArgumentType.word())
+                                                //                .suggests((ctx, builder) -> ISuggestionProvider.suggest(Collections.singleton("your-entry"), builder))
+                                                //                .executes(ctx -> promptHelp(ctx.getSource()))))
+                                                //.then(literal(REMOVE)
+                                                //        .then(Commands.argument("entry", StringArgumentType.word())
+                                                //                .suggests((ctx, builder) -> ISuggestionProvider.suggest(Collections.singleton("your-entry"), builder))
+                                                //                .executes(ctx -> promptHelp(ctx.getSource()))))
+                                        )
+                                )
+                        )
+                );
     }
 
     public static int setActiveState(CommandSource src, IMarkableRegion region, RegionFlag flag, boolean enable) {
