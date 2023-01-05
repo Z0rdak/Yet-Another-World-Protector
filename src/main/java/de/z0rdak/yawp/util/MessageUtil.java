@@ -110,6 +110,12 @@ public class MessageUtil {
                         .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText)));
     }
 
+    public static IFormattableTextComponent buildTextWithHoverMsg(IFormattableTextComponent text, IFormattableTextComponent hoverText, TextFormatting color) {
+        return TextComponentUtils.wrapInSquareBrackets(text)
+                .setStyle(Style.EMPTY.withColor(color)
+                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText)));
+    }
+
     public static IFormattableTextComponent buildDimensionTeleportLink(IMarkableRegion region) {
         String cmdLinkText = buildTeleportLinkText(region.getDim(), region.getTpTarget());
         String executeCmdStr = buildDimTeleportCmd(region.getDim(), "@s", region.getTpTarget());
