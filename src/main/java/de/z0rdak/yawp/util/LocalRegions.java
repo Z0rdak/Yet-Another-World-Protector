@@ -81,6 +81,16 @@ public final class LocalRegions {
                 .collect(Collectors.toList());
     }
 
+    public static List<IMarkableRegion> getInvolvedRegionsFor(RegionFlag flag, BlockPos position, PlayerEntity player, RegistryKey<World> dim) {
+        return RegionDataManager.get().getRegionsFor(dim).stream()
+                .filter(IMarkableRegion::isActive)
+                .filter(region -> region.containsFlag(flag) && region.getFlag(flag.name).isActive())
+                .filter(region -> !region.permits(player))
+                // position check should always be the last check to do, because it is the most computation expensive
+                .filter(region -> region.contains(position))
+                .collect(Collectors.toList());
+    }
+
     public static List<IMarkableRegion> getRegionsAround(BlockPos position, RegistryKey<World> dim) {
         return RegionDataManager.get().getRegionsFor(dim).stream()
                 .filter(region -> region.contains(position))
@@ -101,6 +111,20 @@ public final class LocalRegions {
         }
     }
 
+    public static IMarkableRegion getInvolvedRegionFor(RegionFlag flag, BlockPos position, PlayerEntity player, RegistryKey<World> dim) {
+        List<IMarkableRegion> regionsForPos = getInvolvedRegionsFor(flag, position, player, dim);
+        if (regionsForPos.isEmpty()) {
+            return null;
+        } else {
+            return Collections.max(regionsForPos, Comparator.comparing(IMarkableRegion::getPriority));
+        }
+    }
+
+    /**
+     * Gets intersecting region at the same region hierarchy.
+     * @param cuboidRegion
+     * @return
+     */
     public static List<CuboidRegion> getIntersectingRegionsFor(CuboidRegion cuboidRegion){
         return cuboidRegion.getParent().getChildren().values()
                 .stream()
