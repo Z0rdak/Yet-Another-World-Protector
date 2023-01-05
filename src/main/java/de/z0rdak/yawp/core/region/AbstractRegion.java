@@ -279,6 +279,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
             boolean hasLocalRegionParent = childParent instanceof IMarkableRegion;
             if (hasLocalRegionParent) {
                 if (!childParent.equals(this) && this instanceof IMarkableRegion) {
+                    // TODO: Why not allow this, as long as the owner of both regions are the same?
                     throw new IllegalRegionStateException("Not allowed to \"steal\" child from other parent than a dimensional region");
                 }
                 if (this instanceof DimensionalRegion) {
