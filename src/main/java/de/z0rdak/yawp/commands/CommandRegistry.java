@@ -44,7 +44,7 @@ public class CommandRegistry {
                 //                .executes(ctx -> DimensionCommands.selectReferenceDim(ctx.getSource(), getDimRegionArgument(ctx)))))
                 .then(DimensionCommands.DIMENSION_COMMAND)
                 .then(RegionCommands.REGION_COMMAND)
-                .then(FlagCommands.FLAG_COMMAND)
+                //.then(FlagCommands.FLAG_COMMAND)
                 //.then(RegionCommands.REGIONS_COMMAND)
                 //.then(DimensionFlagCommands.DIMENSION_FLAGS_COMMAND);
                 //.then(CommandExpand.EXPAND_COMMAND)
