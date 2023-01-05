@@ -45,6 +45,7 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -332,14 +333,19 @@ public class DimensionCommands {
         return 1;
     }
 
-
-    // TODO: Flag Component and Link
     private static int promptDimensionFlagList(CommandSource src, DimensionRegionCache dimCache) {
-        List<IFlag> flags = dimCache.getDimensionalRegion().getFlags()
-                .stream()
-                // TODO: implement comparable for flags
-                // .sorted()
+        List<IFlag> activeFlags = dimCache.getDimensionalRegion().getFlags().stream()
+                .filter(IFlag::isActive)
+                .sorted()
                 .collect(Collectors.toList());
+        List<IFlag> inActiveFlags = dimCache.getDimensionalRegion().getFlags().stream()
+                .filter(f -> !f.isActive())
+                .sorted()
+                .collect(Collectors.toList());
+        activeFlags.addAll(inActiveFlags);
+        List<IFlag> flags = new ArrayList<>(activeFlags);
+        flags.addAll(inActiveFlags);
+
         RegistryKey<World> dim = dimCache.dimensionKey();
         if (flags.isEmpty()) {
             sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.flags.empty", dim.location().toString()));
@@ -411,6 +417,7 @@ public class DimensionCommands {
                         .append(buildDimSuggestRegionRemovalLink(region))
                         .append(" ")
                         .append(buildRegionInfoLink(region))
+                        .append(buildTextWithHoverMsg(new StringTextComponent(dimCache.getDimensionalRegion().hasChild(region) ? "*" : ""), new TranslationTextComponent("cli.msg.info.dim.region.child.hover"), GOLD))
                         .append(new StringTextComponent(RESET + " @ " + RESET))
                         .append(buildRegionTeleportLink(region));
                 sendCmdFeedback(source, regionRemoveLink);
