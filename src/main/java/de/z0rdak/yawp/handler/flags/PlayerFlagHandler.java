@@ -143,7 +143,7 @@ public final class PlayerFlagHandler {
                 RegistryKey<World> entityDim = getEntityDim(attacker);
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(entityDim);
                 if (dimCache != null) {
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(attacker, target.blockPosition(), ATTACK_PLAYERS, dimCache.getDimensionalRegion());
+                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(attacker, target.blockPosition(), MELEE_PLAYERS, dimCache.getDimensionalRegion());
                     handleAndSendMsg(event, flagCheckEvent);
                 }
             }
@@ -163,22 +163,22 @@ public final class PlayerFlagHandler {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(entityDim);
             if (dimCache != null) {
                 if (isAnimal(eventEntity)) {
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, eventEntity.blockPosition(), ATTACK_ANIMALS, dimCache.getDimensionalRegion());
+                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, eventEntity.blockPosition(), MELEE_ANIMALS, dimCache.getDimensionalRegion());
                     handleAndSendMsg(event, flagCheckEvent);
                     return;
                 }
                 if (isMonster(eventEntity)) {
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, eventEntity.blockPosition(), ATTACK_MONSTERS, dimCache.getDimensionalRegion());
+                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, eventEntity.blockPosition(), MELEE_MONSTERS, dimCache.getDimensionalRegion());
                     handleAndSendMsg(event, flagCheckEvent);
                     return;
                 }
                 if (event.getTarget() instanceof VillagerEntity) {
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, eventEntity.blockPosition(), ATTACK_VILLAGERS, dimCache.getDimensionalRegion());
+                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, eventEntity.blockPosition(), MELEE_VILLAGERS, dimCache.getDimensionalRegion());
                     handleAndSendMsg(event, flagCheckEvent);
                     return;
                 }
                 if (event.getTarget() instanceof WanderingTraderEntity) {
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, eventEntity.blockPosition(), ATTACK_WANDERING_TRADER, dimCache.getDimensionalRegion());
+                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, eventEntity.blockPosition(), MELEE_WANDERING_TRADER, dimCache.getDimensionalRegion());
                     handleAndSendMsg(event, flagCheckEvent);
                 }
             }
@@ -294,7 +294,7 @@ public final class PlayerFlagHandler {
                     PlayerEntity playerSource = (PlayerEntity) dmgSourceEntity;
 
                     // another check for PVP - this does not prevent knock-back? but prevents dmg
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(playerSource, playerTarget.blockPosition(), ATTACK_PLAYERS, dimCache.getDimensionalRegion());
+                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(playerSource, playerTarget.blockPosition(), MELEE_PLAYERS, dimCache.getDimensionalRegion());
                     handleAndSendMsg(event, flagCheckEvent);
 
                     FlagCheckEvent.PlayerFlagEvent invincibleFlagCheckEvent = checkPlayerEvent(playerTarget, playerTarget.blockPosition(), INVINCIBLE, dimCache.getDimensionalRegion());
@@ -319,7 +319,7 @@ public final class PlayerFlagHandler {
                         PlayerEntity dmgSource = ((PlayerEntity) dmgSourceEntity);
 
                         // another check for PVP - this does not prevent knock-back? but prevents dmg
-                        FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(dmgSource, dmgTarget.blockPosition(), ATTACK_PLAYERS, dimCache.getDimensionalRegion());
+                        FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(dmgSource, dmgTarget.blockPosition(), MELEE_PLAYERS, dimCache.getDimensionalRegion());
                         handleAndSendMsg(event, flagCheckEvent);
 
                         FlagCheckEvent.PlayerFlagEvent invincibleFlagCheckEvent = checkPlayerEvent(dmgTarget, dmgTarget.blockPosition(), INVINCIBLE, dimCache.getDimensionalRegion());
