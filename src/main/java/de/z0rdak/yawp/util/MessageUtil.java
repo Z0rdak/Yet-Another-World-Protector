@@ -189,8 +189,7 @@ public class MessageUtil {
     }
 
     public static IFormattableTextComponent buildRegionEnableComponent(IMarkableRegion region){
-        String cmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), ENABLE.toString(), String.valueOf(!region.isActive()));
-        YetAnotherWorldProtector.LOGGER.warn(cmd);
+        String cmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), ENABLE.toString(), String.valueOf(!region.isActive()));
         String linkTextKey = "cli.msg.info.region.state.enable." + region.isActive() + ".link.text";
         String hoverTextKey = "cli.msg.info.region.state.enable." + !region.isActive() + ".link.hover";
         TextFormatting color = region.isActive() ? TextFormatting.GREEN : TextFormatting.RED;
@@ -218,11 +217,10 @@ public class MessageUtil {
     }
 
     public static IFormattableTextComponent buildRegionAlertComponentLink(IMarkableRegion region){
-        String cmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), ALERT.toString(), String.valueOf(!region.isMuted()));
-        YetAnotherWorldProtector.LOGGER.warn(cmd);
-        String linkTextKey = "cli.msg.info.region.state.alert." + region.isMuted() + ".link.text";
-        String hoverTextKey = "cli.msg.info.region.state.alert." + !region.isMuted() + ".link.hover";
-        TextFormatting color = region.isMuted() ? TextFormatting.GREEN : TextFormatting.RED;
+        String cmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), ALERT.toString(), String.valueOf(!region.isMuted()));
+        String linkTextKey = "cli.msg.info.region.state.alert." + !region.isMuted() + ".link.text";
+        String hoverTextKey = "cli.msg.info.region.state.alert." + region.isMuted() + ".link.hover";
+        TextFormatting color = region.isMuted() ? TextFormatting.RED : TextFormatting.GREEN;
         return buildExecuteCmdComponent(linkTextKey, hoverTextKey, cmd, ClickEvent.Action.RUN_COMMAND, color);
     }
 
