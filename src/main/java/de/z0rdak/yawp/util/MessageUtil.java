@@ -9,6 +9,7 @@ import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.area.SphereArea;
 import de.z0rdak.yawp.core.flag.IFlag;
+import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import net.minecraft.command.CommandSource;
@@ -87,12 +88,12 @@ public class MessageUtil {
         player.sendMessage(new TranslationTextComponent(translationKey), player.getUUID());
     }
 
-    public static void sendStatusMessage(PlayerEntity player, TranslationTextComponent text) {
-        player.displayClientMessage(text, true);
+    public static void sendDimFlagNotification(PlayerEntity player, RegionFlag flag) {
+        player.displayClientMessage(new TranslationTextComponent("flag.dim.player.msg.push.deny", flag.name), true);
     }
 
-    public static void sendStatusMessage(PlayerEntity player, String langKey) {
-        player.displayClientMessage(new TranslationTextComponent(langKey), true);
+    public static void sendFlagNotification(PlayerEntity player, IMarkableRegion region, RegionFlag flag) {
+        player.displayClientMessage(new TranslationTextComponent("flag.local.player.msg.push.deny", region.getName(), flag.name), true);
     }
 
     public static IFormattableTextComponent buildExecuteCmdComponent(String linkText, String hoverText, String command, ClickEvent.Action eventAction, TextFormatting color){
