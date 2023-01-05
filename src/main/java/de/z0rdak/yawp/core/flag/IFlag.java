@@ -28,7 +28,7 @@ import net.minecraftforge.common.util.INBTSerializable;
  * /rs trigger <region> on-leave clear-xp
  *
  */
-public interface IFlag extends INBTSerializable<CompoundNBT> {
+public interface IFlag extends INBTSerializable<CompoundNBT>, Comparable<IFlag> {
 
     /**
      * Get the unique identifier for the flag. <br>

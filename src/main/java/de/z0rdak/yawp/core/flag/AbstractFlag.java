@@ -79,4 +79,12 @@ public abstract class AbstractFlag implements IFlag {
         this.inverted = nbt.getBoolean(IS_INVERTED);
         this.flagType = FlagType.of(nbt.getString(RegionNBT.FLAG_TYPE));
     }
+
+    @Override
+    public int compareTo(IFlag o) {
+        int nameComparsionRes = this.flagIdentifier.compareTo(o.getFlagIdentifier());
+        int activeComparsionRes = this.isActive && !o.isActive() ? 1 : !this.isActive && o.isActive() ? -1 : 0;
+        return nameComparsionRes + activeComparsionRes;
+    }
+
 }
