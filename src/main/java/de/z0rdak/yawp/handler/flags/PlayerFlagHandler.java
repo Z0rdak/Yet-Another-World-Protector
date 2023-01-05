@@ -3,13 +3,8 @@ package de.z0rdak.yawp.handler.flags;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.config.server.FlagConfig;
-import de.z0rdak.yawp.core.flag.IFlag;
-import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.core.region.DimensionalRegion;
-import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.block.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -55,7 +50,6 @@ import java.util.List;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
-import static de.z0rdak.yawp.util.LocalRegions.getInvolvedRegionFor;
 import static net.minecraftforge.common.ToolType.*;
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 
@@ -66,64 +60,6 @@ import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 public final class PlayerFlagHandler {
 
     private PlayerFlagHandler() {
-    }
-
-    public static boolean handleAndSendMsg(Event event, FlagCheckEvent.PlayerFlagEvent flagCheck) {
-        if (flagCheck.getLocalRegion() == null && flagCheck.isDeniedInDim()) {
-            MessageUtil.sendDimFlagNotification(flagCheck.getPlayer(), flagCheck.getFlag());
-        }
-        if (flagCheck.isDeniedLocal()) {
-            if (!flagCheck.getLocalRegion().isMuted()) {
-                MessageUtil.sendFlagNotification(flagCheck.getPlayer(), flagCheck.getLocalRegion(), flagCheck.getFlag());
-            }
-        }
-        event.setCanceled(flagCheck.isDenied());
-        return flagCheck.isDenied();
-    }
-
-    public static boolean sendFlagDeniedMsg(FlagCheckEvent.PlayerFlagEvent flagCheck) {
-        if (flagCheck.getLocalRegion() == null && flagCheck.isDeniedInDim()) {
-            // TODO: Muted property for dimensions | config option | don't display ?
-            MessageUtil.sendDimFlagNotification(flagCheck.getPlayer(), flagCheck.getFlag());
-        }
-        if (flagCheck.isDeniedLocal()) {
-            if (!flagCheck.getLocalRegion().isMuted()) {
-                MessageUtil.sendFlagNotification(flagCheck.getPlayer(), flagCheck.getLocalRegion(), flagCheck.getFlag());
-            }
-        }
-        return flagCheck.isDenied();
-    }
-
-    public static FlagCheckEvent.PlayerFlagEvent checkPlayerEvent(PlayerEntity player, BlockPos target, RegionFlag regionFlag, DimensionalRegion dimRegion) {
-        IMarkableRegion involvedRegion = getInvolvedRegionFor(regionFlag, target, player, player.level.dimension());
-        FlagCheckEvent.PlayerFlagEvent flagCheck = new FlagCheckEvent.PlayerFlagEvent(player, dimRegion, involvedRegion, regionFlag);
-        if (involvedRegion == null) {
-            flagCheck.setDeniedLocal(false);
-        } else {
-            IFlag flag = involvedRegion.getFlag(regionFlag.name);
-            // TODO: Check state with allowed
-            flagCheck.setDeniedLocal(flag.isActive());
-        }
-        if (dimRegion.isActive()) {
-            if (dimRegion.containsFlag(regionFlag) && !dimRegion.permits(player)) {
-                IFlag flag = dimRegion.getFlag(regionFlag.name);
-                // TODO: Check state with allowed
-                flagCheck.setDeniedInDim(flag.isActive());
-            } else {
-                flagCheck.setDeniedInDim(false);
-            }
-        } else {
-            flagCheck.setDeniedInDim(false);
-        }
-
-        if (flagCheck.getLocalRegion() == null) {
-            flagCheck.setDenied(flagCheck.isDeniedInDim());
-            return flagCheck;
-        } else {
-            boolean deniedResult = flagCheck.isDeniedInDim() && flagCheck.isDeniedLocal() || (!flagCheck.isDeniedInDim() || flagCheck.isDeniedLocal()) && (!flagCheck.isDeniedInDim() && (flagCheck.isDeniedLocal()) || !flagCheck.isDeniedInDim() && !flagCheck.isDeniedLocal());
-            flagCheck.setDenied(deniedResult);
-            return flagCheck;
-        }
     }
 
     /**
@@ -448,7 +384,6 @@ public final class PlayerFlagHandler {
 
                     FlagCheckEvent.PlayerFlagEvent enderPearlFromRegionFlagCheck = checkPlayerEvent(player, player.blockPosition(), USE_ENDERPEARL_FROM_REGION, dimCache.getDimensionalRegion());
                     if (handleAndSendMsg(event, enderPearlFromRegionFlagCheck)) {
-                        return;
                     }
 
                     /* FIXME: refund pearl - duplication bug with e.g. origins mod

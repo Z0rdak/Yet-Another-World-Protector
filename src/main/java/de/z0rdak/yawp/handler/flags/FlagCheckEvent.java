@@ -9,6 +9,7 @@ import net.minecraftforge.eventbus.api.Event;
 
 import javax.annotation.Nullable;
 
+// TODO: FlagCheck for 'nested' flags (when boolean flag works with true and false) like secondary tool or use portal
 @Cancelable
 public class FlagCheckEvent extends Event {
 
@@ -23,7 +24,7 @@ public class FlagCheckEvent extends Event {
         return flag;
     }
 
-    private RegionFlag flag;
+    private final RegionFlag flag;
 
 
     public FlagCheckEvent(DimensionalRegion dimRegion, IMarkableRegion localRegion, RegionFlag flag){
