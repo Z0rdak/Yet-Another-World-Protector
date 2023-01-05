@@ -10,10 +10,13 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.item.ExperienceOrbEntity;
 import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
+import net.minecraft.entity.merchant.villager.WanderingTraderEntity;
 import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.entity.monster.ShulkerEntity;
+import net.minecraft.entity.monster.SlimeEntity;
 import net.minecraft.entity.passive.IronGolemEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.passive.SnowGolemEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.EntityTeleportEvent;
@@ -30,105 +33,157 @@ public class EntityFlagHandler {
     private EntityFlagHandler() {
     }
 
-    /**
-     * @param event
-     */
     @SubscribeEvent
-    public static void onEnderTeleportTo(EntityTeleportEvent event) {
+    public static void onEnderTeleportTo(EntityTeleportEvent.EnderEntity event) {
         if (isServerSide(event)) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
-            if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
+            if (dimCache != null) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                // handle player teleportation using ender pearls
-                if (event instanceof EntityTeleportEvent.EnderEntity) {
-                    EntityTeleportEvent.EnderEntity enderEntityEvent = (EntityTeleportEvent.EnderEntity) event;
-                    // handle enderman teleportation
-                    if (enderEntityEvent.getEntityLiving() instanceof EndermanEntity) {
-                        if (dimRegion.containsFlag(RegionFlag.ENDERMAN_TELEPORT_FROM_REGION)
-                                || dimRegion.containsFlag(RegionFlag.ENDERMAN_TELEPORT_TO_REGION)) {
-                            event.setCanceled(true);
-                            return;
-                        }
+                // handle enderman teleportation
+                if (event.getEntityLiving() instanceof EndermanEntity) {
+                    FlagCheckEvent flagCheckEvent = checkTargetEvent(new BlockPos(event.getPrev()), RegionFlag.ENDERMAN_TELEPORT_FROM_REGION, dimRegion);
+                    event.setCanceled(flagCheckEvent.isDenied());
+                    if (event.isCanceled()) {
+                        return;
                     }
-                    // handle shulker teleportation
-                    if (enderEntityEvent.getEntityLiving() instanceof ShulkerEntity) {
-                        if (dimRegion.containsFlag(RegionFlag.SHULKER_TELEPORT_TO_REGION)
-                                || dimRegion.containsFlag(RegionFlag.SHULKER_TELEPORT_FROM_REGION)) {
-                            event.setCanceled(true);
-                            return;
-                        }
+                    /*
+                    flagCheckEvent = checkTargetEvent(new BlockPos(event.getTarget()), RegionFlag.ENDERMAN_TELEPORT_TO_REGION, dimRegion);
+                    event.setCanceled(flagCheckEvent.isDenied());
+                    if (event.isCanceled()) {
+                        return;
                     }
+                     */
+                }
+                // handle shulker teleportation
+                if (event.getEntityLiving() instanceof ShulkerEntity) {
+                    FlagCheckEvent flagCheckEvent = checkTargetEvent(new BlockPos(event.getPrev()), RegionFlag.SHULKER_TELEPORT_FROM_REGION, dimRegion);
+                    event.setCanceled(flagCheckEvent.isDenied());
+                    if (event.isCanceled()) {
+                    }
+                    /*
+                    flagCheckEvent = checkTargetEvent(new BlockPos(event.getTarget()), RegionFlag.SHULKER_TELEPORT_TO_REGION, dimRegion);
+                    event.setCanceled(flagCheckEvent.isDenied());
+                    if (event.isCanceled()) {
+                        return;
+                    }
+                     */
                 }
             }
         }
     }
 
-    /**
-     * @param event
-     */
     @SubscribeEvent
     public static void onFall(LivingFallEvent event) {
         if (isServerSide(event)) {
             LivingEntity entity = event.getEntityLiving();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
-            if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
+            if (dimCache != null) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                // prevent fall damage for all entities
-                if (dimRegion.containsFlag(RegionFlag.FALL_DAMAGE)) {
-                    event.setCanceled(true); // same result as event.setDamageMultiplier(0.0f);
-                    return;
-                }
-                // prevents fall damage only for affiliated players
-                if (entity instanceof PlayerEntity && dimRegion.containsFlag(RegionFlag.FALL_DAMAGE_PLAYERS)
-                        && dimRegion.permits((PlayerEntity) entity)) {
+                FlagCheckEvent flagCheckEvent = checkTargetEvent(entity.blockPosition(), RegionFlag.FALL_DAMAGE, dimRegion);
+                event.setCanceled(flagCheckEvent.isDenied());
+                if (event.isCanceled()) {
+                    event.setDistance(0.0f);
                     event.setDamageMultiplier(0.0f);
                     return;
                 }
-                if (entity instanceof AbstractVillagerEntity && dimRegion.containsFlag(RegionFlag.FALL_DAMAGE_VILLAGERS)) {
-                    event.setDamageMultiplier(0.0f);
-                    return;
+                if (isPlayer(entity)) {
+                    flagCheckEvent = checkTargetEvent(entity.blockPosition(), RegionFlag.FALL_DAMAGE_PLAYERS, dimRegion);
+                    event.setCanceled(flagCheckEvent.isDenied());
+                    if (event.isCanceled()) {
+                        event.setDistance(0.0f);
+                        event.setDamageMultiplier(0.0f);
+                        return;
+                    }
                 }
-                if (isAnimal(entity) && dimRegion.containsFlag(RegionFlag.FALL_DAMAGE_ANIMALS)) {
-                    event.setDamageMultiplier(0.0f);
-                    return;
+                if (isVillager(entity)) {
+                    flagCheckEvent = checkTargetEvent(entity.blockPosition(), RegionFlag.FALL_DAMAGE_VILLAGERS, dimRegion);
+                    event.setCanceled(flagCheckEvent.isDenied());
+                    if (event.isCanceled()) {
+                        event.setDistance(0.0f);
+                        event.setDamageMultiplier(0.0f);
+                        return;
+                    }
                 }
-                if (isMonster(entity) && dimRegion.containsFlag(RegionFlag.FALL_DAMAGE_MONSTERS)) {
-                    event.setDamageMultiplier(0.0f);
-                    return;
+                if (isAnimal(entity)) {
+                    flagCheckEvent = checkTargetEvent(entity.blockPosition(), RegionFlag.FALL_DAMAGE_ANIMALS, dimRegion);
+                    event.setCanceled(flagCheckEvent.isDenied());
+                    if (event.isCanceled()) {
+                        event.setDistance(0.0f);
+                        event.setDamageMultiplier(0.0f);
+                        return;
+                    }
+                }
+                if (isMonster(entity)) {
+                    flagCheckEvent = checkTargetEvent(entity.blockPosition(), RegionFlag.FALL_DAMAGE_MONSTERS, dimRegion);
+                    event.setCanceled(flagCheckEvent.isDenied());
+                    if (event.isCanceled()) {
+                        event.setDistance(0.0f);
+                        event.setDamageMultiplier(0.0f);
+                    }
                 }
             }
         }
     }
 
-    /**
-     * @param event
-     */
     @SubscribeEvent
     public static void onEntityJoinWorld(EntityJoinWorldEvent event) {
         if (isServerSide(event)) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
-            if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
+            if (dimCache != null) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                Entity eventEntity = event.getEntity();
-                if (dimRegion.containsFlag(RegionFlag.SPAWNING_ALL) && eventEntity instanceof MobEntity) {
-                    event.setCanceled(true);
-                    return;
+                Entity entity = event.getEntity();
+                if (entity instanceof MobEntity) {
+                    FlagCheckEvent flagCheckEvent = checkTargetEvent(entity.blockPosition(), RegionFlag.SPAWNING_ALL, dimRegion);
+                    event.setCanceled(flagCheckEvent.isDenied());
+                    if (event.isCanceled()) {
+                        return;
+                    }
                 }
-                if (dimRegion.containsFlag(RegionFlag.SPAWNING_ANIMAL) && isAnimal(eventEntity)) {
-                    event.setCanceled(true);
-                    return;
+                if (isAnimal(entity)) {
+                    FlagCheckEvent flagCheckEvent = checkTargetEvent(entity.blockPosition(), RegionFlag.SPAWNING_ANIMAL, dimRegion);
+                    event.setCanceled(flagCheckEvent.isDenied());
+                    if (event.isCanceled()) {
+                        return;
+                    }
                 }
-                if (dimRegion.containsFlag(RegionFlag.SPAWNING_GOLEM) && eventEntity instanceof IronGolemEntity) {
-                    event.setCanceled(true);
-                    return;
+                if (isMonster(entity)) {
+                    FlagCheckEvent flagCheckEvent = checkTargetEvent(entity.blockPosition(), RegionFlag.SPAWNING_MONSTER, dimRegion);
+                    event.setCanceled(flagCheckEvent.isDenied());
+                    if (event.isCanceled()) {
+                        return;
+                    }
                 }
-                if (dimRegion.containsFlag(RegionFlag.SPAWNING_MONSTERS) && isMonster(eventEntity)) {
-                    event.setCanceled(true);
-                    return;
+                if (entity instanceof SnowGolemEntity || entity instanceof IronGolemEntity) {
+                    FlagCheckEvent flagCheckEvent = checkTargetEvent(entity.blockPosition(), RegionFlag.SPAWNING_GOLEM, dimRegion);
+                    event.setCanceled(flagCheckEvent.isDenied());
+                    if (event.isCanceled()) {
+                        return;
+                    }
                 }
-                if (dimRegion.containsFlag(RegionFlag.SPAWNING_XP) && eventEntity instanceof ExperienceOrbEntity) {
-                    event.setCanceled(true);
-                    return;
+                if (entity instanceof AbstractVillagerEntity) {
+                    FlagCheckEvent flagCheckEvent = checkTargetEvent(entity.blockPosition(), RegionFlag.SPAWNING_VILLAGER, dimRegion);
+                    event.setCanceled(flagCheckEvent.isDenied());
+                    if (event.isCanceled()) {
+                        return;
+                    }
+                }
+                if (entity instanceof WanderingTraderEntity) {
+                    FlagCheckEvent flagCheckEvent = checkTargetEvent(entity.blockPosition(), RegionFlag.SPAWNING_TRADER, dimRegion);
+                    event.setCanceled(flagCheckEvent.isDenied());
+                    if (event.isCanceled()) {
+                        return;
+                    }
+                }
+                if (entity instanceof SlimeEntity) {
+                    FlagCheckEvent flagCheckEvent = checkTargetEvent(entity.blockPosition(), RegionFlag.SPAWNING_SLIME, dimRegion);
+                    event.setCanceled(flagCheckEvent.isDenied());
+                    if (event.isCanceled()) {
+                        return;
+                    }
+                }
+                if (entity instanceof ExperienceOrbEntity) {
+                    FlagCheckEvent flagCheckEvent = checkTargetEvent(entity.blockPosition(), RegionFlag.SPAWNING_XP, dimRegion);
+                    event.setCanceled(flagCheckEvent.isDenied());
                 }
             }
         }
