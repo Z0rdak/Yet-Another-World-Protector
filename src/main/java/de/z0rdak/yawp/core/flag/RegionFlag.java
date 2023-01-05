@@ -29,13 +29,15 @@ public enum RegionFlag {
     WITHER_BLOCK_PROT("wither-destruction", FlagType.BOOLEAN_FLAG),
     ZOMBIE_DOOR_PROT("zombie-destruction", FlagType.BOOLEAN_FLAG),
     LIGHTNING_PROT("lightning", FlagType.BOOLEAN_FLAG),
-    //
     ANIMAL_TAMING("animal-taming", FlagType.BOOLEAN_FLAG),
     ANIMAL_BREEDING("animal-breeding", FlagType.BOOLEAN_FLAG),
     ANIMAL_MOUNTING("animal-mounting", FlagType.BOOLEAN_FLAG),
     // ANIMAL_UNMOUNTING("animal-unmounting", FlagType.BOOLEAN_FLAG)), // FIXME: Minecraft vanilla bug fixed in 1.17 snapshot - mention in wiki
-    SPAWNING_MONSTERS("spawning-monsters", FlagType.BOOLEAN_FLAG),
-    SPAWNING_GOLEM("spawning-irongolem", FlagType.BOOLEAN_FLAG),
+    SPAWNING_MONSTER("spawning-monster", FlagType.BOOLEAN_FLAG),
+    SPAWNING_SLIME("spawning-slime", FlagType.BOOLEAN_FLAG),
+    SPAWNING_GOLEM("spawning-golem", FlagType.BOOLEAN_FLAG),
+    SPAWNING_VILLAGER("spawning-villager", FlagType.BOOLEAN_FLAG),
+    SPAWNING_TRADER("spawning-trader", FlagType.BOOLEAN_FLAG),
     SPAWNING_ANIMAL("spawning-animal", FlagType.BOOLEAN_FLAG),
     SPAWNING_ALL("spawning-all", FlagType.BOOLEAN_FLAG),
     SPAWNING_XP("spawning-xp", FlagType.BOOLEAN_FLAG),
@@ -45,17 +47,19 @@ public enum RegionFlag {
     ENDER_CHEST_ACCESS("access-enderchest", FlagType.BOOLEAN_FLAG),
     USE_ENDERPEARL_FROM_REGION("enderpearl-from", FlagType.BOOLEAN_FLAG),
     USE_ENDERPEARL_TO_REGION("enderpearl-to", FlagType.BOOLEAN_FLAG),
-    ENDERMAN_TELEPORT_TO_REGION("enderman-teleport-to", FlagType.BOOLEAN_FLAG),
-    ENDERMAN_TELEPORT_FROM_REGION("enderman-teleport-from", FlagType.BOOLEAN_FLAG),
-    SHULKER_TELEPORT_TO_REGION("shulker-teleport-to", FlagType.BOOLEAN_FLAG),
-    SHULKER_TELEPORT_FROM_REGION("shulker-teleport-from", FlagType.BOOLEAN_FLAG),
+    // ENDERMAN_TELEPORT_TO_REGION("enderman-tp-to", FlagType.BOOLEAN_FLAG),
+    ENDERMAN_TELEPORT_FROM_REGION("enderman-tp-from", FlagType.BOOLEAN_FLAG),
+    // SHULKER_TELEPORT_TO_REGION("shulker-tp-to", FlagType.BOOLEAN_FLAG),
+    SHULKER_TELEPORT_FROM_REGION("shulker-tp-from", FlagType.BOOLEAN_FLAG),
     ITEM_DROP("item-drop", FlagType.BOOLEAN_FLAG),
     // unrelated: mobs pickup logic => MobEntity#livingTick
     ITEM_PICKUP("item-pickup", FlagType.BOOLEAN_FLAG),
-    LOOT_DROP("loot-drop", FlagType.BOOLEAN_FLAG),
-    XP_DROP_ALL("xp-drop-all", FlagType.BOOLEAN_FLAG), // also includes blocks (furnace for FlagType.BOOLEAN_FLAGl)
-    XP_DROP_MONSTER("xp-drop-monsters", FlagType.BOOLEAN_FLAG), // only hostFlagType.BOOLEAN_FLAGos
-    XP_DROP_OTHER("xp-drop-other", FlagType.BOOLEAN_FLAG), // non-hostile: animals, villaFlagType.BOOLEAN_FLAG..
+    DROP_LOOT_ALL("drop-loot", FlagType.BOOLEAN_FLAG),
+    DROP_LOOT_PLAYER("drop-loot-player", FlagType.BOOLEAN_FLAG),
+    XP_DROP_ALL("xp-drop-all", FlagType.BOOLEAN_FLAG),
+    XP_DROP_PLAYER("xp-drop-player", FlagType.BOOLEAN_FLAG),
+    XP_DROP_MONSTER("xp-drop-monsters", FlagType.BOOLEAN_FLAG),
+    XP_DROP_OTHER("xp-drop-other", FlagType.BOOLEAN_FLAG),
     XP_PICKUP("xp-pickup", FlagType.BOOLEAN_FLAG),
     LEVEL_FREEZE("level-freeze", FlagType.BOOLEAN_FLAG),
     XP_FREEZE("xp-freeze", FlagType.BOOLEAN_FLAG),
@@ -84,10 +88,11 @@ public enum RegionFlag {
     USE_PORTAL_MONSTERS("use-portal-monsters", FlagType.BOOLEAN_FLAG),
     USE_PORTAL_VILLAGERS("use-portal-villagers", FlagType.BOOLEAN_FLAG),
     USE_PORTAL_MINECARTS("use-portal-minecarts", FlagType.BOOLEAN_FLAG),
-    SPAWN_PORTAL("spawn-portal", FlagType.BOOLEAN_FLAG),
+    SPAWN_PORTAL("spawn-portal", FlagType.BOOLEAN_FLAG);
+    // TODO: would need a item use at block check
     //PLAYER_SPAWN_PORTAL("player-spawn-portal", FlagType.BOOLEAN_FLAG);
 
-    SPAWN_ENTITLES("spawn-entities", FlagType.LIST_FLAG);
+    // SPAWN_ENTITLES("spawn-entities", FlagType.LIST_FLAG);
 
     public final String name;
     public final FlagType type;
