@@ -4,12 +4,12 @@ import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
-import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.util.LocalRegions;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.FlyingEntity;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
+import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
 import net.minecraft.entity.monster.MonsterEntity;
 import net.minecraft.entity.monster.ShulkerEntity;
 import net.minecraft.entity.monster.SlimeEntity;
@@ -41,12 +41,6 @@ public final class HandlerUtil {
         return entity instanceof AnimalEntity || entity instanceof WaterMobEntity;
     }
 
-    /**
-     * Utility to check if an event is server-side.
-     *
-     * @param event entity event to check side-ness for
-     * @return true if entity event side-ness is server
-     */
     public static boolean isServerSide(EntityEvent event) {
         return isServerSide(event.getEntity());
     }
@@ -59,16 +53,13 @@ public final class HandlerUtil {
         return !entity.getCommandSenderWorld().isClientSide();
     }
 
-    public static boolean isServerSide(Event event) {
-        if (event instanceof BlockEvent) {
-            return !((BlockEvent) event).getWorld().isClientSide();
-        }
-        if (event instanceof EntityEvent) {
-            return isServerSide(((EntityEvent) event).getEntity());
-        }
-        return false;
+    public static boolean isVillager(Entity entity) {
+        return entity instanceof AbstractVillagerEntity;
     }
 
+    public static boolean isPlayer(Entity entity) {
+        return entity instanceof PlayerEntity;
+    }
 
     public static boolean isMonster(Entity entity) {
         return entity instanceof MonsterEntity
@@ -76,14 +67,6 @@ public final class HandlerUtil {
                 || entity instanceof FlyingEntity
                 || entity instanceof EnderDragonEntity
                 || entity instanceof ShulkerEntity;
-    }
-
-    public static boolean hasNoAffiliationFor(DimensionRegionCache dimCache, PlayerEntity player){
-        return !(dimCache.hasMember(player) || dimCache.hasOwner(player));
-    }
-
-    public static boolean containsFlagAndHasNoAffiliationFor(DimensionRegionCache dimCache, RegionFlag flag, PlayerEntity player){
-        return dimCache.getDimensionalRegion().containsFlag(flag) && hasNoAffiliationFor(dimCache, player);
     }
 
     /**
