@@ -21,7 +21,7 @@ public class BooleanFlag extends AbstractFlag {
     }
 
     public BooleanFlag(RegionFlag flag) {
-        super(flag.name, flag.type, false, false);
+        super(flag.name, flag.type, false, true);
     }
 
     @Override
