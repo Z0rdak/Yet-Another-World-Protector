@@ -244,8 +244,14 @@ public class DimensionCommands {
 
     private static int deleteRegion(CommandSource src, DimensionRegionCache dim, IMarkableRegion region) {
         if (dim.contains(region.getName())) {
+            if (!region.getChildren().isEmpty()) {
+                // TODO: config option which allows deleting region with children? children then default to dim parent
+                sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.dim.region.remove.fail.hasChildren", region.getName(), dim.dimensionKey().location()));
+                return -1;
+            }
             if (region.getParent() != null) {
                 region.getParent().removeChild(region);
+                RegionDataManager.get().cacheFor(region.getDim()).getDimensionalRegion().addChild(region);
             }
             dim.removeRegion(region);
             sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.dim.region.remove.confirm", region.getName(), dim.dimensionKey().location()));
