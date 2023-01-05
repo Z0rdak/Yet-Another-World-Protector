@@ -59,6 +59,7 @@ public enum RegionFlag {
     XP_PICKUP("xp-pickup", FlagType.BOOLEAN_FLAG),
     LEVEL_FREEZE("level-freeze", FlagType.BOOLEAN_FLAG),
     XP_FREEZE("xp-freeze", FlagType.BOOLEAN_FLAG),
+    KNOCKBACK_PLAYERS("knockback-players", FlagType.BOOLEAN_FLAG),
     ATTACK_PLAYERS("attack-players", FlagType.BOOLEAN_FLAG),
     ATTACK_ANIMALS("attack-animals", FlagType.BOOLEAN_FLAG),
     ATTACK_MONSTERS("attack-monsters", FlagType.BOOLEAN_FLAG),
