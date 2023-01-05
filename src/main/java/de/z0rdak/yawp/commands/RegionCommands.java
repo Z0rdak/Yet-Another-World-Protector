@@ -330,6 +330,7 @@ public class RegionCommands {
         if (parent.hasChild(child)) {
             // FIXME: Removing child does not set priority correct with overlapping regions
             dimRegion.addChild(child); // this also removes the child from the local parent
+            child.setIsActive(false);
             LocalRegions.ensureLowerRegionPriorityFor((CuboidRegion) child, RegionConfig.DEFAULT_REGION_PRIORITY.get());
             RegionDataManager.save();
             IFormattableTextComponent parentLink = buildRegionInfoLink(parent);
