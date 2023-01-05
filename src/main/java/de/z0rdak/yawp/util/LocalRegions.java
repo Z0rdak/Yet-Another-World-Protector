@@ -1,11 +1,11 @@
 package de.z0rdak.yawp.util;
 
 import de.z0rdak.yawp.core.area.CuboidArea;
-import de.z0rdak.yawp.core.flag.BooleanFlag;
-import de.z0rdak.yawp.core.flag.FlagType;
-import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.core.region.*;
+import de.z0rdak.yawp.core.region.AbstractMarkableRegion;
+import de.z0rdak.yawp.core.region.CuboidRegion;
+import de.z0rdak.yawp.core.region.IMarkableRegion;
+import de.z0rdak.yawp.core.region.SphereRegion;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.entity.player.PlayerEntity;
@@ -14,7 +14,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public final class LocalRegions {
@@ -58,9 +61,6 @@ public final class LocalRegions {
         return new CuboidRegion(regionName, cuboidArea, player, dim);
     }
 
-
-    // TODO: Maybe trim down number of regions even more by filtering regions of active chunks
-    // TODO: What about children regions and parent regions?
     /**
      * Returns all involved regions for this event.
      * An involved region is defined as follows: <br>
@@ -137,7 +137,7 @@ public final class LocalRegions {
     public static int ensureHigherRegionPriorityFor(CuboidRegion cuboidRegion, int defaultPriority){
         List<CuboidRegion> intersectingRegions = getIntersectingRegionsFor(cuboidRegion);
         boolean hasRegionWithSamePriority = intersectingRegions.stream().anyMatch(r -> r.getPriority() == cuboidRegion.getPriority());
-        if (hasRegionWithSamePriority){
+        if (hasRegionWithSamePriority) {
             int maxPriority = intersectingRegions.stream().mapToInt(AbstractMarkableRegion::getPriority).max().getAsInt();
             cuboidRegion.setPriority(maxPriority + 1);
         } else {
@@ -146,10 +146,33 @@ public final class LocalRegions {
         return cuboidRegion.getPriority();
     }
 
-    public static int ensureLowerRegionPriorityFor(CuboidRegion cuboidRegion, int defaultPriority){
+
+    // TODO: recursive check for ensuring region priorities
+    public static void rectifyRegionPriorities(CuboidRegion parent, int defaultPriority) {
+        List<CuboidRegion> children = getIntersectingRegionsFor(parent);
+        if (children.size() == 0) {
+            return;
+        }
+        for (CuboidRegion child : children) {
+
+            rectifyRegionPriorities(child, parent.getPriority());
+        }
+
+
+        List<CuboidRegion> intersectingRegions = getIntersectingRegionsFor(parent);
+        boolean hasRegionWithSamePriority = intersectingRegions.stream().anyMatch(r -> r.getPriority() == parent.getPriority());
+        if (hasRegionWithSamePriority) {
+            int minPriority = intersectingRegions.stream().mapToInt(AbstractMarkableRegion::getPriority).min().getAsInt();
+            parent.setPriority(minPriority - 1);
+        } else {
+            parent.setPriority(defaultPriority);
+        }
+    }
+
+    public static int ensureLowerRegionPriorityFor(CuboidRegion cuboidRegion, int defaultPriority) {
         List<CuboidRegion> intersectingRegions = getIntersectingRegionsFor(cuboidRegion);
         boolean hasRegionWithSamePriority = intersectingRegions.stream().anyMatch(r -> r.getPriority() == cuboidRegion.getPriority());
-        if (hasRegionWithSamePriority){
+        if (hasRegionWithSamePriority) {
             int minPriority = intersectingRegions.stream().mapToInt(AbstractMarkableRegion::getPriority).min().getAsInt();
             cuboidRegion.setPriority(minPriority - 1);
         } else {
@@ -180,40 +203,4 @@ public final class LocalRegions {
         }
         return filteredRegions;
     }
-
-    /**
-     * Regions are assumed to already be checked to contain the specified flag
-     * @param player which is triggering the event
-     * @param dimRegion involved dimensional region
-     * @param regions list of regions which do contain the flag to be checked
-     * @param targetPos event source position
-     * @param flag value to be checked
-     * @return
-     */
-    public static boolean checkFlagByPassForPlayerEvent(PlayerEntity player, DimensionalRegion dimRegion, List<IMarkableRegion> regions, BlockPos targetPos, RegionFlag flag) {
-        boolean isMemberOfDim = dimRegion.permits(player);
-
-
-
-        IFlag dimFlag = dimRegion.getFlagContainer().get(flag.name);
-        FlagType dimFlagType = dimFlag.getFlagType();
-        boolean isActive = dimFlag.isActive();
-        boolean isInverted = dimFlag.isInverted();
-
-
-
-        switch (dimFlagType) {
-            case BOOLEAN_FLAG:
-                BooleanFlag boolFlag = (BooleanFlag) dimFlag;
-
-                break;
-            case LIST_FLAG:
-                break;
-            case INT_FLAG:
-                break;
-        }
-        return false;
-    }
-
-
 }
