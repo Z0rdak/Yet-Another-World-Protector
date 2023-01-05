@@ -1,11 +1,9 @@
 package de.z0rdak.yawp.handler.flags;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
@@ -16,7 +14,6 @@ import net.minecraft.entity.passive.MooshroomEntity;
 import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.entity.passive.horse.SkeletonHorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.RegistryKey;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
@@ -46,32 +43,28 @@ public class WorldFlagHandler {
     @SubscribeEvent
     public static void onLightningStrikeOccur(EntityStruckByLightningEvent event){
         if (isServerSide(event)) {
-            Entity poorBastard = event.getEntity();
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(poorBastard));
-                DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                // TODO: Implement
-                if (poorBastard instanceof PlayerEntity) {
+            Entity poorEntity = event.getEntity();
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(poorEntity));
+            FlagCheckEvent flagCheckEvent = checkTargetEvent(poorEntity.blockPosition(), LIGHTNING_PROT, dimCache.getDimensionalRegion());
+            event.setCanceled(flagCheckEvent.isDenied());
+            if (flagCheckEvent.isDenied()) {
+                event.getLightning().remove();
+                return;
+            }
 
-                }
-                if (poorBastard instanceof PigEntity) {
-
-                }
-                if (poorBastard instanceof CreeperEntity) {
-
-                }
-                if (poorBastard instanceof MooshroomEntity) {
-                    // Check for entity data Type == red
-                }
-                if (poorBastard instanceof VillagerEntity) {
-
-                }
-                if (poorBastard instanceof SkeletonHorseEntity) {
-
-                }
-                if (dimRegion.containsFlag(LIGHTNING_PROT)){
-                    event.setCanceled(true);
-                    event.getLightning().remove();
-                }
+            // TODO: Implement, flags not yet defined
+            if (poorEntity instanceof PlayerEntity) {
+            }
+            if (poorEntity instanceof PigEntity) {
+            }
+            if (poorEntity instanceof CreeperEntity) {
+            }
+            if (poorEntity instanceof MooshroomEntity) { // Also check for entity data Type == red
+            }
+            if (poorEntity instanceof VillagerEntity) {
+            }
+            if (poorEntity instanceof SkeletonHorseEntity) {
+            }
         }
     }
 
@@ -84,14 +77,11 @@ public class WorldFlagHandler {
     @SubscribeEvent
     public static void onNetherPortalSpawn(BlockEvent.PortalSpawnEvent event) {
         World world = (World) event.getWorld();
-        if (!world.isClientSide) {
+        if (isServerSide(event)) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.dimension());
-            DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-            if (dimRegion.containsFlag(SPAWN_PORTAL)){
-                event.setCanceled(true);
-            }
+            FlagCheckEvent flagCheckEvent = checkTargetEvent(event.getPos(), SPAWN_PORTAL, dimCache.getDimensionalRegion());
+            event.setCanceled(flagCheckEvent.isDenied());
         }
-
     }
 
     /**
@@ -100,35 +90,60 @@ public class WorldFlagHandler {
      * Note: This event is only fired for PlayerEntity (1.16.5), See mixins for other entities.
      * @param event holding info about the entity traveling from one to another dimension.
      */
-    // TODO: FROM and TO dim
     @SubscribeEvent
     public static void onUsePortal(EntityTravelToDimensionEvent event) {
         if (isServerSide(event.getEntity())) {
             Entity entity = event.getEntity();
-            RegistryKey<World> dim = getEntityDim(entity);
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
-            DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-            boolean prohibitsPortalUsage = dimRegion.containsFlag(USE_PORTAL);
-            if (prohibitsPortalUsage) {
-                event.setCanceled(true);
-            }
-            if (entity instanceof PlayerEntity) {
-                if (containsFlagAndHasNoAffiliationFor(dimCache, USE_PORTAL_PLAYERS, (PlayerEntity) entity)) {
-                    event.setCanceled(true);
-                    MessageUtil.sendMessage((PlayerEntity) entity, "flag.msg.event.player.change_dim");
-                    return;
-                } else {
-                    event.setCanceled(false);
+            DimensionalRegion dimRegion = RegionDataManager.get().cacheFor(getEntityDim(entity)).getDimensionalRegion();
+            FlagCheckEvent flagCheckEvent = checkTargetEvent(entity.blockPosition(), USE_PORTAL, dimRegion);
+            event.setCanceled(flagCheckEvent.isDenied());
+            if (event.isCanceled()) {
+                if (entity instanceof PlayerEntity) {
+                    sendFlagDeniedMsg(flagCheckEvent, (PlayerEntity) entity);
                 }
-            }
-            if (dimRegion.containsFlag(USE_PORTAL_ITEMS) && entity instanceof ItemEntity
-                    || dimRegion.containsFlag(USE_PORTAL_ANIMALS) && isAnimal(entity)
-                    || dimRegion.containsFlag(USE_PORTAL_MONSTERS) && isMonster(entity)
-                    || dimRegion.containsFlag(USE_PORTAL_VILLAGERS) && entity instanceof AbstractVillagerEntity
-                    || dimRegion.containsFlag(USE_PORTAL_MINECARTS) && entity instanceof AbstractMinecartEntity) {
-                event.setCanceled(true);
                 return;
             }
+            if (entity instanceof PlayerEntity) {
+                FlagCheckEvent.PlayerFlagEvent playerFlagCheckEvent = checkPlayerEvent((PlayerEntity) entity, entity.blockPosition(), USE_PORTAL_PLAYERS, dimRegion);
+                handleAndSendMsg(event, playerFlagCheckEvent);
+            } else {
+
+                if (entity instanceof ItemEntity) {
+                    flagCheckEvent = checkTargetEvent(entity.blockPosition(), USE_PORTAL_ITEMS, dimRegion);
+                    event.setCanceled(flagCheckEvent.isDenied());
+                    return;
+                }
+                if (isAnimal(entity)) {
+                    flagCheckEvent = checkTargetEvent(entity.blockPosition(), USE_PORTAL_ANIMALS, dimRegion);
+                    event.setCanceled(flagCheckEvent.isDenied());
+                    return;
+                }
+                if (isMonster(entity)) {
+                    flagCheckEvent = checkTargetEvent(entity.blockPosition(), USE_PORTAL_MONSTERS, dimRegion);
+                    event.setCanceled(flagCheckEvent.isDenied());
+                    return;
+                }
+                if (entity instanceof AbstractVillagerEntity) {
+                    flagCheckEvent = checkTargetEvent(entity.blockPosition(), USE_PORTAL_VILLAGERS, dimRegion);
+                    event.setCanceled(flagCheckEvent.isDenied());
+                    return;
+                }
+                if (entity instanceof AbstractMinecartEntity) {
+                    flagCheckEvent = checkTargetEvent(entity.blockPosition(), USE_PORTAL_MINECARTS, dimRegion);
+                    event.setCanceled(flagCheckEvent.isDenied());
+                }
+            }
         }
+    }
+
+
+    @SubscribeEvent
+    public static void onTravelFromDim(EntityTravelToDimensionEvent event) {
+
+    }
+
+    @SubscribeEvent
+    public static void onTravelToDim(EntityTravelToDimensionEvent event) {
+
     }
 }
