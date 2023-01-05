@@ -16,6 +16,7 @@ import de.z0rdak.yawp.core.affiliation.PlayerContainer;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.flag.BooleanFlag;
+import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.core.stick.AbstractStick;
@@ -43,10 +44,8 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.util.CommandUtil.*;
@@ -284,14 +283,14 @@ public class RegionCommands {
     private static int removePlayer(CommandSource src, ServerPlayerEntity player, IMarkableRegion region, String affiliation) {
         switch (affiliation) {
             case "member":
-                if (!region.getMembers().containsPlayer(player.getUUID())) {
+                if (region.getMembers().containsPlayer(player.getUUID())) {
                     region.removeMember(player);
                     RegionDataManager.save();
                     sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.affiliation.player.removed", player.getScoreboardName(), region.getName()));
                 }
                 break;
             case "owner":
-                if (!region.getOwners().containsPlayer(player.getUUID())) {
+                if (region.getOwners().containsPlayer(player.getUUID())) {
                     region.removeOwner(player);
                     RegionDataManager.save();
                     sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.affiliation.player.removed", player.getScoreboardName(), region.getName()));
@@ -645,27 +644,23 @@ public class RegionCommands {
             sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.flag.empty", region.getName()));
             return 1;
         }
-        region.getFlags().stream()
+        List<IFlag> activeFlags = region.getFlags().stream()
+                .filter(IFlag::isActive)
                 .sorted()
-                .sorted((flag, flag1) -> (flag.isActive() && !flag1.isActive()) ? 1 : !flag.isActive() && flag1.isActive() ? -1 : 0)
-                .forEach(flag -> {
-                    IFormattableTextComponent removeFlagEntry = new StringTextComponent(" - ")
-                            .append(buildRemoveFlagLink(flag, region))
-                            .append(new StringTextComponent(" '" + flag.getFlagIdentifier() + "'"));
-                    sendCmdFeedback(src, removeFlagEntry);
-                });
-
-        /*/
-        region.getFlags().forEach(flag -> {
+                .collect(Collectors.toList());
+        List<IFlag> inActiveFlags = region.getFlags().stream()
+                .filter(f -> !f.isActive())
+                .sorted()
+                .collect(Collectors.toList());
+        activeFlags.addAll(inActiveFlags);
+        List<IFlag> flags = new ArrayList<>(activeFlags);
+        flags.addAll(inActiveFlags);
+        flags.forEach(flag -> {
             IFormattableTextComponent removeFlagEntry = new StringTextComponent(" - ")
                     .append(buildRemoveFlagLink(flag, region))
-                    .append(new StringTextComponent(" ").withStyle(TextFormatting.RESET))
-                    .append(buildFlagInfoLink(flag, region))
-                    .append(new StringTextComponent(" ").withStyle(TextFormatting.RESET))
-                    .append(buildFlagInfoLinkDetail(flag, region));
+                    .append(new StringTextComponent(" '" + flag.getFlagIdentifier() + "'"));
             sendCmdFeedback(src, removeFlagEntry);
         });
-         */
         return 0;
     }
 
