@@ -73,7 +73,6 @@ public enum RegionFlag {
     SEND_MESSAGE("send-chat", FlagType.BOOLEAN_FLAG),
     EXECUTE_COMMAND("exec-command", FlagType.BOOLEAN_FLAG),
     SET_SPAWN("set-spawn", FlagType.BOOLEAN_FLAG),
-    // RESET_SPAWN("reset-spawn"), // notFlagType.BOOLEAN_FLAGig
     SLEEP("sleep", FlagType.BOOLEAN_FLAG),
     USE_PORTAL("use-portal", FlagType.BOOLEAN_FLAG),
     //TRAVEL_TO_DIM("travel-to-dim", FlagType.BOOLEAN_FLAG),
