@@ -1,8 +1,10 @@
 package de.z0rdak.yawp.handler.stick;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.region.AbstractMarkableRegion;
+import de.z0rdak.yawp.core.region.CuboidRegion;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -44,7 +46,7 @@ public class MarkerStickHandler {
 
     /**
      * Create a region from the NBT data of the renamed region marker.
-     * @param event
+     * TODO: Make parent selectable for creating region, this is needed to check if a player is allowed to create a region with the stick
      */
     public static void onCreateRegion(AnvilRepairEvent event) {
         ItemStack outputItem = event.getItemResult();
@@ -60,6 +62,7 @@ public class MarkerStickHandler {
                     DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.getCommandSenderWorld().dimension());
                     if (dimCache != null){
                         dimCache.addRegion(region);
+                        LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.DEFAULT_REGION_PRIORITY.get());
                         marker.reset();
                         outputItem.getTag().put(STICK, marker.serializeNBT());
                         setStickName(outputItem, type);
