@@ -70,16 +70,18 @@ public class CommandInterceptor {
         CommandSource src = cmdContext.getSource();
         List<ParsedCommandNode<CommandSource>> cmdNodes = cmdContext.getNodes();
         List<String> nodeNames = cmdNodes.stream().map(node -> node.getNode().getName()).collect(Collectors.toList());
+        if (cmdNodes.size() < 4) {
+            return;
+        }
         // /wp region <dim> <region>
         if (cmdNodes.size() == 4) {
             event.setCanceled(!CommandPermissionConfig.AllowInfoCmds());
             return;
         }
         // /wp region <dim> <region> info|list|spatial
-        if (cmdNodes.size() > 4 &&
-                (nodeNames.contains(CommandConstants.INFO.toString())
-                        || nodeNames.contains(CommandConstants.LIST.toString())
-                        || nodeNames.contains(CommandConstants.SPATIAL.toString()))) {
+        if (nodeNames.contains(CommandConstants.INFO.toString())
+                || nodeNames.contains(CommandConstants.LIST.toString())
+                || nodeNames.contains(CommandConstants.SPATIAL.toString())) {
             event.setCanceled(!CommandPermissionConfig.AllowInfoCmds());
             return;
         }
