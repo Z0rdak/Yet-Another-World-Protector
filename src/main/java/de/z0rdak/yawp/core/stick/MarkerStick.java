@@ -2,7 +2,6 @@ package de.z0rdak.yawp.core.stick;
 
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.util.StickType;
-import de.z0rdak.yawp.util.constants.RegionNBT;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NBTUtil;
@@ -16,6 +15,7 @@ import net.minecraftforge.common.util.INBTSerializable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class MarkerStick extends AbstractStick implements INBTSerializable<CompoundNBT> {
 
@@ -24,6 +24,7 @@ public class MarkerStick extends AbstractStick implements INBTSerializable<Compo
     public static final String AREA_TYPE = "type";
     public static final String DIM = "dim";
     public static final String TP_POS = "tp_pos";
+    public static final String IS_TP_SET = "is_tp_set";
 
     private BlockPos teleportPos;
     private RegistryKey<World> dimension;
@@ -121,10 +122,14 @@ public class MarkerStick extends AbstractStick implements INBTSerializable<Compo
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = super.serializeNBT();
+        // makes stick unique -> non-stackable
+        // this could with a little code-rearrangement used to track which player used a specific stick
+        // but why? Maybe sticks can store permissions in the future? This, of course, would be a potential risk for region owners
+        nbt.putString("stick-id", UUID.randomUUID().toString());
         nbt.putBoolean(VALID_AREA, this.isValidArea);
         nbt.putString(AREA_TYPE, this.areaType.areaType);
         nbt.putString(DIM, this.dimension.location().toString());
-        nbt.putBoolean("tp_set", this.teleportPos != null);
+        nbt.putBoolean(IS_TP_SET, this.teleportPos != null);
         if (this.teleportPos != null) {
             nbt.put(TP_POS, NBTUtil.writeBlockPos(this.teleportPos));
         }
@@ -139,12 +144,12 @@ public class MarkerStick extends AbstractStick implements INBTSerializable<Compo
         super.deserializeNBT(nbt);
         this.isValidArea = nbt.getBoolean(VALID_AREA);
         this.areaType = AreaType.of(nbt.getString(AREA_TYPE));
-        boolean isTpSet = nbt.getBoolean("tp_set");
+        boolean isTpSet = nbt.getBoolean(IS_TP_SET);
         if (isTpSet) {
             this.teleportPos = NBTUtil.readBlockPos(nbt.getCompound(TP_POS));
         }
         this.dimension = RegistryKey.create(Registry.DIMENSION_REGISTRY,
-                new ResourceLocation(nbt.getString(RegionNBT.DIM)));
+                new ResourceLocation(nbt.getString(DIM)));
         ListNBT markedBlocksNBT = nbt.getList(MARKED_BLOCKS, Constants.NBT.TAG_COMPOUND);
         this.markedBlocks = new ArrayList<>();
         markedBlocksNBT.forEach(block -> this.markedBlocks.add(NBTUtil.readBlockPos((CompoundNBT) block)));
