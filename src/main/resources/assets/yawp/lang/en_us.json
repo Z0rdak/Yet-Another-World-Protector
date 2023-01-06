@@ -21,6 +21,7 @@
   "cli.msg.dim.info.region.create.name.invalid": "Invalid region name supplied: '%s'",
   "cli.msg.dim.info.region.create.name.exists": "Dimension '%s' already contains region with name '%s'",
   "cli.msg.dim.info.region.create.stick.missing": "Put a valid(*) RegionMarker in your main hand to create a region!",
+  "cli.msg.dim.info.region.create.stick.perm.deny": "Your don't have the permission to create a region in the region '%s'!",
   "cli.msg.dim.info.region": "Regions",
   "cli.msg.dim.info.region.list.link.text": "%s region(s)",
   "cli.msg.dim.info.region.list.link.hover": "List regions in '%s'  ",
