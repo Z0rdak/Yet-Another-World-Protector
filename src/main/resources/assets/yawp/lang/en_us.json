@@ -60,9 +60,7 @@
   "cli.msg.info.dim.region.remove.link.hover" : "Remove region '%s'",
   "cli.msg.info.dim.region.remove.link.text" : "x",
 
-
   "cli.msg.info.region": "Show region info for region '%s'",
-
   "cli.msg.info.region.flag": "Flags",
   "cli.msg.info.region.flag.header": "== Region '%s' flags ==",
   "cli.msg.info.region.flag.empty": "No flags defined in region '%s'",
@@ -83,7 +81,6 @@
   "cli.msg.info.region.spatial.link.text" : "Spatial Properties",
   "cli.msg.info.region.spatial.link.hover" : "Show region spatial properties for '%s'",
   "cli.msg.info.region.spatial.area.update" : "Updated %s for region %s",
-
 
   "cli.msg.info.region.hierarchy": "Hierarchy",
   "cli.msg.info.region.parent": "Parent",
@@ -139,7 +136,6 @@
   "cli.msg.info.region.affiliation.player.remove.link.text.entry": " - %s '%s'",
   "cli.msg.info.region.affiliation.player.remove.link.hover": "Remove player '%s' from region '%s'",
 
-
   "cli.msg.info.region.state" : "State",
   "cli.msg.info.region.state.link.text" : "State",
   "cli.msg.info.region.state.link.hover" : "Show region state for '%s'",
@@ -170,7 +166,6 @@
   "cli.msg.region.info.tp.link.hover": "Teleport to region",
   "cli.msg.dim.flag.add.link.hover": "Add flag to region",
 
-
   "cli.msg.info.state": "State",
   "cli.msg.info.state.activate": "Activate region",
   "cli.msg.info.state.deactivate": "Deactivate region",
@@ -192,26 +187,6 @@
   "help.tooltip.stick.marker.detail.2": "1. Left-click on the 1st block to start marking a region.\n2. Left-click on the 2nd block to finish marking a region.",
   "help.tooltip.stick.marker.detail.3": "3. Define the region with the \"/wp region define <name>\" command or by renaming the Region Marker in an anvil.",
   "help.tooltip.stick.marker.detail.4": "Keep the Region Marker in your hand while defining a region!",
-  "help.tooltip.stick.flag-stick.simple.1": "Use the Flag Stick to simply modify flags for a region.",
-  "help.tooltip.stick.flag-stick.simple.2": "Keep the Region Stick in your offhand!",
-  "help.tooltip.stick.flag-stick.detail.1": "1. Select a flag by right clicking.",
-  "help.tooltip.stick.flag-stick.detail.2": "2. Switch modes by SHIFT right clicking.",
-  "help.tooltip.stick.flag-stick.detail.3": "3. Hold down the right mouse button to add/remove the selected flag.",
-  "help.tooltip.stick.flag-stick.detail.4": "[Secondary use] SHIFT right click on a container with name tags, named after flags, to add/remove all the corresponding flags!",
-  "help.tooltip.stick.flag-stick.detail.5": "Keep the Region Stick with the selected region in your off hand!",
-
-  "help.tooltip.stick.region-stick.simple.1": "Use the Region Stick to simply add/remove players to/from a region.",
-  "help.tooltip.stick.region-stick.detail.1": "1. Select an existing region by right clicking.",
-  "help.tooltip.stick.region-stick.detail.2": "2. Switch modes by SHIFT right clicking.",
-  "help.tooltip.stick.region-stick.detail.3": "3. Hit the player you want to add/remove (don't worry it wont hurt).",
-  "help.tooltip.stick.region-stick.detail.4": "[Secondary use] Keep the Region Stick in your offhand and read the Flag Stick tooltip.",
-
-
-
-
-
-  "flag.deny.message.break": "You are not allowed to break blocks here!",
-  "flag.deny.message.place": "You are not allowed to place blocks here!",
 
   "cli.arg.area.invalid": "Invalid area value provided: '%s'",
   "cli.arg.area.parse.invalid": "Unable to parse provided area value",
@@ -231,10 +206,8 @@
   "data.nbt.dimensions.loaded.dim.amount" : "Loaded %s region(s) for dimension '%s'",
   "data.nbt.dimensions.save.dim.amount" : "Saving %s region(s) for dimension '%s'",
 
-
   "flag.dim.player.msg.push.deny": "The '%s' flag denies this action in this dimension!",
   "flag.dim.player.msg.push.allow": "",
   "flag.local.player.msg.push.deny": "[%s]: The '%s' flag denies this action here!",
   "flag.local.player.msg.push.allow": ""
-
 }
