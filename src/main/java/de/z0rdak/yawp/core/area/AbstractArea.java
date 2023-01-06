@@ -1,6 +1,5 @@
 package de.z0rdak.yawp.core.area;
 
-import de.z0rdak.yawp.util.constants.NBTConstants;
 import de.z0rdak.yawp.util.constants.RegionNBT;
 import net.minecraft.nbt.CompoundNBT;
 
