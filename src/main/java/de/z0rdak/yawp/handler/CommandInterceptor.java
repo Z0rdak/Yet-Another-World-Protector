@@ -55,8 +55,12 @@ public class CommandInterceptor {
                     case "dim":
                         handleDimCommandExecution(event);
                         break;
+                    case "flag":
+                        break;
+                    case "marker":
+                        event.setCanceled(false);
+                        break;
                 }
-
             }
         }
     }

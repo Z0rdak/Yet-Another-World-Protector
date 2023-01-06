@@ -59,7 +59,6 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
     public void addRegion(IMarkableRegion region) {
         this.regionsInDimension.put(region.getName(), region);
         this.dimensionalRegion.addChild(region);
-
     }
 
     public void addOwner(ServerPlayerEntity player) {

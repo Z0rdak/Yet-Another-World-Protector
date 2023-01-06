@@ -181,7 +181,7 @@ public class RegionCommands {
                         .then(literal(CHILD)
                                 .then(Commands.argument(CHILD.toString(), StringArgumentType.word())
                                         .suggests((ctx, builder) -> RemoveRegionChildArgumentType.childRegions().listSuggestions(ctx, builder))
-                                        .executes(ctx -> removeChildren(ctx.getSource(), getDimRegionArgument(ctx), getRegionArgument(ctx), getChildRegionArgument(ctx))))))
+                                        .executes(ctx -> removeChildren(ctx.getSource(), getDimCacheArgument(ctx), getRegionArgument(ctx), getChildRegionArgument(ctx))))))
                 /* TODO: Facade for reverse child setting ?
                 .then(literal(PARENT)
                         .then(literal(SET)
@@ -326,10 +326,10 @@ public class RegionCommands {
         return 0;
     }
 
-    private static int removeChildren(CommandSource src, DimensionalRegion dimRegion, IMarkableRegion parent, IMarkableRegion child) {
+    private static int removeChildren(CommandSource src, DimensionRegionCache dimCache, IMarkableRegion parent, IMarkableRegion child) {
         if (parent.hasChild(child)) {
             // FIXME: Removing child does not set priority correct with overlapping regions
-            dimRegion.addChild(child); // this also removes the child from the local parent
+            dimCache.getDimensionalRegion().addChild(child); // this also removes the child from the local parent
             child.setIsActive(false);
             LocalRegions.ensureLowerRegionPriorityFor((CuboidRegion) child, RegionConfig.DEFAULT_REGION_PRIORITY.get());
             RegionDataManager.save();

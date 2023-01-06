@@ -9,25 +9,20 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.commands.CommandConstants;
 import de.z0rdak.yawp.commands.arguments.AreaArgumentType;
 import de.z0rdak.yawp.commands.arguments.DimensionCacheArgumentType;
-import de.z0rdak.yawp.commands.arguments.DimensionalRegionArgumentType;
 import de.z0rdak.yawp.commands.arguments.flag.RegionFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.flag.FlagType;
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.DimensionArgument;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.command.arguments.TeamArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.scoreboard.ScorePlayerTeam;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.world.World;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 
@@ -37,15 +32,7 @@ public class CommandUtil {
         return Commands.literal(constant.toString());
     }
 
-    public static RegistryKey<World> getDimensionArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
-        return DimensionArgument.getDimension(ctx, CommandConstants.DIMENSION.toString()).dimension();
-    }
-
-    public static DimensionalRegion getDimRegionArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
-        return DimensionalRegionArgumentType.getDimRegion(ctx, CommandConstants.DIMENSION.toString());
-    }
-
-    public static DimensionRegionCache getDimCacheArgument(CommandContext<CommandSource> ctx) {
+    public static DimensionRegionCache getDimCacheArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
         return DimensionCacheArgumentType.getDimRegion(ctx, CommandConstants.DIMENSION.toString());
     }
 
