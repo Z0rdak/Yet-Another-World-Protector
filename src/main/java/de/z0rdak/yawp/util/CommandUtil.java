@@ -53,9 +53,8 @@ public class CommandUtil {
     }
 
     public static IMarkableRegion getParentRegionArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
-        return RegionArgumentType.getRegion(ctx, PARENT.toString());
+        return RegionArgumentType.getRegionInPlayerDim(ctx, PARENT.toString());
     }
-
 
     public static ServerPlayerEntity getPlayerArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
         return EntityArgument.getPlayer(ctx, CommandConstants.PLAYER.toString());
