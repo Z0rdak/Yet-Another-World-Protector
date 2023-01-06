@@ -50,12 +50,8 @@ public final class LocalRegions {
 
     private static CuboidRegion cuboidRegionFrom(MarkerStick marker, String regionName, PlayerEntity player, RegistryKey<World> dim){
         List<BlockPos> blocks = marker.getMarkedBlocks();
-        // TODO: test this before hand? this would eliminate these double methods with and without dim
-        if (blocks.size() != 2) {
-            return null;
-        }
         CuboidArea cuboidArea = new CuboidArea(blocks);
-        if (marker.getTeleportPos() == null) {
+        if (marker.getTeleportPos() != null) {
             return new CuboidRegion(regionName, cuboidArea, marker.getTeleportPos(), player, dim);
         }
         return new CuboidRegion(regionName, cuboidArea, player, dim);
