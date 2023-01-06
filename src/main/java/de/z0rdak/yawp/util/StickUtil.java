@@ -52,6 +52,15 @@ public final class StickUtil {
         }
     }
 
+    public static ItemStack initMarkerNbt(ItemStack stack, StickType type, RegistryKey<World> dim) {
+        stack.setCount(1);
+        initStickTag(stack, type, dim);
+        setStickName(stack, type);
+        setStickToolTip(stack, type);
+        applyEnchantmentGlint(stack);
+        return stack;
+    }
+
     public static boolean isVanillaStick(ItemStack itemStack) {
         return itemStack.getItem().getDefaultInstance().getDescriptionId().equals(Items.STICK.getDescriptionId());
     }
@@ -112,6 +121,10 @@ public final class StickUtil {
 
     public static void setToolTip(ItemStack stack, ListNBT loreNbt) {
         stack.getOrCreateTagElement("display").put("Lore", loreNbt);
+    }
+
+    public static boolean hasNonNullTag(ItemStack itemStack) {
+        return itemStack.hasTag() && itemStack.getTag() != null;
     }
 
     // TODO: Rework

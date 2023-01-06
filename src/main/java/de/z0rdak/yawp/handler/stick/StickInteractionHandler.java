@@ -42,10 +42,6 @@ public class StickInteractionHandler {
         }
     }
 
-    public static boolean hasNonNullTag(ItemStack itemStack){
-        return itemStack.hasTag() && itemStack.getTag() != null;
-    }
-
     @SubscribeEvent
     public static void onCycleMode(PlayerInteractEvent.RightClickItem event) {
         if (!event.getWorld().isClientSide) {
@@ -114,13 +110,12 @@ public class StickInteractionHandler {
             inputItem.setCount(outputItem.getCount() - 1);
             player.addItem(inputItem);
             // TODO: Send network packet to force inventory sync
+            event.setBreakChance(0.0f);
             player.giveExperienceLevels(1);
-            outputItem.setCount(1);
-            // init NBT
-            initStickTag(outputItem, type, event.getPlayer().getCommandSenderWorld().dimension());
-            setStickName(outputItem, type);
-            setStickToolTip(outputItem, type);
-            applyEnchantmentGlint(outputItem);
+            initMarkerNbt(outputItem, type, event.getPlayer().getCommandSenderWorld().dimension());
+
         }
     }
+
+
 }
