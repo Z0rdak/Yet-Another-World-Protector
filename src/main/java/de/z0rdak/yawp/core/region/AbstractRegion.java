@@ -1,11 +1,9 @@
 package de.z0rdak.yawp.core.region;
 
-import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.core.affiliation.PlayerContainer;
 import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -323,7 +321,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
         }
         if (!parent.getDim().location().equals(GlobalRegion.GLOBAL) || !(parent instanceof GlobalRegion)) {
             if (!parent.getDim().location().equals(this.dimension.location())) {
-                throw new IllegalRegionStateException("Region '" + parent.getName() + "'is not in the same dimension!");
+                throw new IllegalRegionStateException("Region '" + parent.getName() + "' is not in the same dimension!");
             }
         }
         if (parent.equals(this)) {
@@ -332,10 +330,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
         if (children.containsKey(parent.getName())) {
             throw new IllegalRegionStateException("Parent '" + parent.getName() + "' is already set as child for region '" + this.getName() + "'!");
         }
-        if (parent.hasChild(this)) {
-            return true;
-        }
-        return false;
+        return parent.hasChild(this);
     }
 
     @Nullable
