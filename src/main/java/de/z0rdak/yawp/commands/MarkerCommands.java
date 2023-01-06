@@ -1,13 +1,15 @@
 package de.z0rdak.yawp.commands;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.commands.arguments.region.OwnedRegionArgumentType;
+import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.region.AbstractMarkableRegion;
 import de.z0rdak.yawp.core.region.CuboidRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
-import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -16,6 +18,7 @@ import de.z0rdak.yawp.util.StickType;
 import de.z0rdak.yawp.util.StickUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
+import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -25,11 +28,11 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
+import java.util.Collections;
 import java.util.Objects;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
-import static de.z0rdak.yawp.util.CommandUtil.getPlayerArgument;
-import static de.z0rdak.yawp.util.CommandUtil.literal;
+import static de.z0rdak.yawp.util.CommandUtil.*;
 import static de.z0rdak.yawp.util.MessageUtil.*;
 import static de.z0rdak.yawp.util.StickUtil.STICK;
 import static de.z0rdak.yawp.util.StickUtil.getStickType;
@@ -48,68 +51,90 @@ public final class MarkerCommands {
                         .executes(ctx -> giveMarkerStick(ctx.getSource(), null))
                         .then(Commands.argument(PLAYER.toString(), EntityArgument.player())
                                 .executes(ctx -> giveMarkerStick(ctx.getSource(), getPlayerArgument(ctx)))))
-                /*
-                .then(literal(SET)
-                        .then(Commands.argument(PARENT_REGION.toString(), StringArgumentType.word()))
-                        .executes(ctx -> setParent(ctx.getSource(), getParentRegionArgument(ctx))))
-                 */
                 .then(literal(RESET)
                         .executes(ctx -> resetStick(ctx.getSource())))
-                /*
                 .then(literal(CREATE)
-                        .then(Commands.argument(NAME.toString(), StringArgumentType.word())
-                                .executes(ctx -> createRegion(ctx.getSource(), getRegionNameArgument(ctx), getDimCacheArgument(ctx), null)))
-                        .then(Commands.argument(PARENT.toString(), StringArgumentType.word())
-                                .executes(ctx -> createRegion(ctx.getSource(), getRegionNameArgument(ctx), getDimCacheArgument(ctx), getParentRegionArgument(ctx)))))
-                 */
+                        .then(Commands.argument(REGION.toString(), StringArgumentType.word())
+                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(Collections.singletonList("newRegion"), builder))
+                                .executes(ctx -> createRegion(ctx.getSource(), getRegionNameArgument(ctx), null))
+                                .then(Commands.argument(PARENT.toString(), StringArgumentType.word())
+                                        .suggests((ctx, builder) -> OwnedRegionArgumentType.region().listSuggestions(ctx, builder))
+                                        .executes(ctx -> createRegion(ctx.getSource(), getRegionNameArgument(ctx), getParentRegionArgument(ctx))))))
                 ;
     }
 
 
-    private static int createRegion(CommandSource src, String regionName, DimensionRegionCache dimCache, IProtectedRegion parentRegion) {
-        int res = DimensionCommands.checkValidRegionName(regionName, dimCache);
-        if (res == -1) {
-            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.name.invalid", regionName));
-            return res;
-        }
-        if (res == 1) {
-            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.name.exists", dimCache.getDimensionalRegion().getName(), regionName));
-            return res;
-        }
-        // TODO: Check if player is allowed to create region - here or in command interceptor?
-
+    // Argument for getting the Marker? Argument could check for player holding valid marker
+    private static int createRegion(CommandSource src, String regionName, IMarkableRegion parentRegion) {
         try {
             PlayerEntity player = src.getPlayerOrException();
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.level.dimension());
+            int res = DimensionCommands.checkValidRegionName(regionName, dimCache);
+            if (res == -1) {
+                sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.name.invalid", regionName));
+                return res;
+            }
+            if (res == 1) {
+                sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.name.exists", dimCache.getDimensionalRegion().getName(), regionName));
+                return res;
+            }
+
             ItemStack maybeStick = player.getMainHandItem();
-            // TODO: create a method which throws exception on trying to get stick
             if (StickUtil.isVanillaStick(maybeStick)) {
                 StickType stickType = StickUtil.getStickType(maybeStick);
                 if (stickType == StickType.MARKER) {
                     CompoundNBT stickNBT = StickUtil.getStickNBT(maybeStick);
                     if (stickNBT != null) {
-                        AbstractMarkableRegion region = LocalRegions.regionFrom(src.getPlayerOrException(), new MarkerStick(stickNBT), regionName);
+                        MarkerStick marker = new MarkerStick(stickNBT);
+                        AbstractMarkableRegion region = LocalRegions.regionFrom(player, marker, regionName);
                         RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
-                        dimCache.addRegion(region);
-                        LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.DEFAULT_REGION_PRIORITY.get());
-                        RegionDataManager.save();
-                        sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
-
-
+                        boolean hasConfigPermission = CommandPermissionConfig.hasPlayerPermission(player);
+                        if (parentRegion != null) {
+                            // should only be a region which has player as owner at this point due to the OwnerRegionArgumentType suggestions
+                            if (parentRegion.getOwners().containsPlayer(player.getUUID()) || hasConfigPermission) {
+                                if (AbstractMarkableRegion.fullyContains(parentRegion.getArea(), region.getArea())) {
+                                    dimCache.addRegion(region);
+                                    parentRegion.addChild(region);
+                                    LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.DEFAULT_REGION_PRIORITY.get());
+                                    RegionDataManager.save();
+                                    sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
+                                    return 0;
+                                } else {
+                                    sendCmdFeedback(src, new TranslationTextComponent("Parent region does not contain new region"));
+                                    return -1;
+                                }
+                            } else {
+                                sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.stick.local.deny", parentRegion.getName()));
+                                return 1;
+                            }
+                        } else {
+                            if (dimCache.hasOwner(player) || hasConfigPermission) {
+                                dimCache.addRegion(region);
+                                LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.DEFAULT_REGION_PRIORITY.get());
+                                RegionDataManager.save();
+                                sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
+                                return 0;
+                            } else {
+                                sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.stick.dim.deny", dimCache.getDimensionalRegion().getName()));
+                                return 2;
+                            }
+                        }
                     } else {
-                        // stick data corrupt
+                        sendCmdFeedback(src, new TranslationTextComponent("Invalid marker stick data"));
+                        return -2;
                     }
                 } else {
-                    // Player not holding correct stick in hand
+                    sendCmdFeedback(src, new StringTextComponent(RED + "").append(new TranslationTextComponent("cli.msg.dim.info.region.create.stick.missing")));
+                    return -2;
                 }
             } else {
-                // Player not holding stick in hand
                 sendCmdFeedback(src, new StringTextComponent(RED + "").append(new TranslationTextComponent("cli.msg.dim.info.region.create.stick.missing")));
                 return -2;
             }
         } catch (CommandSyntaxException e) {
             YetAnotherWorldProtector.LOGGER.error(e);
+            return -3;
         }
-        return 0;
     }
 
 

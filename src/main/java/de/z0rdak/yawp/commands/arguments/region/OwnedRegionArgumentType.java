@@ -11,6 +11,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
+import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.CommandUtil;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandSource;
@@ -87,8 +88,8 @@ public class OwnedRegionArgumentType implements ArgumentType<String> {
             CommandSource src = (CommandSource) context.getSource();
             try {
                 // TODO: hasOwner als convenient method for regions
-                DimensionRegionCache dimCache = CommandUtil.getDimCacheArgument((CommandContext<CommandSource>) context);
                 ServerPlayerEntity player = src.getPlayerOrException();
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.level.dimension());
                 List<String> ownedRegions = dimCache.getRegions()
                         .stream()
                         .filter(r -> r.getOwners().containsPlayer(player.getUUID()))
