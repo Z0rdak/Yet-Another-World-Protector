@@ -38,6 +38,8 @@ public enum CommandConstants {
     INT("int"),
     MEMBER("member"),
     NAME("name"),
+    MARKER("marker"),
+    GIVE("give"),
     OWNER("owner"),
     PARENT("parent"),
     PARENT_REGION("parent-region"),
