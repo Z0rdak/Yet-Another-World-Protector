@@ -8,15 +8,12 @@ import de.z0rdak.yawp.util.CommandUtil;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.DimensionArgument;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.ClickEvent;
 
-import static de.z0rdak.yawp.util.CommandUtil.getDimRegionArgument;
-import static de.z0rdak.yawp.util.CommandUtil.literal;
 import static de.z0rdak.yawp.util.MessageUtil.buildExecuteCmdComponent;
 import static de.z0rdak.yawp.util.MessageUtil.buildHelpHeader;
 
@@ -43,6 +40,7 @@ public class CommandRegistry {
                 //        .then(Commands.argument(CommandConstants.DIMENSION.toString(), DimensionArgument.dimension())
                 //                .executes(ctx -> DimensionCommands.selectReferenceDim(ctx.getSource(), getDimRegionArgument(ctx)))))
                 .then(DimensionCommands.DIMENSION_COMMAND)
+                .then(MarkerCommands.MARKER_COMMAND)
                 .then(RegionCommands.REGION_COMMAND)
                 //.then(FlagCommands.FLAG_COMMAND)
                 //.then(RegionCommands.REGIONS_COMMAND)
@@ -57,7 +55,7 @@ public class CommandRegistry {
         String command = CommandUtil.buildCommandStr(CommandConstants.DIMENSION.toString());
         IFormattableTextComponent cmdStr = new TranslationTextComponent("cli.msg.help.1", CommandPermissionConfig.BASE_CMD);
         MessageUtil.sendCmdFeedback(src, buildExecuteCmdComponent("=>", "Manage dimensional regions", command, ClickEvent.Action.SUGGEST_COMMAND, TextFormatting.GREEN).append(cmdStr));
-        String wikiLink = "https://github.com/Z0rdak/Yet-Another-World-Protector";
+        String wikiLink = "https://github.com/Z0rdak/Yet-Another-World-Protector/wiki";
         StringTextComponent wikiInfo = new StringTextComponent("The in-game help is under construction.\nVisit the online wiki for a guide on how to use the mod.\nOnline-Wiki: ");
         MessageUtil.sendCmdFeedback(src, wikiInfo.append(buildExecuteCmdComponent(YetAnotherWorldProtector.MODID_LONG + " online wiki", "Open online wiki in your browser", wikiLink,
                 ClickEvent.Action.OPEN_URL, TextFormatting.AQUA)));
