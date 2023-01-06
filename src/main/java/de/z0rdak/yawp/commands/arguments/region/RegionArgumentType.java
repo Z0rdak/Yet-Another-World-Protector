@@ -9,7 +9,6 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import de.z0rdak.yawp.commands.CommandConstants;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.util.CommandUtil;
@@ -24,8 +23,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static de.z0rdak.yawp.commands.CommandConstants.REGION;
 
 public class RegionArgumentType implements ArgumentType<String> {
 
@@ -69,13 +66,17 @@ public class RegionArgumentType implements ArgumentType<String> {
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         if (context.getSource() instanceof CommandSource) {
             CommandSource src = (CommandSource) context.getSource();
-            DimensionRegionCache dimCache = CommandUtil.getDimCacheArgument((CommandContext<CommandSource>) context);
-            Collection<String> regionNames = dimCache.getRegionNames();
-            if (regionNames.isEmpty()) {
-                MessageUtil.sendCmdFeedback(src, new StringTextComponent("No regions defined in dim '" + dimCache.dimensionKey().location() + "'"));
+            try {
+                DimensionRegionCache dimCache = CommandUtil.getDimCacheArgument((CommandContext<CommandSource>) context);
+                Collection<String> regionNames = dimCache.getRegionNames();
+                if (regionNames.isEmpty()) {
+                    MessageUtil.sendCmdFeedback(src, new StringTextComponent("No regions defined in dim '" + dimCache.dimensionKey().location() + "'"));
+                    return Suggestions.empty();
+                }
+                return ISuggestionProvider.suggest(regionNames, builder);
+            } catch (CommandSyntaxException e) {
                 return Suggestions.empty();
             }
-            return ISuggestionProvider.suggest(regionNames, builder);
         } else {
             return Suggestions.empty();
         }
