@@ -64,11 +64,6 @@ public class DimensionCommands {
 
     public static final LiteralArgumentBuilder<CommandSource> DIMENSION_COMMAND = register();
 
-    /**
-     * TODO: Dimensional Region hierarchy
-     *
-     * @return
-     */
     public static LiteralArgumentBuilder<CommandSource> register() {
         List<String> affiliationList = Arrays.asList("member", "owner");
         return literal(DIMENSION)
@@ -77,8 +72,7 @@ public class DimensionCommands {
                         .then(literal(CREATE)
                                 .then(literal(REGION)
                                         .then(Commands.argument(REGION.toString(), StringArgumentType.word())
-                                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(Arrays.asList("name"), builder))
-                                                // TODO: Implement creating region with stick
+                                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(Collections.singletonList("name"), builder))
                                                 //.then(Commands.argument(AREA.toString(), StringArgumentType.word())
                                                 //        .suggests((ctx, builder) -> AreaArgumentType.areaType().listSuggestions(ctx, builder))
                                                 //        .executes(ctx -> createRegion(ctx.getSource(), getRegionNameArgument(ctx), getDimCacheArgument(ctx), getAreaTypeArgument(ctx))))
@@ -114,8 +108,6 @@ public class DimensionCommands {
                                 /* /wp dimension <dim> list flag */
                                 .then(literal(FLAG).executes(ctx -> promptDimensionFlagList(ctx.getSource(), getDimCacheArgument(ctx)))))
                         .then(literal(DELETE)
-                                // FIXME: Only list region which are region.parent == dim
-                                // FIXME: How to handle zombie regions? change child parent to dim? or prohibit removal when children are present
                                 .then(Commands.argument(REGION.toString(), StringArgumentType.word())
                                         .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestions(ctx, builder))
                                         .executes(ctx -> attemptDeleteRegion(ctx.getSource(), getDimCacheArgument(ctx), getRegionArgument(ctx)))
@@ -173,14 +165,26 @@ public class DimensionCommands {
                                                 .executes(ctx -> addFlag(ctx.getSource(), getDimCacheArgument(ctx), StringArgumentType.getString(ctx, FLAG.toString())))))));
     }
 
-    private static int createCuboidRegion(CommandSource src, String regionName, DimensionRegionCache dimCache, BlockPos pos1, BlockPos pos2, @Nullable ServerPlayerEntity owner) {
+    @Nullable
+    public static int checkValidRegionName(String regionName, DimensionRegionCache dimCache) {
         if (!regionName.matches(RegionArgumentType.VALID_NAME_PATTERN.pattern())) {
-            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.name.invalid", regionName));
             return -1;
         }
         if (dimCache.contains(regionName)) {
-            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.name.exists", dimCache.getDimensionalRegion().getName(), regionName));
             return 1;
+        }
+        return 0;
+    }
+
+    private static int createCuboidRegion(CommandSource src, String regionName, DimensionRegionCache dimCache, BlockPos pos1, BlockPos pos2, @Nullable ServerPlayerEntity owner) {
+        int res = checkValidRegionName(regionName, dimCache);
+        if (res == -1) {
+            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.name.invalid", regionName));
+            return res;
+        }
+        if (res == 1) {
+            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.name.exists", dimCache.getDimensionalRegion().getName(), regionName));
+            return res;
         }
         CuboidRegion region = new CuboidRegion(regionName, new CuboidArea(pos1, pos2), owner, dimCache.dimensionKey());
         if (owner == null) {
@@ -212,28 +216,6 @@ public class DimensionCommands {
         return 0;
     }
 
-    private static int createRegion(CommandSource source, String regionName, DimensionRegionCache dimCache, AreaType area) {
-        sendCmdFeedback(source, "Not yet implemented");
-        try {
-            PlayerEntity player = source.getPlayerOrException();
-            ItemStack maybeStick = player.getMainHandItem();
-            // TODO: create a method which throws exception on trying to get stick
-            if (StickUtil.isVanillaStick(maybeStick)) {
-                StickType stickType = StickUtil.getStickType(maybeStick);
-                if (stickType == StickType.MARKER) {
-                    CompoundNBT stickNBT = StickUtil.getStickNBT(maybeStick);
-                    if (stickNBT != null) {
-                        AbstractMarkableRegion region = LocalRegions.regionFrom(source.getPlayerOrException(), new MarkerStick(stickNBT), regionName);
-                        // TODO
-                    }
-                }
-            }
-        } catch (CommandSyntaxException e) {
-            YetAnotherWorldProtector.LOGGER.error(e);
-        }
-        return 0;
-    }
-
     private static int attemptDeleteRegion(CommandSource src, DimensionRegionCache dim, IMarkableRegion region) {
         if (dim.contains(region.getName())) {
             sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.dim.region.remove.attempt", region.getName(), dim.dimensionKey().location()));
@@ -242,6 +224,7 @@ public class DimensionCommands {
         return 1;
     }
 
+    // FIXME: Are child / parent relation properly removed when deleting a region?
     private static int deleteRegion(CommandSource src, DimensionRegionCache dim, IMarkableRegion region) {
         if (dim.contains(region.getName())) {
             if (!region.getChildren().isEmpty()) {
@@ -426,7 +409,9 @@ public class DimensionCommands {
                         .append(buildDimSuggestRegionRemovalLink(region))
                         .append(" ")
                         .append(buildRegionInfoLink(region))
-                        .append(buildTextWithHoverMsg(new StringTextComponent(dimCache.getDimensionalRegion().hasChild(region) ? "*" : ""), new TranslationTextComponent("cli.msg.info.dim.region.child.hover"), GOLD))
+                        .append(dimCache.getDimensionalRegion().hasChild(region)
+                                ? buildTextWithHoverMsg(new StringTextComponent("*"), new TranslationTextComponent("cli.msg.info.dim.region.child.hover"), GOLD)
+                                : new StringTextComponent(""))
                         .append(new StringTextComponent(RESET + " @ " + RESET))
                         .append(buildRegionTeleportLink(region));
                 sendCmdFeedback(source, regionRemoveLink);
