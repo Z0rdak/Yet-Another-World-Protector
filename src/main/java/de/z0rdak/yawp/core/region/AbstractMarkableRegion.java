@@ -12,7 +12,8 @@ import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Objects;
 
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
@@ -90,24 +91,23 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
 
     /**
      * FIXME: refactor to polymorphic instance method
+     *
      * @param outer
      * @param inner
      * @return
      */
-    private static boolean fullyContains(IMarkableArea outer, IMarkableArea inner){
+    public static boolean fullyContains(IMarkableArea outer, IMarkableArea inner) {
         boolean haveSameAreaType = outer.getAreaType() == inner.getAreaType();
-        switch (outer.getAreaType()) {
-            case CUBOID:
-                CuboidArea outerCuboid = (CuboidArea) outer;
-                if (haveSameAreaType) {
-                    // should always be the case in the first iteration where only cuboids are allowed
-                    return outerCuboid.contains((CuboidArea) inner);
-                } else {
-                    throw new UnsupportedOperationException("Only cuboid areas are supported currently.");
-                }
-            default:
+        if (Objects.requireNonNull(outer.getAreaType()) == AreaType.CUBOID) {
+            CuboidArea outerCuboid = (CuboidArea) outer;
+            if (haveSameAreaType) {
+                // should always be the case in the first iteration where only cuboids are allowed
+                return outerCuboid.contains((CuboidArea) inner);
+            } else {
                 throw new UnsupportedOperationException("Only cuboid areas are supported currently.");
+            }
         }
+        throw new UnsupportedOperationException("Only cuboid areas are supported currently.");
     }
 
     /**
@@ -124,10 +124,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
             IMarkableRegion markableParentRegion = (IMarkableRegion) parent;
             if (fullyContains(((IMarkableRegion) parent).getArea(), this.area)) {
                 this.isMuted = markableParentRegion.isMuted();
-                // region is handled after child and parent hierarchy is set
-                // this.priority = markableParentRegion.getPriority() + 1;
                 this.parent = markableParentRegion;
-                //markableParentRegion.addChild(this);
                 YetAnotherWorldProtector.LOGGER.debug("Setting parent '" + parent.getName() + "' for region '" + this.getName() + "'");
                 return true;
             } else {
