@@ -42,7 +42,6 @@ public enum CommandConstants {
     GIVE("give"),
     OWNER("owner"),
     PARENT("parent"),
-    PARENT_REGION("parent-region"),
     PLAYER("player"),
     PLAYERS("players"),
     PRIORITY("priority"),

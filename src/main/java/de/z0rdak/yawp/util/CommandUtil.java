@@ -7,7 +7,9 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.commands.CommandConstants;
-import de.z0rdak.yawp.commands.arguments.*;
+import de.z0rdak.yawp.commands.arguments.AreaArgumentType;
+import de.z0rdak.yawp.commands.arguments.DimensionCacheArgumentType;
+import de.z0rdak.yawp.commands.arguments.DimensionalRegionArgumentType;
 import de.z0rdak.yawp.commands.arguments.flag.RegionFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
@@ -64,7 +66,7 @@ public class CommandUtil {
     }
 
     public static IMarkableRegion getParentRegionArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
-        return RegionArgumentType.getRegion(ctx, PARENT_REGION.toString());
+        return RegionArgumentType.getRegion(ctx, PARENT.toString());
     }
 
 
