@@ -41,13 +41,12 @@ public final class StickUtil {
      * @param dim   dimension tag to set for sticks
      */
     public static void initStickTag(ItemStack stick, StickType type, RegistryKey<World> dim) {
-        CompoundNBT itemTag = new CompoundNBT();
-        if (stick.hasTag()) {
-            itemTag = stick.getTag();
-        }
+        CompoundNBT itemTag = stick.hasTag() ? stick.getTag() : new CompoundNBT();
         if (itemTag != null) {
             if (Objects.requireNonNull(type) == StickType.MARKER) {
-                itemTag.put(STICK, new MarkerStick(dim).serializeNBT());
+                CompoundNBT compoundNBT = new MarkerStick(dim).serializeNBT();
+                itemTag.put(STICK, compoundNBT);
+                stick.setTag(itemTag);
             }
         }
     }
@@ -106,7 +105,7 @@ public final class StickUtil {
     public static void setStickName(ItemStack stick, StickType type) {
         String displayName = "";
         if (Objects.requireNonNull(type) == StickType.MARKER) {
-            MarkerStick marker = new MarkerStick(stick.getTag().getCompound(STICK));
+            MarkerStick marker = new MarkerStick(getStickNBT(stick));
             String validFlag = marker.isValidArea() ? (TextFormatting.GREEN + "*" + TextFormatting.GOLD) : "";
             displayName = TextFormatting.GOLD + type.stickName + " (" + marker.getAreaType().areaType + "" + validFlag + ")";
         }
@@ -127,13 +126,12 @@ public final class StickUtil {
         return itemStack.hasTag() && itemStack.getTag() != null;
     }
 
-    // TODO: Rework
     private static ListNBT getMarkerToolTip() {
         ListNBT lore = new ListNBT();
-        StringNBT simple1 = buildLoreTextLine(new TranslationTextComponent("help.tooltip.stick.marker.simple.1"), "#ff0020");
-        StringNBT simple2 = buildLoreTextLine(new TranslationTextComponent("help.tooltip.stick.marker.simple.2"), "#ff0010");
-        lore.add(simple1);
-        lore.add(simple2);
+        lore.add(buildLoreTextLine(new TranslationTextComponent("help.tooltip.stick.marker.simple.1"), "#ff4d4d"));
+        lore.add(buildLoreTextLine(new TranslationTextComponent("help.tooltip.stick.marker.simple.2"), "#ff4d4d"));
+        lore.add(buildLoreTextLine(new StringTextComponent(TextFormatting.ITALIC + "").append(new TranslationTextComponent("help.tooltip.stick.marker.simple.3")), "#808080"));
+        lore.add(buildLoreTextLine(new StringTextComponent(TextFormatting.ITALIC + "").append(new TranslationTextComponent("help.tooltip.stick.marker.simple.4")), "#808080"));
         return lore;
     }
 

@@ -16,11 +16,11 @@
   "cli.msg.dim.help.4": "/%s dim <dim> add|remove flag <flag>",
   "cli.msg.dim.help.5": "/%s dim <dim> info",
   "cli.msg.dim.help.6": "/%s dim <dim> activate <true|false>",
-
   "cli.msg.dim.info": "Prompt region info",
   "cli.msg.dim.info.region.create.success": "Successfully created region %s",
   "cli.msg.dim.info.region.create.name.invalid": "Invalid region name supplied: '%s'",
   "cli.msg.dim.info.region.create.name.exists": "Dimension '%s' already contains region with name '%s'",
+  "cli.msg.dim.info.region.create.stick.missing": "Put a valid(*) RegionMarker in your main hand to create a region!",
   "cli.msg.dim.info.region": "Regions",
   "cli.msg.dim.info.region.list.link.text": "%s region(s)",
   "cli.msg.dim.info.region.list.link.hover": "List regions in '%s'  ",
@@ -176,22 +176,20 @@
   "cli.msg.info.state.link.deactivate": "inactive",
   "cli.msg.info.state.activated": "Activated region '%s'",
   "cli.msg.info.state.deactivated": "Deactivated region '%s'",
-
   "cli.msg.template.help": "Templates",
   "cli.msg.trigger.help": "Triggers",
   "cli.msg.flag.help": "Flags",
   "cli.msg.affiliation.help": "Affiliation",
-
   "help.tooltip.stick.marker.simple.1": "Used to mark a new region.",
   "help.tooltip.stick.marker.simple.2": "Keep the Region Marker in your hand while defining a region!",
-
+  "help.tooltip.stick.marker.simple.3": "Mark a (Cuboid) region by right-clicking the diagonal opposite corner blocks.",
+  "help.tooltip.stick.marker.simple.4": "The green star on the RegionMarker indicates a valid area.",
   "help.tooltip.stick.marker.optional.1": "2a. [Optional] Expand the region from Y 0 to 255 with the \"/wp expand vert\" command or by holding down the right mouse button.",
   "help.tooltip.stick.marker.optional.2": "2b. [Optional] SHIFT + Right-click allows you to mark a block as the regions teleportation target.",
   "help.tooltip.stick.marker.detail.1": "A region is marked by two blocks.\nThe Region Marker toggles between the 1st and 2nd block after clicking.",
   "help.tooltip.stick.marker.detail.2": "1. Left-click on the 1st block to start marking a region.\n2. Left-click on the 2nd block to finish marking a region.",
   "help.tooltip.stick.marker.detail.3": "3. Define the region with the \"/wp region define <name>\" command or by renaming the Region Marker in an anvil.",
   "help.tooltip.stick.marker.detail.4": "Keep the Region Marker in your hand while defining a region!",
-
   "help.tooltip.stick.flag-stick.simple.1": "Use the Flag Stick to simply modify flags for a region.",
   "help.tooltip.stick.flag-stick.simple.2": "Keep the Region Stick in your offhand!",
   "help.tooltip.stick.flag-stick.detail.1": "1. Select a flag by right clicking.",
