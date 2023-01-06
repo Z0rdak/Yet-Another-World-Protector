@@ -58,11 +58,28 @@ public class CommandInterceptor {
                     case "flag":
                         break;
                     case "marker":
-                        event.setCanceled(false);
+                        handleMarkerCmdExecution(event);
                         break;
                 }
             }
         }
+    }
+
+    public static void handleMarkerCmdExecution(CommandEvent event) {
+        CommandContextBuilder<CommandSource> cmdContext = event.getParseResults().getContext();
+        CommandSource src = cmdContext.getSource();
+        List<ParsedCommandNode<CommandSource>> cmdNodes = cmdContext.getNodes();
+        List<String> nodeNames = cmdNodes.stream().map(node -> node.getNode().getName()).collect(Collectors.toList());
+        if (cmdNodes.size() < 4) {
+            return;
+        }
+        // /wp marker create <regionName> without dim
+        if (cmdNodes.size() == 4) {
+            // TODO: Check if player is allowed to create regions in dim
+        }
+
+        // /wp marker create <regionName> <parentName>
+        // TODO: Check if player is allowed to create region in parent (local region)
     }
 
     public static void handleRegionCmdExecution(CommandEvent event) {
