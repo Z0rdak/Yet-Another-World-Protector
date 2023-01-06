@@ -28,14 +28,17 @@ public class DimensionCacheArgumentType implements ArgumentType<DimensionRegionC
             dim -> new TranslationTextComponent("cli.arg.dim.invalid", dim)
     );
 
-    @Override
-    public DimensionRegionCache parse(StringReader reader) throws CommandSyntaxException {
-        ResourceLocation resourcelocation = ResourceLocation.read(reader);
-        return getDimensionalRegionCache(resourcelocation);
+    /**
+     * Using this as an actual argument does not work on a server-side only mod,
+     * because it needs to be registered in the corresponding registry.
+     *
+     * @return
+     */
+    public static DimensionCacheArgumentType dimRegion() {
+        return new DimensionCacheArgumentType();
     }
 
     private static DimensionRegionCache getDimensionalRegionCache(ResourceLocation resourcelocation) {
-        // TODO: Check valid dimension key?
         RegistryKey<World> registrykey = RegistryKey.create(Registry.DIMENSION_REGISTRY, resourcelocation);
         if (RegionDataManager.get().containsCacheFor(registrykey)) {
             return RegionDataManager.get().cacheFor(registrykey);
@@ -58,18 +61,28 @@ public class DimensionCacheArgumentType implements ArgumentType<DimensionRegionC
         return EXAMPLES;
     }
 
-    /**
-     * Using this as an actual argument does not work on a server-side only mod,
-     * because it needs to be registered in the corresponding registry.
-     * @return
-     */
-    public static DimensionalRegionArgumentType dimRegion() {
-        return new DimensionalRegionArgumentType();
+    public static DimensionRegionCache getDimRegion(CommandContext<CommandSource> context, String dim) throws CommandSyntaxException {
+        ResourceLocation resourcelocation = context.getArgument(dim, ResourceLocation.class);
+        boolean isValidDimResourceLocation = context.getSource().levels().stream().map(RegistryKey::location).anyMatch(loc -> loc.equals(resourcelocation));
+        if (isValidDimResourceLocation) {
+            DimensionRegionCache dimCache = getDimensionalRegionCache(resourcelocation);
+            if (dimCache == null) {
+                throw ERROR_INVALID_VALUE.create(resourcelocation.toString());
+            }
+            return dimCache;
+        } else {
+            throw ERROR_INVALID_VALUE.create(resourcelocation.toString());
+        }
+
     }
 
-    public static DimensionRegionCache getDimRegion(CommandContext<CommandSource> context, String dim) {
-        ResourceLocation resourcelocation = context.getArgument(dim, ResourceLocation.class);
-        return getDimensionalRegionCache(resourcelocation);
-
+    @Override
+    public DimensionRegionCache parse(StringReader reader) throws CommandSyntaxException {
+        ResourceLocation resourcelocation = ResourceLocation.read(reader);
+        RegistryKey<World> registrykey = RegistryKey.create(Registry.DIMENSION_REGISTRY, resourcelocation);
+        if (RegionDataManager.get().containsCacheFor(registrykey)) {
+            return RegionDataManager.get().cacheFor(registrykey);
+        }
+        return null;
     }
 }
