@@ -1,3 +1,23 @@
+# 0.0.1.0-beta4 - Local Region overhaul
+This update brings the first iteration of working Local Regions. Due to some drastic changes in saving and loading region data, older regions are not supported - sorry!
+Rest assured, once the mod goes from beta to release, these kinds of changes regarding will be kept to a minimum to ensure backwards compatibility.
+## Additions
+* Local Region flags are now implemented! Please visit the wiki for a full list of flags and for more information about how the Region hierarchy works.
+* Add RegionMarker stick. Use it to mark an area for a new region and then either use the CLI to create the region or rename the stick in an anvil.
+* Add sub-command to give a player a RegionMarker: `/wp marker give [<player>]`.
+* Add sub-command to reset the state of a RegionMarker the player is holding: `/wp marker reset`.
+* Add flag for knock-back protection against players.
+To learn more about the priorities for overlapping regions and region hierarchy please visit the wiki.
+* Add flag `spawning-slime`, `spawning-villager`, `spawning-trader`, `drop-loot-player`. Visit the wiki for detailed information about the flags.
+## Changes
+* Spherical Regions are for now disabled. They will come back later with other shapes.
+* When removing a child region from a Local Region, its new parent will be the Dimensional Region and the child will be disabled.
+* The flag command `/wp flag ...` is disabled for now. It has currently no real functionality and will come back in the next update.
+* Deleting regions no longer works for regions with children. There will be a config option in a future update to enable this, though.
+* Rename `attack-*` flags to `melee-*`. They only protect against melee attacks, hence the change.
+* Disable explosion related flags. They will come back in the next update.
+## Fixes
+* Various CLI interface fixes regarding visualization and usability
 # 0.0.1.0-beta3 - Minor fixes
 ## Additions
 * Implemented missing command for removing regions
