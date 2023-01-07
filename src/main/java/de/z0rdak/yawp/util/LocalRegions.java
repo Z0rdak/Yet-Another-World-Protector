@@ -44,11 +44,11 @@ public final class LocalRegions {
         return null;
     }
 
-    private static CuboidRegion cuboidRegionFrom(MarkerStick marker, String regionName, PlayerEntity player){
+    private static CuboidRegion cuboidRegionFrom(MarkerStick marker, String regionName, PlayerEntity player) {
         return cuboidRegionFrom(marker, regionName, player, marker.getDimension());
     }
 
-    private static CuboidRegion cuboidRegionFrom(MarkerStick marker, String regionName, PlayerEntity player, RegistryKey<World> dim){
+    private static CuboidRegion cuboidRegionFrom(MarkerStick marker, String regionName, PlayerEntity player, RegistryKey<World> dim) {
         List<BlockPos> blocks = marker.getMarkedBlocks();
         CuboidArea cuboidArea = new CuboidArea(blocks);
         if (marker.getTeleportPos() != null) {
@@ -63,9 +63,10 @@ public final class LocalRegions {
      * 1. The region is active- <br>
      * 2. The region contains the flag- <br>
      * 3. The containing flag is active.
-     * @param flag which must be contained in the region and must be active
+     *
+     * @param flag     which must be contained in the region and must be active
      * @param position the position which must be in the region
-     * @param dim the dimension to check regions for
+     * @param dim      the dimension to check regions for
      * @return a list of regions which match the criteria, can be empty.
      */
     public static List<IMarkableRegion> getInvolvedRegionsFor(RegionFlag flag, BlockPos position, RegistryKey<World> dim) {
@@ -118,19 +119,31 @@ public final class LocalRegions {
 
     /**
      * Gets intersecting region at the same region hierarchy.
+     *
      * @param cuboidRegion
      * @return
      */
-    public static List<CuboidRegion> getIntersectingRegionsFor(CuboidRegion cuboidRegion){
+    public static List<CuboidRegion> getIntersectingRegionsFor(CuboidRegion cuboidRegion) {
         return cuboidRegion.getParent().getChildren().values()
                 .stream()
                 .filter(r -> !r.equals(cuboidRegion)) // filter input region from the result
-                .map(r -> (CuboidRegion)r)
-                .filter(region -> ((CuboidArea)cuboidRegion.getArea()).intersects((CuboidArea)(region).getArea()))
+                .map(r -> (CuboidRegion) r)
+                .filter(r -> ((CuboidArea) cuboidRegion.getArea()).intersects((CuboidArea) (r).getArea()))
                 .collect(Collectors.toList());
     }
 
-    public static int ensureHigherRegionPriorityFor(CuboidRegion cuboidRegion, int defaultPriority){
+    public static List<CuboidRegion> getIntersectingWithSamePriority(CuboidRegion cuboidRegion) {
+        return cuboidRegion.getParent().getChildren().values()
+                .stream()
+                .filter(r -> !r.equals(cuboidRegion)) // filter input region from the result
+                .map(r -> (CuboidRegion) r)
+                .filter(region -> ((CuboidArea) cuboidRegion.getArea()).intersects((CuboidArea) (region).getArea()))
+                .filter(r -> r.getPriority() == cuboidRegion.getPriority())
+                .collect(Collectors.toList());
+    }
+
+
+    public static int ensureHigherRegionPriorityFor(CuboidRegion cuboidRegion, int defaultPriority) {
         List<CuboidRegion> intersectingRegions = getIntersectingRegionsFor(cuboidRegion);
         boolean hasRegionWithSamePriority = intersectingRegions.stream().anyMatch(r -> r.getPriority() == cuboidRegion.getPriority());
         if (hasRegionWithSamePriority) {
@@ -182,6 +195,7 @@ public final class LocalRegions {
      * This list may contain multiple regions with the same priority. <br>
      * In an optimal region setup, the list only contains one region. <br>
      * It is assumed that the provided list of regions only contains 'involved' regions.
+     *
      * @param involvedRegions valid involved regions, may be empty.
      * @return a reduced list of involved regions with the highest priority
      */
