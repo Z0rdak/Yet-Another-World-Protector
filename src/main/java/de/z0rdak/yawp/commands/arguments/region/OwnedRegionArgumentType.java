@@ -20,23 +20,41 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class RegionArgumentType implements ArgumentType<String> {
+public class OwnedRegionArgumentType implements ArgumentType<String> {
 
+    public static final Pattern VALID_NAME_PATTERN = Pattern.compile("^[A-Za-z]+[A-Za-z\\d\\-]+[A-Za-z\\d]+$");
     private static final Collection<String> EXAMPLES = Stream.of(new String[]{"spawn", "arena4pvp", "shop", "nether-hub"})
             .collect(Collectors.toSet());
-
     private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(Component.translatable("cli.arg.region.parse.invalid"));
-
     private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
             flag -> Component.translatable("cli.arg.region.invalid", flag)
     );
 
-    public static final Pattern VALID_NAME_PATTERN = Pattern.compile("^[A-Za-z]+[A-Za-z\\d\\-]+[A-Za-z\\d]+$");
+    /**
+     * Using this as an actual argument does not work on a server-side only mod,
+     * because it needs to be registered in the corresponding registry.
+     */
+    public static OwnedRegionArgumentType region() {
+        return new OwnedRegionArgumentType();
+    }
+
+    public static IMarkableRegion getRegion(CommandContext<CommandSourceStack> context, String argName) throws CommandSyntaxException {
+        String regionName = context.getArgument(argName, String.class);
+        DimensionRegionCache dimCache = CommandUtil.getDimCacheArgument(context);
+        IMarkableRegion region = dimCache.getRegion(regionName);
+        if (region != null) {
+            return region;
+        } else {
+            MessageUtil.sendCmdFeedback(context.getSource(), Component.literal("No region with name '" + argName + "' defined in dim '" + dimCache.dimensionKey().location() + "'"));
+            throw ERROR_INVALID_VALUE.create(regionName);
+        }
+    }
 
     @Override
     public String parse(StringReader reader) throws CommandSyntaxException {
@@ -62,57 +80,34 @@ public class RegionArgumentType implements ArgumentType<String> {
         }
     }
 
-    public static IMarkableRegion getRegion(CommandContext<CommandSourceStack> context, String argName) throws CommandSyntaxException {
-        String regionName = context.getArgument(argName, String.class);
-        DimensionRegionCache dimCache = CommandUtil.getDimCacheArgument(context);
-        IMarkableRegion region = dimCache.getRegion(regionName);
-        if (region != null) {
-            return region;
-        } else {
-            MessageUtil.sendCmdFeedback(context.getSource(), Component.literal("No regions defined in dim '" + dimCache.dimensionKey().location() + "'"));
-            throw ERROR_INVALID_VALUE.create(regionName);
-        }
-    }
-
-    @Override
-    public Collection<String> getExamples() {
-        return EXAMPLES;
-    }
-
-    public static RegionArgumentType region() {
-        return new RegionArgumentType();
-    }
-
-    public static IMarkableRegion getRegionInPlayerDim(CommandContext<CommandSourceStack> context, String argName) throws CommandSyntaxException {
-        String regionName = context.getArgument(argName, String.class);
-        ServerPlayer player = context.getSource().getPlayerOrException();
-        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.level.dimension());
-        IMarkableRegion region = dimCache.getRegion(regionName);
-        if (region != null) {
-            return region;
-        } else {
-            MessageUtil.sendCmdFeedback(context.getSource(), Component.literal("No regions defined in dim '" + dimCache.dimensionKey().location() + "'"));
-            throw ERROR_INVALID_VALUE.create(regionName);
-        }
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         if (context.getSource() instanceof CommandSourceStack src) {
             try {
-                DimensionRegionCache dimCache = CommandUtil.getDimCacheArgument((CommandContext<CommandSourceStack>) context);
-                Collection<String> regionNames = dimCache.getRegionNames();
-                if (regionNames.isEmpty()) {
-                    MessageUtil.sendCmdFeedback(src, Component.literal("No regions defined in dim '" + dimCache.dimensionKey().location() + "'"));
+                // TODO: hasOwner als convenient method for regions
+                ServerPlayer player = src.getPlayerOrException();
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.level.dimension());
+                List<String> ownedRegions = dimCache.getRegions()
+                        .stream()
+                        .filter(r -> r.getOwners().containsPlayer(player.getUUID()))
+                        .map(IMarkableRegion::getName)
+                        .collect(Collectors.toList());
+                if (ownedRegions.isEmpty()) {
+                    MessageUtil.sendCmdFeedback(src, Component.translatable("You don't have owner permissions for any region in this dimension!'"));
                     return Suggestions.empty();
                 }
-                return SharedSuggestionProvider.suggest(regionNames, builder);
+                return SharedSuggestionProvider.suggest(ownedRegions, builder);
             } catch (CommandSyntaxException e) {
                 return Suggestions.empty();
             }
         } else {
             return Suggestions.empty();
         }
+    }
+
+    @Override
+    public Collection<String> getExamples() {
+        return EXAMPLES;
     }
 }

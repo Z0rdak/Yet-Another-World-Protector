@@ -26,6 +26,7 @@ public abstract class CenteredArea extends AbstractArea {
         this.center = center;
     }
 
+    // FIXME: Use Vec3 instead of Vector3d
     public Vector3d getCenter() {
         return new Vector3d(this.center.getX(), this.center.getY(), this.center.getZ());
     }

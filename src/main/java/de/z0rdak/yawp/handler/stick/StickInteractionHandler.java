@@ -16,6 +16,8 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.Objects;
+
 import static de.z0rdak.yawp.util.StickUtil.*;
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 
@@ -29,34 +31,15 @@ public class StickInteractionHandler {
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (!event.getLevel().isClientSide) {
             Player player = event.getEntity();
+            // TODO: Maybe check if player is allowed to mark block
             ItemStack involvedItemStack = event.getItemStack();
             if (!involvedItemStack.equals(ItemStack.EMPTY) && isVanillaStick(involvedItemStack)) {
                 StickType stickType = getStickType(involvedItemStack);
-
-                boolean isShiftPressed = player.isShiftKeyDown();
-                BlockHitResult blockRayTraceResult = event.getHitVec();
-                BlockPos pos = blockRayTraceResult.getBlockPos();
-                HitResult.Type traceResultType = blockRayTraceResult.getType();
-
-                switch (stickType) {
-                    case MARKER:
-                        MarkerStickHandler.onMarkBlock(involvedItemStack, event);
-                        break;
-                    case REGION_STICK:
-                        break;
-                    case FLAG_STICK:
-                        break;
-                    default:
-                        break;
+                if (Objects.requireNonNull(stickType) == StickType.MARKER) {
+                    MarkerStickHandler.onMarkBlock(involvedItemStack, event);
                 }
             }
         }
-        // TODO: check block and handle stick action accordingly
-        // TODO: rendering and charge use needs to be implemented in stickitem mixin
-    }
-
-    public static boolean hasNonNullTag(ItemStack itemStack){
-        return itemStack.hasTag() && itemStack.getTag() != null;
     }
 
     @SubscribeEvent
@@ -79,19 +62,9 @@ public class StickInteractionHandler {
 
                 if (event.getEntity().isShiftKeyDown() && targetIsAir) {
                     StickType stickType = getStickType(involvedItemStack);
-                    switch (stickType) {
-                        case REGION_STICK:
-                            RegionStickHandler.onCycleRegionStick(involvedItemStack);
-                            break;
-                        case FLAG_STICK:
-                            FlagStickHandler.onCycleFlagStick(involvedItemStack);
-                            break;
-                        case MARKER:
-                            MarkerStickHandler.onCycleRegionMarker(involvedItemStack);
-                            break;
-                        case UNKNOWN:
-                        default:
-                            break;
+                    if (Objects.requireNonNull(stickType) == StickType.MARKER) {
+                        // FIXME: cycling mode is disabled for now because there is only one working area type
+                        //MarkerStickHandler.onCycleRegionMarker(involvedItemStack);
                     }
                 }
             }
@@ -110,6 +83,9 @@ public class StickInteractionHandler {
             ItemStack inputItem = event.getLeft();
             ItemStack ingredientInput = event.getRight();
             boolean hasStickTag = outputItem.hasTag() && outputItem.getTag() != null && outputItem.getTag().contains(STICK);
+            // TODO: Check if player is allowed to create region -
+            // FIXME: this is not possible when player has no rights for dimension - a parent would need to be selected
+            // stick set region parent where player == owner
             if (hasStickTag) {
                 MarkerStickHandler.onCreateRegion(event);
             }
@@ -135,13 +111,9 @@ public class StickInteractionHandler {
             inputItem.setCount(outputItem.getCount() - 1);
             player.addItem(inputItem);
             // TODO: Send network packet to force inventory sync
+            event.setBreakChance(0.0f);
             player.giveExperienceLevels(1);
-            outputItem.setCount(1);
-            // init NBT
-            initStickTag(outputItem, type, event.getEntity().getCommandSenderWorld().dimension());
-            setStickName(outputItem, type);
-            setStickToolTip(outputItem, type);
-            applyEnchantmentGlint(outputItem);
+            initMarkerNbt(outputItem, type, event.getEntity().getCommandSenderWorld().dimension());
         }
     }
 }

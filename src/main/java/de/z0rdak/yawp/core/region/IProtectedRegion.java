@@ -1,14 +1,20 @@
 package de.z0rdak.yawp.core.region;
 
 import de.z0rdak.yawp.core.affiliation.PlayerContainer;
+import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.scores.Team;
 import net.minecraftforge.common.util.INBTSerializable;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This interface represents a general protected region.
@@ -21,23 +27,29 @@ import java.util.Collection;
  * active or not.
  * <p>
  * Classes which implement this interface must also provide a way
- * to serialize the region data into a CompoundTag.
- *  * TODO: Maybe move getDim to this interface and implement it in AbstractRegion
+ * to serialize the region data into a CompoundNBT.
  */
 public interface IProtectedRegion extends INBTSerializable<CompoundTag> {
 
     String getName();
 
+    ResourceKey<Level> getDim();
+
     void addFlag(IFlag flag);
 
-    // TODO: String flag -> IFlag flag?
     void removeFlag(String flag);
 
-    boolean containsFlag(IFlag flag);
+    boolean containsFlag(String flag);
 
     boolean containsFlag(RegionFlag flag);
 
     Collection<IFlag> getFlags();
+
+    FlagContainer getFlagContainer();
+
+    IFlag getFlag(String flagName);
+
+    void updateFlag(IFlag flag);
 
     void addMember(Player player);
 
@@ -64,4 +76,22 @@ public interface IProtectedRegion extends INBTSerializable<CompoundTag> {
     PlayerContainer getOwners();
 
     boolean permits(Player player);
+
+    @Nullable
+    IProtectedRegion getParent();
+
+    @Nullable
+    String getParentName();
+
+    boolean setParent(IProtectedRegion parent);
+
+    Map<String, IProtectedRegion> getChildren();
+
+    Set<String> getChildrenNames();
+
+    void addChild(IProtectedRegion child);
+
+    void removeChild(IProtectedRegion child);
+
+    boolean hasChild(IProtectedRegion child);
 }

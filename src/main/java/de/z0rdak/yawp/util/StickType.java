@@ -3,9 +3,7 @@ package de.z0rdak.yawp.util;
 public enum StickType {
 
     UNKNOWN("Unknown"),
-    MARKER("RegionMarker"),
-    FLAG_STICK("FlagStick"),
-    REGION_STICK("RegionStick");
+    MARKER("RegionMarker");
 
     public final String stickName;
 
@@ -14,15 +12,9 @@ public enum StickType {
     }
 
     public static StickType of(String name) {
-        switch (name) {
-            case "RegionMarker":
-                return MARKER;
-            case "FlagStick":
-                return FLAG_STICK;
-            case "RegionStick":
-                return REGION_STICK;
-            default:
-                return UNKNOWN;
+        if (name.equals("RegionMarker")) {
+            return MARKER;
         }
+        return UNKNOWN;
     }
 }

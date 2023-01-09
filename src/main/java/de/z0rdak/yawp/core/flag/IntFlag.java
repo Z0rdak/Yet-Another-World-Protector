@@ -50,4 +50,9 @@ public class IntFlag extends AbstractFlag {
         super.deserializeNBT(nbt);
         // TODO
     }
+
+    @Override
+    public boolean isAllowed(Object... args) {
+        return false;
+    }
 }

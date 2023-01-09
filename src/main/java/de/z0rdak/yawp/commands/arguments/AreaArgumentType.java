@@ -39,15 +39,15 @@ public class AreaArgumentType implements ArgumentType<AreaType> {
     public AreaType parse(StringReader reader) throws CommandSyntaxException {
         int i = reader.getCursor();
 
-        while(reader.canRead() && String.valueOf(reader.peek()).matches(VALID_AREA_NAME_CHAR_PATTERN.pattern())) {
+        while (reader.canRead() && String.valueOf(reader.peek()).matches(VALID_AREA_NAME_CHAR_PATTERN.pattern())) {
             reader.skip();
         }
         String s = reader.getString().substring(i, reader.getCursor());
         try {
-            if (AreaType.isValidAreaType(s)){
+            if (AreaType.isValidAreaType(s)) {
                 return AreaType.of(s);
             } else {
-              throw new IllegalArgumentException("Invalid area type supplied");
+                throw new IllegalArgumentException("Invalid area type supplied");
             }
             // TODO: Make own AreaTypeException? would be overkill... but..
         } catch (IllegalArgumentException argumentException) {

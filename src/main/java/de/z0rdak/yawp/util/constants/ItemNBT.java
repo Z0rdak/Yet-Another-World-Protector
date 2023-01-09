@@ -2,14 +2,6 @@ package de.z0rdak.yawp.util.constants;
 
 public class ItemNBT {
 
-    /* ItemFlagStick constants */
-    public static final String FLAG_IDX = "flag_idx";
-    public static final String FLAG = "flag";
-    public static final String MODE = "mode";
-    public static final String MODE_ADD = "add";
-    public static final String MODE_REMOVE = "remove";
-    public static final String FINISH_ACTION = "finish_action";
-
     /* ItemRegionMarker constants */
     public static final String VALID = "valid";
     public static final String Y_DEFAULT_LOW = "y_low_default";
@@ -25,8 +17,8 @@ public class ItemNBT {
     public static final String TP_Y = "tp_y";
     public static final String TP_Z = "tp_z";
     public static final String TP_TARGET_SET = "tp_target_set";
-
-    /* ItemRegionStick constants */
-    public static final String REGION_IDX = "region_idx";
-    public static final String REGION = "region";
+    public static final String SELECTED_REGION = "selected_region";
+    public static final String SELECTED_PARENT = "selected_parent";
+    public static final String PARENT_TYPE = "parent_type";
+    public static final String FLAG_ACTION = "flag_action";
 }

@@ -3,8 +3,6 @@ package de.z0rdak.yawp.commands;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
@@ -16,13 +14,10 @@ import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.*;
-import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
+import de.z0rdak.yawp.util.LocalRegions;
 import de.z0rdak.yawp.util.MessageUtil;
-import de.z0rdak.yawp.util.RegionUtil;
-import de.z0rdak.yawp.util.StickType;
-import de.z0rdak.yawp.util.StickUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -32,25 +27,23 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.TeamArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.scores.PlayerTeam;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
-import static de.z0rdak.yawp.commands.CommandConstants.DELETE;
 import static de.z0rdak.yawp.util.CommandUtil.*;
 import static de.z0rdak.yawp.util.MessageUtil.*;
+import static net.minecraft.ChatFormatting.RESET;
 import static net.minecraft.ChatFormatting.*;
 
 public class DimensionCommands {
@@ -66,32 +59,25 @@ public class DimensionCommands {
                 /* /wp dimension <dim> list region */
                 .then(Commands.argument(DIMENSION.toString(), DimensionArgument.dimension())
                         .then(literal(CREATE)
-                                .then(literal(REGION).then(Commands.argument(REGION.toString(), StringArgumentType.word())
-                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Arrays.asList("name"), builder))
-                                        // TODO: Implement creating region with stick
-                                        //.then(Commands.argument(AREA.toString(), StringArgumentType.word())
-                                        //        .suggests((ctx, builder) -> AreaArgumentType.areaType().listSuggestions(ctx, builder))
-                                        //        .executes(ctx -> createRegion(ctx.getSource(), getRegionNameArgument(ctx), getDimCacheArgument(ctx), getAreaTypeArgument(ctx))))
-                                        .then(Commands.literal(AreaType.CUBOID.areaType)
-                                                .then(Commands.argument("pos1", BlockPosArgument.blockPos())
-                                                        .then(Commands.argument("pos2", BlockPosArgument.blockPos())
-                                                                .executes(ctx -> createCuboidRegion(ctx.getSource(), getRegionNameArgument(ctx), getDimCacheArgument(ctx),
-                                                                        BlockPosArgument.getSpawnablePos(ctx, "pos1"),
-                                                                        BlockPosArgument.getSpawnablePos(ctx, "pos2"), null))
-                                                                .then(Commands.argument(OWNER.toString(), EntityArgument.player())
+                                .then(literal(REGION)
+                                        .then(Commands.argument(REGION.toString(), StringArgumentType.word())
+                                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Collections.singletonList("name"), builder))
+                                                //.then(Commands.argument(AREA.toString(), StringArgumentType.word())
+                                                //        .suggests((ctx, builder) -> AreaArgumentType.areaType().listSuggestions(ctx, builder))
+                                                //        .executes(ctx -> createRegion(ctx.getSource(), getRegionNameArgument(ctx), getDimCacheArgument(ctx), getAreaTypeArgument(ctx))))
+                                                .then(Commands.literal(AreaType.CUBOID.areaType)
+                                                        .then(Commands.argument("pos1", BlockPosArgument.blockPos())
+                                                                .then(Commands.argument("pos2", BlockPosArgument.blockPos())
                                                                         .executes(ctx -> createCuboidRegion(ctx.getSource(), getRegionNameArgument(ctx), getDimCacheArgument(ctx),
                                                                                 BlockPosArgument.getSpawnablePos(ctx, "pos1"),
-                                                                                BlockPosArgument.getSpawnablePos(ctx, "pos2"), getOwnerArgument(ctx)))))))
-                                        .then(Commands.literal(AreaType.SPHERE.areaType)
-                                                .then(Commands.argument("centerPos", BlockPosArgument.blockPos())
-                                                        .then(Commands.argument("outerPos", BlockPosArgument.blockPos())
-                                                                .executes(ctx -> createSphereRegion(ctx.getSource(), getRegionNameArgument(ctx), getDimCacheArgument(ctx),
-                                                                        BlockPosArgument.getSpawnablePos(ctx, "centerPos"),
-                                                                        BlockPosArgument.getSpawnablePos(ctx, "outerPos"), null))
-                                                                .then(Commands.argument(OWNER.toString(), EntityArgument.player())
-                                                                        .executes(ctx -> createSphereRegion(ctx.getSource(), getRegionNameArgument(ctx), getDimCacheArgument(ctx),
-                                                                                BlockPosArgument.getSpawnablePos(ctx, "centerPos"),
-                                                                                BlockPosArgument.getSpawnablePos(ctx, "outerPos"), getOwnerArgument(ctx)))))))))
+                                                                                BlockPosArgument.getSpawnablePos(ctx, "pos2"), null))
+                                                                        .then(Commands.argument(OWNER.toString(), EntityArgument.player())
+                                                                                .executes(ctx -> createCuboidRegion(ctx.getSource(), getRegionNameArgument(ctx), getDimCacheArgument(ctx),
+                                                                                        BlockPosArgument.getSpawnablePos(ctx, "pos1"),
+                                                                                        BlockPosArgument.getSpawnablePos(ctx, "pos2"), getOwnerArgument(ctx))))))
+                                                )
+                                        )
+                                )
                         )
                         /* /wp dimension <dim> [info] */
                         .executes(ctx -> promptDimensionInfo(ctx.getSource(), getDimCacheArgument(ctx)))
@@ -111,13 +97,11 @@ public class DimensionCommands {
                                 /* /wp dimension <dim> list flag */
                                 .then(literal(FLAG).executes(ctx -> promptDimensionFlagList(ctx.getSource(), getDimCacheArgument(ctx)))))
                         .then(literal(DELETE)
-                                // FIXME: Only list region which are region.parent == dim
-                                // FIXME: How to handle zombie regions? change child parent to dim? or prohibit removal when children are present
                                 .then(Commands.argument(REGION.toString(), StringArgumentType.word())
                                         .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestions(ctx, builder))
                                         .executes(ctx -> attemptDeleteRegion(ctx.getSource(), getDimCacheArgument(ctx), getRegionArgument(ctx)))
                                         .then(Commands.literal("-y")
-                                                .executes(ctx -> deleteRegion(ctx.getSource(),  getDimCacheArgument(ctx), getRegionArgument(ctx))))))
+                                                .executes(ctx -> deleteRegion(ctx.getSource(), getDimCacheArgument(ctx), getRegionArgument(ctx))))))
                         .then(literal(REMOVE)
                                 .then(literal(PLAYER)
                                         .then(Commands.argument(AFFILIATION.toString(), StringArgumentType.string())
@@ -170,72 +154,54 @@ public class DimensionCommands {
                                                 .executes(ctx -> addFlag(ctx.getSource(), getDimCacheArgument(ctx), StringArgumentType.getString(ctx, FLAG.toString())))))));
     }
 
+    @Nullable
+    public static int checkValidRegionName(String regionName, DimensionRegionCache dimCache) {
+        if (!regionName.matches(RegionArgumentType.VALID_NAME_PATTERN.pattern())) {
+            return -1;
+        }
+        if (dimCache.contains(regionName)) {
+            return 1;
+        }
+        return 0;
+    }
+
     private static int createCuboidRegion(CommandSourceStack src, String regionName, DimensionRegionCache dimCache, BlockPos pos1, BlockPos pos2, @Nullable ServerPlayer owner) {
-        sendCmdFeedback(src, Component.literal("NOTE: Local regions are implemented, but the flags for local regions are not yet working, sorry!"));
-        sendCmdFeedback(src, Component.literal("NOTE: Region hierarchy (parents and children regions) is working but there are no checks in place to ensure a proper hierarchy."));
-        sendCmdFeedback(src, Component.literal("NOTE: These features will come soon in the next update! "));
+        int res = checkValidRegionName(regionName, dimCache);
+        if (res == -1) {
+            sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.region.create.name.invalid", regionName));
+            return res;
+        }
+        if (res == 1) {
+            sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.region.create.name.exists", dimCache.getDimensionalRegion().getName(), regionName));
+            return res;
+        }
+        CuboidRegion region = new CuboidRegion(regionName, new CuboidArea(pos1, pos2), owner, dimCache.dimensionKey());
+        if (owner == null) {
+            region.setIsActive(false);
+        }
+        RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
+        dimCache.addRegion(region);
+        LocalRegions.ensureHigherRegionPriorityFor(region, RegionConfig.DEFAULT_REGION_PRIORITY.get());
+        RegionDataManager.save();
+        sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
+        return 0;
+    }
+
+    private static int createSphereRegion(CommandSourceStack src, @Nonnull String regionName, DimensionRegionCache dimCache, BlockPos center, BlockPos outerPos, ServerPlayer owner) {
         if (!regionName.matches(RegionArgumentType.VALID_NAME_PATTERN.pattern())) {
             sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.region.create.name.invalid", regionName));
             return -1;
         }
-        if (dimCache.contains(regionName)){
+        if (dimCache.contains(regionName)) {
             sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.region.create.name.exists", dimCache.dimensionKey(), regionName));
             return 1;
         }
-        Set<String> defaultFlags = RegionConfig.getDefaultFlags();
-        CuboidArea area = new CuboidArea(pos1, pos2);
-        CuboidRegion region = new CuboidRegion(regionName, area, owner, dimCache.dimensionKey());
-        defaultFlags.stream()
-                .map(flagIdentifier -> RegionFlag.fromId(flagIdentifier).flag)
-                .forEach(region::addFlag);
-        dimCache.addRegion(region);
-        sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
-        return 0;
-    }
-
-    private static int createSphereRegion(CommandSourceStack src, String regionName, DimensionRegionCache dimCache, BlockPos center, BlockPos outerPos, ServerPlayer owner) {
-        sendCmdFeedback(src, Component.literal("NOTE: Local regions are implemented, but the flags for local regions are not yet working, sorry!"));
-        sendCmdFeedback(src, Component.literal("NOTE: Region hierarchy (parents and children regions) is working but there are no checks in place to ensure a proper hierarchy."));
-        sendCmdFeedback(src, Component.literal("NOTE: These features will come soon in the next update! "));
-        if (!regionName.matches(RegionArgumentType.VALID_NAME_PATTERN.pattern())) {
-            sendCmdFeedback(src, Component.translatable( "cli.msg.dim.info.region.create.name.invalid", regionName));
-            return -1;
-        }
-        if (dimCache.contains(regionName)){
-            sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.region.create.name.exists", dimCache.dimensionKey(), regionName));
-            return 1;
-        }
-        Set<String> defaultFlags = RegionConfig.getDefaultFlags();
         SphereArea area = new SphereArea(center, outerPos);
         SphereRegion region = new SphereRegion(regionName, area, owner, dimCache.dimensionKey());
-        defaultFlags.stream()
-                .map(flagIdentifier -> RegionFlag.fromId(flagIdentifier).flag)
-                .forEach(region::addFlag);
+        RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
         dimCache.addRegion(region);
+        RegionDataManager.save();
         sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
-        return 0;
-    }
-
-    // TODO:
-    private static int createRegion(CommandSourceStack source, String regionName, DimensionRegionCache dimCache, AreaType area) {
-        sendCmdFeedback(source, "Not yet implemented");
-        try {
-            Player player = source.getPlayerOrException();
-            ItemStack maybeStick = player.getMainHandItem();
-            // TODO: create a method which trhows exception on trying to get stick
-            if (StickUtil.isVanillaStick(maybeStick)) {
-                StickType stickType = StickUtil.getStickType(maybeStick);
-                if (stickType == StickType.MARKER) {
-                    CompoundTag stickNBT = StickUtil.getStickNBT(maybeStick);
-                    if (stickNBT != null) {
-                        AbstractMarkableRegion region = RegionUtil.regionFrom(source.getPlayerOrException(), new MarkerStick(stickNBT), regionName);
-                        // TODO
-                    }
-                }
-            }
-        } catch (CommandSyntaxException e) {
-            YetAnotherWorldProtector.LOGGER.error(e);
-        }
         return 0;
     }
 
@@ -247,8 +213,18 @@ public class DimensionCommands {
         return 1;
     }
 
+    // FIXME: Are child / parent relation properly removed when deleting a region?
     private static int deleteRegion(CommandSourceStack src, DimensionRegionCache dim, IMarkableRegion region) {
         if (dim.contains(region.getName())) {
+            if (!region.getChildren().isEmpty()) {
+                // TODO: config option which allows deleting region with children? children then default to dim parent
+                sendCmdFeedback(src, Component.translatable("cli.msg.info.dim.region.remove.fail.hasChildren", region.getName()));
+                return -1;
+            }
+            if (region.getParent() != null) {
+                region.getParent().removeChild(region);
+                RegionDataManager.get().cacheFor(region.getDim()).getDimensionalRegion().addChild(region);
+            }
             dim.removeRegion(region);
             sendCmdFeedback(src, Component.translatable("cli.msg.info.dim.region.remove.confirm", region.getName(), dim.dimensionKey().location()));
             return 0;
@@ -256,13 +232,7 @@ public class DimensionCommands {
         return 1;
     }
 
-    public static int selectReferenceDim(CommandSourceStack src, DimensionalRegion dim) throws CommandSyntaxException {
-        RegionCommands.CommandSourceStackReferenceDims.put(src, dim.getDimensionKey());
-        MessageUtil.sendCmdFeedback(src, Component.literal("Selected dim '" + dim.getDimensionKey().location().toString() + "' as reference for region commands for '" + src.getTextName() + "'."));
-        return 0;
-    }
-
-    private static int removeFlag(CommandSourceStack src,  DimensionRegionCache dimCache, String flag) {
+    private static int removeFlag(CommandSourceStack src, DimensionRegionCache dimCache, String flag) {
         if (dimCache != null) {
             ResourceKey<Level> dim = dimCache.dimensionKey();
             dimCache.removeFlag(flag);
@@ -344,22 +314,29 @@ public class DimensionCommands {
         return 1;
     }
 
-
-    // TODO: Check
-    private static int promptDimensionFlagList(CommandSourceStack src,  DimensionRegionCache dimCache) {
-        List<IFlag> flags = dimCache.getDimensionalRegion().getFlags()
-                .stream()
-                // TODO: implement comparable for flags
-                // .sorted()
+    private static int promptDimensionFlagList(CommandSourceStack src, DimensionRegionCache dimCache) {
+        List<IFlag> activeFlags = dimCache.getDimensionalRegion().getFlags().stream()
+                .filter(IFlag::isActive)
+                .sorted()
                 .collect(Collectors.toList());
+        List<IFlag> inActiveFlags = dimCache.getDimensionalRegion().getFlags().stream()
+                .filter(f -> !f.isActive())
+                .sorted()
+                .collect(Collectors.toList());
+        activeFlags.addAll(inActiveFlags);
+        List<IFlag> flags = new ArrayList<>(activeFlags);
+        flags.addAll(inActiveFlags);
+
         ResourceKey<Level> dim = dimCache.dimensionKey();
         if (flags.isEmpty()) {
             sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.flags.empty", dim.location().toString()));
             return 1;
         }
-        // TODO: lang key
-        // TODO Dim info link
-        sendCmdFeedback(src, Component.translatable(BOLD + "== Flags in dimension '" + dim.location().toString() + "' =="));
+        MutableComponent dimInfoLink = buildDimensionalInfoLink(dim);
+        MutableComponent regionsInDimHeader = Component.translatable(BOLD + "== Flags in ")
+                .append(dimInfoLink)
+                .append(" ==");
+        sendCmdFeedback(src, regionsInDimHeader);
         flags.forEach(flag -> {
             MutableComponent removeFlagLink = Component.literal(" - ")
                     .append(buildDimensionRemoveFlagLink(flag, dim))
@@ -370,13 +347,16 @@ public class DimensionCommands {
         return 0;
     }
 
-    private static int promptDimensionPlayerList(CommandSourceStack src,  DimensionRegionCache dimCache, CommandConstants memberOrOwner) {
+    private static int promptDimensionPlayerList(CommandSourceStack src, DimensionRegionCache dimCache, CommandConstants memberOrOwner) {
         if (dimCache != null) {
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
             String playerLangKeyPart = memberOrOwner == OWNER ? "owner" : "member";
             String affiliationText = playerLangKeyPart.substring(0, 1).toUpperCase() + playerLangKeyPart.substring(1) + "s";
-            // TODO Dim info link
-            sendCmdFeedback(src, Component.translatable(BOLD + "== " + affiliationText + " in dimension '" + dimRegion.getDimensionKey().location() + "' =="));
+            MutableComponent dimInfoLink = buildDimensionalInfoLink(dimRegion.getDim());
+            MutableComponent regionsInDimHeader = Component.translatable(BOLD + "== " + affiliationText + " in ")
+                    .append(dimInfoLink)
+                    .append(" ==");
+            sendCmdFeedback(src, regionsInDimHeader);
             sendCmdFeedback(src, buildTeamList(dimRegion, memberOrOwner));
             sendCmdFeedback(src, buildPlayerList(dimRegion, memberOrOwner));
             return 0;
@@ -389,37 +369,15 @@ public class DimensionCommands {
             dimCache.setDimState(activate);
 
             String langKey = "cli.msg.info.state." + (activate ? "activated" : "deactivated");
-            sendCmdFeedback(src, Component.translatable(langKey, dimCache.getDimensionalRegion().getDimensionKey().location().toString()));
+            sendCmdFeedback(src, Component.translatable(langKey, dimCache.getDimensionalRegion().getDim().location().toString()));
             return 0;
         }
         return 1;
     }
 
-    private static int promptDimensionRegions(CommandSourceStack source, DimensionRegionCache dimCache) {
-        if (dimCache != null) {
-            ResourceKey<Level> dim =  dimCache.getDimensionalRegion().getDimensionKey();
-            List<IMarkableRegion> regionsForDim = dimCache.regionsInDimension
-                    .values()
-                    .stream()
-                    .sorted(Comparator.comparing(IMarkableRegion::getName))
-                    .collect(Collectors.toList());
-            MutableComponent regions = Component.translatable("cli.msg.info.dim.region").append(": ");
-            if (regionsForDim.isEmpty()) {
-                regions.append(Component.translatable("cli.msg.dim.info.regions.empty"));
-            } else {
-                regions.append(buildDimRegionListLink(dimCache, dimCache.getDimensionalRegion()));
-            }
-            sendCmdFeedback(source, regions);
-            return 0;
-        }
-        return 1;
-    }
-
-
-    // TODO: Check and extract to own method -> dimInfo uses this, too
     private static int promptDimensionRegionList(CommandSourceStack source, DimensionRegionCache dimCache) {
         if (dimCache != null) {
-            ResourceKey<Level> dim =  dimCache.getDimensionalRegion().getDimensionKey();
+            ResourceKey<Level> dim = dimCache.getDimensionalRegion().getDim();
             List<IMarkableRegion> regionsForDim = dimCache.regionsInDimension
                     .values()
                     .stream()
@@ -429,14 +387,22 @@ public class DimensionCommands {
                 sendCmdFeedback(source, Component.translatable("cli.msg.dim.info.regions.empty", dim.location().toString()));
                 return -1;
             }
-            // TODO Dim info link
-            sendCmdFeedback(source, Component.translatable(BOLD + "== Regions in dimension '" + dim.location().toString() + "' =="));
+            MutableComponent dimInfoLink = buildDimensionalInfoLink(dim);
+            MutableComponent regionsInDimHeader = Component.translatable(BOLD + "== Regions in ")
+                    .append(dimInfoLink)
+                    .append(" ==");
+            sendCmdFeedback(source, regionsInDimHeader);
             // TODO: Pagination for more than x regions
             regionsForDim.forEach(region -> {
                 MutableComponent regionRemoveLink = Component.literal(" - ")
                         .append(buildDimSuggestRegionRemovalLink(region))
                         .append(" ")
-                        .append(buildRegionInfoAndTpLink(region));
+                        .append(buildRegionInfoLink(region))
+                        .append(dimCache.getDimensionalRegion().hasChild(region)
+                                ? MessageUtil.buildTextWithHoverMsg(Component.literal("*"), Component.translatable("cli.msg.info.dim.region.child.hover"), GOLD)
+                                : Component.literal(""))
+                        .append(Component.literal(RESET + " @ " + RESET))
+                        .append(buildRegionTeleportLink(region));
                 sendCmdFeedback(source, regionRemoveLink);
             });
             return 0;
@@ -469,6 +435,26 @@ public class DimensionCommands {
                 .append(players).append(Component.literal(", "))
                 .append(teams);
         sendCmdFeedback(src, dimOwners);
+    }
+
+    private static int promptDimensionRegions(CommandSourceStack source, DimensionRegionCache dimCache) {
+        if (dimCache != null) {
+            ResourceKey<Level> dim = dimCache.getDimensionalRegion().getDim();
+            List<IMarkableRegion> regionsForDim = dimCache.regionsInDimension
+                    .values()
+                    .stream()
+                    .sorted(Comparator.comparing(IMarkableRegion::getName))
+                    .collect(Collectors.toList());
+            MutableComponent regions = Component.translatable("cli.msg.info.dim.region").append(": ");
+            if (regionsForDim.isEmpty()) {
+                regions.append(Component.translatable("cli.msg.dim.info.regions.empty", dim.location().toString()));
+            } else {
+                regions.append(buildDimRegionListLink(dimCache, dimCache.getDimensionalRegion()));
+            }
+            sendCmdFeedback(source, regions);
+            return 0;
+        }
+        return 1;
     }
 
     private static void promptDimensionMembers(CommandSourceStack src, DimensionalRegion dimRegion) {
@@ -525,13 +511,14 @@ public class DimensionCommands {
     private static int promptDimensionInfo(CommandSourceStack src, DimensionRegionCache dimCache) {
         // Dimension info header
         DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-        // TODO: header extraction to build uniform header by providing langkey and args
+        // TODO: header extraction to build uniform header by providing lang key and args
         MutableComponent dimInfoHeader = Component.literal(BOLD + "== Dimension ")
-                .append(buildDimensionalInfoLink(dimRegion.getDimensionKey()))
+                .append(buildDimensionalInfoLink(dimRegion.getDim()))
                 .append(Component.literal(BOLD + " information =="));
         sendCmdFeedback(src, dimInfoHeader);
 
         // Regions in dimension
+        // TODO: Change [n region(s)] to [n region(s)] [+]s
         promptDimensionRegions(src, dimCache);
 
         // Dimension owners & members

@@ -45,15 +45,25 @@ public class CuboidArea extends AbstractArea {
                 && pos.getZ() >= this.area.minZ && pos.getZ() <= this.area.maxZ;
     }
 
+    public boolean contains(CuboidArea inner) {
+        return this.area.minX <= inner.area.minX && this.area.maxX >= inner.area.maxX
+                && this.area.minY <= inner.area.minY && this.area.maxY >= inner.area.maxY
+                && this.area.minZ <= inner.area.minZ && this.area.maxZ >= inner.area.maxZ;
+    }
+
+    public boolean intersects(CuboidArea other) {
+        return this.area.intersects(other.area);
+    }
+
     public AABB getArea() {
         return area;
     }
 
-    public BlockPos getAreaP1(){
+    public BlockPos getAreaP1() {
         return new BlockPos(this.area.minX, this.area.minY, this.area.minZ);
     }
 
-    public BlockPos getAreaP2(){
+    public BlockPos getAreaP2() {
         return new BlockPos(this.area.maxX, this.area.maxY, this.area.maxZ);
     }
 
@@ -75,11 +85,10 @@ public class CuboidArea extends AbstractArea {
 
     @Override
     public String toString() {
-        StringBuilder strBuilder = new StringBuilder();
-        strBuilder.append(getAreaType().areaType).append(" ").append(AreaUtil.blockPosStr(this.getAreaP1())).append(" <-> ").append(AreaUtil.blockPosStr(this.getAreaP2()))
-                .append("\n").append("Size: ").append("X=").append(this.area.getXsize()).append(", Y=").append( this.area.getYsize()).append(", Z=").append( this.area.getZsize())
-                .append("\n").append("Blocks: ").append(AreaUtil.blockPosStr(this.getAreaP1())).append(", ").append(AreaUtil.blockPosStr(this.getAreaP2()));
-        return strBuilder.toString();
+        String strBuilder = getAreaType().areaType + " " + AreaUtil.blockPosStr(this.getAreaP1()) + " <-> " + AreaUtil.blockPosStr(this.getAreaP2()) +
+                "\n" + "Size: " + "X=" + this.area.getXsize() + ", Y=" + this.area.getYsize() + ", Z=" + this.area.getZsize() +
+                "\n" + "Blocks: " + AreaUtil.blockPosStr(this.getAreaP1()) + ", " + AreaUtil.blockPosStr(this.getAreaP2());
+        return strBuilder;
     }
 
     @Override

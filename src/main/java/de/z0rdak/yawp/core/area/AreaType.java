@@ -1,13 +1,7 @@
 package de.z0rdak.yawp.core.area;
 
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.z0rdak.yawp.commands.arguments.AreaArgumentType;
-import de.z0rdak.yawp.core.flag.RegionFlag;
-
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Collectors;
 
 // TODO: registry or datapack for area with their area types
@@ -18,7 +12,11 @@ public enum AreaType {
     SPHERE("Sphere", 2),
     // TODO: config values for polygon and prism
     POLYGON_3D("Polygon", 3, 20),
-    PRISM("Prism", 3, 10);
+    PRISM("Prism", 3, 10),
+    CHUNK("Chunk", 1, 1),
+    MULTI_CHUNK("MultiChunk", 1, 100),
+    MULTI_SECTION("MultiSection", 1, 100),
+    SECTION("Section", 1, 1);
 
     public final String areaType;
     public final int neededBlocks;
