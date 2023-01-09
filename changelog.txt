@@ -1,3 +1,6 @@
+# 0.0.1.1-beta4
+## Fixes
+* Fix `spawning-villager` flag working for wandering traders
 # 0.0.1.0-beta4 - Local Region overhaul
 This update brings the first iteration of working Local Regions. Due to some drastic changes in saving and loading region data, older regions are not supported - sorry!
 Rest assured, once the mod goes from beta to release, these kinds of changes regarding will be kept to a minimum to ensure backwards compatibility.
