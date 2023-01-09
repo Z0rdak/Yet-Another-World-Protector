@@ -5,7 +5,6 @@ import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
@@ -37,116 +36,106 @@ public class GrievingFlagHandler {
         if (isServerSide(event.getEntity())) {
             Entity trampler = event.getEntity();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(trampler));
-            if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
-                DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                // cancel all trampling
-                if (dimRegion.containsFlag(RegionFlag.TRAMPLE_FARMLAND)) {
-                    event.setCanceled(true);
+            if (dimCache != null) {
+                FlagCheckEvent flagCheckEvent = checkTargetEvent(event.getPos(), RegionFlag.TRAMPLE_FARMLAND, dimCache.getDimensionalRegion());
+                event.setCanceled(flagCheckEvent.isDenied());
+                if (event.isCanceled()) {
+                    if (trampler instanceof Player) {
+                        sendFlagDeniedMsg(flagCheckEvent, (Player) trampler);
+                    }
                     return;
                 }
                 // cancel only player trampling
-                if (trampler instanceof Player) {
-                    Player player = (Player) trampler;
-                    if (dimRegion.containsFlag(RegionFlag.TRAMPLE_FARMLAND_PLAYER) && !dimRegion.permits(player)) {
-                        event.setCanceled(true);
-                        MessageUtil.sendMessage(player, "message.event.world.trample_farmland");
-                    }
+                if (trampler instanceof Player player) {
+                    FlagCheckEvent.PlayerFlagEvent playerFlagCheckEvent = checkPlayerEvent(player, event.getPos(), RegionFlag.TRAMPLE_FARMLAND_PLAYER, dimCache.getDimensionalRegion());
+                    handleAndSendMsg(event, playerFlagCheckEvent);
                 } else {
-                    // cancel trampling by other entities
-                    if (dimRegion.containsFlag(RegionFlag.TRAMPLE_FARMLAND_OTHER)) {
-                        event.setCanceled(true);
-                    }
+                    // cancel for other entities
+                    flagCheckEvent = checkTargetEvent(event.getPos(), RegionFlag.TRAMPLE_FARMLAND_OTHER, dimCache.getDimensionalRegion());
+                    event.setCanceled(flagCheckEvent.isDenied());
                 }
             }
         }
     }
 
+    // TODO: Test
     @SubscribeEvent
     public static void onEntityDestroyBlock(LivingDestroyBlockEvent event) {
         if (isServerSide(event)) {
             LivingEntity destroyer = event.getEntityLiving();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(destroyer));
-            if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
-
-
+            if (dimCache != null) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                if (dimRegion.containsFlag(RegionFlag.DRAGON_BLOCK_PROT) && destroyer instanceof EnderDragon) {
-                    event.setCanceled(true);
+                if (destroyer instanceof EnderDragon) {
+                    FlagCheckEvent flagCheckEvent = checkTargetEvent(event.getPos(), RegionFlag.DRAGON_BLOCK_PROT, dimRegion);
+                    event.setCanceled(flagCheckEvent.isDenied());
                     return;
                 }
-                if (dimRegion.containsFlag(RegionFlag.WITHER_BLOCK_PROT) && destroyer instanceof WitherBoss) {
-                    event.setCanceled(true);
+                if (destroyer instanceof WitherBoss) {
+                    FlagCheckEvent flagCheckEvent = checkTargetEvent(event.getPos(), RegionFlag.WITHER_BLOCK_PROT, dimRegion);
+                    event.setCanceled(flagCheckEvent.isDenied());
                     return;
                 }
-                if (dimRegion.containsFlag(RegionFlag.ZOMBIE_DOOR_PROT) && destroyer instanceof Zombie) {
-                    event.setCanceled(true);
-                    return;
+                if (destroyer instanceof Zombie) {
+                    FlagCheckEvent flagCheckEvent = checkTargetEvent(event.getPos(), RegionFlag.ZOMBIE_DOOR_PROT, dimRegion);
+                    event.setCanceled(flagCheckEvent.isDenied());
                 }
             }
         }
     }
 
     /**
-     * TODO: Does this trigger for players?
-     * Idea: Flag for player not dropping loot as member/owner?
-     *
-     * @param event
+     * Idea: Flag for player not dropping loot as member/owner? -> local keepInventory
      */
     @SubscribeEvent
     public static void onEntityDropLoot(LivingDropsEvent event) {
         if (isServerSide(event)) {
             LivingEntity lootEntity = event.getEntityLiving();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(lootEntity));
-            if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
-
-
-                DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                if (dimRegion.containsFlag(RegionFlag.LOOT_DROP)) {
-                    event.setCanceled(true);
+            if (dimCache != null) {
+                FlagCheckEvent flagCheckEvent = checkTargetEvent(lootEntity.blockPosition(), RegionFlag.DROP_LOOT_ALL, dimCache.getDimensionalRegion());
+                event.setCanceled(flagCheckEvent.isDenied());
+                if (event.isCanceled()) {
+                    return;
+                }
+                if (isPlayer(event.getSource().getEntity())) {
+                    FlagCheckEvent.PlayerFlagEvent playerFlagCheckEvent = checkPlayerEvent((Player) event.getSource().getEntity(), lootEntity.blockPosition(), RegionFlag.DROP_LOOT_PLAYER, dimCache.getDimensionalRegion());
+                    handleAndSendMsg(event, playerFlagCheckEvent);
                 }
             }
         }
     }
 
-
     @SubscribeEvent
     public static void onEntityXpDrop(LivingExperienceDropEvent event) {
         if (isServerSide(event)) {
             Player player = event.getAttackingPlayer();
-            Entity entity = event.getEntity();
+            Entity xpDroppingEntity = event.getEntityLiving();
             if (player != null) {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
-                if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
-
-
+                if (dimCache != null) {
                     DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                    boolean entityDroppingXpIsPlayer = event.getEntityLiving() instanceof Player;
-
-                    // prevent all xp drops
-                    if (dimRegion.containsFlag(RegionFlag.XP_DROP_ALL)) {
-                        if (entityDroppingXpIsPlayer) {
-                            event.setCanceled(true);
-                            return;
-                        }
-                        if (!dimRegion.permits(player)) {
-                            event.setCanceled(true);
-                            MessageUtil.sendMessage(player, "message.event.world.exp_drop.all");
+                    // prevent all xp drop
+                    FlagCheckEvent flagCheckEvent = checkTargetEvent(xpDroppingEntity.blockPosition(), RegionFlag.XP_DROP_ALL, dimRegion);
+                    event.setCanceled(flagCheckEvent.isDenied());
+                    if (event.isCanceled()) {
+                        return;
+                    }
+                    if (event.getAttackingPlayer() != null) {
+                        // prevent non-member/owner players from dropping xp by killing mobs
+                        FlagCheckEvent.PlayerFlagEvent playerFlagCheckEvent = checkPlayerEvent(player, xpDroppingEntity.blockPosition(), RegionFlag.XP_DROP_PLAYER, dimCache.getDimensionalRegion());
+                        if (handleAndSendMsg(event, playerFlagCheckEvent)) {
                             return;
                         }
                     }
                     // prevent monster xp drop
-                    if (dimRegion.containsFlag(RegionFlag.XP_DROP_MONSTER) && isMonster(entity) && !dimRegion.permits(player)) {
-                        event.setCanceled(true);
-                        MessageUtil.sendMessage(player, "message.event.world.exp_drop.monsters");
-                        return;
-                    }
-                    // prevent other entity xp drop (villagers, animals, ..)
-                    if (dimRegion.containsFlag(RegionFlag.XP_DROP_OTHER) && !isMonster(entity) && !entityDroppingXpIsPlayer) {
-                        if (!dimRegion.permits(player)) {
-                            event.setCanceled(true);
-                            MessageUtil.sendMessage(player, "message.event.world.exp_drop.non_hostile");
-                            return;
-                        }
+                    if (isMonster(xpDroppingEntity)) {
+                        flagCheckEvent = checkTargetEvent(xpDroppingEntity.blockPosition(), RegionFlag.XP_DROP_MONSTER, dimRegion);
+                        event.setCanceled(flagCheckEvent.isDenied());
+                    } else {
+                        // prevent other entity xp drop (villagers, animals, ..)
+                        flagCheckEvent = checkTargetEvent(xpDroppingEntity.blockPosition(), RegionFlag.XP_DROP_OTHER, dimRegion);
+                        event.setCanceled(flagCheckEvent.isDenied());
                     }
                 }
             }
@@ -156,43 +145,35 @@ public class GrievingFlagHandler {
     @SubscribeEvent
     public static void onEndermanPlacingBlock(BlockEvent.EntityPlaceEvent event) {
         if (isServerSide(event)) {
-            if (event.getEntity() != null && event.getEntity() instanceof EnderMan) {
+            if (event.getEntity() instanceof EnderMan) {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
-                if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
-
-
-                    DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                    if (dimRegion.containsFlag(RegionFlag.ENTITY_PLACE)) {
-                        event.setCanceled(true);
-                        YetAnotherWorldProtector.LOGGER.debug("Block placed by enderman denied!");
-                    }
+                if (dimCache != null) {
+                    FlagCheckEvent flagCheckEvent = checkTargetEvent(event.getEntity().blockPosition(), RegionFlag.ENTITY_PLACE, dimCache.getDimensionalRegion());
+                    event.setCanceled(flagCheckEvent.isDenied());
                 }
             }
         }
     }
 
-
     /**
+     * FIXME or disable for next update
      * Removes affected entities and/or blocks from the event list to protect them
-     *
-     * @param event -
      */
     @SubscribeEvent
     public static void onExplosion(ExplosionEvent.Detonate event) {
         if (!event.getWorld().isClientSide) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(event.getWorld().dimension());
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
-
-
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
+
                 if (dimRegion.containsFlag(RegionFlag.EXPLOSION_BLOCK)) {
                     event.getAffectedBlocks().clear();
                 }
                 if (dimRegion.containsFlag(RegionFlag.EXPLOSION_ENTITY)) {
                     event.getAffectedEntities().clear();
                 }
-                //event.getAffectedBlocks().removeAll(filterExplosionAffectedBlocks(event, RegionFlag.EXPLOSION_BLOCK.flag));
-                //event.getAffectedEntities().removeAll(filterAffectedEntities(event, RegionFlag.EXPLOSION_ENTITY.flag));
+                //event.getAffectedBlocks().removeAll(filterExplosionAffectedBlocks(event, RegionFlag.EXPLOSION_BLOCK));
+                //event.getAffectedEntities().removeAll(filterAffectedEntities(event, RegionFlag.EXPLOSION_ENTITY));
 
                 if (event.getExplosion().getSourceMob() != null) {
                     boolean explosionTriggeredByCreeper = (event.getExplosion().getSourceMob() instanceof Creeper);
@@ -203,8 +184,8 @@ public class GrievingFlagHandler {
                         if (dimRegion.containsFlag(RegionFlag.EXPLOSION_OTHER_ENTITY)) {
                             event.getAffectedEntities().clear();
                         }
-                        //event.getAffectedBlocks().removeAll(filterExplosionAffectedBlocks(event, RegionFlag.EXPLOSION_OTHER_BLOCKS.flag));
-                        //event.getAffectedEntities().removeAll(filterAffectedEntities(event, RegionFlag.EXPLOSION_OTHER_ENTITY.flag));
+                        //event.getAffectedBlocks().removeAll(filterExplosionAffectedBlocks(event, RegionFlag.EXPLOSION_OTHER_BLOCKS));
+                        //event.getAffectedEntities().removeAll(filterAffectedEntities(event, RegionFlag.EXPLOSION_OTHER_ENTITY));
 
                     }
                     if (explosionTriggeredByCreeper) {
@@ -214,8 +195,8 @@ public class GrievingFlagHandler {
                         if (dimRegion.containsFlag(RegionFlag.EXPLOSION_CREEPER_ENTITY)) {
                             event.getAffectedEntities().clear();
                         }
-                        //event.getAffectedBlocks().removeAll(filterExplosionAffectedBlocks(event, RegionFlag.EXPLOSION_CREEPER_BLOCK.flag));
-                        //event.getAffectedEntities().removeAll(filterAffectedEntities(event, RegionFlag.EXPLOSION_CREEPER_ENTITY.flag));
+                        //event.getAffectedBlocks().removeAll(filterExplosionAffectedBlocks(event, RegionFlag.EXPLOSION_CREEPER_BLOCK));
+                        //event.getAffectedEntities().removeAll(filterAffectedEntities(event, RegionFlag.EXPLOSION_CREEPER_ENTITY));
                     }
                 }
             }

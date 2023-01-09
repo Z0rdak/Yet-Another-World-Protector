@@ -28,12 +28,6 @@ public class DimensionCacheArgumentType implements ArgumentType<DimensionRegionC
             dim -> new TranslatableComponent("cli.arg.dim.invalid", dim)
     );
 
-    @Override
-    public DimensionRegionCache parse(StringReader reader) throws CommandSyntaxException {
-        ResourceLocation resourcelocation = ResourceLocation.read(reader);
-        return getDimensionalRegionCache(resourcelocation);
-    }
-
     private static DimensionRegionCache getDimensionalRegionCache(ResourceLocation resourcelocation) {
         // TODO: Check valid dimension key?
         ResourceKey<Level> registrykey = ResourceKey.create(Registry.DIMENSION_REGISTRY, resourcelocation);
@@ -58,13 +52,31 @@ public class DimensionCacheArgumentType implements ArgumentType<DimensionRegionC
         return EXAMPLES;
     }
 
-    public static DimensionalRegionArgumentType dimRegion() {
-        return new DimensionalRegionArgumentType();
+    public static DimensionCacheArgumentType dimRegion() {
+        return new DimensionCacheArgumentType();
     }
 
-    public static DimensionRegionCache getDimRegion(CommandContext<CommandSourceStack> context, String dim) {
+    public static DimensionRegionCache getDimRegion(CommandContext<CommandSourceStack> context, String dim) throws CommandSyntaxException {
         ResourceLocation resourcelocation = context.getArgument(dim, ResourceLocation.class);
-        return getDimensionalRegionCache(resourcelocation);
+        boolean isValidDimResourceLocation = context.getSource().levels().stream().map(ResourceKey::location).anyMatch(loc -> loc.equals(resourcelocation));
+        if (isValidDimResourceLocation) {
+            DimensionRegionCache dimCache = getDimensionalRegionCache(resourcelocation);
+            if (dimCache == null) {
+                throw ERROR_INVALID_VALUE.create(resourcelocation.toString());
+            }
+            return dimCache;
+        } else {
+            throw ERROR_INVALID_VALUE.create(resourcelocation.toString());
+        }
+    }
 
+    @Override
+    public DimensionRegionCache parse(StringReader reader) throws CommandSyntaxException {
+        ResourceLocation resourcelocation = ResourceLocation.read(reader);
+        ResourceKey<Level> registrykey = ResourceKey.create(Registry.DIMENSION_REGISTRY, resourcelocation);
+        if (RegionDataManager.get().containsCacheFor(registrykey)) {
+            return RegionDataManager.get().cacheFor(registrykey);
+        }
+        return null;
     }
 }

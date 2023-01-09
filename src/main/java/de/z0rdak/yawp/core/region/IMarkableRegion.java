@@ -2,10 +2,6 @@ package de.z0rdak.yawp.core.region;
 
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.Level;
-
-import java.util.Map;
 
 /**
  * A mark-able region extends the general IProtectedRegion by allowing
@@ -17,8 +13,6 @@ import java.util.Map;
  * and has a teleportation target.
  */
 public interface IMarkableRegion extends IProtectedRegion {
-
-   ResourceKey<Level> getDim();
 
    IMarkableArea getArea();
 
@@ -37,16 +31,4 @@ public interface IMarkableRegion extends IProtectedRegion {
    boolean isMuted();
 
    void setIsMuted(boolean isMuted);
-
-   AbstractRegion getParent();
-
-   void setParent(IProtectedRegion parent);
-
-   Map<String, IMarkableRegion> getChildren();
-
-   void addChild(IMarkableRegion child);
-
-   void removeChild(IMarkableRegion child);
-
-   boolean hasChild(IMarkableRegion child);
 }

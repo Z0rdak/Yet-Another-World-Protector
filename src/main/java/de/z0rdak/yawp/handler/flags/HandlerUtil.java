@@ -2,9 +2,10 @@ package de.z0rdak.yawp.handler.flags;
 
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
+import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
-import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
-import de.z0rdak.yawp.util.RegionUtil;
+import de.z0rdak.yawp.util.LocalRegions;
+import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
@@ -15,46 +16,53 @@ import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.monster.Slime;
+import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
+import net.minecraftforge.eventbus.api.Event;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static de.z0rdak.yawp.util.LocalRegions.getInvolvedRegionFor;
+
 public final class HandlerUtil {
 
-    private HandlerUtil(){}
+    private HandlerUtil() {
+    }
 
-    public static ResourceKey<Level> getEntityDim(Entity entity){
+    public static ResourceKey<Level> getEntityDim(Entity entity) {
         return entity.getCommandSenderWorld().dimension();
     }
 
-    public static boolean isAnimal(Entity entity){
+    public static boolean isAnimal(Entity entity) {
         return entity instanceof Animal || entity instanceof WaterAnimal;
     }
 
-    /**
-     * Utility to check if a event is server-side.
-     * @param event entity event to check side-ness for
-     * @return true if entity event side-ness is server
-     */
-    public static boolean isServerSide(EntityEvent event){
+    public static boolean isServerSide(EntityEvent event) {
         return isServerSide(event.getEntity());
     }
 
-    public static boolean isServerSide(BlockEvent event){
+    public static boolean isServerSide(BlockEvent event) {
         return !event.getWorld().isClientSide();
     }
 
-    public static boolean isServerSide(Entity entity){
+    public static boolean isServerSide(Entity entity) {
         return !entity.getCommandSenderWorld().isClientSide();
     }
 
+    public static boolean isVillager(Entity entity) {
+        return entity instanceof AbstractVillager;
+    }
 
-    public static boolean isMonster(Entity entity){
+    public static boolean isPlayer(Entity entity) {
+        return entity instanceof Player;
+    }
+
+    public static boolean isMonster(Entity entity) {
         return entity instanceof Monster
                 || entity instanceof Slime
                 || entity instanceof FlyingMob
@@ -62,42 +70,142 @@ public final class HandlerUtil {
                 || entity instanceof Shulker;
     }
 
-    public static boolean hasNoAffiliationFor(DimensionRegionCache dimCache, Player player){
-        return !(dimCache.hasMember(player) || dimCache.hasOwner(player));
-    }
-
-    public static boolean containsFlagAndHasNoAffiliationFor(DimensionRegionCache dimCache, RegionFlag flag, Player player){
-        return dimCache.getDimensionalRegion().containsFlag(flag) && hasNoAffiliationFor(dimCache, player);
-    }
-
     /**
      * Checks is any region contains the specified flag
+     *
      * @param regions regions to check for
-     * @param flag flag to be checked for
+     * @param flag    flag to be checked for
      * @return true if any region contains the specified flag, false otherwise
      */
-    public static boolean anyRegionContainsFlag(List<IMarkableRegion> regions, IFlag flag){
+    public static boolean anyRegionContainsFlag(List<IMarkableRegion> regions, RegionFlag flag) {
         return regions.stream()
                 .anyMatch(region -> region.containsFlag(flag));
     }
 
     /**
      * Filters affected blocks from explosion event which are in a region with the specified flag.
+     *
      * @param event detonation event
-     * @param flag flag to be filtered for
+     * @param flag  flag to be filtered for
      * @return list of block positions which are in a region with the specified flag
      */
-    public static List<BlockPos> filterExplosionAffectedBlocks(ExplosionEvent.Detonate event, IFlag flag){
+    // TODO: rework
+    public static List<BlockPos> filterExplosionAffectedBlocks(ExplosionEvent.Detonate event, RegionFlag flag) {
         return event.getAffectedBlocks().stream()
                 .filter(blockPos -> anyRegionContainsFlag(
-                        RegionUtil.getHandlingRegionsFor(blockPos, event.getWorld()), flag))
+                        LocalRegions.getRegionsFor(flag, blockPos, event.getWorld().dimension()), flag))
                 .collect(Collectors.toList());
     }
 
-    public static List<Entity> filterAffectedEntities(ExplosionEvent.Detonate event, IFlag flag) {
+    // TODO: rework
+    public static List<Entity> filterAffectedEntities(ExplosionEvent.Detonate event, RegionFlag flag) {
         return event.getAffectedEntities().stream()
                 .filter(entity -> anyRegionContainsFlag(
-                        RegionUtil.getHandlingRegionsFor(entity.blockPosition(), event.getWorld()), flag))
+                        LocalRegions.getRegionsFor(flag, entity.blockPosition(), event.getWorld().dimension()), flag))
                 .collect(Collectors.toList());
+    }
+
+
+    public static boolean handleAndSendMsg(Event event, FlagCheckEvent.PlayerFlagEvent flagCheck) {
+        if (flagCheck.getLocalRegion() == null && flagCheck.isDeniedInDim()) {
+            MessageUtil.sendDimFlagNotification(flagCheck.getPlayer(), flagCheck.getFlag());
+        }
+        if (flagCheck.isDeniedLocal()) {
+            if (!flagCheck.getLocalRegion().isMuted()) {
+                MessageUtil.sendFlagNotification(flagCheck.getPlayer(), flagCheck.getLocalRegion(), flagCheck.getFlag());
+            }
+        }
+        event.setCanceled(flagCheck.isDenied());
+        return flagCheck.isDenied();
+    }
+
+    public static boolean sendFlagDeniedMsg(FlagCheckEvent.PlayerFlagEvent flagCheck) {
+        if (flagCheck.getLocalRegion() == null && flagCheck.isDeniedInDim()) {
+            // TODO: Muted property for dimensions | config option | don't display ?
+            MessageUtil.sendDimFlagNotification(flagCheck.getPlayer(), flagCheck.getFlag());
+        }
+        if (flagCheck.isDeniedLocal()) {
+            if (!flagCheck.getLocalRegion().isMuted()) {
+                MessageUtil.sendFlagNotification(flagCheck.getPlayer(), flagCheck.getLocalRegion(), flagCheck.getFlag());
+            }
+        }
+        return flagCheck.isDenied();
+    }
+
+    public static boolean sendFlagDeniedMsg(FlagCheckEvent flagCheck, Player player) {
+        if (flagCheck.getLocalRegion() == null && flagCheck.isDeniedInDim()) {
+            // TODO: Muted property for dimensions | config option | don't display ?
+            MessageUtil.sendDimFlagNotification(player, flagCheck.getFlag());
+        }
+        if (flagCheck.isDeniedLocal()) {
+            if (!flagCheck.getLocalRegion().isMuted()) {
+                MessageUtil.sendFlagNotification(player, flagCheck.getLocalRegion(), flagCheck.getFlag());
+            }
+        }
+        return flagCheck.isDenied();
+    }
+
+    public static FlagCheckEvent.PlayerFlagEvent checkPlayerEvent(Player player, BlockPos target, RegionFlag regionFlag, DimensionalRegion dimRegion) {
+        IMarkableRegion involvedRegion = getInvolvedRegionFor(regionFlag, target, player, player.level.dimension());
+        FlagCheckEvent.PlayerFlagEvent flagCheck = new FlagCheckEvent.PlayerFlagEvent(player, dimRegion, involvedRegion, regionFlag);
+        if (involvedRegion == null) {
+            flagCheck.setDeniedLocal(false);
+        } else {
+            IFlag flag = involvedRegion.getFlag(regionFlag.name);
+            // TODO: Check state with allowed
+            flagCheck.setDeniedLocal(flag.isActive());
+        }
+        if (dimRegion.isActive()) {
+            if (dimRegion.containsFlag(regionFlag) && !dimRegion.permits(player)) {
+                IFlag flag = dimRegion.getFlag(regionFlag.name);
+                // TODO: Check state with allowed
+                flagCheck.setDeniedInDim(flag.isActive());
+            } else {
+                flagCheck.setDeniedInDim(false);
+            }
+        } else {
+            flagCheck.setDeniedInDim(false);
+        }
+
+        if (flagCheck.getLocalRegion() == null) {
+            flagCheck.setDenied(flagCheck.isDeniedInDim());
+            return flagCheck;
+        } else {
+            boolean deniedResult = flagCheck.isDeniedInDim() && flagCheck.isDeniedLocal() || (!flagCheck.isDeniedInDim() || flagCheck.isDeniedLocal()) && (!flagCheck.isDeniedInDim() && (flagCheck.isDeniedLocal()) || !flagCheck.isDeniedInDim() && !flagCheck.isDeniedLocal());
+            flagCheck.setDenied(deniedResult);
+            return flagCheck;
+        }
+    }
+
+    public static FlagCheckEvent checkTargetEvent(BlockPos target, RegionFlag regionFlag, DimensionalRegion dimRegion) {
+        IMarkableRegion involvedRegion = getInvolvedRegionFor(regionFlag, target, dimRegion.getDim());
+        FlagCheckEvent flagCheck = new FlagCheckEvent(dimRegion, involvedRegion, regionFlag);
+        if (involvedRegion == null) {
+            flagCheck.setDeniedLocal(false);
+        } else {
+            IFlag flag = involvedRegion.getFlag(regionFlag.name);
+            // TODO: Check state with allowed
+            flagCheck.setDeniedLocal(flag.isActive());
+        }
+        if (dimRegion.isActive()) {
+            if (dimRegion.containsFlag(regionFlag)) {
+                IFlag flag = dimRegion.getFlag(regionFlag.name);
+                // TODO: Check state with allowed
+                flagCheck.setDeniedInDim(flag.isActive());
+            } else {
+                flagCheck.setDeniedInDim(false);
+            }
+        } else {
+            flagCheck.setDeniedInDim(false);
+        }
+
+        if (flagCheck.getLocalRegion() == null) {
+            flagCheck.setDenied(flagCheck.isDeniedInDim());
+            return flagCheck;
+        } else {
+            boolean deniedResult = flagCheck.isDeniedInDim() && flagCheck.isDeniedLocal() || (!flagCheck.isDeniedInDim() || flagCheck.isDeniedLocal()) && (!flagCheck.isDeniedInDim() && (flagCheck.isDeniedLocal()) || !flagCheck.isDeniedInDim() && !flagCheck.isDeniedLocal());
+            flagCheck.setDenied(deniedResult);
+            return flagCheck;
+        }
     }
 }

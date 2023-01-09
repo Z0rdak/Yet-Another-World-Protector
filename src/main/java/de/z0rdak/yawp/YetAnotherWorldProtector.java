@@ -1,6 +1,6 @@
 package de.z0rdak.yawp;
 
-import de.z0rdak.yawp.commands.*;
+import de.z0rdak.yawp.commands.CommandRegistry;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
@@ -21,7 +21,6 @@ import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.network.NetworkConstants;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,17 +39,17 @@ public class YetAnotherWorldProtector
             FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onConfigReloading);
 
             ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, CommandPermissionConfig.CONFIG_SPEC, CommandPermissionConfig.CONFIG_NAME);
-            ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, FlagConfig.CONFIG_SPEC, MODID + "-flags.toml" );
-            ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, RegionConfig.CONFIG_SPEC, MODID + "-region-defaults.toml" );
+            ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, FlagConfig.CONFIG_SPEC, MODID + "-flags.toml");
+            ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, RegionConfig.CONFIG_SPEC, MODID + "-region-defaults.toml");
 
             MinecraftForge.EVENT_BUS.register(this);
-            // Prevent message about missing mod on client in server list
-            ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (s, b) -> true));
         });
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
             LOGGER.info("You are loading " + MODID_LONG + " on a client. " + MODID_LONG + " is a server only mod!");
         });
 
+        //Make sure the mod being absent on the other network side does not cause the client to display the server as incompatible
+        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (s, b) -> true));
     }
 
     private void setup(final FMLCommonSetupEvent event) {

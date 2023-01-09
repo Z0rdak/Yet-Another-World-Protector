@@ -1,10 +1,7 @@
 package de.z0rdak.yawp.util;
 
 import de.z0rdak.yawp.core.stick.AbstractStick;
-import de.z0rdak.yawp.core.stick.FlagStick;
 import de.z0rdak.yawp.core.stick.MarkerStick;
-import de.z0rdak.yawp.core.stick.RegionStick;
-import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -15,6 +12,10 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+
+import java.util.Objects;
+
+import static net.minecraft.ChatFormatting.*;
 
 public final class StickUtil {
 
@@ -41,25 +42,23 @@ public final class StickUtil {
      * @param dim   dimension tag to set for sticks
      */
     public static void initStickTag(ItemStack stick, StickType type, ResourceKey<Level> dim) {
-        CompoundTag itemTag = new CompoundTag();
-        if (stick.hasTag()) {
-            itemTag = stick.getTag();
-        }
+        CompoundTag itemTag = stick.hasTag() ? stick.getTag() : new CompoundTag();
         if (itemTag != null) {
-            switch (type) {
-                case MARKER:
-                    itemTag.put(STICK, new MarkerStick(dim).serializeNBT());
-                    break;
-                case FLAG_STICK:
-                    itemTag.put(STICK, new FlagStick().serializeNBT());
-                    break;
-                case REGION_STICK:
-                    itemTag.put(STICK, new RegionStick().serializeNBT());
-                    break;
-                default:
-                    break;
+            if (Objects.requireNonNull(type) == StickType.MARKER) {
+                CompoundTag compoundNBT = new MarkerStick(dim).serializeNBT();
+                itemTag.put(STICK, compoundNBT);
+                stick.setTag(itemTag);
             }
         }
+    }
+
+    public static ItemStack initMarkerNbt(ItemStack stack, StickType type, ResourceKey<Level> dim) {
+        stack.setCount(1);
+        initStickTag(stack, type, dim);
+        setStickName(stack, type);
+        setStickToolTip(stack, type);
+        applyEnchantmentGlint(stack);
+        return stack;
     }
 
     public static boolean isVanillaStick(ItemStack itemStack) {
@@ -74,17 +73,13 @@ public final class StickUtil {
                 switch (type) {
                     case MARKER:
                         return new MarkerStick(stickNbt);
-                    case FLAG_STICK:
-                        return new FlagStick(stickNbt);
-                    case REGION_STICK:
-                        return new RegionStick(stickNbt);
                     case UNKNOWN:
                     default:
-                        throw new StickException();
+                        throw new StickException("Unknown stick type: '" + type + "'!");
                 }
             }
         }
-        throw new StickException();
+        throw new StickException("Invalid or missing NBT data for Stick '" + stick.getDisplayName().getString() + "'!");
     }
 
     public static StickType getStickType(ItemStack stick) {
@@ -110,37 +105,17 @@ public final class StickUtil {
 
     public static void setStickName(ItemStack stick, StickType type) {
         String displayName = "";
-        switch (type) {
-            case REGION_STICK:
-                displayName = ChatFormatting.GREEN + type.stickName;
-                break;
-            case FLAG_STICK:
-                displayName = ChatFormatting.AQUA + type.stickName;
-                break;
-            case MARKER:
-                MarkerStick marker = new MarkerStick(stick.getTag().getCompound(STICK));
-                String validFlag = marker.isValidArea() ? (ChatFormatting.GREEN + "*" + ChatFormatting.GOLD) : "";
-                displayName = ChatFormatting.GOLD + type.stickName + " (" + marker.getAreaType().areaType + "" + validFlag + ")";
-                break;
-            default:
-                break;
+        if (Objects.requireNonNull(type) == StickType.MARKER) {
+            MarkerStick marker = new MarkerStick(getStickNBT(stick));
+            String validFlag = marker.isValidArea() ? (GREEN + "*" + GOLD) : "";
+            displayName = GOLD + type.stickName + " (" + marker.getAreaType().areaType + "" + validFlag + ")";
         }
         stick.setHoverName(new TextComponent(displayName));
     }
 
     public static void setStickToolTip(ItemStack stick, StickType type) {
-        switch (type) {
-            case REGION_STICK:
-                setToolTip(stick, getRegionStickToolTip());
-                break;
-            case FLAG_STICK:
-                setToolTip(stick, getFlagStickToolTip());
-                break;
-            case MARKER:
-                setToolTip(stick, getMarkerToolTip());
-                break;
-            default:
-                break;
+        if (Objects.requireNonNull(type) == StickType.MARKER) {
+            setToolTip(stick, getMarkerToolTip());
         }
     }
 
@@ -148,33 +123,16 @@ public final class StickUtil {
         stack.getOrCreateTagElement("display").put("Lore", loreNbt);
     }
 
-    // TODO
+    public static boolean hasNonNullTag(ItemStack itemStack) {
+        return itemStack.hasTag() && itemStack.getTag() != null;
+    }
+
     private static ListTag getMarkerToolTip() {
         ListTag lore = new ListTag();
-        StringTag simple1 = buildLoreTextLine(new TranslatableComponent("help.tooltip.stick.marker.simple.1"), "#ff0020");
-        StringTag simple2 = buildLoreTextLine(new TranslatableComponent("help.tooltip.stick.marker.simple.2"), "#ff0010");
-        lore.add(simple1);
-        lore.add(simple2);
-        return lore;
-    }
-
-    // TODO
-    private static ListTag getFlagStickToolTip() {
-        ListTag lore = new ListTag();
-        StringTag simple1 = buildLoreTextLine(new TranslatableComponent("help.tooltip.stick.flag-stick.simple.1"), "#ff0020");
-        StringTag simple2 = buildLoreTextLine(new TranslatableComponent("help.tooltip.stick.flag-stick.simple.2"), "#ff0010");
-        lore.add(simple1);
-        lore.add(simple2);
-        return lore;
-    }
-
-    // TODO
-    private static ListTag getRegionStickToolTip() {
-        ListTag lore = new ListTag();
-        StringTag simple1 = buildLoreTextLine(new TranslatableComponent("help.tooltip.stick.region-stick.simple.1"), "#ff0020");
-        StringTag simple2 = buildLoreTextLine(new TranslatableComponent("help.tooltip.stick.region-stick.simple.2"), "#ff0010");
-        lore.add(simple1);
-        lore.add(simple2);
+        lore.add(buildLoreTextLine(new TranslatableComponent("help.tooltip.stick.marker.simple.1"), "#ff4d4d"));
+        lore.add(buildLoreTextLine(new TranslatableComponent("help.tooltip.stick.marker.simple.2"), "#ff4d4d"));
+        lore.add(buildLoreTextLine(new TextComponent(ITALIC + "").append(new TranslatableComponent("help.tooltip.stick.marker.simple.3")), "#808080"));
+        lore.add(buildLoreTextLine(new TextComponent(ITALIC + "").append(new TranslatableComponent("help.tooltip.stick.marker.simple.4")), "#808080"));
         return lore;
     }
 

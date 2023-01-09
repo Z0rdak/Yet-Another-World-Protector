@@ -13,22 +13,22 @@ public abstract class AbstractFlag implements IFlag {
     protected boolean isActive;
     protected boolean inverted;
 
-    public AbstractFlag(String flagIdentifier, FlagType flagType){
+    public AbstractFlag(String flagIdentifier, FlagType flagType) {
         this(flagIdentifier, flagType, false, true);
     }
 
-    public AbstractFlag(String flagIdentifier, FlagType flagType, boolean inverted){
+    public AbstractFlag(String flagIdentifier, FlagType flagType, boolean inverted) {
         this(flagIdentifier, flagType, inverted, true);
     }
 
-    public AbstractFlag(String flagIdentifier, FlagType flagType, boolean inverted, boolean isActive){
+    public AbstractFlag(String flagIdentifier, FlagType flagType, boolean inverted, boolean isActive) {
         this.flagIdentifier = flagIdentifier;
         this.flagType = flagType;
         this.isActive = isActive;
         this.inverted = inverted;
     }
 
-    public AbstractFlag(CompoundTag nbt){
+    public AbstractFlag(CompoundTag nbt) {
         this.deserializeNBT(nbt);
     }
 
@@ -78,5 +78,12 @@ public abstract class AbstractFlag implements IFlag {
         this.isActive = nbt.getBoolean(FLAG_ACTIVE);
         this.inverted = nbt.getBoolean(IS_INVERTED);
         this.flagType = FlagType.of(nbt.getString(RegionNBT.FLAG_TYPE));
+    }
+
+    @Override
+    public int compareTo(IFlag o) {
+        int nameComparsionRes = this.flagIdentifier.compareTo(o.getFlagIdentifier());
+        int activeComparsionRes = this.isActive && !o.isActive() ? 1 : !this.isActive && o.isActive() ? -1 : 0;
+        return nameComparsionRes + activeComparsionRes;
     }
 }

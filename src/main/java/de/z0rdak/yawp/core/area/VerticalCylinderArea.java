@@ -1,38 +1,39 @@
 package de.z0rdak.yawp.core.area;
 
 import com.mojang.math.Vector3d;
-import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.util.AreaUtil;
 import de.z0rdak.yawp.util.constants.AreaNBT;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 
-import static de.z0rdak.yawp.util.AreaUtil.*;
+import static de.z0rdak.yawp.util.AreaUtil.distance;
+import static de.z0rdak.yawp.util.AreaUtil.length;
 
-// TODO: how to orientation?
-public class CylinderArea extends CenteredArea {
+/**
+ * Vertical, cylindrical area defined by the bottom center position and a perimeter position.
+ * The perimeter position defines both the height and radius of the area.
+ */
+public class VerticalCylinderArea extends CenteredArea {
 
     private BlockPos centerTopPos;
     private int distance;
     private int radius;
 
-    public CylinderArea(BlockPos centerBottomPos, BlockPos scopePos){
+    public VerticalCylinderArea(BlockPos centerBottomPos, BlockPos scopePos) {
         super(centerBottomPos, AreaType.CYLINDER);
         this.centerTopPos = new BlockPos(centerBottomPos.getX(), scopePos.getY(), centerBottomPos.getZ());
         this.radius = (int) (distance(centerBottomPos, new BlockPos(scopePos.getX(), centerBottomPos.getY(), scopePos.getZ())));
         this.distance = (int) (distance(centerBottomPos, this.centerTopPos) + 0.5);
-        YetAnotherWorldProtector.LOGGER.debug(this.toString());
     }
 
-    public CylinderArea(BlockPos centerBottomPos, int radius, int distance){
+    public VerticalCylinderArea(BlockPos centerBottomPos, int radius, int distance) {
         super(centerBottomPos, AreaType.CYLINDER);
         this.centerTopPos = centerBottomPos.offset(0, distance, 0);
-        this.radius =radius;
+        this.radius = radius;
         this.distance = distance;
-        YetAnotherWorldProtector.LOGGER.debug(this.toString());
     }
 
-    public CylinderArea(CompoundTag nbt){
+    public VerticalCylinderArea(CompoundTag nbt) {
         super(nbt);
         this.deserializeNBT(nbt);
     }
