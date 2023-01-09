@@ -9,7 +9,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.item.ExperienceOrbEntity;
-import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
+import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.merchant.villager.WanderingTraderEntity;
 import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.entity.monster.ShulkerEntity;
@@ -160,7 +160,7 @@ public class EntityFlagHandler {
                         return;
                     }
                 }
-                if (entity instanceof AbstractVillagerEntity) {
+                if (entity instanceof VillagerEntity) {
                     FlagCheckEvent flagCheckEvent = checkTargetEvent(entity.blockPosition(), RegionFlag.SPAWNING_VILLAGER, dimRegion);
                     event.setCanceled(flagCheckEvent.isDenied());
                     if (event.isCanceled()) {

@@ -63,7 +63,7 @@ public class RegionFlagArgumentType implements ArgumentType<String> {
     @Override
     @SuppressWarnings("unchecked")
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        if (context.getSource() instanceof ISuggestionProvider) {
+        if (context.getSource() instanceof CommandSource) {
             CommandSource src = (CommandSource) context.getSource();
             try {
                 CuboidRegion region = (CuboidRegion) CommandUtil.getRegionArgument((CommandContext<CommandSource>) context);
