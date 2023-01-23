@@ -166,10 +166,6 @@ public final class MarkerCommands {
         }
     }
 
-    private static int setParent(CommandSource src, IMarkableRegion parent) {
-        return -1;
-    }
-
     public static int giveMarkerStick(CommandSource src, ServerPlayerEntity player) {
         try {
             PlayerEntity targetPlayer;

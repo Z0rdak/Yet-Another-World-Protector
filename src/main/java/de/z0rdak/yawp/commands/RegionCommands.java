@@ -23,10 +23,7 @@ import de.z0rdak.yawp.core.stick.AbstractStick;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import de.z0rdak.yawp.util.LocalRegions;
-import de.z0rdak.yawp.util.StickException;
-import de.z0rdak.yawp.util.StickType;
-import de.z0rdak.yawp.util.StickUtil;
+import de.z0rdak.yawp.util.*;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
@@ -483,10 +480,7 @@ public class RegionCommands {
 
     private static int promptRegionInfo(CommandSource src, IMarkableRegion region) {
         // == Region [<name>] overview ==
-        IFormattableTextComponent regionInfoHeader = new StringTextComponent(TextFormatting.BOLD + "== Region ")
-                .append(buildRegionInfoLink(region))
-                .append(new StringTextComponent(TextFormatting.BOLD + " overview =="));
-        sendCmdFeedback(src, regionInfoHeader);
+        sendCmdFeedback(src, MessageUtil.buildRegionOverviewHeader(region));
 
         // Flags: [n flag(s)][+]
         IFormattableTextComponent regionFlags = new TranslationTextComponent("cli.msg.info.region.flag")
