@@ -91,7 +91,7 @@
   "cli.msg.info.region.affiliation.player.empty": "Keine Spieler mit Zugehörigkeit '%s' in Region '%s' vorhanden",
   "cli.msg.info.region.affiliation.player.list": "== Region '%s' - Spieler mit Zugehörigkeit '%s' ==",
   "cli.msg.info.region.affiliation.player.list.link.hover": "Liste Spieler der Zugehörigkeit '%s' in der Region '%s' auf",
-  "cli.msg.info.region.affiliation.player.list.link.text": "%s player(s)",
+  "cli.msg.info.region.affiliation.player.list.link.text": "%s Spieler",
   "cli.msg.info.region.affiliation.player.remove.link.hover": "Spieler '%s' von Region '%s' entfernen",
   "cli.msg.info.region.affiliation.player.remove.link.text": "x",
   "cli.msg.info.region.affiliation.player.remove.link.text.entry": " - %s '%s'",

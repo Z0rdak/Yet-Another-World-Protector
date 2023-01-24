@@ -77,7 +77,7 @@
   "cli.msg.info.dim.region.remove.link.hover": "Remove region '%s'",
   "cli.msg.info.dim.region.remove.link.text": "x",
   "cli.msg.info.region": "Show region info for region '%s'",
-  "cli.msg.info.region.overview.header": "== % for % ==",
+  "cli.msg.info.region.overview.header": "== %s for %s ==",
   "cli.msg.info.region.overview.dump.link.text": "Region overview",
   "cli.msg.info.region.overview.dump.link.hover": "Copy Region NBT to clipboard",
   "cli.msg.info.region.affiliation": "Affiliation",
