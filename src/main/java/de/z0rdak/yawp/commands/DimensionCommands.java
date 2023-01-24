@@ -458,7 +458,7 @@ public class DimensionCommands {
                 MEMBER);
         IFormattableTextComponent players = members.hasPlayers() ?
                 buildDimPlayerListLink(dimRegion, members, MEMBER)
-                : new TranslationTextComponent("cli.msg.info.region.affiliation.team.list.link.text", members.getPlayers().size());
+                : new TranslationTextComponent("cli.msg.info.region.affiliation.player.list.link.text", members.getPlayers().size());
         players.append(playersAddLink);
 
         // [n team(s)] [+]
@@ -466,7 +466,7 @@ public class DimensionCommands {
                 MEMBER);
         IFormattableTextComponent teams = members.hasTeams()
                 ? buildDimTeamListLink(dimRegion, members, MEMBER)
-                : new TranslationTextComponent("cli.msg.info.region.affiliation.team.list.link.text", members.getPlayers().size());
+                : new TranslationTextComponent("cli.msg.info.region.affiliation.team.list.link.text", members.getTeams().size());
         teams.append(teamAddLink);
 
         // Members: [n player(s)] [+], [n team(s)] [+]
