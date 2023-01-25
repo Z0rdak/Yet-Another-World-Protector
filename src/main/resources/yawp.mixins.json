@@ -1,10 +1,13 @@
 {
-  "required" : true,
+  "required": true,
   "compatibilityLevel": "JAVA_8",
   "minVersion": "0.8.2",
   "package": "de.z0rdak.yawp.mixin",
   "refmap": "${mod_id}.refmap.json",
-  "mixins": [
+  "mixins": [],
+  "client": [],
+  "server": [
+    "FireBlockMixin",
     "MixinAbstractMinecartEntity",
     "MixinAgeableEntity",
     "MixinFlyingEntity",
@@ -13,7 +16,5 @@
     "MixinShulkerEntity",
     "MixinSlimeEntity",
     "MixinWaterMobEntity"
-  ],
-  "client": [],
-  "server": []
+  ]
 }
