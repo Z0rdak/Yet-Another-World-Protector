@@ -14,7 +14,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -94,10 +93,6 @@ public final class LocalRegions {
                 .collect(Collectors.toList());
     }
 
-    public static List<IMarkableRegion> getRegionsFor(RegionFlag flag, BlockPos position, RegistryKey<World> dim) {
-        return getRegionsWithHighestPriority(getInvolvedRegionsFor(flag, position, dim));
-    }
-
     @Nullable
     public static IMarkableRegion getInvolvedRegionFor(RegionFlag flag, BlockPos position, RegistryKey<World> dim) {
         List<IMarkableRegion> regionsForPos = getInvolvedRegionsFor(flag, position, dim);
@@ -141,7 +136,6 @@ public final class LocalRegions {
                 .filter(r -> r.getPriority() == cuboidRegion.getPriority())
                 .collect(Collectors.toList());
     }
-
 
     public static int ensureHigherRegionPriorityFor(CuboidRegion cuboidRegion, int defaultPriority) {
         List<CuboidRegion> intersectingRegions = getIntersectingRegionsFor(cuboidRegion);
@@ -188,29 +182,5 @@ public final class LocalRegions {
             cuboidRegion.setPriority(defaultPriority);
         }
         return cuboidRegion.getPriority();
-    }
-
-    /**
-     * Filter the regions for the ones with the highest priority. <br>
-     * This list may contain multiple regions with the same priority. <br>
-     * In an optimal region setup, the list only contains one region. <br>
-     * It is assumed that the provided list of regions only contains 'involved' regions.
-     *
-     * @param involvedRegions valid involved regions, may be empty.
-     * @return a reduced list of involved regions with the highest priority
-     */
-    public static List<IMarkableRegion> getRegionsWithHighestPriority(List<IMarkableRegion> involvedRegions) {
-        int highestHandlingPriority = Integer.MIN_VALUE;
-        List<IMarkableRegion> filteredRegions = new ArrayList<>();
-        for (IMarkableRegion region : involvedRegions) {
-            if (region.getPriority() == highestHandlingPriority) {
-                involvedRegions.add(region);
-            } else if (region.getPriority() > highestHandlingPriority) {
-                involvedRegions.clear();
-                highestHandlingPriority = region.getPriority();
-                involvedRegions.add(region);
-            }
-        }
-        return filteredRegions;
     }
 }

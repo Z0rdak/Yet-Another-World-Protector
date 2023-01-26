@@ -13,6 +13,7 @@ import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.entity.monster.ZombieEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.living.LivingDestroyBlockEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
@@ -21,6 +22,9 @@ import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
@@ -157,7 +161,7 @@ public class GrievingFlagHandler {
     }
 
     /**
-     * FIXME or disable for next update
+     * TODO: Inverted flags would need to re-add allowed blocks/entites
      * Removes affected entities and/or blocks from the event list to protect them
      */
     @SubscribeEvent
@@ -167,41 +171,37 @@ public class GrievingFlagHandler {
             if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
 
-                if (dimRegion.containsFlag(RegionFlag.EXPLOSION_BLOCK)) {
-                    event.getAffectedBlocks().clear();
-                }
-                if (dimRegion.containsFlag(RegionFlag.EXPLOSION_ENTITY)) {
-                    event.getAffectedEntities().clear();
-                }
-                //event.getAffectedBlocks().removeAll(filterExplosionAffectedBlocks(event, RegionFlag.EXPLOSION_BLOCK));
-                //event.getAffectedEntities().removeAll(filterAffectedEntities(event, RegionFlag.EXPLOSION_ENTITY));
+                Set<BlockPos> protectedBlocks = event.getAffectedBlocks().stream()
+                        .filter(blockPos -> checkTargetEventFor(blockPos, RegionFlag.EXPLOSION_BLOCK, dimRegion))
+                        .collect(Collectors.toSet());
+                Set<Entity> protectedEntities = event.getAffectedEntities().stream()
+                        .filter(entity -> checkTargetEventFor(entity.blockPosition(), RegionFlag.EXPLOSION_ENTITY, dimRegion))
+                        .collect(Collectors.toSet());
+
+                event.getAffectedBlocks().removeAll(protectedBlocks);
+                event.getAffectedEntities().removeAll(protectedEntities);
 
                 if (event.getExplosion().getSourceMob() != null) {
                     boolean explosionTriggeredByCreeper = (event.getExplosion().getSourceMob() instanceof CreeperEntity);
-                    if (!explosionTriggeredByCreeper) {
-                        if (dimRegion.containsFlag(RegionFlag.EXPLOSION_OTHER_BLOCKS)) {
-                            event.getAffectedBlocks().clear();
-                        }
-                        if (dimRegion.containsFlag(RegionFlag.EXPLOSION_OTHER_ENTITY)) {
-                            event.getAffectedEntities().clear();
-                        }
-                        //event.getAffectedBlocks().removeAll(filterExplosionAffectedBlocks(event, RegionFlag.EXPLOSION_OTHER_BLOCKS));
-                        //event.getAffectedEntities().removeAll(filterAffectedEntities(event, RegionFlag.EXPLOSION_OTHER_ENTITY));
-
-                    }
                     if (explosionTriggeredByCreeper) {
-                        if (dimRegion.containsFlag(RegionFlag.EXPLOSION_CREEPER_BLOCK)) {
-                            event.getAffectedBlocks().clear();
-                        }
-                        if (dimRegion.containsFlag(RegionFlag.EXPLOSION_CREEPER_ENTITY)) {
-                            event.getAffectedEntities().clear();
-                        }
-                        //event.getAffectedBlocks().removeAll(filterExplosionAffectedBlocks(event, RegionFlag.EXPLOSION_CREEPER_BLOCK));
-                        //event.getAffectedEntities().removeAll(filterAffectedEntities(event, RegionFlag.EXPLOSION_CREEPER_ENTITY));
+                        protectedBlocks = event.getAffectedBlocks().stream()
+                                .filter(blockPos -> checkTargetEventFor(blockPos, RegionFlag.EXPLOSION_CREEPER_BLOCK, dimRegion))
+                                .collect(Collectors.toSet());
+                        protectedEntities = event.getAffectedEntities().stream()
+                                .filter(entity -> checkTargetEventFor(entity.blockPosition(), RegionFlag.EXPLOSION_CREEPER_ENTITY, dimRegion))
+                                .collect(Collectors.toSet());
+                    } else {
+                        protectedBlocks = event.getAffectedBlocks().stream()
+                                .filter(blockPos -> checkTargetEventFor(blockPos, RegionFlag.EXPLOSION_OTHER_BLOCKS, dimRegion))
+                                .collect(Collectors.toSet());
+                        protectedEntities = event.getAffectedEntities().stream()
+                                .filter(entity -> checkTargetEventFor(entity.blockPosition(), RegionFlag.EXPLOSION_OTHER_ENTITY, dimRegion))
+                                .collect(Collectors.toSet());
                     }
+                    event.getAffectedBlocks().removeAll(protectedBlocks);
+                    event.getAffectedEntities().removeAll(protectedEntities);
                 }
             }
         }
     }
-
 }
