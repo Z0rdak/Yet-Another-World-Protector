@@ -19,9 +19,7 @@ import de.z0rdak.yawp.util.StickUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
@@ -48,9 +46,7 @@ public final class MarkerCommands {
     private static LiteralArgumentBuilder<CommandSource> register() {
         return literal(MARKER)
                 .then(literal(GIVE)
-                        .executes(ctx -> giveMarkerStick(ctx.getSource(), null))
-                        .then(Commands.argument(PLAYER.toString(), EntityArgument.player())
-                                .executes(ctx -> giveMarkerStick(ctx.getSource(), getPlayerArgument(ctx)))))
+                        .executes(ctx -> giveMarkerStick(ctx.getSource())))
                 .then(literal(RESET)
                         .executes(ctx -> resetStick(ctx.getSource())))
                 .then(literal(CREATE)
@@ -166,14 +162,9 @@ public final class MarkerCommands {
         }
     }
 
-    public static int giveMarkerStick(CommandSource src, ServerPlayerEntity player) {
+    public static int giveMarkerStick(CommandSource src) {
         try {
-            PlayerEntity targetPlayer;
-            if (player != null) {
-                targetPlayer = player;
-            } else {
-                targetPlayer = src.getPlayerOrException();
-            }
+            PlayerEntity targetPlayer = src.getPlayerOrException();
             ItemStack markerStick = StickUtil.initMarkerNbt(Items.STICK.getDefaultInstance(), StickType.MARKER, targetPlayer.level.dimension());
             targetPlayer.addItem(markerStick);
             sendCmdFeedback(src, new TranslationTextComponent("Added RegionMarker to inventory of player '" + targetPlayer.getScoreboardName() + "'"));
