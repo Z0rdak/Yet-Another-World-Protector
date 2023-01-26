@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.test.common.core.area;
 
-import de.z0rdak.yawp.core.area.CylinderArea;
+import de.z0rdak.yawp.core.area.VerticalCylinderArea;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import org.junit.jupiter.api.BeforeAll;
@@ -10,10 +10,10 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CylinderAreaTest {
+public class VerticalCylinderAreaTest {
 
-    private static final List<CylinderArea> cylindersToTest = new ArrayList<>();
-    private static final BlockPos center = new BlockPos(0,10,0);
+    private static final List<VerticalCylinderArea> cylindersToTest = new ArrayList<>();
+    private static final BlockPos center = new BlockPos(0, 10, 0);
     private static Map<Integer, Set<BlockPos>> validPositionsForRadius;
     private static Map<Integer, Set<BlockPos>> invalidPositionsForRadius;
     private static Map<Integer, Integer> expectedValidForRadius;
@@ -27,7 +27,7 @@ public class CylinderAreaTest {
         expectedInvalidForRadius = new HashMap<>();
 
         for (int i = 0; i < 6; i++) {
-            cylindersToTest.add(new CylinderArea(center, i, 10));
+            cylindersToTest.add(new VerticalCylinderArea(center, i, 10));
             validPositionsForRadius.put(i, new HashSet<>());
             invalidPositionsForRadius.put(i, new HashSet<>());
         }
@@ -73,16 +73,16 @@ public class CylinderAreaTest {
     }
 
     @Test
-    public void testSerialization(){
-        cylindersToTest.forEach( cylinderArea -> {
-            CompoundTag area = cylinderArea.serializeNBT();
-            CylinderArea clone = new CylinderArea(area);
+    public void testSerialization() {
+        cylindersToTest.forEach(verticalCylinderArea -> {
+            CompoundTag area = verticalCylinderArea.serializeNBT();
+            VerticalCylinderArea clone = new VerticalCylinderArea(area);
 
-            assertEquals(cylinderArea.getCenter(), clone.getCenter(), "Center '" + cylinderArea.getCenter() + "' not equal to '" + clone.getCenter().toString() + "'");
-            assertEquals(cylinderArea.getRadius(), clone.getRadius(), "Radius '" + cylinderArea.getRadius() + "' not equal to '" + clone.getRadius() + "'");
-            assertEquals(cylinderArea.getDistance(), clone.getDistance(), "Distance '" + cylinderArea.getDistance() + "' not equal to '" + clone.getDistance() + "'");
-            assertEquals(cylinderArea.getAreaType(), clone.getAreaType(),"AreaType '" + cylinderArea.getAreaType().toString() + "' not equal to '" + clone.getAreaType().toString() + "'");
-            assertEquals(cylinderArea.toString(), clone.toString(),"CuboidArea '" + cylinderArea + "' not equal to '" + clone + "'");
+            assertEquals(verticalCylinderArea.getCenter(), clone.getCenter(), "Center '" + verticalCylinderArea.getCenter() + "' not equal to '" + clone.getCenter().toString() + "'");
+            assertEquals(verticalCylinderArea.getRadius(), clone.getRadius(), "Radius '" + verticalCylinderArea.getRadius() + "' not equal to '" + clone.getRadius() + "'");
+            assertEquals(verticalCylinderArea.getDistance(), clone.getDistance(), "Distance '" + verticalCylinderArea.getDistance() + "' not equal to '" + clone.getDistance() + "'");
+            assertEquals(verticalCylinderArea.getAreaType(), clone.getAreaType(), "AreaType '" + verticalCylinderArea.getAreaType().toString() + "' not equal to '" + clone.getAreaType().toString() + "'");
+            assertEquals(verticalCylinderArea.toString(), clone.toString(), "CuboidArea '" + verticalCylinderArea + "' not equal to '" + clone + "'");
         });
     }
 }

@@ -6,6 +6,7 @@ import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.managers.data.player.PlayerTrackingManager;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -44,8 +45,9 @@ public class YetAnotherWorldProtector
 
             MinecraftForge.EVENT_BUS.register(this);
         });
+
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-            LOGGER.info("You are loading " + MODID_LONG + " on a client. " + MODID_LONG + " is a server only mod!");
+            LOGGER.info(Component.translatable("loading.client.info", MODID_LONG, MODID.toUpperCase()).getString());
         });
 
         //Make sure the mod being absent on the other network side does not cause the client to display the server as incompatible

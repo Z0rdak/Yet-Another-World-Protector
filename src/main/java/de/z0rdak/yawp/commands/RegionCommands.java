@@ -23,10 +23,7 @@ import de.z0rdak.yawp.core.stick.AbstractStick;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import de.z0rdak.yawp.util.LocalRegions;
-import de.z0rdak.yawp.util.StickException;
-import de.z0rdak.yawp.util.StickType;
-import de.z0rdak.yawp.util.StickUtil;
+import de.z0rdak.yawp.util.*;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -48,7 +45,6 @@ import java.util.stream.Collectors;
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.util.CommandUtil.*;
 import static de.z0rdak.yawp.util.MessageUtil.*;
-import static net.minecraft.ChatFormatting.BOLD;
 import static net.minecraft.ChatFormatting.RESET;
 
 public class RegionCommands {
@@ -482,10 +478,7 @@ public class RegionCommands {
 
     private static int promptRegionInfo(CommandSourceStack src, IMarkableRegion region) {
         // == Region [<name>] overview ==
-        MutableComponent regionInfoHeader = Component.literal(BOLD + "== Region ")
-                .append(buildRegionInfoLink(region))
-                .append(Component.literal(BOLD + " overview =="));
-        sendCmdFeedback(src, regionInfoHeader);
+        sendCmdFeedback(src, MessageUtil.buildRegionOverviewHeader(region));
 
         // Flags: [n flag(s)][+]
         MutableComponent regionFlags = Component.translatable("cli.msg.info.region.flag")

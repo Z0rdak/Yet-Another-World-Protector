@@ -1,11 +1,12 @@
 {
-  "required" : true,
+  "required": true,
   "compatibilityLevel": "JAVA_17",
   "minVersion": "0.8.2",
   "package": "de.z0rdak.yawp.mixin",
   "refmap": "${mod_id}.refmap.json",
-  "mixins": [
-  ],
+  "mixins": [],
   "client": [],
-  "server": []
+  "server": [
+    "FireBlockMixin"
+  ]
 }

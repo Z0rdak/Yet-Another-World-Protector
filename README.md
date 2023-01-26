@@ -15,7 +15,8 @@ new [issue](https://github.com/Z0rdak/Yet-Another-World-Protector/issues) on our
 
 # Credits
 
-Special thanks to IVEN#2107 for the mod logo!
+- Special thanks to IVEN#2107 for the mod logo!
+- Special thanks to Reincarnaciya for the russian translation!
 
 # License
 

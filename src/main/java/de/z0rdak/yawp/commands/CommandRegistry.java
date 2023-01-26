@@ -2,11 +2,9 @@ package de.z0rdak.yawp.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.util.CommandUtil;
 import de.z0rdak.yawp.util.MessageUtil;
-import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.ClickEvent;
@@ -15,6 +13,8 @@ import net.minecraft.network.chat.MutableComponent;
 
 import static de.z0rdak.yawp.util.MessageUtil.buildExecuteCmdComponent;
 import static de.z0rdak.yawp.util.MessageUtil.buildHelpHeader;
+import static net.minecraft.ChatFormatting.AQUA;
+import static net.minecraft.ChatFormatting.GREEN;
 
 public class CommandRegistry {
 
@@ -43,11 +43,23 @@ public class CommandRegistry {
         MessageUtil.sendCmdFeedback(src, buildHelpHeader("cli.msg.help.header"));
         String command = CommandUtil.buildCommandStr(CommandConstants.DIMENSION.toString());
         MutableComponent cmdStr = Component.translatable("cli.msg.help.1", CommandPermissionConfig.BASE_CMD);
-        MessageUtil.sendCmdFeedback(src, buildExecuteCmdComponent("=>", "Manage dimensional regions", command, ClickEvent.Action.SUGGEST_COMMAND, ChatFormatting.GREEN).append(cmdStr));
-        String wikiLink = "https://github.com/Z0rdak/Yet-Another-World-Protector/wiki";
-        MutableComponent wikiInfo = Component.literal("The in-game help is under construction.\nVisit the online wiki for a guide on how to use the mod.\nOnline-Wiki: ");
-        MessageUtil.sendCmdFeedback(src, wikiInfo.append(buildExecuteCmdComponent(YetAnotherWorldProtector.MODID_LONG + " online wiki", "Open online wiki in your browser", wikiLink,
-                ClickEvent.Action.OPEN_URL, ChatFormatting.AQUA)));
+        MessageUtil.sendCmdFeedback(src, buildExecuteCmdComponent(
+                Component.literal("=> "),
+                Component.translatable("help.tooltip.dim"),
+                command, ClickEvent.Action.SUGGEST_COMMAND, GREEN).append(cmdStr));
+        MutableComponent wikiText1 = Component.translatable("help.tooltip.info.wiki.1");
+        MutableComponent wikiText2 = Component.translatable("help.tooltip.info.wiki.2");
+        MutableComponent wikiText3 = Component.translatable("help.tooltip.info.wiki.3");
+        MutableComponent wikiLinkHover = Component.translatable("help.tooltip.info.wiki.link.hover");
+        MutableComponent wikiLink = Component.translatable("help.tooltip.info.wiki.link.text");
+        MutableComponent wikiCopyToClipboardLink = buildExecuteCmdComponent(wikiLink, wikiLinkHover, "", ClickEvent.Action.OPEN_URL, AQUA);
+        wikiText1.append("\n")
+                .append(wikiText2)
+                .append("\n")
+                .append(wikiText3)
+                .append(": ")
+                .append(wikiCopyToClipboardLink);
+        MessageUtil.sendCmdFeedback(src, wikiText1);
         return 0;
     }
 }
