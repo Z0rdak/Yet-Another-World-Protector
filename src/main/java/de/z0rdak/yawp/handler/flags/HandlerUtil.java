@@ -4,7 +4,6 @@ import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
-import de.z0rdak.yawp.util.LocalRegions;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
@@ -21,11 +20,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.world.BlockEvent;
-import net.minecraftforge.event.world.ExplosionEvent;
 import net.minecraftforge.eventbus.api.Event;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.util.LocalRegions.getInvolvedRegionFor;
 
@@ -69,42 +64,6 @@ public final class HandlerUtil {
                 || entity instanceof EnderDragon
                 || entity instanceof Shulker;
     }
-
-    /**
-     * Checks is any region contains the specified flag
-     *
-     * @param regions regions to check for
-     * @param flag    flag to be checked for
-     * @return true if any region contains the specified flag, false otherwise
-     */
-    public static boolean anyRegionContainsFlag(List<IMarkableRegion> regions, RegionFlag flag) {
-        return regions.stream()
-                .anyMatch(region -> region.containsFlag(flag));
-    }
-
-    /**
-     * Filters affected blocks from explosion event which are in a region with the specified flag.
-     *
-     * @param event detonation event
-     * @param flag  flag to be filtered for
-     * @return list of block positions which are in a region with the specified flag
-     */
-    // TODO: rework
-    public static List<BlockPos> filterExplosionAffectedBlocks(ExplosionEvent.Detonate event, RegionFlag flag) {
-        return event.getAffectedBlocks().stream()
-                .filter(blockPos -> anyRegionContainsFlag(
-                        LocalRegions.getRegionsFor(flag, blockPos, event.getWorld().dimension()), flag))
-                .collect(Collectors.toList());
-    }
-
-    // TODO: rework
-    public static List<Entity> filterAffectedEntities(ExplosionEvent.Detonate event, RegionFlag flag) {
-        return event.getAffectedEntities().stream()
-                .filter(entity -> anyRegionContainsFlag(
-                        LocalRegions.getRegionsFor(flag, entity.blockPosition(), event.getWorld().dimension()), flag))
-                .collect(Collectors.toList());
-    }
-
 
     public static boolean handleAndSendMsg(Event event, FlagCheckEvent.PlayerFlagEvent flagCheck) {
         if (flagCheck.getLocalRegion() == null && flagCheck.isDeniedInDim()) {
@@ -207,5 +166,36 @@ public final class HandlerUtil {
             flagCheck.setDenied(deniedResult);
             return flagCheck;
         }
+    }
+
+    public static boolean checkTargetEventFor(BlockPos target, RegionFlag regionFlag, DimensionalRegion dimRegion) {
+        IMarkableRegion involvedRegion = getInvolvedRegionFor(regionFlag, target, dimRegion.getDim());
+        FlagCheckEvent flagCheck = new FlagCheckEvent(dimRegion, involvedRegion, regionFlag);
+        if (involvedRegion == null) {
+            flagCheck.setDeniedLocal(false);
+        } else {
+            IFlag flag = involvedRegion.getFlag(regionFlag.name);
+            // TODO: Check state with allowed
+            flagCheck.setDeniedLocal(flag.isActive());
+        }
+        if (dimRegion.isActive()) {
+            if (dimRegion.containsFlag(regionFlag)) {
+                IFlag flag = dimRegion.getFlag(regionFlag.name);
+                // TODO: Check state with allowed
+                flagCheck.setDeniedInDim(flag.isActive());
+            } else {
+                flagCheck.setDeniedInDim(false);
+            }
+        } else {
+            flagCheck.setDeniedInDim(false);
+        }
+
+        if (flagCheck.getLocalRegion() == null) {
+            flagCheck.setDenied(flagCheck.isDeniedInDim());
+        } else {
+            boolean deniedResult = flagCheck.isDeniedInDim() && flagCheck.isDeniedLocal() || (!flagCheck.isDeniedInDim() || flagCheck.isDeniedLocal()) && (!flagCheck.isDeniedInDim() && (flagCheck.isDeniedLocal()) || !flagCheck.isDeniedInDim() && !flagCheck.isDeniedLocal());
+            flagCheck.setDenied(deniedResult);
+        }
+        return flagCheck.isDenied();
     }
 }
