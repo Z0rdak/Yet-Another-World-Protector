@@ -70,6 +70,7 @@ public enum RegionFlag {
     MELEE_MONSTERS("melee-monsters", FlagType.BOOLEAN_FLAG),
     MELEE_VILLAGERS("melee-villagers", FlagType.BOOLEAN_FLAG),
     MELEE_WANDERING_TRADER("melee-wtrader", FlagType.BOOLEAN_FLAG),
+    NO_PVP("no-pvp", FlagType.BOOLEAN_FLAG),
     INVINCIBLE("invincible", FlagType.BOOLEAN_FLAG),
     FALL_DAMAGE("fall-damage", FlagType.BOOLEAN_FLAG),
     FALL_DAMAGE_VILLAGERS("fall-damage-villagers", FlagType.BOOLEAN_FLAG),
