@@ -208,13 +208,8 @@ public final class PlayerFlagHandler {
         }
     }
 
-    /**
-     * TODO: Separate flags for Villagers, Animals, Monsters, Player
-     * TODO: These flags needs further testing
-     */
     @SubscribeEvent
-    @TargetFocusedFlag(flag = INVINCIBLE)
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onPvpAction(LivingHurtEvent event) {
         if (isServerSide(event)) {
             Entity dmgSourceEntity = event.getSource().getDirectEntity();
             Entity hurtEntity = event.getEntityLiving();
@@ -223,12 +218,23 @@ public final class PlayerFlagHandler {
                 if (dimCache != null) {
                     PlayerEntity playerTarget = (PlayerEntity) hurtEntity;
                     PlayerEntity playerSource = (PlayerEntity) dmgSourceEntity;
-
-                    // another check for PVP - this does not prevent knock-back? but prevents dmg
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(playerSource, playerTarget.blockPosition(), MELEE_PLAYERS, dimCache.getDimensionalRegion());
+                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(playerSource, playerTarget.blockPosition(), NO_PVP, dimCache.getDimensionalRegion());
                     handleAndSendMsg(event, flagCheckEvent);
+                }
+            }
+        }
+    }
 
-                    FlagCheckEvent.PlayerFlagEvent invincibleFlagCheckEvent = checkPlayerEvent(playerTarget, playerTarget.blockPosition(), INVINCIBLE, dimCache.getDimensionalRegion());
+    @SubscribeEvent
+    @TargetFocusedFlag(flag = INVINCIBLE)
+    public static void onPlayerHurt(LivingHurtEvent event) {
+        if (isServerSide(event)) {
+            Entity hurtEntity = event.getEntityLiving();
+            if (hurtEntity instanceof PlayerEntity) {
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(hurtEntity));
+                if (dimCache != null) {
+                    PlayerEntity playerTarget = (PlayerEntity) hurtEntity;
+                    FlagCheckEvent invincibleFlagCheckEvent = checkTargetEvent(playerTarget.blockPosition(), INVINCIBLE, dimCache.getDimensionalRegion());
                     if (invincibleFlagCheckEvent.isDenied()) {
                         event.setCanceled(false);
                     }
@@ -237,8 +243,11 @@ public final class PlayerFlagHandler {
         }
     }
 
+
+    /* TODO: Is this test even necessary anymore?
+     *   - There is already a PVP flag for onHurt in place
+     * */
     @SubscribeEvent
-    @TargetFocusedFlag(flag = INVINCIBLE)
     public static void onReceiveDmg(LivingDamageEvent event) {
         if (isServerSide(event)) {
             Entity dmgSourceEntity = event.getSource().getDirectEntity();
@@ -248,15 +257,9 @@ public final class PlayerFlagHandler {
                     if (event.getEntityLiving() instanceof PlayerEntity) {
                         PlayerEntity dmgTarget = (PlayerEntity) event.getEntityLiving();
                         PlayerEntity dmgSource = ((PlayerEntity) dmgSourceEntity);
-
                         // another check for PVP - this does not prevent knock-back? but prevents dmg
                         FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(dmgSource, dmgTarget.blockPosition(), MELEE_PLAYERS, dimCache.getDimensionalRegion());
                         handleAndSendMsg(event, flagCheckEvent);
-
-                        FlagCheckEvent.PlayerFlagEvent invincibleFlagCheckEvent = checkPlayerEvent(dmgTarget, dmgTarget.blockPosition(), INVINCIBLE, dimCache.getDimensionalRegion());
-                        if (invincibleFlagCheckEvent.isDenied()) {
-                            event.setCanceled(false);
-                        }
                     }
                 }
             }
@@ -267,15 +270,11 @@ public final class PlayerFlagHandler {
     @TargetFocusedFlag(flag = KNOCKBACK_PLAYERS)
     public static void onPlayerKnockback(LivingKnockBackEvent event) {
         if (isServerSide(event)) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
-            if (dimCache != null) {
-                if (event.getEntityLiving() instanceof PlayerEntity) {
+            if (event.getEntityLiving() instanceof PlayerEntity) {
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
+                if (dimCache != null) {
                     PlayerEntity dmgTarget = (PlayerEntity) event.getEntityLiving();
-
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(dmgTarget, dmgTarget.blockPosition(), KNOCKBACK_PLAYERS, dimCache.getDimensionalRegion());
-                    handleAndSendMsg(event, flagCheckEvent);
-
-                    // another check for PVP - Prevents knockback
+                    FlagCheckEvent flagCheckEvent = checkTargetEvent(dmgTarget.blockPosition(), KNOCKBACK_PLAYERS, dimCache.getDimensionalRegion());
                     if (flagCheckEvent.isDenied()) {
                         event.setCanceled(false);
                     }
