@@ -2,19 +2,20 @@ package de.z0rdak.yawp.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.util.CommandUtil;
 import de.z0rdak.yawp.util.MessageUtil;
-import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
 import static de.z0rdak.yawp.util.MessageUtil.buildExecuteCmdComponent;
 import static de.z0rdak.yawp.util.MessageUtil.buildHelpHeader;
+import static net.minecraft.ChatFormatting.AQUA;
+import static net.minecraft.ChatFormatting.GREEN;
 
 public class CommandRegistry {
 
@@ -42,12 +43,24 @@ public class CommandRegistry {
     private static int promptHelp(CommandSourceStack src) {
         MessageUtil.sendCmdFeedback(src, buildHelpHeader("cli.msg.help.header"));
         String command = CommandUtil.buildCommandStr(CommandConstants.DIMENSION.toString());
-        TranslatableComponent cmdStr = new TranslatableComponent("cli.msg.help.1", CommandPermissionConfig.BASE_CMD);
-        MessageUtil.sendCmdFeedback(src, buildExecuteCmdComponent("=>", "Manage dimensional regions", command, ClickEvent.Action.SUGGEST_COMMAND, ChatFormatting.GREEN).append(cmdStr));
-        String wikiLink = "https://github.com/Z0rdak/Yet-Another-World-Protector/wiki";
-        TextComponent wikiInfo = new TextComponent("The in-game help is under construction.\nVisit the online wiki for a guide on how to use the mod.\nOnline-Wiki: ");
-        MessageUtil.sendCmdFeedback(src, wikiInfo.append(buildExecuteCmdComponent(YetAnotherWorldProtector.MODID_LONG + " online wiki", "Open online wiki in your browser", wikiLink,
-                ClickEvent.Action.OPEN_URL, ChatFormatting.AQUA)));
+        MutableComponent cmdStr = new TranslatableComponent("cli.msg.help.1", CommandPermissionConfig.BASE_CMD);
+        MessageUtil.sendCmdFeedback(src, buildExecuteCmdComponent(
+                new TextComponent("=> "),
+                new TranslatableComponent("help.tooltip.dim"),
+                command, ClickEvent.Action.SUGGEST_COMMAND, GREEN).append(cmdStr));
+        MutableComponent wikiText1 = new TranslatableComponent("help.tooltip.info.wiki.1");
+        MutableComponent wikiText2 = new TranslatableComponent("help.tooltip.info.wiki.2");
+        MutableComponent wikiText3 = new TranslatableComponent("help.tooltip.info.wiki.3");
+        MutableComponent wikiLinkHover = new TranslatableComponent("help.tooltip.info.wiki.link.hover");
+        MutableComponent wikiLink = new TranslatableComponent("help.tooltip.info.wiki.link.text");
+        MutableComponent wikiCopyToClipboardLink = buildExecuteCmdComponent(wikiLink, wikiLinkHover, "", ClickEvent.Action.OPEN_URL, AQUA);
+        wikiText1.append("\n")
+                .append(wikiText2)
+                .append("\n")
+                .append(wikiText3)
+                .append(": ")
+                .append(wikiCopyToClipboardLink);
+        MessageUtil.sendCmdFeedback(src, wikiText1);
         return 0;
     }
 }

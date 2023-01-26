@@ -19,11 +19,9 @@ import de.z0rdak.yawp.util.StickUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -48,9 +46,7 @@ public final class MarkerCommands {
     private static LiteralArgumentBuilder<CommandSourceStack> register() {
         return literal(MARKER)
                 .then(literal(GIVE)
-                        .executes(ctx -> giveMarkerStick(ctx.getSource(), null))
-                        .then(Commands.argument(PLAYER.toString(), EntityArgument.player())
-                                .executes(ctx -> giveMarkerStick(ctx.getSource(), getPlayerArgument(ctx)))))
+                        .executes(ctx -> giveMarkerStick(ctx.getSource())))
                 .then(literal(RESET)
                         .executes(ctx -> resetStick(ctx.getSource())))
                 .then(literal(CREATE)
@@ -166,18 +162,9 @@ public final class MarkerCommands {
         }
     }
 
-    private static int setParent(CommandSourceStack src, IMarkableRegion parent) {
-        return -1;
-    }
-
-    public static int giveMarkerStick(CommandSourceStack src, ServerPlayer player) {
+    public static int giveMarkerStick(CommandSourceStack src) {
         try {
-            Player targetPlayer;
-            if (player != null) {
-                targetPlayer = player;
-            } else {
-                targetPlayer = src.getPlayerOrException();
-            }
+            Player targetPlayer = src.getPlayerOrException();
             ItemStack markerStick = StickUtil.initMarkerNbt(Items.STICK.getDefaultInstance(), StickType.MARKER, targetPlayer.level.dimension());
             targetPlayer.addItem(markerStick);
             sendCmdFeedback(src, new TranslatableComponent("Added RegionMarker to inventory of player '" + targetPlayer.getScoreboardName() + "'"));

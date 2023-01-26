@@ -27,6 +27,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.TeamArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
@@ -334,10 +335,8 @@ public class DimensionCommands {
             return 1;
         }
         MutableComponent dimInfoLink = buildDimensionalInfoLink(dim);
-        MutableComponent regionsInDimHeader = new TranslatableComponent(BOLD + "== Flags in ")
-                .append(dimInfoLink)
-                .append(" ==");
-        sendCmdFeedback(src, regionsInDimHeader);
+        MutableComponent headerContent = new TranslatableComponent("cli.msg.info.region.flag.header", dimInfoLink);
+        sendCmdFeedback(src, headerContent);
         flags.forEach(flag -> {
             MutableComponent removeFlagLink = new TextComponent(" - ")
                     .append(buildDimensionRemoveFlagLink(flag, dim))
@@ -354,9 +353,7 @@ public class DimensionCommands {
             String playerLangKeyPart = memberOrOwner == OWNER ? "owner" : "member";
             String affiliationText = playerLangKeyPart.substring(0, 1).toUpperCase() + playerLangKeyPart.substring(1) + "s";
             MutableComponent dimInfoLink = buildDimensionalInfoLink(dimRegion.getDim());
-            MutableComponent regionsInDimHeader = new TranslatableComponent(BOLD + "== " + affiliationText + " in ")
-                    .append(dimInfoLink)
-                    .append(" ==");
+            MutableComponent regionsInDimHeader = new TranslatableComponent("cli.msg.info.region.affiliation.player.list", affiliationText, dimInfoLink);
             sendCmdFeedback(src, regionsInDimHeader);
             sendCmdFeedback(src, buildTeamList(dimRegion, memberOrOwner));
             sendCmdFeedback(src, buildPlayerList(dimRegion, memberOrOwner));
@@ -389,9 +386,7 @@ public class DimensionCommands {
                 return -1;
             }
             MutableComponent dimInfoLink = buildDimensionalInfoLink(dim);
-            MutableComponent regionsInDimHeader = new TranslatableComponent(BOLD + "== Regions in ")
-                    .append(dimInfoLink)
-                    .append(" ==");
+            MutableComponent regionsInDimHeader = new TranslatableComponent("cli.msg.dim.info.region.list.header", dimInfoLink);
             sendCmdFeedback(source, regionsInDimHeader);
             // TODO: Pagination for more than x regions
             regionsForDim.forEach(region -> {
@@ -419,7 +414,7 @@ public class DimensionCommands {
                 OWNER);
         MutableComponent players = owners.hasPlayers()
                 ? buildDimPlayerListLink(dimRegion, owners, OWNER)
-                : new TranslatableComponent(owners.getPlayers().size() + " player(s)");
+                : new TranslatableComponent("cli.msg.info.region.affiliation.player.list.link.text", owners.getPlayers().size());
         players.append(playersAddLink);
 
         // [n team(s)] [+]
@@ -427,7 +422,7 @@ public class DimensionCommands {
                 OWNER);
         MutableComponent teams = owners.hasTeams()
                 ? buildDimTeamListLink(dimRegion, owners, OWNER)
-                : new TranslatableComponent(owners.getTeams().size() + " teams(s)");
+                : new TranslatableComponent("cli.msg.info.region.affiliation.team.list.link.text", owners.getTeams().size());
         teams.append(teamAddLink);
 
         // Owners: [n player(s)] [+], [n team(s)] [+]
@@ -465,8 +460,7 @@ public class DimensionCommands {
                 MEMBER);
         MutableComponent players = members.hasPlayers() ?
                 buildDimPlayerListLink(dimRegion, members, MEMBER)
-                // TODO lang-key
-                : new TranslatableComponent(members.getPlayers().size() + " player(s)");
+                : new TranslatableComponent("cli.msg.info.region.affiliation.player.list.link.text", members.getPlayers().size());
         players.append(playersAddLink);
 
         // [n team(s)] [+]
@@ -474,8 +468,7 @@ public class DimensionCommands {
                 MEMBER);
         MutableComponent teams = members.hasTeams()
                 ? buildDimTeamListLink(dimRegion, members, MEMBER)
-                // TODO lang-key
-                : new TranslatableComponent(members.getTeams().size() + " teams(s)");
+                : new TranslatableComponent("cli.msg.info.region.affiliation.team.list.link.text", members.getTeams().size());
         teams.append(teamAddLink);
 
         // Members: [n player(s)] [+], [n team(s)] [+]
@@ -489,8 +482,7 @@ public class DimensionCommands {
     private static void promptDimensionFlags(CommandSourceStack src, DimensionalRegion dimRegion) {
         MutableComponent dimFlagMessage = new TranslatableComponent("cli.msg.dim.info.flags");
         MutableComponent flags = dimRegion.getFlags().isEmpty()
-                // TODO lang-key
-                ? new TextComponent(dimRegion.getFlags().size() + " flags(s)")
+                ? new TranslatableComponent("cli.msg.info.region.flag.link.text", dimRegion.getFlags().size())
                 : buildDimFlagListLink(dimRegion);
         dimFlagMessage.append(new TextComponent(": "))
                 .append(flags)
@@ -512,10 +504,8 @@ public class DimensionCommands {
     private static int promptDimensionInfo(CommandSourceStack src, DimensionRegionCache dimCache) {
         // Dimension info header
         DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-        // TODO: header extraction to build uniform header by providing lang key and args
-        MutableComponent dimInfoHeader = new TextComponent(BOLD + "== Dimension ")
-                .append(buildDimensionalInfoLink(dimRegion.getDim()))
-                .append(new TextComponent(BOLD + " information =="));
+        MutableComponent clipBoardDumpLink = buildExecuteCmdComponent("cli.msg.dim.overview.header.dump.link.text", "cli.msg.dim.overview.header.dump.link.hover", NbtUtils.prettyPrint(dimRegion.serializeNBT()), ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
+        MutableComponent dimInfoHeader = new TranslatableComponent("cli.msg.dim.overview.header", clipBoardDumpLink, buildDimensionalInfoLink(dimRegion.getDim()));
         sendCmdFeedback(src, dimInfoHeader);
 
         // Regions in dimension
