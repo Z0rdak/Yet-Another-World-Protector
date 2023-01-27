@@ -22,11 +22,12 @@ public class CommandRegistry {
     }
 
     public static void init(CommandDispatcher<CommandSourceStack> commandDispatcher) {
-        commandDispatcher.register(register());
+        commandDispatcher.register(buildCommands(CommandPermissionConfig.BASE_CMD));
+        commandDispatcher.register(buildCommands(CommandPermissionConfig.BASE_CMD_ALT));
     }
 
-    public static LiteralArgumentBuilder<CommandSourceStack> register() {
-        return withSubCommands(Commands.literal(CommandPermissionConfig.BASE_CMD));
+    public static LiteralArgumentBuilder<CommandSourceStack> buildCommands(String baseCmd) {
+        return withSubCommands(Commands.literal(baseCmd));
     }
 
     private static LiteralArgumentBuilder<CommandSourceStack> withSubCommands(LiteralArgumentBuilder<CommandSourceStack> baseCommand) {

@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.config.server;
 
+import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import net.minecraftforge.common.ForgeConfigSpec;
 
@@ -9,6 +10,7 @@ import java.util.stream.Collectors;
 public class RegionConfig {
 
     public static final ForgeConfigSpec CONFIG_SPEC;
+    public static final String CONFIG_NAME = YetAnotherWorldProtector.MODID + "-region-defaults.toml";
     public static final ForgeConfigSpec.ConfigValue<Integer> REGION_DEFAULT_PRIORITY_INC;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> REGION_DEFAULT_FLAGS;
     public static final ForgeConfigSpec.ConfigValue<Boolean> DIM_REGION_DISABLE_ON_CREATION;
