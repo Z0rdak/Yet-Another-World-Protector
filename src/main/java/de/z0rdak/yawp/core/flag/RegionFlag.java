@@ -17,7 +17,7 @@ public enum RegionFlag {
     EXPLOSION_CREEPER_ENTITY("creeper-explosion-blocks", FlagType.BOOLEAN_FLAG),
     EXPLOSION_OTHER_BLOCKS("other-explosion-entities", FlagType.BOOLEAN_FLAG),
     EXPLOSION_OTHER_ENTITY("other-explosion-blocks", FlagType.BOOLEAN_FLAG),
-    FIRE_SPREAD("fire-spread", FlagType.BOOLEAN_FLAG),
+    //FIRE_SPREAD("fire-spread", FlagType.BOOLEAN_FLAG),
     IGNITE_EXPLOSIVES("ignite-explosives", FlagType.BOOLEAN_FLAG),
     TOOL_SECONDARY_USE("tools-secondary", FlagType.BOOLEAN_FLAG),
     AXE_STRIP("strip-wood", FlagType.BOOLEAN_FLAG),
