@@ -23,31 +23,22 @@ public class CommandRegistry {
     }
 
     public static void init(CommandDispatcher<CommandSource> commandDispatcher) {
-        commandDispatcher.register(register());
+        commandDispatcher.register(buildCommands(CommandPermissionConfig.BASE_CMD));
+        commandDispatcher.register(buildCommands(CommandPermissionConfig.BASE_CMD_ALT));
     }
 
-    public static LiteralArgumentBuilder<CommandSource> register() {
-        return withSubCommands(Commands.literal(CommandPermissionConfig.BASE_CMD));
+    public static LiteralArgumentBuilder<CommandSource> buildCommands(String baseCmd) {
+        return withSubCommands(Commands.literal(baseCmd));
     }
 
     private static LiteralArgumentBuilder<CommandSource> withSubCommands(LiteralArgumentBuilder<CommandSource> baseCommand) {
         return baseCommand
-                //.requires(CommandPermissionConfig::hasPermission)
                 .executes(ctx -> promptHelp(ctx.getSource()))
                 .then(CommandUtil.literal(CommandConstants.HELP)
                         .executes(ctx -> promptHelp(ctx.getSource())))
-                //.then(literal(CommandConstants.SELECT)
-                //        .then(Commands.argument(CommandConstants.DIMENSION.toString(), DimensionArgument.dimension())
-                //                .executes(ctx -> DimensionCommands.selectReferenceDim(ctx.getSource(), getDimRegionArgument(ctx)))))
                 .then(DimensionCommands.DIMENSION_COMMAND)
                 .then(MarkerCommands.MARKER_COMMAND)
-                .then(RegionCommands.REGION_COMMAND)
-                //.then(FlagCommands.FLAG_COMMAND)
-                //.then(RegionCommands.REGIONS_COMMAND)
-                //.then(DimensionFlagCommands.DIMENSION_FLAGS_COMMAND);
-                //.then(CommandExpand.EXPAND_COMMAND)
-                //.then(CommandPlayer.PLAYER_COMMAND);
-        ;
+                .then(RegionCommands.REGION_COMMAND);
     }
 
     private static int promptHelp(CommandSource src) {

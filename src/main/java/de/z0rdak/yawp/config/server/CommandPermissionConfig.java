@@ -19,23 +19,17 @@ public class CommandPermissionConfig {
 
     // TODO: Dedicated permission to teleport to region
     public static final ForgeConfigSpec.ConfigValue<Boolean> ALLOW_READ_ONLY_CMDS;
-
-    public static final ForgeConfigSpec.ConfigValue<Integer> WP_COMMAND_ALTERNATIVE;
     public static final ForgeConfigSpec.ConfigValue<Integer> REQUIRED_OP_LEVEL;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> PLAYERS_WITH_PERMISSION;
     public static final ForgeConfigSpec.ConfigValue<Boolean> COMMAND_BLOCK_EXECUTION;
 
-    public static String BASE_CMD;
-    public static final String[] WP_CMDS = new String[]{"wp", "w-p", "yawp"};
+    public static String BASE_CMD = "wp";
+    public static String BASE_CMD_ALT = "yawp";
 
     static {
         final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
         BUILDER.push("YetAnotherWorldProtector mod server configuration").build();
-
-        WP_COMMAND_ALTERNATIVE = BUILDER.comment("Default command alternative used in quick commands in chat.\nThis is only important if another mod uses the /wp command (like Journey Map). Defaults to 0.\n" +
-                        " 0 -> /wp\n 1 -> /w-p\n 2 -> /yawp")
-                .defineInRange("wp_command_alt", 0, 0, 2);
 
         COMMAND_BLOCK_EXECUTION = BUILDER.comment("Permission for command blocks to execute mod commands")
                 .define("command_block_execution", true);
@@ -71,12 +65,6 @@ public class CommandPermissionConfig {
                 });
         BUILDER.pop();
         CONFIG_SPEC = BUILDER.build();
-        BASE_CMD = WP_CMDS[WP_COMMAND_ALTERNATIVE.get()];
-        YetAnotherWorldProtector.LOGGER.info("Setting base command to '/" + BASE_CMD + "'");
-    }
-
-    public static void setBaseCmd(){
-        BASE_CMD = WP_CMDS[WP_COMMAND_ALTERNATIVE.get()];
     }
 
     private static boolean containsBadLength(List<String> tokens, int size) {
@@ -94,7 +82,6 @@ public class CommandPermissionConfig {
                 .map(s -> (String)s)
                 .collect(Collectors.toSet());
     }
-
 
     public static boolean hasPermission(CommandSource source) {
         try {
