@@ -236,7 +236,7 @@ public final class PlayerFlagHandler {
                     PlayerEntity playerTarget = (PlayerEntity) hurtEntity;
                     FlagCheckEvent invincibleFlagCheckEvent = checkTargetEvent(playerTarget.blockPosition(), INVINCIBLE, dimCache.getDimensionalRegion());
                     if (invincibleFlagCheckEvent.isDenied()) {
-                        event.setCanceled(false);
+                        event.setCanceled(true);
                     }
                 }
             }
@@ -276,7 +276,7 @@ public final class PlayerFlagHandler {
                     PlayerEntity dmgTarget = (PlayerEntity) event.getEntityLiving();
                     FlagCheckEvent flagCheckEvent = checkTargetEvent(dmgTarget.blockPosition(), KNOCKBACK_PLAYERS, dimCache.getDimensionalRegion());
                     if (flagCheckEvent.isDenied()) {
-                        event.setCanceled(false);
+                        event.setCanceled(true);
                     }
                 }
             }
