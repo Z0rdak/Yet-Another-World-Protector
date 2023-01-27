@@ -1,3 +1,17 @@
+# 0.0.1.2-beta4 - I18n and flag fixes
+## Additions
+* Add link to Local and Dimensional Region info header to copy region NBT data to clipboard for more easy troubleshooting
+* Added several new lang keys to cover the whole interactive CLI
+* Added russian translation
+* Add `no-pvp` flag. Opposite to the `melee-players` flag, this flag should cover all pvp dmg
+* Explosion related flags now work in Local Regions
+## Changes
+* updated english and german translations
+* remove default flags for new dimensional and new local regions from the config
+* `/wp marker give` only works for the executor of the command (if it is a player)
+* Remove non-functional `w_command_alt` config. `/yawp` is not a default alternative for `/wp`
+## Fixes
+* Fix `invincible` flag not working properly
 # 0.0.1.1-beta4
 ## Fixes
 * Fix `spawning-villager` flag working for wandering traders
