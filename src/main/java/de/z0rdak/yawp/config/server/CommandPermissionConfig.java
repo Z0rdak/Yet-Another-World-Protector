@@ -23,7 +23,7 @@ public class CommandPermissionConfig {
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> PLAYERS_WITH_PERMISSION;
     public static final ForgeConfigSpec.ConfigValue<Boolean> COMMAND_BLOCK_EXECUTION;
 
-    public static String BASE_CMD;
+    public static String BASE_CMD = "wp";
     public static String BASE_CMD_ALT = "yawp";
 
     static {
