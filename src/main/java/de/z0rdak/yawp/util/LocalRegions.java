@@ -77,6 +77,7 @@ public final class LocalRegions {
                 .collect(Collectors.toList());
     }
 
+    // TODO: Start from dimRegion with only the parents, so possible regions to check are far less
     public static List<IMarkableRegion> getInvolvedRegionsFor(RegionFlag flag, BlockPos position, Player player, ResourceKey<Level> dim) {
         return RegionDataManager.get().getRegionsFor(dim).stream()
                 .filter(IMarkableRegion::isActive)
