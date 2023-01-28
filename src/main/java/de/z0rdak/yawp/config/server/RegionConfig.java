@@ -4,7 +4,10 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import net.minecraftforge.common.ForgeConfigSpec;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class RegionConfig {
@@ -26,10 +29,10 @@ public class RegionConfig {
                 .defineInRange("default_region_priority", 10, 0, Integer.MAX_VALUE);
 
         REGION_DEFAULT_FLAGS = BUILDER.comment("Default flags for new local regions.")
-                .defineList("default_flags", new ArrayList<>(Arrays.asList("break_blocks", "place_blocks")), RegionConfig::isValidFlag);
+                .defineList("default_flags", new ArrayList<>(), RegionConfig::isValidFlag);
 
         DIM_REGION_DEFAULT_FLAGS = BUILDER.comment("Default flags for new dimensional regions.")
-                .defineList("dim_default_flags", new ArrayList<>(Arrays.asList("break_blocks", "place_blocks")), RegionConfig::isValidFlag);
+                .defineList("dim_default_flags", new ArrayList<>(), RegionConfig::isValidFlag);
 
         REGION_DEFAULT_PRIORITY_INC = BUILDER.comment("Default region priority increment/decrement.")
                 .defineInRange("default_region_priority_inc", 5, 1, 1000);
