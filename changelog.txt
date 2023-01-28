@@ -7,7 +7,7 @@
 * Explosion related flags now work in Local Regions
 ## Changes
 * updated english and german translations
-* remove default flags for new dimensional and new local regions from the config
+* cleared `break_blocks` and `place_blocks` from the default flags list for new dimensional and new local regions
 * `/wp marker give` only works for the executor of the command (if it is a player)
 * Remove non-functional `w_command_alt` config. `/yawp` is not a default alternative for `/wp`
 ## Fixes
