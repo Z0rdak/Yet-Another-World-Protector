@@ -520,7 +520,7 @@ public class DimensionCommands {
         promptDimensionFlags(src, dimRegion);
 
         // State: [activated]
-        String command = "/" + CommandPermissionConfig.BASE_CMD + " " + DIMENSION + " " + dimRegion.getName() + " " + ENABLE + " " + !dimRegion.isActive();
+        String command = "/" + CommandPermissionConfig.WP + " " + DIMENSION + " " + dimRegion.getName() + " " + ENABLE + " " + !dimRegion.isActive();
         promptDimensionState(src, dimRegion, command);
         return 0;
     }
