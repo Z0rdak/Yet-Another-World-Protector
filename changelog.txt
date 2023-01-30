@@ -1,0 +1,68 @@
+# 0.0.1.2-beta4 - I18n and flag fixes
+## Additions
+* Add link to Local and Dimensional Region info header to copy region NBT data to clipboard for more easy troubleshooting
+* Added several new lang keys to cover the whole interactive CLI
+* Added russian translation
+* Add `no-pvp` flag. Opposite to the `melee-players` flag, this flag should cover all pvp dmg
+* Explosion related flags now work in Local Regions
+## Changes
+* updated english and german translations
+* cleared `break_blocks` and `place_blocks` from the default flags list for new dimensional and new local regions
+* `/wp marker give` only works for the executor of the command (if it is a player)
+* Remove non-functional `w_command_alt` config. `/yawp` is not a default alternative for `/wp`
+## Fixes
+* Fix `invincible` flag not working properly
+# 0.0.1.1-beta4
+## Fixes
+* Fix `spawning-villager` flag working for wandering traders
+# 0.0.1.0-beta4 - Local Region overhaul
+This update brings the first iteration of working Local Regions. Due to some drastic changes in saving and loading region data, older regions are not supported - sorry!
+Rest assured, once the mod goes from beta to release, these kinds of changes regarding will be kept to a minimum to ensure backwards compatibility.
+## Additions
+* Local Region flags are now implemented! Please visit the wiki for a full list of flags and for more information about how the Region hierarchy works.
+* Add RegionMarker stick. Use it to mark an area for a new region and then either use the CLI to create the region or rename the stick in an anvil.
+* Add sub-command to give a player a RegionMarker: `/wp marker give [<player>]`.
+* Add sub-command to reset the state of a RegionMarker the player is holding: `/wp marker reset`.
+* Add flag for knock-back protection against players.
+To learn more about the priorities for overlapping regions and region hierarchy please visit the wiki.
+* Add flag `spawning-slime`, `spawning-villager`, `spawning-trader`, `drop-loot-player`. Visit the wiki for detailed information about the flags.
+## Changes
+* Spherical Regions are for now disabled. They will come back later with other shapes.
+* When removing a child region from a Local Region, its new parent will be the Dimensional Region and the child will be disabled.
+* The flag command `/wp flag ...` is disabled for now. It has currently no real functionality and will come back in the next update.
+* Deleting regions no longer works for regions with children. There will be a config option in a future update to enable this, though.
+* Rename `attack-*` flags to `melee-*`. They only protect against melee attacks, hence the change.
+* Disable explosion related flags. They will come back in the next update.
+## Fixes
+* Various CLI interface fixes regarding visualization and usability
+# 0.0.1.0-beta3 - Minor fixes
+## Additions
+* Implemented missing command for removing regions
+* Add temporary hint explaining not working local region flags and region hierarchy
+* Add config option to set default de/activate state for dimensional regions upon creation
+## Fixes
+* Fix dimensional flags not loading correctly causing them to not work in 1.18 and 1.19.
+* Fix new dimensional region created by argument not containing default flags from config.
+* Fix dimensional region info not showing local region info properly
+# 0.0.1.0-beta2 - Local region preview
+## Additions
+* Add first beta implementation of local regions.
+They come with two different area types: Cuboid and Sphere. More types will come soon!
+NOTE: The flag checks for local regions are still missing, but you are still able to set up your regions.
+They will be valid and working as soon as the checks are implemented in the next version.
+* Add CLI to manage local regions. You are able to manage all properties of local regions with commands and with the interactive CLI.
+For a comprehensive command overview take a look at the wiki.
+* Add new config `allow_info_cmds` to enable the usage of informative region commands for all players.
+* Add new config `dim_default_flags`, replacing `default_flags` for default flags for new dimensional regions.
+## Changes
+* Command to de-/activate dimensional regions changed from `activate` to `enable`.
+* Config option `default_flags` is now used to define default flags for local regions.
+## Fixes
+* Some minor bug and typo fixes
+# 0.0.1.0-beta1 - First beta release
+This is the first beta release of this mod. Please be so kind and report any bugs you encounter on the GitHub issue page: https://github.com/Z0rdak/Yet-Another-World-Protector/issues.
+If you have suggestions, feel free to post them, too.
+* Add online wiki as a guide on how to use the mod: https://github.com/Z0rdak/Yet-Another-World-Protector/wiki
+* Add dimensional regions
+* Add configuration for default region flags, CLI permission,
+* Add many flags to protect your server (visit the wiki for more info)
