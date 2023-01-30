@@ -20,8 +20,8 @@ public class CommandPermissionConfig {
     public static final ForgeConfigSpec.ConfigValue<Integer> REQUIRED_OP_LEVEL;
     public static final ForgeConfigSpec.ConfigValue<Boolean> COMMAND_BLOCK_EXECUTION;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> PLAYERS_WITH_PERMISSION;
-    public static String BASE_CMD = "wp";
-    public static String BASE_CMD_ALT = "yawp";
+    public static String WP = "wp";
+    public static String YAWP = "yawp";
     private static MinecraftServer serverInstance;
 
     static {

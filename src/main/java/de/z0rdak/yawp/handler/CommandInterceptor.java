@@ -6,7 +6,6 @@ import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -24,6 +23,7 @@ import net.minecraft.world.World;
 import java.util.List;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
+import static de.z0rdak.yawp.config.server.CommandPermissionConfig.*;
 
 public class CommandInterceptor {
 
@@ -37,7 +37,7 @@ public class CommandInterceptor {
         List<ParsedCommandNode<ServerCommandSource>> cmdNodes = cmdContext.getNodes();
         if (cmdNodes.size() > 2) {
             String baseCmd = cmdNodes.get(0).getNode().getName();
-            if (baseCmd.equals(CommandPermissionConfig.BASE_CMD)) {
+            if (baseCmd.equals(WP) || baseCmd.equals(YAWP)) {
                 YetAnotherWorldProtector.LOGGER.debug("Executed command: '" + parseResults.getReader().getString() + "' by '" + src.getName() + "'.");
                 String subCmd = cmdNodes.get(1).getNode().getName();
                 switch (subCmd) {
@@ -94,7 +94,7 @@ public class CommandInterceptor {
         }
         // /wp region <dim> <region> state
         if (cmdNodes.size() == 5 && nodeNames.get(4).equals(STATE.toString())) {
-            return CommandPermissionConfig.AllowInfoCmds() ? 0 : 1;
+            return AllowInfoCmds() ? 0 : 1;
         }
 
         // check permission for other commands
@@ -110,7 +110,7 @@ public class CommandInterceptor {
                         try {
                             if (src.getEntity() instanceof PlayerEntity) {
                                 ServerPlayerEntity player = src.getPlayerOrThrow();
-                                boolean hasConfigPermission = CommandPermissionConfig.hasPlayerPermission(player);
+                                boolean hasConfigPermission = hasPlayerPermission(player);
                                 if (!region.getOwners().containsPlayer(player.getUuid()) && !hasConfigPermission) {
                                     YetAnotherWorldProtector.LOGGER.info("PlayerEntity not allowed to manage dim");
                                     MessageUtil.sendCmdFeedback(src, MutableText.of(new LiteralTextContent("You are not allowed to manage this region!")));
@@ -121,7 +121,7 @@ public class CommandInterceptor {
                             YetAnotherWorldProtector.LOGGER.error(e);
                         }
                     } else {
-                        if (!CommandPermissionConfig.hasPermission(src)) {
+                        if (!hasPermission(src)) {
                             YetAnotherWorldProtector.LOGGER.info("' " + src.getName() + "' is not allowed to manage region: '" + region.getName() + "' in dim '" + region.getDim().getValue() + "'!");
                             MessageUtil.sendCmdFeedback(src, MutableText.of(new LiteralTextContent("You are not allowed to manage region: '" + region.getName() + "' in dim '" + region.getDim().getValue() + "'!")));
                             return 1;
@@ -144,7 +144,7 @@ public class CommandInterceptor {
 
         if (nodeNames.contains(INFO.toString())
                 || nodeNames.contains(LIST.toString())) {
-            return CommandPermissionConfig.AllowInfoCmds() ? 0 : 1;
+            return AllowInfoCmds() ? 0 : 1;
         }
         // check permission for other commands
         ParsedArgument<ServerCommandSource, ?> dimParsedArgument = cmdContext.getArguments().get(DIMENSION.toString());
@@ -156,7 +156,7 @@ public class CommandInterceptor {
                     try {
                         if (src.getEntity() instanceof PlayerEntity) {
                             ServerPlayerEntity player = src.getPlayerOrThrow();
-                            boolean hasConfigPermission = CommandPermissionConfig.hasPlayerPermission(player);
+                            boolean hasConfigPermission = hasPlayerPermission(player);
                             if (!dimCache.hasOwner(player) && !hasConfigPermission) {
                                 YetAnotherWorldProtector.LOGGER.info("PlayerEntity not allowed to manage dim");
                                 MessageUtil.sendCmdFeedback(src, MutableText.of(new LiteralTextContent("You are not allowed to manage this dimensional region!")));
@@ -167,7 +167,7 @@ public class CommandInterceptor {
                         YetAnotherWorldProtector.LOGGER.error(e);
                     }
                 } else {
-                    if (!CommandPermissionConfig.hasPermission(src)) {
+                    if (!hasPermission(src)) {
                         YetAnotherWorldProtector.LOGGER.info("' " + src.getName() + "' is not allowed to manage dim");
                         MessageUtil.sendCmdFeedback(src, MutableText.of(new LiteralTextContent("You are not allowed to manage this dimensional region!")));
                         return 1;
