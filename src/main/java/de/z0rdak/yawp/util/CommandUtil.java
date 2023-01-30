@@ -97,7 +97,7 @@ public class CommandUtil {
     }
 
     public static String buildCommandStr(String... cmdTokens) {
-        String preamble = "/" + CommandPermissionConfig.BASE_CMD;
+        String preamble = "/" + CommandPermissionConfig.WP;
         String cmdStr = String.join(" ", cmdTokens);
         return preamble + " " + cmdStr;
     }

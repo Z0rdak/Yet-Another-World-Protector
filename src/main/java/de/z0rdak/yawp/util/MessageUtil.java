@@ -141,7 +141,7 @@ public class MessageUtil {
     }
 
     public static MutableComponent buildHelpSuggestionLink(String translationKey, CommandConstants baseCmd, CommandConstants cmd) {
-        String command = "/" + CommandPermissionConfig.BASE_CMD + " " + baseCmd + " " + cmd + " ";
+        String command = "/" + CommandPermissionConfig.WP + " " + baseCmd + " " + cmd + " ";
         return Component.literal(" ")
                 .append(buildExecuteCmdComponent("=>", "chat.link.hover.command.copy", command, SUGGEST_COMMAND, GREEN))
                 .append(Component.literal(" "))
@@ -157,7 +157,7 @@ public class MessageUtil {
     }
 
     public static String buildDimAddCmdStr(String region) {
-        return "/" + CommandPermissionConfig.BASE_CMD + " " + DIMENSION + " " + region + " " + ADD;
+        return "/" + CommandPermissionConfig.WP + " " + DIMENSION + " " + region + " " + ADD;
     }
 
     public static String buildRegionCmdStr(IMarkableRegion region, CommandConstants constant) {
@@ -212,7 +212,7 @@ public class MessageUtil {
     }
 
     public static MutableComponent buildDimensionalInfoLink(ResourceKey<Level> dim) {
-        String command = "/" + CommandPermissionConfig.BASE_CMD + " " + DIMENSION + " " + dim.location() + " " + INFO;
+        String command = "/" + CommandPermissionConfig.WP + " " + DIMENSION + " " + dim.location() + " " + INFO;
         String hoverText = "cli.msg.dim.info";
         return buildExecuteCmdComponent(dim.location().toString(), hoverText, command, RUN_COMMAND, GREEN);
     }
@@ -470,21 +470,21 @@ public class MessageUtil {
     }
 
     public static MutableComponent buildDimPlayerListLink(DimensionalRegion dimRegion, PlayerContainer players, CommandConstants memberOrOwner) {
-        String command = "/" + CommandPermissionConfig.BASE_CMD + " " + DIMENSION + " " + dimRegion.getName() + " " + LIST + " " + memberOrOwner;
+        String command = "/" + CommandPermissionConfig.WP + " " + DIMENSION + " " + dimRegion.getName() + " " + LIST + " " + memberOrOwner;
         MutableComponent hoverText = Component.translatable("cli.msg.info.region.affiliation.player.list.link.hover", memberOrOwner.toString(), dimRegion.getName());
         MutableComponent linkText = Component.translatable("cli.msg.info.region.affiliation.player.list.link.text", players.getPlayers().size());
         return buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, AQUA);
     }
 
     public static MutableComponent buildDimTeamListLink(DimensionalRegion dimRegion, PlayerContainer teams, CommandConstants memberOrOwner) {
-        String command = "/" + CommandPermissionConfig.BASE_CMD + " " + DIMENSION + " " + dimRegion.getName() + " " + LIST + " " + memberOrOwner;
+        String command = "/" + CommandPermissionConfig.WP + " " + DIMENSION + " " + dimRegion.getName() + " " + LIST + " " + memberOrOwner;
         MutableComponent hoverText = Component.translatable("cli.msg.info.region.affiliation.team.list.link.hover", memberOrOwner.toString(), dimRegion.getName());
         MutableComponent linkText = Component.translatable("cli.msg.info.region.affiliation.team.list.link.text", teams.getTeams().size());
         return buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, AQUA);
     }
 
     public static MutableComponent buildDimRegionListLink(DimensionRegionCache dimCache, DimensionalRegion dimRegion) {
-        String command = "/" + CommandPermissionConfig.BASE_CMD + " " + DIMENSION + " " + dimRegion.getName() + " " + LIST + " " + REGION;
+        String command = "/" + CommandPermissionConfig.WP + " " + DIMENSION + " " + dimRegion.getName() + " " + LIST + " " + REGION;
         MutableComponent hoverText = Component.translatable("cli.msg.dim.info.region.list.link.hover", dimRegion.getName());
         MutableComponent linkText = Component.translatable("cli.msg.dim.info.region.list.link.text", dimCache.getRegions().size());
         return buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, AQUA);
@@ -575,7 +575,7 @@ public class MessageUtil {
     }
 
     public static MutableComponent buildDimensionRemoveFlagLink(IFlag flag, ResourceKey<Level> dim) {
-        String command = "/" + CommandPermissionConfig.BASE_CMD + " " + DIMENSION + " " + dim.location() + " " + REMOVE + " " + FLAG + " " + flag.getFlagIdentifier();
+        String command = "/" + CommandPermissionConfig.WP + " " + DIMENSION + " " + dim.location() + " " + REMOVE + " " + FLAG + " " + flag.getFlagIdentifier();
         MutableComponent hoverText = Component.translatable("cli.msg.dim.info.flag.remove.link.hover", flag.getFlagIdentifier(), dim.location().toString());
         MutableComponent linkText = Component.translatable("cli.msg.dim.info.flag.remove.link.text");
         return buildExecuteCmdComponent(linkText, hoverText, command, SUGGEST_COMMAND, RED);
