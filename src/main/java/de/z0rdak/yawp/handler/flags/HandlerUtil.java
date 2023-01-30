@@ -34,6 +34,10 @@ public final class HandlerUtil {
         return !entity.getWorld().isClient;
     }
 
+    public static boolean isServerSide(World world) {
+        return !world.isClient;
+    }
+
     public static boolean isVillager(Entity entity) {
         return entity instanceof MerchantEntity;
     }

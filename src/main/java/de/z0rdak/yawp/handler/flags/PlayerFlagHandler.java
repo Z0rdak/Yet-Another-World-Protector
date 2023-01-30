@@ -1,26 +1,93 @@
 package de.z0rdak.yawp.handler.flags;
 
+import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
+import de.z0rdak.yawp.managers.data.region.RegionDataManager;
+import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+
+import static de.z0rdak.yawp.core.flag.RegionFlag.BREAK_BLOCKS;
+import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
+
 /**
  * Contains flag handler for events directly related/cause to/by players.
  */
 public final class PlayerFlagHandler {
 
-    private PlayerFlagHandler() {
-    }
+ private PlayerFlagHandler() {
+ }
 
-    public static void registerEventHandler() {
+ public static void registerEventHandler() {
+  PlayerBlockBreakEvents.BEFORE.register(PlayerFlagHandler::onBreakBlock);
+  EntitySleepEvents.ALLOW_SLEEPING.register(PlayerFlagHandler::onAllowSleeping); // ALLOW_BED
+  // ALLOW_SLEEP_TIME
+  // ALLOW_RESETTING_TIME
+  EntitySleepEvents.ALLOW_NEARBY_MONSTERS.register(PlayerFlagHandler::onSleepingWithStrangers);
+  EntitySleepEvents.ALLOW_SETTING_SPAWN.register(PlayerFlagHandler::onSettingSpawn);
 
 
-    }
+  ServerLivingEntityEvents.ALLOW_DAMAGE.register(PlayerFlagHandler::onReceiveDmg);
+  ServerLivingEntityEvents.ALLOW_DEATH.register(PlayerFlagHandler::onDeathblow);
+  ServerLivingEntityEvents.AFTER_DEATH.register(PlayerFlagHandler::onDeath);
 
-    /**
-     * Prevents traditional attacks from players which use EntityPlayer.attackTargetEntityWithCurrentItem(Entity).
+  // ServerEntityEvents.EQUIPMENT_CHANGE
 
-     public static void onAttackPlayer(AttackEntityEvent event) {
-     if (isServerSide(event)) {
-     if (event.getTarget() instanceof PlayerEntity target) {
-     PlayerEntity attacker = event.getPlayer();
-     RegistryKey<World> entityDim = getEntityDim(attacker);
+ }
+
+ private static void onDeath(LivingEntity entity, DamageSource damageSource) {
+
+ }
+
+ private static boolean onDeathblow(LivingEntity entity, DamageSource damageSource, float v) {
+  return false;
+ }
+
+ private static boolean onReceiveDmg(LivingEntity entity, DamageSource dmgSource, float amount) {
+  return false;
+ }
+
+ private static ActionResult onSleepingWithStrangers(PlayerEntity player, BlockPos blockPos, boolean vanillaResult) {
+  return null;
+ }
+
+ private static boolean onSettingSpawn(PlayerEntity player, BlockPos blockPos) {
+  return false;
+ }
+
+ private static PlayerEntity.SleepFailureReason onAllowSleeping(PlayerEntity player, BlockPos blockPos) {
+  return null;
+ }
+
+ private static boolean onBreakBlock(World world, PlayerEntity player, BlockPos blockPos, BlockState blockState, BlockEntity blockEntity) {
+  if (isServerSide(world)) {
+   DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.getRegistryKey());
+   if (dimCache != null) {
+    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, blockPos, BREAK_BLOCKS, dimCache.getDimensionalRegion());
+    handleAndSendMsg(flagCheckEvent);
+    return !flagCheckEvent.isDenied();
+   } else {
+    return true;
+   }
+  }
+  return true;
+ }
+
+ /**
+  * Prevents traditional attacks from players which use EntityPlayer.attackTargetEntityWithCurrentItem(Entity).
+
+  public static void onAttackPlayer(AttackEntityEvent event) {
+  if (isServerSide(event)) {
+  if (event.getTarget() instanceof PlayerEntity target) {
+  PlayerEntity attacker = event.getPlayer();
+  RegistryKey<World> entityDim = getEntityDim(attacker);
      DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(entityDim);
      if (dimCache != null) {
      FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(attacker, target.getBlockPos(), MELEE_PLAYERS, dimCache.getDimensionalRegion());
@@ -215,17 +282,6 @@ public final class PlayerFlagHandler {
      event.setCanceled(true);
      }
      }
-     }
-     }
-     }
-
-     public static void onPlayerBreakBlock(BlockEvent.BreakEvent event) {
-     if (isServerSide(event)) {
-     PlayerEntity player = event.getPlayer();
-     DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
-     if (dimCache != null) {
-     FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getPos(), BREAK_BLOCKS, dimCache.getDimensionalRegion());
-     handleAndSendMsg(event, flagCheckEvent);
      }
      }
      }
