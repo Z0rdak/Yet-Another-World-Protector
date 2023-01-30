@@ -23,8 +23,8 @@ public class CommandRegistry {
     }
 
     public static void init(CommandDispatcher<CommandSource> commandDispatcher) {
-        commandDispatcher.register(buildCommands(CommandPermissionConfig.BASE_CMD));
-        commandDispatcher.register(buildCommands(CommandPermissionConfig.BASE_CMD_ALT));
+        commandDispatcher.register(buildCommands(CommandPermissionConfig.WP));
+        commandDispatcher.register(buildCommands(CommandPermissionConfig.YAWP));
     }
 
     public static LiteralArgumentBuilder<CommandSource> buildCommands(String baseCmd) {
@@ -44,7 +44,7 @@ public class CommandRegistry {
     private static int promptHelp(CommandSource src) {
         MessageUtil.sendCmdFeedback(src, buildHelpHeader("cli.msg.help.header"));
         String command = CommandUtil.buildCommandStr(CommandConstants.DIMENSION.toString());
-        IFormattableTextComponent cmdStr = new TranslationTextComponent("cli.msg.help.1", CommandPermissionConfig.BASE_CMD);
+        IFormattableTextComponent cmdStr = new TranslationTextComponent("cli.msg.help.1", CommandPermissionConfig.WP);
         MessageUtil.sendCmdFeedback(src, buildExecuteCmdComponent(
                 new StringTextComponent("=> "),
                 new TranslationTextComponent("help.tooltip.dim"),

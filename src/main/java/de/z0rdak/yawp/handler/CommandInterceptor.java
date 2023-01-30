@@ -27,6 +27,8 @@ import net.minecraftforge.fml.common.Mod;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static de.z0rdak.yawp.config.server.CommandPermissionConfig.WP;
+import static de.z0rdak.yawp.config.server.CommandPermissionConfig.YAWP;
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 
 @Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER, bus = FORGE)
@@ -45,7 +47,7 @@ public class CommandInterceptor {
         List<ParsedCommandNode<CommandSource>> cmdNodes = cmdContext.getNodes();
         if (cmdNodes.size() > 2) {
             String baseCmd = cmdNodes.get(0).getNode().getName();
-            if (baseCmd.equals(CommandPermissionConfig.BASE_CMD)) {
+            if (baseCmd.equals(WP) || baseCmd.equals(YAWP)) {
                 YetAnotherWorldProtector.LOGGER.debug("Executed command: '" + event.getParseResults().getReader().getString() + "' by '" + src.getTextName() + "'.");
                 String subCmd = cmdNodes.get(1).getNode().getName();
                 switch (subCmd) {
