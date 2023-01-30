@@ -92,7 +92,7 @@ public final class MarkerCommands {
                                 if (AbstractMarkableRegion.fullyContains(parentRegion.getArea(), region.getArea())) {
                                     dimCache.addRegion(region);
                                     parentRegion.addChild(region);
-                                    LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, /*RegionConfig.DEFAULT_REGION_PRIORITY.get()*/ 10);
+                                    LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.DEFAULT_REGION_PRIORITY.get());
                                     RegionDataManager.save();
                                     sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region))));
                                     return 0;
@@ -107,7 +107,7 @@ public final class MarkerCommands {
                         } else {
                             if (dimCache.hasOwner(player) || hasConfigPermission) {
                                 dimCache.addRegion(region);
-                                LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, /*RegionConfig.DEFAULT_REGION_PRIORITY.get()*/ 10);
+                                LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.DEFAULT_REGION_PRIORITY.get());
                                 RegionDataManager.save();
                                 sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region))));
                                 return 0;

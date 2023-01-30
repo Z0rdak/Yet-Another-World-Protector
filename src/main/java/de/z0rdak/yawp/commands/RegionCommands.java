@@ -11,6 +11,7 @@ import de.z0rdak.yawp.commands.arguments.flag.RegionFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.AddRegionChildArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RemoveRegionChildArgumentType;
+import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.affiliation.PlayerContainer;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.CuboidArea;
@@ -202,7 +203,7 @@ public class RegionCommands {
                 CuboidArea cuboidArea = new CuboidArea(pos1, pos2);
                 CuboidRegion cuboidRegion = (CuboidRegion) region;
                 if (parent instanceof DimensionalRegion) {
-                    int newPriority = LocalRegions.ensureHigherRegionPriorityFor(cuboidRegion, /*RegionConfig.DEFAULT_REGION_PRIORITY.get()*/ 10);
+                    int newPriority = LocalRegions.ensureHigherRegionPriorityFor(cuboidRegion, RegionConfig.DEFAULT_REGION_PRIORITY.get());
                 }
                 if (parent instanceof IMarkableRegion localParentRegion) {
                     CuboidArea parentArea = (CuboidArea) localParentRegion.getArea();
@@ -325,7 +326,7 @@ public class RegionCommands {
             // FIXME: Removing child does not set priority correct with overlapping regions
             dimCache.getDimensionalRegion().addChild(child); // this also removes the child from the local parent
             child.setIsActive(false);
-            LocalRegions.ensureLowerRegionPriorityFor((CuboidRegion) child, /*RegionConfig.DEFAULT_REGION_PRIORITY.get()*/ 10);
+            LocalRegions.ensureLowerRegionPriorityFor((CuboidRegion) child, RegionConfig.DEFAULT_REGION_PRIORITY.get());
             RegionDataManager.save();
             MutableText parentLink = buildRegionInfoLink(parent);
             MutableText notLongerChildLink = buildRegionInfoLink(child);

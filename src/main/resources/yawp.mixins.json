@@ -4,9 +4,11 @@
   "minVersion": "0.8.2",
   "package": "de.z0rdak.yawp.mixin",
   "refmap": "yawp.refmap.json",
-  "mixins": [],
+  "mixins": [
+  ],
   "client": [],
   "server": [
+    "CommandManagerMixin",
     "FireBlockMixin"
   ]
 }

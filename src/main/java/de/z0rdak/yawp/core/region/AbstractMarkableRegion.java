@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.core.region;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
@@ -32,7 +33,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         super(name, dimension, RegionType.LOCAL, owner);
         this.area = area;
         this.areaType = area.getAreaType();
-        this.priority = 10; //RegionConfig.DEFAULT_REGION_PRIORITY.get();
+        this.priority = RegionConfig.DEFAULT_REGION_PRIORITY.get();
         this.children = new HashMap<>();
         if (parent != null) {
             this.setParent(parent);

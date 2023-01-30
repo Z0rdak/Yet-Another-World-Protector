@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
+import static de.z0rdak.yawp.config.server.RegionConfig.REGION_DEFAULT_PRIORITY_INC;
 import static de.z0rdak.yawp.util.CommandUtil.buildCommandStr;
 import static net.minecraft.text.ClickEvent.Action.RUN_COMMAND;
 import static net.minecraft.text.ClickEvent.Action.SUGGEST_COMMAND;
@@ -182,13 +183,13 @@ public class MessageUtil {
     }
 
     public static MutableText buildRegionPriorityComponent(IMarkableRegion region) {
-        String incPriorityCmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().getValue().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), INC.toString(), String.valueOf(/* REGION_DEFAULT_PRIORITY_INC.get() */ 10));
-        MutableText incLinkText = MutableText.of(new TranslatableTextContent("cli.msg.info.region.state.priority.increase.link.text", /* REGION_DEFAULT_PRIORITY_INC.get() */ 10));
-        MutableText incHoverText = MutableText.of(new TranslatableTextContent("cli.msg.info.region.state.priority.increase.link.hover", /* REGION_DEFAULT_PRIORITY_INC.get() */ 10));
+        String incPriorityCmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().getValue().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), INC.toString(), String.valueOf(REGION_DEFAULT_PRIORITY_INC.get()));
+        MutableText incLinkText = MutableText.of(new TranslatableTextContent("cli.msg.info.region.state.priority.increase.link.text", REGION_DEFAULT_PRIORITY_INC.get()));
+        MutableText incHoverText = MutableText.of(new TranslatableTextContent("cli.msg.info.region.state.priority.increase.link.hover", REGION_DEFAULT_PRIORITY_INC.get()));
         MutableText increaseLink = buildExecuteCmdComponent(incLinkText, incHoverText, incPriorityCmd, RUN_COMMAND, GREEN);
-        String decPriorityCmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().getValue().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), DEC.toString(), String.valueOf(/* REGION_DEFAULT_PRIORITY_INC.get() */ 10));
-        MutableText decLinkText = MutableText.of(new TranslatableTextContent("cli.msg.info.region.state.priority.decrease.link.text", /* REGION_DEFAULT_PRIORITY_INC.get() */ 10));
-        MutableText decHoverText = MutableText.of(new TranslatableTextContent("cli.msg.info.region.state.priority.decrease.link.hover",/* REGION_DEFAULT_PRIORITY_INC.get() */ 10));
+        String decPriorityCmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().getValue().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), DEC.toString(), String.valueOf(REGION_DEFAULT_PRIORITY_INC.get()));
+        MutableText decLinkText = MutableText.of(new TranslatableTextContent("cli.msg.info.region.state.priority.decrease.link.text", REGION_DEFAULT_PRIORITY_INC.get()));
+        MutableText decHoverText = MutableText.of(new TranslatableTextContent("cli.msg.info.region.state.priority.decrease.link.hover", REGION_DEFAULT_PRIORITY_INC.get()));
         MutableText decreaseLink = buildExecuteCmdComponent(decLinkText, decHoverText, decPriorityCmd, RUN_COMMAND, RED);
         MutableText priorityValue = MutableText.of(new LiteralTextContent(String.valueOf(region.getPriority())));
         String setPriorityCmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().getValue().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), "");

@@ -180,7 +180,7 @@ public class DimensionCommands {
         }
         RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
         dimCache.addRegion(region);
-        LocalRegions.ensureHigherRegionPriorityFor(region, /*RegionConfig.DEFAULT_REGION_PRIORITY.get()*/ 10);
+        LocalRegions.ensureHigherRegionPriorityFor(region, RegionConfig.DEFAULT_REGION_PRIORITY.get());
         RegionDataManager.save();
         sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region))));
         return 0;
