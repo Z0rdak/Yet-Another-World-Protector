@@ -436,50 +436,38 @@ public final class PlayerFlagHandler {
                 boolean isContainer = targetEntity instanceof LecternTileEntity || isLockableTileEntity;
 
                 // used to allow player to place blocks when shift clicking container or usable bock
-                boolean playerHasNoBlocksToPlaceInHands = player.getItemInHand(Hand.MAIN_HAND).getItem().equals(Items.AIR)
-                        && player.getItemInHand(Hand.OFF_HAND).getItem().equals(Items.AIR);
+                boolean hasEmptyHands = hasEmptyHands(player);
 
                 BlockRayTraceResult pos = event.getHitVec();
                 if (pos != null && pos.getType() == RayTraceResult.Type.BLOCK) {
                     BlockPos bPos = pos.getBlockPos();
-                    boolean isInteractableBlock = isInteractableBlock(event.getWorld().getBlockState(bPos).getBlock());
-                    if (isInteractableBlock) {
-                        if (player.isShiftKeyDown() && playerHasNoBlocksToPlaceInHands || !player.isShiftKeyDown()) {
-                            FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, bPos, USE, dimCache.getDimensionalRegion());
-                            handleAndSendMsg(event, flagCheckEvent);
-                        }
+                    if (player.isShiftKeyDown() && hasEmptyHands || !player.isShiftKeyDown()) {
+                        FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, bPos, USE_BLOCKS, dimCache.getDimensionalRegion());
+                        handleAndSendMsg(event, flagCheckEvent);
                     }
                 }
+                if (!hasEmptyHands) {
+                    FlagCheckEvent.PlayerFlagEvent useItemCheck = checkPlayerEvent(player, event.getPos(), USE_ITEMS, dimCache.getDimensionalRegion());
+                    handleAndSendMsg(event, useItemCheck);
+                }
+
+                // Note: following flags are already covered with use_blocks
                 // check for ender chest access
                 if (isEnderChest) {
-                    if (player.isShiftKeyDown() && playerHasNoBlocksToPlaceInHands || !player.isShiftKeyDown()) {
+                    if (player.isShiftKeyDown() && hasEmptyHands || !player.isShiftKeyDown()) {
                         FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, targetEntity.getBlockPos(), ENDER_CHEST_ACCESS, dimCache.getDimensionalRegion());
                         handleAndSendMsg(event, flagCheckEvent);
                     }
                 }
                 // check for container access
                 if (isContainer) {
-                    if (player.isShiftKeyDown() && playerHasNoBlocksToPlaceInHands || !player.isShiftKeyDown()) {
+                    if (player.isShiftKeyDown() && hasEmptyHands || !player.isShiftKeyDown()) {
                         FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, targetEntity.getBlockPos(), CONTAINER_ACCESS, dimCache.getDimensionalRegion());
                         handleAndSendMsg(event, flagCheckEvent);
                     }
                 }
             }
         }
-    }
-
-    private static boolean isInteractableBlock(Block target) {
-        return target instanceof AbstractButtonBlock ||
-                target instanceof DoorBlock ||
-                target instanceof TrapDoorBlock ||
-                target instanceof LeverBlock ||
-                target instanceof NoteBlock ||
-                target instanceof FenceGateBlock ||
-                target instanceof DaylightDetectorBlock ||
-                target instanceof RedstoneDiodeBlock ||
-                target instanceof LecternBlock ||
-                target instanceof BeaconBlock ||
-                target instanceof BrewingStandBlock;
     }
 
     @SubscribeEvent
@@ -493,6 +481,63 @@ public final class PlayerFlagHandler {
                     FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getTarget().blockPosition(), CONTAINER_ACCESS, dimCache.getDimensionalRegion());
                     handleAndSendMsg(event, flagCheckEvent);
                 }
+            }
+        }
+    }
+
+
+    @SubscribeEvent
+    public static void onEntityInteraction(PlayerInteractEvent.EntityInteractSpecific event) {
+        if (isServerSide(event)) {
+            PlayerEntity player = event.getPlayer();
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
+            if (dimCache != null) {
+                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getTarget().blockPosition(), USE_ENTITIES, dimCache.getDimensionalRegion());
+                handleAndSendMsg(event, flagCheckEvent);
+
+                if (!hasEmptyHands(player)) {
+                    FlagCheckEvent.PlayerFlagEvent useItemCheck = checkPlayerEvent(player, event.getPos(), USE_ITEMS, dimCache.getDimensionalRegion());
+                    handleAndSendMsg(event, useItemCheck);
+                }
+            }
+        }
+    }
+
+    private static boolean hasEmptyHands(PlayerEntity player) {
+        return player.getItemInHand(Hand.MAIN_HAND).getItem().equals(Items.AIR)
+                && player.getItemInHand(Hand.OFF_HAND).getItem().equals(Items.AIR);
+    }
+
+    @SubscribeEvent
+    public static void onEntityInteraction(PlayerInteractEvent.EntityInteract event) {
+        if (isServerSide(event)) {
+            PlayerEntity player = event.getPlayer();
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
+            if (dimCache != null) {
+                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getTarget().blockPosition(), USE_ENTITIES, dimCache.getDimensionalRegion());
+                handleAndSendMsg(event, flagCheckEvent);
+
+                if (!hasEmptyHands(player)) {
+                    FlagCheckEvent.PlayerFlagEvent useItemCheck = checkPlayerEvent(player, event.getPos(), USE_ENTITIES, dimCache.getDimensionalRegion());
+                    handleAndSendMsg(event, useItemCheck);
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onEntityInteraction(PlayerInteractEvent.RightClickItem event) {
+        if (isServerSide(event)) {
+            PlayerEntity player = event.getPlayer();
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
+            if (dimCache != null) {
+                if (!hasEmptyHands(player)) {
+                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getPos(), USE_ENTITIES, dimCache.getDimensionalRegion());
+                    handleAndSendMsg(event, flagCheckEvent);
+                }
+
+                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getPos(), USE_ITEMS, dimCache.getDimensionalRegion());
+                handleAndSendMsg(event, flagCheckEvent);
             }
         }
     }
@@ -515,7 +560,7 @@ public final class PlayerFlagHandler {
                     List<PlayerEntity> players = ((World) event.getWorld()).getEntities(EntityType.PLAYER, areaAbovePressurePlate, (player) -> true);
                     boolean isCanceledForOne = false;
                     for (PlayerEntity player : players) {
-                        FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getPos(), USE, dimCache.getDimensionalRegion());
+                        FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getPos(), USE_BLOCKS, dimCache.getDimensionalRegion());
                         isCanceledForOne = isCanceledForOne || handleAndSendMsg(event, flagCheckEvent);
                         event.setCanceled(isCanceledForOne);
                     }
