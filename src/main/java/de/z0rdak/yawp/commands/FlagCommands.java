@@ -34,7 +34,7 @@ public final class FlagCommands {
 
 
     public static int promptHelp(CommandSourceStack src) {
-        MessageUtil.sendCmdFeedback(src, MessageUtil.buildHelpHeader("help.flags.header"));
+        MessageUtil.sendCmdFeedback(src, MessageUtil.buildHeader("help.flags.header"));
         MessageUtil.sendCmdFeedback(src, MessageUtil.buildHelpSuggestionLink("help.flags.1", CommandConstants.FLAG, CommandConstants.ADD));
         MessageUtil.sendCmdFeedback(src, MessageUtil.buildHelpSuggestionLink("help.flags.2", CommandConstants.FLAG, CommandConstants.REMOVE));
         MessageUtil.sendCmdFeedback(src, MessageUtil.buildHelpSuggestionLink("help.flags.3", CommandConstants.FLAG, CommandConstants.LIST));

@@ -4,7 +4,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.util.CommandUtil;
-import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.ClickEvent;
@@ -12,8 +11,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
-import static de.z0rdak.yawp.util.MessageUtil.buildExecuteCmdComponent;
-import static de.z0rdak.yawp.util.MessageUtil.buildHelpHeader;
+import static de.z0rdak.yawp.util.MessageUtil.*;
 import static net.minecraft.ChatFormatting.AQUA;
 import static net.minecraft.ChatFormatting.GREEN;
 
@@ -42,10 +40,10 @@ public class CommandRegistry {
     }
 
     private static int promptHelp(CommandSourceStack src) {
-        MessageUtil.sendCmdFeedback(src, buildHelpHeader("cli.msg.help.header"));
+        sendCmdFeedback(src, buildHeader("cli.msg.help.header"));
         String command = CommandUtil.buildCommandStr(CommandConstants.DIMENSION.toString());
         MutableComponent cmdStr = new TranslatableComponent("cli.msg.help.1", CommandPermissionConfig.WP);
-        MessageUtil.sendCmdFeedback(src, buildExecuteCmdComponent(
+        sendCmdFeedback(src, buildExecuteCmdComponent(
                 new TextComponent("=> "),
                 new TranslatableComponent("help.tooltip.dim"),
                 command, ClickEvent.Action.SUGGEST_COMMAND, GREEN).append(cmdStr));
@@ -61,7 +59,7 @@ public class CommandRegistry {
                 .append(wikiText3)
                 .append(": ")
                 .append(wikiCopyToClipboardLink);
-        MessageUtil.sendCmdFeedback(src, wikiText1);
+        sendCmdFeedback(src, wikiText1);
         return 0;
     }
 }

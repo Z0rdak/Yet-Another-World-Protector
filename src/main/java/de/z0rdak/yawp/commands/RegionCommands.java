@@ -305,14 +305,14 @@ public class RegionCommands {
                 if (!region.getMembers().containsPlayer(player.getUUID())) {
                     region.addMember(player);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.affiliation.player.added", player.getScoreboardName(), affiliation, region.getName()));
+                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.affiliation.player.added", buildPlayerHoverComponent(player), affiliation, region.getName()));
                 }
                 break;
             case "owner":
                 if (!region.getOwners().containsPlayer(player.getUUID())) {
                     region.addOwner(player);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.affiliation.player.added", player.getScoreboardName(), affiliation, region.getName()));
+                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.affiliation.player.added", buildPlayerHoverComponent(player), affiliation, region.getName()));
                 }
                 break;
             default:
@@ -354,36 +354,6 @@ public class RegionCommands {
         // should not happen, due to AddRegionChildArgumentType should only provide valid child regions
         return -1;
     }
-
-    /*
-    private static int clearRegionParent(CommandSourceStack src, IMarkableRegion region) {
-        if (region.getParent() != null) {
-            if (region.setParent(null)) {
-                RegionDataManager.save();
-            } else {
-                sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.parent.clear.fail", region.getName()));
-                return 1;
-            }
-        }
-        sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.parent.clear", region.getName()));
-        return 0;
-    }
-
-     */
-
-    /*
-    private static int setRegionParent(CommandSourceStack src, IMarkableRegion region, IMarkableRegion parent) {
-        if (region.getParent() != null) {
-            if (region.setParent(parent)) {
-                RegionDataManager.save();
-                sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.parent.set", region.getName(), parent.getName()));
-                return 0;
-            }
-        }
-        sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.parent.set.fail", region.getName(), parent.getName()));
-        return 1;
-    }
-     */
 
     // Adds default flag for provided RegionFlag
     private static int addFlag(CommandSourceStack src, IMarkableRegion region, RegionFlag flag) {
@@ -455,25 +425,34 @@ public class RegionCommands {
      */
     private static int setPriority(CommandSourceStack src, IMarkableRegion region, int priority) {
         CuboidRegion cuboidRegion = (CuboidRegion) region;
-        boolean existRegionWithSamePriority = LocalRegions.getIntersectingRegionsFor(cuboidRegion)
+        List<CuboidRegion> intersectingRegions = LocalRegions.getIntersectingRegionsFor(cuboidRegion);
+        boolean existRegionWithSamePriority = intersectingRegions
                 .stream()
-                .anyMatch(r -> r.getPriority() == cuboidRegion.getPriority());
+                .anyMatch(r -> r.getPriority() == priority);
+        IProtectedRegion parent = region.getParent();
+        if (parent instanceof IMarkableRegion) {
+            int parentPriority = ((IMarkableRegion) parent).getPriority();
+            if (parentPriority >= priority) {
+                MutableComponent updatePriorityFailMsg = new TranslatableComponent("cli.msg.info.region.state.priority.set.fail.to-low", buildRegionInfoLink(region));
+                sendCmdFeedback(src, updatePriorityFailMsg);
+                return 1;
+            }
+        }
         if (existRegionWithSamePriority) {
-            TranslatableComponent updatePriorityFailMsg = new TranslatableComponent("cli.msg.info.region.###.area.update.fail", buildRegionSpatialPropLink(region), buildRegionInfoLink(region));
+            MutableComponent updatePriorityFailMsg = new TranslatableComponent("cli.msg.info.region.state.priority.set.fail.same", buildRegionInfoLink(region), priority);
             sendCmdFeedback(src, updatePriorityFailMsg);
             return 1;
         } else {
             int oldPriority = region.getPriority();
-            if (oldPriority != region.getPriority()) {
-                // Priority did not change
-                sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.state.priority.set.value", region.getName(), oldPriority, region.getPriority()));
-            } else {
+            if (oldPriority != priority) {
                 region.setPriority(priority);
                 RegionDataManager.save();
-                TranslatableComponent updatePriorityMsg = new TranslatableComponent("cli.msg.info.region.####.area.update.fail", buildRegionSpatialPropLink(region), buildRegionInfoLink(region));
-                sendCmdFeedback(src, updatePriorityMsg);
+                sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.state.priority.set.success", region.getName(), oldPriority, region.getPriority()));
+                return 0;
+            } else {
+                sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.state.priority.set.fail.no-change", buildRegionInfoLink(region)));
+                return 1;
             }
-            return 0;
         }
     }
 
@@ -635,7 +614,7 @@ public class RegionCommands {
     }
 
     public static int promptRegionFlags(CommandSourceStack src, IMarkableRegion region) {
-        sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.flag.header", buildRegionInfoLink(region)));
+        sendCmdFeedback(src, MessageUtil.buildFlagHeader(region));
         if (region.getFlags().isEmpty()) {
             sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.flag.empty", region.getName()));
             return 1;

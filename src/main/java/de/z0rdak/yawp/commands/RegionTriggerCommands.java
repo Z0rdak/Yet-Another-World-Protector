@@ -26,7 +26,7 @@ public final class RegionTriggerCommands {
     }
 
     public static int promptHelp(CommandSourceStack src) {
-        MessageUtil.sendCmdFeedback(src, MessageUtil.buildHelpHeader("cli.msg.trigger.help"));
+        MessageUtil.sendCmdFeedback(src, MessageUtil.buildHeader("cli.msg.trigger.help"));
         return 0;
     }
 

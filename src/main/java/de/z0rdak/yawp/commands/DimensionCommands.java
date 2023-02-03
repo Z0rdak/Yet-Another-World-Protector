@@ -295,7 +295,7 @@ public class DimensionCommands {
             if (affiliationType.equals(OWNER.toString())) {
                 dimCache.addOwner(player);
             }
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.player.added", player.getScoreboardName(), dim.location().toString(), affiliationType));
+            sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.player.added", buildPlayerHoverComponent(player), dim.location().toString(), affiliationType));
             return 0;
         }
         return 1;
@@ -324,7 +324,7 @@ public class DimensionCommands {
         List<IFlag> inActiveFlags = dimCache.getDimensionalRegion().getFlags().stream()
                 .filter(f -> !f.isActive())
                 .sorted()
-                .collect(Collectors.toList());
+                .toList();
         activeFlags.addAll(inActiveFlags);
         List<IFlag> flags = new ArrayList<>(activeFlags);
         flags.addAll(inActiveFlags);
@@ -334,8 +334,8 @@ public class DimensionCommands {
             sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.flags.empty", dim.location().toString()));
             return 1;
         }
-        MutableComponent dimInfoLink = buildDimensionalInfoLink(dim);
-        MutableComponent headerContent = new TranslatableComponent("cli.msg.info.region.flag.header", dimInfoLink);
+        MutableComponent flagLink = buildDimFlagListLink(dimCache.getDimensionalRegion()).append(buildAddDimFlagLink(dimCache.getDimensionalRegion()));
+        MutableComponent headerContent = new TranslatableComponent("cli.msg.info.region.flag.header", flagLink, buildDimensionalInfoLink(dim));
         sendCmdFeedback(src, headerContent);
         flags.forEach(flag -> {
             MutableComponent removeFlagLink = new TextComponent(" - ")
@@ -380,14 +380,12 @@ public class DimensionCommands {
                     .values()
                     .stream()
                     .sorted(Comparator.comparing(IMarkableRegion::getName))
-                    .collect(Collectors.toList());
+                    .toList();
             if (regionsForDim.isEmpty()) {
                 sendCmdFeedback(source, new TranslatableComponent("cli.msg.dim.info.regions.empty", dim.location().toString()));
                 return -1;
             }
-            MutableComponent dimInfoLink = buildDimensionalInfoLink(dim);
-            MutableComponent regionsInDimHeader = new TranslatableComponent("cli.msg.dim.info.region.list.header", dimInfoLink);
-            sendCmdFeedback(source, regionsInDimHeader);
+            sendCmdFeedback(source, MessageUtil.buildDimRegionListHeader(dimCache));
             // TODO: Pagination for more than x regions
             regionsForDim.forEach(region -> {
                 MutableComponent regionRemoveLink = new TextComponent(" - ")
@@ -445,7 +443,7 @@ public class DimensionCommands {
             if (regionsForDim.isEmpty()) {
                 regions.append(new TranslatableComponent("cli.msg.dim.info.regions.empty", dim.location().toString()));
             } else {
-                regions.append(buildDimRegionListLink(dimCache, dimCache.getDimensionalRegion()));
+                regions.append(buildDimRegionListLink(dimCache));
             }
             sendCmdFeedback(source, regions);
             return 0;

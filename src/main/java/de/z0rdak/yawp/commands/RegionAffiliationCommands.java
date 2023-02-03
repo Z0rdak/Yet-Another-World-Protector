@@ -17,7 +17,7 @@ public class RegionAffiliationCommands {
     }
 
     public static int promptHelp(CommandSourceStack src) {
-        MessageUtil.sendCmdFeedback(src, MessageUtil.buildHelpHeader("cli.msg.affiliation.help"));
+        MessageUtil.sendCmdFeedback(src, MessageUtil.buildHeader("cli.msg.affiliation.help"));
         return 0;
     }
 }
