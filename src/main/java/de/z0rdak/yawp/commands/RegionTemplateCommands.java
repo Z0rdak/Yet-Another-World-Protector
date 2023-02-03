@@ -17,7 +17,7 @@ public class RegionTemplateCommands {
     }
 
     public static int promptHelp(CommandSource src) {
-        MessageUtil.sendCmdFeedback(src, MessageUtil.buildHelpHeader("cli.msg.template.help"));
+        MessageUtil.sendCmdFeedback(src, MessageUtil.buildHeader("cli.msg.template.help"));
         return 0;
     }
 }

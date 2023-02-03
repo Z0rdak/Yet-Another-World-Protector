@@ -17,6 +17,7 @@ import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
+import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
@@ -293,7 +294,7 @@ public class DimensionCommands {
             if (affiliationType.equals(OWNER.toString())) {
                 dimCache.addOwner(player);
             }
-            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.player.added", player.getScoreboardName(), dim.location().toString(), affiliationType));
+            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.player.added", buildPlayerHoverComponent(player), dim.location().toString(), affiliationType));
             return 0;
         }
         return 1;
@@ -332,8 +333,8 @@ public class DimensionCommands {
             sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.flags.empty", dim.location().toString()));
             return 1;
         }
-        IFormattableTextComponent dimInfoLink = buildDimensionalInfoLink(dim);
-        IFormattableTextComponent headerContent = new TranslationTextComponent("cli.msg.info.region.flag.header", dimInfoLink);
+        IFormattableTextComponent flagLink = buildDimFlagListLink(dimCache.getDimensionalRegion()).append(buildAddDimFlagLink(dimCache.getDimensionalRegion()));
+        IFormattableTextComponent headerContent = new TranslationTextComponent("cli.msg.info.region.flag.header", flagLink, buildDimensionalInfoLink(dim));
         sendCmdFeedback(src, headerContent);
         flags.forEach(flag -> {
             IFormattableTextComponent removeFlagLink = new StringTextComponent(" - ")
@@ -383,9 +384,7 @@ public class DimensionCommands {
                 sendCmdFeedback(source, new TranslationTextComponent("cli.msg.dim.info.regions.empty", dim.location().toString()));
                 return -1;
             }
-            IFormattableTextComponent dimInfoLink = buildDimensionalInfoLink(dim);
-            IFormattableTextComponent regionsInDimHeader = new TranslationTextComponent("cli.msg.dim.info.region.list.header", dimInfoLink);
-            sendCmdFeedback(source, regionsInDimHeader);
+            sendCmdFeedback(source, MessageUtil.buildDimRegionListHeader(dimCache));
             // TODO: Pagination for more than x regions
             regionsForDim.forEach(region -> {
                 IFormattableTextComponent regionRemoveLink = new StringTextComponent(" - ")
@@ -443,7 +442,7 @@ public class DimensionCommands {
             if (regionsForDim.isEmpty()) {
                 regions.append(new TranslationTextComponent("cli.msg.dim.info.regions.empty", dim.location().toString()));
             } else {
-                regions.append(buildDimRegionListLink(dimCache, dimCache.getDimensionalRegion()));
+                regions.append(buildDimRegionListLink(dimCache));
             }
             sendCmdFeedback(source, regions);
             return 0;

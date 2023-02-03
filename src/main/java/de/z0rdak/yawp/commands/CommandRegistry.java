@@ -12,8 +12,9 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.ClickEvent;
 
+import static de.z0rdak.yawp.util.MessageUtil.*;
 import static de.z0rdak.yawp.util.MessageUtil.buildExecuteCmdComponent;
-import static de.z0rdak.yawp.util.MessageUtil.buildHelpHeader;
+import static de.z0rdak.yawp.util.MessageUtil.buildHeader;
 import static net.minecraft.util.text.TextFormatting.AQUA;
 import static net.minecraft.util.text.TextFormatting.GREEN;
 
@@ -42,10 +43,10 @@ public class CommandRegistry {
     }
 
     private static int promptHelp(CommandSource src) {
-        MessageUtil.sendCmdFeedback(src, buildHelpHeader("cli.msg.help.header"));
+        sendCmdFeedback(src, buildHeader("cli.msg.help.header"));
         String command = CommandUtil.buildCommandStr(CommandConstants.DIMENSION.toString());
         IFormattableTextComponent cmdStr = new TranslationTextComponent("cli.msg.help.1", CommandPermissionConfig.WP);
-        MessageUtil.sendCmdFeedback(src, buildExecuteCmdComponent(
+        sendCmdFeedback(src, buildExecuteCmdComponent(
                 new StringTextComponent("=> "),
                 new TranslationTextComponent("help.tooltip.dim"),
                 command, ClickEvent.Action.SUGGEST_COMMAND, GREEN).append(cmdStr));
@@ -61,7 +62,7 @@ public class CommandRegistry {
                 .append(wikiText3)
                 .append(": ")
                 .append(wikiCopyToClipboardLink);
-        MessageUtil.sendCmdFeedback(src, wikiText1);
+        sendCmdFeedback(src, wikiText1);
         return 0;
     }
 }
