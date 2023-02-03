@@ -11,8 +11,9 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
+import static de.z0rdak.yawp.util.MessageUtil.*;
 import static de.z0rdak.yawp.util.MessageUtil.buildExecuteCmdComponent;
-import static de.z0rdak.yawp.util.MessageUtil.buildHelpHeader;
+import static de.z0rdak.yawp.util.MessageUtil.buildHeader;
 import static net.minecraft.ChatFormatting.AQUA;
 import static net.minecraft.ChatFormatting.GREEN;
 
@@ -41,10 +42,10 @@ public class CommandRegistry {
     }
 
     private static int promptHelp(CommandSourceStack src) {
-        MessageUtil.sendCmdFeedback(src, buildHelpHeader("cli.msg.help.header"));
+        sendCmdFeedback(src, buildHeader("cli.msg.help.header"));
         String command = CommandUtil.buildCommandStr(CommandConstants.DIMENSION.toString());
         MutableComponent cmdStr = Component.translatable("cli.msg.help.1", CommandPermissionConfig.WP);
-        MessageUtil.sendCmdFeedback(src, buildExecuteCmdComponent(
+        sendCmdFeedback(src, buildExecuteCmdComponent(
                 Component.literal("=> "),
                 Component.translatable("help.tooltip.dim"),
                 command, ClickEvent.Action.SUGGEST_COMMAND, GREEN).append(cmdStr));
@@ -60,7 +61,7 @@ public class CommandRegistry {
                 .append(wikiText3)
                 .append(": ")
                 .append(wikiCopyToClipboardLink);
-        MessageUtil.sendCmdFeedback(src, wikiText1);
+        sendCmdFeedback(src, wikiText1);
         return 0;
     }
 }

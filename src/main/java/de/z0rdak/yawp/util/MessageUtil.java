@@ -14,18 +14,18 @@ import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.apache.commons.lang3.NotImplementedException;
 
 import javax.annotation.Nonnull;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
@@ -41,14 +41,14 @@ public class MessageUtil {
     private MessageUtil() {
     }
 
-    public static MutableComponent buildHelpHeader(String translationKey) {
-        return buildHelpHeader(Component.translatable(translationKey));
+    public static MutableComponent buildHeader(String translationKey) {
+        return buildHeader(Component.translatable(translationKey));
     }
 
-    public static MutableComponent buildHelpHeader(MutableComponent MutableComponent) {
-        return Component.literal(BOLD + " == ")
-                .append(MutableComponent)
-                .append(Component.literal(BOLD + " == "));
+    public static MutableComponent buildHeader(MutableComponent header) {
+        return Component.literal(BOLD + "")
+                .append(header)
+                .append(Component.literal(BOLD + ""));
     }
 
     public static void sendCmdFeedback(CommandSourceStack src, MutableComponent text) {
@@ -95,6 +95,11 @@ public class MessageUtil {
                 .setStyle(Style.EMPTY.withColor(color)
                         .withClickEvent(new ClickEvent(eventAction, command))
                         .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText)));
+    }
+
+    public static MutableComponent buildPlayerHoverComponent(Player player) {
+        HoverEvent.EntityTooltipInfo entityTooltipInfo = new HoverEvent.EntityTooltipInfo(EntityType.PLAYER, player.getUUID(), player.getName());
+        return Component.literal(player.getScoreboardName()).setStyle(Style.EMPTY.withColor(GREEN).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, entityTooltipInfo)));
     }
 
     public static MutableComponent buildTextWithHoverMsg(MutableComponent text, MutableComponent hoverText, ChatFormatting color) {
@@ -213,8 +218,9 @@ public class MessageUtil {
 
     public static MutableComponent buildDimensionalInfoLink(ResourceKey<Level> dim) {
         String command = "/" + CommandPermissionConfig.WP + " " + DIMENSION + " " + dim.location() + " " + INFO;
-        String hoverText = "cli.msg.dim.info";
-        return buildExecuteCmdComponent(dim.location().toString(), hoverText, command, RUN_COMMAND, GREEN);
+        MutableComponent hoverText = Component.translatable("cli.msg.dim.info");
+        MutableComponent linkText = Component.literal(dim.location().toString());
+        return buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, GREEN);
     }
 
     // TODO: How to make info links more generic for AbstractRegion
@@ -238,16 +244,11 @@ public class MessageUtil {
 
     public static MutableComponent buildRegionOverviewHeader(IMarkableRegion region) {
         MutableComponent clipBoardDumpLink = buildExecuteCmdComponent("cli.msg.info.region.overview.dump.link.text", "cli.msg.info.region.overview.dump.link.hover", NbtUtils.prettyPrint(region.serializeNBT()), ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
-        MutableComponent header = Component.translatable("cli.msg.info.region.overview.header", clipBoardDumpLink, buildRegionInfoLink(region));
-        return Component.literal(ChatFormatting.BOLD + "")
-                .append(header)
-                .append(Component.literal(ChatFormatting.BOLD + ""));
+        return buildHeader(Component.translatable("cli.msg.info.region.overview.header", clipBoardDumpLink, buildRegionInfoLink(region)));
     }
 
     public static MutableComponent buildRegionSpatialHeader(IMarkableRegion region) {
-        return Component.literal(BOLD + "")
-                .append(Component.translatable("cli.msg.info.region.spatial.header", buildRegionInfoLink(region)))
-                .append(Component.literal(BOLD + ""));
+        return buildHeader(Component.translatable("cli.msg.info.region.spatial.header", buildRegionSpatialPropLink(region), buildRegionInfoLink(region)));
     }
 
     public static MutableComponent buildRegionLocationComponent(IMarkableRegion region) {
@@ -303,25 +304,27 @@ public class MessageUtil {
         MutableComponent affiliationLinks = Component.literal("");
         List<String> affiliations = Arrays.asList("owner", "member");
         affiliations.forEach(affiliation -> {
-            String cmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), affiliation);
-            int affiliationSize;
             switch (affiliation) {
-                case "owner":
-                    affiliationSize = region.getOwners().getPlayers().size() + region.getOwners().getTeams().size();
-                    break;
-                case "member":
-                    affiliationSize = region.getMembers().getPlayers().size() + region.getMembers().getTeams().size();
-                    break;
-                default:
-                    affiliationSize = -1;
-                    break;
+                case "owner": {
+                    int affiliationSize = region.getOwners().getPlayers().size() + region.getOwners().getTeams().size();
+                    affiliationLinks.append(buildRegionAffiliationLink(region, affiliation)).append(" ");
+                }
+                break;
+                case "member": {
+                    int affiliationSize = region.getMembers().getPlayers().size() + region.getMembers().getTeams().size();
+                    affiliationLinks.append(buildRegionAffiliationLink(region, affiliation)).append(" ");
+                }
+                break;
             }
-            MutableComponent linkText = Component.translatable("cli.msg.info.region.affiliation.list.link.text", affiliationSize, affiliation);
-            MutableComponent hoverText = Component.translatable("cli.msg.info.region.affiliation.list.link.hover", affiliation, region.getName());
-            MutableComponent affiliationLink = buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, AQUA);
-            affiliationLinks.append(affiliationLink).append(" ");
         });
         return affiliationLinks;
+    }
+
+    public static MutableComponent buildRegionAffiliationLink(IMarkableRegion region, String affiliation) {
+        String cmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), affiliation);
+        MutableComponent linkText = Component.translatable("cli.msg.info.region.affiliation.list.link.text", affiliation);
+        MutableComponent hoverText = Component.translatable("cli.msg.info.region.affiliation.list.link.hover", affiliation, region.getName());
+        return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, AQUA);
     }
 
     private static MutableComponent buildRegionAddPlayerLink(IMarkableRegion region, MutableComponent hoverText, String affiliation) {
@@ -337,9 +340,7 @@ public class MessageUtil {
     }
 
     public static MutableComponent buildRegionAffiliationHeader(IMarkableRegion region, String affiliation) {
-        return Component.literal(BOLD + "")
-                .append(Component.translatable("cli.msg.info.region.affiliation.header", buildRegionInfoLink(region), affiliation))
-                .append(Component.literal(BOLD + ""));
+        return buildHeader(Component.translatable("cli.msg.info.region.affiliation.header", buildRegionAffiliationLink(region, affiliation), buildRegionInfoLink(region)));
     }
 
     public static MutableComponent buildRegionAffiliationTeamListLink(IMarkableRegion region, String affiliation, PlayerContainer playerContainer) {
@@ -370,16 +371,8 @@ public class MessageUtil {
         return buildRegionParentLink(region);
     }
 
-
     public static MutableComponent buildRegionChildrenHeader(IMarkableRegion region) {
-        return Component.literal(BOLD + "")
-                .append(Component.translatable("cli.msg.info.region.children.header", buildRegionInfoLink(region)))
-                .append(Component.literal(BOLD + ""));
-    }
-
-    public static MutableComponent buildRegionChildrenComponent(IMarkableRegion region) {
-
-        return Component.literal("Children go here");
+        return buildHeader(Component.translatable("cli.msg.info.region.children.header", buildRegionChildrenLink(region), buildRegionInfoLink(region)));
     }
 
     public static MutableComponent buildRegionParentLink(IMarkableRegion region) {
@@ -448,7 +441,7 @@ public class MessageUtil {
     }
 
     public static MutableComponent buildRegionStateHeader(IMarkableRegion region) {
-        return Component.translatable("cli.msg.info.region.state.header", buildRegionInfoLink(region));
+        return buildHeader(Component.translatable("cli.msg.info.region.state.header", buildRegionStateLink(region), buildRegionInfoLink(region)));
     }
 
     public static MutableComponent composeRegionEnableComponent(IMarkableRegion region) {
@@ -483,10 +476,17 @@ public class MessageUtil {
         return buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, AQUA);
     }
 
-    public static MutableComponent buildDimRegionListLink(DimensionRegionCache dimCache, DimensionalRegion dimRegion) {
-        String command = "/" + CommandPermissionConfig.WP + " " + DIMENSION + " " + dimRegion.getName() + " " + LIST + " " + REGION;
-        MutableComponent hoverText = Component.translatable("cli.msg.dim.info.region.list.link.hover", dimRegion.getName());
+    public static MutableComponent buildDimRegionListLink(DimensionRegionCache dimCache) {
+        String command = "/" + CommandPermissionConfig.WP + " " + DIMENSION + " " + dimCache.getDimensionalRegion().getName() + " " + LIST + " " + REGION;
         MutableComponent linkText = Component.translatable("cli.msg.dim.info.region.list.link.text", dimCache.getRegions().size());
+        MutableComponent hoverText = Component.translatable("cli.msg.dim.info.region.list.link.hover", dimCache.getDimensionalRegion().getName());
+        return buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, AQUA);
+    }
+
+    public static MutableComponent buildDimRegionListHeaderLink(DimensionalRegion dimRegion) {
+        String command = "/" + CommandPermissionConfig.WP + " " + DIMENSION + " " + dimRegion.getName() + " " + LIST + " " + REGION;
+        MutableComponent linkText = Component.translatable("cli.msg.dim.info.region");
+        MutableComponent hoverText = Component.translatable("cli.msg.dim.info.region.list.link.hover", dimRegion.getName());
         return buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, AQUA);
     }
 
@@ -627,6 +627,7 @@ public class MessageUtil {
         return associateNames;
     }
 
+    // TODO: Get player uuid and string from region and build hoverable entity link after remove link
     public static MutableComponent buildPlayerList(DimensionalRegion dimCache, CommandConstants memberOrOwner) {
         Set<String> playerNames = getAssociateList(dimCache, memberOrOwner.toString(), PLAYER.toString());
         MutableComponent playerList = Component.translatable("cli.msg.info.region.affiliation.player").append(": ");
@@ -651,4 +652,11 @@ public class MessageUtil {
         return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, RED);
     }
 
+    public static MutableComponent buildFlagHeader(IMarkableRegion region) {
+        return buildHeader(Component.translatable("cli.msg.info.region.flag.header", buildFlagListLink(region), buildRegionInfoLink(region)));
+    }
+
+    public static MutableComponent buildDimRegionListHeader(DimensionRegionCache dimCache) {
+        return buildHeader(Component.translatable("cli.msg.dim.info.region.list.header", buildDimRegionListLink(dimCache), buildDimensionalInfoLink(dimCache.dimensionKey())));
+    }
 }

@@ -103,10 +103,13 @@ public class RegionDataManager extends SavedData {
                 RegionDataManager data = storage.computeIfAbsent(RegionDataManager::load, RegionDataManager::new, DATA_NAME);
                 storage.set(DATA_NAME, data);
                 regionDataCache = data;
-                YetAnotherWorldProtector.LOGGER.info(Component.translatable("data.nbt.dimensions.load.success", data.getTotalRegionAmount(), data.getDimensionAmount()).getString());
+                //YetAnotherWorldProtector.LOGGER.info(Component.translatable("data.nbt.dimensions.load.success", data.getTotalRegionAmount(), data.getDimensionAmount()).getString());
+                YetAnotherWorldProtector.LOGGER.info(Component.translatable("Loaded " + data.getTotalRegionAmount() + " region(s) for " + data.getDimensionAmount()).getString() + " dimension(s)");
             }
-        } catch (NullPointerException npe) {
-            YetAnotherWorldProtector.LOGGER.error(Component.translatable("data.nbt.dimensions.load.failure").getString());
+        } catch (Exception npe) {
+            //YetAnotherWorldProtector.LOGGER.error(Component.translatable("data.nbt.dimensions.load.failure").getString());
+            YetAnotherWorldProtector.LOGGER.error(Component.translatable("Loading regions failed!").getString());
+            YetAnotherWorldProtector.LOGGER.error(Component.literal(npe.getLocalizedMessage()).getString());
         }
     }
 
@@ -114,7 +117,8 @@ public class RegionDataManager extends SavedData {
         RegionDataManager rdm = new RegionDataManager();
         rdm.dimCacheMap.clear();
         CompoundTag dimensionRegions = nbt.getCompound(DIMENSIONS);
-        YetAnotherWorldProtector.LOGGER.info(Component.translatable("data.nbt.dimensions.load.amount", dimensionRegions.getAllKeys().size()).getString());
+        //YetAnotherWorldProtector.LOGGER.info(Component.translatable("data.nbt.dimensions.load.amount", dimensionRegions.getAllKeys().size()).getString());
+        YetAnotherWorldProtector.LOGGER.info(Component.translatable("Loading region(s) for " + dimensionRegions.getAllKeys().size() + " dimension(s)").getString());
         // deserialize all region without parent and child references
         for (String dimKey : dimensionRegions.getAllKeys()) {
             rdm.dimensionDataNames.add(dimKey);
@@ -122,21 +126,27 @@ public class RegionDataManager extends SavedData {
             if (dimensionRegions.contains(dimKey, Tag.TAG_COMPOUND)) {
                 CompoundTag dimCacheNbt = dimensionRegions.getCompound(dimKey);
                 if (dimCacheNbt.contains(REGIONS, Tag.TAG_COMPOUND)) {
-                    YetAnotherWorldProtector.LOGGER.info(Component.translatable("data.nbt.dimensions.load.dim.amount", dimCacheNbt.getCompound(REGIONS).size(), dimKey).getString());
+                    // YetAnotherWorldProtector.LOGGER.info(Component.translatable("data.nbt.dimensions.load.dim.amount", dimCacheNbt.getCompound(REGIONS).size(), dimKey).getString());
+                    YetAnotherWorldProtector.LOGGER.info(Component.translatable("Loading " + dimCacheNbt.getCompound(REGIONS).size() + " region(s) for dimension '" + dimKey + "'").getString());
                 } else {
-                    YetAnotherWorldProtector.LOGGER.info(Component.translatable("data.nbt.dimensions.load.dim.empty", dimKey).getString());
+                    //YetAnotherWorldProtector.LOGGER.info(Component.translatable("data.nbt.dimensions.load.dim.empty", dimKey).getString());
+                    YetAnotherWorldProtector.LOGGER.info(Component.translatable("No region data for dimension '" + dimKey + "' found").getString());
                 }
                 rdm.dimCacheMap.put(dimension, new DimensionRegionCache(dimCacheNbt));
             }
         }
-        rdm.dimCacheMap.forEach((dimKey, cache) -> YetAnotherWorldProtector.LOGGER.info(Component.translatable("data.nbt.dimensions.loaded.dim.amount", cache.getRegions().size(), dimKey.location().toString()).getString()));
+        rdm.dimCacheMap.forEach((dimKey, cache) -> {
+            //YetAnotherWorldProtector.LOGGER.info(Component.translatable("data.nbt.dimensions.loaded.dim.amount", cache.getRegions().size(), dimKey.location().toString()).getString());
+            YetAnotherWorldProtector.LOGGER.info(Component.translatable("Loaded " + cache.getRegions().size() + " region(s) for dimension '" + dimKey.location() + "'").getString());
+        });
 
         // set parent and child references
         for (String dimKey : dimensionRegions.getAllKeys()) {
             ResourceKey<Level> dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(dimKey));
             DimensionRegionCache dimCache = rdm.dimCacheMap.get(dimension);
             if (dimCache.getRegions().size() > 0) {
-                YetAnotherWorldProtector.LOGGER.info(Component.translatable("data.nbt.dimensions.load.dim.restore", dimKey).getString());
+                //YetAnotherWorldProtector.LOGGER.info(Component.translatable("data.nbt.dimensions.load.dim.restore", dimKey).getString());
+                YetAnotherWorldProtector.LOGGER.info(Component.translatable("Restoring region hierarchy for regions in dimension '" + dimKey + "'").getString());
             }
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
             dimCache.regionsInDimension.values().forEach(region -> {
@@ -221,9 +231,11 @@ public class RegionDataManager extends SavedData {
     @Override
     public CompoundTag save(@Nonnull CompoundTag compound) {
         CompoundTag dimRegionNbtData = new CompoundTag();
-        YetAnotherWorldProtector.LOGGER.info(Component.translatable("data.nbt.dimensions.save.amount", this.getTotalRegionAmount(), dimCacheMap.keySet().size()).getString());
+        //YetAnotherWorldProtector.LOGGER.info(Component.translatable("data.nbt.dimensions.save.amount", this.getTotalRegionAmount(), dimCacheMap.keySet().size()).getString());
+        YetAnotherWorldProtector.LOGGER.info(Component.translatable("Saving " + this.getTotalRegionAmount() + " region(s) for " + dimCacheMap.keySet().size() + " dimensions").getString());
         for (Map.Entry<ResourceKey<Level>, DimensionRegionCache> entry : dimCacheMap.entrySet()) {
-            YetAnotherWorldProtector.LOGGER.info(Component.translatable("data.nbt.dimensions.save.dim.amount", this.getRegionAmount(entry.getKey()), entry.getKey().location().toString()).getString());
+            //YetAnotherWorldProtector.LOGGER.info(Component.translatable("data.nbt.dimensions.save.dim.amount", this.getRegionAmount(entry.getKey()), entry.getKey().location().toString()).getString());
+            YetAnotherWorldProtector.LOGGER.info(Component.translatable("Saving " + this.getRegionAmount(entry.getKey()) + " region(s) for dimension '" + entry.getKey().location() + "'").getString());
             String dimensionName = entry.getValue().getDimensionalRegion().getName();
             dimRegionNbtData.put(dimensionName, entry.getValue().serializeNBT());
         }
