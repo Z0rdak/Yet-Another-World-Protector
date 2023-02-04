@@ -42,7 +42,6 @@ public enum RegionFlag {
     SPAWNING_ANIMAL("spawning-animal", FlagType.BOOLEAN_FLAG),
     SPAWNING_ALL("spawning-all", FlagType.BOOLEAN_FLAG),
     SPAWNING_XP("spawning-xp", FlagType.BOOLEAN_FLAG),
-    USE("use", FlagType.BOOLEAN_FLAG),
     USE_ITEMS("use-items", FlagType.BOOLEAN_FLAG),
     USE_BLOCKS("use-blocks", FlagType.BOOLEAN_FLAG),
     USE_ENTITIES("use-entities", FlagType.BOOLEAN_FLAG),
@@ -51,12 +50,12 @@ public enum RegionFlag {
     ENDER_CHEST_ACCESS("access-enderchest", FlagType.BOOLEAN_FLAG),
     USE_ENDERPEARL_FROM_REGION("enderpearl-from", FlagType.BOOLEAN_FLAG),
     USE_ENDERPEARL_TO_REGION("enderpearl-to", FlagType.BOOLEAN_FLAG),
-    // ENDERMAN_TELEPORT_TO_REGION("enderman-tp-to", FlagType.BOOLEAN_FLAG),
+
     ENDERMAN_TELEPORT_FROM_REGION("enderman-tp-from", FlagType.BOOLEAN_FLAG),
-    // SHULKER_TELEPORT_TO_REGION("shulker-tp-to", FlagType.BOOLEAN_FLAG),
+
     SHULKER_TELEPORT_FROM_REGION("shulker-tp-from", FlagType.BOOLEAN_FLAG),
     ITEM_DROP("item-drop", FlagType.BOOLEAN_FLAG),
-    // unrelated: mobs pickup logic => MobEntity#livingTick
+
     ITEM_PICKUP("item-pickup", FlagType.BOOLEAN_FLAG),
     DROP_LOOT_ALL("drop-loot", FlagType.BOOLEAN_FLAG),
     DROP_LOOT_PLAYER("drop-loot-player", FlagType.BOOLEAN_FLAG),
@@ -85,8 +84,7 @@ public enum RegionFlag {
     SET_SPAWN("set-spawn", FlagType.BOOLEAN_FLAG),
     SLEEP("sleep", FlagType.BOOLEAN_FLAG),
     USE_PORTAL("use-portal", FlagType.BOOLEAN_FLAG),
-    //TRAVEL_TO_DIM("travel-to-dim", FlagType.BOOLEAN_FLAG),
-    //TRAVEL_FROM_DIM("travel-from-dim", FlagType.BOOLEAN_FLAG),
+
     USE_PORTAL_PLAYERS("use-portal-players", FlagType.BOOLEAN_FLAG),
     USE_PORTAL_ITEMS("use-portal-items", FlagType.BOOLEAN_FLAG),
     USE_PORTAL_ANIMALS("use-portal-animals", FlagType.BOOLEAN_FLAG),
@@ -94,10 +92,7 @@ public enum RegionFlag {
     USE_PORTAL_VILLAGERS("use-portal-villagers", FlagType.BOOLEAN_FLAG),
     USE_PORTAL_MINECARTS("use-portal-minecarts", FlagType.BOOLEAN_FLAG),
     SPAWN_PORTAL("spawn-portal", FlagType.BOOLEAN_FLAG);
-    // TODO: would need a item use at block check
-    //PLAYER_SPAWN_PORTAL("player-spawn-portal", FlagType.BOOLEAN_FLAG);
 
-    // SPAWN_ENTITLES("spawn-entities", FlagType.LIST_FLAG);
 
     public final String name;
     public final FlagType type;

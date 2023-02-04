@@ -424,25 +424,34 @@ public class RegionCommands {
      */
     private static int setPriority(ServerCommandSource src, IMarkableRegion region, int priority) {
         CuboidRegion cuboidRegion = (CuboidRegion) region;
-        boolean existRegionWithSamePriority = LocalRegions.getIntersectingRegionsFor(cuboidRegion)
+        List<CuboidRegion> intersectingRegions = LocalRegions.getIntersectingRegionsFor(cuboidRegion);
+        boolean existRegionWithSamePriority = intersectingRegions
                 .stream()
-                .anyMatch(r -> r.getPriority() == cuboidRegion.getPriority());
+                .anyMatch(r -> r.getPriority() == priority);
+        IProtectedRegion parent = region.getParent();
+        if (parent instanceof IMarkableRegion) {
+            int parentPriority = ((IMarkableRegion) parent).getPriority();
+            if (parentPriority >= priority) {
+                MutableText updatePriorityFailMsg = MutableText.of(new TranslatableTextContent("cli.msg.info.region.state.priority.set.fail.to-low", buildRegionInfoLink(region)));
+                sendCmdFeedback(src, updatePriorityFailMsg);
+                return 1;
+            }
+        }
         if (existRegionWithSamePriority) {
-            MutableText updatePriorityFailMsg = MutableText.of(new TranslatableTextContent("cli.msg.info.region.###.area.update.fail", buildRegionSpatialPropLink(region), buildRegionInfoLink(region)));
+            MutableText updatePriorityFailMsg = MutableText.of(new TranslatableTextContent("cli.msg.info.region.state.priority.set.fail.same", buildRegionInfoLink(region), priority));
             sendCmdFeedback(src, updatePriorityFailMsg);
             return 1;
         } else {
             int oldPriority = region.getPriority();
-            if (oldPriority != region.getPriority()) {
-                // Priority did not change
-                sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.region.state.priority.set.value", region.getName(), oldPriority, region.getPriority())));
-            } else {
+            if (oldPriority != priority) {
                 region.setPriority(priority);
                 RegionDataManager.save();
-                MutableText updatePriorityMsg = MutableText.of(new TranslatableTextContent("cli.msg.info.region.####.area.update.fail", buildRegionSpatialPropLink(region), buildRegionInfoLink(region)));
-                sendCmdFeedback(src, updatePriorityMsg);
+                sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.region.state.priority.set.success", region.getName(), oldPriority, region.getPriority())));
+                return 0;
+            } else {
+                sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.region.state.priority.set.fail.no-change", buildRegionInfoLink(region))));
+                return 1;
             }
-            return 0;
         }
     }
 

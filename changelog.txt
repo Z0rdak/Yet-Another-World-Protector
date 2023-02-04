@@ -1,3 +1,25 @@
+# 0.0.1.4-beta4 - CLI improvements & priority fixes
+## Additions
+* Add flag `use-entities` to prevent general entity interactions
+* Add flag `use-items` to prevent general item usage
+* Add flag `use-blocks` to prevent general block usage/interaction.
+This should, beside other things, prevent using modded containers in contradiction to the access-container flag,
+which only covers containers implementing vanilla mechanics.
+* Add some sanity checks when setting region priority, so prevent mistakes for overlapping regions and region hierarchy
+## Changes
+TODO: * Reworked header format (the lines with == ... ==) to be more consistent and add a self-link to each header for easier accessibility.
+* Remove `use` flag.
+## Fixes
+* Fix priority not set properly for Local Regions
+TODO: * Fix some I18n typos and missing translations
+## Notes
+* Currently child regions do not overwrite flags of their parents. This means for example when having a parent with the break-block flag, which denies breaking blocks, and a child which doesn't have this flag, the flag of the parent still covers the child region.
+
+
+
+# 0.0.1.3-beta4
+## Fixes
+* Fix mod commands being executable without permission when using new alternative base command yawp
 # 0.0.1.2-beta4 - I18n and flag fixes
 ## Additions
 * Add link to Local and Dimensional Region info header to copy region NBT data to clipboard for more easy troubleshooting
