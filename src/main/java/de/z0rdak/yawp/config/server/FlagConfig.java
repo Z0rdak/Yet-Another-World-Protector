@@ -10,7 +10,7 @@ import java.util.List;
 public class FlagConfig {
 
     public static final ForgeConfigSpec CONFIG_SPEC;
-    public static final String CONFIG_NAME = YetAnotherWorldProtector.MODID + "-flag.toml";
+    public static final String CONFIG_NAME = YetAnotherWorldProtector.MODID + "-flags.toml";
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> BREAK_FLAG_ENTITIES;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> BREAK_FLAG_ENTITY_TAGS;
 
