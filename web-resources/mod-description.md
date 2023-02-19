@@ -19,7 +19,7 @@ ___
 
 ![Pagination](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/1.16.x/web-resources/yawp-feature-2.png "Interactive CLI")
 
-* Pagination for easy flag, member, etc. management
+* Pagination for more easy management of flags, players, regions, etc.
 
 ![Pagination](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/1.16.x/web-resources/yawp-cli-pagination.png "Pagination")
 
