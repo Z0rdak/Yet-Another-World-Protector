@@ -17,18 +17,18 @@ using [WorldDefender](https://www.curseforge.com/minecraft/mc-mods/world-defende
 
 ___
 
-![Pagination](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/1.16.x/web-resources/yawp-feature-2.png "Interactive CLI")
+![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/1.16.x/web-resources/yawp-feature-2.png "Interactive CLI")
 
 * Pagination for more easy management of flags, players, regions, etc.
 
-![Pagination](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/1.16.x/web-resources/yawp-cli-pagination.png "Pagination")
+![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/1.16.x/web-resources/yawp-cli-pagination.png "Pagination")
 
 * Region CLI
 
-![](https://cdn.modrinth.com/data/py6EMmAJ/images/12e4cd2e56a77247e2e7b8d6212c84ab6b29276b.png)
+![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/1.16.x/web-resources/local-interactive-cli-info.png)
 ___
 
-![Pagination](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/1.16.x/web-resources/yawp-feature-3.png "Region types")
+![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/1.16.x/web-resources/yawp-feature-3.png "Region types")
 
 In YAWP there are different kinds of regions to protect your server: Dimensional Regions and normal, local Regions.
 Dimensional Regions are special regions which are tied to one dimension - like gamerule-flags for different dimensions -
@@ -47,7 +47,7 @@ owners by assigning vanilla teams and specific players to the region.
 The area can be defined (and changed) in different geometric shapes. ~~E.g. Cuboid, Sphere and more to come.~~ For now
 limited to Cuboid shape.
 
-![Pagination](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/1.16.x/web-resources/yawp-feature-5.png "")
+![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/1.16.x/web-resources/yawp-feature-5.png "")
 
 Furthermore, a region can have child regions and a parent region, which are considered with their corresponding flags.
 They also have a priority to manage overlapping regions.
@@ -67,14 +67,14 @@ Dimensional Regions can be managed only by their owners, or by players which hav
 in the configuration.
 For more information, visit the wiki.
 ___
-![Pagination](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/1.16.x/web-resources/yawp-feature-4.png "Region affiliation")
+![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/1.16.x/web-resources/yawp-feature-4.png "Region affiliation")
 
 Regions can have owners and normal members. Owners are allowed to manage the region and bypass the flags, members are
 only allowed to bypass the flags set in the region.
 
 Owners/Members can be individual players or a [team](https://minecraft.fandom.com/wiki/Commands/team).
 
-![Pagination](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/1.16.x/web-resources/yawp-feature-6.png "")
+![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/1.16.x/web-resources/yawp-feature-6.png "")
 
 These affiliations allow you to create regions and assign players as their owners. They can then manage their regions
 themselves and
@@ -86,7 +86,7 @@ There are more granular features planned for region affiliation in the future - 
 permissions.
 
 ___
-![Pagination](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/1.16.x/web-resources/yawp-feature-7.png "")
+![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/1.16.x/web-resources/yawp-feature-7.png "")
 
 You can add rules to Dimensional or Local Regions with flags. If the flag is defined, it prevents the defined action
 associated with the flag.
