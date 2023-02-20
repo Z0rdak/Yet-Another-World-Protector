@@ -96,8 +96,12 @@ public class CommandUtil {
         return IntegerArgumentType.getInteger(ctx, CommandConstants.PRIORITY.toString());
     }
 
+    public static int getPageNoArgument(CommandContext<ServerCommandSource> ctx) {
+        return IntegerArgumentType.getInteger(ctx, PAGE.toString());
+    }
+
     public static String buildCommandStr(String... cmdTokens) {
-        String preamble = "/" + CommandPermissionConfig.WP;
+        String preamble = "/" + CommandPermissionConfig.BASE_CMD;
         String cmdStr = String.join(" ", cmdTokens);
         return preamble + " " + cmdStr;
     }

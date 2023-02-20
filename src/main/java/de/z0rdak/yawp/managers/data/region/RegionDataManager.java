@@ -13,14 +13,14 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.DefaultedRegistry;
+import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.PersistentState;
 import net.minecraft.world.PersistentStateManager;
 import net.minecraft.world.World;
@@ -47,7 +47,7 @@ public class RegionDataManager extends PersistentState {
      */
 
     private static RegionDataManager regionDataCache = new RegionDataManager();
-    private static MinecraftServer serverInstance;
+    public static MinecraftServer serverInstance;
     /**
      * Map which holds the mod region information. Each dimension has its on DimensionRegionCache.
      */
@@ -125,7 +125,7 @@ public class RegionDataManager extends PersistentState {
         // deserialize all region without parent and child references
         for (String dimKey : dimensionRegions.getKeys()) {
             rdm.dimensionDataNames.add(dimKey);
-            RegistryKey<World> dimension = RegistryKey.of(RegistryKeys.WORLD, new Identifier(dimKey));
+            RegistryKey<World> dimension = RegistryKey.of(DefaultedRegistry.WORLD_KEY, new Identifier(dimKey));
             if (dimensionRegions.contains(dimKey, NbtElement.COMPOUND_TYPE)) {
                 NbtCompound dimCacheNbt = dimensionRegions.getCompound(dimKey);
                 if (dimCacheNbt.contains(REGIONS, NbtElement.COMPOUND_TYPE)) {
@@ -140,7 +140,7 @@ public class RegionDataManager extends PersistentState {
 
         // set parent and child references
         for (String dimKey : dimensionRegions.getKeys()) {
-            RegistryKey<World> dimension = RegistryKey.of(RegistryKeys.WORLD, new Identifier(dimKey));
+            RegistryKey<World> dimension = RegistryKey.of(DefaultedRegistry.WORLD_KEY, new Identifier(dimKey));
             DimensionRegionCache dimCache = rdm.dimCacheMap.get(dimension);
             if (dimCache.getRegions().size() > 0) {
                 YetAnotherWorldProtector.LOGGER.info(MutableText.of(new TranslatableTextContent("data.nbt.dimensions.load.dim.restore", dimKey)).getString());

@@ -30,7 +30,7 @@ public class YetAnotherWorldProtector implements ModInitializer {
 
     private static void registerCommands(CommandDispatcher<ServerCommandSource> commandDispatcher, CommandRegistryAccess commandRegistryAccess, CommandManager.RegistrationEnvironment registrationEnvironment) {
         if (registrationEnvironment.dedicated) {
-            CommandRegistry.init(commandDispatcher);
+            CommandRegistry.init(commandDispatcher, "wp");
         } else {
             // Only on integrated server
         }

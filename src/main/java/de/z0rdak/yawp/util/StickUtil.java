@@ -7,10 +7,10 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
-import net.minecraft.registry.RegistryKey;
 import net.minecraft.text.LiteralTextContent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 
 import java.util.Objects;
@@ -131,8 +131,8 @@ public final class StickUtil {
         NbtList lore = new NbtList();
         lore.add(buildLoreTextLine(MutableText.of(new TranslatableTextContent("help.tooltip.stick.marker.simple.1")), "#ff4d4d"));
         lore.add(buildLoreTextLine(MutableText.of(new TranslatableTextContent("help.tooltip.stick.marker.simple.2")), "#ff4d4d"));
-        lore.add(buildLoreTextLine(MutableText.of(new LiteralTextContent(ITALIC + "")).append(MutableText.of(new TranslatableTextContent("help.tooltip.stick.marker.simple.3"))), "#808080"));
-        lore.add(buildLoreTextLine(MutableText.of(new LiteralTextContent(ITALIC + "")).append(MutableText.of(new TranslatableTextContent("help.tooltip.stick.marker.simple.4"))), "#808080"));
+        lore.add(buildLoreTextLine(MutableText.of(new TranslatableTextContent("help.tooltip.stick.marker.simple.3")).formatted(ITALIC), "#808080"));
+        lore.add(buildLoreTextLine(MutableText.of(new TranslatableTextContent("help.tooltip.stick.marker.simple.4")).formatted(ITALIC), "#808080"));
         return lore;
     }
 

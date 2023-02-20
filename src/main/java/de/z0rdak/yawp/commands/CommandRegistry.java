@@ -13,7 +13,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.TranslatableTextContent;
 
 import static de.z0rdak.yawp.util.MessageUtil.buildExecuteCmdComponent;
-import static de.z0rdak.yawp.util.MessageUtil.buildHelpHeader;
+import static de.z0rdak.yawp.util.MessageUtil.buildHeader;
 import static net.minecraft.util.Formatting.AQUA;
 import static net.minecraft.util.Formatting.GREEN;
 
@@ -22,9 +22,8 @@ public class CommandRegistry {
     private CommandRegistry() {
     }
 
-    public static void init(CommandDispatcher<ServerCommandSource> commandDispatcher) {
-        commandDispatcher.register(buildCommands(CommandPermissionConfig.WP));
-        commandDispatcher.register(buildCommands(CommandPermissionConfig.YAWP));
+    public static void init(CommandDispatcher<ServerCommandSource> commandDispatcher, String modRootCmd) {
+        commandDispatcher.register(buildCommands(modRootCmd));
     }
 
     public static LiteralArgumentBuilder<ServerCommandSource> buildCommands(String baseCmd) {
@@ -42,9 +41,9 @@ public class CommandRegistry {
     }
 
     private static int promptHelp(ServerCommandSource src) {
-        MessageUtil.sendCmdFeedback(src, buildHelpHeader("cli.msg.help.header"));
+        MessageUtil.sendCmdFeedback(src, buildHeader("cli.msg.help.header"));
         String command = CommandUtil.buildCommandStr(CommandConstants.DIMENSION.toString());
-        MutableText cmdStr = MutableText.of(new TranslatableTextContent("cli.msg.help.1", CommandPermissionConfig.WP));
+        MutableText cmdStr = MutableText.of(new TranslatableTextContent("cli.msg.help.1", CommandPermissionConfig.BASE_CMD));
         MessageUtil.sendCmdFeedback(src, buildExecuteCmdComponent(
                 MutableText.of(new LiteralTextContent("=> ")),
                 MutableText.of(new TranslatableTextContent("help.tooltip.dim")),

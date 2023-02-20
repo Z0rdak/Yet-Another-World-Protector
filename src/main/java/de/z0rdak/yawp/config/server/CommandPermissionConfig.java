@@ -20,8 +20,9 @@ public class CommandPermissionConfig {
     public static final ForgeConfigSpec.ConfigValue<Integer> REQUIRED_OP_LEVEL;
     public static final ForgeConfigSpec.ConfigValue<Boolean> COMMAND_BLOCK_EXECUTION;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> PLAYERS_WITH_PERMISSION;
-    public static String WP = "wp";
-    public static String YAWP = "yawp";
+    public static final ForgeConfigSpec.ConfigValue<Integer> WP_COMMAND_ALTERNATIVE;
+    public static final String[] WP_CMDS = new String[]{"wp", "yawp"};
+    public static String BASE_CMD;
     private static MinecraftServer serverInstance;
 
     static {
@@ -31,6 +32,10 @@ public class CommandPermissionConfig {
 
         COMMAND_BLOCK_EXECUTION = BUILDER.comment("Permission for command blocks to execute mod commands")
                 .define("command_block_execution", true);
+
+        WP_COMMAND_ALTERNATIVE = BUILDER.comment("Default command alternative used in quick commands in chat.\nThis is only important if another mod uses the /wp command (like Journey Map). Defaults to 0.\n" +
+                        " 0 -> /wp\n 1 -> /yawp")
+                .defineInRange("wp_root_command", 0, 0, 1);
 
         REQUIRED_OP_LEVEL = BUILDER.comment("Minimum OP level to use mod commands.\n")
                 .defineInRange("command_op_level", 4, 0, 4);

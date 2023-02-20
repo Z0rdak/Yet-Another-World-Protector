@@ -9,10 +9,10 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.DefaultedRegistry;
+import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 
 import java.util.*;
@@ -365,7 +365,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
     @Override
     public void deserializeNBT(NbtCompound nbt) {
         this.name = nbt.getString(NAME);
-        this.dimension = RegistryKey.of(RegistryKeys.WORLD, new Identifier(nbt.getString(DIM)));
+        this.dimension = RegistryKey.of(DefaultedRegistry.WORLD_KEY, new Identifier(nbt.getString(DIM)));
         this.isActive = nbt.getBoolean(ACTIVE);
         this.regionType = RegionType.of(nbt.getString(REGION_TYPE));
         this.flags = new FlagContainer(nbt.getCompound(FLAGS));

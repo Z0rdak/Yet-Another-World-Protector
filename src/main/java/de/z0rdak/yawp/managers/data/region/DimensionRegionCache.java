@@ -9,9 +9,9 @@ import de.z0rdak.yawp.core.region.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.registry.RegistryKey;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 
 import java.util.*;
@@ -107,28 +107,8 @@ public class DimensionRegionCache implements INbtSerializable<NbtCompound> {
         RegionDataManager.save();
     }
 
-    public void removeOwner(ServerPlayerEntity player) {
-        this.dimensionalRegion.removeOwner(player);
-        RegionDataManager.save();
-    }
-
-    public void removeOwner(Team team) {
-        this.dimensionalRegion.removeOwner(team);
-        RegionDataManager.save();
-    }
-
-    public void removeMember(ServerPlayerEntity player) {
-        this.dimensionalRegion.removeMember(player);
-        RegionDataManager.save();
-    }
-
     public void setDimState(boolean active) {
         this.dimensionalRegion.setIsActive(active);
-        RegionDataManager.save();
-    }
-
-    public void removeMember(Team team) {
-        this.dimensionalRegion.removeMember(team);
         RegionDataManager.save();
     }
 

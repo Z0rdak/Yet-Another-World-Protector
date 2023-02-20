@@ -2,6 +2,7 @@ package de.z0rdak.yawp.handler.flags;
 
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
+import net.fabricmc.fabric.api.entity.event.v1.EntityElytraEvents;
 import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
@@ -38,8 +39,13 @@ public final class PlayerFlagHandler {
   ServerLivingEntityEvents.ALLOW_DEATH.register(PlayerFlagHandler::onDeathblow);
   ServerLivingEntityEvents.AFTER_DEATH.register(PlayerFlagHandler::onDeath);
 
+  EntityElytraEvents.ALLOW.register(PlayerFlagHandler::onElytraFlight);
   // ServerEntityEvents.EQUIPMENT_CHANGE
 
+ }
+
+ private static boolean onElytraFlight(LivingEntity livingEntity) {
+  return true;
  }
 
  private static void onDeath(LivingEntity entity, DamageSource damageSource) {
@@ -63,9 +69,11 @@ public final class PlayerFlagHandler {
  }
 
  private static PlayerEntity.SleepFailureReason onAllowSleeping(PlayerEntity player, BlockPos blockPos) {
+  player.getInventory().markDirty();
   return null;
  }
 
+ // FIXME: Does not consider creative mode
  private static boolean onBreakBlock(World world, PlayerEntity player, BlockPos blockPos, BlockState blockState, BlockEntity blockEntity) {
   if (isServerSide(world)) {
    DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.getRegistryKey());
@@ -88,16 +96,16 @@ public final class PlayerFlagHandler {
   if (event.getTarget() instanceof PlayerEntity target) {
   PlayerEntity attacker = event.getPlayer();
   RegistryKey<World> entityDim = getEntityDim(attacker);
-     DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(entityDim);
-     if (dimCache != null) {
-     FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(attacker, target.getBlockPos(), MELEE_PLAYERS, dimCache.getDimensionalRegion());
-     handleAndSendMsg(event, flagCheckEvent);
-     }
-     }
-     }
-     }
+  DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(entityDim);
+  if (dimCache != null) {
+  FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(attacker, target.getBlockPos(), MELEE_PLAYERS, dimCache.getDimensionalRegion());
+  handleAndSendMsg(event, flagCheckEvent);
+  }
+  }
+  }
+  }
 
-     /**
+  /**
      * Prevents various entities from been attacked from a player. <br>
      * TODO: Flag for all entities
 

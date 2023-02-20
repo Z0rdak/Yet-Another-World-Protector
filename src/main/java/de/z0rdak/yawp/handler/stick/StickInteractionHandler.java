@@ -5,7 +5,7 @@ public class StickInteractionHandler {
     private StickInteractionHandler() {
     }
 
-    /*
+ /*
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (!event.getWorld().isClientSide) {
             PlayerEntity player = event.getPlayer();
@@ -92,6 +92,6 @@ public class StickInteractionHandler {
             initMarkerNbt(outputItem, type, event.getPlayer().getCommandSenderWorld().dimension());
         }
     }
+*/
 
-     */
 }

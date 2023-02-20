@@ -3,16 +3,16 @@ package de.z0rdak.yawp.core.region;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.DefaultedRegistry;
+import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 
 
 public class GlobalRegion extends AbstractRegion {
 
     public static final Identifier GLOBAL = new Identifier("yawp", "global");
-    public static final RegistryKey<World> GLOBAL_DIMENSION = RegistryKey.of(RegistryKeys.WORLD, GLOBAL);
+    public static final RegistryKey<World> GLOBAL_DIMENSION = RegistryKey.of(DefaultedRegistry.WORLD_KEY, GLOBAL);
 
     protected GlobalRegion(NbtCompound nbt) {
         super(nbt);

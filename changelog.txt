@@ -1,3 +1,39 @@
+# 0.0.2.1-beta4 - Region overlapping hotfix
+## Fixes
+* Fix overlapping regions not correctly considering priority and region member/ownership.
+From now on, regions with the highest priority always should be the deciding region regarding flags.
+* Fix Local Regions not overwriting their parent region flags (either Dimensional or Local Regions).
+Local Regions show now disable flags from their parent regions, if they don't define the flags themselves.
+The following table show how flags are handled for region hierarchies:
+|Parent       | Child           | Result |
+|-------------|-----------------|--------|
+|flag set     | flag set        | deny   |
+|flag not set | flag set        | deny   |
+|flag set     | flag not set    | allow  |
+|flag set     | no child region | deny   |
+* Fix removing teams from regions not working properly
+# 0.0.2.0-beta4 - CLI pagination & new flags
+## Additions
+* Add flag `use-elytra`. This flag prevents players from using the elytra for flying.
+Specifically, it prevents players from starting. It does not force players to land when they are flying in a zone with this flag.
+* Add flag `no-flight`. This flag prevents players from flying in a region. It also forces players to fall.
+* Add flag `enter-dim` for Dimensional Regions. This flag prevents players from traveling (using a portal or teleporting) to the dimension which has this flag active.
+* Add flag `mob-griefing` to prevent mob griefing.
+* Add flag `enderman-griefing` to prevent enderman from picking up and placing blocks. This replaces the now removed flag `entity-place`.
+* Add pagination support for flags, regions/children, players and teams for the CLI
+* Add config option for amount of entries (flags, regions, players or teams) per page: `cli_entries_per_page`. It's located in the `yawp-region-defaults.toml`. It defaults to 5 entries per page.
+* Reintroduced the config option to choose the mods root command: `wp_root_command`. It's located in the `yawp-common.toml` config. You are able to choose between `/wp` and `/yawp`, with `/wp` being the default.
+## Changes
+* Replace most player names in the CLI with player info links
+* Replace most team names in the CLI with team info links
+* Replace most region names in the CLI with region info links
+* Unify affiliate cli for dimensional and local regions
+* Unify colors for different actions in the cli
+## Fixes
+* Fix RegionMarker displaying language keys instead of correct tooltip.
+* Fix player inventory not synced correctly after creation region marker by renaming a stick in an anvil.
+* Fix player teams not considered for permission checks to manage regions
+* Fix `/wp region <dim> <region> area ...` update not checking for parent regions permissions
 # 0.0.1.4-beta4 - CLI improvements & priority fixes
 ## Additions
 * Add flag `use-entities` to prevent general entity interactions
@@ -7,16 +43,13 @@ This should, beside other things, prevent using modded containers in contradicti
 which only covers containers implementing vanilla mechanics.
 * Add some sanity checks when setting region priority, so prevent mistakes for overlapping regions and region hierarchy
 ## Changes
-TODO: * Reworked header format (the lines with == ... ==) to be more consistent and add a self-link to each header for easier accessibility.
+* Reworked header format (the lines with == ... ==) to be more consistent and add a self-link to each header for easier accessibility.
 * Remove `use` flag.
 ## Fixes
 * Fix priority not set properly for Local Regions
-TODO: * Fix some I18n typos and missing translations
+* Fix some I18n typos and missing translations
 ## Notes
 * Currently child regions do not overwrite flags of their parents. This means for example when having a parent with the break-block flag, which denies breaking blocks, and a child which doesn't have this flag, the flag of the parent still covers the child region.
-
-
-
 # 0.0.1.3-beta4
 ## Fixes
 * Fix mod commands being executable without permission when using new alternative base command yawp

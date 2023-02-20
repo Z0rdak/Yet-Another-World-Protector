@@ -10,6 +10,7 @@ import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.region.AbstractMarkableRegion;
 import de.z0rdak.yawp.core.region.CuboidRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
+import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -31,11 +32,14 @@ import java.util.Collections;
 import java.util.Objects;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
+import static de.z0rdak.yawp.core.region.RegionType.LOCAL;
 import static de.z0rdak.yawp.util.CommandUtil.*;
-import static de.z0rdak.yawp.util.MessageUtil.*;
+import static de.z0rdak.yawp.util.MessageUtil.buildRegionInfoLink;
+import static de.z0rdak.yawp.util.MessageUtil.sendCmdFeedback;
 import static de.z0rdak.yawp.util.StickUtil.STICK;
 import static de.z0rdak.yawp.util.StickUtil.getStickType;
 import static net.minecraft.util.Formatting.RED;
+
 
 public final class MarkerCommands {
 
@@ -72,7 +76,7 @@ public final class MarkerCommands {
                 return res;
             }
             if (res == 1) {
-                sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.name.exists", dimCache.getDimensionalRegion().getName(), regionName)));
+                sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.name.exists", buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION), buildRegionInfoLink(dimCache.getRegion(regionName), LOCAL))));
                 return res;
             }
 
@@ -94,14 +98,14 @@ public final class MarkerCommands {
                                     parentRegion.addChild(region);
                                     LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.DEFAULT_REGION_PRIORITY.get());
                                     RegionDataManager.save();
-                                    sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region))));
+                                    sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region, LOCAL))));
                                     return 0;
                                 } else {
                                     sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("Parent region does not contain new region")));
                                     return -1;
                                 }
                             } else {
-                                sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.stick.local.deny", parentRegion.getName())));
+                                sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.stick.local.deny", buildRegionInfoLink(parentRegion, LOCAL))));
                                 return 1;
                             }
                         } else {
@@ -109,10 +113,10 @@ public final class MarkerCommands {
                                 dimCache.addRegion(region);
                                 LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.DEFAULT_REGION_PRIORITY.get());
                                 RegionDataManager.save();
-                                sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region))));
+                                sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region, LOCAL))));
                                 return 0;
                             } else {
-                                sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.stick.dim.deny", dimCache.getDimensionalRegion().getName())));
+                                sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.stick.dim.deny", buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION))));
                                 return 2;
                             }
                         }
@@ -121,13 +125,11 @@ public final class MarkerCommands {
                         return -2;
                     }
                 } else {
-                    sendCmdFeedback(src, MutableText.of(new LiteralTextContent(RED + ""))
-                            .append(MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.stick.missing"))));
+                    sendCmdFeedback(src, MutableText.of(new LiteralTextContent(RED + "")).append(MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.stick.missing"))));
                     return -2;
                 }
             } else {
-                sendCmdFeedback(src, MutableText.of(new LiteralTextContent(RED + ""))
-                        .append(MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.stick.missing"))));
+                sendCmdFeedback(src, MutableText.of(new LiteralTextContent(RED + "")).append(MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.stick.missing"))));
                 return -2;
             }
         } catch (CommandSyntaxException e) {
@@ -170,8 +172,7 @@ public final class MarkerCommands {
             PlayerEntity targetPlayer = src.getPlayerOrThrow();
             ItemStack markerStick = StickUtil.initMarkerNbt(Items.STICK.getDefaultStack(), StickType.MARKER, targetPlayer.world.getRegistryKey());
             targetPlayer.giveItemStack(markerStick);
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("Added RegionMarker to inventory of player '" + targetPlayer.getEntityName() + "'")));
-            sendMessage(targetPlayer, MutableText.of(new TranslatableTextContent("RegionMarker added to your inventory.")));
+            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("RegionMarker added to your inventory.")));
         } catch (CommandSyntaxException e) {
             sendCmdFeedback(src, MutableText.of(new TranslatableTextContent(RED + "Command needs a player as command source" + RESET)));
             return 1;

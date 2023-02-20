@@ -1,9 +1,9 @@
 package de.z0rdak.yawp.core.region;
 
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.DefaultedRegistry;
+import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 
 /**
@@ -33,7 +33,7 @@ public final class DimensionalRegion extends AbstractRegion {
     }
 
     public DimensionalRegion(String dimensionKey) {
-        this(RegistryKey.of(RegistryKeys.WORLD, new Identifier(dimensionKey)));
+        this(RegistryKey.of(DefaultedRegistry.WORLD_KEY, new Identifier(dimensionKey)));
     }
 
     /**
