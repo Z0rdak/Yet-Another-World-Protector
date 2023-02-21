@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(AnvilScreenHandler.class)
 public abstract class AnvilScreenHandlerMixin {
 
-    @Inject(method = "onTakeOutput", at = @At("HEAD"))
+    @Inject(method = "onTakeOutput", at = @At("HEAD"), cancellable = true, allow = 1)
     private void onTakeOutput(PlayerEntity player, ItemStack outputItem, CallbackInfo ci) {
         if (!player.getWorld().isClient) {
             // Retrieve the input and output items from the anvil menu
