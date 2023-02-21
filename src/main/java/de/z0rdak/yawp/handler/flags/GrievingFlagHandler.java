@@ -15,11 +15,13 @@ import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.living.LivingDestroyBlockEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -147,13 +149,33 @@ public class GrievingFlagHandler {
     }
 
     @SubscribeEvent
-    public static void onEndermanPlacingBlock(BlockEvent.EntityPlaceEvent event) {
+    public static void onEndermanPlaceBlock(BlockEvent.EntityPlaceEvent event) {
         if (isServerSide(event)) {
             if (event.getEntity() instanceof EnderMan) {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
                 if (dimCache != null) {
-                    FlagCheckEvent flagCheckEvent = checkTargetEvent(event.getEntity().blockPosition(), RegionFlag.ENTITY_PLACE, dimCache.getDimensionalRegion());
+                    FlagCheckEvent flagCheckEvent = checkTargetEvent(event.getPos(), RegionFlag.ENTITY_PLACE, dimCache.getDimensionalRegion());
                     event.setCanceled(flagCheckEvent.isDenied());
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onMobGriefing(EntityMobGriefingEvent event) {
+        if (isServerSide(event)) {
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
+            if (dimCache != null) {
+                FlagCheckEvent mobGriefingFlagCheck = checkTargetEvent(event.getEntity().blockPosition(), RegionFlag.MOB_GRIEFING, dimCache.getDimensionalRegion());
+                if (mobGriefingFlagCheck.isDenied()) {
+                    event.setResult(Event.Result.DENY);
+                }
+
+                if (event.getEntity() instanceof EnderMan) {
+                    FlagCheckEvent endermanGriefingFlagCheck = checkTargetEvent(event.getEntity().blockPosition(), RegionFlag.ENDERMAN_GRIEFING, dimCache.getDimensionalRegion());
+                    if (endermanGriefingFlagCheck.isDenied()) {
+                        event.setResult(Event.Result.DENY);
+                    }
                 }
             }
         }
@@ -171,10 +193,10 @@ public class GrievingFlagHandler {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
 
                 Set<BlockPos> protectedBlocks = event.getAffectedBlocks().stream()
-                        .filter(blockPos -> checkTargetEventFor(blockPos, RegionFlag.EXPLOSION_BLOCK, dimRegion))
+                        .filter(blockPos -> checkTargetEvent(blockPos, RegionFlag.EXPLOSION_BLOCK, dimRegion).isDenied())
                         .collect(Collectors.toSet());
                 Set<Entity> protectedEntities = event.getAffectedEntities().stream()
-                        .filter(entity -> checkTargetEventFor(entity.blockPosition(), RegionFlag.EXPLOSION_ENTITY, dimRegion))
+                        .filter(entity -> checkTargetEvent(entity.blockPosition(), RegionFlag.EXPLOSION_ENTITY, dimRegion).isDenied())
                         .collect(Collectors.toSet());
 
                 event.getAffectedBlocks().removeAll(protectedBlocks);
@@ -184,17 +206,17 @@ public class GrievingFlagHandler {
                     boolean explosionTriggeredByCreeper = (event.getExplosion().getSourceMob() instanceof Creeper);
                     if (explosionTriggeredByCreeper) {
                         protectedBlocks = event.getAffectedBlocks().stream()
-                                .filter(blockPos -> checkTargetEventFor(blockPos, RegionFlag.EXPLOSION_CREEPER_BLOCK, dimRegion))
+                                .filter(blockPos -> checkTargetEvent(blockPos, RegionFlag.EXPLOSION_CREEPER_BLOCK, dimRegion).isDenied())
                                 .collect(Collectors.toSet());
                         protectedEntities = event.getAffectedEntities().stream()
-                                .filter(entity -> checkTargetEventFor(entity.blockPosition(), RegionFlag.EXPLOSION_CREEPER_ENTITY, dimRegion))
+                                .filter(entity -> checkTargetEvent(entity.blockPosition(), RegionFlag.EXPLOSION_CREEPER_ENTITY, dimRegion).isDenied())
                                 .collect(Collectors.toSet());
                     } else {
                         protectedBlocks = event.getAffectedBlocks().stream()
-                                .filter(blockPos -> checkTargetEventFor(blockPos, RegionFlag.EXPLOSION_OTHER_BLOCKS, dimRegion))
+                                .filter(blockPos -> checkTargetEvent(blockPos, RegionFlag.EXPLOSION_OTHER_BLOCKS, dimRegion).isDenied())
                                 .collect(Collectors.toSet());
                         protectedEntities = event.getAffectedEntities().stream()
-                                .filter(entity -> checkTargetEventFor(entity.blockPosition(), RegionFlag.EXPLOSION_OTHER_ENTITY, dimRegion))
+                                .filter(entity -> checkTargetEvent(entity.blockPosition(), RegionFlag.EXPLOSION_OTHER_ENTITY, dimRegion).isDenied())
                                 .collect(Collectors.toSet());
                     }
                     event.getAffectedBlocks().removeAll(protectedBlocks);

@@ -20,7 +20,9 @@ import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.BasePressurePlateBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.EnderChestBlockEntity;
@@ -34,6 +36,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.ServerChatEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.EntityTeleportEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
@@ -60,6 +63,24 @@ import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 public final class PlayerFlagHandler {
 
     private PlayerFlagHandler() {
+    }
+
+    @SubscribeEvent
+    public static void onElytraFlying(TickEvent.PlayerTickEvent event) {
+        if (isServerSide(event.player) && event.phase == TickEvent.Phase.END) {
+            ResourceKey<Level> entityDim = getEntityDim(event.player);
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(entityDim);
+            if (dimCache != null) {
+                // FIXME FIXME: This check first
+                if (event.player.isFallFlying()) {
+                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(event.player, event.player.blockPosition(), NO_FLIGHT, dimCache.getDimensionalRegion());
+                    if (flagCheckEvent.isDenied()) {
+                        sendFlagDeniedMsg(flagCheckEvent);
+                        event.player.stopFallFlying();
+                    }
+                }
+            }
+        }
     }
 
     /**
