@@ -109,13 +109,11 @@ public class StickInteractionHandler {
             // split stack and only create one stick, also refund xp
             inputItem.setCount(outputItem.getCount() - 1);
             player.addItem(inputItem);
-            // TODO: Send network packet to force inventory sync
             event.setBreakChance(0.0f);
             player.giveExperienceLevels(1);
             initMarkerNbt(outputItem, type, event.getPlayer().getCommandSenderWorld().dimension());
-
+            // FIXME: does not work like in 1.18.2 +
+            player.inventory.setChanged();
         }
     }
-
-
 }
