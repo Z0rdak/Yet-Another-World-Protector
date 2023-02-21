@@ -12,6 +12,7 @@
     "AnimalMixin",
     "AnvilScreenHandlerMixin",
     "CommandManagerMixin",
+    "EntityMixin",
     "FireBlockMixin",
     "FrogMixin",
     "ServerPlayerInteractionManagerMixin"
