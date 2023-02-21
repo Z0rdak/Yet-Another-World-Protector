@@ -56,20 +56,19 @@ public class MarkerStickHandler {
         }
     }
 
-    public static void onCycleMode(PlayerEntity player, ItemStack involvedItem) {
+    public static void onCycleMode(PlayerEntity player, ItemStack involvedItem, BlockHitResult target) {
         if (!player.getWorld().isClient) {
             // is some valid mod stick
             if (!involvedItem.equals(ItemStack.EMPTY)
                     && hasNonNullTag(involvedItem)
                     && involvedItem.getNbt().contains(STICK)) {
-                HitResult blockLookingAt = player.raycast(20.0d, 0.0f, false);
                 boolean targetIsAir;
-                if (blockLookingAt.getType() == HitResult.Type.BLOCK) {
-                    BlockPos blockpos = ((BlockHitResult) blockLookingAt).getBlockPos();
+                if (target.getType() == HitResult.Type.BLOCK) { // should always be block
+                    BlockPos blockpos = target.getBlockPos();
                     BlockState blockstate = player.getWorld().getBlockState(blockpos);
                     targetIsAir = blockstate.getBlock().equals(Blocks.AIR);
                 } else {
-                    targetIsAir = blockLookingAt.getType() == HitResult.Type.MISS;
+                    targetIsAir = target.getType() == HitResult.Type.MISS;
                 }
 
                 if (player.isCrawling() && targetIsAir) {
