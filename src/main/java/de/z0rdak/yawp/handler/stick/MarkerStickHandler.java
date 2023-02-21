@@ -20,16 +20,12 @@ import static de.z0rdak.yawp.util.StickUtil.*;
 
 public class MarkerStickHandler {
 
-    public static void onCreateStick(PlayerEntity player, ItemStack input, ItemStack output) {
-        StickType type = StickType.of(output.getName().getString());
-        if (type != StickType.UNKNOWN) {
-            // split stack and only create one stick, also refund xp
-            input.setCount(output.getCount() - 1);
-            player.giveItemStack(input);
-            player.getInventory().markDirty();
-            player.addExperienceLevels(1);
-            StickUtil.initMarkerNbt(output, type, player.getWorld().getRegistryKey());
-        }
+    public static void onCreateStick(PlayerEntity player, ItemStack input, ItemStack output, StickType type) {
+        // split stack and only create one stick, also refund xp
+        input.setCount(output.getCount() - 1);
+        player.giveItemStack(input);
+        player.addExperienceLevels(1);
+        StickUtil.initMarkerNbt(output, type, player.getWorld().getRegistryKey());
     }
 
     public static void onMarkBlock(PlayerEntity player, ItemStack involvedItem, BlockPos target) {
