@@ -1,11 +1,9 @@
 package de.z0rdak.yawp.util;
 
 import de.z0rdak.yawp.core.area.CuboidArea;
+import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.core.region.AbstractMarkableRegion;
-import de.z0rdak.yawp.core.region.CuboidRegion;
-import de.z0rdak.yawp.core.region.IMarkableRegion;
-import de.z0rdak.yawp.core.region.SphereRegion;
+import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.entity.player.PlayerEntity;
@@ -14,6 +12,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -22,6 +21,27 @@ import java.util.stream.Collectors;
 public final class LocalRegions {
 
     private LocalRegions() {
+    }
+
+    /**
+     * Gets flags of region sorted by active state and name
+     *
+     * @param region
+     * @return
+     */
+    public static List<IFlag> getSortedFlags(IProtectedRegion region) {
+        List<IFlag> activeFlags = region.getFlags().stream()
+                .filter(IFlag::isActive)
+                .sorted()
+                .collect(Collectors.toList());
+        List<IFlag> inActiveFlags = region.getFlags().stream()
+                .filter(f -> !f.isActive())
+                .sorted()
+                .collect(Collectors.toList());
+        activeFlags.addAll(inActiveFlags);
+        List<IFlag> flags = new ArrayList<>(activeFlags);
+        flags.addAll(inActiveFlags);
+        return flags;
     }
 
     public static AbstractMarkableRegion regionFrom(PlayerEntity player, MarkerStick marker, String regionName) {
@@ -77,19 +97,40 @@ public final class LocalRegions {
                 .collect(Collectors.toList());
     }
 
-    // TODO: Start from dimRegion with only the parents, so possible regions to check are far less
-    public static List<IMarkableRegion> getInvolvedRegionsFor(RegionFlag flag, BlockPos position, PlayerEntity player, RegistryKey<World> dim) {
+    public static List<IMarkableRegion> getInvolvedRegionsFor(BlockPos position, RegistryKey<World> dim) {
         return RegionDataManager.get().getRegionsFor(dim).stream()
                 .filter(IMarkableRegion::isActive)
-                .filter(region -> region.containsFlag(flag) && region.getFlag(flag.name).isActive())
-                .filter(region -> !region.permits(player))
                 // position check should always be the last check to do, because it is the most computation expensive
                 .filter(region -> region.contains(position))
                 .collect(Collectors.toList());
     }
 
-    public static List<IMarkableRegion> getRegionsAround(BlockPos position, RegistryKey<World> dim) {
+    @Nullable
+    public static IMarkableRegion getInvolvedRegionFor(BlockPos position, RegistryKey<World> dim) {
+        List<IMarkableRegion> regionsForPos = getInvolvedRegionsFor(position, dim);
+        if (regionsForPos.isEmpty()) {
+            return null;
+        } else {
+            return Collections.max(regionsForPos, Comparator.comparing(IMarkableRegion::getPriority));
+        }
+    }
+
+    // TODO: Start from dimRegion with only the parents, so possible regions to check are far less
+    public static List<IMarkableRegion> getInvolvedRegionsFor(RegionFlag flag, BlockPos position, PlayerEntity player, RegistryKey<World> dim) {
         return RegionDataManager.get().getRegionsFor(dim).stream()
+                .filter(IMarkableRegion::isActive)
+                .filter(region -> region.containsFlag(flag) && region.getFlag(flag.name).isActive())
+                //.filter(region -> !region.permits(player))
+                // position check should always be the last check to do, because it is the most computation expensive
+                .filter(region -> region.contains(position))
+                .collect(Collectors.toList());
+    }
+
+    public static List<IMarkableRegion> getInvolvedRegionsFor(BlockPos position, PlayerEntity player, RegistryKey<World> dim) {
+        return RegionDataManager.get().getRegionsFor(dim).stream()
+                .filter(IMarkableRegion::isActive)
+                //.filter(region -> !region.permits(player))
+                // position check should always be the last check to do, because it is the most computation expensive
                 .filter(region -> region.contains(position))
                 .collect(Collectors.toList());
     }
@@ -106,6 +147,15 @@ public final class LocalRegions {
 
     public static IMarkableRegion getInvolvedRegionFor(RegionFlag flag, BlockPos position, PlayerEntity player, RegistryKey<World> dim) {
         List<IMarkableRegion> regionsForPos = getInvolvedRegionsFor(flag, position, player, dim);
+        if (regionsForPos.isEmpty()) {
+            return null;
+        } else {
+            return Collections.max(regionsForPos, Comparator.comparing(IMarkableRegion::getPriority));
+        }
+    }
+
+    public static IMarkableRegion getInvolvedRegionFor(BlockPos position, PlayerEntity player, RegistryKey<World> dim) {
+        List<IMarkableRegion> regionsForPos = getInvolvedRegionsFor(position, player, dim);
         if (regionsForPos.isEmpty()) {
             return null;
         } else {

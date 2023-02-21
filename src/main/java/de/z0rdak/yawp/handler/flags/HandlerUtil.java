@@ -104,14 +104,18 @@ public final class HandlerUtil {
     }
 
     public static FlagCheckEvent.PlayerFlagEvent checkPlayerEvent(PlayerEntity player, BlockPos target, RegionFlag regionFlag, DimensionalRegion dimRegion) {
-        IMarkableRegion involvedRegion = getInvolvedRegionFor(regionFlag, target, player, player.level.dimension());
+        IMarkableRegion involvedRegion = getInvolvedRegionFor(target, player, player.level.dimension());
         FlagCheckEvent.PlayerFlagEvent flagCheck = new FlagCheckEvent.PlayerFlagEvent(player, dimRegion, involvedRegion, regionFlag);
         if (involvedRegion == null) {
             flagCheck.setDeniedLocal(false);
         } else {
-            IFlag flag = involvedRegion.getFlag(regionFlag.name);
-            // TODO: Check state with allowed
-            flagCheck.setDeniedLocal(flag.isActive());
+            if (involvedRegion.containsFlag(regionFlag) && !involvedRegion.permits(player)) {
+                IFlag flag = involvedRegion.getFlag(regionFlag.name);
+                // TODO: Check state with allowed
+                flagCheck.setDeniedLocal(flag.isActive());
+            } else {
+                flagCheck.setDeniedLocal(false);
+            }
         }
         if (dimRegion.isActive()) {
             if (dimRegion.containsFlag(regionFlag) && !dimRegion.permits(player)) {
@@ -130,20 +134,27 @@ public final class HandlerUtil {
             return flagCheck;
         } else {
             boolean deniedResult = flagCheck.isDeniedInDim() && flagCheck.isDeniedLocal() || (!flagCheck.isDeniedInDim() || flagCheck.isDeniedLocal()) && (!flagCheck.isDeniedInDim() && (flagCheck.isDeniedLocal()) || !flagCheck.isDeniedInDim() && !flagCheck.isDeniedLocal());
-            flagCheck.setDenied(deniedResult);
+            boolean isDenied = flagCheck.isDeniedInDim() && flagCheck.isDeniedLocal()
+                    || !flagCheck.isDeniedInDim() && flagCheck.isDeniedLocal()
+                    || flagCheck.isDeniedInDim() && involvedRegion == null;
+            flagCheck.setDenied(isDenied);
             return flagCheck;
         }
     }
 
     public static FlagCheckEvent checkTargetEvent(BlockPos target, RegionFlag regionFlag, DimensionalRegion dimRegion) {
-        IMarkableRegion involvedRegion = getInvolvedRegionFor(regionFlag, target, dimRegion.getDim());
+        IMarkableRegion involvedRegion = getInvolvedRegionFor(target, dimRegion.getDim());
         FlagCheckEvent flagCheck = new FlagCheckEvent(dimRegion, involvedRegion, regionFlag);
         if (involvedRegion == null) {
             flagCheck.setDeniedLocal(false);
         } else {
-            IFlag flag = involvedRegion.getFlag(regionFlag.name);
-            // TODO: Check state with allowed
-            flagCheck.setDeniedLocal(flag.isActive());
+            if (involvedRegion.containsFlag(regionFlag)) {
+                IFlag flag = involvedRegion.getFlag(regionFlag.name);
+                // TODO: Check state with allowed
+                flagCheck.setDeniedLocal(flag.isActive());
+            } else {
+                flagCheck.setDeniedLocal(false);
+            }
         }
         if (dimRegion.isActive()) {
             if (dimRegion.containsFlag(regionFlag)) {
@@ -162,39 +173,11 @@ public final class HandlerUtil {
             return flagCheck;
         } else {
             boolean deniedResult = flagCheck.isDeniedInDim() && flagCheck.isDeniedLocal() || (!flagCheck.isDeniedInDim() || flagCheck.isDeniedLocal()) && (!flagCheck.isDeniedInDim() && (flagCheck.isDeniedLocal()) || !flagCheck.isDeniedInDim() && !flagCheck.isDeniedLocal());
-            flagCheck.setDenied(deniedResult);
+            boolean isDenied = flagCheck.isDeniedInDim() && flagCheck.isDeniedLocal()
+                    || !flagCheck.isDeniedInDim() && flagCheck.isDeniedLocal()
+                    || flagCheck.isDeniedInDim() && involvedRegion == null;
+            flagCheck.setDenied(isDenied);
             return flagCheck;
         }
-    }
-
-    public static boolean checkTargetEventFor(BlockPos target, RegionFlag regionFlag, DimensionalRegion dimRegion) {
-        IMarkableRegion involvedRegion = getInvolvedRegionFor(regionFlag, target, dimRegion.getDim());
-        FlagCheckEvent flagCheck = new FlagCheckEvent(dimRegion, involvedRegion, regionFlag);
-        if (involvedRegion == null) {
-            flagCheck.setDeniedLocal(false);
-        } else {
-            IFlag flag = involvedRegion.getFlag(regionFlag.name);
-            // TODO: Check state with allowed
-            flagCheck.setDeniedLocal(flag.isActive());
-        }
-        if (dimRegion.isActive()) {
-            if (dimRegion.containsFlag(regionFlag)) {
-                IFlag flag = dimRegion.getFlag(regionFlag.name);
-                // TODO: Check state with allowed
-                flagCheck.setDeniedInDim(flag.isActive());
-            } else {
-                flagCheck.setDeniedInDim(false);
-            }
-        } else {
-            flagCheck.setDeniedInDim(false);
-        }
-
-        if (flagCheck.getLocalRegion() == null) {
-            flagCheck.setDenied(flagCheck.isDeniedInDim());
-        } else {
-            boolean deniedResult = flagCheck.isDeniedInDim() && flagCheck.isDeniedLocal() || (!flagCheck.isDeniedInDim() || flagCheck.isDeniedLocal()) && (!flagCheck.isDeniedInDim() && (flagCheck.isDeniedLocal()) || !flagCheck.isDeniedInDim() && !flagCheck.isDeniedLocal());
-            flagCheck.setDenied(deniedResult);
-        }
-        return flagCheck.isDenied();
     }
 }
