@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.handler.flags;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -15,6 +16,7 @@ import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.entity.passive.horse.SkeletonHorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
@@ -33,15 +35,17 @@ import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 @Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER, bus = FORGE)
 public class WorldFlagHandler {
 
-    private WorldFlagHandler(){}
+    private WorldFlagHandler() {
+    }
 
     /**
      * Prevents all lightning strikes to hurt entities
      * and removes the lightning entity itself (needs testing)
+     *
      * @param event information about the lightning striking an entity
      */
     @SubscribeEvent
-    public static void onLightningStrikeOccur(EntityStruckByLightningEvent event){
+    public static void onLightningStrikeOccur(EntityStruckByLightningEvent event) {
         if (isServerSide(event)) {
             Entity poorEntity = event.getEntity();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(poorEntity));
@@ -72,6 +76,7 @@ public class WorldFlagHandler {
      * Prevents all nether portal spawning.
      * E.g. flint and steel, fire charge, ghast projectiles, dispenser + flint & steel, etc.
      * This has its uses for markable regions but has limited use for dimensional regions.
+     *
      * @param event containing information of nether portal to be created
      */
     @SubscribeEvent
@@ -88,6 +93,7 @@ public class WorldFlagHandler {
      * Handler prevents entities from using portals to travel between dimensions.
      * This has its uses for markable regions but limited use for dimensional regions.
      * Note: This event is only fired for PlayerEntity (1.16.5), See mixins for other entities.
+     *
      * @param event holding info about the entity traveling from one to another dimension.
      */
     @SubscribeEvent
@@ -138,12 +144,36 @@ public class WorldFlagHandler {
 
 
     @SubscribeEvent
-    public static void onTravelFromDim(EntityTravelToDimensionEvent event) {
-
-    }
-
-    @SubscribeEvent
     public static void onTravelToDim(EntityTravelToDimensionEvent event) {
-
+        if (isServerSide(event.getEntity())) {
+            if (event.getEntity() instanceof PlayerEntity) {
+                PlayerEntity player = (PlayerEntity) event.getEntity();
+                DimensionalRegion dimRegion = RegionDataManager.get().cacheFor(event.getDimension()).getDimensionalRegion();
+                ServerWorld targetServerLevel = player.getServer().getLevel(event.getDimension());
+                if (targetServerLevel != null) {
+                    /*
+                    FIXME: Get target position correctly - until then flag only works for dimension
+                    WorldBorder worldborder = targetServerLevel.getWorldBorder();
+                    double tpPosScale = DimensionType.getTeleportationScale(player.level.dimensionType(), targetServerLevel.dimensionType());
+                    BlockPos targetPos = worldborder.clampToBounds(player.getX() * tpPosScale, player.getY(), player.getZ() * tpPosScale);
+                     */
+                    FlagCheckEvent.PlayerFlagEvent playerFlagCheckEvent = new FlagCheckEvent.PlayerFlagEvent(player, dimRegion, null, ENTER_DIM);
+                    playerFlagCheckEvent.setDeniedLocal(false);
+                    if (dimRegion.isActive()) {
+                        if (dimRegion.containsFlag(ENTER_DIM) && !dimRegion.permits(player)) {
+                            IFlag flag = dimRegion.getFlag(ENTER_DIM.name);
+                            // TODO: Check state with allowed
+                            playerFlagCheckEvent.setDeniedInDim(flag.isActive());
+                        } else {
+                            playerFlagCheckEvent.setDeniedInDim(false);
+                        }
+                    } else {
+                        playerFlagCheckEvent.setDeniedInDim(false);
+                    }
+                    playerFlagCheckEvent.setDenied(playerFlagCheckEvent.isDeniedInDim());
+                    handleAndSendMsg(event, playerFlagCheckEvent);
+                }
+            }
+        }
     }
 }
