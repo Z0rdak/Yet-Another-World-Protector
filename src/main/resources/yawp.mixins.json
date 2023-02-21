@@ -15,6 +15,7 @@
     "MixinMonsterEntity",
     "MixinShulkerEntity",
     "MixinSlimeEntity",
-    "MixinWaterMobEntity"
+    "MixinWaterMobEntity",
+    "PlayerEntityMixin"
   ]
 }
