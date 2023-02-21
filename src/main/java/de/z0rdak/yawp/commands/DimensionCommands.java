@@ -52,9 +52,9 @@ public class DimensionCommands {
 
     public static LiteralArgumentBuilder<ServerCommandSource> register() {
         List<String> affiliationList = Arrays.asList(RegionCommands.MEMBER, RegionCommands.OWNER);
-        return literal(CommandConstants.DIMENSION)
+        return literal(CommandConstants.DIM)
                 /* /wp dimension <dim> list region */
-                .then(CommandManager.argument(CommandConstants.DIMENSION.toString(), DimensionArgumentType.dimension())
+                .then(CommandManager.argument(CommandConstants.DIM.toString(), DimensionArgumentType.dimension())
                         .then(literal(CREATE)
                                 .then(literal(REGION)
                                         .then(CommandManager.argument(REGION.toString(), StringArgumentType.word())
@@ -382,7 +382,7 @@ public class DimensionCommands {
             }
             List<MutableText> regionPagination = buildPaginationComponents(
                     buildDimRegionListHeader(dimRegion),
-                    buildCommandStr(DIMENSION.toString(), dimRegion.getName(), LIST.toString(), REGION.toString()),
+                    buildCommandStr(DIM.toString(), dimRegion.getName(), LIST.toString(), REGION.toString()),
                     buildRemoveRegionEntries(dimRegion, regionsForDim, RegionType.DIMENSION),
                     pageNo,
                     MutableText.of(new LiteralTextContent(" - ")).append(buildDimCreateRegionLink(dimRegion)));
@@ -401,7 +401,7 @@ public class DimensionCommands {
         }
         List<MutableText> flagPagination = buildPaginationComponents(
                 buildFlagHeader(dimCache.getDimensionalRegion(), RegionType.DIMENSION),
-                buildCommandStr(DIMENSION.toString(), dimCache.getDimensionalRegion().getName(), LIST.toString(), FLAG.toString()),
+                buildCommandStr(DIM.toString(), dimCache.getDimensionalRegion().getName(), LIST.toString(), FLAG.toString()),
                 buildRemoveFlagEntries(dimCache.getDimensionalRegion(), flags, RegionType.DIMENSION),
                 pageNo,
                 MutableText.of(new LiteralTextContent(" - ")).append(buildDimAddFlagLink(dimCache.getDimensionalRegion())));
@@ -426,7 +426,7 @@ public class DimensionCommands {
         }
         List<MutableText> affiliatePagination = buildPaginationComponents(
                 buildAffiliationHeader(dimRegion, affiliation, affiliationType, RegionType.DIMENSION),
-                buildCommandStr(DIMENSION.toString(), dimRegion.getDim().getValue().toString(), LIST.toString(), affiliation, affiliationType.name),
+                buildCommandStr(DIM.toString(), dimRegion.getDim().getValue().toString(), LIST.toString(), affiliation, affiliationType.name),
                 buildRemoveAffiliationEntries(dimRegion, affiliateNames, affiliationType, affiliation, RegionType.DIMENSION),
                 pageNo,
                 MutableText.of(new LiteralTextContent(" - ")).append(buildAddAffiliateLink(dimRegion, affiliation, affiliationType, RegionType.DIMENSION)));

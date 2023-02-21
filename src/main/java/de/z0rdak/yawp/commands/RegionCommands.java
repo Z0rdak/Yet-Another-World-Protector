@@ -63,7 +63,7 @@ public class RegionCommands {
 
     public static LiteralArgumentBuilder<ServerCommandSource> registerRegionCommands() {
         return literal(REGION)
-                .then(CommandManager.argument(DIMENSION.toString(), DimensionArgumentType.dimension())
+                .then(CommandManager.argument(DIM.toString(), DimensionArgumentType.dimension())
                         .then(regionCommands()));
     }
 

@@ -42,7 +42,7 @@ public class CommandRegistry {
 
     private static int promptHelp(ServerCommandSource src) {
         MessageUtil.sendCmdFeedback(src, buildHeader("cli.msg.help.header"));
-        String command = CommandUtil.buildCommandStr(CommandConstants.DIMENSION.toString());
+        String command = CommandUtil.buildCommandStr(CommandConstants.DIM.toString());
         MutableText cmdStr = MutableText.of(new TranslatableTextContent("cli.msg.help.1", CommandPermissionConfig.BASE_CMD));
         MessageUtil.sendCmdFeedback(src, buildExecuteCmdComponent(
                 MutableText.of(new LiteralTextContent("=> ")),

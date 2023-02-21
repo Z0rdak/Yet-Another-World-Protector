@@ -6,9 +6,9 @@ import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import de.z0rdak.yawp.commands.CommandConstants;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
+import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.MessageUtil;
@@ -27,7 +27,6 @@ import java.util.List;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.config.server.CommandPermissionConfig.*;
-import static de.z0rdak.yawp.core.region.RegionType.DIMENSION;
 import static de.z0rdak.yawp.core.region.RegionType.LOCAL;
 import static de.z0rdak.yawp.util.MessageUtil.buildRegionInfoLink;
 import static de.z0rdak.yawp.util.MessageUtil.sendCmdFeedback;
@@ -84,7 +83,7 @@ public class CommandInterceptor {
         }
 
         // check permission for other commands
-        ParsedArgument<ServerCommandSource, ?> dimParsedArgument = cmdContext.getArguments().get(DIMENSION.toString());
+        ParsedArgument<ServerCommandSource, ?> dimParsedArgument = cmdContext.getArguments().get(DIM.toString());
         if (dimParsedArgument.getResult() instanceof Identifier dimResLoc) {
             RegistryKey<World> dim = RegistryKey.of(DefaultedRegistry.WORLD_KEY, dimResLoc);
             ParsedArgument<ServerCommandSource, ?> regionArg = cmdContext.getArguments().get(REGION.toString());
@@ -124,7 +123,7 @@ public class CommandInterceptor {
                     if (!hasPermission(src)) {
                         DimensionalRegion dimRegion = RegionDataManager.get().cacheFor(region.getDim()).getDimensionalRegion();
                         YetAnotherWorldProtector.LOGGER.info("' " + src.getName() + "' is not allowed to manage region: '" + region.getName() + "' in dim '" + region.getDim().getValue() + "'!");
-                        sendCmdFeedback(src, MutableText.of(new LiteralTextContent("You are not allowed to manage region: '" + buildRegionInfoLink(region, LOCAL) + "' in dim '" + buildRegionInfoLink(dimRegion, DIMENSION) + "'!")));
+                        sendCmdFeedback(src, MutableText.of(new LiteralTextContent("You are not allowed to manage region: '" + buildRegionInfoLink(region, LOCAL) + "' in dim '" + buildRegionInfoLink(dimRegion, RegionType.DIMENSION) + "'!")));
                         return 1;
                     }
                 }
@@ -150,7 +149,7 @@ public class CommandInterceptor {
             return AllowInfoCmds() ? 0 : 1;
         }
         // check permission for other commands
-        ParsedArgument<ServerCommandSource, ?> dimParsedArgument = cmdContext.getArguments().get(CommandConstants.DIMENSION.toString());
+        ParsedArgument<ServerCommandSource, ?> dimParsedArgument = cmdContext.getArguments().get(DIM.toString());
         if (dimParsedArgument.getResult() instanceof Identifier dimResLoc) {
             RegistryKey<World> dim = RegistryKey.of(DefaultedRegistry.WORLD_KEY, dimResLoc);
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
