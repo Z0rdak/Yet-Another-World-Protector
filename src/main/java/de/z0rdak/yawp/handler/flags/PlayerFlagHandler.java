@@ -36,6 +36,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.ServerChatEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.EntityTeleportEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
@@ -62,6 +63,23 @@ import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 public final class PlayerFlagHandler {
 
     private PlayerFlagHandler() {
+    }
+
+    @SubscribeEvent
+    public static void onElytraFlying(TickEvent.PlayerTickEvent event) {
+        if (isServerSide(event.player) && event.phase == TickEvent.Phase.END) {
+            ResourceKey<Level> entityDim = getEntityDim(event.player);
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(entityDim);
+            if (dimCache != null) {
+                if (event.player.isFallFlying()) {
+                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(event.player, event.player.blockPosition(), NO_FLIGHT, dimCache.getDimensionalRegion());
+                    if (flagCheckEvent.isDenied()) {
+                        sendFlagDeniedMsg(flagCheckEvent);
+                        event.player.stopFallFlying();
+                    }
+                }
+            }
+        }
     }
 
     /**
