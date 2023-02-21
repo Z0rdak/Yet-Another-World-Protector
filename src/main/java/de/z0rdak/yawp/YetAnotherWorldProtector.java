@@ -1,11 +1,13 @@
 package de.z0rdak.yawp;
 
+import com.mojang.brigadier.CommandDispatcher;
 import de.z0rdak.yawp.commands.CommandRegistry;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.managers.data.player.PlayerTrackingManager;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -57,14 +59,19 @@ public class YetAnotherWorldProtector
         PlayerTrackingManager.loadPlayerData(event);
     }
 
+    private static CommandDispatcher<CommandSourceStack> dispatcher;
     @SubscribeEvent
     public void onServerStartingRegisterCommands(RegisterCommandsEvent event) {
-        CommandRegistry.init(event.getDispatcher());
+        dispatcher = event.getDispatcher();
     }
 
     @SubscribeEvent
     public void onConfigLoading(ModConfigEvent.Loading event) {
-        // empty for now
+        if (event.getConfig().getModId().equals(MODID) && event.getConfig().getFileName().equals(CommandPermissionConfig.CONFIG_NAME)) {
+            CommandPermissionConfig.BASE_CMD = CommandPermissionConfig.WP_CMDS[CommandPermissionConfig.WP_COMMAND_ALTERNATIVE.get()];
+            YetAnotherWorldProtector.LOGGER.info("Set mod base command to '/" + CommandPermissionConfig.BASE_CMD + "'");
+            CommandRegistry.init(dispatcher, CommandPermissionConfig.BASE_CMD);
+        }
     }
 
     @SubscribeEvent
