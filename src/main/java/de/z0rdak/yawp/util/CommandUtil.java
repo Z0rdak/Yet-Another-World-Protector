@@ -87,6 +87,7 @@ public class CommandUtil {
     public static boolean getAlertArgument(CommandContext<CommandSource> ctx) {
         return !BoolArgumentType.getBool(ctx, CommandConstants.ALERT.toString());
     }
+
     public static boolean getEnableArgument(CommandContext<CommandSource> ctx) {
         return BoolArgumentType.getBool(ctx, CommandConstants.ENABLE.toString());
     }
@@ -95,8 +96,12 @@ public class CommandUtil {
         return IntegerArgumentType.getInteger(ctx, CommandConstants.PRIORITY.toString());
     }
 
-    public static String buildCommandStr(String... cmdTokens){
-        String preamble = "/" + CommandPermissionConfig.WP;
+    public static int getPageNoArgument(CommandContext<CommandSource> ctx) {
+        return IntegerArgumentType.getInteger(ctx, PAGE.toString());
+    }
+
+    public static String buildCommandStr(String... cmdTokens) {
+        String preamble = "/" + CommandPermissionConfig.BASE_CMD;
         String cmdStr = String.join(" ", cmdTokens);
         return preamble + " " + cmdStr;
     }

@@ -8,6 +8,7 @@ public enum RegionFlag {
     ANIMAL_BREEDING("animal-breeding", FlagType.BOOLEAN_FLAG),
     ANIMAL_MOUNTING("animal-mounting", FlagType.BOOLEAN_FLAG),
     ANIMAL_TAMING("animal-taming", FlagType.BOOLEAN_FLAG),
+    ANIMAL_UNMOUNTING("animal-unmounting", FlagType.BOOLEAN_FLAG),
     AXE_STRIP("strip-wood", FlagType.BOOLEAN_FLAG),
     BREAK_BLOCKS("break_blocks", FlagType.BOOLEAN_FLAG),
     BREAK_ENTITIES("break_entities", FlagType.BOOLEAN_FLAG),
@@ -15,8 +16,10 @@ public enum RegionFlag {
     DRAGON_BLOCK_PROT("dragon-destruction", FlagType.BOOLEAN_FLAG),
     DROP_LOOT_ALL("drop-loot", FlagType.BOOLEAN_FLAG),
     DROP_LOOT_PLAYER("drop-loot-player", FlagType.BOOLEAN_FLAG),
+    ENDERMAN_GRIEFING("enderman-griefing", FlagType.BOOLEAN_FLAG),
     ENDERMAN_TELEPORT_FROM_REGION("enderman-tp-from", FlagType.BOOLEAN_FLAG),
     ENDER_CHEST_ACCESS("access-enderchest", FlagType.BOOLEAN_FLAG),
+    ENTER_DIM("enter-dim", FlagType.BOOLEAN_FLAG),
     ENTITY_PLACE("entity-place", FlagType.BOOLEAN_FLAG),
     EXECUTE_COMMAND("exec-command", FlagType.BOOLEAN_FLAG),
     EXPLOSION_BLOCK("explosions-blocks", FlagType.BOOLEAN_FLAG),
@@ -43,6 +46,8 @@ public enum RegionFlag {
     MELEE_PLAYERS("melee-players", FlagType.BOOLEAN_FLAG),
     MELEE_VILLAGERS("melee-villagers", FlagType.BOOLEAN_FLAG),
     MELEE_WANDERING_TRADER("melee-wtrader", FlagType.BOOLEAN_FLAG),
+    MOB_GRIEFING("mob-griefing", FlagType.BOOLEAN_FLAG),
+    NO_FLIGHT("no-flight", FlagType.BOOLEAN_FLAG),
     NO_PVP("no-pvp", FlagType.BOOLEAN_FLAG),
     PLACE_BLOCKS("place_blocks", FlagType.BOOLEAN_FLAG),
     PLACE_FLUIDS("place_fluids", FlagType.BOOLEAN_FLAG),
@@ -67,6 +72,7 @@ public enum RegionFlag {
     TRAMPLE_FARMLAND_PLAYER("trample-farmland-player", FlagType.BOOLEAN_FLAG),
     USE_BLOCKS("use-blocks", FlagType.BOOLEAN_FLAG),
     USE_BONEMEAL("use-bonemeal", FlagType.BOOLEAN_FLAG),
+    USE_ELYTRA("use-elytra", FlagType.BOOLEAN_FLAG),
     USE_ENDERPEARL_FROM_REGION("enderpearl-from", FlagType.BOOLEAN_FLAG),
     USE_ENDERPEARL_TO_REGION("enderpearl-to", FlagType.BOOLEAN_FLAG),
     USE_ENTITIES("use-entities", FlagType.BOOLEAN_FLAG),
@@ -95,14 +101,10 @@ public enum RegionFlag {
         this.type = type;
     }
 
-    @Override
-    public String toString() {
-        return name;
-    }
-
     /**
      * Checks if a flagIdentifier is defined within the RegionFlag enum.
      * Replaces the check of FlagsList.VALID_FLAGS.contains(flag).
+     *
      * @param flagIdentifier to be checked
      * @return true if flagIdentifier is defined within this enum, false otherwise
      */
@@ -113,6 +115,7 @@ public enum RegionFlag {
 
     /**
      * Returns a set of all flags with their string representation defined within this enum.
+     *
      * @return a set of all flagIdentifiers defined within RegionFlag
      */
     public static List<String> getFlagNames() {
@@ -125,7 +128,6 @@ public enum RegionFlag {
         return Arrays.stream(RegionFlag.values())
                 .collect(Collectors.toSet());
     }
-
 
     public static Set<RegionFlag> getFlags(FlagType type) {
         return getFlags()
@@ -152,5 +154,10 @@ public enum RegionFlag {
             throw new IllegalArgumentException("Invalid region flag identifier supplied");
         }
         return singleFlag.get(0);
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

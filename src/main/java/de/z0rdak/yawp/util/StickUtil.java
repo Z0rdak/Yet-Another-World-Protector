@@ -16,6 +16,8 @@ import net.minecraft.world.World;
 
 import java.util.Objects;
 
+import static net.minecraft.util.text.TextFormatting.ITALIC;
+
 public final class StickUtil {
 
     private StickUtil() {
@@ -130,8 +132,8 @@ public final class StickUtil {
         ListNBT lore = new ListNBT();
         lore.add(buildLoreTextLine(new TranslationTextComponent("help.tooltip.stick.marker.simple.1"), "#ff4d4d"));
         lore.add(buildLoreTextLine(new TranslationTextComponent("help.tooltip.stick.marker.simple.2"), "#ff4d4d"));
-        lore.add(buildLoreTextLine(new StringTextComponent(TextFormatting.ITALIC + "").append(new TranslationTextComponent("help.tooltip.stick.marker.simple.3")), "#808080"));
-        lore.add(buildLoreTextLine(new StringTextComponent(TextFormatting.ITALIC + "").append(new TranslationTextComponent("help.tooltip.stick.marker.simple.4")), "#808080"));
+        lore.add(buildLoreTextLine(new TranslationTextComponent("help.tooltip.stick.marker.simple.3").withStyle(ITALIC), "#808080"));
+        lore.add(buildLoreTextLine(new TranslationTextComponent("help.tooltip.stick.marker.simple.4").withStyle(ITALIC), "#808080"));
         return lore;
     }
 
