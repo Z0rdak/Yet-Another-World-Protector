@@ -6,6 +6,7 @@ import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.commands.CommandConstants;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
@@ -149,7 +150,7 @@ public class CommandInterceptor {
             return AllowInfoCmds() ? 0 : 1;
         }
         // check permission for other commands
-        ParsedArgument<ServerCommandSource, ?> dimParsedArgument = cmdContext.getArguments().get(DIMENSION.toString());
+        ParsedArgument<ServerCommandSource, ?> dimParsedArgument = cmdContext.getArguments().get(CommandConstants.DIMENSION.toString());
         if (dimParsedArgument.getResult() instanceof Identifier dimResLoc) {
             RegistryKey<World> dim = RegistryKey.of(DefaultedRegistry.WORLD_KEY, dimResLoc);
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
