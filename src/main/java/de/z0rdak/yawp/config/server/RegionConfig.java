@@ -14,6 +14,8 @@ public class RegionConfig {
 
     public static final ForgeConfigSpec CONFIG_SPEC;
     public static final String CONFIG_NAME = YetAnotherWorldProtector.MODID + "-region-defaults.toml";
+    public static final ForgeConfigSpec.ConfigValue<Integer> CLI_REGION_DEFAULT_PRIORITY_INC;
+    public static final ForgeConfigSpec.ConfigValue<Integer> CLI_PAGINATION_ENTRY_SIZE;
     public static final ForgeConfigSpec.ConfigValue<Integer> REGION_DEFAULT_PRIORITY_INC;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> REGION_DEFAULT_FLAGS;
     public static final ForgeConfigSpec.ConfigValue<Boolean> DIM_REGION_DISABLE_ON_CREATION;
@@ -37,25 +39,34 @@ public class RegionConfig {
         REGION_DEFAULT_PRIORITY_INC = BUILDER.comment("Default region priority increment/decrement.")
                 .defineInRange("default_region_priority_inc", 5, 1, 1000);
 
+        CLI_REGION_DEFAULT_PRIORITY_INC = BUILDER.comment("Default region priority increment/decrement.")
+                .defineInRange("default_region_priority_inc", 5, 1, 1000);
+
+        CLI_PAGINATION_ENTRY_SIZE = BUILDER.comment("Amount of pagination entries for CLI output of flags, region, children region, players, teams, etc.")
+                .defineInRange("cli_entries_per_page", 5, 5, 15);
+
         DIM_REGION_DISABLE_ON_CREATION = BUILDER.comment("Enable new dimensional regions on creation.")
                 .define("dim_enable_new", true);
         BUILDER.pop();
         CONFIG_SPEC = BUILDER.build();
     }
 
-    public static boolean shouldActivateNewDimRegion(){
+    public static boolean shouldActivateNewDimRegion() {
         return RegionConfig.DIM_REGION_DISABLE_ON_CREATION.get();
     }
 
+    public static int getPaginationSize() {
+        return CLI_PAGINATION_ENTRY_SIZE.get();
+    }
 
-    public static Set<String> getDefaultFlags(){
-        return  RegionConfig.REGION_DEFAULT_FLAGS.get().stream()
+    public static Set<String> getDefaultFlags() {
+        return RegionConfig.REGION_DEFAULT_FLAGS.get().stream()
                 .filter(Objects::nonNull)
                 .map(String::toString).collect(Collectors.toSet());
     }
 
-    public static Set<String> getDefaultDimFlags(){
-        return  RegionConfig.DIM_REGION_DEFAULT_FLAGS.get().stream()
+    public static Set<String> getDefaultDimFlags() {
+        return RegionConfig.DIM_REGION_DEFAULT_FLAGS.get().stream()
                 .filter(Objects::nonNull)
                 .map(String::toString).collect(Collectors.toSet());
     }
