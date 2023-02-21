@@ -62,7 +62,7 @@ public final class StickUtil {
     }
 
     public static boolean isVanillaStick(ItemStack itemStack) {
-        return itemStack.getItem().getDefaultStack().getTranslationKey().equals(Items.STICK.getTranslationKey());
+        return ItemStack.areItemsEqual(itemStack, Items.STICK.getDefaultStack());
     }
 
     public static AbstractStick getStick(ItemStack stick) throws StickException {
