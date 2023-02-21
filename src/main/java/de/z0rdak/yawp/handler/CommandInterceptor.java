@@ -52,7 +52,7 @@ public class CommandInterceptor {
                     case "dim":
                         return handleDimCommandExecution(parseResults, command);
                     default:
-                        return 1;
+                        return 0;
                 }
             }
         }
@@ -138,7 +138,12 @@ public class CommandInterceptor {
         ServerCommandSource src = cmdContext.getSource();
         List<ParsedCommandNode<ServerCommandSource>> cmdNodes = cmdContext.getNodes();
         List<String> nodeNames = cmdNodes.stream().map(node -> node.getNode().getName()).toList();
-
+        if (nodeNames.size() < 3) {
+            return 1;
+        }
+        if (nodeNames.size() == 3) {
+            return AllowInfoCmds() ? 0 : 1;
+        }
         if (nodeNames.contains(INFO.toString())
                 || nodeNames.contains(LIST.toString())) {
             return AllowInfoCmds() ? 0 : 1;

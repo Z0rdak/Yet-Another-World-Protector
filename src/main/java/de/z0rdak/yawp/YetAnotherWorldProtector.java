@@ -30,7 +30,9 @@ public class YetAnotherWorldProtector implements ModInitializer {
 
     private static void registerCommands(CommandDispatcher<ServerCommandSource> commandDispatcher, CommandRegistryAccess commandRegistryAccess, CommandManager.RegistrationEnvironment registrationEnvironment) {
         if (registrationEnvironment.dedicated) {
-            CommandRegistry.init(commandDispatcher, "wp");
+            CommandPermissionConfig.BASE_CMD = CommandPermissionConfig.WP_CMDS[0 /* CommandPermissionConfig.WP_COMMAND_ALTERNATIVE.get() */];
+            YetAnotherWorldProtector.LOGGER.info("Set mod base command to '/" + CommandPermissionConfig.BASE_CMD + "'");
+            CommandRegistry.init(commandDispatcher, CommandPermissionConfig.BASE_CMD);
         } else {
             // Only on integrated server
         }

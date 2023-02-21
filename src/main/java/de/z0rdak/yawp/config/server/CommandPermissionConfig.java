@@ -22,7 +22,7 @@ public class CommandPermissionConfig {
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> PLAYERS_WITH_PERMISSION;
     public static final ForgeConfigSpec.ConfigValue<Integer> WP_COMMAND_ALTERNATIVE;
     public static final String[] WP_CMDS = new String[]{"wp", "yawp"};
-    public static String BASE_CMD;
+    public static String BASE_CMD = "wp";
     private static MinecraftServer serverInstance;
 
     static {
