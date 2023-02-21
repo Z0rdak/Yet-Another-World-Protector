@@ -128,10 +128,10 @@ public final class StickUtil {
 
     private static ListTag getMarkerToolTip() {
         ListTag lore = new ListTag();
-        lore.add(buildLoreTextLine(Component.translatable("help.tooltip.stick.marker.simple.1"), "#ff4d4d"));
-        lore.add(buildLoreTextLine(Component.translatable("help.tooltip.stick.marker.simple.2"), "#ff4d4d"));
-        lore.add(buildLoreTextLine(Component.literal(ITALIC + "").append(Component.translatable("help.tooltip.stick.marker.simple.3")), "#808080"));
-        lore.add(buildLoreTextLine(Component.literal(ITALIC + "").append(Component.translatable("help.tooltip.stick.marker.simple.4")), "#808080"));
+        lore.add(buildLoreTextLine(Component.translatable("Used to mark a new region."), "#ff4d4d"));
+        lore.add(buildLoreTextLine(Component.translatable("Keep the Region Marker in your hand while creating a region!"), "#ff4d4d"));
+        lore.add(buildLoreTextLine(Component.translatable("Mark a (Cuboid) region by right-clicking the diagonal opposite corner blocks.").withStyle(ITALIC), "#808080"));
+        lore.add(buildLoreTextLine(Component.translatable("The green star on the RegionMarker indicates a valid area.").withStyle(ITALIC), "#808080"));
         return lore;
     }
 

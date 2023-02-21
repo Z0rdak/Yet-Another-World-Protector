@@ -4,7 +4,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.util.CommandUtil;
-import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.ClickEvent;
@@ -12,8 +11,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
 import static de.z0rdak.yawp.util.MessageUtil.*;
-import static de.z0rdak.yawp.util.MessageUtil.buildExecuteCmdComponent;
-import static de.z0rdak.yawp.util.MessageUtil.buildHeader;
 import static net.minecraft.ChatFormatting.AQUA;
 import static net.minecraft.ChatFormatting.GREEN;
 
@@ -22,9 +19,8 @@ public class CommandRegistry {
     private CommandRegistry() {
     }
 
-    public static void init(CommandDispatcher<CommandSourceStack> commandDispatcher) {
-        commandDispatcher.register(buildCommands(CommandPermissionConfig.WP));
-        commandDispatcher.register(buildCommands(CommandPermissionConfig.YAWP));
+    public static void init(CommandDispatcher<CommandSourceStack> commandDispatcher, String modRootCmd) {
+        commandDispatcher.register(buildCommands(modRootCmd));
     }
 
     public static LiteralArgumentBuilder<CommandSourceStack> buildCommands(String baseCmd) {
@@ -44,7 +40,7 @@ public class CommandRegistry {
     private static int promptHelp(CommandSourceStack src) {
         sendCmdFeedback(src, buildHeader("cli.msg.help.header"));
         String command = CommandUtil.buildCommandStr(CommandConstants.DIMENSION.toString());
-        MutableComponent cmdStr = Component.translatable("cli.msg.help.1", CommandPermissionConfig.WP);
+        MutableComponent cmdStr = Component.translatable("cli.msg.help.1", CommandPermissionConfig.BASE_CMD);
         sendCmdFeedback(src, buildExecuteCmdComponent(
                 Component.literal("=> "),
                 Component.translatable("help.tooltip.dim"),
