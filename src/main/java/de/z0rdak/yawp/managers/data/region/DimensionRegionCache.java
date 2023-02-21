@@ -81,28 +81,8 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
         RegionDataManager.save();
     }
 
-    public void removeOwner(ServerPlayerEntity player) {
-        this.dimensionalRegion.removeOwner(player);
-        RegionDataManager.save();
-    }
-
-    public void removeOwner(Team team) {
-        this.dimensionalRegion.removeOwner(team);
-        RegionDataManager.save();
-    }
-
-    public void removeMember(ServerPlayerEntity player) {
-        this.dimensionalRegion.removeMember(player);
-        RegionDataManager.save();
-    }
-
     public void setDimState(boolean active){
         this.dimensionalRegion.setIsActive(active);
-        RegionDataManager.save();
-    }
-
-    public void removeMember(Team team) {
-        this.dimensionalRegion.removeMember(team);
         RegionDataManager.save();
     }
 
