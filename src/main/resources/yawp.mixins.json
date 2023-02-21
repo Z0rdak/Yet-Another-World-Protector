@@ -5,12 +5,12 @@
   "package": "de.z0rdak.yawp.mixin",
   "refmap": "yawp.refmap.json",
   "mixins": [
-
   ],
   "client": [],
   "server": [
-    "AnvilScreenHandlerMixin"
+    "AnvilScreenHandlerMixin",
     "CommandManagerMixin",
-    "FireBlockMixin"
+    "FireBlockMixin",
+    "ServerPlayerInteractionManagerMixin"
   ]
 }
