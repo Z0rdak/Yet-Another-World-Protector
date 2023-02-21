@@ -4,7 +4,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.util.CommandUtil;
-import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.util.text.IFormattableTextComponent;
@@ -13,8 +12,6 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.ClickEvent;
 
 import static de.z0rdak.yawp.util.MessageUtil.*;
-import static de.z0rdak.yawp.util.MessageUtil.buildExecuteCmdComponent;
-import static de.z0rdak.yawp.util.MessageUtil.buildHeader;
 import static net.minecraft.util.text.TextFormatting.AQUA;
 import static net.minecraft.util.text.TextFormatting.GREEN;
 
@@ -23,9 +20,8 @@ public class CommandRegistry {
     private CommandRegistry() {
     }
 
-    public static void init(CommandDispatcher<CommandSource> commandDispatcher) {
-        commandDispatcher.register(buildCommands(CommandPermissionConfig.WP));
-        commandDispatcher.register(buildCommands(CommandPermissionConfig.YAWP));
+    public static void init(CommandDispatcher<CommandSource> commandDispatcher, String modRootCmd) {
+        commandDispatcher.register(buildCommands(modRootCmd));
     }
 
     public static LiteralArgumentBuilder<CommandSource> buildCommands(String baseCmd) {
@@ -45,7 +41,7 @@ public class CommandRegistry {
     private static int promptHelp(CommandSource src) {
         sendCmdFeedback(src, buildHeader("cli.msg.help.header"));
         String command = CommandUtil.buildCommandStr(CommandConstants.DIMENSION.toString());
-        IFormattableTextComponent cmdStr = new TranslationTextComponent("cli.msg.help.1", CommandPermissionConfig.WP);
+        IFormattableTextComponent cmdStr = new TranslationTextComponent("cli.msg.help.1", CommandPermissionConfig.BASE_CMD);
         sendCmdFeedback(src, buildExecuteCmdComponent(
                 new StringTextComponent("=> "),
                 new TranslationTextComponent("help.tooltip.dim"),
