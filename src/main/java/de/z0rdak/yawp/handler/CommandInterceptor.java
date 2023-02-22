@@ -140,7 +140,13 @@ public class CommandInterceptor {
         CommandSource src = cmdContext.getSource();
         List<ParsedCommandNode<CommandSource>> cmdNodes = cmdContext.getNodes();
         List<String> nodeNames = cmdNodes.stream().map(node -> node.getNode().getName()).collect(Collectors.toList());
-
+        if (nodeNames.size() < 3) {
+            return;
+        }
+        if (nodeNames.size() == 3) {
+            event.setCanceled(!AllowInfoCmds());
+            return;
+        }
         if (nodeNames.contains(INFO.toString())
                 || nodeNames.contains(LIST.toString())) {
             event.setCanceled(!AllowInfoCmds());
