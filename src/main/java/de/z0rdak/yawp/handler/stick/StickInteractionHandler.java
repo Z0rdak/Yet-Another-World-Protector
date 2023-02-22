@@ -81,13 +81,6 @@ public class StickInteractionHandler {
             ItemStack outputItem = event.getItemResult();
             ItemStack inputItem = event.getItemInput();
             ItemStack ingredientInput = event.getIngredientInput();
-            boolean hasStickTag = outputItem.hasTag() && outputItem.getTag() != null && outputItem.getTag().contains(STICK);
-            // TODO: Check if player is allowed to create region -
-            // FIXME: this is not possible when player has no rights for dimension - a parent would need to be selected
-            // stick set region parent where player == owner
-            if (hasStickTag) {
-                MarkerStickHandler.onCreateRegion(event);
-            }
             boolean isInputAndOutputStick = ItemStack.isSame(outputItem, Items.STICK.getDefaultInstance())
                     && ItemStack.isSame(inputItem, Items.STICK.getDefaultInstance());
             if (isInputAndOutputStick && ingredientInput.isEmpty()) {
