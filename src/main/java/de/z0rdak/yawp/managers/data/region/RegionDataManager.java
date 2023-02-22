@@ -9,6 +9,7 @@ import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.RegistryKey;
@@ -21,6 +22,7 @@ import net.minecraft.world.storage.DimensionSavedDataManager;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -200,15 +202,17 @@ public class RegionDataManager extends WorldSavedData {
     /**
      * Event handler which creates a new DimensionRegionCache when a dimension is created the first time, by a player loading the dimension.     *
      *
-     * @param event the PlayerChangedDimensionEvent which serves as a trigger and provides the information which dimension the player is traveling to.
+     * @param event the EntityTravelToDimensionEvent which serves as a trigger and provides the information which dimension the player is traveling to.
      */
     @SubscribeEvent
-    public static void addDimKeyOnDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event) {
-        if (!event.getPlayer().getCommandSenderWorld().isClientSide) {
-            if (!dimCacheMap.containsKey(event.getTo())) {
-                DimensionRegionCache cache = RegionDataManager.get().newCacheFor(event.getTo());
-                YetAnotherWorldProtector.LOGGER.info("Init region data for dimension '" + cache.dimensionKey().location() + "'..");
-                save();
+    public static void addDimKeyOnDimensionChange(EntityTravelToDimensionEvent event) {
+        if (!event.getEntity().getCommandSenderWorld().isClientSide) {
+            if (event.getEntity() instanceof PlayerEntity) {
+                if (!dimCacheMap.containsKey(event.getDimension())) {
+                    DimensionRegionCache cache = regionDataCache.newCacheFor(event.getDimension());
+                    YetAnotherWorldProtector.LOGGER.info("Init region data for dimension '" + cache.dimensionKey().location() + "'..");
+                    save();
+                }
             }
         }
     }
@@ -270,6 +274,9 @@ public class RegionDataManager extends WorldSavedData {
     }
 
     public DimensionRegionCache cacheFor(RegistryKey<World> dim) {
+        if (!dimCacheMap.containsKey(dim)) {
+            newCacheFor(dim);
+        }
         return dimCacheMap.get(dim);
     }
 
