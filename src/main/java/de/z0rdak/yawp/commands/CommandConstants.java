@@ -22,7 +22,7 @@ public enum CommandConstants {
     DEFAULT_Y("y-default"),
     DELETE("delete"),
     DENY("deny"),
-    DIMENSION("dim"),
+    DIM("dim"),
     ENABLE("enable"),
     INVERT("invert"),
     EXPAND("expand"),

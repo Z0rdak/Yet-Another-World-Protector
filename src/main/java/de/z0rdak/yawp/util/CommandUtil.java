@@ -33,7 +33,7 @@ public class CommandUtil {
     }
 
     public static DimensionRegionCache getDimCacheArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        return DimensionCacheArgumentType.getDimRegion(ctx, CommandConstants.DIMENSION.toString());
+        return DimensionCacheArgumentType.getDimRegion(ctx, CommandConstants.DIM.toString());
     }
 
     public static AreaType getAreaTypeArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {

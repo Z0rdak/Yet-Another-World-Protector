@@ -152,7 +152,7 @@ public class CommandInterceptor {
             return;
         }
         // check permission for other commands
-        ParsedArgument<CommandSourceStack, ?> dimParsedArgument = cmdContext.getArguments().get(CommandConstants.DIMENSION.toString());
+        ParsedArgument<CommandSourceStack, ?> dimParsedArgument = cmdContext.getArguments().get(CommandConstants.DIM.toString());
         if (dimParsedArgument != null && dimParsedArgument.getResult() instanceof ResourceLocation dimResLoc) {
             ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, dimResLoc);
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
