@@ -16,6 +16,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.BREAK_BLOCKS;
+import static de.z0rdak.yawp.core.flag.RegionFlag.USE_ELYTRA;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
 
 /**
@@ -27,26 +28,44 @@ public final class PlayerFlagHandler {
  }
 
  public static void registerEventHandler() {
-  PlayerBlockBreakEvents.BEFORE.register(PlayerFlagHandler::onBreakBlock);
+
   EntitySleepEvents.ALLOW_SLEEPING.register(PlayerFlagHandler::onAllowSleeping); // ALLOW_BED
   // ALLOW_SLEEP_TIME
   // ALLOW_RESETTING_TIME
+  // ServerEntityEvents.EQUIPMENT_CHANGE
   EntitySleepEvents.ALLOW_NEARBY_MONSTERS.register(PlayerFlagHandler::onSleepingWithStrangers);
   EntitySleepEvents.ALLOW_SETTING_SPAWN.register(PlayerFlagHandler::onSettingSpawn);
 
-
-  ServerLivingEntityEvents.ALLOW_DAMAGE.register(PlayerFlagHandler::onReceiveDmg);
+  //ServerLivingEntityEvents.ALLOW_DAMAGE.register(PlayerFlagHandler::onReceiveDmg);
   ServerLivingEntityEvents.ALLOW_DEATH.register(PlayerFlagHandler::onDeathblow);
   ServerLivingEntityEvents.AFTER_DEATH.register(PlayerFlagHandler::onDeath);
 
+  PlayerBlockBreakEvents.BEFORE.register(PlayerFlagHandler::onBreakBlock);
   EntityElytraEvents.ALLOW.register(PlayerFlagHandler::onElytraFlight);
-  // ServerEntityEvents.EQUIPMENT_CHANGE
-
  }
 
  private static boolean onElytraFlight(LivingEntity livingEntity) {
+  if (!livingEntity.getWorld().isClient) {
+   if (livingEntity instanceof PlayerEntity player) {
+    DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(HandlerUtil.getEntityDim(player));
+    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = HandlerUtil.checkPlayerEvent(player, player.getBlockPos(), USE_ELYTRA, dimCache.getDimensionalRegion());
+    handleAndSendMsg(flagCheckEvent);
+    return !flagCheckEvent.isDenied();
+   }
+  }
   return true;
  }
+
+ private static boolean onBreakBlock(World world, PlayerEntity player, BlockPos blockPos, BlockState blockState, BlockEntity blockEntity) {
+  if (isServerSide(world)) {
+   DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.getRegistryKey());
+   FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, blockPos, BREAK_BLOCKS, dimCache.getDimensionalRegion());
+   handleAndSendMsg(flagCheckEvent);
+   return !flagCheckEvent.isDenied();
+  }
+  return true;
+ }
+
 
  private static void onDeath(LivingEntity entity, DamageSource damageSource) {
 
@@ -73,20 +92,6 @@ public final class PlayerFlagHandler {
   return null;
  }
 
- // FIXME: Does not consider creative mode
- private static boolean onBreakBlock(World world, PlayerEntity player, BlockPos blockPos, BlockState blockState, BlockEntity blockEntity) {
-  if (isServerSide(world)) {
-   DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.getRegistryKey());
-   if (dimCache != null) {
-    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, blockPos, BREAK_BLOCKS, dimCache.getDimensionalRegion());
-    handleAndSendMsg(flagCheckEvent);
-    return !flagCheckEvent.isDenied();
-   } else {
-    return true;
-   }
-  }
-  return true;
- }
 
  /**
   * Prevents traditional attacks from players which use EntityPlayer.attackTargetEntityWithCurrentItem(Entity).
@@ -106,14 +111,14 @@ public final class PlayerFlagHandler {
   }
 
   /**
-     * Prevents various entities from been attacked from a player. <br>
-     * TODO: Flag for all entities
+  * Prevents various entities from been attacked from a player. <br>
+  * TODO: Flag for all entities
 
-     public static void onAttackEntity(AttackEntityEvent event) {
-     if (isServerSide(event)) {
-     PlayerEntity player = event.getPlayer();
-     Entity eventEntity = event.getTarget();
-     RegistryKey<World> entityDim = getEntityDim(event.getPlayer());
+  public static void onAttackEntity(AttackEntityEvent event) {
+  if (isServerSide(event)) {
+  PlayerEntity player = event.getPlayer();
+  Entity eventEntity = event.getTarget();
+  RegistryKey<World> entityDim = getEntityDim(event.getPlayer());
      DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(entityDim);
      if (dimCache != null) {
      if (isAnimal(eventEntity)) {
