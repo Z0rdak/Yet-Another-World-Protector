@@ -15,6 +15,7 @@
     "EntityMixin",
     "FireBlockMixin",
     "FrogMixin",
+    "PlayerMixin",
     "ServerPlayerInteractionManagerMixin"
   ]
 }
