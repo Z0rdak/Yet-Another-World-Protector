@@ -227,7 +227,7 @@ public class MessageUtil {
     }
 
     public static String buildDimCmdStr(IProtectedRegion region, CommandConstants constant) {
-        return CommandUtil.buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), constant.toString());
+        return CommandUtil.buildCommandStr(DIM.toString(), region.getDim().location().toString(), constant.toString());
     }
 
     public static String buildRegionCmdStr(IProtectedRegion region, CommandConstants constant) {
@@ -273,7 +273,7 @@ public class MessageUtil {
     public static MutableComponent buildRegionInfoLink(IProtectedRegion region, RegionType type) {
         return switch (type) {
             case DIMENSION -> {
-                String command = buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), INFO.toString());
+                String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), INFO.toString());
                 MutableComponent hoverText = Component.translatable("cli.msg.dim.info");
                 MutableComponent linkText = Component.literal(region.getDim().location().toString());
                 yield buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, LINK_COLOR);
@@ -318,7 +318,7 @@ public class MessageUtil {
         MutableComponent linkText = Component.translatable("cli.msg.info.region.affiliation.player.list.link.text", players.getPlayers().size());
         return switch (regionType) {
             case DIMENSION -> {
-                String cmd = buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), LIST.toString(), affiliation, PLAYER.toString());
+                String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), affiliation, PLAYER.toString());
                 yield buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
             case LOCAL -> {
@@ -338,7 +338,7 @@ public class MessageUtil {
         MutableComponent linkText = Component.translatable("cli.msg.info.region.affiliation.team.list.link.text", teams.getTeams().size());
         return switch (regionType) {
             case DIMENSION -> {
-                String cmd = buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), LIST.toString(), affiliation, TEAM.toString());
+                String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), affiliation, TEAM.toString());
                 yield buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
             case LOCAL -> {
@@ -407,7 +407,7 @@ public class MessageUtil {
                 yield buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
             case DIMENSION -> {
-                String cmd = buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), LIST.toString(), affiliation);
+                String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), affiliation);
                 yield buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
             default -> throw new IllegalArgumentException();
@@ -444,7 +444,7 @@ public class MessageUtil {
         MutableComponent flagRemoveEntry = Component.literal(" - ");
         MutableComponent flagRemoveLink = switch (regionType) {
             case DIMENSION -> {
-                String command = buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), REMOVE.toString(), FLAG.toString(), flag.getFlagIdentifier());
+                String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), REMOVE.toString(), FLAG.toString(), flag.getFlagIdentifier());
                 MutableComponent hoverText = Component.translatable("cli.msg.dim.info.flag.remove.link.hover", flag.getFlagIdentifier(), region.getDim().location().toString());
                 MutableComponent linkText = Component.translatable("cli.link.remove");
                 yield buildExecuteCmdComponent(linkText, hoverText, command, SUGGEST_COMMAND, REMOVE_CMD_COLOR);
@@ -606,7 +606,7 @@ public class MessageUtil {
     public static MutableComponent buildRegionChildrenLink(IProtectedRegion region, RegionType type) {
         return switch (type) {
             case DIMENSION -> {
-                String command = buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), LIST.toString(), REGION.toString());
+                String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), REGION.toString());
                 MutableComponent listDimRegionsLinkText = Component.translatable("cli.msg.dim.info.region.list.link.text", region.getChildren().size());
                 MutableComponent listDimRegionsHoverText = Component.translatable("cli.msg.dim.info.region.list.link.hover", region.getName());
                 MutableComponent listDimRegionsListLink = buildExecuteCmdComponent(listDimRegionsLinkText, listDimRegionsHoverText, command, RUN_COMMAND, LINK_COLOR);
@@ -633,7 +633,7 @@ public class MessageUtil {
     }
 
     public static MutableComponent buildDimCreateRegionLink(IProtectedRegion region) {
-        String dimCreateRegionCmd = buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), CREATE.toString(), REGION.toString(), "");
+        String dimCreateRegionCmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), CREATE.toString(), REGION.toString(), "");
         MutableComponent createRegionLinkText = Component.translatable("cli.link.add");
         MutableComponent createRegionHoverText = Component.translatable("cli.msg.dim.info.region.create.link.hover", region.getName());
         return buildExecuteCmdComponent(createRegionLinkText, createRegionHoverText, dimCreateRegionCmd, SUGGEST_COMMAND, ADD_CMD_COLOR);
@@ -642,7 +642,7 @@ public class MessageUtil {
     public static MutableComponent buildFlagListLink(IProtectedRegion region, RegionType type) {
         MutableComponent flagLink = switch (type) {
             case DIMENSION -> {
-                String flagListCmd = buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), LIST.toString(), FLAG.toString());
+                String flagListCmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), FLAG.toString());
                 MutableComponent flagListLinkText = Component.translatable("cli.msg.info.region.flag.link.text", region.getFlags().size());
                 MutableComponent flagListHoverText = Component.translatable("cli.msg.dim.flag.list.link.hover", region.getName());
                 MutableComponent dimFlagListLink = buildExecuteCmdComponent(flagListLinkText, flagListHoverText, flagListCmd, RUN_COMMAND, LINK_COLOR);
@@ -661,7 +661,7 @@ public class MessageUtil {
     }
 
     public static MutableComponent buildDimAddFlagLink(IProtectedRegion dimRegion) {
-        String command = buildCommandStr(DIMENSION.toString(), dimRegion.getDim().location().toString(), ADD.toString(), FLAG.toString(), "");
+        String command = buildCommandStr(DIM.toString(), dimRegion.getDim().location().toString(), ADD.toString(), FLAG.toString(), "");
         MutableComponent hoverText = Component.translatable("cli.msg.dim.flag.add.link.hover", dimRegion.getDim().location().toString());
         MutableComponent linkText = Component.translatable("cli.link.add");
         return buildExecuteCmdComponent(linkText, hoverText, command, SUGGEST_COMMAND, ADD_CMD_COLOR);
@@ -683,7 +683,7 @@ public class MessageUtil {
     }
 
     public static MutableComponent buildStateLink(IProtectedRegion region) {
-        String command = "/" + CommandPermissionConfig.BASE_CMD + " " + DIMENSION + " " + region.getName() + " " + ENABLE + " " + !region.isActive();
+        String command = "/" + CommandPermissionConfig.BASE_CMD + " " + DIM + " " + region.getName() + " " + ENABLE + " " + !region.isActive();
         String onClickAction = region.isActive() ? "deactivate" : "activate";
         String hoverText = "cli.msg.info.state." + onClickAction;
         String linkText = "cli.msg.info.state.link." + (region.isActive() ? "activate" : "deactivate");
@@ -711,7 +711,7 @@ public class MessageUtil {
     }
 
     public static MutableComponent buildDimSuggestRegionRemovalLink(IMarkableRegion region) {
-        String cmd = buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), DELETE.toString(), region.getName());
+        String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), DELETE.toString(), region.getName());
         MutableComponent hover = Component.translatable("cli.msg.info.dim.region.remove.link.hover", region.getName());
         MutableComponent text = Component.translatable("cli.link.remove");
         return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, REMOVE_CMD_COLOR);
@@ -719,7 +719,7 @@ public class MessageUtil {
 
     /* TODO: extract method for n component(s) [+] */
     public static MutableComponent buildDimFlagListLink(IProtectedRegion region) {
-        String command = buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), LIST.toString(), FLAG.toString());
+        String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), FLAG.toString());
         MutableComponent hoverLink = Component.translatable("cli.msg.dim.flag.list.link.hover", region.getDim().location().toString());
         MutableComponent linkText = Component.translatable("cli.msg.flag.list.link.text", region.getFlags().size());
         return region.getFlags().isEmpty()
@@ -737,7 +737,7 @@ public class MessageUtil {
         MutableComponent hoverText = Component.translatable("cli.msg.info.region.affiliation." + affiliationType.name + ".remove.link.hover", affiliateName, region.getName());
         MutableComponent regionRemoveLink = switch (regionType) {
             case DIMENSION -> {
-                String command = buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), REMOVE.toString(), affiliationType.name, affiliation, affiliateName);
+                String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), REMOVE.toString(), affiliationType.name, affiliation, affiliateName);
                 yield buildExecuteCmdComponent(linkText, hoverText, command, SUGGEST_COMMAND, REMOVE_CMD_COLOR);
             }
             case LOCAL -> {
