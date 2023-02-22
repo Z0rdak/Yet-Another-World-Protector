@@ -229,7 +229,7 @@ public class MessageUtil {
     }
 
     public static String buildDimCmdStr(IProtectedRegion region, CommandConstants constant) {
-        return CommandUtil.buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), constant.toString());
+        return CommandUtil.buildCommandStr(DIM.toString(), region.getDim().location().toString(), constant.toString());
     }
 
     public static String buildRegionCmdStr(IProtectedRegion region, CommandConstants constant) {
@@ -276,7 +276,7 @@ public class MessageUtil {
         IFormattableTextComponent res;
         switch (type) {
             case DIMENSION: {
-                String command = buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), INFO.toString());
+                String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), INFO.toString());
                 IFormattableTextComponent hoverText = new TranslationTextComponent("cli.msg.dim.info");
                 IFormattableTextComponent linkText = new StringTextComponent(region.getDim().location().toString());
                 res = buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, LINK_COLOR);
@@ -330,7 +330,7 @@ public class MessageUtil {
         IFormattableTextComponent res;
         switch (regionType) {
             case DIMENSION: {
-                String cmd = buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), LIST.toString(), affiliation, PLAYER.toString());
+                String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), affiliation, PLAYER.toString());
                 res = buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
                 break;
             }
@@ -354,7 +354,7 @@ public class MessageUtil {
         IFormattableTextComponent res;
         switch (regionType) {
             case DIMENSION: {
-                String cmd = buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), LIST.toString(), affiliation, TEAM.toString());
+                String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), affiliation, TEAM.toString());
                 res = buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
                 break;
             }
@@ -434,7 +434,7 @@ public class MessageUtil {
                 break;
             }
             case DIMENSION: {
-                String cmd = buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), LIST.toString(), affiliation);
+                String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), affiliation);
                 res = buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
                 break;
             }
@@ -475,7 +475,7 @@ public class MessageUtil {
         IFormattableTextComponent flagRemoveLink;
         switch (regionType) {
             case DIMENSION: {
-                String command = buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), REMOVE.toString(), FLAG.toString(), flag.getFlagIdentifier());
+                String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), REMOVE.toString(), FLAG.toString(), flag.getFlagIdentifier());
                 IFormattableTextComponent hoverText = new TranslationTextComponent("cli.msg.dim.info.flag.remove.link.hover", flag.getFlagIdentifier(), region.getDim().location().toString());
                 IFormattableTextComponent linkText = new TranslationTextComponent("cli.link.remove");
                 flagRemoveLink = buildExecuteCmdComponent(linkText, hoverText, command, SUGGEST_COMMAND, REMOVE_CMD_COLOR);
@@ -647,7 +647,7 @@ public class MessageUtil {
         IFormattableTextComponent res;
         switch (type) {
             case DIMENSION: {
-                String command = buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), LIST.toString(), REGION.toString());
+                String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), REGION.toString());
                 IFormattableTextComponent listDimRegionsLinkText = new TranslationTextComponent("cli.msg.dim.info.region.list.link.text", region.getChildren().size());
                 IFormattableTextComponent listDimRegionsHoverText = new TranslationTextComponent("cli.msg.dim.info.region.list.link.hover", region.getName());
                 IFormattableTextComponent listDimRegionsListLink = buildExecuteCmdComponent(listDimRegionsLinkText, listDimRegionsHoverText, command, RUN_COMMAND, LINK_COLOR);
@@ -678,7 +678,7 @@ public class MessageUtil {
     }
 
     public static IFormattableTextComponent buildDimCreateRegionLink(IProtectedRegion region) {
-        String dimCreateRegionCmd = buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), CREATE.toString(), REGION.toString(), "");
+        String dimCreateRegionCmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), CREATE.toString(), REGION.toString(), "");
         IFormattableTextComponent createRegionLinkText = new TranslationTextComponent("cli.link.add");
         IFormattableTextComponent createRegionHoverText = new TranslationTextComponent("cli.msg.dim.info.region.create.link.hover", region.getName());
         return buildExecuteCmdComponent(createRegionLinkText, createRegionHoverText, dimCreateRegionCmd, SUGGEST_COMMAND, ADD_CMD_COLOR);
@@ -688,7 +688,7 @@ public class MessageUtil {
         IFormattableTextComponent flagLink;
         switch (type) {
             case DIMENSION: {
-                String flagListCmd = buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), LIST.toString(), FLAG.toString());
+                String flagListCmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), FLAG.toString());
                 IFormattableTextComponent flagListLinkText = new TranslationTextComponent("cli.msg.info.region.flag.link.text", region.getFlags().size());
                 IFormattableTextComponent flagListHoverText = new TranslationTextComponent("cli.msg.dim.flag.list.link.hover", region.getName());
                 IFormattableTextComponent dimFlagListLink = buildExecuteCmdComponent(flagListLinkText, flagListHoverText, flagListCmd, RUN_COMMAND, LINK_COLOR);
@@ -710,7 +710,7 @@ public class MessageUtil {
     }
 
     public static IFormattableTextComponent buildDimAddFlagLink(IProtectedRegion dimRegion) {
-        String command = buildCommandStr(DIMENSION.toString(), dimRegion.getDim().location().toString(), ADD.toString(), FLAG.toString(), "");
+        String command = buildCommandStr(DIM.toString(), dimRegion.getDim().location().toString(), ADD.toString(), FLAG.toString(), "");
         IFormattableTextComponent hoverText = new TranslationTextComponent("cli.msg.dim.flag.add.link.hover", dimRegion.getDim().location().toString());
         IFormattableTextComponent linkText = new TranslationTextComponent("cli.link.add");
         return buildExecuteCmdComponent(linkText, hoverText, command, SUGGEST_COMMAND, ADD_CMD_COLOR);
@@ -732,7 +732,7 @@ public class MessageUtil {
     }
 
     public static IFormattableTextComponent buildStateLink(IProtectedRegion region) {
-        String command = "/" + CommandPermissionConfig.BASE_CMD + " " + DIMENSION + " " + region.getName() + " " + ENABLE + " " + !region.isActive();
+        String command = "/" + CommandPermissionConfig.BASE_CMD + " " + DIM + " " + region.getName() + " " + ENABLE + " " + !region.isActive();
         String onClickAction = region.isActive() ? "deactivate" : "activate";
         String hoverText = "cli.msg.info.state." + onClickAction;
         String linkText = "cli.msg.info.state.link." + (region.isActive() ? "activate" : "deactivate");
@@ -760,7 +760,7 @@ public class MessageUtil {
     }
 
     public static IFormattableTextComponent buildDimSuggestRegionRemovalLink(IMarkableRegion region) {
-        String cmd = buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), DELETE.toString(), region.getName());
+        String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), DELETE.toString(), region.getName());
         IFormattableTextComponent hover = new TranslationTextComponent("cli.msg.info.dim.region.remove.link.hover", region.getName());
         IFormattableTextComponent text = new TranslationTextComponent("cli.link.remove");
         return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, REMOVE_CMD_COLOR);
@@ -768,7 +768,7 @@ public class MessageUtil {
 
     /* TODO: extract method for n component(s) [+] */
     public static IFormattableTextComponent buildDimFlagListLink(IProtectedRegion region) {
-        String command = buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), LIST.toString(), FLAG.toString());
+        String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), FLAG.toString());
         IFormattableTextComponent hoverLink = new TranslationTextComponent("cli.msg.dim.flag.list.link.hover", region.getDim().location().toString());
         IFormattableTextComponent linkText = new TranslationTextComponent("cli.msg.flag.list.link.text", region.getFlags().size());
         return region.getFlags().isEmpty()
@@ -787,7 +787,7 @@ public class MessageUtil {
         IFormattableTextComponent regionRemoveLink;
         switch (regionType) {
             case DIMENSION: {
-                String command = buildCommandStr(DIMENSION.toString(), region.getDim().location().toString(), REMOVE.toString(), affiliationType.name, affiliation, affiliateName);
+                String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), REMOVE.toString(), affiliationType.name, affiliation, affiliateName);
                 regionRemoveLink = buildExecuteCmdComponent(linkText, hoverText, command, SUGGEST_COMMAND, REMOVE_CMD_COLOR);
                 break;
             }

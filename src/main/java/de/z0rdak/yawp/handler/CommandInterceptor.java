@@ -153,7 +153,7 @@ public class CommandInterceptor {
             return;
         }
         // check permission for other commands
-        ParsedArgument<CommandSource, ?> dimParsedArgument = cmdContext.getArguments().get(CommandConstants.DIMENSION.toString());
+        ParsedArgument<CommandSource, ?> dimParsedArgument = cmdContext.getArguments().get(CommandConstants.DIM.toString());
         if (dimParsedArgument.getResult() instanceof ResourceLocation) {
             ResourceLocation dimResLoc = ((ResourceLocation) dimParsedArgument.getResult());
             RegistryKey<World> dim = RegistryKey.create(Registry.DIMENSION_REGISTRY, dimResLoc);

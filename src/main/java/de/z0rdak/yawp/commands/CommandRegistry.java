@@ -40,7 +40,7 @@ public class CommandRegistry {
 
     private static int promptHelp(CommandSource src) {
         sendCmdFeedback(src, buildHeader("cli.msg.help.header"));
-        String command = CommandUtil.buildCommandStr(CommandConstants.DIMENSION.toString());
+        String command = CommandUtil.buildCommandStr(CommandConstants.DIM.toString());
         IFormattableTextComponent cmdStr = new TranslationTextComponent("cli.msg.help.1", CommandPermissionConfig.BASE_CMD);
         sendCmdFeedback(src, buildExecuteCmdComponent(
                 new StringTextComponent("=> "),

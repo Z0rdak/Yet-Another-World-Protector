@@ -50,7 +50,7 @@ public final class FlagCommands {
     private static LiteralArgumentBuilder<CommandSource> register() {
         Set<String> flagTypes = getFlagTypes();
         return literal(FLAG)
-                .then(Commands.argument(DIMENSION.toString(), DimensionArgument.dimension())
+                .then(Commands.argument(DIM.toString(), DimensionArgument.dimension())
                         .then(Commands.argument(REGION.toString(), StringArgumentType.word())
                                 .then(literal(ENABLE)
                                         .then(Commands.argument(ENABLE.toString(), BoolArgumentType.bool())
