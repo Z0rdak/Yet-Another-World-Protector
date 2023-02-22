@@ -50,13 +50,12 @@ public class YetAnotherWorldProtector implements ModInitializer {
         ServerEntityEvents.ENTITY_LOAD.register(RegionDataManager::onPlayerLoadAddDimKey);
         ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register(RegionDataManager::onPlayerChangeWorldAddDimKey);
 
+        // registering configuration
         ModLoadingContext.registerConfig(MODID, ModConfig.Type.SERVER, CommandPermissionConfig.CONFIG_SPEC, CommandPermissionConfig.CONFIG_NAME);
         ModLoadingContext.registerConfig(MODID, ModConfig.Type.SERVER, FlagConfig.CONFIG_SPEC, FlagConfig.CONFIG_NAME);
         ModLoadingContext.registerConfig(MODID, ModConfig.Type.SERVER, RegionConfig.CONFIG_SPEC, RegionConfig.CONFIG_NAME);
 
-        // TODO: Class for event listener for different types of flags
         CommonEvents.register();
-
         PlayerFlagHandler.registerEventHandler();
         WorldFlagHandler.registerEventHandler();
     }
