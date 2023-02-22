@@ -32,7 +32,7 @@ public class FlagConfig {
     }
 
     private static List<String> defaultEntityBreakFlagEntries() {
-        return Arrays.asList("minecraft:armor_stand", "minecraft:painting", "minecraft:item_frame", "minecraft:glow_item_frame");
+        return Arrays.asList("minecraft:armor_stand", "minecraft:painting", "minecraft:item_frame", "minecraft:glow_item_frame", "minecraft:leash_knot");
     }
 
     private static boolean isValidEntityEntry(Object entity) {

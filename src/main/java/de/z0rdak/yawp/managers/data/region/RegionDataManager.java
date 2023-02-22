@@ -273,6 +273,9 @@ public class RegionDataManager extends PersistentState {
     }
 
     public DimensionRegionCache cacheFor(RegistryKey<World> dim) {
+        if (!dimCacheMap.containsKey(dim)) {
+            newCacheFor(dim);
+        }
         return dimCacheMap.get(dim);
     }
 
