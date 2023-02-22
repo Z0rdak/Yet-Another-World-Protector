@@ -17,10 +17,12 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -175,15 +177,17 @@ public class RegionDataManager extends SavedData {
     /**
      * Event handler which creates a new DimensionRegionCache when a dimension is created the first time, by a player loading the dimension.     *
      *
-     * @param event the PlayerChangedDimensionEvent which serves as a trigger and provides the information which dimension the player is traveling to.
+     * @param event the EntityTravelToDimensionEvent which serves as a trigger and provides the information which dimension the player is traveling to.
      */
     @SubscribeEvent
-    public static void addDimKeyOnDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event) {
-        if (!event.getEntity().getCommandSenderWorld().isClientSide && event.getEntity() != null) {
-            if (!regionDataCache.dimCacheMap.containsKey(event.getTo())) {
-                DimensionRegionCache cache = regionDataCache.newCacheFor(event.getTo());
-                YetAnotherWorldProtector.LOGGER.info("Init region data for dimension '" + cache.dimensionKey().location() + "'..");
-                save();
+    public static void addDimKeyOnDimensionChange(EntityTravelToDimensionEvent event) {
+        if (!event.getEntity().getCommandSenderWorld().isClientSide) {
+            if (event.getEntity() instanceof Player) {
+                if (!regionDataCache.dimCacheMap.containsKey(event.getDimension())) {
+                    DimensionRegionCache cache = regionDataCache.newCacheFor(event.getDimension());
+                    YetAnotherWorldProtector.LOGGER.info("Init region data for dimension '" + cache.dimensionKey().location() + "'..");
+                    save();
+                }
             }
         }
     }
@@ -278,6 +282,9 @@ public class RegionDataManager extends SavedData {
     }
 
     public DimensionRegionCache cacheFor(ResourceKey<Level> dim) {
+        if (!dimCacheMap.containsKey(dim)) {
+            newCacheFor(dim);
+        }
         return dimCacheMap.get(dim);
     }
 
