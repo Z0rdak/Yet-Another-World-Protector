@@ -203,9 +203,6 @@ public class DimensionCommands {
             return res;
         }
         CuboidRegion region = new CuboidRegion(regionName, new CuboidArea(pos1, pos2), owner, dimCache.dimensionKey());
-        if (owner == null) {
-            region.setIsActive(false);
-        }
         RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
         dimCache.addRegion(region);
         LocalRegions.ensureHigherRegionPriorityFor(region, RegionConfig.DEFAULT_REGION_PRIORITY.get());
