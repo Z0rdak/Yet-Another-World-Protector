@@ -1,3 +1,10 @@
+# 0.0.2.2-beta4
+## Changes
+* Add default entry `minecraft:leash_knot` to break-entities config
+* New created regions without owner are no longer disabled by default
+## Fixes
+* Fix dimension region caches not initialized before traveling to dimension
+* Fix some other misc stuff
 # 0.0.2.1-beta4 - Region overlapping hotfix
 ## Fixes
 * Fix overlapping regions not correctly considering priority and region member/ownership.
