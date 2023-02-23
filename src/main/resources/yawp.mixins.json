@@ -13,6 +13,7 @@
     "AnvilScreenHandlerMixin",
     "CommandManagerMixin",
     "EntityMixin",
+    "ExplosionMixin",
     "FireBlockMixin",
     "FrogMixin",
     "PlayerMixin",
