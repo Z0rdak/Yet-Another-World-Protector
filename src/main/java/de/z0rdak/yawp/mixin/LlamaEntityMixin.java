@@ -18,7 +18,7 @@ import static de.z0rdak.yawp.handler.flags.HandlerUtil.getEntityDim;
 @Mixin(LlamaEntity.class)
 public abstract class LlamaEntityMixin {
     @Inject(method = "handleFallDamage", at = @At(value = "HEAD"), cancellable = true, allow = 1)
-    public void spawnChildFromBreeding(float fallDistance, float damageMultiplier, DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
+    public void onFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
         LlamaEntity self = (LlamaEntity) (Object) this;
         if (!self.world.isClient) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(self));

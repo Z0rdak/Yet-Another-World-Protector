@@ -23,7 +23,7 @@ import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
 public class ServerWorldMixin {
 
     @Inject(method = "addEntity", at = @At("HEAD"), cancellable = true, allow = 1)
-    public void useItemOn(Entity entity, CallbackInfoReturnable<Boolean> cir) {
+    public void onSpawnEntity(Entity entity, CallbackInfoReturnable<Boolean> cir) {
         if (!entity.world.isClient) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(entity));
             FlagCheckEvent flagCheck = checkTargetEvent(entity.getBlockPos(), SPAWNING_ALL, dimCache.getDimensionalRegion());
