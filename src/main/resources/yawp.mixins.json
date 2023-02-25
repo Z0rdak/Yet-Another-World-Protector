@@ -15,6 +15,7 @@
     "CommandManagerMixin",
     "EntityMixin",
     "ExplosionMixin",
+    "FarmLandBlockMixin",
     "FireBlockMixin",
     "FrogMixin",
     "LivingEntityMixin",
