@@ -9,6 +9,7 @@
   ],
   "client": [],
   "server": [
+    "AbstractHorseEntityMixin",
     "AnimalMixin",
     "AnvilScreenHandlerMixin",
     "CommandManagerMixin",
@@ -16,8 +17,11 @@
     "ExplosionMixin",
     "FireBlockMixin",
     "FrogMixin",
+    "LivingEntityMixin",
+    "LlamaEntityMixin",
     "PlayerMixin",
     "ServerPlayerInteractionManagerMixin",
-    "ServerPlayerMixin"
+    "ServerPlayerMixin",
+    "ServerWorldMixin"
   ]
 }
