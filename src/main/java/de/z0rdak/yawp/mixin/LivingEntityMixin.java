@@ -28,6 +28,24 @@ public abstract class LivingEntityMixin {
     @Nullable
     protected PlayerEntity attackingPlayer;
 
+    @Inject(method = "takeKnockback", at = @At(value = "HEAD"), cancellable = true, allow = 1)
+    public void onKnockback(double strength, double x, double z, CallbackInfo ci) {
+        LivingEntity target = (LivingEntity) (Object) this;
+        if (isServerSide(target)) {
+            if (target instanceof PlayerEntity) {
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(target));
+                if (target.getAttacker() instanceof PlayerEntity attacker) {
+                    FlagCheckEvent flagCheckEvent = checkTargetEvent(target.getBlockPos(), KNOCKBACK_PLAYERS, dimCache.getDimensionalRegion());
+                    if (flagCheckEvent.isDenied()) {
+                        sendFlagDeniedMsg(flagCheckEvent, attacker);
+                        ci.cancel();
+                    }
+                }
+            }
+
+        }
+    }
+
     @Inject(method = "handleFallDamage", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
         LivingEntity self = (LivingEntity) (Object) this;

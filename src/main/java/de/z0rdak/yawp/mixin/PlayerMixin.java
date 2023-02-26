@@ -6,6 +6,7 @@ import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.passive.WanderingTraderEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -22,6 +23,34 @@ import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerMixin {
+
+    @Inject(method = "applyDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;applyArmorToDamage(Lnet/minecraft/entity/damage/DamageSource;F)F"), cancellable = true, allow = 1)
+    public void onHurt(DamageSource source, float amount, CallbackInfo ci) {
+        PlayerEntity target = (PlayerEntity) (Object) this;
+        if (isServerSide(target)) {
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(target));
+            if (source.getAttacker() instanceof PlayerEntity attacker) {
+                FlagCheckEvent flagCheckEvent = checkTargetEvent(target.getBlockPos(), NO_PVP, dimCache.getDimensionalRegion());
+                if (flagCheckEvent.isDenied()) {
+                    sendFlagDeniedMsg(flagCheckEvent, attacker);
+                    ci.cancel();
+                }
+            }
+            FlagCheckEvent flagCheckEvent = checkPlayerEvent(target, target.getBlockPos(), INVINCIBLE, dimCache.getDimensionalRegion());
+            if (!flagCheckEvent.isDenied()) {
+                ci.cancel();
+            }
+        }
+    }
+
+    @Inject(method = "applyDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;setAbsorptionAmount(F)V"), cancellable = true, allow = 1)
+    public void onReceiveDamage(DamageSource source, float amount, CallbackInfo ci) {
+        PlayerEntity player = (PlayerEntity) (Object) this;
+        if (isServerSide(player)) {
+            // TODO: meele-player flag
+        }
+    }
+
 
     @Inject(method = "attack", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onAttackEntity(Entity target, CallbackInfo ci) {
