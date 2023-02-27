@@ -24,6 +24,7 @@
     "PlayerMixin",
     "ServerPlayerInteractionManagerMixin",
     "ServerPlayerMixin",
-    "ServerWorldMixin"
+    "ServerWorldMixin",
+    "ThrownEnderPearlMixin"
   ]
 }
