@@ -239,8 +239,12 @@ public final class PlayerFlagHandler {
                 if (dimCache != null) {
                     PlayerEntity playerTarget = (PlayerEntity) hurtEntity;
                     PlayerEntity playerSource = (PlayerEntity) dmgSourceEntity;
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(playerSource, playerTarget.blockPosition(), NO_PVP, dimCache.getDimensionalRegion());
-                    handleAndSendMsg(event, flagCheckEvent);
+                    FlagCheckEvent flagCheckEvent = checkTargetEvent(playerTarget.blockPosition(), NO_PVP, dimCache.getDimensionalRegion());
+                    if (flagCheckEvent.isDenied()) {
+                        sendFlagDeniedMsg(flagCheckEvent, playerSource);
+                        event.setAmount(0f);
+                        event.setCanceled(true);
+                    }
                 }
             }
         }
@@ -255,8 +259,9 @@ public final class PlayerFlagHandler {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(hurtEntity));
                 if (dimCache != null) {
                     PlayerEntity playerTarget = (PlayerEntity) hurtEntity;
-                    FlagCheckEvent invincibleFlagCheckEvent = checkTargetEvent(playerTarget.blockPosition(), INVINCIBLE, dimCache.getDimensionalRegion());
-                    if (invincibleFlagCheckEvent.isDenied()) {
+                    FlagCheckEvent hurtPlayerFlagCheck = checkPlayerEvent(playerTarget, playerTarget.blockPosition(), INVINCIBLE, dimCache.getDimensionalRegion());
+                    if (!hurtPlayerFlagCheck.isDenied()) {
+                        event.setAmount(0f);
                         event.setCanceled(true);
                     }
                 }
@@ -279,8 +284,12 @@ public final class PlayerFlagHandler {
                         PlayerEntity dmgTarget = (PlayerEntity) event.getEntityLiving();
                         PlayerEntity dmgSource = ((PlayerEntity) dmgSourceEntity);
                         // another check for PVP - this does not prevent knock-back? but prevents dmg
-                        FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(dmgSource, dmgTarget.blockPosition(), MELEE_PLAYERS, dimCache.getDimensionalRegion());
-                        handleAndSendMsg(event, flagCheckEvent);
+                        FlagCheckEvent flagCheckEvent = checkTargetEvent(dmgTarget.blockPosition(), MELEE_PLAYERS, dimCache.getDimensionalRegion());
+                        if (flagCheckEvent.isDenied()) {
+                            sendFlagDeniedMsg(flagCheckEvent, dmgSource);
+                            event.setAmount(0f);
+                            event.setCanceled(true);
+                        }
                     }
                 }
             }
@@ -298,6 +307,7 @@ public final class PlayerFlagHandler {
                     FlagCheckEvent flagCheckEvent = checkTargetEvent(dmgTarget.blockPosition(), KNOCKBACK_PLAYERS, dimCache.getDimensionalRegion());
                     if (flagCheckEvent.isDenied()) {
                         event.setCanceled(true);
+                        event.setStrength(0);
                     }
                 }
             }
