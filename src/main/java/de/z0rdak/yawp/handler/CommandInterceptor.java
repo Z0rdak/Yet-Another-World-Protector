@@ -6,13 +6,13 @@ import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.CommandConstants;
-import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,6 +32,7 @@ import static de.z0rdak.yawp.core.region.RegionType.DIMENSION;
 import static de.z0rdak.yawp.core.region.RegionType.LOCAL;
 import static de.z0rdak.yawp.util.MessageUtil.buildRegionInfoLink;
 import static de.z0rdak.yawp.util.MessageUtil.sendCmdFeedback;
+import static net.minecraft.ChatFormatting.RED;
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 
 @Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER, bus = FORGE)
@@ -105,7 +106,7 @@ public class CommandInterceptor {
                                     && (player.getTeam() == null || !region.getParent().getOwners().containsTeam(player.getTeam()))
                                     && !hasConfigPermission) {
                                 YetAnotherWorldProtector.LOGGER.info("Player not allowed to manage region '" + region.getName() + "'");
-                                sendCmdFeedback(src, new TextComponent("You are not allowed to manage the region '" + buildRegionInfoLink(region, LOCAL) + "'!"));
+                                sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region, LOCAL)));
                                 event.setCanceled(true);
                             }
                         }
@@ -114,7 +115,7 @@ public class CommandInterceptor {
                                 && (player.getTeam() == null || !region.getOwners().containsTeam(player.getTeam()))
                                 && !hasConfigPermission) {
                             YetAnotherWorldProtector.LOGGER.info("Player not allowed to manage region '" + region.getName() + "'");
-                            sendCmdFeedback(src, new TextComponent("You are not allowed to manage the region '" + buildRegionInfoLink(region, LOCAL) + "'!"));
+                            sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region, LOCAL)));
                             event.setCanceled(true);
                         }
                     }
@@ -123,9 +124,8 @@ public class CommandInterceptor {
                 }
             } else {
                 if (!hasPermission(src)) {
-                    DimensionalRegion dimRegion = RegionDataManager.get().cacheFor(region.getDim()).getDimensionalRegion();
                     YetAnotherWorldProtector.LOGGER.info("' " + src.getTextName() + "' is not allowed to manage region: '" + region.getName() + "' in dim '" + region.getDim().location() + "'!");
-                    sendCmdFeedback(src, new TextComponent("You are not allowed to manage region: '" + buildRegionInfoLink(region, LOCAL) + "' in dim '" + buildRegionInfoLink(dimRegion, DIMENSION) + "'!"));
+                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region, LOCAL)));
                     event.setCanceled(true);
                 }
             }
@@ -164,7 +164,7 @@ public class CommandInterceptor {
                             boolean hasConfigPermission = hasPlayerPermission(player);
                             if (!dimCache.hasOwner(player) && !hasConfigPermission) {
                                 YetAnotherWorldProtector.LOGGER.info("Player not allowed to manage dim");
-                                sendCmdFeedback(src, new TextComponent("You are not allowed to manage dimensional region '" + buildRegionInfoLink(dimCache.getDimensionalRegion(), DIMENSION) + "'!"));
+                                sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.modify.dim.deny", buildRegionInfoLink(dimCache.getDimensionalRegion(), DIMENSION)));
                                 event.setCanceled(true);
                             }
                         }
@@ -175,11 +175,11 @@ public class CommandInterceptor {
                     if (!hasPermission(src)) {
                         YetAnotherWorldProtector.LOGGER.info("' " + src.getTextName() + "' is not allowed to manage dim");
                         event.setCanceled(true);
-                        sendCmdFeedback(src, new TextComponent("You are not allowed to manage dimensional region '" + buildRegionInfoLink(dimCache.getDimensionalRegion(), DIMENSION) + "'!"));
+                        sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.modify.dim.deny", buildRegionInfoLink(dimCache.getDimensionalRegion(), DIMENSION)));
                     }
                 }
             } else {
-                sendCmdFeedback(src, new TextComponent("Dimension not found in region data"));
+                sendCmdFeedback(src, new TextComponent("Dimension not found in region data").withStyle(RED));
             }
         }
 
