@@ -1,3 +1,12 @@
+# 0.0.2.4-beta4
+## Changes
+* Adjust mod logging representation
+* Flag `break_blocks` now also covers entities (includes the `break_entities` flag).
+## Removals
+* Remove flag `break_entities`. This is now covered with `break_blocks` flag. The config stays the same.
+## Fixes
+* Fix message for missing region permissions not displaying correctly
+* Attempt to fix NPE for mob grieving flag
 # 0.0.2.3-beta4
 ## Changes
 * `no-pvp` and `knockback-players` flag now denies actions also for owners/members of the region to prevent mischief

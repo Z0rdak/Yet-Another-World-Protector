@@ -45,7 +45,7 @@ public final class HandlerUtil {
     }
 
     public static boolean isServerSide(Entity entity) {
-        return !entity.getCommandSenderWorld().isClientSide();
+        return !entity.getCommandSenderWorld().isClientSide;
     }
 
     public static boolean isVillager(Entity entity) {

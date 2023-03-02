@@ -164,23 +164,26 @@ public class GrievingFlagHandler {
 
     @SubscribeEvent
     public static void onMobGriefing(EntityMobGriefingEvent event) {
-        if (isServerSide(event)) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
-            if (dimCache != null) {
-                FlagCheckEvent mobGriefingFlagCheck = checkTargetEvent(event.getEntity().blockPosition(), RegionFlag.MOB_GRIEFING, dimCache.getDimensionalRegion());
-                if (mobGriefingFlagCheck.isDenied()) {
-                    event.setResult(Event.Result.DENY);
-                }
-
-                if (event.getEntity() instanceof EndermanEntity) {
-                    FlagCheckEvent endermanGriefingFlagCheck = checkTargetEvent(event.getEntity().blockPosition(), RegionFlag.ENDERMAN_GRIEFING, dimCache.getDimensionalRegion());
-                    if (endermanGriefingFlagCheck.isDenied()) {
+        if (event.getEntity() != null && event.getEntity().getCommandSenderWorld() != null) {
+            if (isServerSide(event)) {
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
+                if (dimCache != null) {
+                    FlagCheckEvent mobGriefingFlagCheck = checkTargetEvent(event.getEntity().blockPosition(), RegionFlag.MOB_GRIEFING, dimCache.getDimensionalRegion());
+                    if (mobGriefingFlagCheck.isDenied()) {
                         event.setResult(Event.Result.DENY);
+                    }
+
+                    if (event.getEntity() instanceof EndermanEntity) {
+                        FlagCheckEvent endermanGriefingFlagCheck = checkTargetEvent(event.getEntity().blockPosition(), RegionFlag.ENDERMAN_GRIEFING, dimCache.getDimensionalRegion());
+                        if (endermanGriefingFlagCheck.isDenied()) {
+                            event.setResult(Event.Result.DENY);
+                        }
                     }
                 }
             }
         }
     }
+
 
     /**
      * TODO: Inverted flags would need to re-add allowed blocks/entites
