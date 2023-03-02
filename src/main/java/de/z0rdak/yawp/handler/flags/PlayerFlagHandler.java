@@ -337,9 +337,6 @@ public final class PlayerFlagHandler {
         }
     }
 
-    /**
-     * TODO: Compound Flags for combining common flags? E.g. BREAK_BLOCKS && BREAK_ENTITIES
-     */
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onEntityBreak(AttackEntityEvent event) {
         if (isServerSide(event)) {
@@ -352,7 +349,7 @@ public final class PlayerFlagHandler {
                 boolean isBlockEntityCovered = entities.stream()
                         .anyMatch(entity -> EntityType.getKey(target.getType()).equals(new ResourceLocation(entity)));
                 if (isBlockEntityCovered) {
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getTarget().blockPosition(), BREAK_ENTITIES, dimCache.getDimensionalRegion());
+                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getTarget().blockPosition(), BREAK_BLOCKS, dimCache.getDimensionalRegion());
                     handleAndSendMsg(event, flagCheckEvent);
                 }
             }

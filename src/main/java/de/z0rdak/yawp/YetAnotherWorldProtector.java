@@ -30,7 +30,7 @@ public class YetAnotherWorldProtector
 {
     public static final String MODID = "yawp";
     public static final String MODID_LONG = "Yet Another World Protector";
-    public static final Logger LOGGER = LogManager.getLogger();
+    public static final Logger LOGGER = LogManager.getLogger("YAWP");
 
 
     public YetAnotherWorldProtector() {
