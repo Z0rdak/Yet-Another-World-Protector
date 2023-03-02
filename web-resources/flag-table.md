@@ -6,8 +6,7 @@ and Local Regions.
 | Flag                        | Description                                                                                                                                                                          | Versions |        |        | Availability        | 
 |-----------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|--------|--------|---------------------|
 |                             |                                                                                                                                                                                      | 1.16.5   | 1.18.2 | 1.19.2 |
-| break_blocks                | prevents players from breaking blocks                                                                                                                                                | yes      | yes    | yes    | Local And Dimension |
-| break_entities              | prevents players from breaking title entity blocks¹                                                                                                                                  | yes      | yes    | yes    | Local And Dimension |
+| break_blocks                | prevents players from breaking blocks and some¹ block entities                                                                                                                       | yes      | yes    | yes    | Local And Dimension |
 | place_blocks                | prevents players from placing blocks                                                                                                                                                 | yes      | yes    | yes    | Local And Dimension |
 | scoop_fluids                | prevents players from scooping up fluids with buckets                                                                                                                                | yes      | yes    | yes    | Local And Dimension |
 | place_fluids                | prevents players from placing fluids                                                                                                                                                 | yes      | yes    | yes    | Local And Dimension |
@@ -91,4 +90,5 @@ and Local Regions.
 | mob-griefing                | prevents mob griefing                                                                                                                                                                | yes      | yes    | yes    | Local And Dimension |
 | enderman-griefing           | prevents endermen from picking up and placing blocks                                                                                                                                 | yes      | yes    | yes    | Local And Dimension |
 
-¹ Item Frames, Paintings and Armor Stands are included per default, other Tile Entities need to be added to the config
+¹ Item Frames, Paintings and Armor Stands are included per default, other Tile Entities need to be added to the
+config [`yawp-flags.toml`](https://github.com/Z0rdak/Yet-Another-World-Protector/wiki/Server-Config#flag-config).
