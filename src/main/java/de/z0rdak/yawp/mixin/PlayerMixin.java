@@ -101,7 +101,7 @@ public abstract class PlayerMixin {
             boolean isBlockEntityCovered = entities.stream()
                     .anyMatch(entity -> EntityType.getId(target.getType()).equals(new Identifier(entity)));
             if (isBlockEntityCovered) {
-                FlagCheckEvent.PlayerFlagEvent flagCheck = checkPlayerEvent(player, target.getBlockPos(), BREAK_ENTITIES, dimCache.getDimensionalRegion());
+                FlagCheckEvent.PlayerFlagEvent flagCheck = checkPlayerEvent(player, target.getBlockPos(), BREAK_BLOCKS, dimCache.getDimensionalRegion());
                 handleAndSendMsg(flagCheck);
                 if (flagCheck.isDenied()) {
                     ci.cancel();

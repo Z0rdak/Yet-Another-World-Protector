@@ -11,7 +11,6 @@ public enum RegionFlag {
     ANIMAL_UNMOUNTING("animal-unmounting", FlagType.BOOLEAN_FLAG),
     AXE_STRIP("strip-wood", FlagType.BOOLEAN_FLAG),
     BREAK_BLOCKS("break_blocks", FlagType.BOOLEAN_FLAG),
-    BREAK_ENTITIES("break_entities", FlagType.BOOLEAN_FLAG),
     CONTAINER_ACCESS("access-container", FlagType.BOOLEAN_FLAG),
     DRAGON_BLOCK_PROT("dragon-destruction", FlagType.BOOLEAN_FLAG),
     DROP_LOOT_ALL("drop-loot", FlagType.BOOLEAN_FLAG),

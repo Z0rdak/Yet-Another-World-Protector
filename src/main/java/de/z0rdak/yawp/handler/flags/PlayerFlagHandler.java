@@ -36,9 +36,11 @@ public final class PlayerFlagHandler {
   EntitySleepEvents.ALLOW_NEARBY_MONSTERS.register(PlayerFlagHandler::onSleepingWithStrangers);
   EntitySleepEvents.ALLOW_SETTING_SPAWN.register(PlayerFlagHandler::onSettingSpawn);
 
-  //ServerLivingEntityEvents.ALLOW_DAMAGE.register(PlayerFlagHandler::onReceiveDmg);
+  ServerLivingEntityEvents.ALLOW_DAMAGE.register(PlayerFlagHandler::onReceiveDmg);
   ServerLivingEntityEvents.ALLOW_DEATH.register(PlayerFlagHandler::onDeathblow);
   ServerLivingEntityEvents.AFTER_DEATH.register(PlayerFlagHandler::onDeath);
+  // TODO: Check whether implemented flags could be fit in these events
+
 
   PlayerBlockBreakEvents.BEFORE.register(PlayerFlagHandler::onBreakBlock);
   EntityElytraEvents.ALLOW.register(PlayerFlagHandler::onElytraFlight);
@@ -88,7 +90,7 @@ public final class PlayerFlagHandler {
  }
 
  private static PlayerEntity.SleepFailureReason onAllowSleeping(PlayerEntity player, BlockPos blockPos) {
-  player.getInventory().markDirty();
+
   return null;
  }
 
@@ -119,16 +121,16 @@ public final class PlayerFlagHandler {
   PlayerEntity player = event.getPlayer();
   Entity eventEntity = event.getTarget();
   RegistryKey<World> entityDim = getEntityDim(event.getPlayer());
-     DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(entityDim);
-     if (dimCache != null) {
-     if (isAnimal(eventEntity)) {
-     FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, eventEntity.getBlockPos(), MELEE_ANIMALS, dimCache.getDimensionalRegion());
-     handleAndSendMsg(event, flagCheckEvent);
-     return;
-     }
-     if (isMonster(eventEntity)) {
-     FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, eventEntity.getBlockPos(), MELEE_MONSTERS, dimCache.getDimensionalRegion());
-     handleAndSendMsg(event, flagCheckEvent);
+  DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(entityDim);
+  if (dimCache != null) {
+  if (isAnimal(eventEntity)) {
+  FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, eventEntity.getBlockPos(), MELEE_ANIMALS, dimCache.getDimensionalRegion());
+  handleAndSendMsg(event, flagCheckEvent);
+  return;
+  }
+  if (isMonster(eventEntity)) {
+  FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, eventEntity.getBlockPos(), MELEE_MONSTERS, dimCache.getDimensionalRegion());
+  handleAndSendMsg(event, flagCheckEvent);
      return;
      }
      if (event.getTarget() instanceof VillagerEntity) {

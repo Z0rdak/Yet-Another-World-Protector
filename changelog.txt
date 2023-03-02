@@ -1,3 +1,20 @@
+# 0.0.2.5-beta4
+## Changes
+* `command_op_lvl` not can be set to 5 to disable the usage of mod commands for any OP
+# 0.0.2.4-beta4
+## Changes
+* Adjust mod logging representation
+* Flag `break_blocks` now also covers entities (includes the `break_entities` flag).
+## Removals
+* Remove flag `break_entities`. This is now covered with `break_blocks` flag. The config stays the same.
+## Fixes
+* Fix message for missing region permissions not displaying correctly
+* Attempt to fix NPE for mob grieving flag
+# 0.0.2.3-beta4
+## Changes
+* `no-pvp` and `knockback-players` flag now denies actions also for owners/members of the region to prevent mischief
+## Fixes
+* Fix `invincible` and `no-pvp` flag not working correctly
 # 0.0.2.2-beta4
 ## Changes
 * Add default entry `minecraft:leash_knot` to break-entities config

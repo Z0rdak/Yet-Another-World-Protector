@@ -26,7 +26,7 @@ import org.apache.logging.log4j.Logger;
 public class YetAnotherWorldProtector implements ModInitializer {
 
     public static final String MODID = "yawp";
-    public static final Logger LOGGER = LogManager.getLogger();
+    public static final Logger LOGGER = LogManager.getLogger("YAWP");
 
     private static void registerCommands(CommandDispatcher<ServerCommandSource> commandDispatcher, CommandRegistryAccess commandRegistryAccess, CommandManager.RegistrationEnvironment registrationEnvironment) {
         if (registrationEnvironment.dedicated) {

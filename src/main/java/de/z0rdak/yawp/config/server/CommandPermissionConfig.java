@@ -37,8 +37,8 @@ public class CommandPermissionConfig {
                         " 0 -> /wp\n 1 -> /yawp")
                 .defineInRange("wp_root_command", 0, 0, 1);
 
-        REQUIRED_OP_LEVEL = BUILDER.comment("Minimum OP level to use mod commands.\n")
-                .defineInRange("command_op_level", 4, 0, 4);
+        REQUIRED_OP_LEVEL = BUILDER.comment("Minimum OP level to use mod commands.\n 0 -> everyone can use the commands.\n 1-4 -> OP with specific level can use the commands.\n 5 -> no operator can use the commands.")
+                .defineInRange("command_op_level", 5, 0, 5);
 
         ALLOW_READ_ONLY_CMDS = BUILDER.comment("Defines whether info commands for regions can be used by every player.")
                 .define("allow_info_cmds", true);
