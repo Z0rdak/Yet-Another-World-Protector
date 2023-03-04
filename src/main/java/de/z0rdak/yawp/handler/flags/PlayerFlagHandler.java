@@ -259,8 +259,8 @@ public final class PlayerFlagHandler {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(hurtEntity));
                 if (dimCache != null) {
                     PlayerEntity playerTarget = (PlayerEntity) hurtEntity;
-                    FlagCheckEvent hurtPlayerFlagCheck = checkPlayerEvent(playerTarget, playerTarget.blockPosition(), INVINCIBLE, dimCache.getDimensionalRegion());
-                    if (!hurtPlayerFlagCheck.isDenied()) {
+                    FlagCheckEvent flagCheckEvent = checkTargetEvent(playerTarget.blockPosition(), INVINCIBLE, dimCache.getDimensionalRegion());
+                    if (flagCheckEvent.isDenied()) {
                         event.setAmount(0f);
                         event.setCanceled(true);
                     }
@@ -305,6 +305,11 @@ public final class PlayerFlagHandler {
                 if (dimCache != null) {
                     PlayerEntity dmgTarget = (PlayerEntity) event.getEntityLiving();
                     FlagCheckEvent flagCheckEvent = checkTargetEvent(dmgTarget.blockPosition(), KNOCKBACK_PLAYERS, dimCache.getDimensionalRegion());
+                    if (flagCheckEvent.isDenied()) {
+                        event.setCanceled(true);
+                        event.setStrength(0);
+                    }
+                    flagCheckEvent = checkTargetEvent(dmgTarget.blockPosition(), INVINCIBLE, dimCache.getDimensionalRegion());
                     if (flagCheckEvent.isDenied()) {
                         event.setCanceled(true);
                         event.setStrength(0);
