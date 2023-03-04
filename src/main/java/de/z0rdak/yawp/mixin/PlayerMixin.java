@@ -36,7 +36,7 @@ public abstract class PlayerMixin {
                     ci.cancel();
                 }
             }
-            FlagCheckEvent flagCheckEvent = checkPlayerEvent(target, target.getBlockPos(), INVINCIBLE, dimCache.getDimensionalRegion());
+            FlagCheckEvent flagCheckEvent = checkTargetEvent(target.getBlockPos(), INVINCIBLE, dimCache.getDimensionalRegion());
             if (!flagCheckEvent.isDenied()) {
                 ci.cancel();
             }

@@ -40,6 +40,10 @@ public abstract class LivingEntityMixin {
                         sendFlagDeniedMsg(flagCheckEvent, attacker);
                         ci.cancel();
                     }
+                    flagCheckEvent = checkTargetEvent(target.getBlockPos(), INVINCIBLE, dimCache.getDimensionalRegion());
+                    if (!flagCheckEvent.isDenied()) {
+                        ci.cancel();
+                    }
                 }
             }
 
