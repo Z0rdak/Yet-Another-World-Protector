@@ -1,6 +1,9 @@
 # 0.0.2.5-beta4
 ## Changes
-* `command_op_lvl` not can be set to 5 to disable the usage of mod commands for any OP
+* `command_op_lvl` now can be set to 5 to disable the usage of mod commands for any OP
+* `invincible` flag now additionally grants knock back protection
+## Fixes
+* Fix `invincible` flag not working correctly from changes in 0.0.2.3-beta4
 # 0.0.2.4-beta4
 ## Changes
 * Adjust mod logging representation
