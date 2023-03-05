@@ -70,13 +70,16 @@ public class YetAnotherWorldProtector
         if (event.getConfig().getModId().equals(MODID) && event.getConfig().getFileName().equals(CommandPermissionConfig.CONFIG_NAME)) {
             CommandPermissionConfig.BASE_CMD = CommandPermissionConfig.WP_CMDS[CommandPermissionConfig.WP_COMMAND_ALTERNATIVE.get()];
             YetAnotherWorldProtector.LOGGER.info("Set mod base command to '/" + CommandPermissionConfig.BASE_CMD + "'");
+            CommandPermissionConfig.UUIDsWithPermission().forEach(e -> YetAnotherWorldProtector.LOGGER.info("Player with UUID '" + e + "' read from config"));
             CommandRegistry.init(dispatcher, CommandPermissionConfig.BASE_CMD);
         }
     }
 
     @SubscribeEvent
     public void onConfigReloading(ModConfig.Reloading event) {
-        // reset player uuids?
+        if (event.getConfig().getModId().equals(MODID)) {
+            YetAnotherWorldProtector.LOGGER.info("Reloaded: '" + event.getConfig().getFileName() + "'");
+        }
     }
 
 }
