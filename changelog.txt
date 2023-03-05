@@ -1,3 +1,8 @@
+# 0.0.2.6-beta4
+## Additions
+* Add logging indicator for reloading YAWP config.
+## Fixes
+* Fix region flag list pagination not working
 # 0.0.2.5-beta4
 ## Changes
 * `command_op_lvl` now can be set to 5 to disable the usage of mod commands for any OP

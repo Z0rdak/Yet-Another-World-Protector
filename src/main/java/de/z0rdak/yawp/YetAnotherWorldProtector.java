@@ -26,8 +26,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @Mod(YetAnotherWorldProtector.MODID)
-public class YetAnotherWorldProtector
-{
+public class YetAnotherWorldProtector {
     public static final String MODID = "yawp";
     public static final String MODID_LONG = "Yet Another World Protector";
     public static final Logger LOGGER = LogManager.getLogger("YAWP");
@@ -72,12 +71,15 @@ public class YetAnotherWorldProtector
         if (event.getConfig().getModId().equals(MODID) && event.getConfig().getFileName().equals(CommandPermissionConfig.CONFIG_NAME)) {
             CommandPermissionConfig.BASE_CMD = CommandPermissionConfig.WP_CMDS[CommandPermissionConfig.WP_COMMAND_ALTERNATIVE.get()];
             YetAnotherWorldProtector.LOGGER.info("Set mod base command to '/" + CommandPermissionConfig.BASE_CMD + "'");
+            CommandPermissionConfig.UUIDsWithPermission().forEach(e -> YetAnotherWorldProtector.LOGGER.info("Player with UUID '" + e + "' read from config"));
             CommandRegistry.init(dispatcher, CommandPermissionConfig.BASE_CMD);
         }
     }
 
     @SubscribeEvent
     public void onConfigReloading(ModConfigEvent.Reloading event) {
-        // reset player uuids?
+        if (event.getConfig().getModId().equals(MODID)) {
+            YetAnotherWorldProtector.LOGGER.info("Reloaded: '" + event.getConfig().getFileName() + "'");
+        }
     }
 }
