@@ -594,7 +594,7 @@ public class RegionCommands {
         List<IFlag> flags = LocalRegions.getSortedFlags(region);
         List<IFormattableTextComponent> flagPagination = buildPaginationComponents(
                 buildFlagHeader(region, LOCAL),
-                buildCommandStr(REGION_COMMAND.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), FLAG.toString()),
+                buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), FLAG.toString()),
                 buildRemoveFlagEntries(region, flags, LOCAL),
                 pageNo,
                 new StringTextComponent(" - ").append(buildRegionAddFlagLink(region))
