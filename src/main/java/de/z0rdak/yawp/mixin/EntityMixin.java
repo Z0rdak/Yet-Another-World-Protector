@@ -7,6 +7,7 @@ import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.LightningEntity;
 import net.minecraft.entity.passive.MerchantEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.vehicle.AbstractMinecartEntity;
@@ -35,6 +36,20 @@ public abstract class EntityMixin {
                     cir.setReturnValue(false);
                 }
             }
+        }
+    }
+
+    @Inject(method = "onStruckByLightning", at = @At(value = "HEAD"), cancellable = true, allow = 1)
+    public void onHitByLightning(ServerWorld world, LightningEntity lightning, CallbackInfo ci) {
+        Entity poorSoul = (Entity) (Object) this;
+        if (!poorSoul.world.isClient) {
+            // if (poorSoul instanceof PlayerEntity) {
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(poorSoul));
+            FlagCheckEvent flagCheck = checkTargetEvent(poorSoul.getBlockPos(), LIGHTNING_PROT, dimCache.getDimensionalRegion());
+            if (flagCheck.isDenied()) {
+                ci.cancel();
+            }
+            // }
         }
     }
 
