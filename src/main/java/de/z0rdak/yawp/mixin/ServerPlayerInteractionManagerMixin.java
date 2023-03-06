@@ -23,6 +23,7 @@ import static de.z0rdak.yawp.util.StickUtil.isVanillaStick;
 @Mixin(ServerPlayerInteractionManager.class)
 public class ServerPlayerInteractionManagerMixin {
 
+    // FIXME: Could go in fabric event mixin: UseBlockCallback.EVENT.register(PlayerFlagHandler::onUseBlock);
     @Inject(method = "interactBlock", at = @At("HEAD"), cancellable = true, allow = 1)
     public void useItemOn(ServerPlayerEntity player, World world, ItemStack involvedItemStack, Hand hand, BlockHitResult blockHitResult, CallbackInfoReturnable<ActionResult> cir) {
         if (!world.isClient) {
