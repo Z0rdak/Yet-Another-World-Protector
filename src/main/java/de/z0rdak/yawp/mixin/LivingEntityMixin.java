@@ -34,19 +34,37 @@ public abstract class LivingEntityMixin {
         if (isServerSide(target)) {
             if (target instanceof PlayerEntity) {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(target));
-                if (target.getAttacker() instanceof PlayerEntity attacker) {
-                    FlagCheckEvent flagCheckEvent = checkTargetEvent(target.getBlockPos(), KNOCKBACK_PLAYERS, dimCache.getDimensionalRegion());
-                    if (flagCheckEvent.isDenied()) {
-                        sendFlagDeniedMsg(flagCheckEvent, attacker);
-                        ci.cancel();
-                    }
-                    flagCheckEvent = checkTargetEvent(target.getBlockPos(), INVINCIBLE, dimCache.getDimensionalRegion());
-                    if (!flagCheckEvent.isDenied()) {
-                        ci.cancel();
-                    }
+                FlagCheckEvent flagCheckEvent = checkTargetEvent(target.getBlockPos(), KNOCKBACK_PLAYERS, dimCache.getDimensionalRegion());
+                if (flagCheckEvent.isDenied()) {
+                    ci.cancel();
                 }
+                flagCheckEvent = checkTargetEvent(target.getBlockPos(), INVINCIBLE, dimCache.getDimensionalRegion());
+                if (flagCheckEvent.isDenied()) {
+                    ci.cancel();
+                }
+
             }
 
+        }
+    }
+
+    // FIXME: Separate flags for dropLoot -> mobs, etc AND dropInventory ->
+    @Inject(method = "drop", at = @At(value = "HEAD"), cancellable = true, allow = 1)
+    public void onDrop(DamageSource source, CallbackInfo ci) {
+        LivingEntity target = (LivingEntity) (Object) this;
+        if (isServerSide(target)) {
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(target));
+            FlagCheckEvent flagCheckEvent = checkTargetEvent(target.getBlockPos(), DROP_LOOT_ALL, dimCache.getDimensionalRegion());
+            if (flagCheckEvent.isDenied()) {
+                ci.cancel();
+            }
+
+            if (source.getSource() instanceof PlayerEntity player) {
+                FlagCheckEvent.PlayerFlagEvent playerFlagCheckEvent = checkPlayerEvent(player, target.getBlockPos(), DROP_LOOT_PLAYER, dimCache.getDimensionalRegion());
+                if (playerFlagCheckEvent.isDenied()) {
+                    ci.cancel();
+                }
+            }
         }
     }
 
