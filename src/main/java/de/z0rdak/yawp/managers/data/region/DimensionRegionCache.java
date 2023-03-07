@@ -137,7 +137,6 @@ public class DimensionRegionCache implements INbtSerializable<NbtCompound> {
     public void removeRegion(IMarkableRegion region) {
         if (this.contains(region.getName())) {
             this.regionsInDimension.remove(region.getName());
-            RegionDataManager.save();
         }
     }
 

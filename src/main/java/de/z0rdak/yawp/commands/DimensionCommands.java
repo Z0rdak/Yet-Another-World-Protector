@@ -246,9 +246,11 @@ public class DimensionCommands {
             }
             if (region.getParent() != null) {
                 region.getParent().removeChild(region);
-                RegionDataManager.get().cacheFor(region.getDim()).getDimensionalRegion().addChild(region);
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(region.getDim());
+                dimCache.getDimensionalRegion().addChild(region);
             }
             dim.removeRegion(region);
+            RegionDataManager.save();
             sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.dim.region.remove.confirm", region.getName(), buildRegionInfoLink(dim.getDimensionalRegion(), RegionType.DIMENSION))));
             return 0;
         }
@@ -280,7 +282,7 @@ public class DimensionCommands {
     private static int removePlayer(ServerCommandSource src, ServerPlayerEntity player, DimensionRegionCache dimCache, String affiliationType) {
         if (dimCache != null) {
             if (affiliationType.equals(MEMBER.toString())) {
-                if (dimCache.getDimensionalRegion().getMembers().containsPlayer(player.getUuid())) {
+                if (dimCache.getDimensionalRegion().hasMember(player.getUuid())) {
                     dimCache.getDimensionalRegion().removeMember(player);
                     MutableText playerInfo = buildAffiliateInfo(dimCache.getDimensionalRegion(), player.getEntityName(), AffiliationType.PLAYER);
                     sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.player.removed", affiliationType, playerInfo, buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION))));
@@ -289,7 +291,7 @@ public class DimensionCommands {
                 }
             }
             if (affiliationType.equals(OWNER.toString())) {
-                if (dimCache.getDimensionalRegion().getOwners().containsPlayer(player.getUuid())) {
+                if (dimCache.getDimensionalRegion().hasOwner(player.getUuid())) {
                     dimCache.getDimensionalRegion().removeOwner(player);
                     MutableText playerInfo = buildAffiliateInfo(dimCache.getDimensionalRegion(), player.getEntityName(), AffiliationType.PLAYER);
                     sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.player.removed", affiliationType, playerInfo, buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION))));
@@ -304,7 +306,7 @@ public class DimensionCommands {
     private static int removeTeam(ServerCommandSource src, Team team, DimensionRegionCache dimCache, String affiliationType) {
         if (dimCache != null) {
             if (affiliationType.equals(MEMBER.toString())) {
-                if (dimCache.getDimensionalRegion().getMembers().containsTeam(team)) {
+                if (dimCache.getDimensionalRegion().hasMember(team.getName())) {
                     dimCache.getDimensionalRegion().removeMember(team);
                     sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.player.removed", affiliationType, buildTeamHoverComponent(team), buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION))));
                     RegionDataManager.save();
@@ -312,7 +314,7 @@ public class DimensionCommands {
                 }
             }
             if (affiliationType.equals(OWNER.toString())) {
-                if (dimCache.getDimensionalRegion().getOwners().containsTeam(team)) {
+                if (dimCache.getDimensionalRegion().hasOwner(team.getName())) {
                     dimCache.getDimensionalRegion().removeOwner(team);
                     sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.player.removed", affiliationType, buildTeamHoverComponent(team), buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION))));
                     RegionDataManager.save();
@@ -367,7 +369,6 @@ public class DimensionCommands {
     private static int promptDimensionRegionList(ServerCommandSource src, DimensionRegionCache dimCache, int pageNo) {
         if (dimCache != null) {
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-            RegistryKey<World> dim = dimRegion.getDim();
             List<IMarkableRegion> regionsForDim = dimCache.regionsInDimension
                     .values()
                     .stream()
@@ -391,7 +392,6 @@ public class DimensionCommands {
 
     private static int promptDimensionFlagList(ServerCommandSource src, DimensionRegionCache dimCache, int pageNo) {
         List<IFlag> flags = LocalRegions.getSortedFlags(dimCache.getDimensionalRegion());
-        RegistryKey<World> dim = dimCache.dimensionKey();
         if (flags.isEmpty()) {
             sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.flags.empty", buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION))));
             return 1;

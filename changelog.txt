@@ -1,3 +1,17 @@
+# 0.0.2.6-beta4
+## Additions
+* Add logging indicator for reloading YAWP config.
+* Add logging for invalid default flags for Dimensional and Local Regions provided in `yawp-region-defaults.toml`
+* Add logging for loaded default flags for Dimensional and Local Regions provided in `yawp-region-defaults.toml`
+* Add logging for loaded UUIDs for `players_with_permission`
+* Add logging for loaded block entity identifiers for `break_flag_entities`
+* Add logging for loaded block entity tag identifiers for `break_flag_entity_tags`
+* Conclusion: Added a bunch of logging to make your and my life easier.
+## Fixes
+* Fix region flag list pagination not working
+* Fix creating a region with marker not prompting the correct parent regions
+* Fix creating a region with marker not checking for valid area
+* Fix Dimensional Regions not displaying correct amount of Local Regions
 # 0.0.2.5-beta4
 ## Changes
 * `command_op_lvl` now can be set to 5 to disable the usage of mod commands for any OP

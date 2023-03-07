@@ -9,12 +9,18 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
+import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.CommandUtil;
 import de.z0rdak.yawp.util.MessageUtil;
+import de.z0rdak.yawp.util.StickType;
+import de.z0rdak.yawp.util.StickUtil;
 import net.minecraft.command.CommandSource;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralTextContent;
@@ -87,19 +93,34 @@ public class OwnedRegionArgumentType implements ArgumentType<String> {
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         if (context.getSource() instanceof ServerCommandSource src) {
             try {
-                // TODO: hasOwner als convenient method for regions
                 ServerPlayerEntity player = src.getPlayerOrThrow();
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.world.getRegistryKey());
-                List<String> ownedRegions = dimCache.getRegions()
-                        .stream()
-                        .filter(r -> r.getOwners().containsPlayer(player.getUuid()))
-                        .map(IMarkableRegion::getName)
-                        .collect(Collectors.toList());
-                if (ownedRegions.isEmpty()) {
-                    MessageUtil.sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("You don't have owner permissions for any region in this dimension!'")));
-                    return Suggestions.empty();
+                ItemStack maybeStick = player.getMainHandStack();
+                if (StickUtil.isVanillaStick(maybeStick)) {
+                    StickType stickType = StickUtil.getStickType(maybeStick);
+                    if (stickType == StickType.MARKER) {
+                        NbtCompound stickNBT = StickUtil.getStickNBT(maybeStick);
+                        if (stickNBT != null) {
+                            MarkerStick marker = new MarkerStick(stickNBT);
+                            if (!marker.isValidArea()) {
+                                return Suggestions.empty();
+                            }
+                            CuboidArea markedArea = new CuboidArea(marker.getMarkedBlocks().get(0), marker.getMarkedBlocks().get(1));
+                            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.world.getRegistryKey());
+                            List<String> ownedRegions = dimCache.getRegions()
+                                    .stream()
+                                    .filter(r -> r.hasOwner(player.getUuid()))
+                                    .filter(r -> ((CuboidArea) r.getArea()).contains(markedArea))
+                                    .map(IMarkableRegion::getName)
+                                    .collect(Collectors.toList());
+                            if (ownedRegions.isEmpty()) {
+                                MessageUtil.sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("You don't have owner permissions for any region in this dimension!'")));
+                                return Suggestions.empty();
+                            }
+                            return CommandSource.suggestMatching(ownedRegions, builder);
+                        }
+                    }
                 }
-                return CommandSource.suggestMatching(ownedRegions, builder);
+                return Suggestions.empty();
             } catch (CommandSyntaxException e) {
                 return Suggestions.empty();
             }

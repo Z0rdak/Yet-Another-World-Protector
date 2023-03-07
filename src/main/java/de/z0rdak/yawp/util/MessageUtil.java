@@ -13,6 +13,7 @@ import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.*;
+import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -605,8 +606,9 @@ public class MessageUtil {
     public static MutableText buildRegionChildrenLink(IProtectedRegion region, RegionType type) {
         return switch (type) {
             case DIMENSION -> {
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(region.getDim());
                 String command = buildCommandStr(DIM.toString(), region.getDim().getValue().toString(), LIST.toString(), REGION.toString());
-                MutableText listDimRegionsLinkText = MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.list.link.text", region.getChildren().size()));
+                MutableText listDimRegionsLinkText = MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.list.link.text", dimCache.getRegions().size()));
                 MutableText listDimRegionsHoverText = MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.list.link.hover", region.getName()));
                 MutableText listDimRegionsListLink = buildExecuteCmdComponent(listDimRegionsLinkText, listDimRegionsHoverText, command, RUN_COMMAND, LINK_COLOR);
                 MutableText createRegionLink = buildDimCreateRegionLink(region);

@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.List;
+import java.util.Set;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
@@ -188,7 +188,9 @@ public abstract class PlayerMixin {
 
             // check every other entity if it is in the list of entities to protect
             // this is for BlockEntities which are not covered by the block breaking flag
-            List<? extends String> entities = FlagConfig.BREAK_FLAG_ENTITIES.get();
+            // FIXME: Tags are not yet considered
+            Set<String> entityTags = FlagConfig.getBreakFlagEntityTags();
+            Set<String> entities = FlagConfig.getBreakFlagEntities();
             boolean isBlockEntityCovered = entities.stream()
                     .anyMatch(entity -> EntityType.getId(target.getType()).equals(new Identifier(entity)));
             if (isBlockEntityCovered) {

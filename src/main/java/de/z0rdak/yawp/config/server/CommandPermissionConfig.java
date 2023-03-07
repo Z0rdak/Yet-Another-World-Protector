@@ -56,8 +56,6 @@ public class CommandPermissionConfig {
                             if (uuidTokens.get(0).length() != 8 || containsBadLength(shortTokens, 4) || uuidTokens.get(4).length() != 12) {
                                 throw new IllegalArgumentException("Invalid UUID - wrong token sizes");
                             }
-                            UUID uuidObj = UUID.fromString(uuidStr);
-                            YetAnotherWorldProtector.LOGGER.info("PlayerEntity with UUID '" + uuidObj + "' read from config");
                             return true;
                         } catch (IllegalArgumentException e) {
                             YetAnotherWorldProtector.LOGGER.warn("Invalid UUID '" + uuid + "' in config");

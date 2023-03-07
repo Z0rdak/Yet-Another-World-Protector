@@ -11,7 +11,6 @@ import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.scoreboard.Team;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralTextContent;
@@ -100,8 +99,8 @@ public class CommandInterceptor {
                             // check if player is owner of parent region or has permission to update region area
                             if (cmdNodes.size() > 4 && nodeNames.contains(AREA.toString())) {
                                 // TODO: method to check if player is owner (player or team)
-                                if (!region.getParent().getOwners().containsPlayer(player.getUuid())
-                                        && (player.getScoreboardTeam() == null || !region.getParent().getOwners().containsTeam((Team) player.getScoreboardTeam()))
+                                if (!region.getParent().hasOwner(player.getUuid())
+                                        && (player.getScoreboardTeam() == null || !region.getParent().hasOwner(player.getScoreboardTeam().getName()))
                                         && !hasConfigPermission) {
                                     YetAnotherWorldProtector.LOGGER.info("Player not allowed to manage region '" + region.getName() + "'");
                                     sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region, LOCAL))));
@@ -109,8 +108,8 @@ public class CommandInterceptor {
                                 }
                             }
                             // TODO: method to check if player is owner (player or team)
-                            if (!region.getOwners().containsPlayer(player.getUuid())
-                                    && (player.getScoreboardTeam() == null || !region.getOwners().containsTeam((Team) player.getScoreboardTeam()))
+                            if (!region.hasOwner(player.getUuid())
+                                    && (player.getScoreboardTeam() == null || !region.hasOwner(player.getScoreboardTeam().getName()))
                                     && !hasConfigPermission) {
                                 YetAnotherWorldProtector.LOGGER.info("Player not allowed to manage region '" + region.getName() + "'");
                                 sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region, LOCAL))));
