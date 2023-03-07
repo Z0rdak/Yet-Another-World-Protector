@@ -39,7 +39,11 @@ public class FlagContainer extends HashMap<String, IFlag> implements INBTSeriali
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag nbt = new CompoundTag();
-        this.forEach((key, value) -> nbt.put(key, value.serializeNBT()));
+        this.forEach((flagName, iFlag) -> {
+            if (RegionFlag.contains(flagName)) {
+                nbt.put(flagName, iFlag.serializeNBT());
+            }
+        });
         return nbt;
     }
 

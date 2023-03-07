@@ -17,6 +17,7 @@ import net.minecraft.world.scores.Team;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.UUID;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -218,7 +219,26 @@ public abstract class AbstractRegion implements IProtectedRegion {
     @Override
     public void removeOwner(Team team) {
         this.owners.removeTeam(team);
+    }
 
+    @Override
+    public boolean hasOwner(String teamName) {
+        return this.owners.containsTeam(teamName);
+    }
+
+    @Override
+    public boolean hasOwner(UUID playerUuid) {
+        return this.owners.containsPlayer(playerUuid);
+    }
+
+    @Override
+    public boolean hasMember(String teamName) {
+        return this.members.containsTeam(teamName);
+    }
+
+    @Override
+    public boolean hasMember(UUID playerUuid) {
+        return this.members.containsPlayer(playerUuid);
     }
 
     @Override

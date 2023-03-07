@@ -15,6 +15,7 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * This interface represents a general protected region.
@@ -66,6 +67,14 @@ public interface IProtectedRegion extends INBTSerializable<CompoundTag> {
     void removeMember(Team team);
 
     void removeOwner(Team team);
+
+    boolean hasOwner(String teamName);
+
+    boolean hasOwner(UUID playerUuid);
+
+    boolean hasMember(String teamName);
+
+    boolean hasMember(UUID playerUuid);
 
     boolean isActive();
 

@@ -141,7 +141,7 @@ public class RegionDataManager extends SavedData {
                 YetAnotherWorldProtector.LOGGER.info(new TranslatableComponent("data.nbt.dimensions.load.dim.restore", dimKey).getString());
             }
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-            dimCache.regionsInDimension.values().forEach(region -> {
+            dimCache.getRegionsInDimension().values().forEach(region -> {
                 // set child references
                 region.getChildrenNames().forEach(childName -> {
                     IMarkableRegion childRegion = dimCache.getRegion(childName);
