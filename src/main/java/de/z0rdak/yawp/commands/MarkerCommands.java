@@ -84,12 +84,16 @@ public final class MarkerCommands {
                     CompoundTag stickNBT = StickUtil.getStickNBT(maybeStick);
                     if (stickNBT != null) {
                         MarkerStick marker = new MarkerStick(stickNBT);
+                        if (!marker.isValidArea()) {
+                            sendCmdFeedback(src, Component.translatable("Marked area is not valid").withStyle(RED));
+                            return 1;
+                        }
                         AbstractMarkableRegion region = LocalRegions.regionFrom(player, marker, regionName);
                         RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
                         boolean hasConfigPermission = CommandPermissionConfig.hasPlayerPermission(player);
                         if (parentRegion != null) {
                             // should only be a region which has player as owner at this point due to the OwnerRegionArgumentType suggestions
-                            if (parentRegion.getOwners().containsPlayer(player.getUUID()) || hasConfigPermission) {
+                            if (parentRegion.hasOwner(player.getUUID()) || hasConfigPermission) {
                                 if (AbstractMarkableRegion.fullyContains(parentRegion.getArea(), region.getArea())) {
                                     dimCache.addRegion(region);
                                     parentRegion.addChild(region);

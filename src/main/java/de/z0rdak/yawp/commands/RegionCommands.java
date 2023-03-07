@@ -256,14 +256,14 @@ public class RegionCommands {
     private static int removeTeam(CommandSourceStack src, PlayerTeam team, IMarkableRegion region, String affiliation) {
         switch (affiliation) {
             case "member":
-                if (region.getMembers().containsTeam(team)) {
+                if (region.hasMember(team.getName())) {
                     region.removeMember(team);
                     RegionDataManager.save();
                     sendCmdFeedback(src, Component.translatable("cli.msg.info.region.affiliation.team.removed", team.getName(), buildRegionInfoLink(region, LOCAL)));
                 }
                 break;
             case "owner":
-                if (region.getOwners().containsTeam(team)) {
+                if (region.hasOwner(team.getName())) {
                     region.removeOwner(team);
                     RegionDataManager.save();
                     sendCmdFeedback(src, Component.translatable("cli.msg.info.region.affiliation.team.removed", team.getName(), buildRegionInfoLink(region, LOCAL)));
@@ -279,14 +279,14 @@ public class RegionCommands {
     private static int addTeam(CommandSourceStack src, PlayerTeam team, IMarkableRegion region, String affiliation) {
         switch (affiliation) {
             case "member":
-                if (!region.getMembers().containsTeam(team)) {
+                if (!region.hasMember(team.getName())) {
                     region.addMember(team);
                     RegionDataManager.save();
                     sendCmdFeedback(src, Component.translatable("cli.msg.info.region.affiliation.team.added", team.getName(), affiliation, buildRegionInfoLink(region, LOCAL)));
                 }
                 break;
             case "owner":
-                if (!region.getOwners().containsTeam(team)) {
+                if (!region.hasOwner(team.getName())) {
                     region.addOwner(team);
                     RegionDataManager.save();
                     sendCmdFeedback(src, Component.translatable("cli.msg.info.region.affiliation.team.added", team.getName(), affiliation, buildRegionInfoLink(region, LOCAL)));
@@ -303,14 +303,14 @@ public class RegionCommands {
     private static int removePlayer(CommandSourceStack src, ServerPlayer player, IMarkableRegion region, String affiliation) {
         switch (affiliation) {
             case "member":
-                if (region.getMembers().containsPlayer(player.getUUID())) {
+                if (region.hasMember(player.getUUID())) {
                     region.removeMember(player);
                     RegionDataManager.save();
                     sendCmdFeedback(src, Component.translatable("cli.msg.info.region.affiliation.player.removed", buildPlayerHoverComponent(player), buildRegionInfoLink(region, LOCAL)));
                 }
                 break;
             case "owner":
-                if (region.getOwners().containsPlayer(player.getUUID())) {
+                if (region.hasOwner(player.getUUID())) {
                     region.removeOwner(player);
                     RegionDataManager.save();
                     sendCmdFeedback(src, Component.translatable("cli.msg.info.region.affiliation.player.removed", buildPlayerHoverComponent(player), buildRegionInfoLink(region, LOCAL)));
@@ -326,14 +326,14 @@ public class RegionCommands {
     private static int addPlayer(CommandSourceStack src, ServerPlayer player, IMarkableRegion region, String affiliation) {
         switch (affiliation) {
             case "member":
-                if (!region.getMembers().containsPlayer(player.getUUID())) {
+                if (!region.hasMember(player.getUUID())) {
                     region.addMember(player);
                     RegionDataManager.save();
                     sendCmdFeedback(src, Component.translatable("cli.msg.info.region.affiliation.player.added", buildPlayerHoverComponent(player), affiliation, buildRegionInfoLink(region, LOCAL)));
                 }
                 break;
             case "owner":
-                if (!region.getOwners().containsPlayer(player.getUUID())) {
+                if (!region.hasOwner(player.getUUID())) {
                     region.addOwner(player);
                     RegionDataManager.save();
                     sendCmdFeedback(src, Component.translatable("cli.msg.info.region.affiliation.player.added", buildPlayerHoverComponent(player), affiliation, buildRegionInfoLink(region, LOCAL)));

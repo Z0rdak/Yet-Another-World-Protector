@@ -13,6 +13,8 @@ import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.*;
+import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
+import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
@@ -606,8 +608,9 @@ public class MessageUtil {
     public static MutableComponent buildRegionChildrenLink(IProtectedRegion region, RegionType type) {
         return switch (type) {
             case DIMENSION -> {
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(region.getDim());
                 String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), REGION.toString());
-                MutableComponent listDimRegionsLinkText = Component.translatable("cli.msg.dim.info.region.list.link.text", region.getChildren().size());
+                MutableComponent listDimRegionsLinkText = Component.translatable("cli.msg.dim.info.region.list.link.text", dimCache.getRegions().size());
                 MutableComponent listDimRegionsHoverText = Component.translatable("cli.msg.dim.info.region.list.link.hover", region.getName());
                 MutableComponent listDimRegionsListLink = buildExecuteCmdComponent(listDimRegionsLinkText, listDimRegionsHoverText, command, RUN_COMMAND, LINK_COLOR);
                 MutableComponent createRegionLink = buildDimCreateRegionLink(region);

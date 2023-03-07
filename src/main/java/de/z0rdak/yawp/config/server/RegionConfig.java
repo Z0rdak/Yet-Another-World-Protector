@@ -30,10 +30,10 @@ public class RegionConfig {
                 .defineInRange("default_region_priority", 10, 0, Integer.MAX_VALUE);
 
         REGION_DEFAULT_FLAGS = BUILDER.comment("Default flags for new local regions.")
-                .defineList("default_flags", new ArrayList<>(), RegionConfig::isValidFlag);
+                .defineList("default_flags", new ArrayList<>(), RegionConfig::isValidLocalFlag);
 
         DIM_REGION_DEFAULT_FLAGS = BUILDER.comment("Default flags for new dimensional regions.")
-                .defineList("dim_default_flags", new ArrayList<>(), RegionConfig::isValidFlag);
+                .defineList("dim_default_flags", new ArrayList<>(), RegionConfig::isValidDimFlag);
 
         CLI_REGION_DEFAULT_PRIORITY_INC = BUILDER.comment("Default region priority increment/decrement.")
                 .defineInRange("default_region_priority_inc", 5, 1, 1000);
@@ -67,10 +67,27 @@ public class RegionConfig {
                 .map(String::toString).collect(Collectors.toSet());
     }
 
-    private static boolean isValidFlag(Object flag) {
+    private static boolean isValidDimFlag(Object flag) {
         if (flag instanceof String) {
-            return RegionFlag.contains((String) flag);
+            boolean contains = RegionFlag.contains((String) flag);
+            if (!contains) {
+                YetAnotherWorldProtector.LOGGER.warn("Invalid default flag supplied for 'dim_default_flags': " + flag);
+            }
+            return contains;
         }
+        YetAnotherWorldProtector.LOGGER.warn("Invalid default flag supplied for 'dim_default_flags': " + flag);
+        return false;
+    }
+
+    private static boolean isValidLocalFlag(Object flag) {
+        if (flag instanceof String) {
+            boolean contains = RegionFlag.contains((String) flag);
+            if (!contains) {
+                YetAnotherWorldProtector.LOGGER.warn("Invalid default flag supplied for 'default_flags': " + flag);
+            }
+            return contains;
+        }
+        YetAnotherWorldProtector.LOGGER.warn("Invalid default flag supplied for 'default_flags': " + flag);
         return false;
     }
 }

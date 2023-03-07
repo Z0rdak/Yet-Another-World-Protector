@@ -24,7 +24,7 @@ import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 @Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID)
 public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
 
-    public Map<String, IMarkableRegion> regionsInDimension;
+    private Map<String, IMarkableRegion> regionsInDimension;
     private DimensionalRegion dimensionalRegion;
 
     public DimensionRegionCache(ResourceKey<Level> dim) {
@@ -40,25 +40,8 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
         this.regionsInDimension = new HashMap<>();
     }
 
-    public static IProtectedRegion deserializeRegion(RegionType regionType, CompoundTag regionNbt) {
-        switch (regionType) {
-            case GLOBAL:
-                throw new UnsupportedOperationException("Global not supported yet");
-            case DIMENSION:
-                return new DimensionalRegion(regionNbt);
-            case LOCAL:
-                AreaType areaType = AreaType.of(regionNbt.getString(AREA_TYPE));
-                if (areaType == null) {
-                    YetAnotherWorldProtector.LOGGER.error("Unable to read region type for region!");
-                    return null;
-                } else {
-                    return deserializeLocalRegion(areaType, regionNbt);
-                }
-            case TEMPLATE:
-                throw new UnsupportedOperationException("Template not supported yet");
-            default:
-                throw new IllegalArgumentException("");
-        }
+    public Map<String, IMarkableRegion> getRegionsInDimension() {
+        return Collections.unmodifiableMap(regionsInDimension);
     }
 
     private static String getDataName(DimensionalRegion dim) {
@@ -141,7 +124,6 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
     public void removeRegion(IMarkableRegion region){
         if (this.contains(region.getName())){
             this.regionsInDimension.remove(region.getName());
-            RegionDataManager.save();
         }
     }
 

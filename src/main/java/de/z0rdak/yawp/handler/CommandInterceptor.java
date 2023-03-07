@@ -104,18 +104,16 @@ public class CommandInterceptor {
                         boolean hasConfigPermission = hasPlayerPermission(player);
                         // check if player is owner of parent region or has permission to update region area
                         if (cmdNodes.size() > 4 && nodeNames.contains(AREA.toString())) {
-                            // TODO: method to check if player is owner (player or team)
-                            if (!region.getParent().getOwners().containsPlayer(player.getUUID())
-                                    && (player.getTeam() == null || !region.getParent().getOwners().containsTeam(player.getTeam()))
+                            if (!region.getParent().hasOwner(player.getUUID())
+                                    && (player.getTeam() == null || !region.getParent().hasOwner(player.getTeam().getName()))
                                     && !hasConfigPermission) {
                                 YetAnotherWorldProtector.LOGGER.info("Player not allowed to manage region '" + region.getName() + "'");
                                 sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region, LOCAL)));
                                 event.setCanceled(true);
                             }
                         }
-                        // TODO: method to check if player is owner (player or team)
-                        if (!region.getOwners().containsPlayer(player.getUUID())
-                                && (player.getTeam() == null || !region.getOwners().containsTeam(player.getTeam()))
+                        if (!region.hasOwner(player.getUUID())
+                                && (player.getTeam() == null || !region.hasOwner(player.getTeam().getName()))
                                 && !hasConfigPermission) {
                             YetAnotherWorldProtector.LOGGER.info("Player not allowed to manage region '" + region.getName() + "'");
                             sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region, LOCAL)));
