@@ -26,8 +26,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @Mod(YetAnotherWorldProtector.MODID)
-public class YetAnotherWorldProtector
-{
+public class YetAnotherWorldProtector {
     public static final String MODID = "yawp";
     public static final String MODID_LONG = "Yet Another World Protector";
     public static final Logger LOGGER = LogManager.getLogger("YAWP");
@@ -60,6 +59,7 @@ public class YetAnotherWorldProtector
     }
 
     private static CommandDispatcher<CommandSource> dispatcher;
+
     @SubscribeEvent
     public void onServerStartingRegisterCommands(RegisterCommandsEvent event) {
         dispatcher = event.getDispatcher();
@@ -67,11 +67,48 @@ public class YetAnotherWorldProtector
 
     @SubscribeEvent
     public void onConfigLoading(ModConfig.Loading event) {
-        if (event.getConfig().getModId().equals(MODID) && event.getConfig().getFileName().equals(CommandPermissionConfig.CONFIG_NAME)) {
-            CommandPermissionConfig.BASE_CMD = CommandPermissionConfig.WP_CMDS[CommandPermissionConfig.WP_COMMAND_ALTERNATIVE.get()];
-            YetAnotherWorldProtector.LOGGER.info("Set mod base command to '/" + CommandPermissionConfig.BASE_CMD + "'");
-            CommandPermissionConfig.UUIDsWithPermission().forEach(e -> YetAnotherWorldProtector.LOGGER.info("Player with UUID '" + e + "' read from config"));
-            CommandRegistry.init(dispatcher, CommandPermissionConfig.BASE_CMD);
+        if (event.getConfig().getModId().equals(MODID)) {
+            switch (event.getConfig().getFileName()) {
+                case CommandPermissionConfig.CONFIG_NAME: {
+                    CommandPermissionConfig.BASE_CMD = CommandPermissionConfig.WP_CMDS[CommandPermissionConfig.WP_COMMAND_ALTERNATIVE.get()];
+                    YetAnotherWorldProtector.LOGGER.info("Set mod base command to '/" + CommandPermissionConfig.BASE_CMD + "'");
+                    int numOfUuidsWithPermission = CommandPermissionConfig.UUIDsWithPermission().size();
+                    String uuidsWithPermission = (numOfUuidsWithPermission > 0
+                            ? ": " + String.join(", ", CommandPermissionConfig.UUIDsWithPermission())
+                            : "");
+                    YetAnotherWorldProtector.LOGGER.info(numOfUuidsWithPermission + " UUID(s) with permission read from config" + uuidsWithPermission);
+                    CommandRegistry.init(dispatcher, CommandPermissionConfig.BASE_CMD);
+                }
+                break;
+                case RegionConfig.CONFIG_NAME: {
+                    int numLocalDefaultFlags = RegionConfig.getDefaultFlags().size();
+                    String loadedLocalFlags = (numLocalDefaultFlags > 0
+                            ? ": " + String.join(", ", RegionConfig.getDefaultFlags())
+                            : "");
+                    YetAnotherWorldProtector.LOGGER.info(numLocalDefaultFlags + " default flag(s) for Local Regions read from config" + loadedLocalFlags);
+
+                    int numDimDefaultFlags = RegionConfig.getDefaultDimFlags().size();
+                    String loadedDimFlags = (numDimDefaultFlags > 0
+                            ? ": " + String.join(", ", RegionConfig.getDefaultDimFlags())
+                            : "");
+                    YetAnotherWorldProtector.LOGGER.info(numDimDefaultFlags + " default flag(s) for Dimensional Regions read from config" + loadedDimFlags);
+                }
+                break;
+                case FlagConfig.CONFIG_NAME: {
+                    int numBreakEntityEntries = FlagConfig.getBreakFlagEntities().size();
+                    String loadedBreakEntities = (numBreakEntityEntries > 0
+                            ? ": " + String.join(", ", FlagConfig.getBreakFlagEntities())
+                            : "");
+                    YetAnotherWorldProtector.LOGGER.info(numBreakEntityEntries + " Block Entity entries read from config" + loadedBreakEntities);
+
+                    int numBreakEntityTagEntries = FlagConfig.getBreakFlagEntityTags().size();
+                    String loadedBreakEntityTags = (numBreakEntityTagEntries > 0
+                            ? ": " + String.join(", ", FlagConfig.getBreakFlagEntityTags())
+                            : "");
+                    YetAnotherWorldProtector.LOGGER.info(numBreakEntityTagEntries + " Block Entity tag entries read from config" + loadedBreakEntityTags);
+                }
+                break;
+            }
         }
     }
 

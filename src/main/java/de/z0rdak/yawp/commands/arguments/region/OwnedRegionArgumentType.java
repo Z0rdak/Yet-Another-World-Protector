@@ -9,14 +9,20 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
+import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.CommandUtil;
 import de.z0rdak.yawp.util.MessageUtil;
+import de.z0rdak.yawp.util.StickType;
+import de.z0rdak.yawp.util.StickUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
@@ -87,19 +93,34 @@ public class OwnedRegionArgumentType implements ArgumentType<String> {
         if (context.getSource() instanceof CommandSource) {
             CommandSource src = (CommandSource) context.getSource();
             try {
-                // TODO: hasOwner als convenient method for regions
                 ServerPlayerEntity player = src.getPlayerOrException();
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.level.dimension());
-                List<String> ownedRegions = dimCache.getRegions()
-                        .stream()
-                        .filter(r -> r.getOwners().containsPlayer(player.getUUID()))
-                        .map(IMarkableRegion::getName)
-                        .collect(Collectors.toList());
-                if (ownedRegions.isEmpty()) {
-                    MessageUtil.sendCmdFeedback(src, new TranslationTextComponent("You don't have owner permissions for any region in this dimension!'"));
-                    return Suggestions.empty();
+                ItemStack maybeStick = player.getMainHandItem();
+                if (StickUtil.isVanillaStick(maybeStick)) {
+                    StickType stickType = StickUtil.getStickType(maybeStick);
+                    if (stickType == StickType.MARKER) {
+                        CompoundNBT stickNBT = StickUtil.getStickNBT(maybeStick);
+                        if (stickNBT != null) {
+                            MarkerStick marker = new MarkerStick(stickNBT);
+                            if (!marker.isValidArea()) {
+                                return Suggestions.empty();
+                            }
+                            CuboidArea markedArea = new CuboidArea(marker.getMarkedBlocks().get(0), marker.getMarkedBlocks().get(1));
+                            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.level.dimension());
+                            List<String> ownedRegions = dimCache.getRegions()
+                                    .stream()
+                                    .filter(r -> r.hasOwner(player.getUUID()))
+                                    .filter(r -> ((CuboidArea) r.getArea()).contains(markedArea))
+                                    .map(IMarkableRegion::getName)
+                                    .collect(Collectors.toList());
+                            if (ownedRegions.isEmpty()) {
+                                MessageUtil.sendCmdFeedback(src, new TranslationTextComponent("You don't have owner permissions for any region in this dimension!'"));
+                                return Suggestions.empty();
+                            }
+                            return ISuggestionProvider.suggest(ownedRegions, builder);
+                        }
+                    }
                 }
-                return ISuggestionProvider.suggest(ownedRegions, builder);
+                return Suggestions.empty();
             } catch (CommandSyntaxException e) {
                 return Suggestions.empty();
             }

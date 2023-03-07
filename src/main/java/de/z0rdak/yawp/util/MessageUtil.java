@@ -14,6 +14,8 @@ import de.z0rdak.yawp.core.flag.FlagType;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.*;
+import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
+import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -647,8 +649,9 @@ public class MessageUtil {
         IFormattableTextComponent res;
         switch (type) {
             case DIMENSION: {
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(region.getDim());
                 String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), REGION.toString());
-                IFormattableTextComponent listDimRegionsLinkText = new TranslationTextComponent("cli.msg.dim.info.region.list.link.text", region.getChildren().size());
+                IFormattableTextComponent listDimRegionsLinkText = new TranslationTextComponent("cli.msg.dim.info.region.list.link.text", dimCache.getRegions().size());
                 IFormattableTextComponent listDimRegionsHoverText = new TranslationTextComponent("cli.msg.dim.info.region.list.link.hover", region.getName());
                 IFormattableTextComponent listDimRegionsListLink = buildExecuteCmdComponent(listDimRegionsLinkText, listDimRegionsHoverText, command, RUN_COMMAND, LINK_COLOR);
                 IFormattableTextComponent createRegionLink = buildDimCreateRegionLink(region);

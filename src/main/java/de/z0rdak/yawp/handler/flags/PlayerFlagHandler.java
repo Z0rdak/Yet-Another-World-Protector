@@ -51,6 +51,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.List;
+import java.util.Set;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
@@ -353,7 +354,9 @@ public final class PlayerFlagHandler {
             RegistryKey<World> entityDim = getEntityDim(event.getPlayer());
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(entityDim);
             if (dimCache != null) {
-                List<? extends String> entities = FlagConfig.BREAK_FLAG_ENTITIES.get();
+                // FIXME: Tags not considered yet
+                Set<String> entityTags = FlagConfig.getBreakFlagEntityTags();
+                Set<String> entities = FlagConfig.getBreakFlagEntities();
                 boolean isBlockEntityCovered = entities.stream().anyMatch(entity -> {
                     ResourceLocation entityResourceLocation = new ResourceLocation(entity);
                     return target.getType().getRegistryName() != null && target.getType().getRegistryName().equals(entityResourceLocation);

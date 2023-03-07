@@ -155,7 +155,7 @@ public class RegionDataManager extends WorldSavedData {
                 YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("Restoring region hierarchy for regions in dimension '" + dimKey + "'").getString());
             }
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-            dimCache.regionsInDimension.values().forEach(region -> {
+            dimCache.getRegionsInDimension().values().forEach(region -> {
                 // set child references
                 region.getChildrenNames().forEach(childName -> {
                     IMarkableRegion childRegion = dimCache.getRegion(childName);

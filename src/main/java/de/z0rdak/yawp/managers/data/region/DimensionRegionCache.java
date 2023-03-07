@@ -24,7 +24,7 @@ import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 @Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID)
 public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
 
-    public Map<String, IMarkableRegion> regionsInDimension;
+    private Map<String, IMarkableRegion> regionsInDimension;
     private DimensionalRegion dimensionalRegion;
 
     public DimensionRegionCache(RegistryKey<World> dim){
@@ -35,21 +35,25 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
         this.deserializeNBT(nbt);
     }
 
-    public DimensionRegionCache(DimensionalRegion dimensionalRegion){
+    public DimensionRegionCache(DimensionalRegion dimensionalRegion) {
         this.dimensionalRegion = dimensionalRegion;
         this.regionsInDimension = new HashMap<>();
     }
 
-    public RegistryKey<World> dimensionKey(){
-        return this.dimensionalRegion.getDim();
-    }
-
-    private static String getDataName(DimensionalRegion dim){
+    private static String getDataName(DimensionalRegion dim) {
         return getDataName(dim.getName());
     }
 
-    public static String getDataName(String dim){
+    public static String getDataName(String dim) {
         return YetAnotherWorldProtector.MODID + "-" + dim.replace(':', '-');
+    }
+
+    public RegistryKey<World> dimensionKey() {
+        return this.dimensionalRegion.getDim();
+    }
+
+    public Map<String, IMarkableRegion> getRegionsInDimension() {
+        return Collections.unmodifiableMap(regionsInDimension);
     }
 
     public DimensionalRegion getDimensionalRegion() {
@@ -112,7 +116,6 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
     public void removeRegion(IMarkableRegion region){
         if (this.contains(region.getName())){
             this.regionsInDimension.remove(region.getName());
-            RegionDataManager.save();
         }
     }
 
@@ -185,27 +188,6 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
         PlayerContainer members = this.dimensionalRegion.getMembers();
         return members.containsPlayer(player.getUUID())
                 || (player.getTeam() != null && members.containsTeam(player.getTeam()));
-    }
-
-    public static IProtectedRegion deserializeRegion(RegionType regionType, CompoundNBT regionNbt) {
-        switch (regionType) {
-            case GLOBAL:
-                throw new UnsupportedOperationException("Global not supported yet");
-            case DIMENSION:
-                return new DimensionalRegion(regionNbt);
-            case LOCAL:
-                AreaType areaType = AreaType.of(regionNbt.getString(AREA_TYPE));
-                if (areaType == null) {
-                    YetAnotherWorldProtector.LOGGER.error("Unable to read region type for region!");
-                    return null;
-                } else {
-                    return deserializeLocalRegion(areaType, regionNbt);
-                }
-            case TEMPLATE:
-                throw new UnsupportedOperationException("Template not supported yet");
-            default:
-                throw new IllegalArgumentException("");
-        }
     }
 
     public static IMarkableRegion deserializeLocalRegion(AreaType areaType, CompoundNBT regionNbt) {
