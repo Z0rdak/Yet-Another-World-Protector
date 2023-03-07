@@ -11,13 +11,13 @@ public enum RegionFlag {
     ANIMAL_UNMOUNTING("animal-unmounting", FlagType.BOOLEAN_FLAG),
     AXE_STRIP("strip-wood", FlagType.BOOLEAN_FLAG),
     BREAK_BLOCKS("break-blocks", FlagType.BOOLEAN_FLAG),
-    CONTAINER_ACCESS("access-container", FlagType.BOOLEAN_FLAG), // TODO:
+   // CONTAINER_ACCESS("access-container", FlagType.BOOLEAN_FLAG), // TODO:
     DRAGON_BLOCK_PROT("dragon-destruction", FlagType.BOOLEAN_FLAG),
     DROP_LOOT_ALL("drop-loot", FlagType.BOOLEAN_FLAG),
     DROP_LOOT_PLAYER("drop-loot-player", FlagType.BOOLEAN_FLAG),
-    ENDERMAN_GRIEFING("enderman-griefing", FlagType.BOOLEAN_FLAG), // TODO:
+    // ENDERMAN_GRIEFING("enderman-griefing", FlagType.BOOLEAN_FLAG), // FIXME: soon
     ENDERMAN_TELEPORT_FROM_REGION("enderman-tp-from", FlagType.BOOLEAN_FLAG),
-    ENDER_CHEST_ACCESS("access-enderchest", FlagType.BOOLEAN_FLAG), // TODO:
+    // ENDER_CHEST_ACCESS("access-enderchest", FlagType.BOOLEAN_FLAG), // TODO:
     ENTER_DIM("enter-dim", FlagType.BOOLEAN_FLAG),
     EXECUTE_COMMAND("exec-command", FlagType.BOOLEAN_FLAG),
     EXPLOSION_BLOCK("explosions-blocks", FlagType.BOOLEAN_FLAG),
@@ -44,13 +44,13 @@ public enum RegionFlag {
     MELEE_PLAYERS("melee-players", FlagType.BOOLEAN_FLAG),
     MELEE_VILLAGERS("melee-villagers", FlagType.BOOLEAN_FLAG),
     MELEE_WANDERING_TRADER("melee-wtrader", FlagType.BOOLEAN_FLAG),
-    MOB_GRIEFING("mob-griefing", FlagType.BOOLEAN_FLAG), // TODO:
+    //  MOB_GRIEFING("mob-griefing", FlagType.BOOLEAN_FLAG), // FIXME: soon
     NO_FLIGHT("no-flight", FlagType.BOOLEAN_FLAG),
     NO_PVP("no-pvp", FlagType.BOOLEAN_FLAG),
     PLACE_BLOCKS("place-blocks", FlagType.BOOLEAN_FLAG), // TODO:
-    PLACE_FLUIDS("place-fluids", FlagType.BOOLEAN_FLAG), // TODO:
-    SCOOP_FLUIDS("scoop-fluids", FlagType.BOOLEAN_FLAG), // TODO:
-    SEND_MESSAGE("send-chat", FlagType.BOOLEAN_FLAG), // TODO:
+    //  PLACE_FLUIDS("place-fluids", FlagType.BOOLEAN_FLAG), // TODO:
+    //  SCOOP_FLUIDS("scoop-fluids", FlagType.BOOLEAN_FLAG), // TODO:
+    // SEND_MESSAGE("send-chat", FlagType.BOOLEAN_FLAG), // FIXME: soon
     SET_SPAWN("set-spawn", FlagType.BOOLEAN_FLAG),
     SHOVEL_PATH("shovel-path", FlagType.BOOLEAN_FLAG),
     SHULKER_TELEPORT_FROM_REGION("shulker-tp-from", FlagType.BOOLEAN_FLAG),
@@ -68,13 +68,13 @@ public enum RegionFlag {
     TRAMPLE_FARMLAND("trample-farmland", FlagType.BOOLEAN_FLAG),
     TRAMPLE_FARMLAND_OTHER("trample-farmland-other", FlagType.BOOLEAN_FLAG),
     TRAMPLE_FARMLAND_PLAYER("trample-farmland-player", FlagType.BOOLEAN_FLAG),
-    USE_BLOCKS("use-blocks", FlagType.BOOLEAN_FLAG), // TODO:
+    // USE_BLOCKS("use-blocks", FlagType.BOOLEAN_FLAG), // TODO:
     USE_BONEMEAL("use-bonemeal", FlagType.BOOLEAN_FLAG),
     USE_ELYTRA("use-elytra", FlagType.BOOLEAN_FLAG),
     USE_ENDERPEARL_FROM_REGION("enderpearl-from", FlagType.BOOLEAN_FLAG),
     USE_ENDERPEARL_TO_REGION("enderpearl-to", FlagType.BOOLEAN_FLAG),
-    USE_ENTITIES("use-entities", FlagType.BOOLEAN_FLAG), // TODO:
-    USE_ITEMS("use-items", FlagType.BOOLEAN_FLAG), // TODO:
+    // USE_ENTITIES("use-entities", FlagType.BOOLEAN_FLAG), // TODO:
+    // USE_ITEMS("use-items", FlagType.BOOLEAN_FLAG), // TODO:
     USE_PORTAL("use-portal", FlagType.BOOLEAN_FLAG),
     USE_PORTAL_ANIMALS("use-portal-animals", FlagType.BOOLEAN_FLAG),
     USE_PORTAL_ITEMS("use-portal-items", FlagType.BOOLEAN_FLAG),
@@ -88,8 +88,8 @@ public enum RegionFlag {
     XP_DROP_OTHER("xp-drop-other", FlagType.BOOLEAN_FLAG),
     XP_DROP_PLAYER("xp-drop-player", FlagType.BOOLEAN_FLAG),
     XP_FREEZE("xp-freeze", FlagType.BOOLEAN_FLAG),
-    XP_PICKUP("xp-pickup", FlagType.BOOLEAN_FLAG),
-    ZOMBIE_DOOR_PROT("zombie-destruction", FlagType.BOOLEAN_FLAG); // TODO:
+    XP_PICKUP("xp-pickup", FlagType.BOOLEAN_FLAG);
+    // ZOMBIE_DOOR_PROT("zombie-destruction", FlagType.BOOLEAN_FLAG); // FIXME: soon
 
     public final String name;
     public final FlagType type;
