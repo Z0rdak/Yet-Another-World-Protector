@@ -369,7 +369,7 @@ public class DimensionCommands {
     private static int promptDimensionRegionList(ServerCommandSource src, DimensionRegionCache dimCache, int pageNo) {
         if (dimCache != null) {
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-            List<IMarkableRegion> regionsForDim = dimCache.regionsInDimension
+            List<IMarkableRegion> regionsForDim = dimCache.getRegionsInDimension()
                     .values()
                     .stream()
                     .sorted(Comparator.comparing(IMarkableRegion::getName))

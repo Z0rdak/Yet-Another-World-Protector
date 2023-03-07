@@ -21,7 +21,7 @@ import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
 public class DimensionRegionCache implements INbtSerializable<NbtCompound> {
 
-    public Map<String, IMarkableRegion> regionsInDimension;
+    private Map<String, IMarkableRegion> regionsInDimension;
     private DimensionalRegion dimensionalRegion;
 
     public DimensionRegionCache(RegistryKey<World> dim) {
@@ -37,25 +37,8 @@ public class DimensionRegionCache implements INbtSerializable<NbtCompound> {
         this.regionsInDimension = new HashMap<>();
     }
 
-    public static IProtectedRegion deserializeRegion(RegionType regionType, NbtCompound regionNbt) {
-        switch (regionType) {
-            case GLOBAL:
-                throw new UnsupportedOperationException("Global not supported yet");
-            case DIMENSION:
-                return new DimensionalRegion(regionNbt);
-            case LOCAL:
-                AreaType areaType = AreaType.of(regionNbt.getString(AREA_TYPE));
-                if (areaType == null) {
-                    YetAnotherWorldProtector.LOGGER.error("Unable to read region type for region!");
-                    return null;
-                } else {
-                    return deserializeLocalRegion(areaType, regionNbt);
-                }
-            case TEMPLATE:
-                throw new UnsupportedOperationException("Template not supported yet");
-            default:
-                throw new IllegalArgumentException("");
-        }
+    public Map<String, IMarkableRegion> getRegionsInDimension() {
+        return Collections.unmodifiableMap(regionsInDimension);
     }
 
     private static String getDataName(DimensionalRegion dim) {
