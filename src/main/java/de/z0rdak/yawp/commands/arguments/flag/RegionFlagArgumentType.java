@@ -15,9 +15,8 @@ import de.z0rdak.yawp.util.CommandUtil;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.LiteralTextContent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
 
 import java.util.Collection;
 import java.util.List;
@@ -30,9 +29,9 @@ public class RegionFlagArgumentType implements ArgumentType<String> {
 
     public static final Pattern VALID_FLAG_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z\\-][A-Za-z]$");
     private static final Collection<String> EXAMPLES = RegionFlag.getFlagNames();
-    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(MutableText.of(new TranslatableTextContent("cli.arg.flag.parse.invalid")));
+    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(new TranslatableText("cli.arg.flag.parse.invalid"));
     private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
-            flag -> MutableText.of(new TranslatableTextContent("cli.arg.flag.invalid", flag))
+            flag -> new TranslatableText("cli.arg.flag.invalid", flag)
     );
 
     /**
@@ -48,7 +47,7 @@ public class RegionFlagArgumentType implements ArgumentType<String> {
         if (RegionFlag.contains(flagIdentifier)) {
             return RegionFlag.fromId(flagIdentifier);
         } else {
-            MessageUtil.sendCmdFeedback(context.getSource(), MutableText.of(new LiteralTextContent("Invalid flag identifier: '" + flagIdentifier + "'!")));
+            MessageUtil.sendCmdFeedback(context.getSource(), new LiteralText("Invalid flag identifier: '" + flagIdentifier + "'!"));
             throw ERROR_INVALID_VALUE.create(flagIdentifier);
         }
     }
@@ -97,10 +96,10 @@ public class RegionFlagArgumentType implements ArgumentType<String> {
                 }
                 if (flagNames.isEmpty()) {
                     if (input.contains("add")) {
-                        MessageUtil.sendCmdFeedback(src, MutableText.of(new LiteralTextContent("There are no flag left to add for this region '" + region.getName() + "'.")));
+                        MessageUtil.sendCmdFeedback(src, new LiteralText("There are no flag left to add for this region '" + region.getName() + "'."));
                     }
                     if (input.contains("remove")) {
-                        MessageUtil.sendCmdFeedback(src, MutableText.of(new LiteralTextContent("Region '" + region.getName() + "' does not contain any flags.")));
+                        MessageUtil.sendCmdFeedback(src, new LiteralText("Region '" + region.getName() + "' does not contain any flags."));
                     }
                     return Suggestions.empty();
                 }

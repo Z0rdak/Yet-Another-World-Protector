@@ -17,9 +17,8 @@ import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralTextContent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
@@ -32,9 +31,9 @@ public class RegionArgumentType implements ArgumentType<String> {
     public static final Pattern VALID_NAME_PATTERN = Pattern.compile("^[A-Za-z]+[A-Za-z\\d\\-]+[A-Za-z\\d]+$");
     private static final Collection<String> EXAMPLES = Stream.of(new String[]{"spawn", "arena4pvp", "shop", "nether-hub"})
             .collect(Collectors.toSet());
-    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(MutableText.of(new TranslatableTextContent("cli.arg.region.parse.invalid")));
+    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(new TranslatableText("cli.arg.region.parse.invalid"));
     private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
-            flag -> MutableText.of(new TranslatableTextContent("cli.arg.region.invalid", flag))
+            flag -> new TranslatableText("cli.arg.region.invalid", flag)
     );
 
     public static IMarkableRegion getRegion(CommandContext<ServerCommandSource> context, String argName) throws CommandSyntaxException {
@@ -44,7 +43,7 @@ public class RegionArgumentType implements ArgumentType<String> {
         if (region != null) {
             return region;
         } else {
-            MessageUtil.sendCmdFeedback(context.getSource(), MutableText.of(new LiteralTextContent("No regions defined in dim '" + dimCache.dimensionKey().getValue() + "'")));
+            MessageUtil.sendCmdFeedback(context.getSource(), new LiteralText("No regions defined in dim '" + dimCache.dimensionKey().getValue() + "'"));
             throw ERROR_INVALID_VALUE.create(regionName);
         }
     }
@@ -55,13 +54,13 @@ public class RegionArgumentType implements ArgumentType<String> {
 
     public static IMarkableRegion getRegionInPlayerDim(CommandContext<ServerCommandSource> context, String argName) throws CommandSyntaxException {
         String regionName = context.getArgument(argName, String.class);
-        ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
+        ServerPlayerEntity player = context.getSource().getPlayer();
         DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.world.getRegistryKey());
         IMarkableRegion region = dimCache.getRegion(regionName);
         if (region != null) {
             return region;
         } else {
-            MessageUtil.sendCmdFeedback(context.getSource(), MutableText.of(new LiteralTextContent("No regions defined in dim '" + dimCache.dimensionKey().getValue() + "'")));
+            MessageUtil.sendCmdFeedback(context.getSource(), new LiteralText("No regions defined in dim '" + dimCache.dimensionKey().getValue() + "'"));
             throw ERROR_INVALID_VALUE.create(regionName);
         }
     }
@@ -103,7 +102,7 @@ public class RegionArgumentType implements ArgumentType<String> {
                 DimensionRegionCache dimCache = CommandUtil.getDimCacheArgument((CommandContext<ServerCommandSource>) context);
                 Collection<String> regionNames = dimCache.getRegionNames();
                 if (regionNames.isEmpty()) {
-                    MessageUtil.sendCmdFeedback(src, MutableText.of(new LiteralTextContent("No regions defined in dim '" + dimCache.dimensionKey().getValue() + "'")));
+                    MessageUtil.sendCmdFeedback(src, new LiteralText("No regions defined in dim '" + dimCache.dimensionKey().getValue() + "'"));
                     return Suggestions.empty();
                 }
                 return CommandSource.suggestMatching(regionNames, builder);

@@ -87,7 +87,7 @@ public class CommandPermissionConfig {
 
     public static boolean hasPermission(ServerCommandSource source) {
         try {
-            return hasPlayerPermission(source.getPlayerOrThrow());
+            return hasPlayerPermission(source.getPlayer());
         } catch (CommandSyntaxException e) {
             // FIXME: How to identify server console
             boolean isServerConsole = source.getName().equals("Server");

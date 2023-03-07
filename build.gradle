@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.1-SNAPSHOT'
+	id 'fabric-loom' version '0.12-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -37,9 +37,7 @@ dependencies {
 	// e.g. forgeconfigapiport-547434:3671141 for mod version 3.2.0 for Minecraft 1.18.2,
 	// all required ids for this version are found here: https://www.curseforge.com/minecraft/mc-mods/forge-config-api-port-fabric/files/3671141
 	// 1.18.2
-	// modImplementation "curse.maven:forgeconfigapiport-547434:3671141"
-	// 1.19.2
-	modImplementation "curse.maven:forgeconfigapiport-547434:4143545"
+	modImplementation "curse.maven:forgeconfigapiport-547434:3671141"
 
 
 	// Uncomment the following line to enable the deprecated Fabric API modules. 

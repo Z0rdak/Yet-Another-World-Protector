@@ -24,9 +24,8 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.LiteralTextContent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -68,15 +67,15 @@ public final class MarkerCommands {
     // Argument for getting the Marker? Argument could check for player holding valid marker
     private static int createRegion(ServerCommandSource src, String regionName, IMarkableRegion parentRegion) {
         try {
-            PlayerEntity player = src.getPlayerOrThrow();
+            PlayerEntity player = src.getPlayer();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.world.getRegistryKey());
             int res = DimensionCommands.checkValidRegionName(regionName, dimCache);
             if (res == -1) {
-                sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.name.invalid", regionName)));
+                sendCmdFeedback(src, new TranslatableText("cli.msg.dim.info.region.create.name.invalid", regionName));
                 return res;
             }
             if (res == 1) {
-                sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.name.exists", buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION), buildRegionInfoLink(dimCache.getRegion(regionName), LOCAL))));
+                sendCmdFeedback(src, new TranslatableText("cli.msg.dim.info.region.create.name.exists", buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION), buildRegionInfoLink(dimCache.getRegion(regionName), LOCAL)));
                 return res;
             }
 
@@ -88,7 +87,7 @@ public final class MarkerCommands {
                     if (stickNBT != null) {
                         MarkerStick marker = new MarkerStick(stickNBT);
                         if (!marker.isValidArea()) {
-                            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("Marked area is not valid")).formatted(RED));
+                            sendCmdFeedback(src, new TranslatableText("Marked area is not valid").formatted(RED));
                             return 1;
                         }
                         AbstractMarkableRegion region = LocalRegions.regionFrom(player, marker, regionName);
@@ -102,14 +101,14 @@ public final class MarkerCommands {
                                     parentRegion.addChild(region);
                                     LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.DEFAULT_REGION_PRIORITY.get());
                                     RegionDataManager.save();
-                                    sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region, LOCAL))));
+                                    sendCmdFeedback(src, new TranslatableText("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region, LOCAL)));
                                     return 0;
                                 } else {
-                                    sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("Parent region does not contain new region")));
+                                    sendCmdFeedback(src, new TranslatableText("Parent region does not contain new region"));
                                     return -1;
                                 }
                             } else {
-                                sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.stick.local.deny", buildRegionInfoLink(parentRegion, LOCAL))));
+                                sendCmdFeedback(src, new TranslatableText("cli.msg.dim.info.region.create.stick.local.deny", buildRegionInfoLink(parentRegion, LOCAL)));
                                 return 1;
                             }
                         } else {
@@ -117,23 +116,23 @@ public final class MarkerCommands {
                                 dimCache.addRegion(region);
                                 LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.DEFAULT_REGION_PRIORITY.get());
                                 RegionDataManager.save();
-                                sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region, LOCAL))));
+                                sendCmdFeedback(src, new TranslatableText("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region, LOCAL)));
                                 return 0;
                             } else {
-                                sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.stick.dim.deny", buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION))));
+                                sendCmdFeedback(src, new TranslatableText("cli.msg.dim.info.region.create.stick.dim.deny", buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION)));
                                 return 2;
                             }
                         }
                     } else {
-                        sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("Invalid marker stick data")));
+                        sendCmdFeedback(src, new TranslatableText("Invalid marker stick data"));
                         return -2;
                     }
                 } else {
-                    sendCmdFeedback(src, MutableText.of(new LiteralTextContent(RED + "")).append(MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.stick.missing"))));
+                    sendCmdFeedback(src, new LiteralText(RED + "").append(new TranslatableText("cli.msg.dim.info.region.create.stick.missing")));
                     return -2;
                 }
             } else {
-                sendCmdFeedback(src, MutableText.of(new LiteralTextContent(RED + "")).append(MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.stick.missing"))));
+                sendCmdFeedback(src, new LiteralText(RED + "").append(new TranslatableText("cli.msg.dim.info.region.create.stick.missing")));
                 return -2;
             }
         } catch (CommandSyntaxException e) {
@@ -145,7 +144,7 @@ public final class MarkerCommands {
 
     private static int resetStick(ServerCommandSource src) {
         try {
-            PlayerEntity player = src.getPlayerOrThrow();
+            PlayerEntity player = src.getPlayer();
             ItemStack mainHandItem = player.getMainHandStack();
             // is valid stick
             if (!mainHandItem.equals(ItemStack.EMPTY)
@@ -155,30 +154,30 @@ public final class MarkerCommands {
                 if (Objects.requireNonNull(stickType) == StickType.MARKER) {
                     mainHandItem = StickUtil.initMarkerNbt(mainHandItem, StickType.MARKER, player.getWorld().getRegistryKey());
                     // FIXME: When different area types are available: Get stick, reset it, and save it back.
-                    sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("RegionMarker reset!")));
+                    sendCmdFeedback(src, new TranslatableText("RegionMarker reset!"));
                     return 0;
                 } else {
-                    sendCmdFeedback(src, MutableText.of(new TranslatableTextContent(RED + "The item in the main hand is not a RegionMarker!")));
+                    sendCmdFeedback(src, new TranslatableText(RED + "The item in the main hand is not a RegionMarker!"));
                     return 1;
                 }
             } else {
-                sendCmdFeedback(src, MutableText.of(new TranslatableTextContent(RED + "The item in the main hand is not a RegionMarker!")));
+                sendCmdFeedback(src, new TranslatableText(RED + "The item in the main hand is not a RegionMarker!"));
                 return 1;
             }
         } catch (CommandSyntaxException e) {
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent(RED + "Command needs a player as command source" + RESET)));
+            sendCmdFeedback(src, new TranslatableText(RED + "Command needs a player as command source" + RESET));
             return 1;
         }
     }
 
     public static int giveMarkerStick(ServerCommandSource src) {
         try {
-            PlayerEntity targetPlayer = src.getPlayerOrThrow();
+            PlayerEntity targetPlayer = src.getPlayer();
             ItemStack markerStick = StickUtil.initMarkerNbt(Items.STICK.getDefaultStack(), StickType.MARKER, targetPlayer.world.getRegistryKey());
             targetPlayer.giveItemStack(markerStick);
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("RegionMarker added to your inventory.")));
+            sendCmdFeedback(src, new TranslatableText("RegionMarker added to your inventory."));
         } catch (CommandSyntaxException e) {
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent(RED + "Command needs a player as command source" + RESET)));
+            sendCmdFeedback(src, new TranslatableText(RED + "Command needs a player as command source" + RESET));
             return 1;
         }
         return 0;

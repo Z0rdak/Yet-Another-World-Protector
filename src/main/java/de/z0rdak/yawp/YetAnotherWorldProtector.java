@@ -9,16 +9,14 @@ import de.z0rdak.yawp.handler.CommonEvents;
 import de.z0rdak.yawp.handler.flags.PlayerFlagHandler;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraftforge.api.ModLoadingContext;
-import net.minecraftforge.api.fml.event.config.ModConfigEvents;
+import net.minecraftforge.api.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.config.ModConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,8 +28,8 @@ public class YetAnotherWorldProtector implements ModInitializer {
 
     private static CommandDispatcher<ServerCommandSource> cmdDispatcher;
 
-    private static void registerCommands(CommandDispatcher<ServerCommandSource> commandDispatcher, CommandRegistryAccess commandRegistryAccess, CommandManager.RegistrationEnvironment registrationEnvironment) {
-        if (registrationEnvironment.dedicated) {
+    private static void registerCommands(CommandDispatcher<ServerCommandSource> commandDispatcher, boolean isDedicated) {
+        if (isDedicated) {
             cmdDispatcher = commandDispatcher;
         }
     }
@@ -100,8 +98,8 @@ public class YetAnotherWorldProtector implements ModInitializer {
         ServerEntityEvents.ENTITY_LOAD.register(RegionDataManager::onPlayerLoadAddDimKey);
         ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register(RegionDataManager::onPlayerChangeWorldAddDimKey);
 
-        ModConfigEvents.loading(MODID).register(YetAnotherWorldProtector::onModLoading);
-        ModConfigEvents.reloading(MODID).register(YetAnotherWorldProtector::onModReloading);
+        ModConfigEvent.LOADING.register(YetAnotherWorldProtector::onModLoading);
+        ModConfigEvent.RELOADING.register(YetAnotherWorldProtector::onModReloading);
 
         // registering configuration
         ModLoadingContext.registerConfig(MODID, ModConfig.Type.SERVER, CommandPermissionConfig.CONFIG_SPEC, CommandPermissionConfig.CONFIG_NAME);

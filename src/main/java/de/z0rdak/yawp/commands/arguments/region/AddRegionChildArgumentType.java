@@ -18,9 +18,8 @@ import de.z0rdak.yawp.util.CommandUtil;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.LiteralTextContent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
 
 import java.util.Collection;
 import java.util.List;
@@ -34,9 +33,9 @@ public class AddRegionChildArgumentType implements ArgumentType<String> {
     public static final Pattern VALID_NAME_PATTERN = Pattern.compile("^[A-Za-z]+[A-Za-z\\d\\-]+[A-Za-z\\d]+$");
     private static final Collection<String> EXAMPLES = Stream.of(new String[]{"spawn", "arena4pvp", "shop", "nether-hub"})
             .collect(Collectors.toSet());
-    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(MutableText.of(new TranslatableTextContent("cli.arg.region.parse.invalid")));
+    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(new TranslatableText("cli.arg.region.parse.invalid"));
     private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
-            flag -> MutableText.of(new TranslatableTextContent("cli.arg.region.invalid", flag))
+            flag -> new TranslatableText("cli.arg.region.invalid", flag)
     );
 
     /**
@@ -97,7 +96,7 @@ public class AddRegionChildArgumentType implements ArgumentType<String> {
                         .map(AbstractRegion::getName)
                         .collect(Collectors.toList());
                 if (potentialChildrenNames.isEmpty()) {
-                    MessageUtil.sendCmdFeedback(src, MutableText.of(new LiteralTextContent("There are no valid child regions for region '" + region.getName() + "'.")));
+                    MessageUtil.sendCmdFeedback(src, new LiteralText("There are no valid child regions for region '" + region.getName() + "'."));
                     return Suggestions.empty();
                 }
                 return CommandSource.suggestMatching(potentialChildrenNames, builder);

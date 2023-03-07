@@ -8,9 +8,9 @@ import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.ClickEvent;
-import net.minecraft.text.LiteralTextContent;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
-import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.text.TranslatableText;
 
 import static de.z0rdak.yawp.util.MessageUtil.buildExecuteCmdComponent;
 import static de.z0rdak.yawp.util.MessageUtil.buildHeader;
@@ -43,16 +43,16 @@ public class CommandRegistry {
     private static int promptHelp(ServerCommandSource src) {
         MessageUtil.sendCmdFeedback(src, buildHeader("cli.msg.help.header"));
         String command = CommandUtil.buildCommandStr(CommandConstants.DIM.toString());
-        MutableText cmdStr = MutableText.of(new TranslatableTextContent("cli.msg.help.1", CommandPermissionConfig.BASE_CMD));
+        MutableText cmdStr = new TranslatableText("cli.msg.help.1", CommandPermissionConfig.BASE_CMD);
         MessageUtil.sendCmdFeedback(src, buildExecuteCmdComponent(
-                MutableText.of(new LiteralTextContent("=> ")),
-                MutableText.of(new TranslatableTextContent("help.tooltip.dim")),
+                new LiteralText("=> "),
+                new TranslatableText("help.tooltip.dim"),
                 command, ClickEvent.Action.SUGGEST_COMMAND, GREEN).append(cmdStr));
-        MutableText wikiText1 = MutableText.of(new TranslatableTextContent("help.tooltip.info.wiki.1"));
-        MutableText wikiText2 = MutableText.of(new TranslatableTextContent("help.tooltip.info.wiki.2"));
-        MutableText wikiText3 = MutableText.of(new TranslatableTextContent("help.tooltip.info.wiki.3"));
-        MutableText wikiLinkHover = MutableText.of(new TranslatableTextContent("help.tooltip.info.wiki.link.hover"));
-        MutableText wikiLink = MutableText.of(new TranslatableTextContent("help.tooltip.info.wiki.link.text"));
+        MutableText wikiText1 = new TranslatableText("help.tooltip.info.wiki.1");
+        MutableText wikiText2 = new TranslatableText("help.tooltip.info.wiki.2");
+        MutableText wikiText3 = new TranslatableText("help.tooltip.info.wiki.3");
+        MutableText wikiLinkHover = new TranslatableText("help.tooltip.info.wiki.link.hover");
+        MutableText wikiLink = new TranslatableText("help.tooltip.info.wiki.link.text");
         MutableText wikiCopyToClipboardLink = buildExecuteCmdComponent(wikiLink, wikiLinkHover, "", ClickEvent.Action.OPEN_URL, AQUA);
         wikiText1.append("\n")
                 .append(wikiText2)

@@ -4,7 +4,7 @@ import de.z0rdak.yawp.handler.flags.FlagCheckEvent;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.passive.AbstractHorseEntity;
+import net.minecraft.entity.passive.HorseBaseEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -15,12 +15,12 @@ import static de.z0rdak.yawp.core.flag.RegionFlag.FALL_DAMAGE_ANIMALS;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.checkTargetEvent;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.getEntityDim;
 
-@Mixin(AbstractHorseEntity.class)
+@Mixin(HorseBaseEntity.class)
 public abstract class AbstractHorseEntityMixin {
 
     @Inject(method = "handleFallDamage", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
-        AbstractHorseEntity self = (AbstractHorseEntity) (Object) this;
+        HorseBaseEntity self = (HorseBaseEntity) (Object) this;
         if (!self.world.isClient) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(self));
             FlagCheckEvent flagCheck = checkTargetEvent(self.getBlockPos(), FALL_DAMAGE, dimCache.getDimensionalRegion());

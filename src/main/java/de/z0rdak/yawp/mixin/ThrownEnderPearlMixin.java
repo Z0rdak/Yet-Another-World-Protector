@@ -20,7 +20,7 @@ import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
 @Mixin(EnderPearlEntity.class)
 public abstract class ThrownEnderPearlMixin {
 
-    @Inject(method = "onCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/random/Random;nextFloat()F"), cancellable = true, allow = 1)
+    @Inject(method = "onCollision", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextFloat()F"), cancellable = true, allow = 1)
     public void onThrowPearlIntoRegion(HitResult hitResult, CallbackInfo ci) {
         EnderPearlEntity pearl = (EnderPearlEntity) (Object) this;
         if (!pearl.world.isClient) {
@@ -39,7 +39,7 @@ public abstract class ThrownEnderPearlMixin {
         }
     }
 
-    @Inject(method = "onCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/random/Random;nextFloat()F"), cancellable = true, allow = 1)
+    @Inject(method = "onCollision", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextFloat()F"), cancellable = true, allow = 1)
     public void onThrowPearlOutOfRegion(HitResult hitResult, CallbackInfo ci) {
         EnderPearlEntity pearl = (EnderPearlEntity) (Object) this;
         if (!pearl.world.isClient) {

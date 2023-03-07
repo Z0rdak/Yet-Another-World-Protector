@@ -38,9 +38,9 @@ import net.minecraft.scoreboard.Team;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralTextContent;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
-import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 
@@ -235,12 +235,12 @@ public class RegionCommands {
                     if (parentArea.contains(cuboidArea)) {
                         int newPriority = LocalRegions.ensureHigherRegionPriorityFor(cuboidRegion, localParentRegion.getPriority() + 1);
                     } else {
-                        MutableText updateAreaFailMsg = MutableText.of(new TranslatableTextContent("cli.msg.info.region.spatial.area.update.fail", buildRegionSpatialPropLink(region), buildRegionInfoLink(region, LOCAL)));
+                        MutableText updateAreaFailMsg = new TranslatableText("cli.msg.info.region.spatial.area.update.fail", buildRegionSpatialPropLink(region), buildRegionInfoLink(region, LOCAL));
                         sendCmdFeedback(src, updateAreaFailMsg);
                         return 1;
                     }
                 }
-                MutableText updateAreaMsg = MutableText.of(new TranslatableTextContent("cli.msg.info.region.spatial.area.update", buildRegionSpatialPropLink(region), buildRegionInfoLink(region, LOCAL)));
+                MutableText updateAreaMsg = new TranslatableText("cli.msg.info.region.spatial.area.update", buildRegionSpatialPropLink(region), buildRegionInfoLink(region, LOCAL));
                 cuboidRegion.setArea(cuboidArea);
                 RegionDataManager.save();
                 sendCmdFeedback(src, updateAreaMsg);
@@ -260,14 +260,14 @@ public class RegionCommands {
                 if (region.hasMember(team.getName())) {
                     region.removeMember(team);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.region.affiliation.team.removed", team.getName(), buildRegionInfoLink(region, LOCAL))));
+                    sendCmdFeedback(src, new TranslatableText("cli.msg.info.region.affiliation.team.removed", team.getName(), buildRegionInfoLink(region, LOCAL)));
                 }
                 break;
             case "owner":
                 if (region.hasOwner(team.getName())) {
                     region.removeOwner(team);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.region.affiliation.team.removed", team.getName(), buildRegionInfoLink(region, LOCAL))));
+                    sendCmdFeedback(src, new TranslatableText("cli.msg.info.region.affiliation.team.removed", team.getName(), buildRegionInfoLink(region, LOCAL)));
                 }
                 break;
             default:
@@ -283,14 +283,14 @@ public class RegionCommands {
                 if (!region.hasMember(team.getName())) {
                     region.addMember(team);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.region.affiliation.team.added", team.getName(), affiliation, buildRegionInfoLink(region, LOCAL))));
+                    sendCmdFeedback(src, new TranslatableText("cli.msg.info.region.affiliation.team.added", team.getName(), affiliation, buildRegionInfoLink(region, LOCAL)));
                 }
                 break;
             case "owner":
                 if (!region.hasOwner(team.getName())) {
                     region.addOwner(team);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.region.affiliation.team.added", team.getName(), affiliation, buildRegionInfoLink(region, LOCAL))));
+                    sendCmdFeedback(src, new TranslatableText("cli.msg.info.region.affiliation.team.added", team.getName(), affiliation, buildRegionInfoLink(region, LOCAL)));
                 }
                 break;
             default:
@@ -307,14 +307,14 @@ public class RegionCommands {
                 if (region.hasMember(player.getUuid())) {
                     region.removeMember(player);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.region.affiliation.player.removed", buildPlayerHoverComponent(player), buildRegionInfoLink(region, LOCAL))));
+                    sendCmdFeedback(src, new TranslatableText("cli.msg.info.region.affiliation.player.removed", buildPlayerHoverComponent(player), buildRegionInfoLink(region, LOCAL)));
                 }
                 break;
             case "owner":
                 if (region.hasOwner(player.getUuid())) {
                     region.removeOwner(player);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.region.affiliation.player.removed", buildPlayerHoverComponent(player), buildRegionInfoLink(region, LOCAL))));
+                    sendCmdFeedback(src, new TranslatableText("cli.msg.info.region.affiliation.player.removed", buildPlayerHoverComponent(player), buildRegionInfoLink(region, LOCAL)));
                 }
                 break;
             default:
@@ -330,14 +330,14 @@ public class RegionCommands {
                 if (!region.hasMember(player.getUuid())) {
                     region.addMember(player);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.region.affiliation.player.added", buildPlayerHoverComponent(player), affiliation, buildRegionInfoLink(region, LOCAL))));
+                    sendCmdFeedback(src, new TranslatableText("cli.msg.info.region.affiliation.player.added", buildPlayerHoverComponent(player), affiliation, buildRegionInfoLink(region, LOCAL)));
                 }
                 break;
             case "owner":
                 if (!region.hasOwner(player.getUuid())) {
                     region.addOwner(player);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.region.affiliation.player.added", buildPlayerHoverComponent(player), affiliation, buildRegionInfoLink(region, LOCAL))));
+                    sendCmdFeedback(src, new TranslatableText("cli.msg.info.region.affiliation.player.added", buildPlayerHoverComponent(player), affiliation, buildRegionInfoLink(region, LOCAL)));
                 }
                 break;
             default:
@@ -357,8 +357,8 @@ public class RegionCommands {
             MutableText parentLink = buildRegionInfoLink(parent, LOCAL);
             MutableText notLongerChildLink = buildRegionInfoLink(child, LOCAL);
             MutableText dimensionalLink = buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION);
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.region.children.remove", notLongerChildLink, parentLink)));
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.region.parent.clear", notLongerChildLink, dimensionalLink)));
+            sendCmdFeedback(src, new TranslatableText("cli.msg.info.region.children.remove", notLongerChildLink, parentLink));
+            sendCmdFeedback(src, new TranslatableText("cli.msg.info.region.parent.clear", notLongerChildLink, dimensionalLink));
             return 0;
         }
         // should not happen, due to RemoveRegionChildArgumentType should only provide valid child regions
@@ -373,7 +373,7 @@ public class RegionCommands {
 
             MutableText parentLink = buildRegionInfoLink(parent, LOCAL);
             MutableText childLink = buildRegionInfoLink(child, LOCAL);
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.region.children.add", childLink, parentLink)));
+            sendCmdFeedback(src, new TranslatableText("cli.msg.info.region.children.add", childLink, parentLink));
             return 0;
         }
         // should not happen, due to AddRegionChildArgumentType should only provide valid child regions
@@ -393,7 +393,7 @@ public class RegionCommands {
             }
             RegionDataManager.save();
             // TODO: replace flag.name with link to flag info cmd
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.flags.added", flag.name, buildRegionInfoLink(region, LOCAL))));
+            sendCmdFeedback(src, new TranslatableText("cli.msg.flags.added", flag.name, buildRegionInfoLink(region, LOCAL)));
             return 0;
         }
         return 1;
@@ -403,7 +403,7 @@ public class RegionCommands {
         if (region.containsFlag(flag)) {
             region.removeFlag(flag.name);
             RegionDataManager.save();
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.flags.removed", flag.name, buildRegionInfoLink(region, LOCAL))));
+            sendCmdFeedback(src, new TranslatableText("cli.msg.flags.removed", flag.name, buildRegionInfoLink(region, LOCAL)));
             return 0;
         }
         return 1;
@@ -415,7 +415,7 @@ public class RegionCommands {
         RegionDataManager.save();
         if (wasEnabled == region.isMuted()) {
             boolean isEnabled = !region.isMuted();
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.region.state.alert.set.value", buildRegionInfoLink(region, LOCAL), wasEnabled, isEnabled)));
+            sendCmdFeedback(src, new TranslatableText("cli.msg.info.region.state.alert.set.value", buildRegionInfoLink(region, LOCAL), wasEnabled, isEnabled));
         }
         return 0;
     }
@@ -425,7 +425,7 @@ public class RegionCommands {
         region.setIsActive(enable);
         RegionDataManager.save();
         if (oldState != region.isActive()) {
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.region.state.enable.set.value", buildRegionInfoLink(region, LOCAL), oldState, region.isActive())));
+            sendCmdFeedback(src, new TranslatableText("cli.msg.info.region.state.enable.set.value", buildRegionInfoLink(region, LOCAL), oldState, region.isActive()));
         }
         return 0;
     }
@@ -435,7 +435,7 @@ public class RegionCommands {
         if (Integer.MAX_VALUE - newValue > 0) {
             return setPriority(src, region, (int) newValue);
         } else {
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.warn.region.state.priority.set.invalid", buildRegionInfoLink(region, LOCAL), newValue)));
+            sendCmdFeedback(src, new TranslatableText("cli.msg.warn.region.state.priority.set.invalid", buildRegionInfoLink(region, LOCAL), newValue));
             return -1;
         }
     }
@@ -459,13 +459,13 @@ public class RegionCommands {
         if (parent instanceof IMarkableRegion) {
             int parentPriority = ((IMarkableRegion) parent).getPriority();
             if (parentPriority >= priority) {
-                MutableText updatePriorityFailMsg = MutableText.of(new TranslatableTextContent("cli.msg.info.region.state.priority.set.fail.to-low", buildRegionInfoLink(region, LOCAL)));
+                MutableText updatePriorityFailMsg = new TranslatableText("cli.msg.info.region.state.priority.set.fail.to-low", buildRegionInfoLink(region, LOCAL));
                 sendCmdFeedback(src, updatePriorityFailMsg);
                 return 1;
             }
         }
         if (existRegionWithSamePriority) {
-            MutableText updatePriorityFailMsg = MutableText.of(new TranslatableTextContent("cli.msg.info.region.state.priority.set.fail.same", buildRegionInfoLink(region, LOCAL), priority));
+            MutableText updatePriorityFailMsg = new TranslatableText("cli.msg.info.region.state.priority.set.fail.same", buildRegionInfoLink(region, LOCAL), priority);
             sendCmdFeedback(src, updatePriorityFailMsg);
             return 1;
         } else {
@@ -473,10 +473,10 @@ public class RegionCommands {
             if (oldPriority != priority) {
                 region.setPriority(priority);
                 RegionDataManager.save();
-                sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.region.state.priority.set.success", buildRegionInfoLink(region, LOCAL), oldPriority, region.getPriority())));
+                sendCmdFeedback(src, new TranslatableText("cli.msg.info.region.state.priority.set.success", buildRegionInfoLink(region, LOCAL), oldPriority, region.getPriority()));
                 return 0;
             } else {
-                sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.region.state.priority.set.fail.no-change", buildRegionInfoLink(region, LOCAL))));
+                sendCmdFeedback(src, new TranslatableText("cli.msg.info.region.state.priority.set.fail.no-change", buildRegionInfoLink(region, LOCAL)));
                 return 1;
             }
         }
@@ -492,10 +492,10 @@ public class RegionCommands {
         // Affiliations: [owners], [members], [<listAffiliations>]
         sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.affiliation", buildAffiliationLinks(region, RegionType.LOCAL)));
         // Hierarchy: [parent][-|+], [n children][+]
-        MutableText regionHierarchy = MutableText.of(new TranslatableTextContent("cli.msg.info.region.hierarchy"))
+        MutableText regionHierarchy = new TranslatableText("cli.msg.info.region.hierarchy")
                 .append(": ")
                 .append(buildRegionParentLink(region))
-                .append(MutableText.of(new LiteralTextContent(", ")).formatted(Formatting.RESET))
+                .append(new LiteralText(", ")).formatted(Formatting.RESET)
                 .append(buildRegionChildrenLink(region, LOCAL));
         sendCmdFeedback(src, regionHierarchy);
         // State: [State]
@@ -505,9 +505,9 @@ public class RegionCommands {
 
     private static int promptRegionChildren(ServerCommandSource src, IMarkableRegion region, int pageNo) {
         List<IMarkableRegion> children = region.getChildren().values().stream().map(r -> (IMarkableRegion) r).collect(Collectors.toList());
-        MutableText childRegionList = MutableText.of(new LiteralTextContent(""));
+        MutableText childRegionList = new LiteralText("");
         if (children.isEmpty()) {
-            MutableText noChildrenText = MutableText.of(new TranslatableTextContent("cli.msg.info.region.children.empty", buildRegionInfoLink(region, LOCAL)));
+            MutableText noChildrenText = new TranslatableText("cli.msg.info.region.children.empty", buildRegionInfoLink(region, LOCAL));
             childRegionList.append(noChildrenText);
             sendCmdFeedback(src, childRegionList);
         }
@@ -516,7 +516,7 @@ public class RegionCommands {
                 buildCommandStr(REGION.toString(), region.getDim().getValue().toString(), region.getName(), LIST.toString(), CHILDREN.toString()),
                 buildRemoveRegionEntries(region, children, LOCAL),
                 pageNo,
-                MutableText.of(new LiteralTextContent(" - ")).append(buildRegionAddChildrenLink(region)));
+                new LiteralText(" - ").append(buildRegionAddChildrenLink(region)));
         regionPagination.forEach(line -> sendCmdFeedback(src, line));
         return 0;
     }
@@ -536,7 +536,7 @@ public class RegionCommands {
     private static int promptRegionAffiliationList(ServerCommandSource src, IMarkableRegion region, String affiliation, AffiliationType affiliationType, int pageNo) {
         List<String> affiliateNames = getAffiliateList(region, affiliation, affiliationType);
         if (affiliateNames.isEmpty()) {
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.region.affiliation." + affiliationType.name + ".empty", affiliation, buildRegionInfoLink(region, LOCAL))));
+            sendCmdFeedback(src, new TranslatableText("cli.msg.info.region.affiliation." + affiliationType.name + ".empty", affiliation, buildRegionInfoLink(region, LOCAL)));
             return 1;
         }
         List<MutableText> regionPagination = buildPaginationComponents(
@@ -544,7 +544,7 @@ public class RegionCommands {
                 buildCommandStr(REGION.toString(), region.getDim().getValue().toString(), region.getName(), LIST.toString(), affiliation, affiliationType.name),
                 buildRemoveAffiliationEntries(region, affiliateNames, affiliationType, affiliation, RegionType.LOCAL),
                 pageNo,
-                MutableText.of(new LiteralTextContent(" - ")).append(buildAddAffiliateLink(region, affiliation, affiliationType, RegionType.LOCAL)));
+                new LiteralText(" - ").append(buildAddAffiliateLink(region, affiliation, affiliationType, RegionType.LOCAL)));
         regionPagination.forEach(line -> sendCmdFeedback(src, line));
         return 0;
     }
@@ -560,7 +560,7 @@ public class RegionCommands {
      * @return
      */
     public static int promptRegionSpatialProperties(ServerCommandSource src, IMarkableRegion region) {
-        sendCmdFeedback(src, buildHeader(MutableText.of(new TranslatableTextContent("cli.msg.info.header.for", buildRegionSpatialPropLink(region), buildRegionInfoLink(region, LOCAL)))));
+        sendCmdFeedback(src, buildHeader(new TranslatableText("cli.msg.info.header.for", buildRegionSpatialPropLink(region), buildRegionInfoLink(region, LOCAL))));
         sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.spatial.location", buildDimensionTeleportLink(region)));
         sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.spatial.area", buildRegionAreaDetailComponent(region)));
         return 0;
@@ -578,7 +578,7 @@ public class RegionCommands {
      * @return
      */
     public static int promptRegionState(ServerCommandSource src, IMarkableRegion region) {
-        sendCmdFeedback(src, buildHeader(MutableText.of(new TranslatableTextContent("cli.msg.info.header.for", buildRegionStateLink(region), buildRegionInfoLink(region, LOCAL)))));
+        sendCmdFeedback(src, buildHeader(new TranslatableText("cli.msg.info.header.for", buildRegionStateLink(region), buildRegionInfoLink(region, LOCAL))));
         sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.state.priority", buildRegionPriorityComponent(region)));
         sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.state.enable", buildRegionEnableComponent(region)));
         sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.state.alert", buildRegionAlertComponentLink(region)));
@@ -587,7 +587,7 @@ public class RegionCommands {
 
     public static int promptRegionFlags(ServerCommandSource src, IMarkableRegion region, int pageNo) {
         if (region.getFlags().isEmpty()) {
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.region.flag.empty", buildRegionInfoLink(region, LOCAL))));
+            sendCmdFeedback(src, new TranslatableText("cli.msg.info.region.flag.empty", buildRegionInfoLink(region, LOCAL)));
             return 1;
         }
         List<IFlag> flags = LocalRegions.getSortedFlags(region);
@@ -596,7 +596,7 @@ public class RegionCommands {
                 buildCommandStr(REGION_COMMAND.toString(), region.getDim().getValue().toString(), region.getName(), LIST.toString(), FLAG.toString()),
                 buildRemoveFlagEntries(region, flags, LOCAL),
                 pageNo,
-                MutableText.of(new LiteralTextContent(" - ")).append(buildRegionAddFlagLink(region))
+                new LiteralText(" - ").append(buildRegionAddFlagLink(region))
         );
         flagPagination.forEach(line -> sendCmdFeedback(src, line));
         return 0;
@@ -606,7 +606,7 @@ public class RegionCommands {
     // assumption: regions are only updated with the region marker when in the same dimension
     private static int updateRegion(ServerCommandSource src, IMarkableRegion region) {
         try {
-            PlayerEntity player = src.getPlayerOrThrow();
+            PlayerEntity player = src.getPlayer();
             ItemStack maybeStick = player.getMainHandStack();
             if (StickUtil.isVanillaStick(maybeStick)) {
                 try {
@@ -633,7 +633,7 @@ public class RegionCommands {
 
     private static int teleport(ServerCommandSource src, IMarkableRegion region) {
         try {
-            ServerPlayerEntity player = src.getPlayerOrThrow();
+            ServerPlayerEntity player = src.getPlayer();
             src.getServer().getCommandManager().getDispatcher().execute(buildRegionTpCmd(region, player.getEntityName()), src);
             return 0;
         } catch (CommandSyntaxException e) {
@@ -658,7 +658,7 @@ public class RegionCommands {
             region.setTpTarget(target);
             RegionDataManager.save();
             MutableText newTpTargetLink = buildDimensionalBlockTpLink(region.getDim(), target);
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.region.spatial.location.teleport.set", region.getName(), newTpTargetLink)));
+            sendCmdFeedback(src, new TranslatableText("cli.msg.info.region.spatial.location.teleport.set", region.getName(), newTpTargetLink));
             return 0;
         }
         return 1;

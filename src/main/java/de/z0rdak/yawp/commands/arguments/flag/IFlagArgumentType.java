@@ -15,9 +15,8 @@ import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.LiteralTextContent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
 
 import java.util.Collection;
 import java.util.List;
@@ -32,9 +31,9 @@ public class IFlagArgumentType implements ArgumentType<String> {
 
     public static final Pattern VALID_FLAG_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z\\-][A-Za-z]$");
     private static final Collection<String> EXAMPLES = RegionFlag.getFlagNames();
-    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(MutableText.of(new TranslatableTextContent("cli.arg.flag.parse.invalid")));
+    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(new TranslatableText("cli.arg.flag.parse.invalid"));
     private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
-            flag -> MutableText.of(new TranslatableTextContent("cli.arg.flag.invalid", flag))
+            flag -> new TranslatableText("cli.arg.flag.invalid", flag)
     );
 
     private IFlagArgumentType() {
@@ -55,12 +54,12 @@ public class IFlagArgumentType implements ArgumentType<String> {
             if (region.containsFlag(flagIdentifier)) {
                 return region.getFlag(flagIdentifier);
             } else {
-                MessageUtil.sendCmdFeedback(context.getSource(), MutableText.of(new LiteralTextContent("Region '" + region.getName() + "' does not contain flag '" + flagIdentifier + "'!")));
+                MessageUtil.sendCmdFeedback(context.getSource(), new LiteralText("Region '" + region.getName() + "' does not contain flag '" + flagIdentifier + "'!"));
                 // Should not happen!
                 throw new IllegalArgumentException("Region '" + region.getName() + "' does not contain flag '" + flagIdentifier + "'!");
             }
         } else {
-            MessageUtil.sendCmdFeedback(context.getSource(), MutableText.of(new LiteralTextContent("Invalid flag identifier: '" + flagIdentifier + "'!")));
+            MessageUtil.sendCmdFeedback(context.getSource(), new LiteralText("Invalid flag identifier: '" + flagIdentifier + "'!"));
             throw ERROR_INVALID_VALUE.create(flagIdentifier);
         }
     }
@@ -120,11 +119,11 @@ public class IFlagArgumentType implements ArgumentType<String> {
                     flagToSuggest = allFlags;
                 }
                 if (isRemoveCmd && flagToSuggest.isEmpty()) {
-                    MessageUtil.sendCmdFeedback(src, MutableText.of(new LiteralTextContent("No flags defined in region '" + region.getName() + "'!")));
+                    MessageUtil.sendCmdFeedback(src, new LiteralText("No flags defined in region '" + region.getName() + "'!"));
                     return Suggestions.empty();
                 }
                 if (!isRemoveCmd && flagToSuggest.isEmpty()) {
-                    MessageUtil.sendCmdFeedback(src, MutableText.of(new LiteralTextContent("Region '" + region.getName() + "' already contains all flags!")));
+                    MessageUtil.sendCmdFeedback(src, new LiteralText("Region '" + region.getName() + "' already contains all flags!"));
                     return Suggestions.empty();
                 }
                 return CommandSource.suggestMatching(flagToSuggest, builder);

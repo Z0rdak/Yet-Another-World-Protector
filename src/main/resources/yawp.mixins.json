@@ -22,7 +22,6 @@
     "ExplosionMixin",
     "FarmLandBlockMixin",
     "FireBlockMixin",
-    "FrogMixin",
     "HoeItemMixin",
     "ItemEntityMixin",
     "LightningEntityMixin",

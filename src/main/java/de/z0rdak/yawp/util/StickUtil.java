@@ -7,9 +7,9 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
-import net.minecraft.text.LiteralTextContent;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
-import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 
@@ -110,7 +110,7 @@ public final class StickUtil {
             String validFlag = marker.isValidArea() ? (GREEN + "*" + GOLD) : "";
             displayName = GOLD + type.stickName + " (" + marker.getAreaType().areaType + "" + validFlag + ")";
         }
-        stick.setCustomName(MutableText.of(new LiteralTextContent(displayName)));
+        stick.setCustomName(new LiteralText(displayName));
     }
 
     public static void setStickToolTip(ItemStack stick, StickType type) {
@@ -129,10 +129,10 @@ public final class StickUtil {
 
     private static NbtList getMarkerToolTip() {
         NbtList lore = new NbtList();
-        lore.add(buildLoreTextLine(MutableText.of(new TranslatableTextContent("help.tooltip.stick.marker.simple.1")), "#ff4d4d"));
-        lore.add(buildLoreTextLine(MutableText.of(new TranslatableTextContent("help.tooltip.stick.marker.simple.2")), "#ff4d4d"));
-        lore.add(buildLoreTextLine(MutableText.of(new TranslatableTextContent("help.tooltip.stick.marker.simple.3")).formatted(ITALIC), "#808080"));
-        lore.add(buildLoreTextLine(MutableText.of(new TranslatableTextContent("help.tooltip.stick.marker.simple.4")).formatted(ITALIC), "#808080"));
+        lore.add(buildLoreTextLine(new TranslatableText("help.tooltip.stick.marker.simple.1"), "#ff4d4d"));
+        lore.add(buildLoreTextLine(new TranslatableText("help.tooltip.stick.marker.simple.2"), "#ff4d4d"));
+        lore.add(buildLoreTextLine(new TranslatableText("help.tooltip.stick.marker.simple.3").formatted(ITALIC), "#808080"));
+        lore.add(buildLoreTextLine(new TranslatableText("help.tooltip.stick.marker.simple.4").formatted(ITALIC), "#808080"));
         return lore;
     }
 

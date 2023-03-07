@@ -40,7 +40,7 @@ public class MarkerStickHandler {
                         YetAnotherWorldProtector.LOGGER.warn("Unknown area type on marking - should really not happening");
                         return;
                     }
-                    if (player.isCrawling()) {
+                    if (player.isSneaking()) {
                         marker.setTeleportPos(target);
                         involvedItem.getNbt().put(STICK, marker.serializeNBT());
                         return;
@@ -71,7 +71,7 @@ public class MarkerStickHandler {
                     targetIsAir = target.getType() == HitResult.Type.MISS;
                 }
 
-                if (player.isCrawling() && targetIsAir) {
+                if (player.isSneaking() && targetIsAir) {
                     StickType stickType = getStickType(involvedItem);
                     if (Objects.requireNonNull(stickType) == StickType.MARKER) {
                         NbtCompound nbt = involvedItem.getNbt();
