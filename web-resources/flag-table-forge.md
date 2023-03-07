@@ -1,12 +1,9 @@
-# Overview
-
-Currently, there are **80+ flags** available. See command [reference](Commands) for how to manage flags for Dimensional
-and Local Regions.
+# Forge Flag Table
 
 | Flag                        | Description                                                                                                                                                                          | Versions |        |        | Availability        | 
 |-----------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|--------|--------|---------------------|
 |                             |                                                                                                                                                                                      | 1.16.5   | 1.18.2 | 1.19.2 |
-| break_blocks                | prevents players from breaking blocks and some¹ block entities                                                                                                                       | yes      | yes    | yes    | Local And Dimension |
+| break_blocks¹               | prevents players from breaking blocks and some block entities                                                                                                                        | yes      | yes    | yes    | Local And Dimension |
 | place_blocks                | prevents players from placing blocks                                                                                                                                                 | yes      | yes    | yes    | Local And Dimension |
 | scoop_fluids                | prevents players from scooping up fluids with buckets                                                                                                                                | yes      | yes    | yes    | Local And Dimension |
 | place_fluids                | prevents players from placing fluids                                                                                                                                                 | yes      | yes    | yes    | Local And Dimension |
@@ -68,7 +65,6 @@ and Local Regions.
 | fall-damage-animals         | prevents animals from taking fall damage                                                                                                                                             | yes      | yes    | yes    | Local And Dimension |
 | fall-damage-villagers       | prevents villagers from taking fall damage                                                                                                                                           | yes      | yes    | yes    | Local And Dimension |
 | fall-damage-monsters        | prevents monsters from taking fall damage                                                                                                                                            | yes      | yes    | yes    | Local And Dimension |
-| send-chat                   | prevents players from sending chat messages (doesn't block commands)                                                                                                                 | yes      | yes    | yes    | Local And Dimension |
 | exec-command                | prevents players from executing commands                                                                                                                                             | yes      | yes    | yes    | Local And Dimension |
 | set-spawn                   | prevents players from setting their spawn point                                                                                                                                      | yes      | yes    | yes    | Local And Dimension |
 | sleep                       | prevents players from sleeping                                                                                                                                                       | yes      | yes    | yes    | Local And Dimension |
@@ -87,8 +83,12 @@ and Local Regions.
 | creeper-explosions-entities | prevents explosions caused by Creepers to damage entities                                                                                                                            | yes      | yes    | yes    | Local And Dimension |
 | other-explosions-blocks     | prevents all other explosions from destroying blocks                                                                                                                                 | yes      | yes    | yes    | Local And Dimension |
 | other-explosions-entities   | prevents all other explosions from damaging entities                                                                                                                                 | yes      | yes    | yes    | Local And Dimension |
+| zombie-destruction          | prevents doors from being destroyed by zombies                                                                                                                                       | yes      | yes    | yes    | Local And Dimension |
 | mob-griefing                | prevents mob griefing                                                                                                                                                                | yes      | yes    | yes    | Local And Dimension |
 | enderman-griefing           | prevents endermen from picking up and placing blocks                                                                                                                                 | yes      | yes    | yes    | Local And Dimension |
+| wither-destruction          | prevents block destruction by the wither                                                                                                                                             | yes      | yes    | yes    | Local And Dimension |
+| dragon-destruction          | prevents block destruction by the ender dragon                                                                                                                                       | yes      | yes    | yes    | Local And Dimension |
 
-¹ Item Frames, Paintings and Armor Stands are included per default, other Tile Entities need to be added to the
-config [`yawp-flags.toml`](https://github.com/Z0rdak/Yet-Another-World-Protector/wiki/Server-Config#flag-config).
+- ¹ Item Frames, Paintings, Leash Knots and Armor Stands are included per default, other Tile Entities need to be added
+  to the
+  config [`yawp-flags.toml`](https://github.com/Z0rdak/Yet-Another-World-Protector/wiki/Server-Config#flag-config).
