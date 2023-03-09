@@ -17,6 +17,8 @@ import net.minecraft.block.entity.LockableContainerBlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.vehicle.StorageMinecartEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.ActionResult;
@@ -52,31 +54,26 @@ public final class PlayerFlagHandler {
         EntityElytraEvents.ALLOW.register(PlayerFlagHandler::onElytraFlight);
         UseItemCallback.EVENT.register(PlayerFlagHandler::onUseItem);
         UseBlockCallback.EVENT.register(PlayerFlagHandler::onUseBlock);
+        UseBlockCallback.EVENT.register(PlayerFlagHandler::onAccessContainer);
         UseEntityCallback.EVENT.register(PlayerFlagHandler::onUseEntity);
     }
 
     private static TypedActionResult<ItemStack> onUseItem(PlayerEntity player, World world, Hand hand) {
         if (isServerSide(world)) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
-            // player.raycast()
-            BlockPos raycastHitPos = new BlockPos(0, 0, 0);
-            if (!hasEmptyHands(player)) {
-                /*
-                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, player.getBlockPos(), USE_ENTITIES, dimCache.getDimensionalRegion());
-                if (flagCheckEvent.isDenied()) {
-                    sendFlagDeniedMsg(flagCheckEvent);
-                    return TypedActionResult.pass(player.getStackInHand(hand));
-                }
-                 */
-            }
-            /*
-            FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, player.getBlockPos(), USE_ITEMS, dimCache.getDimensionalRegion());
+
+            // FIXME: Position of target entity would be more correct here
+            FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, player.getBlockPos(), USE_ENTITIES, dimCache.getDimensionalRegion());
             if (flagCheckEvent.isDenied()) {
                 sendFlagDeniedMsg(flagCheckEvent);
                 return TypedActionResult.fail(player.getStackInHand(hand));
             }
-            */
 
+            flagCheckEvent = checkPlayerEvent(player, player.getBlockPos(), USE_ITEMS, dimCache.getDimensionalRegion());
+            if (flagCheckEvent.isDenied()) {
+                sendFlagDeniedMsg(flagCheckEvent);
+                return TypedActionResult.fail(player.getStackInHand(hand));
+            }
         }
         return TypedActionResult.pass(player.getStackInHand(hand));
     }
@@ -86,32 +83,60 @@ public final class PlayerFlagHandler {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.getRegistryKey());
             BlockPos targetPos = blockHitResult.getBlockPos();
             BlockEntity targetEntity = world.getBlockEntity(targetPos);
-            boolean isLockableTileEntity = targetEntity instanceof LockableContainerBlockEntity;
-            boolean isEnderChest = targetEntity instanceof EnderChestBlockEntity;
-            boolean isContainer = targetEntity instanceof LecternBlockEntity || isLockableTileEntity;
-            // used to allow player to place blocks when shift clicking container or usable bock
-            boolean hasEmptyHands = hasEmptyHands(player);
 
+            boolean hasEmptyHands = hasEmptyHands(player);
+            boolean hasStackInHand = !player.getStackInHand(hand).isEmpty();
+            boolean isSneakingWithEmptyHands = player.isSneaking() && hasEmptyHands;
+
+            //  // does this include water blocks and placing lilly pads for example?
             if (blockHitResult.getType() == HitResult.Type.BLOCK) {
-                /*
-                if (player.isCrawling() && hasEmptyHands || !player.isCrawling()) {
+                // allow player to place blocks when shift clicking usable bock
+                if ((isSneakingWithEmptyHands || !player.isSneaking()) || !hasStackInHand) {
                     FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, targetPos, USE_BLOCKS, dimCache.getDimensionalRegion());
                     if (flagCheckEvent.isDenied()) {
                         sendFlagDeniedMsg(flagCheckEvent);
                         return ActionResult.FAIL;
                     }
                 }
-                if (!hasEmptyHands) {
-                    FlagCheckEvent.PlayerFlagEvent useItemCheck = checkPlayerEvent(player, player.getBlockPos(), USE_ITEMS, dimCache.getDimensionalRegion());
-                    if (useItemCheck.isDenied()) {
-                        sendFlagDeniedMsg(useItemCheck);
+                boolean itemInHandIsPlaceableBlock = Item.BLOCK_ITEMS.containsValue(player.getStackInHand(hand).getItem()); // this does not cover item frames & armors stands.. etc
+
+                if (hasStackInHand) {
+                    // Player attempting to place block
+                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, blockHitResult.getBlockPos(), PLACE_BLOCKS, dimCache.getDimensionalRegion());
+                    if (flagCheckEvent.isDenied()) {
+                        sendFlagDeniedMsg(flagCheckEvent);
                         return ActionResult.FAIL;
                     }
                 }
+            }
+
+            // targetEntity != null
+            if (!hasEmptyHands) {
+                // FIXME: Still working when targeting entity -> also implement int use-entity
+                FlagCheckEvent.PlayerFlagEvent useItemCheck = checkPlayerEvent(player, player.getBlockPos(), USE_ITEMS, dimCache.getDimensionalRegion());
+                if (useItemCheck.isDenied()) {
+                    sendFlagDeniedMsg(useItemCheck);
+                    return ActionResult.FAIL;
+                }
+            }
+        }
+        return ActionResult.PASS;
+    }
+
+    private static ActionResult onAccessContainer(PlayerEntity player, World world, Hand hand, BlockHitResult blockHitResult) {
+        if (isServerSide(world)) {
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.getRegistryKey());
+            BlockPos targetPos = blockHitResult.getBlockPos();
+            BlockEntity targetEntity = world.getBlockEntity(targetPos);
+            boolean isLockableTileEntity = targetEntity instanceof LockableContainerBlockEntity;
+            boolean isEnderChest = targetEntity instanceof EnderChestBlockEntity;
+            boolean isContainer = targetEntity instanceof LecternBlockEntity || isLockableTileEntity;
+            boolean hasEmptyHands = hasEmptyHands(player);
+            if (blockHitResult.getType() == HitResult.Type.BLOCK) {
                 // Note: following flags are already covered with use_blocks
-                // check for ender chest access
                 if (isEnderChest) {
-                    if (player.isCrawling() && hasEmptyHands || !player.isCrawling()) {
+                    // check allows player to place blocks when shift clicking container
+                    if (player.isSneaking() && hasEmptyHands || !player.isSneaking()) {
                         FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, targetPos, ENDER_CHEST_ACCESS, dimCache.getDimensionalRegion());
                         if (flagCheckEvent.isDenied()) {
                             sendFlagDeniedMsg(flagCheckEvent);
@@ -119,9 +144,9 @@ public final class PlayerFlagHandler {
                         }
                     }
                 }
-                // check for container access
                 if (isContainer) {
-                    if (player.isCrawling() && hasEmptyHands || !player.isCrawling()) {
+                    // check allows player to place blocks when shift clicking container
+                    if (player.isSneaking() && hasEmptyHands || !player.isSneaking()) {
                         FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, targetPos, CONTAINER_ACCESS, dimCache.getDimensionalRegion());
                         if (flagCheckEvent.isDenied()) {
                             sendFlagDeniedMsg(flagCheckEvent);
@@ -129,14 +154,39 @@ public final class PlayerFlagHandler {
                         }
                     }
                 }
-                */
-                if (!player.getStackInHand(hand).isEmpty()) {
-                    // Player attempting to place block
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, blockHitResult.getBlockPos(), PLACE_BLOCKS, dimCache.getDimensionalRegion());
-                    if (flagCheckEvent.isDenied()) {
-                        sendFlagDeniedMsg(flagCheckEvent);
-                        return ActionResult.FAIL;
-                    }
+            }
+        }
+        return ActionResult.PASS;
+    }
+
+    private static ActionResult onUseEntity(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult entityHitResult) {
+        if (isServerSide(world)) {
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
+
+            FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, entity.getBlockPos(), USE_ENTITIES, dimCache.getDimensionalRegion());
+            if (flagCheckEvent.isDenied()) {
+                sendFlagDeniedMsg(flagCheckEvent);
+                // FIXME: Does trigger, but does not prevent event
+                return ActionResult.FAIL;
+            }
+
+            if (!hasEmptyHands(player) && entityHitResult != null && entityHitResult.getType() == HitResult.Type.ENTITY
+                    && !hasEmptyHands(player) && entityHitResult.getType() != HitResult.Type.BLOCK) {
+                FlagCheckEvent.PlayerFlagEvent useItemCheck = checkPlayerEvent(player, entity.getBlockPos(), USE_ITEMS, dimCache.getDimensionalRegion());
+                if (useItemCheck.isDenied()) {
+                    sendFlagDeniedMsg(useItemCheck);
+                    // FIXME: Does trigger, but does not prevent event
+                    return ActionResult.FAIL;
+                }
+            }
+
+            // check minecart chest access
+            if (entity instanceof StorageMinecartEntity) {
+                flagCheckEvent = checkPlayerEvent(player, entity.getBlockPos(), CONTAINER_ACCESS, dimCache.getDimensionalRegion());
+                if (flagCheckEvent.isDenied()) {
+                    // FIXME: Does trigger, but opens gui regardless
+                    sendFlagDeniedMsg(flagCheckEvent);
+                    return ActionResult.FAIL;
                 }
             }
         }
@@ -148,36 +198,6 @@ public final class PlayerFlagHandler {
                 && player.getStackInHand(Hand.OFF_HAND).getItem().equals(Items.AIR);
     }
 
-    private static ActionResult onUseEntity(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult entityHitResult) {
-        if (isServerSide(world)) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
-            /*
-            FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, entity.getBlockPos(), USE_ENTITIES, dimCache.getDimensionalRegion());
-            if (flagCheckEvent.isDenied()) {
-                sendFlagDeniedMsg(flagCheckEvent);
-                return ActionResult.FAIL;
-            }
-
-            if (!hasEmptyHands(player)) {
-                FlagCheckEvent.PlayerFlagEvent useItemCheck = checkPlayerEvent(player, entity.getBlockPos(), USE_ITEMS, dimCache.getDimensionalRegion());
-                if (useItemCheck.isDenied()) {
-                    sendFlagDeniedMsg(useItemCheck);
-                    return ActionResult.FAIL;
-                }
-            }
-
-            // check minecart chest access
-            if (entity instanceof AbstractMinecartEntity) {
-                flagCheckEvent = checkPlayerEvent(player, entity.getBlockPos(), CONTAINER_ACCESS, dimCache.getDimensionalRegion());
-                if (flagCheckEvent.isDenied()) {
-                    sendFlagDeniedMsg(flagCheckEvent);
-                    return ActionResult.FAIL;
-                }
-            }
-            */
-        }
-        return ActionResult.PASS;
-    }
 
     private static boolean onElytraFlight(LivingEntity livingEntity) {
         if (!livingEntity.getWorld().isClient) {

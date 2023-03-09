@@ -47,14 +47,29 @@ public class FlagConfig {
     public static Set<String> getBreakFlagEntityTags() {
         return FlagConfig.BREAK_FLAG_ENTITY_TAGS.get().stream()
                 .filter(Objects::nonNull)
-                .map(String::toString).collect(Collectors.toSet());
+                .map(String::toString)
+                .collect(Collectors.toSet());
     }
 
     private static boolean isValidEntityEntry(Object entity) {
-        return true;
+        if (entity instanceof String str) {
+            boolean isNotEmptyAndContainsColon = !str.isEmpty() && !str.isBlank() && str.contains(":");
+            if (!isNotEmptyAndContainsColon) {
+                YetAnotherWorldProtector.LOGGER.warn("Invalid block tile resource key supplied for 'break_flag_entities': " + entity);
+            }
+            return isNotEmptyAndContainsColon;
+        }
+        return false;
     }
 
     private static boolean isValidTagEntry(Object entity) {
-        return true;
+        if (entity instanceof String str) {
+            boolean isNotEmptyAndContainsColon = !str.isEmpty() && !str.isBlank() && str.contains(":");
+            if (!isNotEmptyAndContainsColon) {
+                YetAnotherWorldProtector.LOGGER.warn("Invalid block tile resource key supplied for 'break_flag_entity_tags': " + entity);
+            }
+            return isNotEmptyAndContainsColon;
+        }
+        return false;
     }
 }

@@ -23,6 +23,8 @@ import net.minecraftforge.fml.config.ModConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.stream.Collectors;
+
 public class YetAnotherWorldProtector implements ModInitializer {
 
     public static final String MODID = "yawp";
@@ -50,7 +52,7 @@ public class YetAnotherWorldProtector implements ModInitializer {
                     YetAnotherWorldProtector.LOGGER.info("Set mod base command to '/" + CommandPermissionConfig.BASE_CMD + "'");
                     int numOfUuidsWithPermission = CommandPermissionConfig.UUIDsWithPermission().size();
                     String uuidsWithPermission = (numOfUuidsWithPermission > 0
-                            ? ": " + String.join(", ", CommandPermissionConfig.UUIDsWithPermission())
+                            ? ": " + CommandPermissionConfig.UUIDsWithPermission().stream().map(uuid -> "'" + uuid + "'").collect(Collectors.joining(", "))
                             : "");
                     YetAnotherWorldProtector.LOGGER.info(numOfUuidsWithPermission + " UUID(s) with permission read from config" + uuidsWithPermission);
                     CommandRegistry.init(cmdDispatcher, CommandPermissionConfig.BASE_CMD);
@@ -59,13 +61,13 @@ public class YetAnotherWorldProtector implements ModInitializer {
                 case RegionConfig.CONFIG_NAME: {
                     int numLocalDefaultFlags = RegionConfig.getDefaultFlags().size();
                     String loadedLocalFlags = (numLocalDefaultFlags > 0
-                            ? ": " + String.join(", ", RegionConfig.getDefaultFlags())
+                            ? ": " + RegionConfig.getDefaultFlags().stream().map(flag -> "'" + flag + "'").collect(Collectors.joining(", "))
                             : "");
                     YetAnotherWorldProtector.LOGGER.info(numLocalDefaultFlags + " default flag(s) for Local Regions read from config" + loadedLocalFlags);
 
                     int numDimDefaultFlags = RegionConfig.getDefaultDimFlags().size();
                     String loadedDimFlags = (numDimDefaultFlags > 0
-                            ? ": " + String.join(", ", RegionConfig.getDefaultDimFlags())
+                            ? ": " + RegionConfig.getDefaultDimFlags().stream().map(flag -> "'" + flag + "'").collect(Collectors.joining(", "))
                             : "");
                     YetAnotherWorldProtector.LOGGER.info(numDimDefaultFlags + " default flag(s) for Dimensional Regions read from config" + loadedDimFlags);
                 }
@@ -73,13 +75,13 @@ public class YetAnotherWorldProtector implements ModInitializer {
                 case FlagConfig.CONFIG_NAME: {
                     int numBreakEntityEntries = FlagConfig.getBreakFlagEntities().size();
                     String loadedBreakEntities = (numBreakEntityEntries > 0
-                            ? ": " + String.join(", ", FlagConfig.getBreakFlagEntities())
+                            ? ": " + FlagConfig.getBreakFlagEntities().stream().map(entry -> "'" + entry + "'").collect(Collectors.joining(", "))
                             : "");
                     YetAnotherWorldProtector.LOGGER.info(numBreakEntityEntries + " Block Entity entries read from config" + loadedBreakEntities);
 
                     int numBreakEntityTagEntries = FlagConfig.getBreakFlagEntityTags().size();
                     String loadedBreakEntityTags = (numBreakEntityTagEntries > 0
-                            ? ": " + String.join(", ", FlagConfig.getBreakFlagEntityTags())
+                            ? ": " + FlagConfig.getBreakFlagEntityTags().stream().map(tag -> "'" + tag + "'").collect(Collectors.joining(", "))
                             : "");
                     YetAnotherWorldProtector.LOGGER.info(numBreakEntityTagEntries + " Block Entity tag entries read from config" + loadedBreakEntityTags);
                 }
