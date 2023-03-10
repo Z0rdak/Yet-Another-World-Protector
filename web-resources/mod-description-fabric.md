@@ -6,8 +6,8 @@ It allows you to protect your creations against various different events/actions
 It was inspired by the forge mod [WorldProtector](https://www.curseforge.com/minecraft/mc-mods/worldprotector) and
 the [WorldGuard](https://dev.bukkit.org/projects/worldguard) plugin.
 
-**This is the FORGE version of YAWP. For the FABRIC version
-click [here](https://www.curseforge.com/minecraft/mc-mods/yawp-fabric)**
+**This is the FABRIC version of YAWP. For the FORGE version
+click [here](https://www.curseforge.com/minecraft/mc-mods/yawp)**
 
 Join our discord if you have any questions or suggestions: [YAWP Discord](https://discord.gg/d7hArKCUtm)
 
@@ -92,6 +92,9 @@ permissions.
 
 ___
 ![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/1.16.x/web-resources/yawp-feature-7_m.png "")
+
+**There are still some flags missing from the original forge version of the mod. Checkout the wiki about the
+available [flags](https://github.com/Z0rdak/Yet-Another-World-Protector/wiki/Flags).**
 
 You can add rules to Dimensional or Local Regions with flags. If the flag is defined, it prevents the defined action
 associated with the flag.
