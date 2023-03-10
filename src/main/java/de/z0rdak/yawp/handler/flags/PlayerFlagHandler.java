@@ -18,12 +18,12 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.vehicle.StorageMinecartEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.UseAction;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -62,14 +62,15 @@ public final class PlayerFlagHandler {
         if (isServerSide(world)) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
 
-            // FIXME: Position of target entity would be more correct here
-            FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, player.getBlockPos(), USE_ENTITIES, dimCache.getDimensionalRegion());
-            if (flagCheckEvent.isDenied()) {
-                sendFlagDeniedMsg(flagCheckEvent);
-                return TypedActionResult.fail(player.getStackInHand(hand));
+            if (!hasEmptyHands(player)) {
+                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, player.getBlockPos(), USE_ENTITIES, dimCache.getDimensionalRegion());
+                if (flagCheckEvent.isDenied()) {
+                    sendFlagDeniedMsg(flagCheckEvent);
+                    return TypedActionResult.fail(player.getStackInHand(hand));
+                }
             }
 
-            flagCheckEvent = checkPlayerEvent(player, player.getBlockPos(), USE_ITEMS, dimCache.getDimensionalRegion());
+            FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, player.getBlockPos(), USE_ITEMS, dimCache.getDimensionalRegion());
             if (flagCheckEvent.isDenied()) {
                 sendFlagDeniedMsg(flagCheckEvent);
                 return TypedActionResult.fail(player.getStackInHand(hand));
@@ -82,8 +83,6 @@ public final class PlayerFlagHandler {
         if (isServerSide(world)) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.getRegistryKey());
             BlockPos targetPos = blockHitResult.getBlockPos();
-            BlockEntity targetEntity = world.getBlockEntity(targetPos);
-
             boolean hasEmptyHands = hasEmptyHands(player);
             boolean hasStackInHand = !player.getStackInHand(hand).isEmpty();
             boolean isSneakingWithEmptyHands = player.isSneaking() && hasEmptyHands;
@@ -98,27 +97,26 @@ public final class PlayerFlagHandler {
                         return ActionResult.FAIL;
                     }
                 }
-                boolean itemInHandIsPlaceableBlock = Item.BLOCK_ITEMS.containsValue(player.getStackInHand(hand).getItem()); // this does not cover item frames & armors stands.. etc
-
-                if (hasStackInHand) {
-                    // Player attempting to place block
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, blockHitResult.getBlockPos(), PLACE_BLOCKS, dimCache.getDimensionalRegion());
-                    if (flagCheckEvent.isDenied()) {
-                        sendFlagDeniedMsg(flagCheckEvent);
-                        return ActionResult.FAIL;
-                    }
-                }
             }
 
-            // targetEntity != null
             if (!hasEmptyHands) {
-                // FIXME: Still working when targeting entity -> also implement int use-entity
                 FlagCheckEvent.PlayerFlagEvent useItemCheck = checkPlayerEvent(player, player.getBlockPos(), USE_ITEMS, dimCache.getDimensionalRegion());
                 if (useItemCheck.isDenied()) {
                     sendFlagDeniedMsg(useItemCheck);
                     return ActionResult.FAIL;
                 }
             }
+
+            if (hasStackInHand && player.getStackInHand(hand).getUseAction() == UseAction.NONE) {
+                // Player attempting to place block
+                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, blockHitResult.getBlockPos(), PLACE_BLOCKS, dimCache.getDimensionalRegion());
+                if (flagCheckEvent.isDenied()) {
+                    sendFlagDeniedMsg(flagCheckEvent);
+                    return ActionResult.FAIL;
+                }
+            }
+
+
         }
         return ActionResult.PASS;
     }
@@ -166,29 +164,25 @@ public final class PlayerFlagHandler {
             FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, entity.getBlockPos(), USE_ENTITIES, dimCache.getDimensionalRegion());
             if (flagCheckEvent.isDenied()) {
                 sendFlagDeniedMsg(flagCheckEvent);
-                // FIXME: Does trigger, but does not prevent event
                 return ActionResult.FAIL;
             }
 
-            if (!hasEmptyHands(player) && entityHitResult != null && entityHitResult.getType() == HitResult.Type.ENTITY
-                    && !hasEmptyHands(player) && entityHitResult.getType() != HitResult.Type.BLOCK) {
+            if (!hasEmptyHands(player)) {
                 FlagCheckEvent.PlayerFlagEvent useItemCheck = checkPlayerEvent(player, entity.getBlockPos(), USE_ITEMS, dimCache.getDimensionalRegion());
                 if (useItemCheck.isDenied()) {
                     sendFlagDeniedMsg(useItemCheck);
-                    // FIXME: Does trigger, but does not prevent event
                     return ActionResult.FAIL;
                 }
             }
 
-            // check minecart chest access
             if (entity instanceof StorageMinecartEntity) {
                 flagCheckEvent = checkPlayerEvent(player, entity.getBlockPos(), CONTAINER_ACCESS, dimCache.getDimensionalRegion());
                 if (flagCheckEvent.isDenied()) {
-                    // FIXME: Does trigger, but opens gui regardless
                     sendFlagDeniedMsg(flagCheckEvent);
                     return ActionResult.FAIL;
                 }
             }
+            return ActionResult.PASS;
         }
         return ActionResult.PASS;
     }
