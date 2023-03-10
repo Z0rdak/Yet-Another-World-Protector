@@ -5,7 +5,6 @@ import de.z0rdak.yawp.commands.CommandRegistry;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
-import de.z0rdak.yawp.managers.data.player.tracking.PlayerTrackingManager;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
@@ -55,7 +54,7 @@ public class YetAnotherWorldProtector {
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         RegionDataManager.loadRegionData(event);
-        PlayerTrackingManager.loadPlayerData(event);
+
     }
 
 
