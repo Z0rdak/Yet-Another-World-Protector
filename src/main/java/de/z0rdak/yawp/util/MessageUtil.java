@@ -18,12 +18,12 @@ import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtHelper;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.NotImplementedException;
 

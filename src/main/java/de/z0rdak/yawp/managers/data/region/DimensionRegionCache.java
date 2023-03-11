@@ -9,9 +9,9 @@ import de.z0rdak.yawp.core.region.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 
 import java.util.*;

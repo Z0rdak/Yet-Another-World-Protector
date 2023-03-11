@@ -7,10 +7,10 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.text.LiteralTextContent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.TranslatableTextContent;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 
 import java.util.Objects;

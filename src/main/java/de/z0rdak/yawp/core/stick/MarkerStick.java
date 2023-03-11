@@ -7,10 +7,10 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.DefaultedRegistry;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -148,7 +148,7 @@ public class MarkerStick extends AbstractStick implements INbtSerializable<NbtCo
         if (isTpSet) {
             this.teleportPos = NbtHelper.toBlockPos(nbt.getCompound(TP_POS));
         }
-        this.dimension = RegistryKey.of(DefaultedRegistry.WORLD_KEY, new Identifier(nbt.getString(DIM)));
+        this.dimension = RegistryKey.of(RegistryKeys.WORLD, new Identifier(nbt.getString(DIM)));
         NbtList markedBlocksNBT = nbt.getList(MARKED_BLOCKS, NbtElement.COMPOUND_TYPE);
         this.markedBlocks = new ArrayList<>();
         markedBlocksNBT.forEach(block -> this.markedBlocks.add(NbtHelper.toBlockPos((NbtCompound) block)));

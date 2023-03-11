@@ -14,6 +14,7 @@ import net.minecraft.entity.passive.WanderingTraderEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
 import net.minecraft.world.explosion.ExplosionBehavior;
 import org.jetbrains.annotations.Nullable;
@@ -85,9 +86,9 @@ public class ServerWorldMixin {
     }
 
     @Inject(method = "createExplosion", at = @At("HEAD"), cancellable = true, allow = 1)
-    public void onIgniteExplosive(@Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionBehavior behavior, double x, double y, double z, float power, boolean createFire, Explosion.DestructionType destructionType, CallbackInfoReturnable<Boolean> cir) {
+    public void onIgniteExplosive(@Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionBehavior behavior, double x, double y, double z, float power, boolean createFire, World.ExplosionSourceType explosionSourceType, CallbackInfoReturnable<Boolean> cir) {
         ServerWorld world = (ServerWorld) (Object) this;
-        Explosion explosion = new Explosion(world, entity, damageSource, behavior, x, y, z, power, createFire, destructionType);
+        Explosion explosion = world.createExplosion(entity, damageSource, behavior, x, y, z, power, createFire, explosionSourceType, false);
         if (!world.isClient) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.getRegistryKey());
             FlagCheckEvent flagCheck = checkTargetEvent(new BlockPos(x, y, z), IGNITE_EXPLOSIVES, dimCache.getDimensionalRegion());

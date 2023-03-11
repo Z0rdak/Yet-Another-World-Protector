@@ -10,12 +10,12 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.command.CommandSource;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.DefaultedRegistry;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 
 import java.util.Collection;
@@ -31,7 +31,7 @@ public class DimensionCacheArgumentType implements ArgumentType<DimensionRegionC
 
     private static DimensionRegionCache getDimensionalRegionCache(Identifier resourcelocation) {
         // TODO: Check valid dimension key?
-        RegistryKey<World> registrykey = RegistryKey.of(DefaultedRegistry.WORLD_KEY, resourcelocation);
+        RegistryKey<World> registrykey = RegistryKey.of(RegistryKeys.WORLD, resourcelocation);
         if (RegionDataManager.get().containsCacheFor(registrykey)) {
             return RegionDataManager.get().cacheFor(registrykey);
         } else {
@@ -74,7 +74,7 @@ public class DimensionCacheArgumentType implements ArgumentType<DimensionRegionC
     @Override
     public DimensionRegionCache parse(StringReader reader) throws CommandSyntaxException {
         Identifier resourcelocation = Identifier.fromCommandInput(reader);
-        RegistryKey<World> registrykey = RegistryKey.of(DefaultedRegistry.WORLD_KEY, resourcelocation);
+        RegistryKey<World> registrykey = RegistryKey.of(RegistryKeys.WORLD, resourcelocation);
         if (RegionDataManager.get().containsCacheFor(registrykey)) {
             return RegionDataManager.get().cacheFor(registrykey);
         }

@@ -11,14 +11,14 @@ import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralTextContent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.DefaultedRegistry;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -85,7 +85,7 @@ public class CommandInterceptor {
         // check permission for other commands
         ParsedArgument<ServerCommandSource, ?> dimParsedArgument = cmdContext.getArguments().get(DIM.toString());
         if (dimParsedArgument.getResult() instanceof Identifier dimResLoc) {
-            RegistryKey<World> dim = RegistryKey.of(DefaultedRegistry.WORLD_KEY, dimResLoc);
+            RegistryKey<World> dim = RegistryKey.of(RegistryKeys.WORLD, dimResLoc);
             ParsedArgument<ServerCommandSource, ?> regionArg = cmdContext.getArguments().get(REGION.toString());
             if (regionArg == null) {
                 return 1;
@@ -150,7 +150,7 @@ public class CommandInterceptor {
         // check permission for other commands
         ParsedArgument<ServerCommandSource, ?> dimParsedArgument = cmdContext.getArguments().get(DIM.toString());
         if (dimParsedArgument.getResult() instanceof Identifier dimResLoc) {
-            RegistryKey<World> dim = RegistryKey.of(DefaultedRegistry.WORLD_KEY, dimResLoc);
+            RegistryKey<World> dim = RegistryKey.of(RegistryKeys.WORLD, dimResLoc);
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
             if (dimCache != null) {
                 if (src.getEntity() != null) {
