@@ -8,7 +8,7 @@ import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.handler.CommonEvents;
 import de.z0rdak.yawp.handler.flags.PlayerFlagHandler;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import net.fabricmc.api.ModInitializer;
+import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
@@ -25,7 +25,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.stream.Collectors;
 
-public class YetAnotherWorldProtector implements ModInitializer {
+public class YetAnotherWorldProtector implements DedicatedServerModInitializer {
 
     public static final String MODID = "yawp";
     public static final Logger LOGGER = LogManager.getLogger("YAWP");
@@ -91,7 +91,7 @@ public class YetAnotherWorldProtector implements ModInitializer {
     }
 
     @Override
-    public void onInitialize() {
+    public void onInitializeServer() {
         // callback to register commands
         CommandRegistrationCallback.EVENT.register(YetAnotherWorldProtector::registerCommands);
 

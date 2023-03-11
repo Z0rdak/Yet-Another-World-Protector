@@ -15,7 +15,7 @@
   "icon": "assets/yawp/icon.png",
   "environment": "*",
   "entrypoints": {
-    "main": [
+    "server": [
       "de.z0rdak.yawp.YetAnotherWorldProtector"
     ]
   },
