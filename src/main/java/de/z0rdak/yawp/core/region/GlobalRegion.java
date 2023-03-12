@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.core.region;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -13,7 +13,7 @@ import javax.annotation.Nullable;
 public class GlobalRegion extends AbstractRegion {
 
     public static final ResourceLocation GLOBAL = new ResourceLocation("yawp", "global");
-    public static final ResourceKey<Level> GLOBAL_DIMENSION = ResourceKey.create(Registry.DIMENSION_REGISTRY, GLOBAL);
+    public static final ResourceKey<Level> GLOBAL_DIMENSION = ResourceKey.create(Registries.DIMENSION, GLOBAL);
 
     protected GlobalRegion(CompoundTag nbt) {
         super(nbt);

@@ -4,7 +4,7 @@ import de.z0rdak.yawp.core.affiliation.PlayerContainer;
 import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -391,7 +391,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         this.name = nbt.getString(NAME);
-        this.dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY,
+        this.dimension = ResourceKey.create(Registries.DIMENSION,
                 new ResourceLocation(nbt.getString(DIM)));
         this.isActive = nbt.getBoolean(ACTIVE);
         this.regionType = RegionType.of(nbt.getString(REGION_TYPE));

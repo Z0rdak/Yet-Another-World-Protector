@@ -11,7 +11,7 @@ import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -30,7 +30,7 @@ public class DimensionCacheArgumentType implements ArgumentType<DimensionRegionC
 
     private static DimensionRegionCache getDimensionalRegionCache(ResourceLocation resourcelocation) {
         // TODO: Check valid dimension key?
-        ResourceKey<Level> registrykey = ResourceKey.create(Registry.DIMENSION_REGISTRY, resourcelocation);
+        ResourceKey<Level> registrykey = ResourceKey.create(Registries.DIMENSION, resourcelocation);
         if (RegionDataManager.get().containsCacheFor(registrykey)) {
             return RegionDataManager.get().cacheFor(registrykey);
         } else {
@@ -73,7 +73,7 @@ public class DimensionCacheArgumentType implements ArgumentType<DimensionRegionC
     @Override
     public DimensionRegionCache parse(StringReader reader) throws CommandSyntaxException {
         ResourceLocation resourcelocation = ResourceLocation.read(reader);
-        ResourceKey<Level> registrykey = ResourceKey.create(Registry.DIMENSION_REGISTRY, resourcelocation);
+        ResourceKey<Level> registrykey = ResourceKey.create(Registries.DIMENSION, resourcelocation);
         if (RegionDataManager.get().containsCacheFor(registrykey)) {
             return RegionDataManager.get().cacheFor(registrykey);
         }

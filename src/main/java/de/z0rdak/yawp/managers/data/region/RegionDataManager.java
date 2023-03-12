@@ -9,7 +9,7 @@ import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
@@ -124,7 +124,7 @@ public class RegionDataManager extends SavedData {
         // deserialize all region without parent and child references
         for (String dimKey : dimensionRegions.getAllKeys()) {
             rdm.dimensionDataNames.add(dimKey);
-            ResourceKey<Level> dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(dimKey));
+            ResourceKey<Level> dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(dimKey));
             if (dimensionRegions.contains(dimKey, Tag.TAG_COMPOUND)) {
                 CompoundTag dimCacheNbt = dimensionRegions.getCompound(dimKey);
                 if (dimCacheNbt.contains(REGIONS, Tag.TAG_COMPOUND)) {
@@ -144,7 +144,7 @@ public class RegionDataManager extends SavedData {
 
         // set parent and child references
         for (String dimKey : dimensionRegions.getAllKeys()) {
-            ResourceKey<Level> dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(dimKey));
+            ResourceKey<Level> dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(dimKey));
             DimensionRegionCache dimCache = rdm.dimCacheMap.get(dimension);
             if (dimCache.getRegions().size() > 0) {
                 //YetAnotherWorldProtector.LOGGER.info(Component.translatable("data.nbt.dimensions.load.dim.restore", dimKey).getString());

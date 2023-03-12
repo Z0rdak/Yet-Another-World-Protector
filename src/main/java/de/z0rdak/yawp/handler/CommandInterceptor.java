@@ -10,7 +10,7 @@ import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -155,7 +155,7 @@ public class CommandInterceptor {
         // check permission for other commands
         ParsedArgument<CommandSourceStack, ?> dimParsedArgument = cmdContext.getArguments().get(CommandConstants.DIM.toString());
         if (dimParsedArgument != null && dimParsedArgument.getResult() instanceof ResourceLocation dimResLoc) {
-            ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, dimResLoc);
+            ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, dimResLoc);
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
             if (dimCache != null) {
                 if (src.getEntity() != null) {

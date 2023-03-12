@@ -1,9 +1,9 @@
 package de.z0rdak.yawp.core.area;
 
-import com.mojang.math.Vector3d;
 import de.z0rdak.yawp.util.AreaUtil;
 import de.z0rdak.yawp.util.constants.AreaNBT;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 
 import static de.z0rdak.yawp.util.AreaUtil.distance;
@@ -23,8 +23,8 @@ public class SphereArea extends CenteredArea {
     }
 
     @Override
-    public Vector3d getCenter() {
-        return new Vector3d(this.center.getX(), this.center.getY(), this.center.getZ());
+    public Vec3i getCenter() {
+        return new Vec3i(this.center.getX(), this.center.getY(), this.center.getZ());
     }
 
     public int getRadius() {

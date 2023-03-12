@@ -151,14 +151,6 @@ dependencies {
 
     annotationProcessor "org.spongepowered:mixin:${mixin_version}:processor"
 
-    implementation 'com.squareup.okhttp:okhttp:2.7.5'
-
-    // compileOnly fg.deobf("vazkii.patchouli:Patchouli:1.16.4-51:api")
-    // runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:1.16.4-51")
-
-    // compileOnly fg.deobf("mezz.jei:jei-1.16.4:7.6.0.58:api")
-    // runtimeOnly fg.deobf("mezz.jei:jei-1.16.4:7.6.0.58")
-
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.1'
 }

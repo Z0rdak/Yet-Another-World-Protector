@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.core.area;
 
-import com.mojang.math.Vector3d;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 
@@ -16,19 +16,18 @@ public abstract class CenteredArea extends AbstractArea {
         super(areaType);
     }
 
-    public CenteredArea(CompoundTag nbt){
+    public CenteredArea(CompoundTag nbt) {
         super(nbt);
         this.deserializeNBT(nbt);
     }
 
-    public CenteredArea(BlockPos center, AreaType areaType){
+    public CenteredArea(BlockPos center, AreaType areaType) {
         super(areaType);
         this.center = center;
     }
 
-    // FIXME: Use Vec3 instead of Vector3d
-    public Vector3d getCenter() {
-        return new Vector3d(this.center.getX(), this.center.getY(), this.center.getZ());
+    public Vec3i getCenter() {
+        return new Vec3i(this.center.getX(), this.center.getY(), this.center.getZ());
     }
 
     @Override

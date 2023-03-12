@@ -3,7 +3,7 @@ package de.z0rdak.yawp.core.stick;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.util.StickType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
@@ -148,7 +148,7 @@ public class MarkerStick extends AbstractStick implements INBTSerializable<Compo
         if (isTpSet) {
             this.teleportPos = NbtUtils.readBlockPos(nbt.getCompound(TP_POS));
         }
-        this.dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(nbt.getString(DIM)));
+        this.dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(nbt.getString(DIM)));
         ListTag markedBlocksNBT = nbt.getList(MARKED_BLOCKS, Tag.TAG_COMPOUND);
         this.markedBlocks = new ArrayList<>();
         markedBlocksNBT.forEach(block -> this.markedBlocks.add(NbtUtils.readBlockPos((CompoundTag) block)));

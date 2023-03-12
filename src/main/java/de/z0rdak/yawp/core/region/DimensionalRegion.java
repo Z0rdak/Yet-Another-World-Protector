@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.core.region;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -33,7 +33,7 @@ public final class DimensionalRegion extends AbstractRegion {
     }
 
     public DimensionalRegion(String dimensionKey) {
-        this(ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(dimensionKey)));
+        this(ResourceKey.create(Registries.DIMENSION, new ResourceLocation(dimensionKey)));
     }
 
     /**

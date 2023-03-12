@@ -368,14 +368,14 @@ public final class PlayerFlagHandler {
     public static void onExplosionStarted(ExplosionEvent.Start event) {
         if (!event.getLevel().isClientSide) {
             Explosion explosion = event.getExplosion();
-            if (explosion.getSourceMob() instanceof Player player) {
+            if (explosion.getExploder() instanceof Player player) {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
                 if (dimCache != null) {
                     FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, new BlockPos(explosion.getPosition()), IGNITE_EXPLOSIVES, dimCache.getDimensionalRegion());
                     handleAndSendMsg(event, flagCheckEvent);
                 }
             } else {
-                if (explosion.getSourceMob() == null) {
+                if (explosion.getExploder() == null) {
                     // ignited by e.g. dispenser
                     // TODO: Griefing/dedicated dispenser flag
                 }

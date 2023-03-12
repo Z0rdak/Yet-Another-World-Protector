@@ -16,7 +16,7 @@ public final class CylinderRegion extends AbstractMarkableRegion {
     }
 
     public CylinderRegion(String name, VerticalCylinderArea area, Player owner, ResourceKey<Level> dimension) {
-        this(name, area, new BlockPos(area.getCenter().x, area.getCenter().y, area.getCenter().z), owner, dimension);
+        this(name, area, new BlockPos(area.getCenter().getX(), area.getCenter().getY(), area.getCenter().getZ()), owner, dimension);
     }
 
     public CylinderRegion(String name, VerticalCylinderArea area, BlockPos tpPos, Player owner, ResourceKey<Level> dimension) {

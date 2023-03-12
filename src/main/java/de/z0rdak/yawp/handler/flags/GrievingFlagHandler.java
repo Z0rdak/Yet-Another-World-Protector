@@ -204,8 +204,8 @@ public class GrievingFlagHandler {
                 event.getAffectedBlocks().removeAll(protectedBlocks);
                 event.getAffectedEntities().removeAll(protectedEntities);
 
-                if (event.getExplosion().getSourceMob() != null) {
-                    boolean explosionTriggeredByCreeper = (event.getExplosion().getSourceMob() instanceof Creeper);
+                if (event.getExplosion().getExploder() != null) {
+                    boolean explosionTriggeredByCreeper = (event.getExplosion().getExploder() instanceof Creeper);
                     if (explosionTriggeredByCreeper) {
                         protectedBlocks = event.getAffectedBlocks().stream()
                                 .filter(blockPos -> checkTargetEvent(blockPos, RegionFlag.EXPLOSION_CREEPER_BLOCK, dimRegion).isDenied())
