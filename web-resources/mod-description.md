@@ -6,9 +6,6 @@ It allows you to protect your creations against various different events/actions
 It was inspired by the forge mod [WorldProtector](https://www.curseforge.com/minecraft/mc-mods/worldprotector) and
 the [WorldGuard](https://dev.bukkit.org/projects/worldguard) plugin.
 
-**This is the FORGE version of YAWP. For the FABRIC version
-click [here](https://www.curseforge.com/minecraft/mc-mods/yawp-fabric)**
-
 Join our discord if you have any questions or suggestions: [YAWP Discord](https://discord.gg/d7hArKCUtm)
 
 ![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/1.16.x/web-resources/yawp-feature-1_m.png)
