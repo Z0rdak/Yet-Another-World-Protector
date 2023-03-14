@@ -13,8 +13,7 @@ import de.z0rdak.yawp.commands.CommandConstants;
 import de.z0rdak.yawp.core.area.AreaType;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.text.Text;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
@@ -28,10 +27,10 @@ public class AreaArgumentType implements ArgumentType<AreaType> {
             .map(areaType -> areaType.areaType)
             .collect(Collectors.toSet());
 
-    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(MutableText.of(new TranslatableTextContent("cli.arg.area.parse.invalid")));
+    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(Text.translatable("cli.arg.area.parse.invalid"));
 
     private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
-            flag -> MutableText.of(new TranslatableTextContent("cli.arg.area.invalid", flag))
+            flag -> Text.translatable("cli.arg.area.invalid", flag)
     );
 
     private static final Pattern VALID_AREA_NAME_CHAR_PATTERN = Pattern.compile("^[A-Za-z]$");

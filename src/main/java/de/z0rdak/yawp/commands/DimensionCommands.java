@@ -26,9 +26,8 @@ import net.minecraft.scoreboard.Team;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralTextContent;
 import net.minecraft.text.MutableText;
-import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
@@ -193,12 +192,12 @@ public class DimensionCommands {
     private static int createCuboidRegion(ServerCommandSource src, String regionName, DimensionRegionCache dimCache, BlockPos pos1, BlockPos pos2, ServerPlayerEntity owner) {
         int res = checkValidRegionName(regionName, dimCache);
         if (res == -1) {
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.name.invalid", regionName)));
+            sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.create.name.invalid", regionName));
             return res;
         }
         if (res == 1) {
 
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.name.exists", dimCache.getDimensionalRegion().getName(), buildRegionInfoLink(dimCache.getRegion(regionName), LOCAL))));
+            sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.create.name.exists", dimCache.getDimensionalRegion().getName(), buildRegionInfoLink(dimCache.getRegion(regionName), LOCAL)));
             return res;
         }
         CuboidRegion region = new CuboidRegion(regionName, new CuboidArea(pos1, pos2), owner, dimCache.dimensionKey());
@@ -206,17 +205,17 @@ public class DimensionCommands {
         dimCache.addRegion(region);
         LocalRegions.ensureHigherRegionPriorityFor(region, RegionConfig.DEFAULT_REGION_PRIORITY.get());
         RegionDataManager.save();
-        sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region, LOCAL))));
+        sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region, LOCAL)));
         return 0;
     }
 
     private static int createSphereRegion(ServerCommandSource src, String regionName, DimensionRegionCache dimCache, BlockPos center, BlockPos outerPos, ServerPlayerEntity owner) {
         if (!regionName.matches(RegionArgumentType.VALID_NAME_PATTERN.pattern())) {
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.name.invalid", regionName)));
+            sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.create.name.invalid", regionName));
             return -1;
         }
         if (dimCache.contains(regionName)) {
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.name.exists", dimCache.dimensionKey(), regionName)));
+            sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.create.name.exists", dimCache.dimensionKey(), regionName));
             return 1;
         }
         SphereArea area = new SphereArea(center, outerPos);
@@ -224,13 +223,13 @@ public class DimensionCommands {
         RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
         dimCache.addRegion(region);
         RegionDataManager.save();
-        sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region, LOCAL))));
+        sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region, LOCAL)));
         return 0;
     }
 
     private static int attemptDeleteRegion(ServerCommandSource src, DimensionRegionCache dim, IMarkableRegion region) {
         if (dim.contains(region.getName())) {
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.dim.region.remove.attempt", buildRegionInfoLink(region, LOCAL), buildRegionInfoLink(dim.getDimensionalRegion(), RegionType.DIMENSION))));
+            sendCmdFeedback(src, Text.translatable("cli.msg.info.dim.region.remove.attempt", buildRegionInfoLink(region, LOCAL), buildRegionInfoLink(dim.getDimensionalRegion(), RegionType.DIMENSION)));
             return 0;
         }
         return 1;
@@ -241,7 +240,7 @@ public class DimensionCommands {
         if (dim.contains(region.getName())) {
             if (!region.getChildren().isEmpty()) {
                 // TODO: config option which allows deleting region with children? children then default to dim parent
-                sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.dim.region.remove.fail.hasChildren", buildRegionInfoLink(region, LOCAL))));
+                sendCmdFeedback(src, Text.translatable("cli.msg.info.dim.region.remove.fail.hasChildren", buildRegionInfoLink(region, LOCAL)));
                 return -1;
             }
             if (region.getParent() != null) {
@@ -251,7 +250,7 @@ public class DimensionCommands {
             }
             dim.removeRegion(region);
             RegionDataManager.save();
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.dim.region.remove.confirm", region.getName(), buildRegionInfoLink(dim.getDimensionalRegion(), RegionType.DIMENSION))));
+            sendCmdFeedback(src, Text.translatable("cli.msg.info.dim.region.remove.confirm", region.getName(), buildRegionInfoLink(dim.getDimensionalRegion(), RegionType.DIMENSION)));
             return 0;
         }
         return 1;
@@ -260,7 +259,7 @@ public class DimensionCommands {
     private static int removeFlag(ServerCommandSource src, DimensionRegionCache dimCache, String flag) {
         if (dimCache != null) {
             dimCache.removeFlag(flag);
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.flags.removed", flag, buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION))));
+            sendCmdFeedback(src, Text.translatable("cli.msg.flags.removed", flag, buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION)));
             return 0;
         }
         return 1;
@@ -272,7 +271,7 @@ public class DimensionCommands {
         if (dimCache != null) {
             dimCache.addFlag(iflag);
             // TODO: replace with flag info link
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.flags.added", flag, buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION))));
+            sendCmdFeedback(src, Text.translatable("cli.msg.flags.added", flag, buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION)));
             return 0;
         }
         return 1;
@@ -285,7 +284,7 @@ public class DimensionCommands {
                 if (dimCache.getDimensionalRegion().hasMember(player.getUuid())) {
                     dimCache.getDimensionalRegion().removeMember(player);
                     MutableText playerInfo = buildAffiliateInfo(dimCache.getDimensionalRegion(), player.getEntityName(), AffiliationType.PLAYER);
-                    sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.player.removed", affiliationType, playerInfo, buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION))));
+                    sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.player.removed", affiliationType, playerInfo, buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION)));
                     RegionDataManager.save();
                     return 0;
                 }
@@ -294,7 +293,7 @@ public class DimensionCommands {
                 if (dimCache.getDimensionalRegion().hasOwner(player.getUuid())) {
                     dimCache.getDimensionalRegion().removeOwner(player);
                     MutableText playerInfo = buildAffiliateInfo(dimCache.getDimensionalRegion(), player.getEntityName(), AffiliationType.PLAYER);
-                    sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.player.removed", affiliationType, playerInfo, buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION))));
+                    sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.player.removed", affiliationType, playerInfo, buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION)));
                     RegionDataManager.save();
                     return 0;
                 }
@@ -308,7 +307,7 @@ public class DimensionCommands {
             if (affiliationType.equals(MEMBER.toString())) {
                 if (dimCache.getDimensionalRegion().hasMember(team.getName())) {
                     dimCache.getDimensionalRegion().removeMember(team);
-                    sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.player.removed", affiliationType, buildTeamHoverComponent(team), buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION))));
+                    sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.player.removed", affiliationType, buildTeamHoverComponent(team), buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION)));
                     RegionDataManager.save();
                     return 0;
                 }
@@ -316,7 +315,7 @@ public class DimensionCommands {
             if (affiliationType.equals(OWNER.toString())) {
                 if (dimCache.getDimensionalRegion().hasOwner(team.getName())) {
                     dimCache.getDimensionalRegion().removeOwner(team);
-                    sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.player.removed", affiliationType, buildTeamHoverComponent(team), buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION))));
+                    sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.player.removed", affiliationType, buildTeamHoverComponent(team), buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION)));
                     RegionDataManager.save();
                     return 0;
                 }
@@ -335,7 +334,7 @@ public class DimensionCommands {
             if (affiliationType.equals(OWNER.toString())) {
                 dimCache.addOwner(player);
             }
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.player.added", buildPlayerHoverComponent(player), dim.getValue().toString(), affiliationType)));
+            sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.player.added", buildPlayerHoverComponent(player), dim.getValue().toString(), affiliationType));
             return 0;
         }
         return 1;
@@ -350,7 +349,7 @@ public class DimensionCommands {
             if (affiliationType.equals(OWNER.toString())) {
                 dimCache.addOwner(team);
             }
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.team.added", buildTeamHoverComponent(team), dim.getValue().toString(), affiliationType)));
+            sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.team.added", buildTeamHoverComponent(team), dim.getValue().toString(), affiliationType));
             return 0;
         }
         return 1;
@@ -360,7 +359,7 @@ public class DimensionCommands {
         if (dimCache != null) {
             dimCache.setDimState(activate);
             String langKey = "cli.msg.info.state." + (activate ? "activated" : "deactivated");
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent(langKey, buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION))));
+            sendCmdFeedback(src, Text.translatable(langKey, buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION)));
             return 0;
         }
         return 1;
@@ -375,7 +374,7 @@ public class DimensionCommands {
                     .sorted(Comparator.comparing(IMarkableRegion::getName))
                     .toList();
             if (regionsForDim.isEmpty()) {
-                sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.regions.empty", buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION))));
+                sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.regions.empty", buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION)));
                 return -1;
             }
             List<MutableText> regionPagination = buildPaginationComponents(
@@ -383,7 +382,7 @@ public class DimensionCommands {
                     buildCommandStr(DIM.toString(), dimRegion.getName(), LIST.toString(), REGION.toString()),
                     buildRemoveRegionEntries(dimRegion, regionsForDim, RegionType.DIMENSION),
                     pageNo,
-                    MutableText.of(new LiteralTextContent(" - ")).append(buildDimCreateRegionLink(dimRegion)));
+                    Text.literal((" - ")).append(buildDimCreateRegionLink(dimRegion)));
             regionPagination.forEach(line -> sendCmdFeedback(src, line));
             return 0;
         }
@@ -393,7 +392,7 @@ public class DimensionCommands {
     private static int promptDimensionFlagList(ServerCommandSource src, DimensionRegionCache dimCache, int pageNo) {
         List<IFlag> flags = LocalRegions.getSortedFlags(dimCache.getDimensionalRegion());
         if (flags.isEmpty()) {
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.flags.empty", buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION))));
+            sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.flags.empty", buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION)));
             return 1;
         }
         List<MutableText> flagPagination = buildPaginationComponents(
@@ -401,7 +400,7 @@ public class DimensionCommands {
                 buildCommandStr(DIM.toString(), dimCache.getDimensionalRegion().getName(), LIST.toString(), FLAG.toString()),
                 buildRemoveFlagEntries(dimCache.getDimensionalRegion(), flags, RegionType.DIMENSION),
                 pageNo,
-                MutableText.of(new LiteralTextContent(" - ")).append(buildDimAddFlagLink(dimCache.getDimensionalRegion())));
+                Text.literal((" - ")).append(buildDimAddFlagLink(dimCache.getDimensionalRegion())));
         flagPagination.forEach(line -> sendCmdFeedback(src, line));
         return 0;
     }
@@ -418,7 +417,7 @@ public class DimensionCommands {
         DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
         List<String> affiliateNames = getAffiliateList(dimRegion, affiliation, affiliationType);
         if (affiliateNames.isEmpty()) {
-            sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.info.region.affiliation." + affiliationType.name + ".empty", affiliation, buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION))));
+            sendCmdFeedback(src, Text.translatable("cli.msg.info.region.affiliation." + affiliationType.name + ".empty", affiliation, buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION)));
             return 1;
         }
         List<MutableText> affiliatePagination = buildPaginationComponents(
@@ -426,7 +425,7 @@ public class DimensionCommands {
                 buildCommandStr(DIM.toString(), dimRegion.getDim().getValue().toString(), LIST.toString(), affiliation, affiliationType.name),
                 buildRemoveAffiliationEntries(dimRegion, affiliateNames, affiliationType, affiliation, RegionType.DIMENSION),
                 pageNo,
-                MutableText.of(new LiteralTextContent(" - ")).append(buildAddAffiliateLink(dimRegion, affiliation, affiliationType, RegionType.DIMENSION)));
+                Text.literal((" - ")).append(buildAddAffiliateLink(dimRegion, affiliation, affiliationType, RegionType.DIMENSION)));
         affiliatePagination.forEach(line -> sendCmdFeedback(src, line));
         return 0;
     }
