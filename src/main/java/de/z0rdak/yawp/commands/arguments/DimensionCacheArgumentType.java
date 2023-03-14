@@ -13,8 +13,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 
@@ -26,7 +25,7 @@ public class DimensionCacheArgumentType implements ArgumentType<DimensionRegionC
     private static final Collection<String> EXAMPLES = RegionDataManager.get().getDimensionList();
 
     private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
-            dim -> MutableText.of(new TranslatableTextContent("cli.arg.dim.invalid", dim))
+            dim -> Text.translatable("cli.arg.dim.invalid", dim)
     );
 
     private static DimensionRegionCache getDimensionalRegionCache(Identifier resourcelocation) {

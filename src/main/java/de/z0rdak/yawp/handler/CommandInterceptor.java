@@ -15,9 +15,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralTextContent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 
@@ -103,7 +101,7 @@ public class CommandInterceptor {
                                         && (player.getScoreboardTeam() == null || !region.getParent().hasOwner(player.getScoreboardTeam().getName()))
                                         && !hasConfigPermission) {
                                     YetAnotherWorldProtector.LOGGER.info("Player not allowed to manage region '" + region.getName() + "'");
-                                    sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region, LOCAL))));
+                                    sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region, LOCAL)));
                                     return 1;
                                 }
                             }
@@ -112,7 +110,7 @@ public class CommandInterceptor {
                                     && (player.getScoreboardTeam() == null || !region.hasOwner(player.getScoreboardTeam().getName()))
                                     && !hasConfigPermission) {
                                 YetAnotherWorldProtector.LOGGER.info("Player not allowed to manage region '" + region.getName() + "'");
-                                sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region, LOCAL))));
+                                sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region, LOCAL)));
                                 return 1;
                             }
                         }
@@ -122,7 +120,7 @@ public class CommandInterceptor {
                 } else {
                     if (!hasPermission(src)) {
                         YetAnotherWorldProtector.LOGGER.info("' " + src.getName() + "' is not allowed to manage region: '" + region.getName() + "' in dim '" + region.getDim().getValue() + "'!");
-                        sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region, LOCAL))));
+                        sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region, LOCAL)));
                         return 1;
                     }
                 }
@@ -160,7 +158,7 @@ public class CommandInterceptor {
                             boolean hasConfigPermission = hasPlayerPermission(player);
                             if (!dimCache.hasOwner(player) && !hasConfigPermission) {
                                 YetAnotherWorldProtector.LOGGER.info("PlayerEntity not allowed to manage dim");
-                                sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.modify.dim.deny", buildRegionInfoLink(dimCache.getDimensionalRegion(), DIMENSION))));
+                                sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.modify.dim.deny", buildRegionInfoLink(dimCache.getDimensionalRegion(), DIMENSION)));
                                 return 1;
                             }
                         }
@@ -170,12 +168,12 @@ public class CommandInterceptor {
                 } else {
                     if (!hasPermission(src)) {
                         YetAnotherWorldProtector.LOGGER.info("' " + src.getName() + "' is not allowed to manage dim");
-                        sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("cli.msg.dim.info.region.modify.dim.deny", buildRegionInfoLink(dimCache.getDimensionalRegion(), DIMENSION))));
+                        sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.modify.dim.deny", buildRegionInfoLink(dimCache.getDimensionalRegion(), DIMENSION)));
                         return 1;
                     }
                 }
             } else {
-                MessageUtil.sendCmdFeedback(src, MutableText.of(new LiteralTextContent("Dimension not found in region data")).formatted(RED));
+                MessageUtil.sendCmdFeedback(src, Text.literal(("Dimension not found in region data")).formatted(RED));
             }
         }
         return 0;
