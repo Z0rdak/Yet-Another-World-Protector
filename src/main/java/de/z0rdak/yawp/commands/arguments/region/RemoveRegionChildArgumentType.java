@@ -15,9 +15,7 @@ import de.z0rdak.yawp.util.CommandUtil;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.LiteralTextContent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.text.Text;
 
 import java.util.Collection;
 import java.util.List;
@@ -31,9 +29,9 @@ public class RemoveRegionChildArgumentType implements ArgumentType<String> {
     public static final Pattern VALID_NAME_PATTERN = Pattern.compile("^[A-Za-z]+[A-Za-z\\d\\-]+[A-Za-z\\d]+$");
     private static final Collection<String> EXAMPLES = Stream.of(new String[]{"spawn", "arena4pvp", "shop", "nether-hub"})
             .collect(Collectors.toSet());
-    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(MutableText.of(new TranslatableTextContent("cli.arg.region.parse.invalid")));
+    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(Text.translatable("cli.arg.region.parse.invalid"));
     private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
-            flag -> MutableText.of(new TranslatableTextContent("cli.arg.region.invalid", flag))
+            flag -> Text.translatable("cli.arg.region.invalid", flag)
     );
 
     /**
@@ -88,7 +86,7 @@ public class RemoveRegionChildArgumentType implements ArgumentType<String> {
                         .map(IProtectedRegion::getName)
                         .collect(Collectors.toList());
                 if (childNames.isEmpty()) {
-                    MessageUtil.sendCmdFeedback(src, MutableText.of(new LiteralTextContent("Region '" + region.getName() + "' has no children.")));
+                    MessageUtil.sendCmdFeedback(src, Text.literal(("Region '" + region.getName() + "' has no children.")));
                     return Suggestions.empty();
                 }
                 return CommandSource.suggestMatching(childNames, builder);

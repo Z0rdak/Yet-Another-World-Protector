@@ -23,9 +23,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralTextContent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.text.Text;
 
 import java.util.Collection;
 import java.util.List;
@@ -39,9 +37,9 @@ public class OwnedRegionArgumentType implements ArgumentType<String> {
     public static final Pattern VALID_NAME_PATTERN = Pattern.compile("^[A-Za-z]+[A-Za-z\\d\\-]+[A-Za-z\\d]+$");
     private static final Collection<String> EXAMPLES = Stream.of(new String[]{"spawn", "arena4pvp", "shop", "nether-hub"})
             .collect(Collectors.toSet());
-    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(MutableText.of(new TranslatableTextContent("cli.arg.region.parse.invalid")));
+    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(Text.translatable("cli.arg.region.parse.invalid"));
     private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
-            flag -> MutableText.of(new TranslatableTextContent("cli.arg.region.invalid", flag))
+            flag -> Text.translatable("cli.arg.region.invalid", flag)
     );
 
     /**
@@ -59,7 +57,7 @@ public class OwnedRegionArgumentType implements ArgumentType<String> {
         if (region != null) {
             return region;
         } else {
-            MessageUtil.sendCmdFeedback(context.getSource(), MutableText.of(new LiteralTextContent("No region with name '" + argName + "' defined in dim '" + dimCache.dimensionKey().getValue() + "'")));
+            MessageUtil.sendCmdFeedback(context.getSource(), Text.literal(("No region with name '" + argName + "' defined in dim '" + dimCache.dimensionKey().getValue() + "'")));
             throw ERROR_INVALID_VALUE.create(regionName);
         }
     }
@@ -113,7 +111,7 @@ public class OwnedRegionArgumentType implements ArgumentType<String> {
                                     .map(IMarkableRegion::getName)
                                     .collect(Collectors.toList());
                             if (ownedRegions.isEmpty()) {
-                                MessageUtil.sendCmdFeedback(src, MutableText.of(new TranslatableTextContent("You don't have owner permissions for any region in this dimension!'")));
+                                MessageUtil.sendCmdFeedback(src, Text.translatable("You don't have owner permissions for any region in this dimension!'"));
                                 return Suggestions.empty();
                             }
                             return CommandSource.suggestMatching(ownedRegions, builder);
