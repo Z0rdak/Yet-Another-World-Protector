@@ -16,6 +16,10 @@ repositories {
 		name = 'Curse Maven'
 		url = 'https://cursemaven.com'
 	}
+	maven {
+		name = "Fuzs Mod Resources"
+		url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
+	}
 	// Add repositories to retrieve artifacts from in here.
 	// You should only use this when depending on other mods because
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
@@ -38,7 +42,7 @@ dependencies {
 	// all required ids for this version are found here: https://www.curseforge.com/minecraft/mc-mods/forge-config-api-port-fabric/files/3671141
 
 	// 1.19.3
-	modImplementation "curse.maven:forgeconfigapiport-547434:4381441"
+	modImplementation "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:5.0.9"
 
 
 	// Uncomment the following line to enable the deprecated Fabric API modules. 

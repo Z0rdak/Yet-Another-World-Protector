@@ -91,7 +91,7 @@ public class ServerWorldMixin {
         Explosion explosion = world.createExplosion(entity, damageSource, behavior, x, y, z, power, createFire, explosionSourceType, false);
         if (!world.isClient) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.getRegistryKey());
-            FlagCheckEvent flagCheck = checkTargetEvent(new BlockPos(x, y, z), IGNITE_EXPLOSIVES, dimCache.getDimensionalRegion());
+            FlagCheckEvent flagCheck = checkTargetEvent(new BlockPos((int) x, (int) y, (int) z), IGNITE_EXPLOSIVES, dimCache.getDimensionalRegion());
             if (flagCheck.isDenied()) {
                 if (explosion.getDamageSource().getSource() instanceof PlayerEntity player) {
                     sendFlagDeniedMsg(flagCheck, player);

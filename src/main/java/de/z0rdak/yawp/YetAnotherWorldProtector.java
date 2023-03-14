@@ -8,6 +8,7 @@ import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.handler.CommonEvents;
 import de.z0rdak.yawp.handler.flags.PlayerFlagHandler;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
+import fuzs.forgeconfigapiport.api.config.v2.ForgeConfigRegistry;
 import fuzs.forgeconfigapiport.api.config.v2.ModConfigEvents;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -18,7 +19,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraftforge.api.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -106,9 +106,9 @@ public class YetAnotherWorldProtector implements DedicatedServerModInitializer {
         ModConfigEvents.reloading(MODID).register(YetAnotherWorldProtector::onModReloading);
 
         // registering configuration
-        ModLoadingContext.registerConfig(MODID, ModConfig.Type.SERVER, CommandPermissionConfig.CONFIG_SPEC, CommandPermissionConfig.CONFIG_NAME);
-        ModLoadingContext.registerConfig(MODID, ModConfig.Type.SERVER, FlagConfig.CONFIG_SPEC, FlagConfig.CONFIG_NAME);
-        ModLoadingContext.registerConfig(MODID, ModConfig.Type.SERVER, RegionConfig.CONFIG_SPEC, RegionConfig.CONFIG_NAME);
+        ForgeConfigRegistry.INSTANCE.register(MODID, ModConfig.Type.SERVER, CommandPermissionConfig.CONFIG_SPEC, CommandPermissionConfig.CONFIG_NAME);
+        ForgeConfigRegistry.INSTANCE.register(MODID, ModConfig.Type.SERVER, FlagConfig.CONFIG_SPEC, FlagConfig.CONFIG_NAME);
+        ForgeConfigRegistry.INSTANCE.register(MODID, ModConfig.Type.SERVER, RegionConfig.CONFIG_SPEC, RegionConfig.CONFIG_NAME);
 
         CommonEvents.register();
         PlayerFlagHandler.registerEventHandler();
