@@ -14,22 +14,23 @@ import net.minecraft.world.level.Level;
  */
 public final class CuboidRegion extends AbstractMarkableRegion {
 
-	public CuboidRegion(CompoundTag nbt) {
-		super(nbt);
-		this.deserializeNBT(nbt);
-	}
+    public CuboidRegion(CompoundTag nbt) {
+        super(nbt);
+        this.deserializeNBT(nbt);
+    }
 
-	public CuboidRegion(String name, CuboidArea area, Player owner, ResourceKey<Level> dimension) {
-		super(name, area, new BlockPos(area.getArea().getCenter()), owner, dimension);
-	}
+    public CuboidRegion(String name, CuboidArea area, Player owner, ResourceKey<Level> dimension) {
+        super(name, area, new BlockPos((int) area.getArea().getCenter().x,
+                (int) area.getArea().getCenter().y, (int) area.getArea().getCenter().z), owner, dimension);
+    }
 
-	public CuboidRegion(String name, CuboidArea area, BlockPos tpPos, Player owner, ResourceKey<Level> dimension) {
-		super(name, area, tpPos, owner, dimension);
-	}
+    public CuboidRegion(String name, CuboidArea area, BlockPos tpPos, Player owner, ResourceKey<Level> dimension) {
+        super(name, area, tpPos, owner, dimension);
+    }
 
-	@Override
-	public void deserializeNBT(CompoundTag nbt) {
-		super.deserializeNBT(nbt);
-		this.area = new CuboidArea(nbt.getCompound(RegionNBT.AREA));
-	}
+    @Override
+    public void deserializeNBT(CompoundTag nbt) {
+        super.deserializeNBT(nbt);
+        this.area = new CuboidArea(nbt.getCompound(RegionNBT.AREA));
+    }
 }

@@ -371,7 +371,8 @@ public final class PlayerFlagHandler {
             if (explosion.getExploder() instanceof Player player) {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
                 if (dimCache != null) {
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, new BlockPos(explosion.getPosition()), IGNITE_EXPLOSIVES, dimCache.getDimensionalRegion());
+                    BlockPos explosionPos = new BlockPos((int) explosion.getPosition().x, (int) explosion.getPosition().y, (int) explosion.getPosition().z);
+                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, explosionPos, IGNITE_EXPLOSIVES, dimCache.getDimensionalRegion());
                     handleAndSendMsg(event, flagCheckEvent);
                 }
             } else {
@@ -403,8 +404,8 @@ public final class PlayerFlagHandler {
                 // handle player teleportation using ender pearls
                 if (event instanceof EntityTeleportEvent.EnderPearl enderPearlEvent) {
                     Player player = enderPearlEvent.getPlayer();
-
-                    FlagCheckEvent.PlayerFlagEvent enderPearlToRegionFlagCheck = checkPlayerEvent(player, new BlockPos(event.getTarget()), USE_ENDERPEARL_TO_REGION, dimCache.getDimensionalRegion());
+                    BlockPos target = new BlockPos((int) event.getTarget().x, (int) event.getTarget().y, (int) event.getTarget().z);
+                    FlagCheckEvent.PlayerFlagEvent enderPearlToRegionFlagCheck = checkPlayerEvent(player, target, USE_ENDERPEARL_TO_REGION, dimCache.getDimensionalRegion());
                     if (handleAndSendMsg(event, enderPearlToRegionFlagCheck)) {
                         return;
                     }
@@ -609,7 +610,7 @@ public final class PlayerFlagHandler {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
             if (dimCache != null && event.getTarget() != null) {
                 HitResult pos = event.getTarget();
-                BlockPos targetPos = new BlockPos(event.getTarget().getLocation());
+                BlockPos targetPos = new BlockPos((int) event.getTarget().getLocation().x, (int) event.getTarget().getLocation().y, (int) event.getTarget().getLocation().z);
                 // MaxStackSize: 1 -> full bucket so only placeable; >1 -> empty bucket, only fillable
                 int bucketItemMaxStackCount = event.getEmptyBucket().getMaxStackSize();
                 // placing fluid

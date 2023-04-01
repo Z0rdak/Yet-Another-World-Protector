@@ -77,7 +77,7 @@ public class YetAnotherWorldProtector {
                             ? ": " + String.join(", ", CommandPermissionConfig.UUIDsWithPermission())
                             : "");
                     YetAnotherWorldProtector.LOGGER.info(numOfUuidsWithPermission + " UUID(s) with permission read from config" + uuidsWithPermission);
-                    CommandRegistry.init(dispatcher, CommandPermissionConfig.BASE_CMD);
+                    CommandRegistry.register(dispatcher, CommandPermissionConfig.BASE_CMD);
                 }
                 break;
                 case RegionConfig.CONFIG_NAME: {

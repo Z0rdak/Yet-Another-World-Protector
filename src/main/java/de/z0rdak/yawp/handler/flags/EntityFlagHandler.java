@@ -41,7 +41,7 @@ public class EntityFlagHandler {
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                 // handle enderman teleportation
                 if (event.getEntityLiving() instanceof EnderMan) {
-                    FlagCheckEvent flagCheckEvent = checkTargetEvent(new BlockPos(event.getPrev()), RegionFlag.ENDERMAN_TELEPORT_FROM_REGION, dimRegion);
+                    FlagCheckEvent flagCheckEvent = checkTargetEvent(event.getEntity().blockPosition(), RegionFlag.ENDERMAN_TELEPORT_FROM_REGION, dimRegion);
                     event.setCanceled(flagCheckEvent.isDenied());
                     if (event.isCanceled()) {
                         return;
@@ -56,7 +56,7 @@ public class EntityFlagHandler {
                 }
                 // handle shulker teleportation
                 if (event.getEntityLiving() instanceof Shulker) {
-                    FlagCheckEvent flagCheckEvent = checkTargetEvent(new BlockPos(event.getPrev()), RegionFlag.SHULKER_TELEPORT_FROM_REGION, dimRegion);
+                    FlagCheckEvent flagCheckEvent = checkTargetEvent(event.getEntity().blockPosition(), RegionFlag.SHULKER_TELEPORT_FROM_REGION, dimRegion);
                     event.setCanceled(flagCheckEvent.isDenied());
                     if (event.isCanceled()) {
                     }

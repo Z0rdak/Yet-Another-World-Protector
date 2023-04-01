@@ -3,8 +3,11 @@ package de.z0rdak.yawp.config.server;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.players.ServerOpListEntry;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
@@ -44,16 +47,16 @@ public class CommandPermissionConfig {
         ALLOW_READ_ONLY_CMDS = BUILDER.comment("Defines whether info commands for regions can be used by every player.")
                 .define("allow_info_cmds", true);
 
-        PLAYERS_WITH_PERMISSION = BUILDER.comment("Player UUIDs with permission to use mod commands")
+        PLAYERS_WITH_PERMISSION = BUILDER.comment("Player UUIDs with permission to use mod commands.\n Make sure to put the UUIDs in parentheses, just like a normal string.\n Example: players_with_permission = [\"614c9eac-11c9-3ca6-b697-938355fa8235\", \"b9f5e998-520a-3fa2-8208-0c20f22aa20f\"]")
                 .defineListAllowEmpty(Collections.singletonList("players_with_permission"), ArrayList::new, (uuid) -> {
                     if (uuid instanceof String) {
                         try {
                             String uuidStr = (String) uuid;
                             if (uuidStr.length() != 36) {
-                               throw new IllegalArgumentException("Invalid UUID - wrong length");
+                                throw new IllegalArgumentException("Invalid UUID - wrong length");
                             }
                             List<String> uuidTokens = Arrays.asList(uuidStr.split("-"));
-                            List<String> shortTokens = uuidTokens.subList(1,3);
+                            List<String> shortTokens = uuidTokens.subList(1, 3);
                             if (uuidTokens.get(0).length() != 8 || containsBadLength(shortTokens, 4) || uuidTokens.get(4).length() != 12) {
                                 throw new IllegalArgumentException("Invalid UUID - wrong token sizes");
                             }
@@ -73,29 +76,34 @@ public class CommandPermissionConfig {
         return tokens.stream().anyMatch(t -> t.length() != size);
     }
 
-    public static boolean AllowInfoCmds(){
+    public static boolean AllowInfoCmds() {
         return ALLOW_READ_ONLY_CMDS.get();
     }
 
-    public static Set<String> UUIDsWithPermission(){
+    public static Set<String> UUIDsWithPermission() {
         return PLAYERS_WITH_PERMISSION.get()
                 .stream()
                 .filter(Objects::nonNull)
-                .map(s -> (String)s)
+                .map(s -> (String) s)
                 .collect(Collectors.toSet());
     }
 
 
+    // FIXME: What about CommandBlockMinecarts?
     public static boolean hasPermission(CommandSourceStack source) {
         try {
             return hasPlayerPermission(source.getPlayerOrException());
         } catch (CommandSyntaxException e) {
-            // FIXME: How to identify server console
             boolean isServerConsole = source.getTextName().equals("Server");
             if (isServerConsole) {
                 return true;
             } else {
-                return COMMAND_BLOCK_EXECUTION.get();
+                BlockPos srcPos = new BlockPos((int) source.getPosition().x, (int) source.getPosition().y, (int) source.getPosition().z);
+                BlockEntity blockEntity = source.getLevel().getBlockEntity(srcPos);
+                if (blockEntity instanceof CommandBlockEntity) {
+                    return COMMAND_BLOCK_EXECUTION.get();
+                }
+                return false;
             }
         }
     }
