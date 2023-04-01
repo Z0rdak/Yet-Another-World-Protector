@@ -55,7 +55,7 @@ public class YetAnotherWorldProtector implements DedicatedServerModInitializer {
                             ? ": " + CommandPermissionConfig.UUIDsWithPermission().stream().map(uuid -> "'" + uuid + "'").collect(Collectors.joining(", "))
                             : "");
                     YetAnotherWorldProtector.LOGGER.info(numOfUuidsWithPermission + " UUID(s) with permission read from config" + uuidsWithPermission);
-                    CommandRegistry.init(cmdDispatcher, CommandPermissionConfig.BASE_CMD);
+                    CommandRegistry.register(cmdDispatcher, CommandPermissionConfig.BASE_CMD);
                 }
                 break;
                 case RegionConfig.CONFIG_NAME: {

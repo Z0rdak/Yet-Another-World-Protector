@@ -20,7 +20,7 @@ public final class CuboidRegion extends AbstractMarkableRegion {
     }
 
     public CuboidRegion(String name, CuboidArea area, PlayerEntity owner, RegistryKey<World> dimension) {
-        super(name, area, new BlockPos(area.getArea().getCenter()), owner, dimension);
+        super(name, area, new BlockPos((int) area.getArea().getCenter().x, (int) area.getArea().getCenter().y, (int) area.getArea().getCenter().z), owner, dimension);
     }
 
     public CuboidRegion(String name, CuboidArea area, BlockPos tpPos, PlayerEntity owner, RegistryKey<World> dimension) {

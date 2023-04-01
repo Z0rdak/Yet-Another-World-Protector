@@ -41,8 +41,8 @@ dependencies {
 	// e.g. forgeconfigapiport-547434:3671141 for mod version 3.2.0 for Minecraft 1.18.2,
 	// all required ids for this version are found here: https://www.curseforge.com/minecraft/mc-mods/forge-config-api-port-fabric/files/3671141
 
-	// 1.19.3
-	modImplementation "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:5.0.9"
+	// 1.19.4
+	modImplementation "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:6.0.2"
 
 
 	// Uncomment the following line to enable the deprecated Fabric API modules. 
