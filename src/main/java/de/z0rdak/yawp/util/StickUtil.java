@@ -18,11 +18,17 @@ import static net.minecraft.util.Formatting.*;
 
 public final class StickUtil {
 
+    public static final String MARKED_BLOCKS = "blocks";
+    public static final String VALID_AREA = "valid";
+    public static final String AREA_TYPE = "type";
+    public static final String DIM = "dim";
+    public static final String TP_POS = "tp_pos";
+    public static final String IS_TP_SET = "is_tp_set";
+    public static final String STICK_ID = "stick-id";
     public static final String STICK_TYPE = "stick_type";
-    public static final String STICK = "stick";
-
     private StickUtil() {
     }
+    public static final String STICK = "stick";
 
     public static void applyEnchantmentGlint(ItemStack item) {
         NbtCompound dummy = new NbtCompound();
@@ -107,7 +113,7 @@ public final class StickUtil {
         if (Objects.requireNonNull(type) == StickType.MARKER) {
             MarkerStick marker = new MarkerStick(getStickNBT(stick));
             String validFlag = marker.isValidArea() ? (GREEN + "*" + GOLD) : "";
-            displayName = GOLD + type.stickName + " (" + marker.getAreaType().areaType + "" + validFlag + ")";
+            displayName = GOLD + type.stickName + " (" + marker.getAreaType().areaType + validFlag + ")";
         }
         stick.setCustomName(Text.literal((displayName)));
     }

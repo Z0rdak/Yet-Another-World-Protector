@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static de.z0rdak.yawp.util.StickUtil.STICK_ID;
+
 public class MarkerStick extends AbstractStick implements INbtSerializable<NbtCompound> {
 
     public static final String MARKED_BLOCKS = "blocks";
@@ -122,10 +124,7 @@ public class MarkerStick extends AbstractStick implements INbtSerializable<NbtCo
     @Override
     public NbtCompound serializeNBT() {
         NbtCompound nbt = super.serializeNBT();
-        // makes stick unique -> non-stackable
-        // this could with a little code-rearrangement used to track which player used a specific stick
-        // but why? Maybe sticks can store permissions in the future? This, of course, would be a potential risk for region owners
-        nbt.putString("stick-id", UUID.randomUUID().toString());
+        nbt.putString(STICK_ID, UUID.randomUUID().toString());
         nbt.putBoolean(VALID_AREA, this.isValidArea);
         nbt.putString(AREA_TYPE, this.areaType.areaType);
         nbt.putString(DIM, this.dimension.getValue().toString());

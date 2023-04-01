@@ -100,6 +100,16 @@ public class CommandUtil {
         return IntegerArgumentType.getInteger(ctx, PAGE.toString());
     }
 
+    public static String revertCommand(String cmd, CommandConstants toReplace, CommandConstants reverted) {
+        String revertedCmd = cmd.replace(toReplace.toString(), reverted.toString());
+        return cmd.startsWith("/") ? revertedCmd : "/" + revertedCmd;
+    }
+
+    public static String revertCommand(String cmd, String toReplace, String reverted) {
+        String revertedCmd = cmd.replace(toReplace, reverted);
+        return cmd.startsWith("/") ? revertedCmd : "/" + revertedCmd;
+    }
+
     public static String buildCommandStr(String... cmdTokens) {
         String preamble = "/" + CommandPermissionConfig.BASE_CMD;
         String cmdStr = String.join(" ", cmdTokens);
