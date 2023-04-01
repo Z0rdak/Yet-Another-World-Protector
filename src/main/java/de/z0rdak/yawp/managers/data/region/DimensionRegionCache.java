@@ -10,7 +10,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.scoreboard.Team;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 
@@ -70,41 +69,6 @@ public class DimensionRegionCache implements INbtSerializable<NbtCompound> {
         return dimensionalRegion;
     }
 
-    public void addOwner(ServerPlayerEntity player) {
-        this.dimensionalRegion.addOwner(player);
-        RegionDataManager.save();
-    }
-
-    public void addOwner(Team team) {
-        this.dimensionalRegion.addOwner(team);
-        RegionDataManager.save();
-    }
-
-    public void addMember(ServerPlayerEntity player) {
-        this.dimensionalRegion.addMember(player);
-        RegionDataManager.save();
-    }
-
-    public void addMember(Team team) {
-        this.dimensionalRegion.addMember(team);
-        RegionDataManager.save();
-    }
-
-    public void setDimState(boolean active) {
-        this.dimensionalRegion.setIsActive(active);
-        RegionDataManager.save();
-    }
-
-    public void addFlag(IFlag flag) {
-        this.dimensionalRegion.addFlag(flag);
-        RegionDataManager.save();
-    }
-
-    public void removeFlag(String flag) {
-        this.dimensionalRegion.removeFlag(flag);
-        RegionDataManager.save();
-    }
-
     public IMarkableRegion getRegion(String regionName) {
         return this.regionsInDimension.get(regionName);
     }
@@ -122,6 +86,15 @@ public class DimensionRegionCache implements INbtSerializable<NbtCompound> {
             this.regionsInDimension.remove(region.getName());
         }
     }
+
+    public void renameRegion(IMarkableRegion region, String regionName) {
+        IMarkableRegion currentRegion = this.regionsInDimension.get(region.getName());
+        // TODO: Rename me -> remove region, clone region, change name, add region, restore hierarchy
+        // TODO: update children name in parent
+        IProtectedRegion parent = currentRegion.getParent();
+        this.regionsInDimension.put(regionName, currentRegion);
+    }
+
 
     public void clearRegions() {
         this.regionsInDimension.clear();
@@ -202,4 +175,5 @@ public class DimensionRegionCache implements INbtSerializable<NbtCompound> {
             }
         });
     }
+
 }
