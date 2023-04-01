@@ -1,3 +1,22 @@
+# [0.0.2.7-beta1] - 2023-03-29
+From now on this changelog will use the keep a changelog format: https://keepachangelog.com/en/1.0.0/. YAWP is still following the schematic versioning suggested by forge: https://docs.minecraftforge.net/en/1.19.x/gettingstarted/versioning/.
+## Added
+* CLI: Region state quick-link & command enhancements: `/wp region <dim> <region> state enable|alert` and `/wp dim <dim> enable` now can be used without providing the new state (you can still provide the state explicitly though). They work as a toggle used this way. The related quick-links for Dimensional and Local Regions have been adjusted accordingly.
+* CLI: Undo links. Most command confirmation messages will now provide a link to undo the action. (#63)
+* Spawning-related flags now despawns all entities in the Local Region, which are covered by the flag.
+* Spawning-related flags now despawns all entities in the Dimensional Region, which are covered by the flag (exluding entities in the Local Regions without the flag).
+## Changed
+* CLI: All remove commands will now run the command immediately instead of suggesting it. (#63)
+* Breaking change: Unified flag naming. Replaced all `_` with `-`. Invalid flags will be removed automatically from your regions. (#64)
+Make sure to re-add the removed flags. Affected flags:
+    - `break_blocks` -> `break-blocks`
+    - `place_blocks` -> `place-blocks`
+    - `place_fluids` -> `place-fluids`
+    - `scoop_fluids` -> `scoop-fluids`
+## Removed
+* Flag `entity-place`. It is replaced by the `enderman-griefing` flag, which covers picking and placing of blocks by endermen.
+## Fixed
+* Fix Cuboid areas not saving marked blocks correctly. This does not affect already defined areas.
 # 0.0.2.6-beta4
 ## Additions
 * Add logging indicator for reloading YAWP config.

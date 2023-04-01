@@ -34,7 +34,9 @@ public class DimensionCacheArgumentType implements ArgumentType<DimensionRegionC
         if (RegionDataManager.get().containsCacheFor(registrykey)) {
             return RegionDataManager.get().cacheFor(registrykey);
         } else {
-            return RegionDataManager.get().newCacheFor(registrykey);
+            DimensionRegionCache newCache = RegionDataManager.get().newCacheFor(registrykey);
+            RegionDataManager.save();
+            return newCache;
         }
     }
 

@@ -17,6 +17,8 @@ import java.util.List;
 public class CuboidArea extends AbstractArea {
 
     private AABB area;
+    private BlockPos p1;
+    private BlockPos p2;
 
     public CuboidArea(AABB area) {
         super(AreaType.CUBOID);
@@ -25,6 +27,8 @@ public class CuboidArea extends AbstractArea {
 
     public CuboidArea(BlockPos p1, BlockPos p2) {
         this(new AABB(p1, p2));
+        this.p1 = p1;
+        this.p2 = p2;
     }
 
     public CuboidArea(List<BlockPos> blocks){
@@ -60,39 +64,39 @@ public class CuboidArea extends AbstractArea {
     }
 
     public BlockPos getAreaP1() {
-        return new BlockPos(this.area.minX, this.area.minY, this.area.minZ);
+        return this.p1;
     }
 
     public BlockPos getAreaP2() {
-        return new BlockPos(this.area.maxX, this.area.maxY, this.area.maxZ);
+        return this.p2;
     }
 
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag nbt = super.serializeNBT();
-        nbt.put(AreaNBT.P1, NbtUtils.writeBlockPos(this.getAreaP1()));
-        nbt.put(AreaNBT.P2, NbtUtils.writeBlockPos(this.getAreaP2()));
+        nbt.put(AreaNBT.P1, NbtUtils.writeBlockPos(this.p1));
+        nbt.put(AreaNBT.P2, NbtUtils.writeBlockPos(this.p2));
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-        BlockPos p1 = NbtUtils.readBlockPos(nbt.getCompound(AreaNBT.P1));
-        BlockPos p2 = NbtUtils.readBlockPos(nbt.getCompound(AreaNBT.P2));
-        this.area = new AABB(p1, p2);
+        this.p1 = NbtUtils.readBlockPos(nbt.getCompound(AreaNBT.P1));
+        this.p2 = NbtUtils.readBlockPos(nbt.getCompound(AreaNBT.P2));
+        this.area = new AABB(this.p1, this.p2);
     }
 
     @Override
     public String toString() {
-        String strBuilder = getAreaType().areaType + " " + AreaUtil.blockPosStr(this.getAreaP1()) + " <-> " + AreaUtil.blockPosStr(this.getAreaP2()) +
+        String strBuilder = getAreaType().areaType + " " + AreaUtil.blockPosStr(this.p1) + " <-> " + AreaUtil.blockPosStr(this.p2) +
                 "\n" + "Size: " + "X=" + this.area.getXsize() + ", Y=" + this.area.getYsize() + ", Z=" + this.area.getZsize() +
-                "\n" + "Blocks: " + AreaUtil.blockPosStr(this.getAreaP1()) + ", " + AreaUtil.blockPosStr(this.getAreaP2());
+                "\n" + "Blocks: " + AreaUtil.blockPosStr(this.p1) + ", " + AreaUtil.blockPosStr(this.p2);
         return strBuilder;
     }
 
     @Override
     public List<BlockPos> getMarkedBlocks() {
-        return Arrays.asList(this.getAreaP1(), this.getAreaP2());
+        return Arrays.asList(this.p1, this.p2);
     }
 }
