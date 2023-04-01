@@ -29,6 +29,8 @@ public enum CommandConstants {
     FLAG("flag"),
     FLAGS("flags"),
     FLAG_TYPE("flag-type"),
+    FALSE("false"),
+    TRUE("true"),
     HELP("help"),
     INC("+"),
     INFO("info"),
