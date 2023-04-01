@@ -20,22 +20,18 @@ public class CommandRegistry {
     private CommandRegistry() {
     }
 
-    public static void init(CommandDispatcher<CommandSource> commandDispatcher, String modRootCmd) {
+    public static void register(CommandDispatcher<CommandSource> commandDispatcher, String modRootCmd) {
         commandDispatcher.register(buildCommands(modRootCmd));
     }
 
     public static LiteralArgumentBuilder<CommandSource> buildCommands(String baseCmd) {
-        return withSubCommands(Commands.literal(baseCmd));
-    }
-
-    private static LiteralArgumentBuilder<CommandSource> withSubCommands(LiteralArgumentBuilder<CommandSource> baseCommand) {
-        return baseCommand
+        return Commands.literal(baseCmd)
                 .executes(ctx -> promptHelp(ctx.getSource()))
                 .then(CommandUtil.literal(CommandConstants.HELP)
                         .executes(ctx -> promptHelp(ctx.getSource())))
-                .then(DimensionCommands.DIMENSION_COMMAND)
-                .then(MarkerCommands.MARKER_COMMAND)
-                .then(RegionCommands.REGION_COMMAND);
+                .then(DimensionCommands.build())
+                .then(MarkerCommands.build())
+                .then(RegionCommands.build());
     }
 
     private static int promptHelp(CommandSource src) {
