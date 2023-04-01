@@ -7,18 +7,18 @@ import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
- * Represents and wraps a simple AxisAlignedBB.<br>
- * This area is marked by two diagonal opposite positions and thus span a cuboid shape.
+ * Represents and wraps a simple AxisAlignedBB.
+ * This area is marked by two positions and thus spans a cuboid shape
  */
 public class CuboidArea extends AbstractArea {
 
     private AxisAlignedBB area;
+    private BlockPos p1;
+    private BlockPos p2;
 
     public CuboidArea(AxisAlignedBB area) {
         super(AreaType.CUBOID);
@@ -27,9 +27,11 @@ public class CuboidArea extends AbstractArea {
 
     public CuboidArea(BlockPos p1, BlockPos p2) {
         this(new AxisAlignedBB(p1, p2));
+        this.p1 = p1;
+        this.p2 = p2;
     }
 
-    public CuboidArea(List<BlockPos> blocks) {
+    public CuboidArea(List<BlockPos> blocks){
         this(blocks.get(0), blocks.get(1));
     }
 
@@ -41,7 +43,7 @@ public class CuboidArea extends AbstractArea {
     @Override
     public boolean contains(BlockPos pos) {
         // INFO: this.area.contains(x,y,z); does not work, because the max checks are exclusive by default.
-        // INFO: Maybe replace with net.minecraft.util.math.MutableBoundingBox::intersectsWith which has inclusive checks
+        // TODO: Maybe replace with net.minecraft.util.math.MutableBoundingBox::intersectsWith which has inclusive checks
         return pos.getX() >= area.minX && pos.getX() <= area.maxX
                 && pos.getY() >= this.area.minY && pos.getY() <= this.area.maxY
                 && pos.getZ() >= this.area.minZ && pos.getZ() <= this.area.maxZ;
@@ -62,40 +64,39 @@ public class CuboidArea extends AbstractArea {
     }
 
     public BlockPos getAreaP1() {
-        return new BlockPos(this.area.minX, this.area.minY, this.area.minZ);
+        return this.p1;
     }
 
     public BlockPos getAreaP2() {
-        return new BlockPos(this.area.maxX, this.area.maxY, this.area.maxZ);
+        return this.p2;
     }
 
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = super.serializeNBT();
-        nbt.put(AreaNBT.P1, NBTUtil.writeBlockPos(this.getAreaP1()));
-        nbt.put(AreaNBT.P2, NBTUtil.writeBlockPos(this.getAreaP2()));
+        nbt.put(AreaNBT.P1, NBTUtil.writeBlockPos(this.p1));
+        nbt.put(AreaNBT.P2, NBTUtil.writeBlockPos(this.p2));
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
         super.deserializeNBT(nbt);
-        BlockPos p1 = NBTUtil.readBlockPos(nbt.getCompound(AreaNBT.P1));
-        BlockPos p2 = NBTUtil.readBlockPos(nbt.getCompound(AreaNBT.P2));
-        this.area = new AxisAlignedBB(p1, p2);
+        this.p1 = NBTUtil.readBlockPos(nbt.getCompound(AreaNBT.P1));
+        this.p2 = NBTUtil.readBlockPos(nbt.getCompound(AreaNBT.P2));
+        this.area = new AxisAlignedBB(this.p1, this.p2);
     }
 
     @Override
     public String toString() {
-        StringBuilder strBuilder = new StringBuilder();
-        strBuilder.append(getAreaType().areaType).append(" ").append(AreaUtil.blockPosStr(this.getAreaP1())).append(" <-> ").append(AreaUtil.blockPosStr(this.getAreaP2()))
-                .append("\n").append("Size: ").append("X=").append(this.area.getXsize()).append(", Y=").append( this.area.getYsize()).append(", Z=").append( this.area.getZsize())
-                .append("\n").append("Blocks: ").append(AreaUtil.blockPosStr(this.getAreaP1())).append(", ").append(AreaUtil.blockPosStr(this.getAreaP2()));
-        return strBuilder.toString();
+        String strBuilder = getAreaType().areaType + " " + AreaUtil.blockPosStr(this.p1) + " <-> " + AreaUtil.blockPosStr(this.p2) +
+                "\n" + "Size: " + "X=" + this.area.getXsize() + ", Y=" + this.area.getYsize() + ", Z=" + this.area.getZsize() +
+                "\n" + "Blocks: " + AreaUtil.blockPosStr(this.p1) + ", " + AreaUtil.blockPosStr(this.p2);
+        return strBuilder;
     }
 
     @Override
     public List<BlockPos> getMarkedBlocks() {
-        return Arrays.asList(this.getAreaP1(), this.getAreaP2());
+        return Arrays.asList(this.p1, this.p2);
     }
 }
