@@ -81,12 +81,14 @@ public class MessageUtil {
     public static void sendFlagNotification(PlayerEntity player, IMarkableRegion region, RegionFlag flag) {
         player.sendMessage(new TranslatableText("flag.local.player.msg.push.deny", region.getName(), flag.name), true);
     }
+
     public final static Formatting LINK_COLOR = AQUA;
     public final static Formatting INACTIVE_LINK_COLOR = GRAY;
     public final static Formatting ADD_CMD_COLOR = DARK_GREEN;
     public final static Formatting REMOVE_CMD_COLOR = DARK_RED;
     public static final String PAGINATION_FIRST = "<<";
     public static final String PAGINATION_PREVIOUS = "<";
+    public static int FIRST_PAGE_IDX = 0;
 
     public static String buildTeleportCmd(String tpSource, BlockPos target) {
         return "tp " + tpSource + " " + target.getX() + " " + target.getY() + " " + target.getZ();
@@ -116,18 +118,15 @@ public class MessageUtil {
     public static String buildRegionTpCmd(IMarkableRegion region, String target) {
         return buildDimTeleportCmd(region.getDim(), target, region.getTpTarget());
     }
-    public static final String PAGINATION_NEXT = ">";
-    public static final String PAGINATION_LAST = ">>";
-    public static int FIRST_PAGE_IDX = 0;
 
     public static MutableText buildHeader(String translationKey) {
         return buildHeader(new TranslatableText(translationKey));
     }
 
     public static MutableText buildHeader(MutableText header) {
-        return new LiteralText(BOLD + "")
+        return new LiteralText((BOLD + ""))
                 .append(header)
-                .append(new LiteralText(BOLD + ""));
+                .append(new LiteralText((BOLD + "")));
     }
 
     public static MutableText buildExecuteCmdComponent(String linkText, String hoverText, String command, ClickEvent.Action eventAction, Formatting color) {
@@ -148,7 +147,7 @@ public class MessageUtil {
 
     public static MutableText buildPlayerHoverComponent(PlayerEntity player) {
         HoverEvent.EntityContent entityTooltipInfo = new HoverEvent.EntityContent(EntityType.PLAYER, player.getUuid(), player.getName());
-        MutableText playerName = new LiteralText(player.getEntityName());
+        MutableText playerName = new LiteralText((player.getEntityName()));
         playerName.setStyle(playerName.getStyle()
                 .withColor(LINK_COLOR)
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, entityTooltipInfo))
@@ -157,7 +156,7 @@ public class MessageUtil {
     }
 
     public static MutableText buildTeamHoverComponent(Team team) {
-        MutableText playerName = new LiteralText(team.getName());
+        MutableText playerName = new LiteralText((team.getName()));
         playerName.setStyle(playerName.getStyle()
                 .withColor(LINK_COLOR)
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableText("cli.msg.info.region.affiliation.link.hover")))
@@ -173,7 +172,7 @@ public class MessageUtil {
 
     public static MutableText buildRegionAreaDetailComponent(IMarkableRegion region) {
         IMarkableArea area = region.getArea();
-        MutableText areaInfo = new LiteralText(area.getAreaType().areaType)
+        MutableText areaInfo = new LiteralText((area.getAreaType().areaType))
                 .append("\n");
         switch (area.getAreaType()) {
             case CUBOID: {
@@ -205,14 +204,14 @@ public class MessageUtil {
         String cmdLinkText = buildTeleportLinkText(region.getDim(), region.getTpTarget());
         String executeCmdStr = buildDimTeleportCmd(region.getDim(), "@s", region.getTpTarget());
         MutableText teleportCmdHoverText = new TranslatableText("cli.msg.info.region.spatial.location.teleport", region.getName(), region.getDim().getValue().toString());
-        return buildExecuteCmdComponent(new LiteralText(cmdLinkText), teleportCmdHoverText, executeCmdStr, RUN_COMMAND, TP_COLOR);
+        return buildExecuteCmdComponent(new LiteralText((cmdLinkText)), teleportCmdHoverText, executeCmdStr, RUN_COMMAND, TP_COLOR);
     }
 
     public static MutableText buildHelpSuggestionLink(String translationKey, CommandConstants baseCmd, CommandConstants cmd) {
         String command = "/" + CommandPermissionConfig.BASE_CMD + " " + baseCmd + " " + cmd + " ";
-        return new LiteralText(" ")
+        return new LiteralText((" "))
                 .append(buildExecuteCmdComponent("=>", "chat.link.hover.command.copy", command, SUGGEST_COMMAND, SUGGEST_COLOR))
-                .append(new LiteralText(" "))
+                .append(new LiteralText((" ")))
                 .append(new TranslatableText(translationKey));
     }
 
@@ -225,7 +224,7 @@ public class MessageUtil {
     }
 
     public static MutableText buildRegionEnableComponent(IMarkableRegion region) {
-        String cmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().getValue().toString(), region.getName(), STATE.toString(), ENABLE.toString(), String.valueOf(!region.isActive()));
+        String cmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().getValue().toString(), region.getName(), STATE.toString(), ENABLE.toString());
         String linkTextKey = "cli.msg.info.region.state.enable." + region.isActive() + ".link.text";
         String hoverTextKey = "cli.msg.info.region.state.enable." + !region.isActive() + ".link.hover";
         Formatting color = region.isActive() ? ADD_CMD_COLOR : REMOVE_CMD_COLOR;
@@ -241,7 +240,7 @@ public class MessageUtil {
         MutableText decLinkText = new TranslatableText("cli.msg.info.region.state.priority.decrease.link.text", CLI_REGION_DEFAULT_PRIORITY_INC.get());
         MutableText decHoverText = new TranslatableText("cli.msg.info.region.state.priority.decrease.link.hover", CLI_REGION_DEFAULT_PRIORITY_INC.get());
         MutableText decreaseLink = buildExecuteCmdComponent(decLinkText, decHoverText, decPriorityCmd, ClickEvent.Action.RUN_COMMAND, REMOVE_CMD_COLOR);
-        MutableText priorityValue = new LiteralText(String.valueOf(region.getPriority()));
+        MutableText priorityValue = new LiteralText((String.valueOf(region.getPriority())));
         String setPriorityCmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().getValue().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), "");
         MutableText setPriorityLinkText = new TranslatableText("cli.msg.info.region.state.priority.set.link.text");
         MutableText setPriorityHoverText = new TranslatableText("cli.msg.info.region.state.priority.set.link.hover");
@@ -253,7 +252,7 @@ public class MessageUtil {
     }
 
     public static MutableText buildRegionAlertComponentLink(IMarkableRegion region) {
-        String cmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().getValue().toString(), region.getName(), STATE.toString(), ALERT.toString(), String.valueOf(!region.isMuted()));
+        String cmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().getValue().toString(), region.getName(), STATE.toString(), ALERT.toString());
         String linkTextKey = "cli.msg.info.region.state.alert." + !region.isMuted() + ".link.text";
         String hoverTextKey = "cli.msg.info.region.state.alert." + region.isMuted() + ".link.hover";
         Formatting color = region.isMuted() ? REMOVE_CMD_COLOR : ADD_CMD_COLOR;
@@ -265,12 +264,12 @@ public class MessageUtil {
             case DIMENSION -> {
                 String command = buildCommandStr(DIM.toString(), region.getDim().getValue().toString(), INFO.toString());
                 MutableText hoverText = new TranslatableText("cli.msg.dim.info");
-                MutableText linkText = new LiteralText(region.getDim().getValue().toString());
+                MutableText linkText = new LiteralText((region.getDim().getValue().toString()));
                 yield buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, LINK_COLOR);
             }
             case LOCAL -> {
                 String cmd = buildCommandStr(REGION.toString(), region.getDim().getValue().toString(), region.getName(), INFO.toString());
-                MutableText regionInfoLinkText = new LiteralText(region.getName());
+                MutableText regionInfoLinkText = new LiteralText((region.getName()));
                 MutableText regionInfoLinkHover = new TranslatableText("cli.msg.info.region", region.getName());
                 yield buildExecuteCmdComponent(regionInfoLinkText, regionInfoLinkHover, cmd, RUN_COMMAND, LINK_COLOR);
             }
@@ -304,7 +303,7 @@ public class MessageUtil {
                 .stream()
                 .map(pos -> buildDimensionalBlockTpLink(region.getDim(), pos))
                 .collect(Collectors.toList());
-        MutableText blockPosTpLinkList = new LiteralText("");
+        MutableText blockPosTpLinkList = new LiteralText((""));
         tpLinks.forEach(tpLink -> blockPosTpLinkList.append(tpLink).append(" "));
         return blockPosTpLinkList;
     }
@@ -367,7 +366,7 @@ public class MessageUtil {
     }
 
     public static MutableText buildAffiliationLinks(IProtectedRegion region, RegionType regionType) {
-        MutableText affiliationLinks = new LiteralText("");
+        MutableText affiliationLinks = new LiteralText((""));
         List<String> affiliations = Arrays.asList("owner", "member");
         affiliations.forEach(affiliation -> {
             switch (affiliation) {
@@ -441,13 +440,13 @@ public class MessageUtil {
     }
 
     private static MutableText buildRemoveFlagEntry(IProtectedRegion region, IFlag flag, RegionType regionType) {
-        MutableText flagRemoveEntry = new LiteralText(" - ");
+        MutableText flagRemoveEntry = new LiteralText((" - "));
         MutableText flagRemoveLink = switch (regionType) {
             case DIMENSION -> {
                 String command = buildCommandStr(DIM.toString(), region.getDim().getValue().toString(), REMOVE.toString(), FLAG.toString(), flag.getFlagIdentifier());
                 MutableText hoverText = new TranslatableText("cli.msg.dim.info.flag.remove.link.hover", flag.getFlagIdentifier(), region.getDim().getValue().toString());
                 MutableText linkText = new TranslatableText("cli.link.remove");
-                yield buildExecuteCmdComponent(linkText, hoverText, command, SUGGEST_COMMAND, REMOVE_CMD_COLOR);
+                yield buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, REMOVE_CMD_COLOR);
             }
             case LOCAL -> {
                 String cmd = buildCommandStr(REGION.toString(), region.getDim().getValue().toString(), region.getName(), REMOVE.toString(), FLAG.toString(), flag.getFlagIdentifier());
@@ -461,17 +460,31 @@ public class MessageUtil {
     }
 
     // TODO: Add command to toggle negated and active state, and add link here as well
-    private static MutableText buildFlagQuickInfo(IFlag flag) {
+    public static MutableText buildFlagQuickInfo(IFlag flag) {
         return switch (flag.getFlagType()) {
             case BOOLEAN_FLAG -> {
                 BooleanFlag boolFlag = (BooleanFlag) flag;
-                MutableText flagName = new LiteralText(boolFlag.getFlagIdentifier());
-                MutableText flagInfo = new LiteralText("Flag state: Active=" + boolFlag.isActive() + ", negated=" + boolFlag.isInverted());
+                MutableText flagName = new LiteralText((boolFlag.getFlagIdentifier()));
+                MutableText flagInfo = new LiteralText(("Flag state: Active=" + boolFlag.isActive() + ", negated=" + boolFlag.isInverted()));
                 yield buildTextWithHoverMsg(flagName, flagInfo, ITALIC);
             }
             default -> throw new IllegalStateException("Unexpected value: " + flag.getFlagType());
         };
     }
+
+    public static MutableText buildFlagCmdInfoLink(IProtectedRegion region, RegionType regionType, IFlag iflag) {
+        switch (regionType) {
+            case DIMENSION: {
+                String cmd = buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().getValue().toString());
+            }
+            break;
+            case LOCAL: {
+            }
+            break;
+        }
+        return new LiteralText(iflag.getFlagIdentifier());
+    }
+
 
     public static List<MutableText> buildRemoveFlagEntries(IProtectedRegion region, List<IFlag> flags, RegionType regionType) {
         return flags.stream().map(flag -> buildRemoveFlagEntry(region, flag, regionType)).collect(Collectors.toList());
@@ -483,23 +496,23 @@ public class MessageUtil {
 
     public static MutableText buildRemoveRegionEntry(IProtectedRegion parent, IMarkableRegion region, RegionType parentType) {
         Style resetStyle = Style.EMPTY.withColor(WHITE).withHoverEvent(null).withClickEvent(null);
-        MutableText separator = new LiteralText(" ").setStyle(resetStyle);
+        MutableText separator = new LiteralText((" ")).setStyle(resetStyle);
         MutableText regionRemoveLink = switch (parentType) {
             case DIMENSION -> {
                 MutableText removeLink = buildDimSuggestRegionRemovalLink(region);
                 removeLink.append(separator).append(buildRegionInfoLink(region, LOCAL));
-                MutableText childIndicator = buildTextWithHoverMsg(new LiteralText("*"), new TranslatableText("cli.msg.info.dim.region.child.hover"), GOLD);
+                MutableText childIndicator = buildTextWithHoverMsg(new LiteralText(("*")), new TranslatableText("cli.msg.info.dim.region.child.hover"), GOLD);
                 if (parent.hasChild(region)) {
                     removeLink.append(childIndicator.setStyle(childIndicator.getStyle().withInsertion("Test")));
                 }
-                removeLink.append(new LiteralText(" @ ")).setStyle(resetStyle).append(buildRegionTeleportLink(region));
+                removeLink.append(new LiteralText((" @ ")).setStyle(resetStyle)).append(buildRegionTeleportLink(region));
                 yield removeLink;
             }
             case LOCAL ->
                     buildRegionRemoveChildLink(parent, region).append(separator).append(buildRegionInfoLink(region, LOCAL));
             default -> throw new IllegalArgumentException();
         };
-        return new LiteralText(" - ").append(regionRemoveLink);
+        return new LiteralText((" - ")).append(regionRemoveLink);
     }
 
     private static String buildPageCommand(String cmd, int page) {
@@ -519,17 +532,17 @@ public class MessageUtil {
         boolean hasMultiplePages = numberOfPages > 1;
 
         MutableText first = hasMultiplePages && pageNo != FIRST_PAGE_IDX
-                ? buildExecuteCmdComponent(new LiteralText(PAGINATION_FIRST), new TranslatableText("cli.msg.info.pagination.first"), buildPageCommand(cmd, FIRST_PAGE_IDX), RUN_COMMAND, LINK_COLOR)
-                : Texts.bracketed(new LiteralText(PAGINATION_FIRST)).formatted(INACTIVE_LINK_COLOR);
+                ? buildExecuteCmdComponent(new TranslatableText("cli.msg.info.pagination.first.text"), new TranslatableText("cli.msg.info.pagination.first.hover"), buildPageCommand(cmd, FIRST_PAGE_IDX), RUN_COMMAND, LINK_COLOR)
+                : Texts.bracketed(new TranslatableText("cli.msg.info.pagination.first.text")).formatted(INACTIVE_LINK_COLOR);
         MutableText prev = hasMultiplePages && pageNo > FIRST_PAGE_IDX
-                ? buildExecuteCmdComponent(new LiteralText(PAGINATION_PREVIOUS), new TranslatableText("cli.msg.info.pagination.previous"), buildPageCommand(cmd, Math.max(pageNo - 1, FIRST_PAGE_IDX)), RUN_COMMAND, LINK_COLOR)
-                : Texts.bracketed(new LiteralText(PAGINATION_PREVIOUS)).formatted(INACTIVE_LINK_COLOR);
+                ? buildExecuteCmdComponent(new TranslatableText("cli.msg.info.pagination.previous.text"), new TranslatableText("cli.msg.info.pagination.previous.hover"), buildPageCommand(cmd, Math.max(pageNo - 1, FIRST_PAGE_IDX)), RUN_COMMAND, LINK_COLOR)
+                : Texts.bracketed(new TranslatableText("cli.msg.info.pagination.previous.text")).formatted(INACTIVE_LINK_COLOR);
         MutableText next = hasMultiplePages && pageNo < numberOfPages - 1
-                ? buildExecuteCmdComponent(new LiteralText(PAGINATION_NEXT), new TranslatableText("cli.msg.info.pagination.next"), buildPageCommand(cmd, Math.min(pageNo + 1, numberOfPages - 1)), RUN_COMMAND, LINK_COLOR)
-                : Texts.bracketed(new LiteralText(PAGINATION_NEXT)).formatted(INACTIVE_LINK_COLOR);
+                ? buildExecuteCmdComponent(new TranslatableText("cli.msg.info.pagination.next.text"), new TranslatableText("cli.msg.info.pagination.next.hover"), buildPageCommand(cmd, Math.min(pageNo + 1, numberOfPages - 1)), RUN_COMMAND, LINK_COLOR)
+                : Texts.bracketed(new TranslatableText("cli.msg.info.pagination.next.text")).formatted(INACTIVE_LINK_COLOR);
         MutableText last = hasMultiplePages && pageNo < numberOfPages - 1
-                ? buildExecuteCmdComponent(new LiteralText(PAGINATION_LAST), new TranslatableText("cli.msg.info.pagination.last"), buildPageCommand(cmd, numberOfPages - 1), RUN_COMMAND, LINK_COLOR)
-                : Texts.bracketed(new LiteralText(PAGINATION_LAST)).formatted(INACTIVE_LINK_COLOR);
+                ? buildExecuteCmdComponent(new TranslatableText("cli.msg.info.pagination.last.text"), new TranslatableText("cli.msg.info.pagination.last.hover"), buildPageCommand(cmd, numberOfPages - 1), RUN_COMMAND, LINK_COLOR)
+                : Texts.bracketed(new TranslatableText("cli.msg.info.pagination.last.text")).formatted(INACTIVE_LINK_COLOR);
 
         MutableText paginationControl = buildPaginationControl(first, prev, pageNo, numberOfPages, next, last);
         int from = pageNo * RegionConfig.getPaginationSize();
@@ -550,11 +563,11 @@ public class MessageUtil {
 
     public static MutableText buildPaginationControl(MutableText front, MutableText back, int pageNo, int maxPage, MutableText forward, MutableText last) {
         // [<<]  [<]  x/n  [>]  [>>]
-        MutableText pageIndicator = new LiteralText((pageNo + 1) + "/" + (maxPage));
+        MutableText pageIndicator = new LiteralText(((pageNo + 1) + "/" + (maxPage)));
         pageIndicator.setStyle(pageIndicator.getStyle().withColor(RESET).withHoverEvent(null).withClickEvent(null));
-        MutableText resetSpace = new LiteralText("  ");
+        MutableText resetSpace = new LiteralText(("  "));
         resetSpace.setStyle(resetSpace.getStyle().withColor(RESET).withHoverEvent(null).withClickEvent(null));
-        return new LiteralText(" ")
+        return new LiteralText((" "))
                 .append(front).append(resetSpace)
                 .append(back).append(resetSpace)
                 .append(pageIndicator).append(resetSpace)
@@ -580,7 +593,7 @@ public class MessageUtil {
                 MutableText parentClearLinkText = new TranslatableText("cli.msg.info.region.parent.clear.link.text");
                 MutableText parentClearHoverText = new TranslatableText("cli.msg.info.region.parent.clear.link.hover", region.getParent().getName());
                 parentLink = buildExecuteCmdComponent(parentLinkText, parentHoverText, regionParentInfoCmd, RUN_COMMAND, LINK_COLOR)
-                        .append(buildExecuteCmdComponent(parentClearLinkText, parentClearHoverText, clearRegionParentCmd, SUGGEST_COMMAND, REMOVE_CMD_COLOR));
+                        .append(buildExecuteCmdComponent(parentClearLinkText, parentClearHoverText, clearRegionParentCmd, RUN_COMMAND, REMOVE_CMD_COLOR));
                 return parentLink;
             }
             if (region.getParent() instanceof GlobalRegion) { // FIXME: Not needed here
@@ -593,7 +606,7 @@ public class MessageUtil {
             MutableText setParentHoverText = new TranslatableText("cli.msg.info.region.parent.set.link.hover", region.getName());
             parentLink = new TranslatableText("cli.msg.info.region.parent.null")
                     .append(" ")
-                    .append(buildExecuteCmdComponent(setParentLinkText, setParentHoverText, setRegionParentCmd, SUGGEST_COMMAND, GREEN));
+                    .append(buildExecuteCmdComponent(setParentLinkText, setParentHoverText, setRegionParentCmd, RUN_COMMAND, GREEN));
         }
         return parentLink;
     }
@@ -684,14 +697,14 @@ public class MessageUtil {
     }
 
     public static MutableText buildStateLink(IProtectedRegion region) {
-        String command = "/" + CommandPermissionConfig.BASE_CMD + " " + DIM + " " + region.getName() + " " + ENABLE + " " + !region.isActive();
+        String command = CommandUtil.buildCommandStr(DIM.toString(), region.getDim().getValue().toString(), ENABLE.toString());
         String onClickAction = region.isActive() ? "deactivate" : "activate";
         String hoverText = "cli.msg.info.state." + onClickAction;
         String linkText = "cli.msg.info.state.link." + (region.isActive() ? "activate" : "deactivate");
         Formatting color = region.isActive() ? ADD_CMD_COLOR : REMOVE_CMD_COLOR;
         MutableText stateLink = buildExecuteCmdComponent(linkText, hoverText, command, ClickEvent.Action.RUN_COMMAND, color);
         return new TranslatableText("cli.msg.info.state")
-                .append(new LiteralText(": "))
+                .append(new LiteralText((": ")))
                 .append(stateLink);
     }
 
@@ -739,15 +752,15 @@ public class MessageUtil {
         MutableText regionRemoveLink = switch (regionType) {
             case DIMENSION -> {
                 String command = buildCommandStr(DIM.toString(), region.getDim().getValue().toString(), REMOVE.toString(), affiliationType.name, affiliation, affiliateName);
-                yield buildExecuteCmdComponent(linkText, hoverText, command, SUGGEST_COMMAND, REMOVE_CMD_COLOR);
+                yield buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, REMOVE_CMD_COLOR);
             }
             case LOCAL -> {
                 String command = buildCommandStr(REGION.toString(), region.getDim().getValue().toString(), region.getName(), REMOVE.toString(), affiliationType.name, affiliation, affiliateName);
-                yield buildExecuteCmdComponent(linkText, hoverText, command, SUGGEST_COMMAND, REMOVE_CMD_COLOR);
+                yield buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, REMOVE_CMD_COLOR);
             }
             default -> throw new IllegalArgumentException();
         };
-        return new LiteralText(" - ")
+        return new LiteralText((" - "))
                 .append(regionRemoveLink).append(" ")
                 .append(buildAffiliateInfo(region, affiliateName, affiliationType));
     }
@@ -757,12 +770,12 @@ public class MessageUtil {
             case PLAYER -> {
                 PlayerEntity player = RegionDataManager.serverInstance.getPlayerManager().getPlayer(affiliateName);
                 yield player == null
-                        ? new LiteralText(affiliateName).formatted(GRAY).append(" ").append(new TranslatableText("cli.msg.info.player.list.entry.offline"))
+                        ? new LiteralText((affiliateName)).formatted(GRAY).append(" ").append(new TranslatableText("cli.msg.info.player.list.entry.offline"))
                         : buildPlayerHoverComponent(player);
             }
             case TEAM -> {
                 Team team = RegionDataManager.serverInstance.getScoreboard().getPlayerTeam(affiliateName);
-                yield team == null ? new LiteralText(affiliateName) : buildTeamHoverComponent(team);
+                yield team == null ? new LiteralText((affiliateName)) : buildTeamHoverComponent(team);
             }
         };
     }
@@ -803,6 +816,22 @@ public class MessageUtil {
         MutableText linkHoverText = new TranslatableText("cli.msg.info.region.children.remove.link.hover", child.getName(), region.getName());
         return buildExecuteCmdComponent(linkText, linkHoverText, command, SUGGEST_COMMAND, REMOVE_CMD_COLOR);
     }
+
+
+    public static MutableText buildRegionActionUndoLink(String cmd, CommandConstants toReplace, CommandConstants replacement) {
+        String revertCmd = CommandUtil.revertCommand(cmd, toReplace, replacement);
+        MutableText revertLinkText = new TranslatableText("cli.link.action.undo.text");
+        MutableText revertLinkHover = new TranslatableText("cli.link.action.undo.hover");
+        return buildExecuteCmdComponent(revertLinkText, revertLinkHover, revertCmd, RUN_COMMAND, DARK_RED);
+    }
+
+    public static MutableText buildRegionActionUndoLink(String cmd, String toReplace, String replacement) {
+        String revertCmd = CommandUtil.revertCommand(cmd, toReplace, replacement);
+        MutableText revertLinkText = new TranslatableText("cli.link.action.undo.text");
+        MutableText revertLinkHover = new TranslatableText("cli.link.action.undo.hover");
+        return buildExecuteCmdComponent(revertLinkText, revertLinkHover, revertCmd, RUN_COMMAND, DARK_RED);
+    }
+
 
     public static MutableText buildFlagHeader(IProtectedRegion region, RegionType regionType) {
         return switch (regionType) {

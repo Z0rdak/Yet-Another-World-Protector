@@ -11,6 +11,7 @@ import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.DefaultedRegistry;
@@ -34,7 +35,9 @@ public class DimensionCacheArgumentType implements ArgumentType<DimensionRegionC
         if (RegionDataManager.get().containsCacheFor(registrykey)) {
             return RegionDataManager.get().cacheFor(registrykey);
         } else {
-            return RegionDataManager.get().newCacheFor(registrykey);
+            DimensionRegionCache newCache = RegionDataManager.get().newCacheFor(registrykey);
+            RegionDataManager.save();
+            return newCache;
         }
     }
 

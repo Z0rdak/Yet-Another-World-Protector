@@ -7,10 +7,7 @@ import de.z0rdak.yawp.util.CommandUtil;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.*;
 
 import static de.z0rdak.yawp.util.MessageUtil.buildExecuteCmdComponent;
 import static de.z0rdak.yawp.util.MessageUtil.buildHeader;
@@ -22,22 +19,18 @@ public class CommandRegistry {
     private CommandRegistry() {
     }
 
-    public static void init(CommandDispatcher<ServerCommandSource> commandDispatcher, String modRootCmd) {
+    public static void register(CommandDispatcher<ServerCommandSource> commandDispatcher, String modRootCmd) {
         commandDispatcher.register(buildCommands(modRootCmd));
     }
 
     public static LiteralArgumentBuilder<ServerCommandSource> buildCommands(String baseCmd) {
-        return withSubCommands(CommandManager.literal(baseCmd));
-    }
-
-    private static LiteralArgumentBuilder<ServerCommandSource> withSubCommands(LiteralArgumentBuilder<ServerCommandSource> baseCommand) {
-        return baseCommand
+        return CommandManager.literal(baseCmd)
                 .executes(ctx -> promptHelp(ctx.getSource()))
                 .then(CommandUtil.literal(CommandConstants.HELP)
                         .executes(ctx -> promptHelp(ctx.getSource())))
-                .then(DimensionCommands.DIMENSION_COMMAND)
-                .then(MarkerCommands.MARKER_COMMAND)
-                .then(RegionCommands.REGION_COMMAND);
+                .then(DimensionCommands.build())
+                .then(MarkerCommands.build())
+                .then(RegionCommands.build());
     }
 
     private static int promptHelp(ServerCommandSource src) {

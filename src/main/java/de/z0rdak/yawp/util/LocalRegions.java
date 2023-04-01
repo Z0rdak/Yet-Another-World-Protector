@@ -98,6 +98,24 @@ public final class LocalRegions {
                 .collect(Collectors.toList());
     }
 
+    public static List<IMarkableRegion> getRegionsWithoutFlag(RegionFlag flag, BlockPos position, RegistryKey<World> dim) {
+        return RegionDataManager.get().getRegionsFor(dim).stream()
+                .filter(IMarkableRegion::isActive)
+                .filter(region -> !region.containsFlag(flag))
+                // position check should always be the last check to do, because it is the most computation expensive
+                .filter(region -> region.contains(position))
+                .collect(Collectors.toList());
+    }
+
+    public static IMarkableRegion getRegionWithoutFlag(RegionFlag flag, BlockPos position, RegistryKey<World> dim) {
+        List<IMarkableRegion> regionsForPos = getRegionsWithoutFlag(flag, position, dim);
+        if (regionsForPos.isEmpty()) {
+            return null;
+        } else {
+            return Collections.max(regionsForPos, Comparator.comparing(IMarkableRegion::getPriority));
+        }
+    }
+
     public static List<IMarkableRegion> getInvolvedRegionsFor(BlockPos position, RegistryKey<World> dim) {
         return RegionDataManager.get().getRegionsFor(dim).stream()
                 .filter(IMarkableRegion::isActive)
