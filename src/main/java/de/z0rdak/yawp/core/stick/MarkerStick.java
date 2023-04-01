@@ -17,14 +17,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class MarkerStick extends AbstractStick implements INBTSerializable<CompoundTag> {
+import static de.z0rdak.yawp.util.StickUtil.*;
 
-    public static final String MARKED_BLOCKS = "blocks";
-    public static final String VALID_AREA = "valid";
-    public static final String AREA_TYPE = "type";
-    public static final String DIM = "dim";
-    public static final String TP_POS = "tp_pos";
-    public static final String IS_TP_SET = "is_tp_set";
+public class MarkerStick extends AbstractStick implements INBTSerializable<CompoundTag> {
 
     private BlockPos teleportPos;
     private ResourceKey<Level> dimension;
@@ -122,10 +117,7 @@ public class MarkerStick extends AbstractStick implements INBTSerializable<Compo
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag nbt = super.serializeNBT();
-        // makes stick unique -> non-stackable
-        // this could with a little code-rearrangement used to track which player used a specific stick
-        // but why? Maybe sticks can store permissions in the future? This, of course, would be a potential risk for region owners
-        nbt.putString("stick-id", UUID.randomUUID().toString());
+        nbt.putString(STICK_ID, UUID.randomUUID().toString());
         nbt.putBoolean(VALID_AREA, this.isValidArea);
         nbt.putString(AREA_TYPE, this.areaType.areaType);
         nbt.putString(DIM, this.dimension.location().toString());

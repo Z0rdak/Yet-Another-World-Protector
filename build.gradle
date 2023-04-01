@@ -151,7 +151,7 @@ dependencies {
 
     annotationProcessor "org.spongepowered:mixin:${mixin_version}:processor"
 
-    implementation 'com.squareup.okhttp:okhttp:2.7.5'
+    // implementation 'com.squareup.okhttp:okhttp:2.7.5'
 
     // compileOnly fg.deobf("vazkii.patchouli:Patchouli:1.16.4-51:api")
     // runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:1.16.4-51")

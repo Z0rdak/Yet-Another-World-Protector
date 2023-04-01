@@ -21,7 +21,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -29,8 +28,10 @@ import net.minecraft.world.item.Items;
 
 import java.util.Collections;
 import java.util.Objects;
+import java.util.Random;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
+import static de.z0rdak.yawp.commands.DimensionCommands.regionNameSuggestions;
 import static de.z0rdak.yawp.core.region.RegionType.LOCAL;
 import static de.z0rdak.yawp.util.CommandUtil.*;
 import static de.z0rdak.yawp.util.MessageUtil.buildRegionInfoLink;
@@ -41,12 +42,10 @@ import static net.minecraft.ChatFormatting.RED;
 
 public final class MarkerCommands {
 
-    public static final LiteralArgumentBuilder<CommandSourceStack> MARKER_COMMAND = register();
-
     private MarkerCommands() {
     }
 
-    private static LiteralArgumentBuilder<CommandSourceStack> register() {
+    public static LiteralArgumentBuilder<CommandSourceStack> build() {
         return literal(MARKER)
                 .then(literal(GIVE)
                         .executes(ctx -> giveMarkerStick(ctx.getSource())))
@@ -54,7 +53,7 @@ public final class MarkerCommands {
                         .executes(ctx -> resetStick(ctx.getSource())))
                 .then(literal(CREATE)
                         .then(Commands.argument(REGION.toString(), StringArgumentType.word())
-                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Collections.singletonList("newRegion"), builder))
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Collections.singletonList(regionNameSuggestions.get(new Random().nextInt(regionNameSuggestions.size()))), builder))
                                 .executes(ctx -> createRegion(ctx.getSource(), getRegionNameArgument(ctx), null))
                                 .then(Commands.argument(PARENT.toString(), StringArgumentType.word())
                                         .suggests((ctx, builder) -> OwnedRegionArgumentType.region().listSuggestions(ctx, builder))
@@ -63,7 +62,7 @@ public final class MarkerCommands {
     }
 
 
-    // Argument for getting the Marker? Argument could check for player holding valid marker
+    // TODO: Argument for getting the Marker? Argument could check for player holding valid marker
     private static int createRegion(CommandSourceStack src, String regionName, IMarkableRegion parentRegion) {
         try {
             Player player = src.getPlayerOrException();
@@ -86,7 +85,7 @@ public final class MarkerCommands {
                     if (stickNBT != null) {
                         MarkerStick marker = new MarkerStick(stickNBT);
                         if (!marker.isValidArea()) {
-                            sendCmdFeedback(src, new TranslatableComponent("Marked area is not valid").withStyle(RED));
+                            sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.stick.area.invalid").withStyle(RED));
                             return 1;
                         }
                         AbstractMarkableRegion region = LocalRegions.regionFrom(player, marker, regionName);
@@ -103,11 +102,11 @@ public final class MarkerCommands {
                                     sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region, LOCAL)));
                                     return 0;
                                 } else {
-                                    sendCmdFeedback(src, new TranslatableComponent("Parent region does not contain new region"));
+                                    sendCmdFeedback(src, new TranslatableComponent( "cli.msg.dim.info.region.create.stick.area.invalid.parent", buildRegionInfoLink(parentRegion, LOCAL)));
                                     return -1;
                                 }
                             } else {
-                                sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.stick.local.deny", buildRegionInfoLink(parentRegion, LOCAL)));
+                                sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.local.deny", buildRegionInfoLink(parentRegion, LOCAL)));
                                 return 1;
                             }
                         } else {
@@ -118,20 +117,20 @@ public final class MarkerCommands {
                                 sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region, LOCAL)));
                                 return 0;
                             } else {
-                                sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.stick.dim.deny", buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION)));
+                                sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.dim.deny", buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION)));
                                 return 2;
                             }
                         }
                     } else {
-                        sendCmdFeedback(src, new TranslatableComponent("Invalid marker stick data"));
+                        sendCmdFeedback(src, new TranslatableComponent(  "cli.msg.dim.info.region.create.stick.invalid"));
                         return -2;
                     }
                 } else {
-                    sendCmdFeedback(src, new TextComponent(RED + "").append(new TranslatableComponent("cli.msg.dim.info.region.create.stick.missing")));
+                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.stick.missing").withStyle(RED));
                     return -2;
                 }
             } else {
-                sendCmdFeedback(src, new TextComponent(RED + "").append(new TranslatableComponent("cli.msg.dim.info.region.create.stick.missing")));
+                sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.stick.missing").withStyle(RED));
                 return -2;
             }
         } catch (CommandSyntaxException e) {
@@ -153,18 +152,18 @@ public final class MarkerCommands {
                 if (Objects.requireNonNull(stickType) == StickType.MARKER) {
                     mainHandItem = StickUtil.initMarkerNbt(mainHandItem, StickType.MARKER, player.getCommandSenderWorld().dimension());
                     // FIXME: When different area types are available: Get stick, reset it, and save it back.
-                    sendCmdFeedback(src, new TranslatableComponent("RegionMarker reset!"));
+                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.stick.reset"));
                     return 0;
                 } else {
-                    sendCmdFeedback(src, new TranslatableComponent(RED + "The item in the main hand is not a RegionMarker!"));
+                    sendCmdFeedback(src, new TranslatableComponent( "cli.msg.dim.info.region.create.stick.missing").withStyle(RED));
                     return 1;
                 }
             } else {
-                sendCmdFeedback(src, new TranslatableComponent(RED + "The item in the main hand is not a RegionMarker!"));
+                sendCmdFeedback(src, new TranslatableComponent( "cli.msg.dim.info.region.create.stick.missing").withStyle(RED));
                 return 1;
             }
         } catch (CommandSyntaxException e) {
-            sendCmdFeedback(src, new TranslatableComponent(RED + "Command needs a player as command source" + RESET));
+            sendCmdFeedback(src, new TranslatableComponent(  "cli.msg.dim.info.region.create.stick.no-player").withStyle(RED));
             return 1;
         }
     }
@@ -174,9 +173,9 @@ public final class MarkerCommands {
             Player targetPlayer = src.getPlayerOrException();
             ItemStack markerStick = StickUtil.initMarkerNbt(Items.STICK.getDefaultInstance(), StickType.MARKER, targetPlayer.level.dimension());
             targetPlayer.addItem(markerStick);
-            sendCmdFeedback(src, new TranslatableComponent("RegionMarker added to your inventory."));
+            sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.stick.reset"));
         } catch (CommandSyntaxException e) {
-            sendCmdFeedback(src, new TranslatableComponent(RED + "Command needs a player as command source" + RESET));
+            sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.stick.no-player").withStyle(RED));
             return 1;
         }
         return 0;

@@ -272,6 +272,7 @@ public class RegionDataManager extends SavedData {
     public DimensionRegionCache cacheFor(ResourceKey<Level> dim) {
         if (!dimCacheMap.containsKey(dim)) {
             newCacheFor(dim);
+            save();
         }
         return dimCacheMap.get(dim);
     }
@@ -293,7 +294,7 @@ public class RegionDataManager extends SavedData {
     public DimensionRegionCache newCacheFor(ResourceKey<Level> dim) {
         DimensionRegionCache cache = new DimensionRegionCache(dim);
         addFlags(RegionConfig.getDefaultDimFlags(), cache.getDimensionalRegion());
-        cache.setDimState(RegionConfig.shouldActivateNewDimRegion());
+        cache.getDimensionalRegion().setIsActive(RegionConfig.shouldActivateNewDimRegion());
         cache.getDimensionalRegion().setParent(globalRegion);
         dimCacheMap.put(dim, cache);
         dimensionDataNames.add(cache.getDimensionalRegion().getName());

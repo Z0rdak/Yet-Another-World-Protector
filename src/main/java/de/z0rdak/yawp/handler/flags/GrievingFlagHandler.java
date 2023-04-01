@@ -149,19 +149,6 @@ public class GrievingFlagHandler {
     }
 
     @SubscribeEvent
-    public static void onEndermanPlaceBlock(BlockEvent.EntityPlaceEvent event) {
-        if (isServerSide(event)) {
-            if (event.getEntity() instanceof EnderMan) {
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
-                if (dimCache != null) {
-                    FlagCheckEvent flagCheckEvent = checkTargetEvent(event.getPos(), RegionFlag.ENTITY_PLACE, dimCache.getDimensionalRegion());
-                    event.setCanceled(flagCheckEvent.isDenied());
-                }
-            }
-        }
-    }
-
-    @SubscribeEvent
     public static void onMobGriefing(EntityMobGriefingEvent event) {
         if (event.getEntity() != null && event.getEntity().getCommandSenderWorld() != null) {
             if (isServerSide(event)) {

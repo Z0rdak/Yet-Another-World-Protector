@@ -4,7 +4,7 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.arguments.flag.RegionFlagArgumentType;
@@ -21,6 +21,7 @@ import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.core.stick.AbstractStick;
 import de.z0rdak.yawp.core.stick.MarkerStick;
+import de.z0rdak.yawp.handler.flags.HandlerUtil;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
@@ -38,16 +39,27 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.animal.AbstractGolem;
+import net.minecraft.world.entity.monster.Slime;
+import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.scores.PlayerTeam;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
+import static de.z0rdak.yawp.commands.DimensionCommands.checkValidRegionName;
 import static de.z0rdak.yawp.core.region.RegionType.LOCAL;
 import static de.z0rdak.yawp.util.CommandUtil.*;
 import static de.z0rdak.yawp.util.MessageUtil.*;
@@ -55,173 +67,168 @@ import static net.minecraft.ChatFormatting.RESET;
 
 public class RegionCommands {
 
-    public static final LiteralArgumentBuilder<CommandSourceStack> REGION_COMMAND = registerRegionCommands();
-
     private RegionCommands() {
-    }
-
-    public static LiteralArgumentBuilder<CommandSourceStack> registerRegionCommands() {
-        return literal(REGION)
-                .then(Commands.argument(DIM.toString(), DimensionArgument.dimension())
-                        .then(regionCommands()));
     }
 
     public final static String MEMBER = "member";
     public final static String OWNER = "owner";
 
-    /**
-     * TODO: Command to invert enable and alert based on region state
-     * TODO: Renaming a region
-     *
-     * @return
-     */
-    private static RequiredArgumentBuilder<CommandSourceStack, String> regionCommands() {
+    public static LiteralArgumentBuilder<CommandSourceStack> build() {
         List<String> affiliationList = Arrays.asList(MEMBER, OWNER);
-        return Commands.argument(REGION.toString(), StringArgumentType.word())
-                .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestions(ctx, builder))
-                .executes(ctx -> promptRegionInfo(ctx.getSource(), getRegionArgument(ctx)))
-                .then(literal(INFO)
-                        .executes(ctx -> promptRegionInfo(ctx.getSource(), getRegionArgument(ctx))))
-                .then(literal(SPATIAL)
-                        .executes(ctx -> promptRegionSpatialProperties(ctx.getSource(), getRegionArgument(ctx))))
-                .then(literal(STATE)
-                        .executes(ctx -> promptRegionState(ctx.getSource(), getRegionArgument(ctx)))
-                        .then(literal(ALERT)
-                                // TODO: add default true and toggle cmd
-                                .then(Commands.argument(ALERT.toString(), BoolArgumentType.bool())
-                                        .executes(ctx -> setAlertState(ctx.getSource(), getRegionArgument(ctx), getAlertArgument(ctx)))))
-                        .then(literal(ENABLE)
-                                // TODO: add default true and toggle cmd
-                                .then(Commands.argument(ENABLE.toString(), BoolArgumentType.bool())
-                                        .executes(ctx -> setEnableState(ctx.getSource(), getRegionArgument(ctx), getEnableArgument(ctx)))))
-                        .then(literal(PRIORITY)
-                                .then(Commands.argument(PRIORITY.toString(), IntegerArgumentType.integer())
-                                        .executes(ctx -> setPriority(ctx.getSource(), getRegionArgument(ctx), getPriorityArgument(ctx))))
-                                .then(literal(INC)
-                                        .then(Commands.argument(PRIORITY.toString(), IntegerArgumentType.integer())
-                                                .executes(ctx -> setPriority(ctx.getSource(), getRegionArgument(ctx), getPriorityArgument(ctx), 1))))
-                                .then(literal(DEC)
-                                        .then(Commands.argument(PRIORITY.toString(), IntegerArgumentType.integer())
-                                                .executes(ctx -> setPriority(ctx.getSource(), getRegionArgument(ctx), getPriorityArgument(ctx), -1))))))
-                .then(literal(LIST)
-                        .then(literal(FLAG)
-                                .executes(ctx -> promptRegionFlags(ctx.getSource(), getRegionArgument(ctx), 0))
-                                .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
-                                        .executes(ctx -> promptRegionFlags(ctx.getSource(), getRegionArgument(ctx), getPageNoArgument(ctx)))))
-                        .then(literal(CommandConstants.OWNER)
-                                .executes(ctx -> promptRegionAffiliates(ctx.getSource(), getRegionArgument(ctx), OWNER))
-                                .then(literal(TEAM)
-                                        .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), OWNER, AffiliationType.TEAM, 0))
-                                        .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
-                                                .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), OWNER, AffiliationType.TEAM, getPageNoArgument(ctx)))))
-                                .then(literal(PLAYER)
-                                        .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), OWNER, AffiliationType.PLAYER, 0))
-                                        .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
-                                                .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), OWNER, AffiliationType.PLAYER, getPageNoArgument(ctx))))
-                                ))
-                        .then(literal(CommandConstants.MEMBER)
-                                .executes(ctx -> promptRegionAffiliates(ctx.getSource(), getRegionArgument(ctx), MEMBER))
-                                .then(literal(TEAM)
-                                        .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), MEMBER, AffiliationType.TEAM, 0))
-                                        .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
-                                                .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), MEMBER, AffiliationType.TEAM, getPageNoArgument(ctx)))))
-                                .then(literal(PLAYER)
-                                        .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), MEMBER, AffiliationType.PLAYER, 0))
-                                        .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
-                                                .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), MEMBER, AffiliationType.PLAYER, getPageNoArgument(ctx))))
-                                ))
-                        .then(literal(CHILDREN)
-                                .executes(ctx -> promptRegionChildren(ctx.getSource(), getRegionArgument(ctx), 0))
-                                .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
-                                        .executes(ctx -> promptRegionChildren(ctx.getSource(), getRegionArgument(ctx), getPageNoArgument(ctx))))
-                        ))
-                .then(literal(AREA)
-                        .then(Commands.literal(AreaType.CUBOID.areaType)
-                                .then(Commands.argument("pos1", BlockPosArgument.blockPos())
-                                        .then(Commands.argument("pos2", BlockPosArgument.blockPos())
-                                                .executes(ctx -> updateArea(ctx.getSource(), getRegionArgument(ctx), AreaType.CUBOID,
-                                                        BlockPosArgument.getSpawnablePos(ctx, "pos1"),
-                                                        BlockPosArgument.getSpawnablePos(ctx, "pos2")))))
-                        ))
-                // TODO: rename region
-                // TODO: Only with marker
-                //.then(literal(UPDATE)
-                //        .then(Commands.argument(AREA.toString(), StringArgumentType.word())
-                //                .suggests((ctx, builder) -> AreaArgumentType.areaType().listSuggestions(ctx, builder))
-                //                .executes(ctx -> updateRegion(ctx.getSource(), getRegionArgument(ctx)))))
-                .then(literal(ADD)
-                        .then(literal(CommandConstants.PLAYER)
-                                .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(affiliationList, builder))
-                                        .then(Commands.argument(CommandConstants.PLAYER.toString(), EntityArgument.player())
-                                                .executes(ctx -> addPlayer(ctx.getSource(), getPlayerArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx)))))
-                                .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(affiliationList, builder))
-                                        .then(Commands.argument(CommandConstants.PLAYER.toString(), EntityArgument.player())
-                                                .executes(ctx -> addPlayer(ctx.getSource(), getPlayerArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx))))))
-                        .then(literal(CommandConstants.TEAM)
-                                .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(affiliationList, builder))
-                                        .then(Commands.argument(CommandConstants.TEAM.toString(), TeamArgument.team())
-                                                .executes(ctx -> addTeam(ctx.getSource(), getTeamArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx)))))
-                                .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(affiliationList, builder))
-                                        .then(Commands.argument(CommandConstants.TEAM.toString(), TeamArgument.team())
-                                                .executes(ctx -> addTeam(ctx.getSource(), getTeamArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx))))))
-                        .then(literal(FLAG)
-                                .then(Commands.argument(FLAG.toString(), StringArgumentType.word())
-                                        .suggests((ctx, builder) -> RegionFlagArgumentType.flag().listSuggestions(ctx, builder))
-                                        .executes(ctx -> addFlag(ctx.getSource(), getRegionArgument(ctx), getFlagArgument(ctx)))))
-                        .then(literal(CHILD)
-                                .then(Commands.argument(CHILD.toString(), StringArgumentType.word())
-                                        .suggests((ctx, builder) -> AddRegionChildArgumentType.potentialChildRegions().listSuggestions(ctx, builder))
-                                        .executes(ctx -> addChildren(ctx.getSource(), getRegionArgument(ctx), getChildRegionArgument(ctx))))))
-                .then(literal(REMOVE)
-                        .then(literal(CommandConstants.PLAYER)
-                                .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(affiliationList, builder))
-                                        .then(Commands.argument(CommandConstants.PLAYER.toString(), EntityArgument.player())
-                                                .executes(ctx -> removePlayer(ctx.getSource(), getPlayerArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx)))))
-                                .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(affiliationList, builder))
-                                        .then(Commands.argument(CommandConstants.PLAYER.toString(), EntityArgument.player())
-                                                .executes(ctx -> removePlayer(ctx.getSource(), getPlayerArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx))))))
-                        .then(literal(CommandConstants.TEAM)
-                                .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(affiliationList, builder))
-                                        .then(Commands.argument(CommandConstants.TEAM.toString(), TeamArgument.team())
-                                                .executes(ctx -> removeTeam(ctx.getSource(), getTeamArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx)))))
-                                .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(affiliationList, builder))
-                                        .then(Commands.argument(CommandConstants.TEAM.toString(), TeamArgument.team())
-                                                .executes(ctx -> removeTeam(ctx.getSource(), getTeamArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx))))))
-                        .then(literal(FLAG)
-                                .then(Commands.argument(FLAG.toString(), StringArgumentType.word())
-                                        .suggests((ctx, builder) -> RegionFlagArgumentType.flag().listSuggestions(ctx, builder))
-                                        .executes(ctx -> removeFlag(ctx.getSource(), getRegionArgument(ctx), getFlagArgument(ctx)))))
-                        .then(literal(CHILD)
-                                .then(Commands.argument(CHILD.toString(), StringArgumentType.word())
-                                        .suggests((ctx, builder) -> RemoveRegionChildArgumentType.childRegions().listSuggestions(ctx, builder))
-                                        .executes(ctx -> removeChildren(ctx.getSource(), getDimCacheArgument(ctx), getRegionArgument(ctx), getChildRegionArgument(ctx))))))
-                /* TODO: Facade for reverse child setting ?
-                .then(literal(PARENT)
-                        .then(literal(SET)
-                                .then(Commands.argument(PARENT_REGION.toString(), StringArgumentType.word())
-                                        .suggests((ctx, builder) -> SetRegionParentArgumentType.parentRegion().listSuggestions(ctx, builder))
-                                        .executes(ctx -> setRegionParent(ctx.getSource(), RegionArgumentType.getRegion(ctx, REGION.toString()), RegionArgumentType.getRegion(ctx, PARENT_REGION.toString())))))
-                        .then(literal(CLEAR)
-                                .executes(ctx -> clearRegionParent(ctx.getSource(), RegionArgumentType.getRegion(ctx, REGION.toString())))))
-                 */
-                .then(literal(TELEPORT)
-                        .executes(ctx -> teleport(ctx.getSource(), getRegionArgument(ctx)))
-                        .then(Commands.argument(PLAYER.toString(), EntityArgument.player())
-                                .executes(ctx -> teleport(ctx.getSource(), getRegionArgument(ctx), getPlayerArgument(ctx))))
-                        .then(Commands.literal(SET.toString())
-                                .then(Commands.argument(TARGET.toString(), BlockPosArgument.blockPos())
-                                        .executes(ctx -> setTeleportPos(ctx.getSource(), getRegionArgument(ctx), BlockPosArgument.getSpawnablePos(ctx, TARGET.toString()))))));
+        return literal(REGION)
+                .then(Commands.argument(DIM.toString(), DimensionArgument.dimension())
+                        .then(Commands.argument(REGION.toString(), StringArgumentType.word())
+                                .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestions(ctx, builder))
+                                .executes(ctx -> promptRegionInfo(ctx.getSource(), getRegionArgument(ctx)))
+                                .then(literal(INFO)
+                                        .executes(ctx -> promptRegionInfo(ctx.getSource(), getRegionArgument(ctx))))
+                                .then(literal(SPATIAL)
+                                        .executes(ctx -> promptRegionSpatialProperties(ctx.getSource(), getRegionArgument(ctx))))
+                                .then(literal(STATE)
+                                        .executes(ctx -> promptRegionState(ctx.getSource(), getRegionArgument(ctx)))
+                                        .then(literal(ALERT)
+                                                .executes(ctx -> setAlertState(ctx, getRegionArgument(ctx)))
+                                                .then(Commands.argument(ALERT.toString(), BoolArgumentType.bool())
+                                                        .executes(ctx -> setAlertState(ctx, getRegionArgument(ctx), getAlertArgument(ctx)))))
+                                        .then(literal(ENABLE)
+                                                .executes(ctx -> setEnableState(ctx, getRegionArgument(ctx)))
+                                                .then(Commands.argument(ENABLE.toString(), BoolArgumentType.bool())
+                                                        .executes(ctx -> setEnableState(ctx, getRegionArgument(ctx), getEnableArgument(ctx)))))
+                                        .then(literal(PRIORITY)
+                                                .then(Commands.argument(PRIORITY.toString(), IntegerArgumentType.integer())
+                                                        .executes(ctx -> setPriority(ctx, getRegionArgument(ctx), getPriorityArgument(ctx))))
+                                                .then(literal(INC)
+                                                        .then(Commands.argument(PRIORITY.toString(), IntegerArgumentType.integer())
+                                                                .executes(ctx -> setPriority(ctx, getRegionArgument(ctx), getPriorityArgument(ctx), 1))))
+                                                .then(literal(DEC)
+                                                        .then(Commands.argument(PRIORITY.toString(), IntegerArgumentType.integer())
+                                                                .executes(ctx -> setPriority(ctx, getRegionArgument(ctx), getPriorityArgument(ctx), -1))))))
+                                .then(literal(LIST)
+                                        .then(literal(FLAG)
+                                                .executes(ctx -> promptRegionFlags(ctx.getSource(), getRegionArgument(ctx), 0))
+                                                .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
+                                                        .executes(ctx -> promptRegionFlags(ctx.getSource(), getRegionArgument(ctx), getPageNoArgument(ctx)))))
+                                        .then(literal(CommandConstants.OWNER)
+                                                .executes(ctx -> promptRegionAffiliates(ctx.getSource(), getRegionArgument(ctx), OWNER))
+                                                .then(literal(TEAM)
+                                                        .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), OWNER, AffiliationType.TEAM, 0))
+                                                        .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
+                                                                .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), OWNER, AffiliationType.TEAM, getPageNoArgument(ctx)))))
+                                                .then(literal(PLAYER)
+                                                        .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), OWNER, AffiliationType.PLAYER, 0))
+                                                        .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
+                                                                .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), OWNER, AffiliationType.PLAYER, getPageNoArgument(ctx))))
+                                                ))
+                                        .then(literal(CommandConstants.MEMBER)
+                                                .executes(ctx -> promptRegionAffiliates(ctx.getSource(), getRegionArgument(ctx), MEMBER))
+                                                .then(literal(TEAM)
+                                                        .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), MEMBER, AffiliationType.TEAM, 0))
+                                                        .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
+                                                                .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), MEMBER, AffiliationType.TEAM, getPageNoArgument(ctx)))))
+                                                .then(literal(PLAYER)
+                                                        .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), MEMBER, AffiliationType.PLAYER, 0))
+                                                        .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
+                                                                .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), MEMBER, AffiliationType.PLAYER, getPageNoArgument(ctx))))
+                                                ))
+                                        .then(literal(CHILDREN)
+                                                .executes(ctx -> promptRegionChildren(ctx.getSource(), getRegionArgument(ctx), 0))
+                                                .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
+                                                        .executes(ctx -> promptRegionChildren(ctx.getSource(), getRegionArgument(ctx), getPageNoArgument(ctx))))
+                                        ))
+                                .then(literal(AREA)
+                                        .then(Commands.literal(AreaType.CUBOID.areaType)
+                                                .then(Commands.argument("pos1", BlockPosArgument.blockPos())
+                                                        .then(Commands.argument("pos2", BlockPosArgument.blockPos())
+                                                                .executes(ctx -> updateArea(ctx, getRegionArgument(ctx), AreaType.CUBOID,
+                                                                        BlockPosArgument.getSpawnablePos(ctx, "pos1"),
+                                                                        BlockPosArgument.getSpawnablePos(ctx, "pos2")))))
+                                        ))
+                                // .then(literal(NAME)
+                                //         .then(Commands.argument(REGION.toString(), StringArgumentType.word())
+                                //                 .executes(ctx -> renameRegion(ctx, getRegionArgument(ctx), getRegionNameArgument(ctx), getDimCacheArgument(ctx)))
+                                //         )
+                                // )
+                                // TODO: rename region
+                                // TODO: Only with marker
+                                //.then(literal(UPDATE)
+                                //        .then(Commands.argument(AREA.toString(), StringArgumentType.word())
+                                //                .suggests((ctx, builder) -> AreaArgumentType.areaType().listSuggestions(ctx, builder))
+                                //                .executes(ctx -> updateRegion(ctx.getSource(), getRegionArgument(ctx)))))
+                                .then(literal(ADD)
+                                        .then(literal(CommandConstants.PLAYER)
+                                                .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(affiliationList, builder))
+                                                        .then(Commands.argument(CommandConstants.PLAYER.toString(), EntityArgument.player())
+                                                                .executes(ctx -> addPlayer(ctx, getPlayerArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx)))))
+                                                .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(affiliationList, builder))
+                                                        .then(Commands.argument(CommandConstants.PLAYER.toString(), EntityArgument.player())
+                                                                .executes(ctx -> addPlayer(ctx, getPlayerArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx))))))
+                                        .then(literal(CommandConstants.TEAM)
+                                                .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(affiliationList, builder))
+                                                        .then(Commands.argument(CommandConstants.TEAM.toString(), TeamArgument.team())
+                                                                .executes(ctx -> addTeam(ctx, getTeamArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx)))))
+                                                .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(affiliationList, builder))
+                                                        .then(Commands.argument(CommandConstants.TEAM.toString(), TeamArgument.team())
+                                                                .executes(ctx -> addTeam(ctx, getTeamArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx))))))
+                                        .then(literal(FLAG)
+                                                .then(Commands.argument(FLAG.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> RegionFlagArgumentType.flag().listSuggestions(ctx, builder))
+                                                        .executes(ctx -> addFlag(ctx, getRegionArgument(ctx), getFlagArgument(ctx)))))
+                                        .then(literal(CHILD)
+                                                .then(Commands.argument(CHILD.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> AddRegionChildArgumentType.potentialChildRegions().listSuggestions(ctx, builder))
+                                                        .executes(ctx -> addChildren(ctx, getRegionArgument(ctx), getChildRegionArgument(ctx))))))
+                                .then(literal(REMOVE)
+                                        .then(literal(CommandConstants.PLAYER)
+                                                .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(affiliationList, builder))
+                                                        .then(Commands.argument(CommandConstants.PLAYER.toString(), EntityArgument.player())
+                                                                .executes(ctx -> removePlayer(ctx, getPlayerArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx)))))
+                                                .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(affiliationList, builder))
+                                                        .then(Commands.argument(CommandConstants.PLAYER.toString(), EntityArgument.player())
+                                                                .executes(ctx -> removePlayer(ctx, getPlayerArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx))))))
+                                        .then(literal(CommandConstants.TEAM)
+                                                .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(affiliationList, builder))
+                                                        .then(Commands.argument(CommandConstants.TEAM.toString(), TeamArgument.team())
+                                                                .executes(ctx -> removeTeam(ctx, getTeamArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx)))))
+                                                .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(affiliationList, builder))
+                                                        .then(Commands.argument(CommandConstants.TEAM.toString(), TeamArgument.team())
+                                                                .executes(ctx -> removeTeam(ctx, getTeamArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx))))))
+                                        .then(literal(FLAG)
+                                                .then(Commands.argument(FLAG.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> RegionFlagArgumentType.flag().listSuggestions(ctx, builder))
+                                                        .executes(ctx -> removeFlag(ctx, getRegionArgument(ctx), getFlagArgument(ctx)))))
+                                        .then(literal(CHILD)
+                                                .then(Commands.argument(CHILD.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> RemoveRegionChildArgumentType.childRegions().listSuggestions(ctx, builder))
+                                                        .executes(ctx -> removeChildren(ctx, getDimCacheArgument(ctx), getRegionArgument(ctx), getChildRegionArgument(ctx))))))
+                                /* TODO: Facade for reverse child setting ?
+                                .then(literal(PARENT)
+                                        .then(literal(SET)
+                                                .then(Commands.argument(PARENT_REGION.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> SetRegionParentArgumentType.parentRegion().listSuggestions(ctx, builder))
+                                                        .executes(ctx -> setRegionParent(ctx.getSource(), RegionArgumentType.getRegion(ctx, REGION.toString()), RegionArgumentType.getRegion(ctx, PARENT_REGION.toString())))))
+                                        .then(literal(CLEAR)
+                                                .executes(ctx -> clearRegionParent(ctx.getSource(), RegionArgumentType.getRegion(ctx, REGION.toString())))))
+                                 */
+                                .then(literal(TELEPORT)
+                                        .executes(ctx -> teleport(ctx.getSource(), getRegionArgument(ctx)))
+                                        .then(Commands.argument(PLAYER.toString(), EntityArgument.player())
+                                                .executes(ctx -> teleport(ctx.getSource(), getRegionArgument(ctx), getPlayerArgument(ctx))))
+                                        .then(Commands.literal(SET.toString())
+                                                .then(Commands.argument(TARGET.toString(), BlockPosArgument.blockPos())
+                                                        .executes(ctx -> setTeleportPos(ctx, getRegionArgument(ctx), BlockPosArgument.getSpawnablePos(ctx, TARGET.toString()))))))));
     }
 
-    private static int updateArea(CommandSourceStack src, IMarkableRegion region, AreaType areaType, BlockPos pos1, BlockPos pos2) {
+
+
+    private static int updateArea(CommandContext<CommandSourceStack> src, IMarkableRegion region, AreaType areaType, BlockPos pos1, BlockPos pos2) {
         IProtectedRegion parent = region.getParent();
         switch (areaType) {
             case CUBOID:
@@ -236,14 +243,14 @@ public class RegionCommands {
                         int newPriority = LocalRegions.ensureHigherRegionPriorityFor(cuboidRegion, localParentRegion.getPriority() + 1);
                     } else {
                         MutableComponent updateAreaFailMsg = new TranslatableComponent("cli.msg.info.region.spatial.area.update.fail", buildRegionSpatialPropLink(region), buildRegionInfoLink(region, LOCAL));
-                        sendCmdFeedback(src, updateAreaFailMsg);
+                        sendCmdFeedback(src.getSource(), updateAreaFailMsg);
                         return 1;
                     }
                 }
                 MutableComponent updateAreaMsg = new TranslatableComponent("cli.msg.info.region.spatial.area.update", buildRegionSpatialPropLink(region), buildRegionInfoLink(region, LOCAL));
                 cuboidRegion.setArea(cuboidArea);
                 RegionDataManager.save();
-                sendCmdFeedback(src, updateAreaMsg);
+                sendCmdFeedback(src.getSource(), updateAreaMsg);
                 break;
             case CYLINDER:
             case SPHERE:
@@ -254,100 +261,128 @@ public class RegionCommands {
         return 0;
     }
 
-    private static int removeTeam(CommandSourceStack src, PlayerTeam team, IMarkableRegion region, String affiliation) {
+    private static int renameRegion(CommandContext<CommandSourceStack> src, IMarkableRegion region, String regionName, DimensionRegionCache dimCache) {
+        int res = checkValidRegionName(regionName, dimCache);
+        if (res == -1) {
+            sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.dim.info.region.create.name.invalid", regionName));
+            return res;
+        }
+        if (res == 1) {
+            sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.dim.info.region.create.name.exists", dimCache.getDimensionalRegion().getName(), buildRegionInfoLink(dimCache.getRegion(regionName), LOCAL)));
+            return res;
+        }
+        // FIXME:
+        dimCache.renameRegion(region, regionName);
+        RegionDataManager.save();
+        return 0;
+    }
+
+    private static int removeTeam(CommandContext<CommandSourceStack> src, PlayerTeam team, IMarkableRegion region, String affiliation) {
+        MutableComponent undoLink = buildRegionActionUndoLink(src.getInput(), REMOVE, ADD);
         switch (affiliation) {
             case "member":
                 if (region.hasMember(team.getName())) {
                     region.removeMember(team);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.affiliation.team.removed", team.getName(), buildRegionInfoLink(region, LOCAL)));
+                    sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.info.region.affiliation.team.removed",
+                            team.getName(), buildRegionInfoLink(region, LOCAL)).append(" ").append(undoLink));
                 }
                 break;
             case "owner":
                 if (region.hasOwner(team.getName())) {
                     region.removeOwner(team);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.affiliation.team.removed", team.getName(), buildRegionInfoLink(region, LOCAL)));
+                    sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.info.region.affiliation.team.removed",
+                            team.getName(), buildRegionInfoLink(region, LOCAL)).append(" ").append(undoLink));
                 }
                 break;
             default:
-                // TODO Create new affiliation with no permissions?
                 return 1;
         }
         return 0;
     }
 
-    private static int addTeam(CommandSourceStack src, PlayerTeam team, IMarkableRegion region, String affiliation) {
+    private static int addTeam(CommandContext<CommandSourceStack> src, PlayerTeam team, IMarkableRegion region, String affiliation) {
+        MutableComponent undoLink = buildRegionActionUndoLink(src.getInput(), ADD, REMOVE);
         switch (affiliation) {
             case "member":
                 if (!region.hasMember(team.getName())) {
                     region.addMember(team);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.affiliation.team.added", team.getName(), affiliation, buildRegionInfoLink(region, LOCAL)));
+                    sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.info.region.affiliation.team.added",
+                            team.getName(), affiliation, buildRegionInfoLink(region, LOCAL)).append(" ").append(undoLink));
                 }
                 break;
             case "owner":
                 if (!region.hasOwner(team.getName())) {
                     region.addOwner(team);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.affiliation.team.added", team.getName(), affiliation, buildRegionInfoLink(region, LOCAL)));
+                    sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.info.region.affiliation.team.added",
+                            team.getName(), affiliation, buildRegionInfoLink(region, LOCAL)).append(" ").append(undoLink));
                 }
                 break;
             default:
-                // TODO Create new affiliation with no permissions?
                 return 1;
         }
         return 0;
     }
 
     // TODO: Option to remove player by name
-    private static int removePlayer(CommandSourceStack src, ServerPlayer player, IMarkableRegion region, String affiliation) {
+    private static int removePlayer(CommandContext<CommandSourceStack> src, String playerName, IMarkableRegion region, String affiliation) {
+        return 1;
+    }
+
+    private static int removePlayer(CommandContext<CommandSourceStack> src, ServerPlayer player, IMarkableRegion region, String affiliation) {
+        MutableComponent undoLink = buildRegionActionUndoLink(src.getInput(), REMOVE, ADD);
         switch (affiliation) {
             case "member":
                 if (region.hasMember(player.getUUID())) {
                     region.removeMember(player);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.affiliation.player.removed", buildPlayerHoverComponent(player), buildRegionInfoLink(region, LOCAL)));
+                    sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.info.region.affiliation.player.removed",
+                            buildPlayerHoverComponent(player), buildRegionInfoLink(region, LOCAL)).append(" ").append(undoLink));
                 }
                 break;
             case "owner":
                 if (region.hasOwner(player.getUUID())) {
                     region.removeOwner(player);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.affiliation.player.removed", buildPlayerHoverComponent(player), buildRegionInfoLink(region, LOCAL)));
+                    sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.info.region.affiliation.player.removed",
+                            buildPlayerHoverComponent(player), buildRegionInfoLink(region, LOCAL)).append(" ").append(undoLink));
                 }
                 break;
             default:
-                // TODO Create new affiliation with no permissions?
                 return 1;
         }
         return 0;
     }
 
-    private static int addPlayer(CommandSourceStack src, ServerPlayer player, IMarkableRegion region, String affiliation) {
+    private static int addPlayer(CommandContext<CommandSourceStack> src, ServerPlayer player, IMarkableRegion region, String affiliation) {
+        MutableComponent undoLink = buildRegionActionUndoLink(src.getInput(), ADD, REMOVE);
         switch (affiliation) {
             case "member":
                 if (!region.hasMember(player.getUUID())) {
                     region.addMember(player);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.affiliation.player.added", buildPlayerHoverComponent(player), affiliation, buildRegionInfoLink(region, LOCAL)));
+                    sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.info.region.affiliation.player.added",
+                            buildPlayerHoverComponent(player), affiliation, buildRegionInfoLink(region, LOCAL)).append(" ").append(undoLink));
                 }
                 break;
             case "owner":
                 if (!region.hasOwner(player.getUUID())) {
                     region.addOwner(player);
                     RegionDataManager.save();
-                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.affiliation.player.added", buildPlayerHoverComponent(player), affiliation, buildRegionInfoLink(region, LOCAL)));
+                    sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.info.region.affiliation.player.added",
+                            buildPlayerHoverComponent(player), affiliation, buildRegionInfoLink(region, LOCAL)).append(" ").append(undoLink));
                 }
                 break;
             default:
-                // TODO Create new affiliation with no permissions?
                 return 1;
         }
         return 0;
     }
 
-    private static int removeChildren(CommandSourceStack src, DimensionRegionCache dimCache, IMarkableRegion parent, IMarkableRegion child) {
+    private static int removeChildren(CommandContext<CommandSourceStack> src, DimensionRegionCache dimCache, IMarkableRegion parent, IMarkableRegion child) {
         if (parent.hasChild(child)) {
             // FIXME: Removing child does not set priority correct with overlapping regions
             dimCache.getDimensionalRegion().addChild(child); // this also removes the child from the local parent
@@ -357,85 +392,176 @@ public class RegionCommands {
             MutableComponent parentLink = buildRegionInfoLink(parent, LOCAL);
             MutableComponent notLongerChildLink = buildRegionInfoLink(child, LOCAL);
             MutableComponent dimensionalLink = buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION);
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.children.remove", notLongerChildLink, parentLink));
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.parent.clear", notLongerChildLink, dimensionalLink));
+            sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.info.region.children.remove", notLongerChildLink, parentLink));
+            sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.info.region.parent.clear", notLongerChildLink, dimensionalLink));
             return 0;
         }
         // should not happen, due to RemoveRegionChildArgumentType should only provide valid child regions
         return -1;
     }
 
-    private static int addChildren(CommandSourceStack src, IMarkableRegion parent, IMarkableRegion child) {
+    private static int addChildren(CommandContext<CommandSourceStack> src, IMarkableRegion parent, IMarkableRegion child) {
         if (!parent.hasChild(child) && child.getParent() != null && child.getParent() instanceof DimensionalRegion) {
             parent.addChild(child);
             LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) child, parent.getPriority() + 1);
             RegionDataManager.save();
-
             MutableComponent parentLink = buildRegionInfoLink(parent, LOCAL);
             MutableComponent childLink = buildRegionInfoLink(child, LOCAL);
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.children.add", childLink, parentLink));
+            MutableComponent undoLink = buildRegionActionUndoLink(src.getInput(), ADD, REMOVE);
+            sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.info.region.children.add", childLink, parentLink).append(" ").append(undoLink));
             return 0;
         }
         // should not happen, due to AddRegionChildArgumentType should only provide valid child regions
         return -1;
     }
 
+
     // Adds default flag for provided RegionFlag
-    private static int addFlag(CommandSourceStack src, IMarkableRegion region, RegionFlag flag) {
+    private static int addFlag(CommandContext<CommandSourceStack> src, IMarkableRegion region, RegionFlag flag) {
         if (!region.containsFlag(flag)) {
+            IFlag iFlag = null;
             switch (flag.type) {
                 case BOOLEAN_FLAG:
-                    region.addFlag(new BooleanFlag(flag));
+                    iFlag = new BooleanFlag(flag);
+                    region.addFlag(iFlag);
                     break;
                 case LIST_FLAG:
                 case INT_FLAG:
                     break;
             }
+            // TODO: More general: Trigger for adding flags?
+            if (flag.name.contains("spawning")) {
+                removeInvolvedEntities(src, region, flag);
+            }
             RegionDataManager.save();
-            // TODO: replace flag.name with link to flag info cmd
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.flags.added", flag.name, buildRegionInfoLink(region, LOCAL)));
+            // TODO: flag cmd info link
+            sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.flags.added", buildFlagQuickInfo(iFlag),
+                    buildRegionInfoLink(region, LOCAL)).append(" ").append(buildRegionActionUndoLink(src.getInput(), ADD, REMOVE)));
             return 0;
         }
         return 1;
     }
 
-    private static int removeFlag(CommandSourceStack src, IMarkableRegion region, RegionFlag flag) {
+    public static void removeInvolvedEntities(CommandContext<CommandSourceStack> src, IProtectedRegion region, RegionFlag flag) {
+        // FIXME: Level is where the command source is, not the target level of the region
+        ServerLevel level = src.getSource().getLevel();
+        Predicate<? super Entity> entityFilter = getEntityFilterForFlag(flag);
+        if (region instanceof DimensionalRegion) {
+            List<Entity> entities = getEntitiesToRemove(level, entityFilter, flag);
+            entities.forEach(e -> e.setRemoved(Entity.RemovalReason.DISCARDED));
+        }
+        if (region instanceof IMarkableRegion) {
+            List<Entity> entities = getEntitiesToRemove(level, (IMarkableRegion) region, entityFilter);
+            entities.forEach(e -> e.setRemoved(Entity.RemovalReason.DISCARDED));
+        }
+        if (region instanceof GlobalRegion) {
+            Map<ServerLevel, List<Entity>> entities = getEntitiesToRemove((GlobalRegion) region, entityFilter);
+            entities.forEach((world, entityList) -> {
+                entityList.forEach(e -> e.setRemoved(Entity.RemovalReason.DISCARDED));
+            });
+        }
+    }
+
+    private static Predicate<? super Entity> getEntityFilterForFlag(RegionFlag flag) {
+        switch (flag) {
+            case SPAWNING_ALL:
+                // FIXME: does not remove ExperienceOrbEntity
+                return e -> !(e instanceof Player);
+            case SPAWNING_MONSTER:
+                return HandlerUtil::isMonster;
+            case SPAWNING_ANIMAL:
+                return HandlerUtil::isAnimal;
+            case SPAWNING_GOLEM:
+                return e -> e instanceof AbstractGolem;
+            case SPAWNING_TRADER:
+                return e -> e instanceof WanderingTrader;
+            case SPAWNING_SLIME:
+                return e -> e instanceof Slime;
+            case SPAWNING_VILLAGER:
+                return HandlerUtil::isVillager;
+            case SPAWNING_XP:
+                return e -> e instanceof ExperienceOrb;
+            default:
+                return e -> false;
+        }
+    }
+
+    private static List<Entity> getEntitiesToRemove(ServerLevel level, IMarkableRegion region, Predicate<? super Entity> entityFilter) {
+        // TODO: make this work with areas of different shapes by manually implementing it
+        // TODO: Use the predicate to determine if the entity is within the region
+        // area.intersects(entity.getBoundingBox()) ...
+        return level.getEntities((Entity) null, ((CuboidArea) region.getArea()).getArea(), entityFilter);
+    }
+
+    private static Map<ServerLevel, List<Entity>> getEntitiesToRemove(GlobalRegion region, Predicate<? super Entity> entityFilter) {
+        // FIXME: Exclude entities from Local Regions or DimensionalRegions with flag
+        return new HashMap<>();
+    }
+
+    private static List<Entity> getEntitiesToRemove(ServerLevel level, Predicate<? super Entity> entityFilter, RegionFlag flag) {
+        List<? extends Entity> entities = level.getEntities(EntityTypeTest.forClass(Entity.class), entityFilter);
+        // List<Entity> entities = level.getEntities(null, entityFilter);
+        // don't consider entities, which are currently in a Local Region which doesn't have the flag
+        // TODO: fixme after flags can be negated (either flag is not existent or deactivated...)
+        return entities.stream()
+                .filter(e -> isInRegionWithoutFlag(level, flag, e))
+                .collect(Collectors.toList());
+    }
+
+    private static boolean isInRegionWithoutFlag(ServerLevel level, RegionFlag flag, Entity e) {
+        return LocalRegions.getRegionWithoutFlag(flag, e.blockPosition(), level.dimension()) == null;
+    }
+
+    private static int removeFlag(CommandContext<CommandSourceStack> src, IMarkableRegion region, RegionFlag flag) {
         if (region.containsFlag(flag)) {
             region.removeFlag(flag.name);
             RegionDataManager.save();
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.flags.removed", flag.name, buildRegionInfoLink(region, LOCAL)));
+            sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.flags.removed",
+                    flag.name, buildRegionInfoLink(region, LOCAL)).append(" ").append(buildRegionActionUndoLink(src.getInput(), REMOVE, ADD)));
             return 0;
         }
         return 1;
     }
 
-    private static int setAlertState(CommandSourceStack src, IMarkableRegion region, boolean showAlert) {
-        boolean wasEnabled = !region.isMuted();
+    private static int setAlertState(CommandContext<CommandSourceStack> src, IMarkableRegion region, boolean showAlert) {
+        boolean oldState = !region.isMuted();
         region.setIsMuted(showAlert);
         RegionDataManager.save();
-        if (wasEnabled == region.isMuted()) {
+        if (oldState == region.isMuted()) {
             boolean isEnabled = !region.isMuted();
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.state.alert.set.value", buildRegionInfoLink(region, LOCAL), wasEnabled, isEnabled));
+            MutableComponent undoLink = buildRegionActionUndoLink(src.getInput(), showAlert ? TRUE : FALSE, showAlert ? FALSE : TRUE);
+            sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.info.region.state.alert.set.value",
+                    buildRegionInfoLink(region, LOCAL), oldState, isEnabled).append(" ").append(undoLink));
         }
         return 0;
     }
 
-    private static int setEnableState(CommandSourceStack src, IMarkableRegion region, boolean enable) {
+    private static int setAlertState(CommandContext<CommandSourceStack> src, IMarkableRegion region) {
+        return setAlertState(src, region, !region.isMuted());
+    }
+
+    private static int setEnableState(CommandContext<CommandSourceStack> src, IMarkableRegion region, boolean enable) {
         boolean oldState = region.isActive();
         region.setIsActive(enable);
         RegionDataManager.save();
         if (oldState != region.isActive()) {
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.state.enable.set.value", buildRegionInfoLink(region, LOCAL), oldState, region.isActive()));
+            MutableComponent undoLink = buildRegionActionUndoLink(src.getInput(), enable ? TRUE : FALSE, enable ? FALSE : TRUE);
+            sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.info.region.state.enable.set.value",
+                    buildRegionInfoLink(region, LOCAL), oldState, region.isActive()).append(" ").append(undoLink));
         }
         return 0;
     }
 
-    private static int setPriority(CommandSourceStack src, IMarkableRegion region, int priority, int factor) {
+    private static int setEnableState(CommandContext<CommandSourceStack> src, IMarkableRegion region) {
+        return setEnableState(src, region, !region.isActive());
+    }
+
+    private static int setPriority(CommandContext<CommandSourceStack> src, IMarkableRegion region, int priority, int factor) {
         long newValue = (long) region.getPriority() + ((long) priority * factor);
         if (Integer.MAX_VALUE - newValue > 0) {
             return setPriority(src, region, (int) newValue);
         } else {
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.warn.region.state.priority.set.invalid", buildRegionInfoLink(region, LOCAL), newValue));
+            sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.warn.region.state.priority.set.invalid", buildRegionInfoLink(region, LOCAL), newValue));
             return -1;
         }
     }
@@ -449,7 +575,7 @@ public class RegionCommands {
      * @param priority
      * @return
      */
-    private static int setPriority(CommandSourceStack src, IMarkableRegion region, int priority) {
+    private static int setPriority(CommandContext<CommandSourceStack> src, IMarkableRegion region, int priority) {
         CuboidRegion cuboidRegion = (CuboidRegion) region;
         List<CuboidRegion> intersectingRegions = LocalRegions.getIntersectingRegionsFor(cuboidRegion);
         boolean existRegionWithSamePriority = intersectingRegions
@@ -460,23 +586,25 @@ public class RegionCommands {
             int parentPriority = ((IMarkableRegion) parent).getPriority();
             if (parentPriority >= priority) {
                 MutableComponent updatePriorityFailMsg = new TranslatableComponent("cli.msg.info.region.state.priority.set.fail.to-low", buildRegionInfoLink(region, LOCAL));
-                sendCmdFeedback(src, updatePriorityFailMsg);
+                sendCmdFeedback(src.getSource(), updatePriorityFailMsg);
                 return 1;
             }
         }
         if (existRegionWithSamePriority) {
             MutableComponent updatePriorityFailMsg = new TranslatableComponent("cli.msg.info.region.state.priority.set.fail.same", buildRegionInfoLink(region, LOCAL), priority);
-            sendCmdFeedback(src, updatePriorityFailMsg);
+            sendCmdFeedback(src.getSource(), updatePriorityFailMsg);
             return 1;
         } else {
             int oldPriority = region.getPriority();
             if (oldPriority != priority) {
                 region.setPriority(priority);
                 RegionDataManager.save();
-                sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.state.priority.set.success", buildRegionInfoLink(region, LOCAL), oldPriority, region.getPriority()));
+                MutableComponent undoLink = buildRegionActionUndoLink(src.getInput(), String.valueOf(oldPriority), String.valueOf(priority));
+                sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.info.region.state.priority.set.success",
+                        buildRegionInfoLink(region, LOCAL), oldPriority, region.getPriority()).append(" ").append(undoLink));
                 return 0;
             } else {
-                sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.state.priority.set.fail.no-change", buildRegionInfoLink(region, LOCAL)));
+                sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.info.region.state.priority.set.fail.no-change", buildRegionInfoLink(region, LOCAL)));
                 return 1;
             }
         }
@@ -604,9 +732,9 @@ public class RegionCommands {
 
     // TODO: Only with region marker
     // assumption: regions are only updated with the region marker when in the same dimension
-    private static int updateRegion(CommandSourceStack src, IMarkableRegion region) {
+    private static int updateRegion(CommandContext<CommandSourceStack> src, IMarkableRegion region) {
         try {
-            Player player = src.getPlayerOrException();
+            Player player = src.getSource().getPlayerOrException();
             ItemStack maybeStick = player.getMainHandItem();
             if (StickUtil.isVanillaStick(maybeStick)) {
                 try {
@@ -616,7 +744,7 @@ public class RegionCommands {
                         // TODO: RegionDataManager.get().update(regionName, marker);
                     }
                 } catch (StickException e) {
-                    sendCmdFeedback(src, "CommandSourceStack is not player. Aborting.. Needs RegionMarker with Block-NBT data in player hand");
+                    sendCmdFeedback(src.getSource(), "CommandSource is not player. Aborting.. Needs RegionMarker with Block-NBT data in player hand");
                 }
             }
         } catch (CommandSyntaxException e) {
@@ -653,14 +781,16 @@ public class RegionCommands {
         }
     }
 
-    private static int setTeleportPos(CommandSourceStack src, IMarkableRegion region, BlockPos target) {
+    // Todo: Enable/Disable teleporting? - Only for owners?
+    private static int setTeleportPos(CommandContext<CommandSourceStack> src, IMarkableRegion region, BlockPos target) {
         if (!region.getTpTarget().equals(target)) {
             region.setTpTarget(target);
             RegionDataManager.save();
             MutableComponent newTpTargetLink = buildDimensionalBlockTpLink(region.getDim(), target);
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.region.spatial.location.teleport.set", buildRegionInfoLink(region, LOCAL), newTpTargetLink));
+            sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.info.region.spatial.location.teleport.set", buildRegionInfoLink(region, LOCAL), newTpTargetLink));
             return 0;
         }
         return 1;
     }
+
 }
