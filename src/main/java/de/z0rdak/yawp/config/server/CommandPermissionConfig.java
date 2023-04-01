@@ -5,6 +5,9 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.management.OpEntry;
+import net.minecraft.tileentity.CommandBlockTileEntity;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
@@ -45,7 +48,7 @@ public class CommandPermissionConfig {
         ALLOW_READ_ONLY_CMDS = BUILDER.comment("Defines whether info commands for regions can be used by every player.")
                 .define("allow_info_cmds", true);
 
-        PLAYERS_WITH_PERMISSION = BUILDER.comment("Player UUIDs with permission to use mod commands")
+        PLAYERS_WITH_PERMISSION = BUILDER.comment("Player UUIDs with permission to use mod commands.\n Make sure to put the UUIDs in parentheses, just like a normal string.\n Example: players_with_permission = [\"614c9eac-11c9-3ca6-b697-938355fa8235\", \"b9f5e998-520a-3fa2-8208-0c20f22aa20f\"]")
                 .defineListAllowEmpty(Collections.singletonList("players_with_permission"), ArrayList::new, (uuid) -> {
                     if (uuid instanceof String) {
                         try {
@@ -87,16 +90,20 @@ public class CommandPermissionConfig {
     }
 
 
+    // FIXME: What about CommandBlockMinecarts?
     public static boolean hasPermission(CommandSource source) {
         try {
             return hasPlayerPermission(source.getPlayerOrException());
         } catch (CommandSyntaxException e) {
-            // FIXME: How to identify server console
             boolean isServerConsole = source.getTextName().equals("Server");
             if (isServerConsole) {
                 return true;
             } else {
-                return COMMAND_BLOCK_EXECUTION.get();
+                TileEntity blockEntity = source.getLevel().getBlockEntity(new BlockPos(source.getPosition()));
+                if (blockEntity instanceof CommandBlockTileEntity) {
+                    return COMMAND_BLOCK_EXECUTION.get();
+                }
+                return false;
             }
         }
     }
