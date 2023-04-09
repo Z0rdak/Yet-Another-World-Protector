@@ -27,7 +27,7 @@ public abstract class CommandManagerMixin {
     @Final
     private CommandDispatcher<ServerCommandSource> dispatcher;
 
-    @Inject(method = "execute", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/CommandDispatcher;execute(Lcom/mojang/brigadier/StringReader;Ljava/lang/Object;)I"), cancellable = true, remap = false)
+    @Inject(method = "execute", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/CommandDispatcher;execute(Lcom/mojang/brigadier/StringReader;Ljava/lang/Object;)I"), cancellable = true)
     public void execute(ServerCommandSource commandSource, String command, CallbackInfoReturnable<Integer> cir) {
         // check mod command permissions
         ParseResults<ServerCommandSource> parseResults = this.dispatcher.parse(command, commandSource);

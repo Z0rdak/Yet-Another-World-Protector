@@ -24,7 +24,7 @@ import static de.z0rdak.yawp.handler.flags.HandlerUtil.sendFlagDeniedMsg;
 @Mixin(FarmlandBlock.class)
 public abstract class FarmLandBlockMixin {
 
-    @Inject(method = "onLandedUpon", at = @At(value = "HEAD"), cancellable = true, remap = false)
+    @Inject(method = "onLandedUpon", at = @At(value = "HEAD"), cancellable = true)
     private void onTrampleFarmland(World world, BlockState state, BlockPos pos, Entity trampler, float fallDistance, CallbackInfo info) {
         if (!world.isClient) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.getRegistryKey());
