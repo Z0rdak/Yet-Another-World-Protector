@@ -1,3 +1,6 @@
+# [0.0.2.7-beta2] - 2023-04-09
+## Fixed
+* Fix YAWP flags not working due to configuration errors (damn mixins!)
 # [0.0.2.7-beta1] - 2023-03-29
 From now on this changelog will use the keep a changelog format: https://keepachangelog.com/en/1.0.0/. YAWP is still following the schematic versioning suggested by forge: https://docs.minecraftforge.net/en/1.19.x/gettingstarted/versioning/.
 ## Added
