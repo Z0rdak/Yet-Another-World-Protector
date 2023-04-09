@@ -32,7 +32,6 @@ public class ServerWorldMixin {
     @Inject(method = "addEntity", at = @At("HEAD"), cancellable = true, allow = 1)
     public void onSpawnEntity(Entity entity, CallbackInfoReturnable<Boolean> cir) {
         if (!entity.world.isClient) {
-            YetAnotherWorldProtector.LOGGER.info("Spawning Mixin triggered!");
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(entity));
             FlagCheckEvent flagCheck = checkTargetEvent(entity.getBlockPos(), SPAWNING_ALL, dimCache.getDimensionalRegion());
             if (flagCheck.isDenied()) {
@@ -40,7 +39,6 @@ public class ServerWorldMixin {
                 return;
             }
             if (isMonster(entity)) {
-                YetAnotherWorldProtector.LOGGER.info("MONSTER - Spawning Mixin triggered!");
                 flagCheck = checkTargetEvent(entity.getBlockPos(), SPAWNING_MONSTER, dimCache.getDimensionalRegion());
                 if (flagCheck.isDenied()) {
                     cir.setReturnValue(false);
