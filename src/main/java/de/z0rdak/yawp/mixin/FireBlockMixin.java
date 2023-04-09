@@ -17,7 +17,7 @@ import java.util.Random;
 @Mixin(FireBlock.class)
 public abstract class FireBlockMixin {
 
-    @Inject(method = "tryCatchFire", at = @At(value = "HEAD"), cancellable = true, remap = false)
+    @Inject(method = "tryCatchFire", at = @At(value = "HEAD"), cancellable = true)
     private void spread(Level world, BlockPos pos, int spreadFactor, Random rand, int currentAge, Direction dir, CallbackInfo info) {
         if (!world.isClientSide) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.dimension());
