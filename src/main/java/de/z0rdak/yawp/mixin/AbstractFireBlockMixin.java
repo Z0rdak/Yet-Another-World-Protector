@@ -22,7 +22,7 @@ import static de.z0rdak.yawp.handler.flags.HandlerUtil.checkTargetEvent;
 @Mixin(AbstractFireBlock.class)
 public abstract class AbstractFireBlockMixin {
 
-    @Inject(method = "onBlockAdded", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/dimension/AreaHelper;getNewPortal(Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/Direction$Axis;)Ljava/util/Optional;"), cancellable = true, remap = false)
+    @Inject(method = "onBlockAdded", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/dimension/AreaHelper;getNewPortal(Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/Direction$Axis;)Ljava/util/Optional;"), cancellable = true)
     private void onSpawnPortal(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify, CallbackInfo info) {
         if (!world.isClient) {
             Optional<NetherPortal> optional = NetherPortal.getNewPortal(world, pos, Direction.Axis.X);
