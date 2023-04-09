@@ -1,6 +1,6 @@
 {
   "pack": {
-    "description": "${mod_name} resources",
-    "pack_format": 9
+    "description": "Internationalisation keys for Yet Another World Protector",
+    "pack_format": 8
   }
 }

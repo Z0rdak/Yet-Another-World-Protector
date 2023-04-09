@@ -1,19 +1,20 @@
 {
   "schemaVersion": 1,
   "id": "yawp",
-  "version": "0.0.2.7-beta1",
+  "version": "0.0.2.7-beta2",
   "name": "Yet Another World Protector",
-  "description": "",
+  "description": "Yet Another World Protector (YAWP) is a server-side mod to protect your creations. It was inspired by the forge mod WorldProtector and the WorldGuard plugin.",
   "authors": [
     "Z0rdak"
   ],
   "contact": {
     "homepage": "https://www.curseforge.com/minecraft/mc-mods/yawp",
-    "sources": "https://github.com/Z0rdak/Yet-Another-World-Protector"
+    "sources": "https://github.com/Z0rdak/Yet-Another-World-Protector",
+    "issues": "https://github.com/Z0rdak/Yet-Another-World-Protector/issues"
   },
   "license": "LGPL-3.0",
-  "icon": "assets/yawp/icon.png",
-  "environment": "*",
+  "icon": "logo.png",
+  "environment": "server",
   "entrypoints": {
     "server": [
       "de.z0rdak.yawp.YetAnotherWorldProtector"
@@ -25,10 +26,9 @@
   "depends": {
     "fabricloader": ">=0.14.6",
     "fabric": "*",
+    "fabric-api": ">=0.70",
+    "forgeconfigapiport": "*",
     "minecraft": "~1.18.2",
     "java": ">=17"
-  },
-  "suggests": {
-    "another-mod": "*"
   }
 }
