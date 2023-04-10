@@ -2,10 +2,10 @@ package de.z0rdak.yawp.mixin;
 
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.FireBlock;
-import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -17,14 +17,14 @@ import java.util.Random;
 @Mixin(FireBlock.class)
 public abstract class FireBlockMixin {
 
-    @Inject(method = "tryCatchFire", at = @At(value = "HEAD"), cancellable = true)
-    private void spread(World world, BlockPos pos, int spreadFactor, Random rand, int currentAge, Direction dir, CallbackInfo info) {
+    @Inject(method = "tick", at = @At(value = "HEAD"), cancellable = true, remap = false)
+    private void onFireTick(BlockState state, ServerWorld world, BlockPos pos, Random rand, CallbackInfo info) {
         if (!world.isClientSide) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.dimension());
             /*
-            FlagCheckEvent flagCheckEvent = HandlerUtil.checkTargetEvent(pos, FIRE_TICK, dimCache.getDimensionalRegion());
+            FlagCheckEvent flagCheckEvent = HandlerUtil.checkTargetEvent(pos, FIRE_DESTROY, dimCache.getDimensionalRegion());
             if (flagCheckEvent.isDenied()) {
-                info.cancel();
+               info.cancel();
             }
 
              */
