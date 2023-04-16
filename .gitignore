@@ -6,6 +6,8 @@ bin
 .classpath
 .project
 
+logs
+
 # idea
 out
 *.ipr
