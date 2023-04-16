@@ -99,6 +99,7 @@ public class RegionDataManager extends WorldSavedData {
      *
      * @param event which is fired upon server start and acts as trigger to load region data from disk.
      */
+    @SubscribeEvent
     public static void loadRegionData(FMLServerStartingEvent event) {
         try {
             ServerWorld world = Objects.requireNonNull(event.getServer().overworld());
