@@ -7,7 +7,10 @@ import de.z0rdak.yawp.util.CommandUtil;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.*;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.TranslatableText;
 
 import static de.z0rdak.yawp.util.MessageUtil.buildExecuteCmdComponent;
 import static de.z0rdak.yawp.util.MessageUtil.buildHeader;
@@ -19,11 +22,24 @@ public class CommandRegistry {
     private CommandRegistry() {
     }
 
-    public static void register(CommandDispatcher<ServerCommandSource> commandDispatcher, String modRootCmd) {
-        commandDispatcher.register(buildCommands(modRootCmd));
+    private static CommandDispatcher<ServerCommandSource> dispatcher;
+    private static boolean isConfigInitialized = false;
+
+    public static void registerCommands(CommandDispatcher<ServerCommandSource> commandDispatcher, boolean isDedicated) {
+        dispatcher = commandDispatcher;
+        if (isDedicated) {
+            if (isConfigInitialized) {
+                CommandRegistry.register(CommandPermissionConfig.BASE_CMD);
+            }
+        }
     }
 
-    public static LiteralArgumentBuilder<ServerCommandSource> buildCommands(String baseCmd) {
+    public static void register(String modRootCmd) {
+        dispatcher.register(buildCommands(modRootCmd));
+        CommandRegistry.isConfigInitialized = true;
+    }
+
+    private static LiteralArgumentBuilder<ServerCommandSource> buildCommands(String baseCmd) {
         return CommandManager.literal(baseCmd)
                 .executes(ctx -> promptHelp(ctx.getSource()))
                 .then(CommandUtil.literal(CommandConstants.HELP)

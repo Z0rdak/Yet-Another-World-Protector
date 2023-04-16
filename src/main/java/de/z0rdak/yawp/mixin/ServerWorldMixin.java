@@ -85,7 +85,7 @@ public class ServerWorldMixin {
     }
 
     @Inject(method = "createExplosion", at = @At("HEAD"), cancellable = true, allow = 1)
-    public void onIgniteExplosive(@Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionBehavior behavior, double x, double y, double z, float power, boolean createFire, Explosion.DestructionType destructionType, CallbackInfoReturnable<Boolean> cir) {
+    public void onIgniteExplosive(@Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionBehavior behavior, double x, double y, double z, float power, boolean createFire, Explosion.DestructionType destructionType, CallbackInfoReturnable<Explosion> cir) {
         ServerWorld world = (ServerWorld) (Object) this;
         Explosion explosion = new Explosion(world, entity, damageSource, behavior, x, y, z, power, createFire, destructionType);
         if (!world.isClient) {
@@ -95,7 +95,7 @@ public class ServerWorldMixin {
                 if (explosion.getDamageSource().getSource() instanceof PlayerEntity player) {
                     sendFlagDeniedMsg(flagCheck, player);
                 }
-                cir.setReturnValue(false);
+                cir.setReturnValue(explosion);
             }
         }
     }

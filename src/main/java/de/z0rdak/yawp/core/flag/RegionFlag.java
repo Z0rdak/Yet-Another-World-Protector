@@ -39,12 +39,17 @@ public enum RegionFlag {
     KNOCKBACK_PLAYERS("knockback-players", FlagType.BOOLEAN_FLAG),
     LEVEL_FREEZE("level-freeze", FlagType.BOOLEAN_FLAG),
     LIGHTNING_PROT("lightning", FlagType.BOOLEAN_FLAG),
+    //NO_MELTING("melting", FlagType.BOOLEAN_FLAG),
+    //NO_WATER_FREEZE("water-freeze", FlagType.BOOLEAN_FLAG),
+    NO_WALKER_FREEZE("walker-freeze", FlagType.BOOLEAN_FLAG),
+    LEAF_DECAY("leaf-decay", FlagType.BOOLEAN_FLAG),
+    FIRE_TICK("fire-tick", FlagType.BOOLEAN_FLAG),
     MELEE_ANIMALS("melee-animals", FlagType.BOOLEAN_FLAG),
     MELEE_MONSTERS("melee-monsters", FlagType.BOOLEAN_FLAG),
     MELEE_PLAYERS("melee-players", FlagType.BOOLEAN_FLAG),
     MELEE_VILLAGERS("melee-villagers", FlagType.BOOLEAN_FLAG),
     MELEE_WANDERING_TRADER("melee-wtrader", FlagType.BOOLEAN_FLAG),
-    //  MOB_GRIEFING("mob-griefing", FlagType.BOOLEAN_FLAG), // FIXME: soon
+    // MOB_GRIEFING("mob-griefing", FlagType.BOOLEAN_FLAG), // FIXME: soon
     NO_FLIGHT("no-flight", FlagType.BOOLEAN_FLAG),
     NO_PVP("no-pvp", FlagType.BOOLEAN_FLAG),
     PLACE_BLOCKS("place-blocks", FlagType.BOOLEAN_FLAG),

@@ -5,7 +5,7 @@ import de.z0rdak.yawp.handler.flags.HandlerUtil;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.FireBlock;
+import net.minecraft.block.LeavesBlock;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,16 +15,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Random;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.FIRE_TICK;
+import static de.z0rdak.yawp.core.flag.RegionFlag.LEAF_DECAY;
 
-@Mixin(FireBlock.class)
-public abstract class FireBlockMixin {
+@Mixin(LeavesBlock.class)
+public class LeavesBlockMixin {
 
-    @Inject(method = "scheduledTick", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "randomTick", at = @At(value = "HEAD"), cancellable = true)
     private void spread(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo info) {
         if (!world.isClient) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.getRegistryKey());
-            FlagCheckEvent flagCheckEvent = HandlerUtil.checkTargetEvent(pos, FIRE_TICK, dimCache.getDimensionalRegion());
+            FlagCheckEvent flagCheckEvent = HandlerUtil.checkTargetEvent(pos, LEAF_DECAY, dimCache.getDimensionalRegion());
             if (flagCheckEvent.isDenied()) {
                 info.cancel();
             }

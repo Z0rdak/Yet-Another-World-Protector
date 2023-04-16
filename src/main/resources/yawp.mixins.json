@@ -4,7 +4,6 @@
   "minVersion": "0.8.2",
   "package": "de.z0rdak.yawp.mixin",
   "mixins": [
-
   ],
   "client": [],
   "server": [
@@ -21,8 +20,10 @@
     "ExplosionMixin",
     "FarmLandBlockMixin",
     "FireBlockMixin",
+    "FrostWalkerEnchantmentMixin",
     "HoeItemMixin",
     "ItemEntityMixin",
+    "LeavesBlockMixin",
     "LightningEntityMixin",
     "LivingEntityMixin",
     "LlamaEntityMixin",
