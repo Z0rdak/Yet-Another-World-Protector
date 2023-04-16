@@ -4,10 +4,13 @@
   "minVersion": "0.8.2",
   "package": "de.z0rdak.yawp.mixin",
   "refmap": "${mod_id}.refmap.json",
-  "mixins": [],
+  "mixins": [
+  ],
   "client": [],
   "server": [
     "FireBlockMixin",
+    "FrostWalkerEnchantmentMixin",
+    "LeavesBlockMixin",
     "MixinAbstractMinecartEntity",
     "MixinAgeableEntity",
     "MixinFlyingEntity",
