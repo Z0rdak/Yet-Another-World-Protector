@@ -98,6 +98,7 @@ public class RegionDataManager extends SavedData {
      *
      * @param event which is fired upon server start and acts as trigger to load region data from disk.
      */
+    @SubscribeEvent
     public static void loadRegionData(ServerStartingEvent event) {
         try {
             ServerLevel world = Objects.requireNonNull(event.getServer().overworld());
