@@ -4,10 +4,11 @@
   "minVersion": "0.8.2",
   "package": "de.z0rdak.yawp.mixin",
   "mixins": [
-
   ],
   "client": [],
   "server": [
+    "FrostWalkerEnchantmentMixin",
+    "LeavesBlockMixin",
     "AbstractFireBlockMixin",
     "AbstractHorseEntityMixin",
     "AnimalMixin",
