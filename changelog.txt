@@ -1,3 +1,13 @@
+# [0.0.2.8-beta1] - 2023-04-14
+## Added
+* Add `leaf-decay` flag (#66).
+* Add `fire-tick` flag (#66).
+* Add `walker-freeze` flag (#66).
+* YAWP now detects whether Journey Map is loaded alongside it and sets the base command to `/yawp`.
+## Fixed
+* Fix YAWP commands being unregistered upon using `/reload`. This fixes the issue with using Ice & Fire together with YAWP (#75).
+* Fix YAWP resource pack not loading correctly at client side.
+* Fix `ignite-explosives` causing the server to crash.
 # [0.0.2.7-beta2] - 2023-04-09
 ## Fixed
 * Fix YAWP flags not working due to configuration errors (damn mixins!)
