@@ -14,9 +14,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.DefaultedRegistry;
@@ -177,7 +175,7 @@ public class RegionDataManager extends PersistentState {
      * @param origin
      * @param destination
      */
-    public static void onPlayerChangeWorldAddDimKey(ServerPlayerEntity serverPlayerEntity, ServerWorld origin, ServerWorld destination) {
+    public static void onPlayerChangeWorldAddDimKey(PlayerEntity serverPlayerEntity, ServerWorld origin, ServerWorld destination) {
         if (!destination.isClient) {
             if (!regionDataCache.dimCacheMap.containsKey(destination.getRegistryKey())) {
                 DimensionRegionCache cache = RegionDataManager.get().newCacheFor(destination.getRegistryKey());

@@ -39,6 +39,7 @@ public abstract class ServerPlayerMixin {
     private void onChangeDimension(ServerWorld destination, CallbackInfoReturnable<Entity> cir) {
         PlayerEntity player = (PlayerEntity) (Object) this;
         if (isServerSide(player)) {
+            RegionDataManager.onPlayerChangeWorldAddDimKey(player, (ServerWorld) player.world, destination);
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
             FlagCheckEvent.PlayerFlagEvent flagCheck = checkPlayerEvent(player, player.getBlockPos(), RegionFlag.USE_PORTAL_PLAYERS, dimCache.getDimensionalRegion());
