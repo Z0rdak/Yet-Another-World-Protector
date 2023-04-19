@@ -72,6 +72,7 @@ public abstract class EntityMixin {
     public void onChangeDimension(ServerWorld destination, CallbackInfoReturnable<Entity> cir) {
         Entity self = (Entity) (Object) this;
         if (!self.getWorld().isClient) {
+            RegionDataManager.onPlayerChangeWorldAddDimKey(null, (ServerWorld) self.world, destination);
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(self));
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
             // Note: does not seem to trigger for players, which is fine
