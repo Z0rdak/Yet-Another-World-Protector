@@ -16,7 +16,6 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -172,11 +171,11 @@ public class RegionDataManager extends PersistentState {
      * An event which is called after a player has been moved to a different world.
      * Event handler which creates a new DimensionRegionCache when a dimension is created the first time, by a player loading the dimension.
      *
-     * @param serverPlayerEntity
+     * @param playerEntity
      * @param origin
      * @param destination
      */
-    public static void onPlayerChangeWorldAddDimKey(ServerPlayerEntity serverPlayerEntity, ServerWorld origin, ServerWorld destination) {
+    public static void onPlayerChangeWorldAddDimKey(PlayerEntity playerEntity, ServerWorld origin, ServerWorld destination) {
         if (!destination.isClient) {
             if (!regionDataCache.dimCacheMap.containsKey(destination.getRegistryKey())) {
                 DimensionRegionCache cache = RegionDataManager.get().newCacheFor(destination.getRegistryKey());
