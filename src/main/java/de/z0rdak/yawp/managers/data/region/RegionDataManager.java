@@ -25,6 +25,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.server.ServerLifecycleHooks;
@@ -170,7 +171,7 @@ public class RegionDataManager extends SavedData {
      *
      * @param event the EntityTravelToDimensionEvent which serves as a trigger and provides the information which dimension the player is traveling to.
      */
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
     public static void addDimKeyOnDimensionChange(EntityTravelToDimensionEvent event) {
         if (!event.getEntity().getCommandSenderWorld().isClientSide) {
             if (event.getEntity() instanceof Player) {
