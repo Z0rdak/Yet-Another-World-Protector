@@ -70,29 +70,29 @@ public class CommandInterceptor {
                 if (src.getEntity() instanceof PlayerEntity) {
                     ServerPlayerEntity player = src.getPlayerOrThrow();
                     boolean hasConfigPermission = hasPlayerPermission(player);
+                    boolean isOwner = region.hasOwner(player.getUuid()) || (player.getScoreboardTeam() != null && region.hasOwner(player.getScoreboardTeam().getName()));
+                    boolean isOwnerOfParent = region.getParent() != null && region.getParent().hasOwner(player.getUuid())
+                            || (player.getScoreboardTeam() != null && region.getParent().hasOwner(player.getScoreboardTeam().getName()));
                     boolean containsInfoCmd = nodeNames.contains(INFO.toString()) || nodeNames.contains(LIST.toString()) || nodeNames.contains(SPATIAL.toString());
+
                     // /wp region <dim> <region> info|list|spatial|state
                     if (cmdNodes.size() == 4 || (cmdNodes.size() > 4 && containsInfoCmd) || cmdNodes.size() == 5 && nodeNames.get(4).equals(STATE.toString())) {
-                        if (!(AllowInfoCmds() || hasConfigPermission)) {
-                            sendCmdFeedback(src, Text.translatable(  "cli.msg.dim.info.region.info.deny", buildRegionInfoLink(region, LOCAL)));
+                        if (!(isOwner || AllowInfoCmds() || hasConfigPermission)) {
+                            sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.info.deny", buildRegionInfoLink(region, LOCAL)));
                             return 1;
                         }
                         return 0;
                     }
                     // check if player is owner of parent region or has permission to update region area
                     if (cmdNodes.size() > 4 && nodeNames.contains(AREA.toString())) {
-                        if (!region.getParent().hasOwner(player.getUuid())
-                                && (player.getScoreboardTeam() == null || !region.getParent().hasOwner(player.getScoreboardTeam().getName()))
-                                && !hasConfigPermission) {
+                        if (!isOwnerOfParent && !isOwner && !hasConfigPermission) {
                             YetAnotherWorldProtector.LOGGER.info("Player not allowed to manage region '" + region.getName() + "'");
                             sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region, LOCAL)));
                             return 1;
                         }
                     }
                     // check permission for other commands
-                    if (!region.hasOwner(player.getUuid())
-                            && (player.getScoreboardTeam() == null || !region.hasOwner(player.getScoreboardTeam().getName()))
-                            && !hasConfigPermission) {
+                    if (!isOwner && !hasConfigPermission) {
                         YetAnotherWorldProtector.LOGGER.info("Player not allowed to manage region '" + region.getName() + "'");
                         sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region, LOCAL)));
                         return 1;
@@ -127,20 +127,22 @@ public class CommandInterceptor {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
             try {
                 if (src.getEntity() instanceof PlayerEntity) {
-                    ServerPlayerEntity player = src.getPlayerOrThrow();
-                    boolean hasConfigPermission = hasPlayerPermission(player);
-                    // check for info cmd permission
-                    boolean isInfoCmd = (nodeNames.size() > 3 && nodeNames.contains(INFO.toString()) || nodeNames.contains(LIST.toString()));
-                    if (nodeNames.size() == 3 || isInfoCmd) {
-                        if (!(AllowInfoCmds() || hasConfigPermission))  {
-                            sendCmdFeedback(src, Text.translatable(  "cli.msg.dim.info.region.info.deny", buildRegionInfoLink(dimCache.getDimensionalRegion(), DIMENSION)));
-                            return 1;
-                        }
-                        return 0;
-                    }
-                    // check permission for other commands
                     if (dimCache != null) {
-                        if (!dimCache.hasOwner(player) && !hasConfigPermission) {
+                        ServerPlayerEntity player = src.getPlayerOrThrow();
+                        boolean hasConfigPermission = hasPlayerPermission(player);
+                        boolean isOwner = dimCache.hasOwner(player);
+
+                        // check for info cmd permission
+                        boolean isInfoCmd = (nodeNames.size() > 3 && nodeNames.contains(INFO.toString()) || nodeNames.contains(LIST.toString()));
+                        if (nodeNames.size() == 3 || isInfoCmd) {
+                            if (!(isOwner || AllowInfoCmds() || hasConfigPermission)) {
+                                sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.info.deny", buildRegionInfoLink(dimCache.getDimensionalRegion(), DIMENSION)));
+                                return 1;
+                            }
+                            return 0;
+                        }
+                        // check permission for other commands
+                        if (!isOwner && !hasConfigPermission) {
                             YetAnotherWorldProtector.LOGGER.info("Player not allowed to manage dim");
                             sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.modify.dim.deny", buildRegionInfoLink(dimCache.getDimensionalRegion(), DIMENSION)));
                             return 1;
