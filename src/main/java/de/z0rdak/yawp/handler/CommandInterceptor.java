@@ -66,47 +66,53 @@ public class CommandInterceptor {
             return 0;
         }
         ParsedArgument<ServerCommandSource, ?> regionArg = cmdContext.getArguments().get(REGION.toString());
-        if (regionArg.getResult() instanceof IMarkableRegion region) {
-            try {
-                if (src.getEntity() instanceof PlayerEntity) {
-                    ServerPlayerEntity player = src.getPlayer();
-                    boolean hasConfigPermission = hasPlayerPermission(player);
-                    boolean isOwner = region.hasOwner(player.getUuid()) || (player.getScoreboardTeam() != null && region.hasOwner(player.getScoreboardTeam().getName()));
-                    boolean isOwnerOfParent = region.getParent() != null && region.getParent().hasOwner(player.getUuid())
-                            || (player.getScoreboardTeam() != null && region.getParent().hasOwner(player.getScoreboardTeam().getName()));
-                    boolean containsInfoCmd = nodeNames.contains(INFO.toString()) || nodeNames.contains(LIST.toString()) || nodeNames.contains(SPATIAL.toString());
+        if (regionArg != null && regionArg.getResult() instanceof String regionName) {
+            ParsedArgument<ServerCommandSource, ?> dimParsedArgument = cmdContext.getArguments().get(DIM.toString());
+            if (dimParsedArgument != null && dimParsedArgument.getResult() instanceof Identifier dimResLoc) {
+                RegistryKey<World> dim = RegistryKey.of(DefaultedRegistry.WORLD_KEY, dimResLoc);
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
+                IMarkableRegion region = dimCache.getRegion(regionName);
+                try {
+                    if (src.getEntity() instanceof PlayerEntity) {
+                        ServerPlayerEntity player = src.getPlayer();
+                        boolean hasConfigPermission = hasPlayerPermission(player);
+                        boolean isOwner = region.hasOwner(player.getUuid()) || (player.getScoreboardTeam() != null && region.hasOwner(player.getScoreboardTeam().getName()));
+                        boolean isOwnerOfParent = region.getParent() != null && region.getParent().hasOwner(player.getUuid())
+                                || (player.getScoreboardTeam() != null && region.getParent().hasOwner(player.getScoreboardTeam().getName()));
+                        boolean containsInfoCmd = nodeNames.contains(INFO.toString()) || nodeNames.contains(LIST.toString()) || nodeNames.contains(SPATIAL.toString());
 
-                    // /wp region <dim> <region> info|list|spatial|state
-                    if (cmdNodes.size() == 4 || (cmdNodes.size() > 4 && containsInfoCmd) || cmdNodes.size() == 5 && nodeNames.get(4).equals(STATE.toString())) {
-                        if (!(isOwner || AllowInfoCmds() || hasConfigPermission)) {
-                            sendCmdFeedback(src, new TranslatableText("cli.msg.dim.info.region.info.deny", buildRegionInfoLink(region, LOCAL)));
-                            return 1;
+                        // /wp region <dim> <region> info|list|spatial|state
+                        if (cmdNodes.size() == 4 || (cmdNodes.size() > 4 && containsInfoCmd) || cmdNodes.size() == 5 && nodeNames.get(4).equals(STATE.toString())) {
+                            if (!(isOwner || AllowInfoCmds() || hasConfigPermission)) {
+                                sendCmdFeedback(src, new TranslatableText("cli.msg.dim.info.region.info.deny", buildRegionInfoLink(region, LOCAL)));
+                                return 1;
+                            }
+                            return 0;
                         }
-                        return 0;
-                    }
-                    // check if player is owner of parent region or has permission to update region area
-                    if (cmdNodes.size() > 4 && nodeNames.contains(AREA.toString())) {
-                        if (!isOwnerOfParent && !isOwner && !hasConfigPermission) {
+                        // check if player is owner of parent region or has permission to update region area
+                        if (cmdNodes.size() > 4 && nodeNames.contains(AREA.toString())) {
+                            if (!isOwnerOfParent && !isOwner && !hasConfigPermission) {
+                                YetAnotherWorldProtector.LOGGER.info("Player not allowed to manage region '" + region.getName() + "'");
+                                sendCmdFeedback(src, new TranslatableText("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region, LOCAL)));
+                                return 1;
+                            }
+                        }
+                        // check permission for other commands
+                        if (!isOwner && !hasConfigPermission) {
                             YetAnotherWorldProtector.LOGGER.info("Player not allowed to manage region '" + region.getName() + "'");
                             sendCmdFeedback(src, new TranslatableText("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region, LOCAL)));
                             return 1;
                         }
+                    } else {
+                        if (!hasPermission(src)) {
+                            YetAnotherWorldProtector.LOGGER.info("' " + src.getName() + "' is not allowed to manage region: '" + region.getName() + "' in dim '" + region.getDim().getValue() + "'!");
+                            sendCmdFeedback(src, new TranslatableText("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region, LOCAL)));
+                            return 1;
+                        }
                     }
-                    // check permission for other commands
-                    if (!isOwner && !hasConfigPermission) {
-                        YetAnotherWorldProtector.LOGGER.info("Player not allowed to manage region '" + region.getName() + "'");
-                        sendCmdFeedback(src, new TranslatableText("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region, LOCAL)));
-                        return 1;
-                    }
-                } else {
-                    if (!hasPermission(src)) {
-                        YetAnotherWorldProtector.LOGGER.info("' " + src.getName() + "' is not allowed to manage region: '" + region.getName() + "' in dim '" + region.getDim().getValue() + "'!");
-                        sendCmdFeedback(src, new TranslatableText("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region, LOCAL)));
-                        return 1;
-                    }
+                } catch (CommandSyntaxException e) {
+                    YetAnotherWorldProtector.LOGGER.error(e);
                 }
-            } catch (CommandSyntaxException e) {
-                YetAnotherWorldProtector.LOGGER.error(e);
             }
         }
         return 0;
