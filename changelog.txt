@@ -1,4 +1,4 @@
-# [0.0.2.8-beta1] - 2023-04-17
+# [0.0.2.8-beta2] - 2023-04-20
 ## Fixes
 * Fix rare NPE occurring because of random event handler order.
 * Fix region owners not be considered for command permission when having `allow_info_cmds` set to `false`.
