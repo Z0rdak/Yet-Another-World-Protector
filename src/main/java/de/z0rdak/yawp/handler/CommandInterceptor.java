@@ -93,7 +93,7 @@ public class CommandInterceptor {
                     }
                     // check if player is owner of parent region or has permission to update region area
                     if (cmdNodes.size() > 4 && nodeNames.contains(AREA.toString())) {
-                        if (!isOwnerOfParent && !hasConfigPermission) {
+                        if (!isOwnerOfParent && !isOwner && !hasConfigPermission) {
                             YetAnotherWorldProtector.LOGGER.info("Player not allowed to manage region '" + region.getName() + "'");
                             sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region, LOCAL)));
                             event.setCanceled(true);
