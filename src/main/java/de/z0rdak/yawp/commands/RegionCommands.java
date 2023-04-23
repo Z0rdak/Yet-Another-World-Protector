@@ -142,11 +142,11 @@ public class RegionCommands {
                                                                         BlockPosArgument.getSpawnablePos(ctx, "pos1"),
                                                                         BlockPosArgument.getSpawnablePos(ctx, "pos2")))))
                                         ))
-                                .then(literal(NAME)
-                                        .then(Commands.argument(REGION.toString(), StringArgumentType.word())
-                                                .executes(ctx -> renameRegion(ctx, getRegionArgument(ctx), getRegionNameArgument(ctx), getDimCacheArgument(ctx)))
-                                        )
-                                )
+                                //.then(literal(NAME)
+                                //        .then(Commands.argument(REGION.toString(), StringArgumentType.word())
+                                //                .executes(ctx -> renameRegion(ctx, getRegionArgument(ctx), getRegionNameArgument(ctx), getDimCacheArgument(ctx)))
+                                //        )
+                                //)
                                 // TODO: rename region
                                 // TODO: Only with marker
                                 //.then(literal(UPDATE)
