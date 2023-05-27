@@ -15,7 +15,7 @@ public enum RegionFlag {
     DRAGON_BLOCK_PROT("dragon-destruction", FlagType.BOOLEAN_FLAG),
     DROP_LOOT_ALL("drop-loot", FlagType.BOOLEAN_FLAG),
     DROP_LOOT_PLAYER("drop-loot-player", FlagType.BOOLEAN_FLAG),
-    // ENDERMAN_GRIEFING("enderman-griefing", FlagType.BOOLEAN_FLAG), // FIXME: soon
+    ENDERMAN_GRIEFING("enderman-griefing", FlagType.BOOLEAN_FLAG),
     ENDERMAN_TELEPORT_FROM_REGION("enderman-tp-from", FlagType.BOOLEAN_FLAG),
     ENDER_CHEST_ACCESS("access-enderchest", FlagType.BOOLEAN_FLAG),
     ENTER_DIM("enter-dim", FlagType.BOOLEAN_FLAG),

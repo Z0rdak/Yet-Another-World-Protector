@@ -20,6 +20,8 @@
     "EntityMixin",
     "ExperienceOrbEntityMixin",
     "ExplosionMixin",
+    "EnderManEntityPickUpBlockGoalMixin",
+    "EnderManEntityPlaceBlockGoalMixin",
     "FarmLandBlockMixin",
     "FireBlockMixin",
     "FrogMixin",
