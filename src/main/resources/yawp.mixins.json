@@ -17,6 +17,7 @@
     "BoneMealItemMixin",
     "CommandManagerMixin",
     "EnderDragonEntityMixin",
+    "EntityAiBreakDoorGoalMixin",
     "EntityMixin",
     "ExperienceOrbEntityMixin",
     "ExplosionMixin",
