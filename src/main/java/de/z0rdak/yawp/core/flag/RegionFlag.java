@@ -93,8 +93,8 @@ public enum RegionFlag {
     XP_DROP_OTHER("xp-drop-other", FlagType.BOOLEAN_FLAG),
     XP_DROP_PLAYER("xp-drop-player", FlagType.BOOLEAN_FLAG),
     XP_FREEZE("xp-freeze", FlagType.BOOLEAN_FLAG),
-    XP_PICKUP("xp-pickup", FlagType.BOOLEAN_FLAG);
-    // ZOMBIE_DOOR_PROT("zombie-destruction", FlagType.BOOLEAN_FLAG); // FIXME: soon
+    XP_PICKUP("xp-pickup", FlagType.BOOLEAN_FLAG),
+    ZOMBIE_DOOR_PROT("zombie-destruction", FlagType.BOOLEAN_FLAG);
 
     public final String name;
     public final FlagType type;
