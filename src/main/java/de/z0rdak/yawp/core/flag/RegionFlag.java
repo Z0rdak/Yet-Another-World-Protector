@@ -49,7 +49,7 @@ public enum RegionFlag {
     MELEE_PLAYERS("melee-players", FlagType.BOOLEAN_FLAG),
     MELEE_VILLAGERS("melee-villagers", FlagType.BOOLEAN_FLAG),
     MELEE_WANDERING_TRADER("melee-wtrader", FlagType.BOOLEAN_FLAG),
-    // MOB_GRIEFING("mob-griefing", FlagType.BOOLEAN_FLAG), // FIXME: soon
+    MOB_GRIEFING("mob-griefing", FlagType.BOOLEAN_FLAG), 
     NO_FLIGHT("no-flight", FlagType.BOOLEAN_FLAG),
     NO_PVP("no-pvp", FlagType.BOOLEAN_FLAG),
     PLACE_BLOCKS("place-blocks", FlagType.BOOLEAN_FLAG),
