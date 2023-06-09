@@ -29,7 +29,7 @@ public abstract class EntityAiBreakDoorGoalMixin extends DoorInteractGoal {
 
     @Inject(method = "canStart", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onCanStart(CallbackInfoReturnable<Boolean> cir) {
-        if (!mob.world.isClient) {
+        if (!mob.getWorld().isClient) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(mob));
 
             FlagCheckEvent flagCheck = checkTargetEvent(mob.getBlockPos(), ZOMBIE_DOOR_PROT, dimCache.getDimensionalRegion());

@@ -76,7 +76,7 @@ public abstract class LivingEntityMixin {
     @Inject(method = "handleFallDamage", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
         LivingEntity self = (LivingEntity) (Object) this;
-        if (!self.world.isClient) {
+        if (!self.getWorld().isClient) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(self));
             FlagCheckEvent flagCheck = checkTargetEvent(self.getBlockPos(), FALL_DAMAGE, dimCache.getDimensionalRegion());
             if (flagCheck.isDenied()) {
@@ -118,7 +118,7 @@ public abstract class LivingEntityMixin {
         DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
         FlagCheckEvent flagCheckEvent = checkTargetEvent(self.getBlockPos(), RegionFlag.XP_DROP_ALL, dimRegion);
         if (flagCheckEvent.isDenied()) {
-            ExperienceOrbEntity.spawn((ServerWorld) self.world, self.getPos(), 0);
+            ExperienceOrbEntity.spawn((ServerWorld) self.getWorld(), self.getPos(), 0);
             ci.cancel();
             return;
         }
@@ -126,7 +126,7 @@ public abstract class LivingEntityMixin {
             FlagCheckEvent.PlayerFlagEvent playerFlagCheckEvent = checkPlayerEvent(this.attackingPlayer, self.getBlockPos(), RegionFlag.XP_DROP_PLAYER, dimCache.getDimensionalRegion());
             if (playerFlagCheckEvent.isDenied()) {
                 sendFlagDeniedMsg(playerFlagCheckEvent);
-                ExperienceOrbEntity.spawn((ServerWorld) self.world, self.getPos(), 0);
+                ExperienceOrbEntity.spawn((ServerWorld) self.getWorld(), self.getPos(), 0);
                 ci.cancel();
 
             }
@@ -137,7 +137,7 @@ public abstract class LivingEntityMixin {
             flagCheckEvent = checkTargetEvent(self.getBlockPos(), RegionFlag.XP_DROP_OTHER, dimRegion);
         }
         if (flagCheckEvent.isDenied()) {
-            ExperienceOrbEntity.spawn((ServerWorld) self.world, self.getPos(), 0);
+            ExperienceOrbEntity.spawn((ServerWorld) self.getWorld(), self.getPos(), 0);
             ci.cancel();
         }
 
@@ -147,13 +147,13 @@ public abstract class LivingEntityMixin {
     @Inject(method = "onKilledBy(Lnet/minecraft/entity/LivingEntity;)V", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onKilledBy(@Nullable LivingEntity adversary, CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
-        if (self.world.isClient) {
+        if (self.getWorld().isClient) {
             return;
         }
         if (adversary instanceof WitherEntity) {
             if (MobGriefingHelper.preventGrief(self)) {
-                ItemEntity itemEntity = new ItemEntity(self.world, self.getX(), self.getY(), self.getZ(), new ItemStack(Items.WITHER_ROSE));
-                self.world.spawnEntity(itemEntity);
+                ItemEntity itemEntity = new ItemEntity(self.getWorld(), self.getX(), self.getY(), self.getZ(), new ItemStack(Items.WITHER_ROSE));
+                self.getWorld().spawnEntity(itemEntity);
                 ci.cancel();
             }
         }

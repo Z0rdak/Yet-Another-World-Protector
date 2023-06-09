@@ -15,7 +15,7 @@ public class SmallFireballEntityMixin {
     @Inject(method = "onBlockHit(Lnet/minecraft/util/hit/BlockHitResult;)V", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onBlockHit(BlockHitResult b, CallbackInfo ci) {
         SmallFireballEntity self = (SmallFireballEntity) (Object) this;
-        if (!self.world.isClient) {
+        if (!self.getWorld().isClient) {
             if (MobGriefingHelper.preventGrief(self)) {
                 ci.cancel();
             }

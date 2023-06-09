@@ -27,7 +27,7 @@ public abstract class EntityMixin {
     @Inject(method = "startRiding(Lnet/minecraft/entity/Entity;Z)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;canStartRiding(Lnet/minecraft/entity/Entity;)Z"), cancellable = true, allow = 1)
     public void spawnChildFromBreeding(Entity vehicle, boolean force, CallbackInfoReturnable<Boolean> cir) {
         Entity rider = (Entity) (Object) this;
-        if (!rider.world.isClient) {
+        if (!rider.getWorld().isClient) {
             if (rider instanceof PlayerEntity player) {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(vehicle));
                 FlagCheckEvent.PlayerFlagEvent flagCheck = checkPlayerEvent(player, vehicle.getBlockPos(), RegionFlag.ANIMAL_MOUNTING, dimCache.getDimensionalRegion());
@@ -42,7 +42,7 @@ public abstract class EntityMixin {
     @Inject(method = "onStruckByLightning", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onHitByLightning(ServerWorld world, LightningEntity lightning, CallbackInfo ci) {
         Entity poorSoul = (Entity) (Object) this;
-        if (!poorSoul.world.isClient) {
+        if (!poorSoul.getWorld().isClient) {
             // if (poorSoul instanceof PlayerEntity) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(poorSoul));
             FlagCheckEvent flagCheck = checkTargetEvent(poorSoul.getBlockPos(), LIGHTNING_PROT, dimCache.getDimensionalRegion());
@@ -56,7 +56,7 @@ public abstract class EntityMixin {
     @Inject(method = "dismountVehicle", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;vehicle:Lnet/minecraft/entity/Entity;", ordinal = 2), cancellable = true, allow = 1)
     public void spawnChildFromBreeding(CallbackInfo ci) {
         Entity rider = (Entity) (Object) this;
-        if (!rider.world.isClient) {
+        if (!rider.getWorld().isClient) {
             if (rider instanceof PlayerEntity player) {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(rider));
                 FlagCheckEvent.PlayerFlagEvent flagCheck = checkPlayerEvent(player, player.getBlockPos(), RegionFlag.ANIMAL_UNMOUNTING, dimCache.getDimensionalRegion());
@@ -72,7 +72,7 @@ public abstract class EntityMixin {
     public void onChangeDimension(ServerWorld destination, CallbackInfoReturnable<Entity> cir) {
         Entity self = (Entity) (Object) this;
         if (!self.getWorld().isClient) {
-            RegionDataManager.onPlayerChangeWorldAddDimKey(null, (ServerWorld) self.world, destination);
+            RegionDataManager.onPlayerChangeWorldAddDimKey(null, (ServerWorld) self.getWorld(), destination);
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(self));
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
             // Note: does not seem to trigger for players, which is fine

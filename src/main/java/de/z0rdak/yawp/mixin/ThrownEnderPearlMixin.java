@@ -22,7 +22,7 @@ public abstract class ThrownEnderPearlMixin {
     @Inject(method = "onCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/random/Random;nextFloat()F"), cancellable = true, allow = 1)
     public void onThrowPearlIntoRegion(HitResult hitResult, CallbackInfo ci) {
         EnderPearlEntity pearl = (EnderPearlEntity) (Object) this;
-        if (!pearl.world.isClient) {
+        if (!pearl.getWorld().isClient) {
             Entity owner = pearl.getOwner();
             if (owner instanceof PlayerEntity player) {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(owner));
@@ -41,7 +41,7 @@ public abstract class ThrownEnderPearlMixin {
     @Inject(method = "onCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/random/Random;nextFloat()F"), cancellable = true, allow = 1)
     public void onThrowPearlOutOfRegion(HitResult hitResult, CallbackInfo ci) {
         EnderPearlEntity pearl = (EnderPearlEntity) (Object) this;
-        if (!pearl.world.isClient) {
+        if (!pearl.getWorld().isClient) {
             Entity owner = pearl.getOwner();
             if (owner instanceof PlayerEntity player) {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(owner));

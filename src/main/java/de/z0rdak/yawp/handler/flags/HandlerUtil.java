@@ -93,7 +93,7 @@ public final class HandlerUtil {
     }
 
     public static FlagCheckEvent.PlayerFlagEvent checkPlayerEvent(PlayerEntity player, BlockPos target, RegionFlag regionFlag, DimensionalRegion dimRegion) {
-        IMarkableRegion involvedRegion = getInvolvedRegionFor(target, player, player.world.getRegistryKey());
+        IMarkableRegion involvedRegion = getInvolvedRegionFor(target, player, player.getWorld().getRegistryKey());
         FlagCheckEvent.PlayerFlagEvent flagCheck = new FlagCheckEvent.PlayerFlagEvent(player, dimRegion, involvedRegion, regionFlag);
         if (involvedRegion == null) {
             flagCheck.setDeniedLocal(false);

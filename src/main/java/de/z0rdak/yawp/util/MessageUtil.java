@@ -53,7 +53,7 @@ public class MessageUtil {
     public static void sendCmdFeedback(ServerCommandSource src, MutableText text) {
         try {
             if (src.getEntity() == null) {
-                src.sendFeedback(text, true);
+                src.sendFeedback(() -> text, true);
             } else {
                 sendMessage(src.getPlayerOrThrow(), text);
             }

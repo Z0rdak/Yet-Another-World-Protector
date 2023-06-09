@@ -66,7 +66,7 @@ public final class MarkerCommands {
     private static int createRegion(ServerCommandSource src, String regionName, IMarkableRegion parentRegion) {
         try {
             PlayerEntity player = src.getPlayerOrThrow();
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.world.getRegistryKey());
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.getWorld().getRegistryKey());
             int res = DimensionCommands.checkValidRegionName(regionName, dimCache);
             if (res == -1) {
                 sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.create.name.invalid", regionName));
@@ -171,7 +171,7 @@ public final class MarkerCommands {
     public static int giveMarkerStick(ServerCommandSource src) {
         try {
             PlayerEntity targetPlayer = src.getPlayerOrThrow();
-            ItemStack markerStick = StickUtil.initMarkerNbt(Items.STICK.getDefaultStack(), StickType.MARKER, targetPlayer.world.getRegistryKey());
+            ItemStack markerStick = StickUtil.initMarkerNbt(Items.STICK.getDefaultStack(), StickType.MARKER, targetPlayer.getWorld().getRegistryKey());
             targetPlayer.giveItemStack(markerStick);
             sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.create.stick.reset"));
         } catch (CommandSyntaxException e) {

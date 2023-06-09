@@ -18,7 +18,7 @@ public abstract class EnderManEntityMixin {
     @Inject(method = "teleportTo(DDD)Z", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onEndermanTeleport(double x, double y, double z, CallbackInfoReturnable<Boolean> cir) {
         EndermanEntity self = (EndermanEntity) (Object) this;
-        if (!self.world.isClient) {
+        if (!self.getWorld().isClient) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(self));
             FlagCheckEvent flagCheck = checkTargetEvent(self.getBlockPos(), ENDERMAN_TELEPORT_FROM_REGION, dimCache.getDimensionalRegion());
             if (flagCheck.isDenied()) {

@@ -41,9 +41,9 @@ public class TntBlockMixin {
 
     private static boolean sameItemStackIgnoreDurability(ItemStack left, ItemStack right){
         if (!left.isDamageable()) {
-            return left.isItemEqual(right);
+            return ItemStack.canCombine(left, right);
         } else {
-            return !right.isEmpty() && left.isOf(right.getItem());
+            return false;
         }
     }
 }

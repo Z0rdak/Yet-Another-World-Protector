@@ -19,7 +19,7 @@ public abstract class ExperienceOrbEntityMixin {
     @Inject(method = "onPlayerCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;sendPickup(Lnet/minecraft/entity/Entity;I)V"), cancellable = true, allow = 1)
     public void onPickUpExperience(PlayerEntity player, CallbackInfo ci) {
         ExperienceOrbEntity xpOrb = (ExperienceOrbEntity) (Object) this;
-        if (!xpOrb.world.isClient) {
+        if (!xpOrb.getWorld().isClient) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
             FlagCheckEvent.PlayerFlagEvent flagCheck = checkPlayerEvent(player, xpOrb.getBlockPos(), RegionFlag.XP_PICKUP, dimCache.getDimensionalRegion());
             if (flagCheck.isDenied()) {

@@ -19,7 +19,7 @@ public abstract class ItemEntityMixin {
     @Inject(method = "onPlayerCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getCount()I"), cancellable = true, allow = 1)
     public void onPickUpItem(PlayerEntity player, CallbackInfo ci) {
         ItemEntity itemToPickup = (ItemEntity) (Object) this;
-        if (!itemToPickup.world.isClient) {
+        if (!itemToPickup.getWorld().isClient) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
             FlagCheckEvent.PlayerFlagEvent flagCheck = checkPlayerEvent(player, itemToPickup.getBlockPos(), RegionFlag.ITEM_PICKUP, dimCache.getDimensionalRegion());
             if (flagCheck.isDenied()) {

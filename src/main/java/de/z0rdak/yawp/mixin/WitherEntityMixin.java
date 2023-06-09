@@ -19,7 +19,7 @@ public abstract class WitherEntityMixin {
     @Inject(method = "mobTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/boss/WitherEntity;canDestroy(Lnet/minecraft/block/BlockState;)Z"), cancellable = true, allow = 1)
     public void onWitherDestroyBlocks(CallbackInfo ci) {
         WitherEntity self = (WitherEntity) (Object) this;
-        if (!self.world.isClient) {
+        if (!self.getWorld().isClient) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(self));
             FlagCheckEvent flagCheck = checkTargetEvent(self.getBlockPos(), WITHER_BLOCK_PROT, dimCache.getDimensionalRegion());
             if (flagCheck.isDenied()) {

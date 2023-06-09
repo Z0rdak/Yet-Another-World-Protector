@@ -20,7 +20,7 @@ public abstract class LlamaEntityMixin {
     @Inject(method = "handleFallDamage", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
         LlamaEntity self = (LlamaEntity) (Object) this;
-        if (!self.world.isClient) {
+        if (!self.getWorld().isClient) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(self));
             FlagCheckEvent flagCheck = checkTargetEvent(self.getBlockPos(), FALL_DAMAGE, dimCache.getDimensionalRegion());
             if (flagCheck.isDenied()) {

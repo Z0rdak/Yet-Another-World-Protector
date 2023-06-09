@@ -38,7 +38,7 @@ public abstract class SilverfishEntityCallForHelpGoalMixin {
     public void onTick(CallbackInfo ci) {
         --this.delay;
         if (this.delay <= 0) {
-            World world = this.silverfish.world;
+            World world = this.silverfish.getWorld();
             Random random = this.silverfish.getRandom();
             BlockPos blockPos = this.silverfish.getBlockPos();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.getRegistryKey());

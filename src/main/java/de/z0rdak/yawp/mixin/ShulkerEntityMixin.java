@@ -18,7 +18,7 @@ public abstract class ShulkerEntityMixin {
     @Inject(method = "tryTeleport", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onShulkerTeleport(CallbackInfoReturnable<Boolean> cir) {
         ShulkerEntity self = (ShulkerEntity) (Object) this;
-        if (!self.world.isClient) {
+        if (!self.getWorld().isClient) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(self));
             FlagCheckEvent flagCheck = checkTargetEvent(self.getBlockPos(), SHULKER_TELEPORT_FROM_REGION, dimCache.getDimensionalRegion());
             if (flagCheck.isDenied()) {

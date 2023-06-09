@@ -18,7 +18,7 @@ public abstract class TameableEntityMixin {
     @Inject(method = "setOwner", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onAnimalTame(PlayerEntity player, CallbackInfo ci) {
         TameableEntity self = (TameableEntity) (Object) this;
-        if (!self.world.isClient) {
+        if (!self.getWorld().isClient) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(self));
             FlagCheckEvent.PlayerFlagEvent flagCheck = checkPlayerEvent(player, self.getBlockPos(), ANIMAL_TAMING, dimCache.getDimensionalRegion());
             if (flagCheck.isDenied()) {
