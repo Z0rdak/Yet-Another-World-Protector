@@ -1,7 +1,9 @@
 package de.z0rdak.yawp.mixin;
 
+
 import static de.z0rdak.yawp.core.flag.RegionFlag.ZOMBIE_DOOR_PROT;
-//import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
+import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
+
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.checkTargetEvent;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.getEntityDim;
 
@@ -29,14 +31,15 @@ public abstract class EntityAiBreakDoorGoalMixin extends DoorInteractGoal {
     public void onCanStart(CallbackInfoReturnable<Boolean> cir) {
         if (!mob.world.isClient) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(mob));
+
             FlagCheckEvent flagCheck = checkTargetEvent(mob.getBlockPos(), ZOMBIE_DOOR_PROT, dimCache.getDimensionalRegion());
             if (flagCheck.isDenied()) {
                 cir.setReturnValue(false);
             }
-//            flagCheck = checkTargetEvent(mob.getBlockPos(), MOB_GRIEFING, dimCache.getDimensionalRegion());
-//            if (flagCheck.isDenied()) {
-//                cir.setReturnValue(false);
-//            }
+            flagCheck = checkTargetEvent(mob.getBlockPos(), MOB_GRIEFING, dimCache.getDimensionalRegion());
+            if (flagCheck.isDenied()) {
+                cir.setReturnValue(false);
+            }
         }
     }
 }
