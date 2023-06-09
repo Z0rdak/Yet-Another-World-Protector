@@ -1,3 +1,11 @@
+# [0.0.2.9-beta1] - 2023-06-09
+## Added
+* [Fabric] Add `mob-griefing`, `enderman-griefing` and `zombie-destruction` flag. Ported by petersv5 aka. ptefar - thanks a lot!
+## Changed
+* Change default value for config `command_op_level` back to 4. This caused many players to struggle with setting up the mod in the first place.
+With the default 4 we assume that the player setting up the server is OP lvl 4 and thus admin.
+## Fixed
+* [Forge] Replace mixin for `walker-freeze` flag with forge event. This should solve #85.
 # [0.0.2.8-beta2] - 2023-04-21
 ## Fixes
 * Fix rare NPE occurring because of random event handler order.
