@@ -13,6 +13,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.item.PrimedTnt;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
@@ -368,17 +370,21 @@ public final class PlayerFlagHandler {
     public static void onExplosionStarted(ExplosionEvent.Start event) {
         if (!event.getLevel().isClientSide) {
             Explosion explosion = event.getExplosion();
-            if (explosion.getExploder() instanceof Player player) {
+            BlockPos explosionPos = new BlockPos((int) explosion.getPosition().x, (int) explosion.getPosition().y, (int) explosion.getPosition().z);
+            // Extra check for player initiated explosion here. Should normally be prevented by not allowing
+            // the ignition to begin with.
+            if (event.getExplosion().getExploder() instanceof PrimedTnt tntEntity && tntEntity.getOwner() instanceof Player player) {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
                 if (dimCache != null) {
-                    BlockPos explosionPos = new BlockPos((int) explosion.getPosition().x, (int) explosion.getPosition().y, (int) explosion.getPosition().z);
                     FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, explosionPos, IGNITE_EXPLOSIVES, dimCache.getDimensionalRegion());
                     handleAndSendMsg(event, flagCheckEvent);
                 }
-            } else {
-                if (explosion.getExploder() == null) {
-                    // ignited by e.g. dispenser
-                    // TODO: Griefing/dedicated dispenser flag
+            }
+            if (explosion.getExploder() instanceof Monster monster) {
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(monster));
+                FlagCheckEvent flagCheck = checkTargetEvent(explosionPos, MOB_GRIEFING, dimCache.getDimensionalRegion());
+                if (flagCheck.isDenied()) {
+                    event.setCanceled(flagCheck.isDenied());
                 }
             }
         }

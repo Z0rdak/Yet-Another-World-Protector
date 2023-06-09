@@ -28,6 +28,7 @@ import net.minecraftforge.fml.common.Mod;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static de.z0rdak.yawp.core.flag.RegionFlag.NO_WALKER_FREEZE;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 
@@ -165,6 +166,20 @@ public class GrievingFlagHandler {
                             event.setResult(Event.Result.DENY);
                         }
                     }
+                }
+            }
+        }
+    }
+
+    // idea: differentiate between player and other entities (armor stand/mobs)
+    @SubscribeEvent
+    public static void onFreezeWaterWithBoots(BlockEvent.EntityPlaceEvent event) {
+        if (!event.getLevel().isClientSide()) {
+            if (event.getEntity() != null) {
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(event.getEntity().getLevel().dimension());
+                FlagCheckEvent flagCheckEvent = HandlerUtil.checkTargetEvent(event.getPos(), NO_WALKER_FREEZE, dimCache.getDimensionalRegion());
+                if (flagCheckEvent.isDenied()) {
+                    event.setCanceled(true);
                 }
             }
         }
