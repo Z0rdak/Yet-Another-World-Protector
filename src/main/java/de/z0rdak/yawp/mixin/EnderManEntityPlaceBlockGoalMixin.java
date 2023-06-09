@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.ENDERMAN_GRIEFING;
+import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.checkTargetEvent;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.getEntityDim;
 
@@ -29,6 +30,10 @@ public abstract class EnderManEntityPlaceBlockGoalMixin {
         DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(self));
         DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
         FlagCheckEvent flagCheck = checkTargetEvent(self.getBlockPos(), ENDERMAN_GRIEFING, dimRegion);
+        if (flagCheck.isDenied()) {
+            cir.setReturnValue(false);
+        }
+        flagCheck = checkTargetEvent(self.getBlockPos(), MOB_GRIEFING, dimRegion);
         if (flagCheck.isDenied()) {
             cir.setReturnValue(false);
         }
