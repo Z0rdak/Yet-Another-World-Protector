@@ -43,7 +43,7 @@ public class CommandPermissionConfig {
                 .defineInRange("wp_root_command", 0, 0, 1);
 
         REQUIRED_OP_LEVEL = BUILDER.comment("Minimum OP level to use mod commands.\n 0 -> everyone can use the commands.\n 1-4 -> OP with specific level can use the commands.\n 5 -> no operator can use the commands.\n Defaults to 5.")
-                .defineInRange("command_op_level", 5, 0, 5);
+                .defineInRange("command_op_level", 4, 0, 5);
 
         ALLOW_READ_ONLY_CMDS = BUILDER.comment("Defines whether info commands for regions can be used by every player.")
                 .define("allow_info_cmds", true);

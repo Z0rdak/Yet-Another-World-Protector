@@ -11,9 +11,11 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.IWaterLoggable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.item.TNTEntity;
 import net.minecraft.entity.item.minecart.ContainerMinecartEntity;
 import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.merchant.villager.WanderingTraderEntity;
+import net.minecraft.entity.monster.MonsterEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -373,17 +375,25 @@ public final class PlayerFlagHandler {
     public static void onExplosionStarted(ExplosionEvent.Start event) {
         if (!event.getWorld().isClientSide) {
             Explosion explosion = event.getExplosion();
-            if (explosion.getSourceMob() instanceof PlayerEntity) {
-                PlayerEntity player = (PlayerEntity) explosion.getSourceMob();
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
-                if (dimCache != null) {
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, new BlockPos(explosion.getPosition()), IGNITE_EXPLOSIVES, dimCache.getDimensionalRegion());
-                    handleAndSendMsg(event, flagCheckEvent);
+            // Extra check for player initiated explosion here. Should normally be prevented by not allowing
+            // the ignition to begin with.
+            if (event.getExplosion().getExploder() instanceof TNTEntity) {
+                TNTEntity tntEntity = (TNTEntity) event.getExplosion().getExploder();
+                if (tntEntity.getOwner() instanceof PlayerEntity) {
+                    PlayerEntity player = (PlayerEntity) tntEntity.getOwner();
+                    DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
+                    if (dimCache != null) {
+                        FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, new BlockPos(explosion.getPosition()), IGNITE_EXPLOSIVES, dimCache.getDimensionalRegion());
+                        handleAndSendMsg(event, flagCheckEvent);
+                    }
                 }
-            } else {
-                if (explosion.getSourceMob() == null) {
-                    // ignited by e.g. dispenser
-                    // TODO: Griefing/dedicated dispenser flag
+            }
+            if (explosion.getSourceMob() instanceof MonsterEntity) {
+                MonsterEntity monster = (MonsterEntity) explosion.getSourceMob();
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(monster));
+                FlagCheckEvent flagCheck = checkTargetEvent(new BlockPos(explosion.getPosition()), MOB_GRIEFING, dimCache.getDimensionalRegion());
+                if (flagCheck.isDenied()) {
+                    event.setCanceled(flagCheck.isDenied());
                 }
             }
         }

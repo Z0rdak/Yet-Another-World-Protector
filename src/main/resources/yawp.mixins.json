@@ -19,6 +19,7 @@
     "MixinShulkerEntity",
     "MixinSlimeEntity",
     "MixinWaterMobEntity",
-    "PlayerEntityMixin"
+    "PlayerEntityMixin",
+    "TntBlockMixin"
   ]
 }
