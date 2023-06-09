@@ -103,7 +103,7 @@ public class OwnedRegionArgumentType implements ArgumentType<String> {
                                 return Suggestions.empty();
                             }
                             CuboidArea markedArea = new CuboidArea(marker.getMarkedBlocks().get(0), marker.getMarkedBlocks().get(1));
-                            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.level.dimension());
+                            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.level().dimension());
                             List<String> ownedRegions = dimCache.getRegions()
                                     .stream()
                                     .filter(r -> r.hasOwner(player.getUUID()))

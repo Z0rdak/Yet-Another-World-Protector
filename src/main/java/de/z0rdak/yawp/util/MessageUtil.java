@@ -62,7 +62,7 @@ public class MessageUtil {
     public static void sendCmdFeedback(CommandSourceStack src, MutableComponent text) {
         try {
             if (src.getEntity() == null) {
-                src.sendSuccess(text, true);
+                src.sendSuccess(() -> text, true);
             } else {
                 sendMessage(src.getPlayerOrException(), text);
             }

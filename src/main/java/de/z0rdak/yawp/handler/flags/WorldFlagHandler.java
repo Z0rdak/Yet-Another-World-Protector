@@ -158,7 +158,7 @@ public class WorldFlagHandler {
                     /*
                     FIXME: Get target position correctly - until then flag only works for dimension
                     WorldBorder worldborder = targetServerLevel.getWorldBorder();
-                    double tpPosScale = DimensionType.getTeleportationScale(player.level.dimensionType(), targetServerLevel.dimensionType());
+                    double tpPosScale = DimensionType.getTeleportationScale(player..level().dimensionType(), targetServerLevel.dimensionType());
                     BlockPos targetPos = worldborder.clampToBounds(player.getX() * tpPosScale, player.getY(), player.getZ() * tpPosScale);
                      */
                     FlagCheckEvent.PlayerFlagEvent playerFlagCheckEvent = new FlagCheckEvent.PlayerFlagEvent(player, dimRegion, null, ENTER_DIM);

@@ -82,8 +82,8 @@ public class StickInteractionHandler {
             ItemStack outputItem = event.getOutput();
             ItemStack inputItem = event.getLeft();
             ItemStack ingredientInput = event.getRight();
-            boolean isInputAndOutputStick = ItemStack.isSame(outputItem, Items.STICK.getDefaultInstance())
-                    && ItemStack.isSame(inputItem, Items.STICK.getDefaultInstance());
+            boolean isInputAndOutputStick = ItemStack.matches(outputItem, Items.STICK.getDefaultInstance())
+                    && ItemStack.matches(inputItem, Items.STICK.getDefaultInstance());
             if (isInputAndOutputStick && ingredientInput.isEmpty()) {
                 onCreateStick(event);
             }

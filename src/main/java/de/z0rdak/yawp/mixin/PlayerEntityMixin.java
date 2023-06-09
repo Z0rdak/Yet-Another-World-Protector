@@ -24,8 +24,8 @@ abstract class PlayerEntityMixin extends LivingEntity {
 
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/EquipmentSlot;CHEST:Lnet/minecraft/world/entity/EquipmentSlot;"), method = "tryToStartFallFlying()Z", allow = 1, cancellable = true)
     void injectElytraCheck(CallbackInfoReturnable<Boolean> cir) {
-        if (!level.isClientSide) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(level.dimension());
+        if (!level().isClientSide) {
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(level().dimension());
             FlagCheckEvent flagCheckEvent = HandlerUtil.checkTargetEvent(this.blockPosition(), USE_ELYTRA, dimCache.getDimensionalRegion());
             if (flagCheckEvent.isDenied()) {
                 cir.setReturnValue(false);

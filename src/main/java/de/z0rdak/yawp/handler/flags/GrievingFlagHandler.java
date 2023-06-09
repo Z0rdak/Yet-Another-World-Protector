@@ -176,7 +176,7 @@ public class GrievingFlagHandler {
     public static void onFreezeWaterWithBoots(BlockEvent.EntityPlaceEvent event) {
         if (!event.getLevel().isClientSide()) {
             if (event.getEntity() != null) {
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(event.getEntity().getLevel().dimension());
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(event.getEntity().level().dimension());
                 FlagCheckEvent flagCheckEvent = HandlerUtil.checkTargetEvent(event.getPos(), NO_WALKER_FREEZE, dimCache.getDimensionalRegion());
                 if (flagCheckEvent.isDenied()) {
                     event.setCanceled(true);
