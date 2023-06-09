@@ -76,7 +76,7 @@ public abstract class ServerPlayerMixin {
         }
     }
 
-    @Inject(method = "teleport", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;getWorld()Lnet/minecraft/server/world/ServerWorld;"), allow = 1, cancellable = true)
+    @Inject(method = "teleport", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;getServerWorld()Lnet/minecraft/server/world/ServerWorld;"), allow = 1, cancellable = true)
     private void onTeleportToDimension(ServerWorld destination, double x, double y, double z, float yaw, float pitch, CallbackInfo ci) {
         PlayerEntity player = (PlayerEntity) (Object) this;
         if (isServerSide(player)) {
