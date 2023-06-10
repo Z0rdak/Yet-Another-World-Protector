@@ -1,3 +1,6 @@
+# [0.0.2.10-beta1] - 2023-06-10
+## Added
+* [1.19.4+] Add default english fallback translation
 # [0.0.2.9-beta1] - 2023-06-09
 ## Added
 * [Fabric] Add `mob-griefing`, `enderman-griefing` and `zombie-destruction` flag. Ported by petersv5 aka. ptefar - thanks a lot!
