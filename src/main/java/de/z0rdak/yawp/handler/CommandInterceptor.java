@@ -90,7 +90,7 @@ public class CommandInterceptor {
                         if (cmdNodes.size() == 4 || (cmdNodes.size() > 4 && containsInfoCmd) || cmdNodes.size() == 5 && nodeNames.get(4).equals(STATE.toString())) {
                             event.setCanceled(!(isOwner || AllowInfoCmds() || hasConfigPermission));
                             if (event.isCanceled()) {
-                                sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.region.info.deny", buildRegionInfoLink(region, LOCAL)));
+                                sendCmdFeedback(src, Component.translatableWithFallback("cli.msg.dim.info.region.info.deny", "You don't have permission to view the region information for %s!", buildRegionInfoLink(region, LOCAL)));
                             }
                             return;
                         }
@@ -98,20 +98,20 @@ public class CommandInterceptor {
                         if (cmdNodes.size() > 4 && nodeNames.contains(AREA.toString())) {
                             if (!isOwnerOfParent && !isOwner && !hasConfigPermission) {
                                 YetAnotherWorldProtector.LOGGER.info("Player not allowed to manage region '" + region.getName() + "'");
-                                sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region, LOCAL)));
+                                sendCmdFeedback(src, Component.translatableWithFallback("cli.msg.dim.info.region.modify.local.deny", "You don't have the permission to modify the local region %s!", buildRegionInfoLink(region, LOCAL)));
                                 event.setCanceled(true);
                             }
                         }
                         // check permission for other commands
                         if (!isOwner && !hasConfigPermission) {
                             YetAnotherWorldProtector.LOGGER.info("Player not allowed to manage region '" + region.getName() + "'");
-                            sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region, LOCAL)));
+                            sendCmdFeedback(src, Component.translatableWithFallback("cli.msg.dim.info.region.modify.local.deny", "You don't have the permission to modify the local region %s!", buildRegionInfoLink(region, LOCAL)));
                             event.setCanceled(true);
                         }
                     } else {
                         if (!hasPermission(src)) {
                             YetAnotherWorldProtector.LOGGER.info("' " + src.getTextName() + "' is not allowed to manage region: '" + region.getName() + "' in dim '" + region.getDim().location() + "'!");
-                            sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region, LOCAL)));
+                            sendCmdFeedback(src, Component.translatableWithFallback("cli.msg.dim.info.region.modify.local.deny", "You don't have the permission to modify the local region %s!", buildRegionInfoLink(region, LOCAL)));
                             event.setCanceled(true);
                         }
                     }
@@ -147,14 +147,14 @@ public class CommandInterceptor {
                         if (nodeNames.size() == 3 || isInfoCmd) {
                             event.setCanceled(!(isOwner || AllowInfoCmds() || hasConfigPermission));
                             if (event.isCanceled()) {
-                                sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.region.info.deny", buildRegionInfoLink(dimCache.getDimensionalRegion(), DIMENSION)));
+                                sendCmdFeedback(src, Component.translatableWithFallback("cli.msg.dim.info.region.info.deny", "You don't have permission to view the region information for %s!", buildRegionInfoLink(dimCache.getDimensionalRegion(), DIMENSION)));
                             }
                             return;
                         }
                         // check permission for other commands
                         if (!isOwner && !hasConfigPermission) {
                             YetAnotherWorldProtector.LOGGER.info("Player not allowed to manage dim");
-                            sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.region.modify.dim.deny", buildRegionInfoLink(dimCache.getDimensionalRegion(), DIMENSION)));
+                            sendCmdFeedback(src, Component.translatableWithFallback("cli.msg.dim.info.region.modify.dim.deny", "You don't have the permission to modify the dimensional region %s!", buildRegionInfoLink(dimCache.getDimensionalRegion(), DIMENSION)));
                             event.setCanceled(true);
                         }
                     } else {
@@ -165,7 +165,7 @@ public class CommandInterceptor {
                     if (!hasPermission(src)) {
                         YetAnotherWorldProtector.LOGGER.info("' " + src.getTextName() + "' is not allowed to manage dim");
                         event.setCanceled(true);
-                        sendCmdFeedback(src, Component.translatable("cli.msg.dim.info.region.modify.dim.deny", buildRegionInfoLink(dimCache.getDimensionalRegion(), DIMENSION)));
+                        sendCmdFeedback(src, Component.translatableWithFallback("cli.msg.dim.info.region.modify.dim.deny", "You don't have the permission to modify the dimensional region %s!", buildRegionInfoLink(dimCache.getDimensionalRegion(), DIMENSION)));
                     }
                 }
             } catch (CommandSyntaxException e) {

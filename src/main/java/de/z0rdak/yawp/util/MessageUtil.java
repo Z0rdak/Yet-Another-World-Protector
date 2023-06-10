@@ -53,6 +53,10 @@ public class MessageUtil {
         return buildHeader(Component.translatable(translationKey));
     }
 
+    public static MutableComponent buildHeader(String translationKey, String fallback) {
+        return buildHeader(Component.translatableWithFallback(translationKey, fallback));
+    }
+
     public static MutableComponent buildHeader(MutableComponent header) {
         return Component.literal(BOLD + "")
                 .append(header)
@@ -75,20 +79,20 @@ public class MessageUtil {
         sendCmdFeedback(src, Component.translatable(langKey));
     }
 
+    public static void sendCmdFeedback(CommandSourceStack src, String langKey, String fallback) {
+        sendCmdFeedback(src, Component.translatableWithFallback(langKey, fallback));
+    }
+
     public static void sendMessage(Player player, MutableComponent textComponent) {
         player.sendSystemMessage(textComponent);
     }
 
-    public static void sendMessage(Player player, String translationKey) {
-        player.sendSystemMessage(Component.translatable(translationKey));
-    }
-
     public static void sendDimFlagNotification(Player player, RegionFlag flag) {
-        player.displayClientMessage(Component.translatable("flag.dim.player.msg.push.deny", flag.name), true);
+        player.displayClientMessage(Component.translatableWithFallback("flag.dim.player.msg.push.deny", "The '%s' flag denies this action in this dimension!", flag.name), true);
     }
 
     public static void sendFlagNotification(Player player, IMarkableRegion region, RegionFlag flag) {
-        player.displayClientMessage(Component.translatable("flag.local.player.msg.push.deny", region.getName(), flag.name), true);
+        player.displayClientMessage(Component.translatableWithFallback("flag.local.player.msg.push.deny", "[%s]: The '%s' flag denies this action here!", region.getName(), flag.name), true);
     }
 
     public final static ChatFormatting SUGGEST_COLOR = BLUE;
@@ -128,14 +132,6 @@ public class MessageUtil {
         return buildDimTeleportCmd(region.getDim(), target, region.getTpTarget());
     }
 
-    public static MutableComponent buildExecuteCmdComponent(String linkText, String hoverText, String command, ClickEvent.Action eventAction, ChatFormatting color) {
-        MutableComponent text = ComponentUtils.wrapInSquareBrackets(Component.translatable(linkText));
-        return text.setStyle(text.getStyle()
-                .withColor(color)
-                .withClickEvent(new ClickEvent(eventAction, command))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable(hoverText))));
-    }
-
     public static MutableComponent buildExecuteCmdComponent(MutableComponent linkText, MutableComponent hoverText, String command, ClickEvent.Action eventAction, ChatFormatting color) {
         MutableComponent text = ComponentUtils.wrapInSquareBrackets(linkText);
         return text.setStyle(text.getStyle()
@@ -158,7 +154,7 @@ public class MessageUtil {
         MutableComponent playerName = Component.literal(team.getName());
         playerName.setStyle(playerName.getStyle()
                 .withColor(LINK_COLOR)
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("cli.msg.info.region.affiliation.link.hover")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatableWithFallback("cli.msg.info.region.affiliation.link.hover", "Click to display team info")))
                 .withClickEvent(new ClickEvent(RUN_COMMAND, "/team list " + team.getName())));
         return playerName;
     }
@@ -180,10 +176,10 @@ public class MessageUtil {
         switch (area.getAreaType()) {
             case CUBOID: {
                 CuboidArea cuboidArea = (CuboidArea) area;
-                MutableComponent sizeInfo = Component.translatable("cli.msg.info.region.spatial.area.size")
+                MutableComponent sizeInfo = Component.translatableWithFallback("cli.msg.info.region.spatial.area.size", "Size")
                         .append(": ")
                         .append("X=" + cuboidArea.getArea().getXsize() + ", Y=" + cuboidArea.getArea().getYsize() + ", Z=" + cuboidArea.getArea().getZsize());
-                MutableComponent markedBlocksInfo = Component.translatable("cli.msg.info.region.spatial.area.blocks")
+                MutableComponent markedBlocksInfo = Component.translatableWithFallback("cli.msg.info.region.spatial.area.blocks", "Marked Blocks")
                         .append(": ")
                         .append(buildBlockPosTpLinks(region));
                 areaInfo.append(sizeInfo).append("\n")
@@ -212,14 +208,17 @@ public class MessageUtil {
     public static MutableComponent buildDimensionTeleportLink(IMarkableRegion region) {
         String cmdLinkText = buildTeleportLinkText(region.getDim(), region.getTpTarget());
         String executeCmdStr = buildDimTeleportCmd(region.getDim(), "@s", region.getTpTarget());
-        MutableComponent teleportCmdHoverText = Component.translatable("cli.msg.info.region.spatial.location.teleport", region.getName(), region.getDim().location().toString());
+        MutableComponent teleportCmdHoverText = Component.translatableWithFallback("cli.msg.info.region.spatial.location.teleport", "Teleport to region %s in dimension %s", region.getName(), region.getDim().location().toString());
         return buildExecuteCmdComponent(Component.literal(cmdLinkText), teleportCmdHoverText, executeCmdStr, RUN_COMMAND, TP_COLOR);
     }
 
+    // Not used at the moment
     public static MutableComponent buildHelpSuggestionLink(String translationKey, CommandConstants baseCmd, CommandConstants cmd) {
         String command = "/" + CommandPermissionConfig.BASE_CMD + " " + baseCmd + " " + cmd + " ";
+        MutableComponent text = Component.translatableWithFallback("=>", "=>");
+        MutableComponent hover = Component.translatableWithFallback("not.existing.key", "place-text-here");
         return Component.literal(" ")
-                .append(buildExecuteCmdComponent("=>", "chat.link.hover.command.copy", command, SUGGEST_COMMAND, SUGGEST_COLOR))
+                .append(buildExecuteCmdComponent(text, hover, command, SUGGEST_COMMAND, SUGGEST_COLOR))
                 .append(Component.literal(" "))
                 .append(Component.translatable(translationKey));
     }
@@ -234,25 +233,26 @@ public class MessageUtil {
 
     public static MutableComponent buildRegionEnableComponent(IMarkableRegion region) {
         String cmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), ENABLE.toString());
-        String linkTextKey = "cli.msg.info.region.state.enable." + region.isActive() + ".link.text";
-        String hoverTextKey = "cli.msg.info.region.state.enable." + !region.isActive() + ".link.hover";
+        MutableComponent text = Component.translatableWithFallback("cli.msg.info.region.state.enable." + region.isActive() + ".link.text", region.isActive() ? "yes" : "no");
+        MutableComponent hover = Component.translatableWithFallback("cli.msg.info.region.state.enable." + !region.isActive() + ".link.hover",
+                !region.isActive() ? "Disable flag checks" : "Enable flag checks");
         ChatFormatting color = region.isActive() ? ADD_CMD_COLOR : REMOVE_CMD_COLOR;
-        return buildExecuteCmdComponent(linkTextKey, hoverTextKey, cmd, ClickEvent.Action.RUN_COMMAND, color);
+        return buildExecuteCmdComponent(text, hover, cmd, ClickEvent.Action.RUN_COMMAND, color);
     }
 
     public static MutableComponent buildRegionPriorityComponent(IMarkableRegion region) {
         String incPriorityCmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), INC.toString(), String.valueOf(CLI_REGION_DEFAULT_PRIORITY_INC.get()));
-        MutableComponent incLinkText = Component.translatable("cli.msg.info.region.state.priority.increase.link.text", CLI_REGION_DEFAULT_PRIORITY_INC.get());
-        MutableComponent incHoverText = Component.translatable("cli.msg.info.region.state.priority.increase.link.hover", CLI_REGION_DEFAULT_PRIORITY_INC.get());
+        MutableComponent incLinkText = Component.translatableWithFallback("cli.msg.info.region.state.priority.increase.link.text", "+%s", CLI_REGION_DEFAULT_PRIORITY_INC.get());
+        MutableComponent incHoverText = Component.translatableWithFallback("cli.msg.info.region.state.priority.increase.link.hover", "Increase region priority by %s", CLI_REGION_DEFAULT_PRIORITY_INC.get());
         MutableComponent increaseLink = buildExecuteCmdComponent(incLinkText, incHoverText, incPriorityCmd, ClickEvent.Action.RUN_COMMAND, ADD_CMD_COLOR);
         String decPriorityCmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), DEC.toString(), String.valueOf(CLI_REGION_DEFAULT_PRIORITY_INC.get()));
-        MutableComponent decLinkText = Component.translatable("cli.msg.info.region.state.priority.decrease.link.text", CLI_REGION_DEFAULT_PRIORITY_INC.get());
-        MutableComponent decHoverText = Component.translatable("cli.msg.info.region.state.priority.decrease.link.hover", CLI_REGION_DEFAULT_PRIORITY_INC.get());
+        MutableComponent decLinkText = Component.translatableWithFallback("cli.msg.info.region.state.priority.decrease.link.text", "-%s", CLI_REGION_DEFAULT_PRIORITY_INC.get());
+        MutableComponent decHoverText = Component.translatableWithFallback("cli.msg.info.region.state.priority.decrease.link.hover", "Decrease region priority by %s", CLI_REGION_DEFAULT_PRIORITY_INC.get());
         MutableComponent decreaseLink = buildExecuteCmdComponent(decLinkText, decHoverText, decPriorityCmd, ClickEvent.Action.RUN_COMMAND, REMOVE_CMD_COLOR);
         MutableComponent priorityValue = Component.literal(String.valueOf(region.getPriority()));
         String setPriorityCmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), "");
-        MutableComponent setPriorityLinkText = Component.translatable("cli.msg.info.region.state.priority.set.link.text");
-        MutableComponent setPriorityHoverText = Component.translatable("cli.msg.info.region.state.priority.set.link.hover");
+        MutableComponent setPriorityLinkText = Component.translatableWithFallback("cli.msg.info.region.state.priority.set.link.text", "#");
+        MutableComponent setPriorityHoverText = Component.translatableWithFallback("cli.msg.info.region.state.priority.set.link.hover", "Set priority for region");
         MutableComponent setPriorityLink = buildExecuteCmdComponent(setPriorityLinkText, setPriorityHoverText, setPriorityCmd, SUGGEST_COMMAND, SUGGEST_COLOR);
         return priorityValue.append(" ")
                 .append(setPriorityLink).append(" ")
@@ -262,24 +262,26 @@ public class MessageUtil {
 
     public static MutableComponent buildRegionAlertComponentLink(IMarkableRegion region) {
         String cmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), ALERT.toString());
-        String linkTextKey = "cli.msg.info.region.state.alert." + !region.isMuted() + ".link.text";
-        String hoverTextKey = "cli.msg.info.region.state.alert." + region.isMuted() + ".link.hover";
+        MutableComponent text = Component.translatableWithFallback("cli.msg.info.region.state.alert." + !region.isMuted() + ".link.text",
+                !region.isMuted() ? "off" : "on");
+        MutableComponent hover = Component.translatableWithFallback("cli.msg.info.region.state.alert." + region.isMuted() + ".link.hover",
+                "Turn flag alerts " + (region.isMuted() ? "on" : "off"));
         ChatFormatting color = region.isMuted() ? REMOVE_CMD_COLOR : ADD_CMD_COLOR;
-        return buildExecuteCmdComponent(linkTextKey, hoverTextKey, cmd, ClickEvent.Action.RUN_COMMAND, color);
+        return buildExecuteCmdComponent(text, hover, cmd, ClickEvent.Action.RUN_COMMAND, color);
     }
 
     public static MutableComponent buildRegionInfoLink(IProtectedRegion region, RegionType type) {
         return switch (type) {
             case DIMENSION -> {
                 String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), INFO.toString());
-                MutableComponent hoverText = Component.translatable("cli.msg.dim.info");
+                MutableComponent hoverText = Component.translatableWithFallback("cli.msg.dim.info", "Prompt region info");
                 MutableComponent linkText = Component.literal(region.getDim().location().toString());
                 yield buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, LINK_COLOR);
             }
             case LOCAL -> {
                 String cmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), INFO.toString());
                 MutableComponent regionInfoLinkText = Component.literal(region.getName());
-                MutableComponent regionInfoLinkHover = Component.translatable("cli.msg.info.region", region.getName());
+                MutableComponent regionInfoLinkHover = Component.translatableWithFallback("cli.msg.info.region", "Show region info for region %s", region.getName());
                 yield buildExecuteCmdComponent(regionInfoLinkText, regionInfoLinkHover, cmd, RUN_COMMAND, LINK_COLOR);
             }
             default -> throw new IllegalStateException("Unexpected value: " + type);
@@ -288,20 +290,24 @@ public class MessageUtil {
 
     public static MutableComponent buildRegionSpatialPropLink(IMarkableRegion region) {
         String showSpatialPropLink = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), SPATIAL.toString());
-        MutableComponent spatialPropLinkText = Component.translatable("cli.msg.info.region.spatial.link.text");
-        MutableComponent spatialPropHoverText = Component.translatable("cli.msg.info.region.spatial.link.hover", region.getName());
+        MutableComponent spatialPropLinkText = Component.translatableWithFallback("cli.msg.info.region.spatial.link.text", "Spatial Properties");
+        MutableComponent spatialPropHoverText = Component.translatableWithFallback("cli.msg.info.region.spatial.link.hover", "Show region spatial properties for %s", region.getName());
         return buildExecuteCmdComponent(spatialPropLinkText, spatialPropHoverText, showSpatialPropLink, RUN_COMMAND, LINK_COLOR);
     }
 
     public static MutableComponent buildRegionOverviewHeader(IProtectedRegion region, RegionType type) {
         return switch (type) {
             case DIMENSION -> {
-                MutableComponent clipBoardDumpLink = buildExecuteCmdComponent("cli.msg.dim.overview.header.dump.link.text", "cli.msg.dim.overview.header.dump.link.hover", NbtUtils.prettyPrint(region.serializeNBT()), ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
-                yield buildHeader(Component.translatable("cli.msg.info.header.for", clipBoardDumpLink, buildRegionInfoLink(region, RegionType.DIMENSION)));
+                MutableComponent dumpLinkText = Component.translatableWithFallback("cli.msg.dim.overview.header.dump.link.text", "Dimension overview");
+                MutableComponent dumpLinkHover = Component.translatableWithFallback("cli.msg.dim.overview.header.dump.link.hover", "Copy Dimensional Region NBT to clipboard");
+                MutableComponent clipBoardDumpLink = buildExecuteCmdComponent(dumpLinkText, dumpLinkHover, NbtUtils.prettyPrint(region.serializeNBT()), ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
+                yield buildHeader(Component.translatableWithFallback("cli.msg.info.header.for", "== %s for %s ==", clipBoardDumpLink, buildRegionInfoLink(region, RegionType.DIMENSION)));
             }
             case LOCAL -> {
-                MutableComponent clipBoardDumpLink = buildExecuteCmdComponent("cli.msg.info.region.overview.dump.link.text", "cli.msg.info.region.overview.dump.link.hover", NbtUtils.prettyPrint(region.serializeNBT()), ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
-                yield buildHeader(Component.translatable("cli.msg.info.header.for", clipBoardDumpLink, buildRegionInfoLink(region, LOCAL)));
+                MutableComponent dumpLinkText = Component.translatableWithFallback("cli.msg.info.region.overview.dump.link.text", "Region overview");
+                MutableComponent dumpLinkHover = Component.translatableWithFallback("cli.msg.info.region.overview.dump.link.hover", "Copy Region NBT to clipboard");
+                MutableComponent clipBoardDumpLink = buildExecuteCmdComponent(dumpLinkText, dumpLinkHover, NbtUtils.prettyPrint(region.serializeNBT()), ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
+                yield buildHeader(Component.translatableWithFallback("cli.msg.info.header.for", "== %s for %s ==", clipBoardDumpLink, buildRegionInfoLink(region, LOCAL)));
             }
             default -> throw new IllegalStateException("Unexpected value: " + type);
         };
@@ -312,8 +318,8 @@ public class MessageUtil {
      * // TODO:
      */
     public static MutableComponent buildPlayerListLink(IProtectedRegion region, PlayerContainer players, String affiliation, RegionType regionType) {
-        MutableComponent hoverText = Component.translatable("cli.msg.info.region.affiliation.player.list.link.hover", affiliation, region.getName());
-        MutableComponent linkText = Component.translatable("cli.msg.info.region.affiliation.player.list.link.text", players.getPlayers().size());
+        MutableComponent hoverText = Component.translatableWithFallback("cli.msg.info.region.affiliation.player.list.link.hover", "List players of affiliation '%s' in region %s", affiliation, region.getName());
+        MutableComponent linkText = Component.translatableWithFallback("cli.msg.info.region.affiliation.player.list.link.text", "%s player(s)", players.getPlayers().size());
         return switch (regionType) {
             case DIMENSION -> {
                 String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), affiliation, PLAYER.toString());
@@ -329,11 +335,10 @@ public class MessageUtil {
 
     /**
      * Teams: [n team(s)] [+]
-     * // TODO:
      */
     public static MutableComponent buildTeamListLink(IProtectedRegion region, PlayerContainer teams, String affiliation, RegionType regionType) {
-        MutableComponent hoverText = Component.translatable("cli.msg.info.region.affiliation.team.list.link.hover", affiliation, region.getName());
-        MutableComponent linkText = Component.translatable("cli.msg.info.region.affiliation.team.list.link.text", teams.getTeams().size());
+        MutableComponent hoverText = Component.translatableWithFallback("cli.msg.info.region.affiliation.team.list.link.hover", "List teams of affiliation '%s' in region %s", affiliation, region.getName());
+        MutableComponent linkText = Component.translatableWithFallback("cli.msg.info.region.affiliation.team.list.link.text", "%s team(s)", teams.getTeams().size());
         return switch (regionType) {
             case DIMENSION -> {
                 String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), affiliation, TEAM.toString());
@@ -348,8 +353,9 @@ public class MessageUtil {
     }
 
     public static MutableComponent buildAddAffiliateLink(IProtectedRegion region, String affiliation, AffiliationType affiliationType, RegionType regionType) {
-        MutableComponent linkText = Component.translatable("cli.link.add");
-        MutableComponent hoverText = Component.translatable("cli.msg.info.region.affiliation." + affiliationType.name + ".add.link.hover", affiliation, region.getName());
+        MutableComponent linkText = Component.translatableWithFallback("cli.link.add", "+");
+        String affiliationFallback = "Add " + affiliationType.name + " as '%s' to region %s";
+        MutableComponent hoverText = Component.translatableWithFallback("cli.msg.info.region.affiliation." + affiliationType.name + ".add.link.hover", affiliationFallback, affiliation, region.getName());
         String subCmd = " " + affiliationType.name + " " + affiliation + " ";
         return switch (regionType) {
             case LOCAL -> {
@@ -389,16 +395,17 @@ public class MessageUtil {
         int amountMembers = (region.getMembers().getTeams().size() + region.getMembers().getPlayers().size());
         int affiliationSize = affiliation.equals("owner") ? amountOwners : amountMembers;
         MutableComponent affiliationLink = buildAffiliationLink(region, affiliation, affiliationSize, regionType);
-        return buildHeader(Component.translatable("cli.msg.info.header.in", affiliationLink, buildRegionInfoLink(region, regionType)));
+        return buildHeader(Component.translatableWithFallback("cli.msg.info.header.in", "== %s in %s ==", affiliationLink, buildRegionInfoLink(region, regionType)));
     }
 
     public static MutableComponent buildAffiliationHeader(IProtectedRegion region, String affiliation, AffiliationType affiliationType, RegionType regionType) {
-        return Component.translatable("cli.msg.info.region.affiliation." + affiliationType.name + ".list", buildRegionInfoLink(region, regionType), affiliation);
+        String fallbackString = "== Region '%s' " + affiliationType.name + "s in %s ==";
+        return Component.translatableWithFallback("cli.msg.info.region.affiliation." + affiliationType.name + ".list", fallbackString, buildRegionInfoLink(region, regionType), affiliation);
     }
 
     public static MutableComponent buildAffiliationLink(IProtectedRegion region, String affiliation, int affiliationSize, RegionType regionType) {
-        MutableComponent linkText = Component.translatable("cli.msg.info.region.affiliation.list.link.text", affiliationSize, affiliation);
-        MutableComponent hoverText = Component.translatable("cli.msg.info.region.affiliation.list.link.hover", affiliation, region.getName());
+        MutableComponent linkText = Component.translatableWithFallback("cli.msg.info.region.affiliation.list.link.text", "%s %s(s)", affiliationSize, affiliation);
+        MutableComponent hoverText = Component.translatableWithFallback("cli.msg.info.region.affiliation.list.link.hover", "List %ss for region %s", affiliation, region.getName());
         return switch (regionType) {
             case LOCAL -> {
                 String cmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), affiliation);
@@ -416,11 +423,11 @@ public class MessageUtil {
     public static MutableComponent buildAffiliationTeamListLink(IProtectedRegion region, String affiliation, RegionType regionType) {
         // Teams: [n team(s)] [+]
         PlayerContainer playerContainer = affiliation.equals("owner") ? region.getOwners() : region.getMembers();
-        MutableComponent teams = Component.translatable("cli.msg.info.region.affiliation.team").append(": ");
+        MutableComponent teams = Component.translatableWithFallback("cli.msg.info.region.affiliation.team", "Teams").append(": ");
         MutableComponent teamAddLink = buildAddAffiliateLink(region, affiliation, AffiliationType.TEAM, regionType);
         MutableComponent teamListLink = playerContainer.hasTeams()
                 ? buildTeamListLink(region, playerContainer, affiliation, regionType)
-                : Component.translatable("cli.msg.info.region.affiliation.team.list.link.text", playerContainer.getTeams().size());
+                : Component.translatableWithFallback("cli.msg.info.region.affiliation.team.list.link.text", "%s team(s)", playerContainer.getTeams().size());
         teams.append(teamListLink).append(teamAddLink);
         return teams;
     }
@@ -429,11 +436,11 @@ public class MessageUtil {
     public static MutableComponent buildAffiliationPlayerListLink(IProtectedRegion region, String affiliation, RegionType regionType) {
         // Players: [n player(s)] [+]
         PlayerContainer playerContainer = affiliation.equals("owner") ? region.getOwners() : region.getMembers();
-        MutableComponent players = Component.translatable("cli.msg.info.region.affiliation.player").append(": ");
+        MutableComponent players = Component.translatableWithFallback("cli.msg.info.region.affiliation.player", "Players").append(": ");
         MutableComponent playersAddLink = buildAddAffiliateLink(region, affiliation, AffiliationType.PLAYER, regionType);
         MutableComponent playerListLink = playerContainer.hasPlayers()
                 ? buildPlayerListLink(region, playerContainer, affiliation, regionType)
-                : Component.translatable("cli.msg.info.region.affiliation.player.list.link.text", playerContainer.getPlayers().size());
+                : Component.translatableWithFallback("cli.msg.info.region.affiliation.player.list.link.text", "%s player(s)", playerContainer.getPlayers().size());
         players.append(playerListLink).append(playersAddLink);
         return players;
     }
@@ -444,15 +451,15 @@ public class MessageUtil {
         switch (regionType) {
             case DIMENSION: {
                 String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), REMOVE.toString(), FLAG.toString(), flag.getFlagIdentifier());
-                MutableComponent hoverText = Component.translatable("cli.msg.dim.info.flag.remove.link.hover", flag.getFlagIdentifier(), region.getDim().location().toString());
-                MutableComponent linkText = Component.translatable("cli.link.remove");
+                MutableComponent hoverText = Component.translatableWithFallback("cli.msg.dim.info.flag.remove.link.hover", "Remove flag '%s' from dimension %s", flag.getFlagIdentifier(), region.getDim().location().toString());
+                MutableComponent linkText = Component.translatableWithFallback("cli.link.remove", "x");
                 flagRemoveLink = buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, REMOVE_CMD_COLOR);
                 break;
             }
             case LOCAL: {
                 String cmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), REMOVE.toString(), FLAG.toString(), flag.getFlagIdentifier());
-                MutableComponent hoverText = Component.translatable("cli.msg.info.region.flag.remove.link.hover", flag.getFlagIdentifier(), region.getName());
-                MutableComponent linkText = Component.translatable("cli.link.remove");
+                MutableComponent hoverText = Component.translatableWithFallback("cli.msg.info.region.flag.remove.link.hover", "Remove flag '%s' from region %s", flag.getFlagIdentifier(), region.getName());
+                MutableComponent linkText = Component.translatableWithFallback("cli.link.remove", "x");
                 flagRemoveLink = buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, REMOVE_CMD_COLOR);
                 break;
             }
@@ -503,7 +510,8 @@ public class MessageUtil {
             case DIMENSION -> {
                 MutableComponent removeLink = buildDimSuggestRegionRemovalLink(region);
                 removeLink.append(separator).append(buildRegionInfoLink(region, LOCAL));
-                MutableComponent childIndicator = buildTextWithHoverMsg(Component.literal("*"), Component.translatable("cli.msg.info.dim.region.child.hover"), GOLD);
+                MutableComponent childIndicator = buildTextWithHoverMsg(Component.literal("*"),
+                        Component.translatableWithFallback("cli.msg.info.dim.region.child.hover", "Marks this region as a direct child region"), GOLD);
                 if (parent.hasChild(region)) {
                     removeLink.append(childIndicator.setStyle(childIndicator.getStyle().withInsertion("Test")));
                 }
@@ -528,23 +536,31 @@ public class MessageUtil {
             numberOfPages += 1;
         }
         if (pageNo < FIRST_PAGE_IDX || pageNo >= numberOfPages) {
-            paginationComponents.add(Component.translatable("cli.msg.info.pagination.error.index", pageNo, numberOfPages - 1).withStyle(RED));
+            paginationComponents.add(Component.translatableWithFallback("cli.msg.info.pagination.error.index", "Invalid page index supplied: %s (Try 0-%s)", pageNo, numberOfPages - 1).withStyle(RED));
             return paginationComponents;
         }
         boolean hasMultiplePages = numberOfPages > 1;
 
+        MutableComponent firstText = Component.translatableWithFallback("cli.msg.info.pagination.first.text", "⏮");
+        MutableComponent firstHover = Component.translatableWithFallback("cli.msg.info.pagination.first.hover", "First page");
+        MutableComponent prevText = Component.translatableWithFallback("cli.msg.info.pagination.previous.text", "◀");
+        MutableComponent prevHover = Component.translatableWithFallback("cli.msg.info.pagination.previous.hover", "Previous page");
+        MutableComponent nextText = Component.translatableWithFallback("cli.msg.info.pagination.next.text", "▶");
+        MutableComponent nextHover = Component.translatableWithFallback("cli.msg.info.pagination.next.hover", "Next page");
+        MutableComponent lastText = Component.translatableWithFallback("cli.msg.info.pagination.last.text", "⏭");
+        MutableComponent lastHover = Component.translatableWithFallback("cli.msg.info.pagination.last.hover", "Last page");
         MutableComponent first = hasMultiplePages && pageNo != FIRST_PAGE_IDX
-                ? buildExecuteCmdComponent(Component.translatable("cli.msg.info.pagination.first.text"), Component.translatable("cli.msg.info.pagination.first.hover"), buildPageCommand(cmd, FIRST_PAGE_IDX), RUN_COMMAND, LINK_COLOR)
-                : ComponentUtils.wrapInSquareBrackets(Component.translatable("cli.msg.info.pagination.first.text")).withStyle(INACTIVE_LINK_COLOR);
+                ? buildExecuteCmdComponent(firstText, firstHover, buildPageCommand(cmd, FIRST_PAGE_IDX), RUN_COMMAND, LINK_COLOR)
+                : ComponentUtils.wrapInSquareBrackets(firstText).withStyle(INACTIVE_LINK_COLOR);
         MutableComponent prev = hasMultiplePages && pageNo > FIRST_PAGE_IDX
-                ? buildExecuteCmdComponent(Component.translatable("cli.msg.info.pagination.previous.text"), Component.translatable("cli.msg.info.pagination.previous.hover"), buildPageCommand(cmd, Math.max(pageNo - 1, FIRST_PAGE_IDX)), RUN_COMMAND, LINK_COLOR)
-                : ComponentUtils.wrapInSquareBrackets(Component.translatable("cli.msg.info.pagination.previous.text")).withStyle(INACTIVE_LINK_COLOR);
+                ? buildExecuteCmdComponent(prevText, prevHover, buildPageCommand(cmd, Math.max(pageNo - 1, FIRST_PAGE_IDX)), RUN_COMMAND, LINK_COLOR)
+                : ComponentUtils.wrapInSquareBrackets(prevText).withStyle(INACTIVE_LINK_COLOR);
         MutableComponent next = hasMultiplePages && pageNo < numberOfPages - 1
-                ? buildExecuteCmdComponent(Component.translatable("cli.msg.info.pagination.next.text"), Component.translatable("cli.msg.info.pagination.next.hover"), buildPageCommand(cmd, Math.min(pageNo + 1, numberOfPages - 1)), RUN_COMMAND, LINK_COLOR)
-                : ComponentUtils.wrapInSquareBrackets(Component.translatable("cli.msg.info.pagination.next.text")).withStyle(INACTIVE_LINK_COLOR);
+                ? buildExecuteCmdComponent(nextText, nextHover, buildPageCommand(cmd, Math.min(pageNo + 1, numberOfPages - 1)), RUN_COMMAND, LINK_COLOR)
+                : ComponentUtils.wrapInSquareBrackets(nextText).withStyle(INACTIVE_LINK_COLOR);
         MutableComponent last = hasMultiplePages && pageNo < numberOfPages - 1
-                ? buildExecuteCmdComponent(Component.translatable("cli.msg.info.pagination.last.text"), Component.translatable("cli.msg.info.pagination.last.hover"), buildPageCommand(cmd, numberOfPages - 1), RUN_COMMAND, LINK_COLOR)
-                : ComponentUtils.wrapInSquareBrackets(Component.translatable("cli.msg.info.pagination.last.text")).withStyle(INACTIVE_LINK_COLOR);
+                ? buildExecuteCmdComponent(lastText, lastHover, buildPageCommand(cmd, numberOfPages - 1), RUN_COMMAND, LINK_COLOR)
+                : ComponentUtils.wrapInSquareBrackets(lastText).withStyle(INACTIVE_LINK_COLOR);
 
         MutableComponent paginationControl = buildPaginationControl(first, prev, pageNo, numberOfPages, next, last);
         int from = pageNo * RegionConfig.getPaginationSize();
@@ -578,22 +594,23 @@ public class MessageUtil {
     }
 
     public static MutableComponent buildRegionChildrenHeader(IProtectedRegion region, RegionType type) {
-        return buildHeader(Component.translatable("cli.msg.info.header.in", buildRegionChildrenLink(region, type), buildRegionInfoLink(region, type)));
+        return buildHeader(Component.translatableWithFallback("cli.msg.info.header.in", "== %s in %s ==",
+                buildRegionChildrenLink(region, type), buildRegionInfoLink(region, type)));
     }
 
     public static MutableComponent buildRegionParentLink(IMarkableRegion region) {
         MutableComponent parentLink = null;
         if (region.getParent() != null) { // FIXME: should not happen. it is either a dim or local region as parent
             String regionParentInfoCmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getParent().getName(), INFO.toString());
-            MutableComponent parentLinkText = Component.translatable("cli.msg.info.region.parent.link.text", region.getParent().getName());
-            MutableComponent parentHoverText = Component.translatable("cli.msg.info.region.parent.link.hover", region.getParent().getName());
+            MutableComponent parentLinkText = Component.translatableWithFallback("cli.msg.info.region.parent.link.text", "%s", region.getParent().getName());
+            MutableComponent parentHoverText = Component.translatableWithFallback("cli.msg.info.region.parent.link.hover", "Show info about regions parent '%s'", region.getParent().getName());
             if (region.getParent() instanceof DimensionalRegion) {
                 return buildRegionInfoLink(region.getParent(), RegionType.DIMENSION);
             }
             if (region.getParent() instanceof IMarkableRegion) {
                 String clearRegionParentCmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), PARENT.toString(), CLEAR.toString(), region.getParent().getName());
-                MutableComponent parentClearLinkText = Component.translatable("cli.msg.info.region.parent.clear.link.text");
-                MutableComponent parentClearHoverText = Component.translatable("cli.msg.info.region.parent.clear.link.hover", region.getParent().getName());
+                MutableComponent parentClearLinkText = Component.translatableWithFallback("cli.msg.info.region.parent.clear.link.text", "-");
+                MutableComponent parentClearHoverText = Component.translatableWithFallback("cli.msg.info.region.parent.clear.link.hover", "Clear %s as parent region", region.getParent().getName());
                 parentLink = buildExecuteCmdComponent(parentLinkText, parentHoverText, regionParentInfoCmd, RUN_COMMAND, LINK_COLOR)
                         .append(buildExecuteCmdComponent(parentClearLinkText, parentClearHoverText, clearRegionParentCmd, RUN_COMMAND, REMOVE_CMD_COLOR));
                 return parentLink;
@@ -604,9 +621,9 @@ public class MessageUtil {
 
         } else {
             String setRegionParentCmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), PARENT.toString(), SET.toString(), "");
-            MutableComponent setParentLinkText = Component.translatable("cli.link.add");
-            MutableComponent setParentHoverText = Component.translatable("cli.msg.info.region.parent.set.link.hover", region.getName());
-            parentLink = Component.translatable("cli.msg.info.region.parent.null")
+            MutableComponent setParentLinkText = Component.translatableWithFallback("cli.link.add", "+");
+            MutableComponent setParentHoverText = Component.translatableWithFallback("cli.msg.info.region.parent.set.link.hover", "Set parent for region %s", region.getName());
+            parentLink = Component.translatableWithFallback("cli.msg.info.region.parent.null", "No parent set")
                     .append(" ")
                     .append(buildExecuteCmdComponent(setParentLinkText, setParentHoverText, setRegionParentCmd, RUN_COMMAND, GREEN));
         }
@@ -614,7 +631,7 @@ public class MessageUtil {
     }
 
     public static MutableComponent buildDimRegionListHeader(DimensionalRegion dimRegion) {
-        return buildHeader(Component.translatable("cli.msg.info.header.in",
+        return buildHeader(Component.translatableWithFallback("cli.msg.info.header.in", "== %s in %s ==",
                 buildRegionChildrenLink(dimRegion, RegionType.DIMENSION), buildRegionInfoLink(dimRegion, RegionType.DIMENSION)));
     }
 
@@ -623,16 +640,16 @@ public class MessageUtil {
             case DIMENSION -> {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(region.getDim());
                 String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), REGION.toString());
-                MutableComponent listDimRegionsLinkText = Component.translatable("cli.msg.dim.info.region.list.link.text", dimCache.getRegions().size());
-                MutableComponent listDimRegionsHoverText = Component.translatable("cli.msg.dim.info.region.list.link.hover", region.getName());
+                MutableComponent listDimRegionsLinkText = Component.translatableWithFallback("cli.msg.dim.info.region.list.link.text", "%s region(s)", dimCache.getRegions().size());
+                MutableComponent listDimRegionsHoverText = Component.translatableWithFallback("cli.msg.dim.info.region.list.link.hover", "List regions in %s", region.getName());
                 MutableComponent listDimRegionsListLink = buildExecuteCmdComponent(listDimRegionsLinkText, listDimRegionsHoverText, command, RUN_COMMAND, LINK_COLOR);
                 MutableComponent createRegionLink = buildDimCreateRegionLink(region);
                 yield (region.getChildren().size() == 0) ? listDimRegionsLinkText.append(createRegionLink) : listDimRegionsListLink.append(createRegionLink);
             }
             case LOCAL -> {
                 String regionChildrenListLink = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), CHILDREN.toString());
-                MutableComponent childrenLinkText = Component.translatable("cli.msg.info.region.children.link.text", region.getChildren().size());
-                MutableComponent childrenHoverText = Component.translatable("cli.msg.info.region.children.link.hover", region.getName());
+                MutableComponent childrenLinkText = Component.translatableWithFallback("cli.msg.info.region.children.link.text", "%s children", region.getChildren().size());
+                MutableComponent childrenHoverText = Component.translatableWithFallback("cli.msg.info.region.children.link.hover", "Show list of children for region %s", region.getName());
                 MutableComponent regionChildrenLink = buildExecuteCmdComponent(childrenLinkText, childrenHoverText, regionChildrenListLink, RUN_COMMAND, LINK_COLOR);
                 MutableComponent addChildrenLink = buildRegionAddChildrenLink(region);
                 yield (region.getChildren().size() == 0) ? childrenLinkText.append(addChildrenLink) : regionChildrenLink.append(addChildrenLink);
@@ -643,15 +660,15 @@ public class MessageUtil {
 
     public static MutableComponent buildRegionAddChildrenLink(IProtectedRegion region) {
         String addChildrenCmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), ADD.toString(), CHILD.toString(), "");
-        MutableComponent addChildrenLinkText = Component.translatable("cli.link.add");
-        MutableComponent addChildrenHoverText = Component.translatable("cli.msg.info.region.children.add.link.hover", region.getName());
+        MutableComponent addChildrenLinkText = Component.translatableWithFallback("cli.link.add", "+");
+        MutableComponent addChildrenHoverText = Component.translatableWithFallback("cli.msg.info.region.children.add.link.hover", "Add child for region %s", region.getName());
         return buildExecuteCmdComponent(addChildrenLinkText, addChildrenHoverText, addChildrenCmd, SUGGEST_COMMAND, ADD_CMD_COLOR);
     }
 
     public static MutableComponent buildDimCreateRegionLink(IProtectedRegion region) {
         String dimCreateRegionCmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), CREATE.toString(), REGION.toString(), "");
-        MutableComponent createRegionLinkText = Component.translatable("cli.link.add");
-        MutableComponent createRegionHoverText = Component.translatable("cli.msg.dim.info.region.create.link.hover", region.getName());
+        MutableComponent createRegionLinkText = Component.translatableWithFallback("cli.link.add", "+");
+        MutableComponent createRegionHoverText = Component.translatableWithFallback("cli.msg.dim.info.region.create.link.hover", "Create region in dimension %s", region.getName());
         return buildExecuteCmdComponent(createRegionLinkText, createRegionHoverText, dimCreateRegionCmd, SUGGEST_COMMAND, ADD_CMD_COLOR);
     }
 
@@ -659,15 +676,15 @@ public class MessageUtil {
         MutableComponent flagLink = switch (type) {
             case DIMENSION -> {
                 String flagListCmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), FLAG.toString());
-                MutableComponent flagListLinkText = Component.translatable("cli.msg.info.region.flag.link.text", region.getFlags().size());
-                MutableComponent flagListHoverText = Component.translatable("cli.msg.dim.flag.list.link.hover", region.getName());
+                MutableComponent flagListLinkText = Component.translatableWithFallback("cli.msg.info.region.flag.link.text", "%s flag(s)", region.getFlags().size());
+                MutableComponent flagListHoverText = Component.translatableWithFallback("cli.msg.dim.flag.list.link.hover", "Show region flags for region %s", region.getName());
                 MutableComponent dimFlagListLink = buildExecuteCmdComponent(flagListLinkText, flagListHoverText, flagListCmd, RUN_COMMAND, LINK_COLOR);
                 yield dimFlagListLink.append(buildDimAddFlagLink(region));
             }
             case LOCAL -> {
                 String listCmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), FLAG.toString());
-                MutableComponent flagListLinkText = Component.translatable("cli.msg.info.region.flag.link.text", region.getFlags().size());
-                MutableComponent flagListHoverText = Component.translatable("cli.msg.info.region.flag.link.hover", region.getName());
+                MutableComponent flagListLinkText = Component.translatableWithFallback("cli.msg.info.region.flag.link.text", "%s flag(s)", region.getFlags().size());
+                MutableComponent flagListHoverText = Component.translatableWithFallback("cli.msg.info.region.flag.link.hover", "Show region flags for region %s", region.getName());
                 MutableComponent flagListLink = buildExecuteCmdComponent(flagListLinkText, flagListHoverText, listCmd, RUN_COMMAND, LINK_COLOR);
                 yield flagListLink.append(buildRegionAddFlagLink(region));
             }
@@ -678,68 +695,75 @@ public class MessageUtil {
 
     public static MutableComponent buildDimAddFlagLink(IProtectedRegion dimRegion) {
         String command = buildCommandStr(DIM.toString(), dimRegion.getDim().location().toString(), ADD.toString(), FLAG.toString(), "");
-        MutableComponent hoverText = Component.translatable("cli.msg.dim.flag.add.link.hover", dimRegion.getDim().location().toString());
-        MutableComponent linkText = Component.translatable("cli.link.add");
+        MutableComponent hoverText = Component.translatableWithFallback("cli.msg.dim.flag.add.link.hover", "Add new flag to dimension %s", dimRegion.getDim().location().toString());
+        MutableComponent linkText = Component.translatableWithFallback("cli.link.add", "+");
         return buildExecuteCmdComponent(linkText, hoverText, command, SUGGEST_COMMAND, ADD_CMD_COLOR);
     }
 
     public static MutableComponent buildRegionAddFlagLink(IProtectedRegion region) {
         String addCmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), ADD.toString(), FLAG.toString(), "");
-        MutableComponent flagAddHoverText = Component.translatable("cli.msg.info.region.flag.add.link.hover", region.getName());
-        MutableComponent flagAddLinkText = Component.translatable("cli.link.add");
+        MutableComponent flagAddHoverText = Component.translatableWithFallback("cli.msg.info.region.flag.add.link.hover", "Add new flag to region %s", region.getName());
+        MutableComponent flagAddLinkText = Component.translatableWithFallback("cli.link.add", "+");
         MutableComponent addFlag = buildExecuteCmdComponent(flagAddLinkText, flagAddHoverText, addCmd, SUGGEST_COMMAND, ADD_CMD_COLOR);
         return addFlag;
     }
 
     public static MutableComponent buildRegionStateLink(IMarkableRegion region) {
         String showStateCmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString());
-        MutableComponent stateLinkText = Component.translatable("cli.msg.info.region.state.link.text");
-        MutableComponent stateHoverText = Component.translatable("cli.msg.info.region.state.link.hover", region.getName());
+        MutableComponent stateLinkText = Component.translatableWithFallback("cli.msg.info.region.state.link.text", "State");
+        MutableComponent stateHoverText = Component.translatableWithFallback("cli.msg.info.region.state.link.hover", "Show region state for %s", region.getName());
         return buildExecuteCmdComponent(stateLinkText, stateHoverText, showStateCmd, RUN_COMMAND, LINK_COLOR);
     }
 
     public static MutableComponent buildStateLink(IProtectedRegion region) {
         String command = CommandUtil.buildCommandStr(DIM.toString(), region.getDim().location().toString(), ENABLE.toString());
         String onClickAction = region.isActive() ? "deactivate" : "activate";
-        String hoverText = "cli.msg.info.state." + onClickAction;
-        String linkText = "cli.msg.info.state.link." + (region.isActive() ? "activate" : "deactivate");
         ChatFormatting color = region.isActive() ? ADD_CMD_COLOR : REMOVE_CMD_COLOR;
-        MutableComponent stateLink = buildExecuteCmdComponent(linkText, hoverText, command, ClickEvent.Action.RUN_COMMAND, color);
-        return Component.translatable("cli.msg.info.state")
+        MutableComponent text = Component.translatableWithFallback("cli.msg.info.state." + onClickAction,
+                region.isActive() ? "active" : "inactive");
+        MutableComponent hover = Component.translatableWithFallback("cli.msg.info.state.link." + (region.isActive() ? "activate" : "deactivate"),
+                region.isActive() ? "Deactivate region" : "Activate region");
+        MutableComponent stateLink = buildExecuteCmdComponent(text, hover, command, ClickEvent.Action.RUN_COMMAND, color);
+        return Component.translatableWithFallback("cli.msg.info.state", "State")
                 .append(Component.literal(": "))
                 .append(stateLink);
     }
 
-    public static MutableComponent buildInfoComponent(String subjectLangKey, MutableComponent payload) {
-        return Component.translatable(subjectLangKey).append(": ").append(payload);
+    public static MutableComponent buildInfoComponent(String subjectLangKey, String fallback, MutableComponent payload) {
+        return Component.translatableWithFallback(subjectLangKey, fallback).append(": ").append(payload);
     }
 
     public static MutableComponent buildRegionTeleportLink(IMarkableRegion region) {
         String teleportCmd = buildDimTeleportCmd(region.getDim(), "@s", region.getTpTarget());
-        return buildExecuteCmdComponent(buildBlockPosTeleportLinkText(region.getTpTarget()),
-                "cli.msg.region.info.tp.link.hover", teleportCmd, RUN_COMMAND, TP_COLOR);
+        String text = buildBlockPosTeleportLinkText(region.getTpTarget());
+        MutableComponent textComp = Component.translatableWithFallback(text, text);
+        MutableComponent hover = Component.translatableWithFallback("cli.msg.region.info.tp.link.hover", "Teleport to region");
+
+        return buildExecuteCmdComponent(textComp, hover, teleportCmd, RUN_COMMAND, TP_COLOR);
     }
 
     public static MutableComponent buildDimensionalBlockTpLink(ResourceKey<Level> dim, BlockPos target) {
         String teleportCmd = buildDimTeleportCmd(dim, "@s", target);
-        return buildExecuteCmdComponent(buildBlockPosTeleportLinkText(target),
-                "cli.msg.info.region.spatial.location.teleport.link.hover", teleportCmd, RUN_COMMAND, TP_COLOR);
+        String text = buildBlockPosTeleportLinkText(target);
+        MutableComponent textComp = Component.translatableWithFallback(text, text);
+        MutableComponent hover = Component.translatableWithFallback("cli.msg.info.region.spatial.location.teleport.link.hover", "Teleport to block");
+        return buildExecuteCmdComponent(textComp, hover, teleportCmd, RUN_COMMAND, TP_COLOR);
     }
 
     public static MutableComponent buildDimSuggestRegionRemovalLink(IMarkableRegion region) {
         String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), DELETE.toString(), region.getName());
-        MutableComponent hover = Component.translatable("cli.msg.info.dim.region.remove.link.hover", region.getName());
-        MutableComponent text = Component.translatable("cli.link.remove");
+        MutableComponent hover = Component.translatableWithFallback("cli.msg.info.dim.region.remove.link.hover", "Remove region %s", region.getName());
+        MutableComponent text = Component.translatableWithFallback("cli.link.remove", "x");
         return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, REMOVE_CMD_COLOR);
     }
 
     /* TODO: extract method for n component(s) [+] */
     public static MutableComponent buildDimFlagListLink(IProtectedRegion region) {
         String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), FLAG.toString());
-        MutableComponent hoverLink = Component.translatable("cli.msg.dim.flag.list.link.hover", region.getDim().location().toString());
-        MutableComponent linkText = Component.translatable("cli.msg.flag.list.link.text", region.getFlags().size());
+        MutableComponent hoverLink = Component.translatableWithFallback("cli.msg.dim.flag.list.link.hover", "List flags in dimension %s", region.getDim().location().toString());
+        MutableComponent linkText = Component.translatableWithFallback("cli.msg.flag.list.link.text", "%s flag(s)", region.getFlags().size());
         return region.getFlags().isEmpty()
-                ? Component.translatable("cli.msg.info.region.flag.link.text", region.getFlags().size())
+                ? Component.translatableWithFallback("cli.msg.info.region.flag.link.text", "%s flag(s)", region.getFlags().size())
                 : buildExecuteCmdComponent(linkText, hoverLink, command, RUN_COMMAND, LINK_COLOR);
     }
 
@@ -749,8 +773,10 @@ public class MessageUtil {
     }
 
     public static MutableComponent buildRemoveAffiliateEntry(IProtectedRegion region, String affiliateName, AffiliationType affiliationType, String affiliation, RegionType regionType) {
-        MutableComponent linkText = Component.translatable("cli.link.remove");
-        MutableComponent hoverText = Component.translatable("cli.msg.info.region.affiliation." + affiliationType.name + ".remove.link.hover", affiliateName, region.getName());
+        MutableComponent linkText = Component.translatableWithFallback("cli.link.remove", "x");
+        String fallback = "Remove " + affiliationType.name + " '%s' from region %s";
+        String key = "cli.msg.info.region.affiliation." + affiliationType.name + ".remove.link.hover";
+        MutableComponent hoverText = Component.translatableWithFallback(key, fallback, affiliateName, region.getName());
         MutableComponent regionRemoveLink = switch (regionType) {
             case DIMENSION -> {
                 String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), REMOVE.toString(), affiliationType.name, affiliation, affiliateName);
@@ -771,8 +797,9 @@ public class MessageUtil {
         return switch (affiliationType) {
             case PLAYER -> {
                 Player player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByName(affiliateName);
+                MutableComponent playerEntry = Component.translatableWithFallback("cli.msg.info.player.list.entry.offline", "(offline)");
                 yield player == null
-                        ? Component.literal(affiliateName).withStyle(GRAY).append(" ").append(Component.translatable("cli.msg.info.player.list.entry.offline"))
+                        ? Component.literal(affiliateName).withStyle(GRAY).append(" ").append(playerEntry)
                         : buildPlayerHoverComponent(player);
             }
             case TEAM -> {
@@ -819,31 +846,31 @@ public class MessageUtil {
 
     public static MutableComponent buildRegionRemoveChildLink(IProtectedRegion region, IProtectedRegion child) {
         String command = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), REMOVE.toString(), CHILD.toString(), child.getName());
-        MutableComponent linkText = Component.translatable("cli.link.remove");
-        MutableComponent linkHoverText = Component.translatable("cli.msg.info.region.children.remove.link.hover", child.getName(), region.getName());
+        MutableComponent linkText = Component.translatableWithFallback("cli.link.remove", "x");
+        MutableComponent linkHoverText = Component.translatableWithFallback("cli.msg.info.region.children.remove.link.hover", "Remove child '%s' from region %s", child.getName(), region.getName());
         return buildExecuteCmdComponent(linkText, linkHoverText, command, SUGGEST_COMMAND, REMOVE_CMD_COLOR);
     }
 
     public static MutableComponent buildRegionActionUndoLink(String cmd, CommandConstants toReplace, CommandConstants replacement) {
         String revertCmd = CommandUtil.revertCommand(cmd, toReplace, replacement);
-        MutableComponent revertLinkText = Component.translatable("cli.link.action.undo.text");
-        MutableComponent revertLinkHover = Component.translatable("cli.link.action.undo.hover");
+        MutableComponent revertLinkText = Component.translatableWithFallback("cli.link.action.undo.text", "←");
+        MutableComponent revertLinkHover = Component.translatableWithFallback("cli.link.action.undo.hover", "Undo action.");
         return buildExecuteCmdComponent(revertLinkText, revertLinkHover, revertCmd, RUN_COMMAND, DARK_RED);
     }
 
     public static MutableComponent buildRegionActionUndoLink(String cmd, String toReplace, String replacement) {
         String revertCmd = CommandUtil.revertCommand(cmd, toReplace, replacement);
-        MutableComponent revertLinkText = Component.translatable("cli.link.action.undo.text");
-        MutableComponent revertLinkHover = Component.translatable("cli.link.action.undo.hover");
+        MutableComponent revertLinkText = Component.translatableWithFallback("cli.link.action.undo.text", "←");
+        MutableComponent revertLinkHover = Component.translatableWithFallback("cli.link.action.undo.hover", "Undo action.");
         return buildExecuteCmdComponent(revertLinkText, revertLinkHover, revertCmd, RUN_COMMAND, DARK_RED);
     }
 
     public static MutableComponent buildFlagHeader(IProtectedRegion region, RegionType regionType) {
         return switch (regionType) {
             case DIMENSION ->
-                    buildHeader(Component.translatable("cli.msg.info.header.in", buildFlagListLink(region, regionType), buildRegionInfoLink(region, regionType)));
+                    buildHeader(Component.translatableWithFallback("cli.msg.info.header.in", "== %s in %s ==", buildFlagListLink(region, regionType), buildRegionInfoLink(region, regionType)));
             case LOCAL ->
-                    buildHeader(Component.translatable("cli.msg.info.header.in", buildFlagListLink(region, regionType), buildRegionInfoLink(region, regionType)));
+                    buildHeader(Component.translatableWithFallback("cli.msg.info.header.in", "== %s in %s ==", buildFlagListLink(region, regionType), buildRegionInfoLink(region, regionType)));
             default -> throw new IllegalStateException("Unexpected value: " + regionType);
         };
     }

@@ -9,6 +9,7 @@ import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
+import de.z0rdak.yawp.util.MessageUtil;
 import de.z0rdak.yawp.util.StickType;
 import de.z0rdak.yawp.util.StickUtil;
 import net.minecraft.nbt.CompoundTag;
@@ -18,7 +19,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.player.AnvilRepairEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 
-import static de.z0rdak.yawp.util.MessageUtil.sendMessage;
 import static de.z0rdak.yawp.util.StickUtil.*;
 
 public class MarkerStickHandler {
@@ -69,16 +69,16 @@ public class MarkerStickHandler {
                         // TODO: Reset marker on dimChange?
                         RegionDataManager.save();
                     } else {
-                        sendMessage(player, Component.translatable("Player dimension not matching marker data"));
+                        MessageUtil.sendMessage(player, Component.translatableWithFallback("Player dimension not matching marker data", "Player dimension not matching marker data"));
                     }
                 } else {
-                    sendMessage(player, Component.translatable("Invalid region type"));
+                    MessageUtil.sendMessage(player, Component.translatableWithFallback("Invalid region type", "Invalid region type"));
                 }
             } else {
-                sendMessage(player, Component.translatable("Could not create region"));
+                MessageUtil.sendMessage(player, Component.translatableWithFallback("Could not create region", "Could not create region"));
             }
         } else {
-            sendMessage(player, Component.translatable("Invalid stick type / NBT data"));
+            MessageUtil.sendMessage(player, Component.translatableWithFallback("Invalid stick type / NBT data", "Invalid stick type / NBT data"));
         }
     }
 
