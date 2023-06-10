@@ -35,7 +35,7 @@ public class YetAnotherWorldProtector {
         DistExecutor.unsafeRunWhenOn(Dist.DEDICATED_SERVER, () -> ConfigRegistry::register);
 
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-            LOGGER.info(Component.translatable("loading.client.info", MODID_LONG, MODID.toUpperCase()).getString());
+            LOGGER.info(Component.translatableWithFallback("loading.client.info", "You are loading %s on a client. %s is a server-side only mod. The client only provides Internationalization.",MODID_LONG, MODID.toUpperCase()).getString());
         });
 
         //Make sure the mod being absent on the other network side does not cause the client to display the server as incompatible

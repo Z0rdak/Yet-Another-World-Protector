@@ -25,7 +25,7 @@ public class DimensionCacheArgumentType implements ArgumentType<DimensionRegionC
     private static final Collection<String> EXAMPLES = RegionDataManager.get().getDimensionList();
 
     private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
-            dim -> Component.translatable("cli.arg.dim.invalid", dim)
+            dim -> Component.translatableWithFallback("cli.arg.dim.invalid", "Dimension '%s' does not exist!", dim)
     );
 
     private static DimensionRegionCache getDimensionalRegionCache(ResourceLocation resourcelocation) {

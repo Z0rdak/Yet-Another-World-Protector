@@ -37,9 +37,10 @@ public class OwnedRegionArgumentType implements ArgumentType<String> {
     public static final Pattern VALID_NAME_PATTERN = Pattern.compile("^[A-Za-z]+[A-Za-z\\d\\-]+[A-Za-z\\d]+$");
     private static final Collection<String> EXAMPLES = Stream.of(new String[]{"spawn", "arena4pvp", "shop", "nether-hub"})
             .collect(Collectors.toSet());
-    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(Component.translatable("cli.arg.region.parse.invalid"));
+    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(
+            Component.translatableWithFallback("cli.arg.region.parse.invalid",  "Unable to parse region name!"));
     private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
-            flag -> Component.translatable("cli.arg.region.invalid", flag)
+            flag -> Component.translatableWithFallback("cli.arg.region.invalid", "Region '%s' does not exist", flag)
     );
 
     /**
@@ -111,7 +112,8 @@ public class OwnedRegionArgumentType implements ArgumentType<String> {
                                     .map(IMarkableRegion::getName)
                                     .collect(Collectors.toList());
                             if (ownedRegions.isEmpty()) {
-                                MessageUtil.sendCmdFeedback(src, Component.translatable("You don't have owner permissions for any region in this dimension!'"));
+                                MessageUtil.sendCmdFeedback(src, Component.translatableWithFallback("You don't have owner permissions for any region in this dimension!'",
+                                        "You don't have owner permissions for any region in this dimension!'"));
                                 return Suggestions.empty();
                             }
                             return SharedSuggestionProvider.suggest(ownedRegions, builder);

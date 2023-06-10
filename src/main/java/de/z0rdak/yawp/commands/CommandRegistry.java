@@ -53,18 +53,18 @@ public final class CommandRegistry {
     }
 
     private static int promptHelp(CommandSourceStack src) {
-        sendCmdFeedback(src, buildHeader("cli.msg.help.header"));
+        sendCmdFeedback(src, buildHeader("cli.msg.help.header", "YetAnotherWorldProtector help"));
         String command = CommandUtil.buildCommandStr(CommandConstants.DIM.toString());
-        MutableComponent cmdStr = Component.translatable("cli.msg.help.1", CommandPermissionConfig.BASE_CMD);
+        MutableComponent cmdStr = Component.translatableWithFallback("cli.msg.help.1", "Use '/%s dim info | list | add | remove | activate' to manage dimensional regions.", CommandPermissionConfig.BASE_CMD);
         sendCmdFeedback(src, buildExecuteCmdComponent(
                 Component.literal("=> "),
-                Component.translatable("help.tooltip.dim"),
+                Component.translatableWithFallback("help.tooltip.dim", "Manage dimensional regions with /wp dim <dim> ..."),
                 command, ClickEvent.Action.SUGGEST_COMMAND, GREEN).append(cmdStr));
-        MutableComponent wikiText1 = Component.translatable("help.tooltip.info.wiki.1");
-        MutableComponent wikiText2 = Component.translatable("help.tooltip.info.wiki.2");
-        MutableComponent wikiText3 = Component.translatable("help.tooltip.info.wiki.3");
-        MutableComponent wikiLinkHover = Component.translatable("help.tooltip.info.wiki.link.hover");
-        MutableComponent wikiLink = Component.translatable("help.tooltip.info.wiki.link.text");
+        MutableComponent wikiText1 = Component.translatableWithFallback("help.tooltip.info.wiki.1","The in-game help is under construction.");
+        MutableComponent wikiText2 = Component.translatableWithFallback("help.tooltip.info.wiki.2","Visit the online wiki for a guide on how to use the mod.");
+        MutableComponent wikiText3 = Component.translatableWithFallback("help.tooltip.info.wiki.3",  "Online-Wiki");
+        MutableComponent wikiLinkHover = Component.translatableWithFallback("help.tooltip.info.wiki.link.hover","Open Wiki in default browser");
+        MutableComponent wikiLink = Component.translatableWithFallback("help.tooltip.info.wiki.link.text","https://github.com/Z0rdak/Yet-Another-World-Protector/wiki");
         MutableComponent wikiCopyToClipboardLink = buildExecuteCmdComponent(wikiLink, wikiLinkHover, "", ClickEvent.Action.OPEN_URL, AQUA);
         wikiText1.append("\n")
                 .append(wikiText2)
