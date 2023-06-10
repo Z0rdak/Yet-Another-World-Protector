@@ -30,9 +30,10 @@ public class IFlagArgumentType implements ArgumentType<String> {
 
     public static final Pattern VALID_FLAG_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z\\-][A-Za-z]$");
     private static final Collection<String> EXAMPLES = RegionFlag.getFlagNames();
-    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(Text.translatable("cli.arg.flag.parse.invalid"));
+    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(Text.translatableWithFallback("cli.arg.flag.parse.invalid", "Unable to parse flag identifier!"));
+
     private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
-            flag -> Text.translatable("cli.arg.flag.invalid", flag)
+            flag -> Text.translatableWithFallback("cli.arg.flag.invalid", "Invalid region identifier: '%s'", flag)
     );
 
     private IFlagArgumentType() {

@@ -16,7 +16,6 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -57,7 +56,7 @@ public class RegionDataManager extends PersistentState {
     }
 
     public static void save() {
-        YetAnotherWorldProtector.LOGGER.debug(Text.translatable("Save for RegionDataManager called. Attempting to save region data...").getString());
+        YetAnotherWorldProtector.LOGGER.debug(Text.translatableWithFallback("data.nbt.dimensions.save", "Save for RegionDataManager called. Attempting to save region data...").getString());
         regionDataCache.markDirty();
     }
 
@@ -109,10 +108,10 @@ public class RegionDataManager extends PersistentState {
                 RegionDataManager data = storage.getOrCreate(RegionDataManager::load, RegionDataManager::new, DATA_NAME);
                 storage.set(DATA_NAME, data);
                 regionDataCache = data;
-                YetAnotherWorldProtector.LOGGER.info(Text.translatable("data.nbt.dimensions.load.success", data.getTotalRegionAmount(), data.getDimensionAmount()).getString());
+                YetAnotherWorldProtector.LOGGER.info(Text.translatableWithFallback("data.nbt.dimensions.load.success", "Loaded %s region(s) for %s dimension(s)", data.getTotalRegionAmount(), data.getDimensionAmount()).getString());
             }
         } catch (NullPointerException npe) {
-            YetAnotherWorldProtector.LOGGER.error(Text.translatable("data.nbt.dimensions.load.failure").getString());
+            YetAnotherWorldProtector.LOGGER.error(Text.translatableWithFallback("data.nbt.dimensions.load.failure", "Loading regions failed!").getString());
         }
     }
 
@@ -120,7 +119,7 @@ public class RegionDataManager extends PersistentState {
         RegionDataManager rdm = new RegionDataManager();
         rdm.dimCacheMap.clear();
         NbtCompound dimensionRegions = nbt.getCompound(DIMENSIONS);
-        YetAnotherWorldProtector.LOGGER.info(Text.translatable("data.nbt.dimensions.load.amount", dimensionRegions.getKeys().size()).getString());
+        YetAnotherWorldProtector.LOGGER.info(Text.translatableWithFallback("data.nbt.dimensions.load.amount", "Loading region(s) for %s dimension(s)", dimensionRegions.getKeys().size()).getString());
         // deserialize all region without parent and child references
         for (String dimKey : dimensionRegions.getKeys()) {
             rdm.dimensionDataNames.add(dimKey);
@@ -128,21 +127,23 @@ public class RegionDataManager extends PersistentState {
             if (dimensionRegions.contains(dimKey, NbtElement.COMPOUND_TYPE)) {
                 NbtCompound dimCacheNbt = dimensionRegions.getCompound(dimKey);
                 if (dimCacheNbt.contains(REGIONS, NbtElement.COMPOUND_TYPE)) {
-                    YetAnotherWorldProtector.LOGGER.info(Text.translatable("data.nbt.dimensions.load.dim.amount", dimCacheNbt.getCompound(REGIONS).getSize(), dimKey).getString());
+                    YetAnotherWorldProtector.LOGGER.info(Text.translatableWithFallback("data.nbt.dimensions.load.dim.amount", "Loading %s region(s) for dimension %s", dimCacheNbt.getCompound(REGIONS).getSize(), dimKey).getString());
                 } else {
-                    YetAnotherWorldProtector.LOGGER.info(Text.translatable("data.nbt.dimensions.load.dim.empty", dimKey).getString());
+                    YetAnotherWorldProtector.LOGGER.info(Text.translatableWithFallback("data.nbt.dimensions.load.dim.empty", "No region data for dimension %s found", dimKey).getString());
                 }
                 rdm.dimCacheMap.put(dimension, new DimensionRegionCache(dimCacheNbt));
             }
         }
-        rdm.dimCacheMap.forEach((dimKey, cache) -> YetAnotherWorldProtector.LOGGER.info(Text.translatable("data.nbt.dimensions.loaded.dim.amount", cache.getRegions().size(), dimKey.getValue().toString()).getString()));
+        rdm.dimCacheMap.forEach((dimKey, cache) -> {
+            YetAnotherWorldProtector.LOGGER.info(Text.translatableWithFallback("data.nbt.dimensions.loaded.dim.amount", "Loaded %s region(s) for dimension %s", cache.getRegions().size(), dimKey.getValue().toString()).getString());
+        });
 
         // set parent and child references
         for (String dimKey : dimensionRegions.getKeys()) {
             RegistryKey<World> dimension = RegistryKey.of(RegistryKeys.WORLD, new Identifier(dimKey));
             DimensionRegionCache dimCache = rdm.dimCacheMap.get(dimension);
             if (dimCache.getRegions().size() > 0) {
-                YetAnotherWorldProtector.LOGGER.info(Text.translatable("data.nbt.dimensions.load.dim.restore", dimKey).getString());
+                YetAnotherWorldProtector.LOGGER.info(Text.translatableWithFallback("data.nbt.dimensions.load.dim.restore", "Restoring region hierarchy for regions in dimension %s", dimKey).getString());
             }
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
             dimCache.getRegionsInDimension().values().forEach(region -> {
@@ -228,9 +229,9 @@ public class RegionDataManager extends PersistentState {
     @Override
     public NbtCompound writeNbt(NbtCompound compound) {
         NbtCompound dimRegionNbtData = new NbtCompound();
-        YetAnotherWorldProtector.LOGGER.info(Text.translatable("data.nbt.dimensions.save.amount", this.getTotalRegionAmount(), dimCacheMap.keySet().size()).getString());
+        YetAnotherWorldProtector.LOGGER.info(Text.translatableWithFallback("data.nbt.dimensions.save.amount", "Saving %s region(s) for %s dimensions", this.getTotalRegionAmount(), dimCacheMap.keySet().size()).getString());
         for (Map.Entry<RegistryKey<World>, DimensionRegionCache> entry : dimCacheMap.entrySet()) {
-            YetAnotherWorldProtector.LOGGER.info(Text.translatable("data.nbt.dimensions.save.dim.amount", this.getRegionAmount(entry.getKey()), entry.getKey().getValue().toString()).getString());
+            YetAnotherWorldProtector.LOGGER.info(Text.translatableWithFallback("data.nbt.dimensions.save.dim.amount", "Saving %s region(s) for dimension %s", this.getRegionAmount(entry.getKey()), entry.getKey().getValue().toString()).getString());
             String dimensionName = entry.getValue().getDimensionalRegion().getName();
             dimRegionNbtData.put(dimensionName, entry.getValue().serializeNBT());
         }

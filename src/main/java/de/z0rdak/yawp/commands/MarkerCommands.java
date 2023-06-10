@@ -40,6 +40,7 @@ import static de.z0rdak.yawp.util.StickUtil.STICK;
 import static de.z0rdak.yawp.util.StickUtil.getStickType;
 import static net.minecraft.util.Formatting.RED;
 
+
 public final class MarkerCommands {
 
     private MarkerCommands() {
@@ -69,11 +70,14 @@ public final class MarkerCommands {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.world.getRegistryKey());
             int res = DimensionCommands.checkValidRegionName(regionName, dimCache);
             if (res == -1) {
-                sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.create.name.invalid", regionName));
+                sendCmdFeedback(src, Text.translatableWithFallback("cli.msg.dim.info.region.create.name.invalid",
+                        "Invalid region name supplied: '%s'", regionName));
                 return res;
             }
             if (res == 1) {
-                sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.create.name.exists", buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION), buildRegionInfoLink(dimCache.getRegion(regionName), LOCAL)));
+                sendCmdFeedback(src, Text.translatableWithFallback("cli.msg.dim.info.region.create.name.exists",
+                        "Dimension %s already contains region with name %s",
+                        buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION), buildRegionInfoLink(dimCache.getRegion(regionName), LOCAL)));
                 return res;
             }
 
@@ -85,7 +89,7 @@ public final class MarkerCommands {
                     if (stickNBT != null) {
                         MarkerStick marker = new MarkerStick(stickNBT);
                         if (!marker.isValidArea()) {
-                            sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.create.stick.area.invalid").formatted(RED));
+                            sendCmdFeedback(src, Text.translatableWithFallback("cli.msg.dim.info.region.create.stick.area.invalid", "Marked area is not valid").formatted(RED));
                             return 1;
                         }
                         AbstractMarkableRegion region = LocalRegions.regionFrom(player, marker, regionName);
@@ -99,14 +103,17 @@ public final class MarkerCommands {
                                     parentRegion.addChild(region);
                                     LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.DEFAULT_REGION_PRIORITY.get());
                                     RegionDataManager.save();
-                                    sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region, LOCAL)));
+                                    sendCmdFeedback(src, Text.translatableWithFallback("cli.msg.dim.info.region.create.success",
+                                            "Successfully created region %s", buildRegionInfoLink(region, LOCAL)));
                                     return 0;
                                 } else {
-                                    sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.create.stick.area.invalid.parent", buildRegionInfoLink(parentRegion, LOCAL)));
+                                    sendCmdFeedback(src, Text.translatableWithFallback("cli.msg.dim.info.region.create.stick.area.invalid.parent",
+                                            "Parent region %s does not contain the marked area", buildRegionInfoLink(parentRegion, LOCAL)));
                                     return -1;
                                 }
                             } else {
-                                sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.create.local.deny", buildRegionInfoLink(parentRegion, LOCAL)));
+                                sendCmdFeedback(src, Text.translatableWithFallback("cli.msg.dim.info.region.create.local.deny",
+                                        "You don't have the permission to create a region in the region %s!", buildRegionInfoLink(parentRegion, LOCAL)));
                                 return 1;
                             }
                         } else {
@@ -114,23 +121,29 @@ public final class MarkerCommands {
                                 dimCache.addRegion(region);
                                 LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.DEFAULT_REGION_PRIORITY.get());
                                 RegionDataManager.save();
-                                sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region, LOCAL)));
+                                sendCmdFeedback(src, Text.translatableWithFallback("cli.msg.dim.info.region.create.success",
+                                        "Successfully created region %s", buildRegionInfoLink(region, LOCAL)));
                                 return 0;
                             } else {
-                                sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.create.dim.deny", buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION)));
+                                sendCmdFeedback(src, Text.translatableWithFallback("cli.msg.dim.info.region.create.dim.deny",
+                                        "You don't have the permission to create a region in the dimension %s!",
+                                        buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION)));
                                 return 2;
                             }
                         }
                     } else {
-                        sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.create.stick.invalid"));
+                        sendCmdFeedback(src, Text.translatableWithFallback("cli.msg.dim.info.region.create.stick.invalid",
+                                "Invalid RegionMarker data, sorry. Get a new one and try again."));
                         return -2;
                     }
                 } else {
-                    sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.create.stick.missing").formatted(RED));
+                    sendCmdFeedback(src, Text.translatableWithFallback("cli.msg.dim.info.region.create.stick.missing",
+                            "Put a valid(*) RegionMarker in your main hand to create a region!").formatted(RED));
                     return -2;
                 }
             } else {
-                sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.create.stick.missing").formatted(RED));
+                sendCmdFeedback(src, Text.translatableWithFallback("cli.msg.dim.info.region.create.stick.missing",
+                        "Put a valid(*) RegionMarker in your main hand to create a region!").formatted(RED));
                 return -2;
             }
         } catch (CommandSyntaxException e) {
@@ -152,18 +165,22 @@ public final class MarkerCommands {
                 if (Objects.requireNonNull(stickType) == StickType.MARKER) {
                     mainHandItem = StickUtil.initMarkerNbt(mainHandItem, StickType.MARKER, player.getWorld().getRegistryKey());
                     // FIXME: When different area types are available: Get stick, reset it, and save it back.
-                    sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.create.stick.reset"));
+                    sendCmdFeedback(src, Text.translatableWithFallback("cli.msg.dim.info.region.create.stick.reset",
+                            "RegionMarker successfully reset!"));
                     return 0;
                 } else {
-                    sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.create.stick.missing").formatted(RED));
+                    sendCmdFeedback(src, Text.translatableWithFallback("cli.msg.dim.info.region.create.stick.missing",
+                            "Put a valid(*) RegionMarker in your main hand to create a region!").formatted(RED));
                     return 1;
                 }
             } else {
-                sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.create.stick.missing").formatted(RED));
+                sendCmdFeedback(src, Text.translatableWithFallback("cli.msg.dim.info.region.create.stick.missing",
+                        "Put a valid(*) RegionMarker in your main hand to create a region!").formatted(RED));
                 return 1;
             }
         } catch (CommandSyntaxException e) {
-            sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.create.stick.no-player").formatted(RED));
+            sendCmdFeedback(src, Text.translatableWithFallback("cli.msg.dim.info.region.create.stick.no-player",
+                    "This command can only be executed as a player!").formatted(RED));
             return 1;
         }
     }
@@ -173,9 +190,11 @@ public final class MarkerCommands {
             PlayerEntity targetPlayer = src.getPlayerOrThrow();
             ItemStack markerStick = StickUtil.initMarkerNbt(Items.STICK.getDefaultStack(), StickType.MARKER, targetPlayer.world.getRegistryKey());
             targetPlayer.giveItemStack(markerStick);
-            sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.create.stick.reset"));
+            sendCmdFeedback(src, Text.translatableWithFallback("cli.msg.dim.info.region.create.stick.reset",
+                    "RegionMarker successfully reset!"));
         } catch (CommandSyntaxException e) {
-            sendCmdFeedback(src, Text.translatable("cli.msg.dim.info.region.create.stick.no-player").formatted(RED));
+            sendCmdFeedback(src, Text.translatableWithFallback("cli.msg.dim.info.region.create.stick.no-player",
+                    "This command can only be executed as a player!").formatted(RED));
             return 1;
         }
         return 0;

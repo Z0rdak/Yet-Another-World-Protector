@@ -4,7 +4,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.util.CommandUtil;
-import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -12,8 +11,7 @@ import net.minecraft.text.ClickEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 
-import static de.z0rdak.yawp.util.MessageUtil.buildExecuteCmdComponent;
-import static de.z0rdak.yawp.util.MessageUtil.buildHeader;
+import static de.z0rdak.yawp.util.MessageUtil.*;
 import static net.minecraft.util.Formatting.AQUA;
 import static net.minecraft.util.Formatting.GREEN;
 
@@ -50,18 +48,18 @@ public class CommandRegistry {
     }
 
     private static int promptHelp(ServerCommandSource src) {
-        MessageUtil.sendCmdFeedback(src, buildHeader("cli.msg.help.header"));
+        sendCmdFeedback(src, buildHeader("cli.msg.help.header", "YetAnotherWorldProtector help"));
         String command = CommandUtil.buildCommandStr(CommandConstants.DIM.toString());
-        MutableText cmdStr = Text.translatable("cli.msg.help.1", CommandPermissionConfig.BASE_CMD);
-        MessageUtil.sendCmdFeedback(src, buildExecuteCmdComponent(
+        MutableText cmdStr = Text.translatableWithFallback("cli.msg.help.1", "Use '/%s dim info | list | add | remove | activate' to manage dimensional regions.", CommandPermissionConfig.BASE_CMD);
+        sendCmdFeedback(src, buildExecuteCmdComponent(
                 Text.literal("=> "),
-                Text.translatable("help.tooltip.dim"),
+                Text.translatableWithFallback("help.tooltip.dim", "Manage dimensional regions with /wp dim <dim> ..."),
                 command, ClickEvent.Action.SUGGEST_COMMAND, GREEN).append(cmdStr));
-        MutableText wikiText1 = Text.translatable("help.tooltip.info.wiki.1");
-        MutableText wikiText2 = Text.translatable("help.tooltip.info.wiki.2");
-        MutableText wikiText3 = Text.translatable("help.tooltip.info.wiki.3");
-        MutableText wikiLinkHover = Text.translatable("help.tooltip.info.wiki.link.hover");
-        MutableText wikiLink = Text.translatable("help.tooltip.info.wiki.link.text");
+        MutableText wikiText1 = Text.translatableWithFallback("help.tooltip.info.wiki.1", "The in-game help is under construction.");
+        MutableText wikiText2 = Text.translatableWithFallback("help.tooltip.info.wiki.2", "Visit the online wiki for a guide on how to use the mod.");
+        MutableText wikiText3 = Text.translatableWithFallback("help.tooltip.info.wiki.3", "Online-Wiki");
+        MutableText wikiLinkHover = Text.translatableWithFallback("help.tooltip.info.wiki.link.hover", "Open Wiki in default browser");
+        MutableText wikiLink = Text.translatableWithFallback("help.tooltip.info.wiki.link.text", "https://github.com/Z0rdak/Yet-Another-World-Protector/wiki");
         MutableText wikiCopyToClipboardLink = buildExecuteCmdComponent(wikiLink, wikiLinkHover, "", ClickEvent.Action.OPEN_URL, AQUA);
         wikiText1.append("\n")
                 .append(wikiText2)
@@ -69,7 +67,7 @@ public class CommandRegistry {
                 .append(wikiText3)
                 .append(": ")
                 .append(wikiCopyToClipboardLink);
-        MessageUtil.sendCmdFeedback(src, wikiText1);
+        sendCmdFeedback(src, wikiText1);
         return 0;
     }
 }

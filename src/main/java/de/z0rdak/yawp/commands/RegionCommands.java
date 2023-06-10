@@ -47,7 +47,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.TypeFilter;
 import net.minecraft.util.math.BlockPos;
 
@@ -63,14 +62,15 @@ import static de.z0rdak.yawp.commands.DimensionCommands.checkValidRegionName;
 import static de.z0rdak.yawp.core.region.RegionType.LOCAL;
 import static de.z0rdak.yawp.util.CommandUtil.*;
 import static de.z0rdak.yawp.util.MessageUtil.*;
+import static net.minecraft.util.Formatting.RESET;
 
 public class RegionCommands {
 
-    public final static String MEMBER = "member";
-    public final static String OWNER = "owner";
-
     private RegionCommands() {
     }
+
+    public final static String MEMBER = "member";
+    public final static String OWNER = "owner";
 
     public static LiteralArgumentBuilder<ServerCommandSource> build() {
         List<String> affiliationList = Arrays.asList(MEMBER, OWNER);
@@ -154,14 +154,14 @@ public class RegionCommands {
                                 //                .suggests((ctx, builder) -> AreaArgumentType.areaType().listSuggestions(ctx, builder))
                                 //                .executes(ctx -> updateRegion(ctx.getSource(), getRegionArgument(ctx)))))
                                 .then(literal(ADD)
-                                        .then(literal(CommandConstants.PLAYER)
+                                        .then(literal(PLAYER)
                                                 .then(CommandManager.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
                                                         .suggests((ctx, builder) -> CommandSource.suggestMatching(affiliationList, builder))
-                                                        .then(CommandManager.argument(CommandConstants.PLAYER.toString(), EntityArgumentType.player())
+                                                        .then(CommandManager.argument(PLAYER.toString(), EntityArgumentType.player())
                                                                 .executes(ctx -> addPlayer(ctx, getPlayerArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx)))))
                                                 .then(CommandManager.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
                                                         .suggests((ctx, builder) -> CommandSource.suggestMatching(affiliationList, builder))
-                                                        .then(CommandManager.argument(CommandConstants.PLAYER.toString(), EntityArgumentType.player())
+                                                        .then(CommandManager.argument(PLAYER.toString(), EntityArgumentType.player())
                                                                 .executes(ctx -> addPlayer(ctx, getPlayerArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx))))))
                                         .then(literal(CommandConstants.TEAM)
                                                 .then(CommandManager.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
@@ -181,14 +181,14 @@ public class RegionCommands {
                                                         .suggests((ctx, builder) -> AddRegionChildArgumentType.potentialChildRegions().listSuggestions(ctx, builder))
                                                         .executes(ctx -> addChildren(ctx, getRegionArgument(ctx), getChildRegionArgument(ctx))))))
                                 .then(literal(REMOVE)
-                                        .then(literal(CommandConstants.PLAYER)
+                                        .then(literal(PLAYER)
                                                 .then(CommandManager.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
                                                         .suggests((ctx, builder) -> CommandSource.suggestMatching(affiliationList, builder))
-                                                        .then(CommandManager.argument(CommandConstants.PLAYER.toString(), EntityArgumentType.player())
+                                                        .then(CommandManager.argument(PLAYER.toString(), EntityArgumentType.player())
                                                                 .executes(ctx -> removePlayer(ctx, getPlayerArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx)))))
                                                 .then(CommandManager.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
                                                         .suggests((ctx, builder) -> CommandSource.suggestMatching(affiliationList, builder))
-                                                        .then(CommandManager.argument(CommandConstants.PLAYER.toString(), EntityArgumentType.player())
+                                                        .then(CommandManager.argument(PLAYER.toString(), EntityArgumentType.player())
                                                                 .executes(ctx -> removePlayer(ctx, getPlayerArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx))))))
                                         .then(literal(CommandConstants.TEAM)
                                                 .then(CommandManager.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
@@ -240,12 +240,12 @@ public class RegionCommands {
                     if (parentArea.contains(cuboidArea)) {
                         int newPriority = LocalRegions.ensureHigherRegionPriorityFor(cuboidRegion, localParentRegion.getPriority() + 1);
                     } else {
-                        MutableText updateAreaFailMsg = Text.translatable("cli.msg.info.region.spatial.area.update.fail", buildRegionSpatialPropLink(region), buildRegionInfoLink(region, LOCAL));
+                        MutableText updateAreaFailMsg = Text.translatableWithFallback("cli.msg.info.region.spatial.area.update.fail", "Failed to update %s for region %s", buildRegionSpatialPropLink(region), buildRegionInfoLink(region, LOCAL));
                         sendCmdFeedback(src.getSource(), updateAreaFailMsg);
                         return 1;
                     }
                 }
-                MutableText updateAreaMsg = Text.translatable("cli.msg.info.region.spatial.area.update", buildRegionSpatialPropLink(region), buildRegionInfoLink(region, LOCAL));
+                MutableText updateAreaMsg = Text.translatableWithFallback("cli.msg.info.region.spatial.area.update", "Updated %s for region %s", buildRegionSpatialPropLink(region), buildRegionInfoLink(region, LOCAL));
                 cuboidRegion.setArea(cuboidArea);
                 RegionDataManager.save();
                 sendCmdFeedback(src.getSource(), updateAreaMsg);
@@ -262,11 +262,11 @@ public class RegionCommands {
     private static int renameRegion(CommandContext<ServerCommandSource> src, IMarkableRegion region, String regionName, DimensionRegionCache dimCache) {
         int res = checkValidRegionName(regionName, dimCache);
         if (res == -1) {
-            sendCmdFeedback(src.getSource(), Text.translatable("cli.msg.dim.info.region.create.name.invalid", regionName));
+            sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.dim.info.region.create.name.invalid", "Invalid region name supplied: '%s'", regionName));
             return res;
         }
         if (res == 1) {
-            sendCmdFeedback(src.getSource(), Text.translatable("cli.msg.dim.info.region.create.name.exists", dimCache.getDimensionalRegion().getName(), buildRegionInfoLink(dimCache.getRegion(regionName), LOCAL)));
+            sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.dim.info.region.create.name.exists", "Dimension %s already contains region with name %s", dimCache.getDimensionalRegion().getName(), buildRegionInfoLink(dimCache.getRegion(regionName), LOCAL)));
             return res;
         }
         // FIXME:
@@ -282,7 +282,7 @@ public class RegionCommands {
                 if (region.hasMember(team.getName())) {
                     region.removeMember(team);
                     RegionDataManager.save();
-                    sendCmdFeedback(src.getSource(), Text.translatable("cli.msg.info.region.affiliation.team.removed",
+                    sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.affiliation.team.removed", "Removed team '%s' from region %s",
                             team.getName(), buildRegionInfoLink(region, LOCAL)).append(" ").append(undoLink));
                 }
                 break;
@@ -290,7 +290,7 @@ public class RegionCommands {
                 if (region.hasOwner(team.getName())) {
                     region.removeOwner(team);
                     RegionDataManager.save();
-                    sendCmdFeedback(src.getSource(), Text.translatable("cli.msg.info.region.affiliation.team.removed",
+                    sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.affiliation.team.removed", "Removed team '%s' from region %s",
                             team.getName(), buildRegionInfoLink(region, LOCAL)).append(" ").append(undoLink));
                 }
                 break;
@@ -307,7 +307,7 @@ public class RegionCommands {
                 if (!region.hasMember(team.getName())) {
                     region.addMember(team);
                     RegionDataManager.save();
-                    sendCmdFeedback(src.getSource(), Text.translatable("cli.msg.info.region.affiliation.team.added",
+                    sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.affiliation.team.added", "Added team '%s' with as '%s' to region %s",
                             team.getName(), affiliation, buildRegionInfoLink(region, LOCAL)).append(" ").append(undoLink));
                 }
                 break;
@@ -315,7 +315,7 @@ public class RegionCommands {
                 if (!region.hasOwner(team.getName())) {
                     region.addOwner(team);
                     RegionDataManager.save();
-                    sendCmdFeedback(src.getSource(), Text.translatable("cli.msg.info.region.affiliation.team.added",
+                    sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.affiliation.team.added", "Added team '%s' with as '%s' to region %s",
                             team.getName(), affiliation, buildRegionInfoLink(region, LOCAL)).append(" ").append(undoLink));
                 }
                 break;
@@ -337,7 +337,7 @@ public class RegionCommands {
                 if (region.hasMember(player.getUuid())) {
                     region.removeMember(player);
                     RegionDataManager.save();
-                    sendCmdFeedback(src.getSource(), Text.translatable("cli.msg.info.region.affiliation.player.removed",
+                    sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.affiliation.player.removed", "Removed player '%s' from region %s",
                             buildPlayerHoverComponent(player), buildRegionInfoLink(region, LOCAL)).append(" ").append(undoLink));
                 }
                 break;
@@ -345,7 +345,7 @@ public class RegionCommands {
                 if (region.hasOwner(player.getUuid())) {
                     region.removeOwner(player);
                     RegionDataManager.save();
-                    sendCmdFeedback(src.getSource(), Text.translatable("cli.msg.info.region.affiliation.player.removed",
+                    sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.affiliation.player.removed", "Removed player '%s' from region %s",
                             buildPlayerHoverComponent(player), buildRegionInfoLink(region, LOCAL)).append(" ").append(undoLink));
                 }
                 break;
@@ -362,7 +362,7 @@ public class RegionCommands {
                 if (!region.hasMember(player.getUuid())) {
                     region.addMember(player);
                     RegionDataManager.save();
-                    sendCmdFeedback(src.getSource(), Text.translatable("cli.msg.info.region.affiliation.player.added",
+                    sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.affiliation.player.added", "Added player '%s' as '%s' to region %s",
                             buildPlayerHoverComponent(player), affiliation, buildRegionInfoLink(region, LOCAL)).append(" ").append(undoLink));
                 }
                 break;
@@ -370,7 +370,7 @@ public class RegionCommands {
                 if (!region.hasOwner(player.getUuid())) {
                     region.addOwner(player);
                     RegionDataManager.save();
-                    sendCmdFeedback(src.getSource(), Text.translatable("cli.msg.info.region.affiliation.player.added",
+                    sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.affiliation.player.added", "Added player '%s' as '%s' to region %s",
                             buildPlayerHoverComponent(player), affiliation, buildRegionInfoLink(region, LOCAL)).append(" ").append(undoLink));
                 }
                 break;
@@ -390,8 +390,8 @@ public class RegionCommands {
             MutableText parentLink = buildRegionInfoLink(parent, LOCAL);
             MutableText notLongerChildLink = buildRegionInfoLink(child, LOCAL);
             MutableText dimensionalLink = buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION);
-            sendCmdFeedback(src.getSource(), Text.translatable("cli.msg.info.region.children.remove", notLongerChildLink, parentLink));
-            sendCmdFeedback(src.getSource(), Text.translatable("cli.msg.info.region.parent.clear", notLongerChildLink, dimensionalLink));
+            sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.children.remove", "Removed child '%s' from region %s", notLongerChildLink, parentLink));
+            sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.parent.clear", "Reset default parent for %s back to %s", notLongerChildLink, dimensionalLink));
             return 0;
         }
         // should not happen, due to RemoveRegionChildArgumentType should only provide valid child regions
@@ -406,7 +406,7 @@ public class RegionCommands {
             MutableText parentLink = buildRegionInfoLink(parent, LOCAL);
             MutableText childLink = buildRegionInfoLink(child, LOCAL);
             MutableText undoLink = buildRegionActionUndoLink(src.getInput(), ADD, REMOVE);
-            sendCmdFeedback(src.getSource(), Text.translatable("cli.msg.info.region.children.add", childLink, parentLink).append(" ").append(undoLink));
+            sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.children.add", "Added child %s to region %s", childLink, parentLink).append(" ").append(undoLink));
             return 0;
         }
         // should not happen, due to AddRegionChildArgumentType should only provide valid child regions
@@ -433,10 +433,8 @@ public class RegionCommands {
             }
             RegionDataManager.save();
             // TODO: flag cmd info link
-            sendCmdFeedback(src.getSource(), Text.translatable("cli.msg.flags.added", buildFlagQuickInfo(iFlag),
-                    buildRegionInfoLink(region, LOCAL))
-                    .append(" ")
-                    .append(buildRegionActionUndoLink(src.getInput(), ADD, REMOVE)));
+            sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.flags.added", "Added flag '%s' to region %s", buildFlagQuickInfo(iFlag),
+                    buildRegionInfoLink(region, LOCAL)).append(" ").append(buildRegionActionUndoLink(src.getInput(), ADD, REMOVE)));
             return 0;
         }
         return 1;
@@ -516,10 +514,8 @@ public class RegionCommands {
         if (region.containsFlag(flag)) {
             region.removeFlag(flag.name);
             RegionDataManager.save();
-            sendCmdFeedback(src.getSource(), Text.translatable("cli.msg.flags.removed",
-                    flag.name, buildRegionInfoLink(region, LOCAL))
-                    .append(" ")
-                    .append(buildRegionActionUndoLink(src.getInput(), REMOVE, ADD)));
+            sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.flags.removed", "Removed flag '%s' from region %s",
+                    flag.name, buildRegionInfoLink(region, LOCAL)).append(" ").append(buildRegionActionUndoLink(src.getInput(), REMOVE, ADD)));
             return 0;
         }
         return 1;
@@ -532,7 +528,7 @@ public class RegionCommands {
         if (oldState == region.isMuted()) {
             boolean isEnabled = !region.isMuted();
             MutableText undoLink = buildRegionActionUndoLink(src.getInput(), showAlert ? TRUE : FALSE, showAlert ? FALSE : TRUE);
-            sendCmdFeedback(src.getSource(), Text.translatable("cli.msg.info.region.state.alert.set.value",
+            sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.state.alert.set.value", "Changed alert state for region %s: %s -> %s",
                     buildRegionInfoLink(region, LOCAL), oldState, isEnabled).append(" ").append(undoLink));
         }
         return 0;
@@ -548,7 +544,7 @@ public class RegionCommands {
         RegionDataManager.save();
         if (oldState != region.isActive()) {
             MutableText undoLink = buildRegionActionUndoLink(src.getInput(), enable ? TRUE : FALSE, enable ? FALSE : TRUE);
-            sendCmdFeedback(src.getSource(), Text.translatable("cli.msg.info.region.state.enable.set.value",
+            sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.state.enable.set.value", "Changed enable state for region %s: %s -> %s",
                     buildRegionInfoLink(region, LOCAL), oldState, region.isActive()).append(" ").append(undoLink));
         }
         return 0;
@@ -563,7 +559,7 @@ public class RegionCommands {
         if (Integer.MAX_VALUE - newValue > 0) {
             return setPriority(src, region, (int) newValue);
         } else {
-            sendCmdFeedback(src.getSource(), Text.translatable("cli.msg.warn.region.state.priority.set.invalid", buildRegionInfoLink(region, LOCAL), newValue));
+            sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.warn.region.state.priority.set.invalid", "Unable to change priority for region %s: %s is to high/low", buildRegionInfoLink(region, LOCAL), newValue));
             return -1;
         }
     }
@@ -587,13 +583,13 @@ public class RegionCommands {
         if (parent instanceof IMarkableRegion) {
             int parentPriority = ((IMarkableRegion) parent).getPriority();
             if (parentPriority >= priority) {
-                MutableText updatePriorityFailMsg = Text.translatable("cli.msg.info.region.state.priority.set.fail.to-low", buildRegionInfoLink(region, LOCAL));
+                MutableText updatePriorityFailMsg = Text.translatableWithFallback("cli.msg.info.region.state.priority.set.fail.to-low", "Unable to set priority for region %s. The priority is not higher than its parents priority", buildRegionInfoLink(region, LOCAL));
                 sendCmdFeedback(src.getSource(), updatePriorityFailMsg);
                 return 1;
             }
         }
         if (existRegionWithSamePriority) {
-            MutableText updatePriorityFailMsg = Text.translatable("cli.msg.info.region.state.priority.set.fail.same", buildRegionInfoLink(region, LOCAL), priority);
+            MutableText updatePriorityFailMsg = Text.translatableWithFallback("cli.msg.info.region.state.priority.set.fail.same", "Unable to set priority for region %s. There is already another region with priority %s.", buildRegionInfoLink(region, LOCAL), priority);
             sendCmdFeedback(src.getSource(), updatePriorityFailMsg);
             return 1;
         } else {
@@ -602,11 +598,11 @@ public class RegionCommands {
                 region.setPriority(priority);
                 RegionDataManager.save();
                 MutableText undoLink = buildRegionActionUndoLink(src.getInput(), String.valueOf(oldPriority), String.valueOf(priority));
-                sendCmdFeedback(src.getSource(), Text.translatable("cli.msg.info.region.state.priority.set.success",
+                sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.state.priority.set.success", "Changed priority for region %s: %s -> %s",
                         buildRegionInfoLink(region, LOCAL), oldPriority, region.getPriority()).append(" ").append(undoLink));
                 return 0;
             } else {
-                sendCmdFeedback(src.getSource(), Text.translatable("cli.msg.info.region.state.priority.set.fail.no-change", buildRegionInfoLink(region, LOCAL)));
+                sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.state.priority.set.fail.no-change", "Unable to set priority for region %s. The priority is the same.", buildRegionInfoLink(region, LOCAL)));
                 return 1;
             }
         }
@@ -616,20 +612,20 @@ public class RegionCommands {
         // == Region [<name>] overview ==
         sendCmdFeedback(src, buildRegionOverviewHeader(region, LOCAL));
         // Flags: [n flag(s)][+]
-        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.flag", buildFlagListLink(region, RegionType.LOCAL)));
+        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.flag", "Flags", buildFlagListLink(region, RegionType.LOCAL)));
         // Spatial: [Spatial Properties]
-        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.spatial", buildRegionSpatialPropLink(region)));
+        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.spatial", "Spatial", buildRegionSpatialPropLink(region)));
         // Affiliations: [owners], [members], [<listAffiliations>]
-        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.affiliation", buildAffiliationLinks(region, RegionType.LOCAL)));
+        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.affiliation", "Affiliation", buildAffiliationLinks(region, RegionType.LOCAL)));
         // Hierarchy: [parent][-|+], [n children][+]
-        MutableText regionHierarchy = Text.translatable("cli.msg.info.region.hierarchy")
+        MutableText regionHierarchy = Text.translatableWithFallback("cli.msg.info.region.hierarchy", "Hierarchy")
                 .append(": ")
                 .append(buildRegionParentLink(region))
-                .append(Text.literal(", ").formatted(Formatting.RESET))
+                .append(Text.literal(", ").formatted(RESET))
                 .append(buildRegionChildrenLink(region, LOCAL));
         sendCmdFeedback(src, regionHierarchy);
         // State: [State]
-        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.state", buildRegionStateLink(region)));
+        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.state", "State", buildRegionStateLink(region)));
         return 0;
     }
 
@@ -637,7 +633,7 @@ public class RegionCommands {
         List<IMarkableRegion> children = region.getChildren().values().stream().map(r -> (IMarkableRegion) r).collect(Collectors.toList());
         MutableText childRegionList = Text.literal("");
         if (children.isEmpty()) {
-            MutableText noChildrenText = Text.translatable("cli.msg.info.region.children.empty", buildRegionInfoLink(region, LOCAL));
+            MutableText noChildrenText = Text.translatableWithFallback("cli.msg.info.region.children.empty", "No children defined for region %s", buildRegionInfoLink(region, LOCAL));
             childRegionList.append(noChildrenText);
             sendCmdFeedback(src, childRegionList);
         }
@@ -666,7 +662,9 @@ public class RegionCommands {
     private static int promptRegionAffiliationList(ServerCommandSource src, IMarkableRegion region, String affiliation, AffiliationType affiliationType, int pageNo) {
         List<String> affiliateNames = getAffiliateList(region, affiliation, affiliationType);
         if (affiliateNames.isEmpty()) {
-            sendCmdFeedback(src, Text.translatable("cli.msg.info.region.affiliation." + affiliationType.name + ".empty", affiliation, buildRegionInfoLink(region, LOCAL)));
+            String fallback = "No " + affiliationType.name + "s defined as '%s' in %s";
+            String key = "cli.msg.info.region.affiliation." + affiliationType.name + ".empty";
+            sendCmdFeedback(src, Text.translatableWithFallback(key, fallback, affiliation, buildRegionInfoLink(region, LOCAL)));
             return 1;
         }
         List<MutableText> regionPagination = buildPaginationComponents(
@@ -690,9 +688,9 @@ public class RegionCommands {
      * @return
      */
     public static int promptRegionSpatialProperties(ServerCommandSource src, IMarkableRegion region) {
-        sendCmdFeedback(src, buildHeader(Text.translatable("cli.msg.info.header.for", buildRegionSpatialPropLink(region), buildRegionInfoLink(region, LOCAL))));
-        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.spatial.location", buildDimensionTeleportLink(region)));
-        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.spatial.area", buildRegionAreaDetailComponent(region)));
+        sendCmdFeedback(src, buildHeader(Text.translatableWithFallback("cli.msg.info.header.for", "== %s for %s ==", buildRegionSpatialPropLink(region), buildRegionInfoLink(region, LOCAL))));
+        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.spatial.location", "Location", buildDimensionTeleportLink(region)));
+        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.spatial.area", "Area", buildRegionAreaDetailComponent(region)));
         return 0;
     }
 
@@ -708,16 +706,16 @@ public class RegionCommands {
      * @return
      */
     public static int promptRegionState(ServerCommandSource src, IMarkableRegion region) {
-        sendCmdFeedback(src, buildHeader(Text.translatable("cli.msg.info.header.for", buildRegionStateLink(region), buildRegionInfoLink(region, LOCAL))));
-        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.state.priority", buildRegionPriorityComponent(region)));
-        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.state.enable", buildRegionEnableComponent(region)));
-        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.state.alert", buildRegionAlertComponentLink(region)));
+        sendCmdFeedback(src, buildHeader(Text.translatableWithFallback("cli.msg.info.header.for", "== %s for %s ==", buildRegionStateLink(region), buildRegionInfoLink(region, LOCAL))));
+        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.state.priority", "Priority", buildRegionPriorityComponent(region)));
+        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.state.enable", "Enabled", buildRegionEnableComponent(region)));
+        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.state.alert", "Alert", buildRegionAlertComponentLink(region)));
         return 0;
     }
 
     public static int promptRegionFlags(ServerCommandSource src, IMarkableRegion region, int pageNo) {
         if (region.getFlags().isEmpty()) {
-            sendCmdFeedback(src, Text.translatable("cli.msg.info.region.flag.empty", buildRegionInfoLink(region, LOCAL)));
+            sendCmdFeedback(src, Text.translatableWithFallback("cli.msg.info.region.flag.empty", "No flags defined in region %s", buildRegionInfoLink(region, LOCAL)));
             return 1;
         }
         List<IFlag> flags = LocalRegions.getSortedFlags(region);
@@ -789,7 +787,7 @@ public class RegionCommands {
             region.setTpTarget(target);
             RegionDataManager.save();
             MutableText newTpTargetLink = buildDimensionalBlockTpLink(region.getDim(), target);
-            sendCmdFeedback(src.getSource(), Text.translatable("cli.msg.info.region.spatial.location.teleport.set", buildRegionInfoLink(region, LOCAL), newTpTargetLink));
+            sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.spatial.location.teleport.set", "Set new teleport target for region %s: '%s'", buildRegionInfoLink(region, LOCAL), newTpTargetLink));
             return 0;
         }
         return 1;
