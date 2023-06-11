@@ -2,7 +2,7 @@
 
 Yet Another World Protector (YAWP) is the admin tool to protect your minecraft server!
 
-It allows admins (and permitted players) to protect your creations against various events/actions of players, mobs and
+It allows admins (and permitted players) to protect their creations against various events/actions of players, mobs and
 the environment.
 
 Create regions for your builds and apply region flags to protect them.
