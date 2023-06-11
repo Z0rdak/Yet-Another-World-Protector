@@ -2,8 +2,13 @@
 
 Yet Another World Protector (YAWP) is the admin tool to protect your minecraft server!
 
-It allows you to protect your creations against various different events/actions of players, mobs and the environment.
-It was inspired by the forge mod [WorldProtector](https://www.curseforge.com/minecraft/mc-mods/worldprotector) and
+It allows admins (and permitted players) to protect your creations against various events/actions of players, mobs and
+the environment.
+
+Create regions for your builds and apply region flags to protect them.
+Assign players or vanilla teams to regions, so they can manage their own regions.
+
+YAWP was inspired by the forge mod [WorldProtector](https://www.curseforge.com/minecraft/mc-mods/worldprotector) and
 the [WorldGuard](https://dev.bukkit.org/projects/worldguard) plugin.
 
 Join our discord if you have any questions or suggestions: [YAWP Discord](https://discord.gg/d7hArKCUtm)
