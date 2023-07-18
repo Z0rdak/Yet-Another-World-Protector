@@ -7,6 +7,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.TntEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.SlimeEntity;
 import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.entity.passive.SnowGolemEntity;
@@ -36,9 +37,11 @@ public class ServerWorldMixin {
         if (!entity.getWorld().isClient) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(entity));
             FlagCheckEvent flagCheck = checkTargetEvent(entity.getBlockPos(), SPAWNING_ALL, dimCache.getDimensionalRegion());
-            if (flagCheck.isDenied()) {
-                cir.setReturnValue(false);
-                return;
+            if (entity instanceof MobEntity) {
+                if (flagCheck.isDenied()) {
+                    cir.setReturnValue(false);
+                    return;
+                }
             }
             if (isMonster(entity)) {
                 flagCheck = checkTargetEvent(entity.getBlockPos(), SPAWNING_MONSTER, dimCache.getDimensionalRegion());
