@@ -182,7 +182,7 @@ public class MessageUtil {
                 CuboidArea cuboidArea = (CuboidArea) area;
                 MutableComponent sizeInfo = Component.translatable("cli.msg.info.region.spatial.area.size")
                         .append(": ")
-                        .append("X=" + cuboidArea.getArea().getXsize() + ", Y=" + cuboidArea.getArea().getYsize() + ", Z=" + cuboidArea.getArea().getZsize());
+                        .append("X=" + cuboidArea.getXsize() + ", Y=" + cuboidArea.getYsize() + ", Z=" + cuboidArea.getZsize());
                 MutableComponent markedBlocksInfo = Component.translatable("cli.msg.info.region.spatial.area.blocks")
                         .append(": ")
                         .append(buildBlockPosTpLinks(region));

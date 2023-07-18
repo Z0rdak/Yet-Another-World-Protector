@@ -63,6 +63,18 @@ public class CuboidArea extends AbstractArea {
         return area;
     }
 
+    public int getXsize(){
+        return (int) Math.max(this.area.getXsize(), 1);
+    }
+
+    public int getZsize(){
+        return (int) Math.max(this.area.getZsize(), 1);
+    }
+
+    public int getYsize(){
+        return (int) Math.max(this.area.getYsize(), 1);
+    }
+
     public BlockPos getAreaP1() {
         return this.p1;
     }
@@ -90,7 +102,7 @@ public class CuboidArea extends AbstractArea {
     @Override
     public String toString() {
         String strBuilder = getAreaType().areaType + " " + AreaUtil.blockPosStr(this.p1) + " <-> " + AreaUtil.blockPosStr(this.p2) +
-                "\n" + "Size: " + "X=" + this.area.getXsize() + ", Y=" + this.area.getYsize() + ", Z=" + this.area.getZsize() +
+                "\n" + "Size: " + "X=" + this.getXsize() + ", Y=" + this.getYsize() + ", Z=" + this.getZsize() +
                 "\n" + "Blocks: " + AreaUtil.blockPosStr(this.p1) + ", " + AreaUtil.blockPosStr(this.p2);
         return strBuilder;
     }
