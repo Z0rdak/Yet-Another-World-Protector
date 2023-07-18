@@ -38,8 +38,8 @@ import static de.z0rdak.yawp.core.region.RegionType.LOCAL;
 import static de.z0rdak.yawp.util.CommandUtil.buildCommandStr;
 import static net.minecraft.text.ClickEvent.Action.RUN_COMMAND;
 import static net.minecraft.text.ClickEvent.Action.SUGGEST_COMMAND;
-import static net.minecraft.util.Formatting.*;
 import static net.minecraft.util.Formatting.RESET;
+import static net.minecraft.util.Formatting.*;
 
 
 public class MessageUtil {
@@ -176,7 +176,7 @@ public class MessageUtil {
                 CuboidArea cuboidArea = (CuboidArea) area;
                 MutableText sizeInfo = Text.translatableWithFallback("cli.msg.info.region.spatial.area.size", "Size")
                         .append(": ")
-                        .append("X=" + cuboidArea.getArea().getXLength() + ", Y=" + cuboidArea.getArea().getYLength() + ", Z=" + cuboidArea.getArea().getZLength());
+                        .append("X=" + cuboidArea.getXsize() + ", Y=" + cuboidArea.getYsize() + ", Z=" + cuboidArea.getZsize());
                 MutableText markedBlocksInfo = Text.translatableWithFallback("cli.msg.info.region.spatial.area.blocks", "Marked Blocks")
                         .append(": ")
                         .append(buildBlockPosTpLinks(region));
