@@ -63,6 +63,19 @@ public class CuboidArea extends AbstractArea {
         return area;
     }
 
+
+    public int getXsize(){
+        return (int) Math.max(this.area.getXLength(), 1);
+    }
+
+    public int getZsize(){
+        return (int) Math.max(this.area.getZLength(), 1);
+    }
+
+    public int getYsize(){
+        return (int) Math.max(this.area.getYLength(), 1);
+    }
+
     public BlockPos getAreaP1() {
         return this.p1;
     }
