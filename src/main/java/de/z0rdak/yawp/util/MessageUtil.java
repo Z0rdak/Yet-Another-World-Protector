@@ -177,7 +177,7 @@ public class MessageUtil {
                 CuboidArea cuboidArea = (CuboidArea) area;
                 MutableText sizeInfo = Text.translatable("cli.msg.info.region.spatial.area.size")
                         .append(": ")
-                        .append("X=" + cuboidArea.getArea().getXLength() + ", Y=" + cuboidArea.getArea().getYLength() + ", Z=" + cuboidArea.getArea().getZLength());
+                        .append("X=" + cuboidArea.getXsize() + ", Y=" + cuboidArea.getYsize() + ", Z=" + cuboidArea.getZsize());
                 MutableText markedBlocksInfo = Text.translatable("cli.msg.info.region.spatial.area.blocks")
                         .append(": ")
                         .append(buildBlockPosTpLinks(region));
