@@ -186,7 +186,7 @@ public class MessageUtil {
                 CuboidArea cuboidArea = (CuboidArea) area;
                 IFormattableTextComponent sizeInfo = new TranslationTextComponent("cli.msg.info.region.spatial.area.size")
                         .append(": ")
-                        .append("X=" + cuboidArea.getArea().getXsize() + ", Y=" + cuboidArea.getArea().getYsize() + ", Z=" + cuboidArea.getArea().getZsize());
+                        .append("X=" + cuboidArea.getXsize() + ", Y=" + cuboidArea.getYsize() + ", Z=" + cuboidArea.getZsize());
                 IFormattableTextComponent markedBlocksInfo = new TranslationTextComponent("cli.msg.info.region.spatial.area.blocks")
                         .append(": ")
                         .append(buildBlockPosTpLinks(region));
