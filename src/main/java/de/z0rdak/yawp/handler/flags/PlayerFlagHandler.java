@@ -43,6 +43,7 @@ public final class PlayerFlagHandler {
     }
 
     public static void registerEventHandler() {
+
         // ServerEntityEvents.EQUIPMENT_CHANGE
         // EntitySleepEvents.ALLOW_BED
         // EntitySleepEvents.ALLOW_SLEEP_TIME
@@ -69,6 +70,9 @@ public final class PlayerFlagHandler {
                     return TypedActionResult.fail(player.getStackInHand(hand));
                 }
             }
+
+            // TODO: Cover sweetberries, glowberries and so on... how?
+            // TODO: Look at forge implementation
 
             FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, player.getBlockPos(), USE_ITEMS, dimCache.getDimensionalRegion());
             if (flagCheckEvent.isDenied()) {
@@ -100,6 +104,7 @@ public final class PlayerFlagHandler {
             }
 
             if (!hasEmptyHands) {
+                // TODO: Not covering berry bush, needs to be on place item?
                 FlagCheckEvent.PlayerFlagEvent useItemCheck = checkPlayerEvent(player, player.getBlockPos(), USE_ITEMS, dimCache.getDimensionalRegion());
                 if (useItemCheck.isDenied()) {
                     sendFlagDeniedMsg(useItemCheck);
@@ -112,6 +117,8 @@ public final class PlayerFlagHandler {
                 FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, blockHitResult.getBlockPos(), PLACE_BLOCKS, dimCache.getDimensionalRegion());
                 if (flagCheckEvent.isDenied()) {
                     sendFlagDeniedMsg(flagCheckEvent);
+                    // sync inventory
+                    player.getInventory().updateItems();
                     return ActionResult.FAIL;
                 }
             }
