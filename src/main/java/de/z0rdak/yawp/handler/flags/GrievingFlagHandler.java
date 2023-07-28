@@ -22,6 +22,7 @@ import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -172,18 +173,24 @@ public class GrievingFlagHandler {
     }
 
     // idea: differentiate between player and other entities (armor stand/mobs)
-    @SubscribeEvent
+    /*
+    TODO: Disabled this to enable compatibility with PLACE_BLOCKS again because they use the same event
+    @SubscribeEvent(priority = EventPriority.NORMAL, receiveCanceled = true)
     public static void onFreezeWaterWithBoots(BlockEvent.EntityPlaceEvent event) {
         if (!event.getLevel().isClientSide()) {
             if (event.getEntity() != null) {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(event.getEntity().level().dimension());
                 FlagCheckEvent flagCheckEvent = HandlerUtil.checkTargetEvent(event.getPos(), NO_WALKER_FREEZE, dimCache.getDimensionalRegion());
+                if (event.isCanceled()) {
+
+                }
                 if (flagCheckEvent.isDenied()) {
                     event.setCanceled(true);
                 }
             }
         }
     }
+     */
 
     /**
      * TODO: Inverted flags would need to re-add allowed blocks/entites
