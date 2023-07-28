@@ -6,8 +6,11 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.players.ServerOpListEntry;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
@@ -22,6 +25,7 @@ public class CommandPermissionConfig {
 
     // TODO: Dedicated permission to teleport to region
     public static final ForgeConfigSpec.ConfigValue<Boolean> ALLOW_READ_ONLY_CMDS;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> ALLOW_REGION_TELEPORT;
     public static final ForgeConfigSpec.ConfigValue<Integer> REQUIRED_OP_LEVEL;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> PLAYERS_WITH_PERMISSION;
     public static final ForgeConfigSpec.ConfigValue<Boolean> COMMAND_BLOCK_EXECUTION;
@@ -35,7 +39,7 @@ public class CommandPermissionConfig {
         BUILDER.push("YetAnotherWorldProtector mod server configuration").build();
 
         COMMAND_BLOCK_EXECUTION = BUILDER.comment("Permission for command blocks to execute mod commands")
-                .define("command_block_execution", true);
+                .define("command_block_execution", false);
 
         WP_COMMAND_ALTERNATIVE = BUILDER.comment("Default command alternative used in quick commands in chat.\nThis is only important if another mod uses the /wp command (like Journey Map). Defaults to 0.\n" +
                         " 0 -> /wp\n 1 -> /yawp")
@@ -46,6 +50,9 @@ public class CommandPermissionConfig {
 
         ALLOW_READ_ONLY_CMDS = BUILDER.comment("Defines whether info commands for regions can be used by every player.")
                 .define("allow_info_cmds", true);
+
+        ALLOW_REGION_TELEPORT = BUILDER.comment("Defines whether teleport in and out of regions is allowed without permission.\n This may need to be enable for mods like Waystones to work properly.\n true -> allow teleport\n false -> disallow teleport.")
+                .define("allow_region_teleport", true);
 
         PLAYERS_WITH_PERMISSION = BUILDER.comment("Player UUIDs with permission to use mod commands.\n Make sure to put the UUIDs in parentheses, just like a normal string.\n Example: players_with_permission = [\"614c9eac-11c9-3ca6-b697-938355fa8235\", \"b9f5e998-520a-3fa2-8208-0c20f22aa20f\"]")
                 .defineListAllowEmpty(Collections.singletonList("players_with_permission"), ArrayList::new, (uuid) -> {
@@ -80,6 +87,11 @@ public class CommandPermissionConfig {
         return ALLOW_READ_ONLY_CMDS.get();
     }
 
+    public static boolean isRegionTeleportAllowed() {
+        return ALLOW_REGION_TELEPORT.get();
+    }
+
+
     public static Set<String> UUIDsWithPermission() {
         return PLAYERS_WITH_PERMISSION.get()
                 .stream()
@@ -98,12 +110,7 @@ public class CommandPermissionConfig {
             if (isServerConsole) {
                 return true;
             } else {
-                BlockPos srcPos = new BlockPos((int) source.getPosition().x, (int) source.getPosition().y, (int) source.getPosition().z);
-                BlockEntity blockEntity = source.getLevel().getBlockEntity(srcPos);
-                if (blockEntity instanceof CommandBlockEntity) {
-                    return COMMAND_BLOCK_EXECUTION.get();
-                }
-                return false;
+                return COMMAND_BLOCK_EXECUTION.get();
             }
         }
     }
