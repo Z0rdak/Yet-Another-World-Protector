@@ -98,12 +98,7 @@ public class CommandPermissionConfig {
             if (isServerConsole) {
                 return true;
             } else {
-                BlockPos srcPos = new BlockPos((int) source.getPosition().x, (int) source.getPosition().y, (int) source.getPosition().z);
-                BlockEntity blockEntity = source.getLevel().getBlockEntity(srcPos);
-                if (blockEntity instanceof CommandBlockEntity) {
-                    return COMMAND_BLOCK_EXECUTION.get();
-                }
-                return false;
+                return COMMAND_BLOCK_EXECUTION.get();
             }
         }
     }
