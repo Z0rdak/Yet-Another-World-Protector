@@ -2,13 +2,10 @@ package de.z0rdak.yawp.config.server;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.CommandBlockBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.OperatorEntry;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 import java.util.*;
@@ -96,12 +93,7 @@ public class CommandPermissionConfig {
             if (isServerConsole) {
                 return true;
             } else {
-                BlockPos pos = new BlockPos((int) source.getPosition().x, (int) source.getPosition().y, (int) source.getPosition().z);
-                BlockEntity blockEntity = source.getWorld().getBlockEntity(pos);
-                if (blockEntity instanceof CommandBlockBlockEntity) {
-                    return COMMAND_BLOCK_EXECUTION.get();
-                }
-                return false;
+                return COMMAND_BLOCK_EXECUTION.get();
             }
         }
     }
