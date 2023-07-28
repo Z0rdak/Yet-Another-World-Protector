@@ -172,6 +172,8 @@ public class GrievingFlagHandler {
     }
 
     // idea: differentiate between player and other entities (armor stand/mobs)
+    /*
+    TODO: Disabled this to enable compatibility with PLACE_BLOCKS again because they use the same event
     @SubscribeEvent
     public static void onFreezeWaterWithBoots(BlockEvent.EntityPlaceEvent event) {
         if (!event.getWorld().isClientSide()) {
@@ -184,6 +186,7 @@ public class GrievingFlagHandler {
             }
         }
     }
+    */
 
     /**
      * TODO: Inverted flags would need to re-add allowed blocks/entites
