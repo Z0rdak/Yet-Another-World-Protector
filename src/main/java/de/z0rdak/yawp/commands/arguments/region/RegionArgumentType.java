@@ -40,6 +40,10 @@ public class RegionArgumentType implements ArgumentType<String> {
     public static IMarkableRegion getRegion(CommandContext<ServerCommandSource> context, String argName) throws CommandSyntaxException {
         String regionName = context.getArgument(argName, String.class);
         DimensionRegionCache dimCache = CommandUtil.getDimCacheArgument(context);
+        if (!dimCache.contains(regionName)) {
+            MessageUtil.sendCmdFeedback(context.getSource(), Text.literal("No region with name '" + regionName + "' defined in dim '" + dimCache.dimensionKey().getValue() + "'"));
+            throw ERROR_INVALID_VALUE.create(regionName);
+        }
         IMarkableRegion region = dimCache.getRegion(regionName);
         if (region != null) {
             return region;
