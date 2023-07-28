@@ -8,6 +8,7 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
+import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -76,6 +77,11 @@ public class CommandInterceptor {
             if (dimParsedArgument != null && dimParsedArgument.getResult() instanceof ResourceLocation dimResLoc) {
                 ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, dimResLoc);
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
+                if (!dimCache.contains(regionName)) {
+                    MessageUtil.sendCmdFeedback(cmdContext.getSource(), Component.literal("No region with name '" + regionName + "' defined in dim '" + dimCache.dimensionKey().location() + "'"));
+                    event.setCanceled(true);
+                    return;
+                }
                 IMarkableRegion region = dimCache.getRegion(regionName);
                 try {
                     if (src.getEntity() instanceof Player) {
