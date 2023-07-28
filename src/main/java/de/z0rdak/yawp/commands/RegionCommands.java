@@ -47,7 +47,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.TypeFilter;
 import net.minecraft.util.math.BlockPos;
 
@@ -62,10 +61,7 @@ import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.DimensionCommands.checkValidRegionName;
 import static de.z0rdak.yawp.core.region.RegionType.LOCAL;
 import static de.z0rdak.yawp.util.CommandUtil.*;
-
 import static de.z0rdak.yawp.util.MessageUtil.*;
-import static de.z0rdak.yawp.util.MessageUtil.buildRegionActionUndoLink;
-import static net.minecraft.util.Formatting.*;
 import static net.minecraft.util.Formatting.RESET;
 
 public class RegionCommands {
@@ -229,38 +225,46 @@ public class RegionCommands {
                                                         .executes(ctx -> setTeleportPos(ctx, getRegionArgument(ctx), BlockPosArgumentType.getBlockPos(ctx, TARGET.toString()))))))));
     }
 
-
     private static int updateArea(CommandContext<ServerCommandSource> src, IMarkableRegion region, AreaType areaType, BlockPos pos1, BlockPos pos2) {
-        IProtectedRegion parent = region.getParent();
-        switch (areaType) {
-            case CUBOID:
-                CuboidArea cuboidArea = new CuboidArea(pos1, pos2);
-                CuboidRegion cuboidRegion = (CuboidRegion) region;
-                if (parent instanceof DimensionalRegion) {
-                    int newPriority = LocalRegions.ensureHigherRegionPriorityFor(cuboidRegion, RegionConfig.DEFAULT_REGION_PRIORITY.get());
-                }
-                if (parent instanceof IMarkableRegion localParentRegion) {
-                    CuboidArea parentArea = (CuboidArea) localParentRegion.getArea();
-                    if (parentArea.contains(cuboidArea)) {
-                        int newPriority = LocalRegions.ensureHigherRegionPriorityFor(cuboidRegion, localParentRegion.getPriority() + 1);
-                    } else {
-                        MutableText updateAreaFailMsg = Text.translatableWithFallback("cli.msg.info.region.spatial.area.update.fail", "Failed to update %s for region %s", buildRegionSpatialPropLink(region), buildRegionInfoLink(region, LOCAL));
-                        sendCmdFeedback(src.getSource(), updateAreaFailMsg);
-                        return 1;
+        try {
+            IProtectedRegion parent = region.getParent();
+            // TODO: Contains method for regions, with dimensional always returning true if dim is the same
+            // IMarkableRegions would use the area contains method
+            switch (areaType) {
+                case CUBOID:
+                    CuboidArea cuboidArea = new CuboidArea(pos1, pos2);
+                    CuboidRegion cuboidRegion = (CuboidRegion) region;
+                    if (parent instanceof DimensionalRegion) {
+                        int newPriority = LocalRegions.ensureHigherRegionPriorityFor(cuboidRegion, RegionConfig.DEFAULT_REGION_PRIORITY.get());
+                        YetAnotherWorldProtector.LOGGER.info("New priority {} for region {}", newPriority, region.getName());
                     }
-                }
-                MutableText updateAreaMsg = Text.translatableWithFallback("cli.msg.info.region.spatial.area.update", "Updated %s for region %s", buildRegionSpatialPropLink(region), buildRegionInfoLink(region, LOCAL));
-                cuboidRegion.setArea(cuboidArea);
-                RegionDataManager.save();
-                sendCmdFeedback(src.getSource(), updateAreaMsg);
-                break;
-            case CYLINDER:
-            case SPHERE:
-            case POLYGON_3D:
-            case PRISM:
-                throw new UnsupportedOperationException("Unsupported region type");
+                    if (parent instanceof IMarkableRegion localParentRegion) {
+                        CuboidArea parentArea = (CuboidArea) localParentRegion.getArea();
+                        if (parentArea.contains(cuboidArea)) {
+                            int newPriority = LocalRegions.ensureHigherRegionPriorityFor(cuboidRegion, localParentRegion.getPriority() + 1);
+                            YetAnotherWorldProtector.LOGGER.info("New priority {} for region {}", newPriority, region.getName());
+                        } else {
+                            MutableText updateAreaFailMsg = Text.translatableWithFallback("cli.msg.info.region.spatial.area.update.fail.boundaries", "Parent region %s does not fully contain new are for region %s", buildRegionInfoLink(parent, LOCAL), buildRegionInfoLink(region, LOCAL));
+                            sendCmdFeedback(src.getSource(), updateAreaFailMsg);
+                            return 1;
+                        }
+                    }
+                    cuboidRegion.setArea(cuboidArea);
+                    RegionDataManager.save();
+                    MutableText updateAreaMsg = Text.translatableWithFallback("cli.msg.info.region.spatial.area.update", "Updated %s for region %s", buildRegionSpatialPropLink(region), buildRegionInfoLink(region, LOCAL));
+                    sendCmdFeedback(src.getSource(), updateAreaMsg);
+                    return 0;
+                case CYLINDER:
+                case SPHERE:
+                case POLYGON_3D:
+                case PRISM:
+                    throw new UnsupportedOperationException("Unsupported region type");
+            }
+            return 0;
+        } catch (Exception ex) {
+            YetAnotherWorldProtector.LOGGER.error("Failed to update area: {}", ex.getMessage());
+            return 1;
         }
-        return 0;
     }
 
     private static int renameRegion(CommandContext<ServerCommandSource> src, IMarkableRegion region, String regionName, DimensionRegionCache dimCache) {
