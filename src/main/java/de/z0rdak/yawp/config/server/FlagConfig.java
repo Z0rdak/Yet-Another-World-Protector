@@ -24,7 +24,7 @@ public class FlagConfig {
 
         BREAK_FLAG_ENTITY_TAGS = BUILDER
                 .comment("Entity tags included/protected by the break block flag.")
-                .defineListAllowEmpty(Collections.singletonList("break_flag_entity_tags"), () -> Collections.singletonList(""), FlagConfig::isValidTagEntry);
+                .defineListAllowEmpty(Collections.singletonList("break_flag_entity_tags"), ArrayList::new, FlagConfig::isValidTagEntry);
 
         BUILDER.pop();
         CONFIG_SPEC = BUILDER.build();
