@@ -6,6 +6,7 @@
 * Fix command block execution not working
 * Fix misleading error message when supplying invalid local region name
 * Fix single block region area size being calculated incorrectly
+* Fix warn message for invalid keys in yawp-flags.toml config file
 * Fix typos
 # [0.0.2.9-beta2] - 2023-06-11
 ## Added
