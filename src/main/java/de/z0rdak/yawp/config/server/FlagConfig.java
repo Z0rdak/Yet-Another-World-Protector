@@ -3,10 +3,7 @@ package de.z0rdak.yawp.config.server;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import net.minecraftforge.common.ForgeConfigSpec;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class FlagConfig {
@@ -27,7 +24,7 @@ public class FlagConfig {
 
         BREAK_FLAG_ENTITY_TAGS = BUILDER
                 .comment("Entity tags included/protected by the break block flag.")
-                .defineListAllowEmpty(List.of("break_flag_entity_tags"), () -> List.of(""), FlagConfig::isValidTagEntry);
+                .defineListAllowEmpty(List.of("break_flag_entity_tags"), ArrayList::new, FlagConfig::isValidTagEntry);
 
         BUILDER.pop();
         CONFIG_SPEC = BUILDER.build();
