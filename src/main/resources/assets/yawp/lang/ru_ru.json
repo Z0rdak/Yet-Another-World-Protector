@@ -224,5 +224,7 @@
   "cli.msg.dim.info.region.create.stick.no-player": "This command can only be executed as a player!",
   "cli.msg.dim.info.region.create.stick.invalid": "Invalid RegionMarker data, sorry. Get a new one and try again.",
   "cli.msg.dim.info.region.create.stick.area.invalid": "Marked area is not valid",
-  "cli.msg.dim.info.region.create.stick.area.invalid.parent": "Parent region %s does not contain the marked area"
+  "cli.msg.dim.info.region.create.stick.area.invalid.parent": "Parent region %s does not contain the marked area",
+  "data.nbt.dimensions.save": "Save for RegionDataManager called. Attempting to save region data...",
+  "cli.msg.info.region.spatial.area.update.fail.boundaries": "Parent region %s does not fully contain new are for region %s"
 }
