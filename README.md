@@ -32,4 +32,4 @@ This mod is released under the GNU LESSER GENERAL PUBLIC LICENSE Version 3.
 
 # Development roadmap
 
-See [Wiki](https://github.com/Z0rdak/Yet-Another-World-Protector/wiki)
+See [Wiki](https://github.com/Z0rdak/Yet-Another-World-Protector/wiki)<!-- @IGNORE PREVIOUS: link -->
