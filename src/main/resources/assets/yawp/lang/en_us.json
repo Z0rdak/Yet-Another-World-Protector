@@ -128,6 +128,7 @@
   "cli.msg.info.region.children.remove.link.hover": "Remove child '%s' from region %s",
   "cli.msg.info.region.flag": "Flags",
   "cli.msg.info.region.spatial.area.update.fail": "Failed to update %s for region %s",
+  "cli.msg.info.region.spatial.area.update.fail.boundaries": "Parent region %s does not fully contain new are for region %s",
   "cli.msg.info.region.flag.add.link.hover": "Add new flag to region %s",
   "cli.msg.info.region.flag.empty": "No flags defined in region %s",
   "cli.msg.info.region.flag.link.hover": "Show region flags for region %s",
