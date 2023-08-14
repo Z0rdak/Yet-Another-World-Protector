@@ -73,7 +73,7 @@ java {
 }
 
 jar {
-	from("LICENSE") {
+	from("LICENSE.txt") {
 		rename { "${it}_${project.archivesBaseName}" }
 	}
 }
