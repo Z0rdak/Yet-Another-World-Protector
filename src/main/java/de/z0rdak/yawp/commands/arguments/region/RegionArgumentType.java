@@ -54,8 +54,11 @@ public class RegionArgumentType implements ArgumentType<String> {
 
     public static IMarkableRegion getRegionInPlayerDim(CommandContext<ServerCommandSource> context, String argName) throws CommandSyntaxException {
         String regionName = context.getArgument(argName, String.class);
-        ServerPlayerEntity player = context.getSource().getPlayer();
-        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.world.getRegistryKey());
+        DimensionRegionCache dimCache = CommandUtil.getDimCacheArgument(context);
+        if (!dimCache.contains(regionName)) {
+            MessageUtil.sendCmdFeedback(context.getSource(), new LiteralText("No region with name '" + regionName + "' defined in dim '" + dimCache.dimensionKey().getValue() + "'"));
+            throw ERROR_INVALID_VALUE.create(regionName);
+        }
         IMarkableRegion region = dimCache.getRegion(regionName);
         if (region != null) {
             return region;
