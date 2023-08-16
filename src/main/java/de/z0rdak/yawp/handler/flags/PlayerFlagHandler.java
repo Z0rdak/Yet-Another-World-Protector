@@ -112,6 +112,8 @@ public final class PlayerFlagHandler {
                 FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, blockHitResult.getBlockPos(), PLACE_BLOCKS, dimCache.getDimensionalRegion());
                 if (flagCheckEvent.isDenied()) {
                     sendFlagDeniedMsg(flagCheckEvent);
+                    // sync inventory
+                    player.getInventory().updateItems();
                     return ActionResult.FAIL;
                 }
             }
