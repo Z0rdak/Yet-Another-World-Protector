@@ -1,3 +1,24 @@
+# [0.0.2.9-beta3] - 2023-08-12
+## Fixed
+* [Forge] Fix place-blocks and no-walker-freeze flags not working together properly
+* [Fabric] Fix spawning-all flag destroying thrown out items
+* [Fabric] Fix inventory desync when placing a block with the `place-blocks` flag active
+* Fix command block execution not working
+* Fix misleading error message when supplying invalid local region name
+* Fix single block region area size being calculated incorrectly
+* Fix warn message for invalid keys in yawp-flags.toml config file
+* Fix typos
+# [0.0.2.9-beta2] - 2023-06-11
+## Added
+* [1.19.4+] Add default english fallback translation
+# [0.0.2.9-beta1] - 2023-06-09
+## Added
+* [Fabric] Add `mob-griefing`, `enderman-griefing` and `zombie-destruction` flag. Ported by petersv5 aka. ptefar - thanks a lot!
+## Changed
+* Change default value for config `command_op_level` back to 4. This caused many players to struggle with setting up the mod in the first place.
+With the default 4 we assume that the player setting up the server is OP lvl 4 and thus admin.
+## Fixed
+* [Forge] Replace mixin for `walker-freeze` flag with forge event. This should solve #85.
 # [0.0.2.8-beta2] - 2023-04-21
 ## Fixes
 * Fix rare NPE occurring because of random event handler order.
