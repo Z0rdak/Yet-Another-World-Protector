@@ -96,11 +96,7 @@ public class CommandPermissionConfig {
             if (isServerConsole) {
                 return true;
             } else {
-                BlockEntity blockEntity = source.getWorld().getBlockEntity(new BlockPos(source.getPosition()));
-                if (blockEntity instanceof CommandBlockBlockEntity) {
-                    return COMMAND_BLOCK_EXECUTION.get();
-                }
-                return false;
+                return COMMAND_BLOCK_EXECUTION.get();
             }
         }
     }
