@@ -30,7 +30,6 @@ public final class LocalRegions {
      * @param region
      * @return
      */
-    @NotNull
     public static List<IFlag> getSortedFlags(IProtectedRegion region) {
         List<IFlag> activeFlags = region.getFlags().stream()
                 .filter(IFlag::isActive)
@@ -39,8 +38,7 @@ public final class LocalRegions {
         List<IFlag> inActiveFlags = region.getFlags().stream()
                 .filter(f -> !f.isActive())
                 .sorted()
-                .toList();
-        activeFlags.addAll(inActiveFlags);
+                .collect(Collectors.toList());
         List<IFlag> flags = new ArrayList<>(activeFlags);
         flags.addAll(inActiveFlags);
         return flags;
@@ -209,7 +207,6 @@ public final class LocalRegions {
                 .collect(Collectors.toList());
     }
 
-
     public static int ensureHigherRegionPriorityFor(CuboidRegion cuboidRegion, int defaultPriority) {
         List<CuboidRegion> intersectingRegions = getIntersectingRegionsFor(cuboidRegion);
         boolean hasRegionWithSamePriority = intersectingRegions.stream().anyMatch(r -> r.getPriority() == cuboidRegion.getPriority());
@@ -256,5 +253,4 @@ public final class LocalRegions {
         }
         return cuboidRegion.getPriority();
     }
-
 }
