@@ -44,7 +44,7 @@ public class MarkerStickHandler {
         }
         // add block to NBT list
         marker.addMarkedBlock(event.getPos());
-        int blockNo = (marker.getMarkedBlocks().size() % marker.getAreaType().neededBlocks) + 1;
+        int blockNo = marker.getMarkedBlocks().size() % marker.getAreaType().neededBlocks;
         sendMessage(event.getPlayer(), new TranslationTextComponent("cli.marker.create.mark.block", blockNo, shortBlockPos(event.getPos())));
         // check whether marked blocks form a valid marked area
         boolean hasValidArea = marker.checkValidArea();
