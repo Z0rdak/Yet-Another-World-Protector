@@ -17,17 +17,15 @@ import java.util.stream.Collectors;
 public class CommandPermissionConfig {
 
     public static final ForgeConfigSpec CONFIG_SPEC;
-
     public static final String CONFIG_NAME = YetAnotherWorldProtector.MODID + "-common.toml";
 
-    // TODO: Dedicated permission to teleport to region
-    public static final ForgeConfigSpec.ConfigValue<Boolean> ALLOW_READ_ONLY_CMDS;
-    public static final ForgeConfigSpec.ConfigValue<Integer> REQUIRED_OP_LEVEL;
+    private static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_REGION_TP;
+    private static final ForgeConfigSpec.ConfigValue<Boolean> ALLOW_READ_ONLY_CMDS;
+    private static final ForgeConfigSpec.ConfigValue<Integer> REQUIRED_OP_LEVEL;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> PLAYERS_WITH_PERMISSION;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> COMMAND_BLOCK_EXECUTION;
-
-    public static final ForgeConfigSpec.ConfigValue<Integer> WP_COMMAND_ALTERNATIVE;
-    public static final String[] WP_CMDS = new String[]{"wp", "yawp"};
+    private static final ForgeConfigSpec.ConfigValue<Boolean> COMMAND_BLOCK_EXECUTION;
+    private static final ForgeConfigSpec.ConfigValue<Integer> WP_COMMAND_ALTERNATIVE;
+    private static final String[] WP_CMDS = new String[]{"wp", "yawp"};
     public static String BASE_CMD;
 
     static {
@@ -47,6 +45,9 @@ public class CommandPermissionConfig {
 
         ALLOW_READ_ONLY_CMDS = BUILDER.comment("Defines whether info commands for regions can be used by every player.")
                 .define("allow_info_cmds", true);
+
+        ENABLE_REGION_TP = BUILDER.comment("Defines whether teleport in and out of a region is allowed by everyone. Mostly useful when using something like Waystones inside of regions.")
+                .define("allow_region_tp", false);
 
         PLAYERS_WITH_PERMISSION = BUILDER.comment("Player UUIDs with permission to use mod commands.\n Make sure to put the UUIDs in parentheses, just like a normal string.\n Example: players_with_permission = [\"614c9eac-11c9-3ca6-b697-938355fa8235\", \"b9f5e998-520a-3fa2-8208-0c20f22aa20f\"]")
                 .defineListAllowEmpty(Collections.singletonList("players_with_permission"), ArrayList::new, (uuid) -> {
@@ -77,18 +78,29 @@ public class CommandPermissionConfig {
         return tokens.stream().anyMatch(t -> t.length() != size);
     }
 
-    public static boolean AllowInfoCmds(){
+    public static boolean AllowInfoCmds() {
         return ALLOW_READ_ONLY_CMDS.get();
     }
 
-    public static Set<String> UUIDsWithPermission(){
+    public static String getBaseCmdAlt() {
+        return WP_CMDS[1];
+    }
+
+    public static String getBaseCmd() {
+        return WP_CMDS[WP_COMMAND_ALTERNATIVE.get()];
+    }
+
+    public static boolean allowRegionTp() {
+        return ENABLE_REGION_TP.get();
+    }
+
+    public static Set<String> UUIDsWithPermission() {
         return PLAYERS_WITH_PERMISSION.get()
                 .stream()
                 .filter(Objects::nonNull)
-                .map(s -> (String)s)
+                .map(s -> (String) s)
                 .collect(Collectors.toSet());
     }
-
 
     // FIXME: What about CommandBlockMinecarts?
     public static boolean hasPermission(CommandSourceStack source) {
