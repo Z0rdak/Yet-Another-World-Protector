@@ -80,6 +80,10 @@ public interface IProtectedRegion extends INBTSerializable<CompoundTag> {
 
     void setIsActive(boolean isActive);
 
+    boolean isMuted();
+
+    void setIsMuted(boolean isMuted);
+
     PlayerContainer getMembers();
 
     PlayerContainer getOwners();
