@@ -12,16 +12,12 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
-import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
-import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import de.z0rdak.yawp.util.CommandUtil;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -83,7 +79,7 @@ public class IFlagArgumentType implements ArgumentType<String> {
                         .contains(REMOVE.toString());
                 List<String> flagsInRegion = region.getFlags()
                         .stream()
-                        .map(IFlag::getFlagIdentifier)
+                        .map(IFlag::getName)
                         .distinct()
                         .collect(Collectors.toList());
                 if (isRemoveCmd) {
