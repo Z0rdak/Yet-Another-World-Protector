@@ -9,6 +9,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import de.z0rdak.yawp.api.events.region.RegionEvent;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
+import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.affiliation.AffiliationType;
 import de.z0rdak.yawp.core.area.AreaType;
@@ -38,6 +39,7 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
+import org.apache.commons.lang3.NotImplementedException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -45,6 +47,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
+import static de.z0rdak.yawp.core.region.RegionType.DIMENSION;
 import static de.z0rdak.yawp.core.region.RegionType.LOCAL;
 import static de.z0rdak.yawp.util.CommandUtil.*;
 import static de.z0rdak.yawp.util.MessageUtil.*;
@@ -90,6 +93,35 @@ public class DimensionCommands {
                                 .executes(ctx -> setActiveState(ctx, getDimCacheArgument(ctx)))
                                 .then(Commands.argument(ENABLE.toString(), BoolArgumentType.bool())
                                         .executes(ctx -> setActiveState(ctx, getDimCacheArgument(ctx), getEnableArgument(ctx)))))
+                        // TODO: State (muted
+                        .then(literal(COPY)
+                                .then(Commands.argument(SRC_DIM.toString(), DimensionArgument.dimension())
+                                        .then(Commands.argument(SRC_REGION.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> RegionArgumentType.region().listSrcRegions(ctx, builder))
+                                                        .then(literal(FLAGS)
+                                                                .executes(ctx -> copyRegionFlags(ctx, getRegionArgument(ctx), getSourceRegionArgument(ctx))))
+                                                        .then(literal(STATE)
+                                                                .executes(ctx -> copyRegionState(ctx, getRegionArgument(ctx), getSourceRegionArgument(ctx))))
+                                                        .then(literal(PLAYERS)
+                                                                .executes(ctx -> copyRegionPlayers(ctx, getRegionArgument(ctx), getSourceRegionArgument(ctx)))
+                                                                .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
+                                                                        .suggests((ctx, builder) -> ISuggestionProvider.suggest(affiliationList, builder))
+                                                                        .executes(ctx -> copyRegionPlayers(ctx, getRegionArgument(ctx), getSourceRegionArgument(ctx), getAffiliationArgument(ctx))))
+                                                        )
+                                                // .then(literal(TEAMS)
+                                                //         .executes(ctx -> copyRegionTeams(ctx, getRegionArgument(ctx), getSourceRegionArgument(ctx)))
+                                                //         .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
+                                                //                 .suggests((ctx, builder) -> ISuggestionProvider.suggest(affiliationList, builder))
+                                                //                 .executes(ctx -> copyRegionTeams(ctx, getRegionArgument(ctx), getSourceRegionArgument(ctx), getAffiliationArgument(ctx))))
+                                                // )
+                                                // .then(literal(AFFILIATION)
+                                                //         .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
+                                                //                 .suggests((ctx, builder) -> ISuggestionProvider.suggest(affiliationList, builder))
+                                                //                 .executes(ctx -> copyRegionAffiliation(ctx, getRegionArgument(ctx), getSourceRegionArgument(ctx), getAffiliationArgument(ctx))))
+                                                // )
+                                        )
+                                )
+                        )
                         .then(literal(LIST)
                                 .then(literal(REGION)
                                         .executes(ctx -> promptDimensionRegionList(ctx.getSource(), getDimCacheArgument(ctx), 0))
@@ -242,6 +274,81 @@ public class DimensionCommands {
         dimCache.addRegion(region);
         RegionDataManager.save();
         sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region, LOCAL)));
+        return 0;
+    }
+
+    public static int copyRegionFlags(CommandContext<CommandSource> ctx, IProtectedRegion region, IProtectedRegion srcRegion) {
+        srcRegion.getFlags().forEach(region::addFlag);
+        RegionDataManager.save();
+        RegionType srcRegiontype = srcRegion instanceof DimensionalRegion ? DIMENSION : LOCAL;
+        RegionType targetRegiontype = region instanceof DimensionalRegion ? DIMENSION : LOCAL;
+        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("Copied flags from region %s to %s", buildRegionInfoLink(srcRegion, srcRegiontype), buildRegionInfoLink(region, targetRegiontype)));
+        return 0;
+    }
+
+    public static int copyRegionState(CommandContext<CommandSource> ctx, IProtectedRegion region, IProtectedRegion srcRegion) {
+        region.setIsActive(srcRegion.isActive());
+        region.setIsMuted(srcRegion.isMuted());
+        if (region instanceof IMarkableRegion && srcRegion instanceof IMarkableRegion) {
+            IMarkableRegion regionTarget = (IMarkableRegion) region;
+            IMarkableRegion regionSource = (IMarkableRegion) srcRegion;
+            regionTarget.setPriority(regionSource.getPriority());
+        }
+        RegionDataManager.save();
+        RegionType srcRegiontype = srcRegion instanceof DimensionalRegion ? DIMENSION : LOCAL;
+        RegionType targetRegiontype = region instanceof DimensionalRegion ? DIMENSION : LOCAL;
+        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("Copied state from region %s to %s", buildRegionInfoLink(srcRegion, srcRegiontype), buildRegionInfoLink(region, targetRegiontype)));
+        return 0;
+    }
+
+    public static int copyRegionPlayers(CommandContext<CommandSource> ctx, IProtectedRegion region, IProtectedRegion srcRegion, String affiliation) {
+        switch (affiliation) {
+            case "member":
+                srcRegion.getMembers().getPlayers().forEach((uuid, name) -> region.getMembers().addPlayer(uuid, name));
+                break;
+            case "owner":
+                srcRegion.getOwners().getPlayers().forEach((uuid, name) -> region.getOwners().addPlayer(uuid, name));
+                break;
+            default:
+                throw new IllegalArgumentException("Unexpected value = " + affiliation);
+        }
+        RegionDataManager.save();
+        RegionType srcRegiontype = srcRegion instanceof DimensionalRegion ? DIMENSION : LOCAL;
+        RegionType targetRegiontype = region instanceof DimensionalRegion ? DIMENSION : LOCAL;
+        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("Copied players with affiliation '%s' from %s to %s", affiliation, buildRegionInfoLink(srcRegion, srcRegiontype), buildRegionInfoLink(region, targetRegiontype)));
+        return 0;
+    }
+
+    public static int copyRegionPlayers(CommandContext<CommandSource> ctx, IProtectedRegion region, IProtectedRegion srcRegion) {
+        return copyRegionPlayers(ctx, region, srcRegion, MEMBER.toString()) + copyRegionPlayers(ctx, region, srcRegion, OWNER.toString());
+    }
+
+    // FIXME: Teams can only be copied from the same dimension!
+    public static int copyRegionTeams(CommandContext<CommandSource> ctx, IProtectedRegion region, IProtectedRegion srcRegion, String affiliation) {
+        switch (affiliation) {
+            case "member":
+                srcRegion.getMembers().getTeams().forEach(team -> region.getMembers().addTeam(team));
+                break;
+            case "owner":
+                srcRegion.getOwners().getTeams().forEach(team -> region.getOwners().addTeam(team));
+                break;
+            default:
+                throw new IllegalArgumentException("Unexpected value = " + affiliation);
+        }
+        RegionDataManager.save();
+        RegionType srcRegiontype = srcRegion instanceof DimensionalRegion ? DIMENSION : LOCAL;
+        RegionType targetRegiontype = region instanceof DimensionalRegion ? DIMENSION : LOCAL;
+        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("Copied teams with affiliation '%s' from %s to %s", affiliation, buildRegionInfoLink(srcRegion, srcRegiontype), buildRegionInfoLink(region, targetRegiontype)));
+        return 0;
+    }
+
+    public static int copyRegionTeams(CommandContext<CommandSource> ctx, IProtectedRegion region, IProtectedRegion srcRegion) {
+        return copyRegionTeams(ctx, region, srcRegion, MEMBER.toString()) + copyRegionTeams(ctx, region, srcRegion, OWNER.toString());
+    }
+
+    // FIXME: Teams can only be copied from the same dimension - maybe replace teams with some permission group from another mod
+    public static int copyRegionAffiliation(CommandContext<CommandSource> ctx, IProtectedRegion region, IProtectedRegion srcRegion, String affiliation) {
+        RegionDataManager.save();
         return 0;
     }
 

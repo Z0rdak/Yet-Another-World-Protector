@@ -12,10 +12,12 @@ import de.z0rdak.yawp.commands.arguments.flag.RegionFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.AddRegionChildArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RemoveRegionChildArgumentType;
+import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.affiliation.AffiliationType;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.CuboidArea;
+import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
@@ -48,6 +50,7 @@ import net.minecraft.scoreboard.Team;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.MinecraftForge;
@@ -83,6 +86,34 @@ public class RegionCommands {
                                 .executes(ctx -> promptRegionInfo(ctx.getSource(), getRegionArgument(ctx)))
                                 .then(literal(INFO)
                                         .executes(ctx -> promptRegionInfo(ctx.getSource(), getRegionArgument(ctx))))
+                                .then(literal(COPY)
+                                        .then(Commands.argument(SRC_DIM.toString(), DimensionArgument.dimension())
+                                                .then(Commands.argument(SRC_REGION.toString(), StringArgumentType.word())
+                                                                .suggests((ctx, builder) -> RegionArgumentType.region().listSrcRegions(ctx, builder))
+                                                                .then(literal(FLAGS)
+                                                                        .executes(ctx -> DimensionCommands.copyRegionFlags(ctx, getRegionArgument(ctx), getSourceRegionArgument(ctx))))
+                                                                .then(literal(STATE)
+                                                                        .executes(ctx -> DimensionCommands.copyRegionState(ctx, getRegionArgument(ctx), getSourceRegionArgument(ctx))))
+                                                                .then(literal(PLAYERS)
+                                                                        .executes(ctx -> DimensionCommands.copyRegionPlayers(ctx, getRegionArgument(ctx), getSourceRegionArgument(ctx)))
+                                                                        .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
+                                                                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(affiliationList, builder))
+                                                                                .executes(ctx -> DimensionCommands.copyRegionPlayers(ctx, getRegionArgument(ctx), getSourceRegionArgument(ctx), getAffiliationArgument(ctx))))
+                                                                )
+                                                        // .then(literal(TEAMS)
+                                                        //         .executes(ctx -> DimensionCommands.copyRegionTeams(ctx, getRegionArgument(ctx), getSourceRegionArgument(ctx)))
+                                                        //         .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
+                                                        //                 .suggests((ctx, builder) -> ISuggestionProvider.suggest(affiliationList, builder))
+                                                        //                 .executes(ctx -> DimensionCommands.copyRegionTeams(ctx, getRegionArgument(ctx), getSourceRegionArgument(ctx), getAffiliationArgument(ctx))))
+                                                        // )
+                                                        // .then(literal(AFFILIATION)
+                                                        //         .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
+                                                        //                 .suggests((ctx, builder) -> ISuggestionProvider.suggest(affiliationList, builder))
+                                                        //                 .executes(ctx -> DimensionCommands.copyRegionAffiliation(ctx, getRegionArgument(ctx), getSourceRegionArgument(ctx), getAffiliationArgument(ctx))))
+                                                        // )
+                                                )
+                                        )
+                                )
                                 .then(literal(SPATIAL)
                                         .executes(ctx -> promptRegionSpatialProperties(ctx.getSource(), getRegionArgument(ctx))))
                                 .then(literal(STATE)
@@ -103,7 +134,8 @@ public class RegionCommands {
                                                                 .executes(ctx -> setPriority(ctx, getRegionArgument(ctx), getPriorityArgument(ctx), 1))))
                                                 .then(literal(DEC)
                                                         .then(Commands.argument(PRIORITY.toString(), IntegerArgumentType.integer())
-                                                                .executes(ctx -> setPriority(ctx, getRegionArgument(ctx), getPriorityArgument(ctx), -1))))))
+                                                                .executes(ctx -> setPriority(ctx, getRegionArgument(ctx), getPriorityArgument(ctx), -1)))))
+                                )
                                 .then(literal(LIST)
                                         .then(literal(FLAG)
                                                 .executes(ctx -> promptRegionFlags(ctx.getSource(), getRegionArgument(ctx), 0))
@@ -135,25 +167,28 @@ public class RegionCommands {
                                                 .executes(ctx -> promptRegionChildren(ctx.getSource(), getRegionArgument(ctx), 0))
                                                 .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
                                                         .executes(ctx -> promptRegionChildren(ctx.getSource(), getRegionArgument(ctx), getPageNoArgument(ctx))))
-                                        ))
+                                        )
+                                )
                                 .then(literal(AREA)
-                                        .then(Commands.literal(AreaType.CUBOID.areaType)
-                                                .then(Commands.argument("pos1", BlockPosArgument.blockPos())
-                                                        .then(Commands.argument("pos2", BlockPosArgument.blockPos())
-                                                                .executes(ctx -> updateArea(ctx, getRegionArgument(ctx), AreaType.CUBOID,
-                                                                        BlockPosArgument.getOrLoadBlockPos(ctx, "pos1"),
-                                                                        BlockPosArgument.getOrLoadBlockPos(ctx, "pos2")))))
-                                        ))
+                                        .then(literal(SET)
+                                                .then(Commands.literal(AreaType.CUBOID.areaType)
+                                                        .then(Commands.argument("pos1", BlockPosArgument.blockPos())
+                                                                .then(Commands.argument("pos2", BlockPosArgument.blockPos())
+                                                                        .executes(ctx -> updateArea(ctx, getRegionArgument(ctx), AreaType.CUBOID, BlockPosArgument.getOrLoadBlockPos(ctx, "pos1"), BlockPosArgument.getOrLoadBlockPos(ctx, "pos2"))))))
+                                        )
+                                        .then(literal(EXPAND)
+                                                .executes(ctx -> expandArea(ctx, getRegionArgument(ctx), -64, 320))
+                                                .then(Commands.argument("yMin", IntegerArgumentType.integer(-64, 320))
+                                                        .then(Commands.argument("yMax", IntegerArgumentType.integer(-64, 320))
+                                                                .executes(ctx -> expandArea(ctx, getRegionArgument(ctx), IntegerArgumentType.getInteger(ctx, "yMin"), IntegerArgumentType.getInteger(ctx, "yMax"))))
+                                                )
+                                        )
+                                )
                                 // .then(literal(NAME)
                                 //         .then(Commands.argument(REGION.toString(), StringArgumentType.word())
                                 //                 .executes(ctx -> renameRegion(ctx, getRegionArgument(ctx), getRegionNameArgument(ctx), getDimCacheArgument(ctx)))
                                 //         )
                                 // )
-                                // TODO: Only with marker
-                                //.then(literal(UPDATE)
-                                //        .then(Commands.argument(AREA.toString(), StringArgumentType.word())
-                                //                .suggests((ctx, builder) -> AreaArgumentType.areaType().listSuggestions(ctx, builder))
-                                //                .executes(ctx -> updateRegion(ctx.getSource(), getRegionArgument(ctx)))))
                                 .then(literal(ADD)
                                         .then(literal(CommandConstants.PLAYER)
                                                 .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
@@ -223,7 +258,49 @@ public class RegionCommands {
                                                 .executes(ctx -> teleport(ctx.getSource(), getRegionArgument(ctx), getPlayerArgument(ctx))))
                                         .then(Commands.literal(SET.toString())
                                                 .then(Commands.argument(TARGET.toString(), BlockPosArgument.blockPos())
-                                                        .executes(ctx -> setTeleportPos(ctx, getRegionArgument(ctx), BlockPosArgument.getOrLoadBlockPos(ctx, TARGET.toString()))))))));
+                                                        .executes(ctx -> setTeleportPos(ctx, getRegionArgument(ctx), BlockPosArgument.getOrLoadBlockPos(ctx, TARGET.toString()))))))))
+                ;
+    }
+
+    // TODO: Needs rework after other shapes are implemented
+    private static int expandArea(CommandContext<CommandSource> ctx, IMarkableRegion region, int yMin, int yMax) {
+        int min = Math.min(yMin, yMax);
+        int max = Math.max(yMin, yMax);
+        IMarkableArea oldArea = region.getArea();
+        if (oldArea instanceof CuboidArea) {
+            CuboidArea cuboidArea = CuboidArea.expand((CuboidArea) oldArea, min, max);
+            region.setArea(cuboidArea);
+        } else {
+            throw new IllegalArgumentException("Unexpected value = " + oldArea.getClass().getName());
+        }
+        RegionDataManager.save();
+        IFormattableTextComponent updateAreaMsg = new TranslationTextComponent("cli.msg.info.region.spatial.area.update", buildRegionSpatialPropLink(region), buildRegionInfoLink(region, LOCAL));
+        sendCmdFeedback(ctx.getSource(), updateAreaMsg);
+        return 0;
+    }
+
+    private static int copyPlayers(CommandContext<CommandSource> ctx, IMarkableRegion region, IMarkableRegion srcRegion, String affiliation) {
+
+        RegionDataManager.save();
+        return 0;
+    }
+
+    private static int copyPlayers(CommandContext<CommandSource> ctx, IMarkableRegion region, IMarkableRegion srcRegion) {
+        return copyPlayers(ctx, region, srcRegion, "member") + copyPlayers(ctx, region, srcRegion, "owners");
+    }
+
+    private static int copyTeams(CommandContext<CommandSource> ctx, IMarkableRegion region, IMarkableRegion srcRegion, String affiliation) {
+        RegionDataManager.save();
+        return 0;
+    }
+
+    private static int copyTeams(CommandContext<CommandSource> ctx, IMarkableRegion region, IMarkableRegion srcRegion) {
+        return copyTeams(ctx, region, srcRegion, "member") + copyTeams(ctx, region, srcRegion, "owners");
+    }
+
+    private static int copyAffiliation(CommandContext<CommandSource> ctx, IMarkableRegion region, IMarkableRegion srcRegion, String affiliation) {
+        RegionDataManager.save();
+        return 0;
     }
 
 
@@ -249,7 +326,7 @@ public class RegionCommands {
                     }
 
                     if (parent instanceof DimensionalRegion) {
-                        int newPriority = LocalRegions.ensureHigherRegionPriorityFor(cuboidRegion, RegionConfig.DEFAULT_REGION_PRIORITY.get());
+                        int newPriority = LocalRegions.ensureHigherRegionPriorityFor(cuboidRegion, RegionConfig.getDefaultPriority());
                         YetAnotherWorldProtector.LOGGER.info("New priority {} for region {}", newPriority, region.getName());
                     }
                     if (parent instanceof IMarkableRegion) {
@@ -418,7 +495,7 @@ public class RegionCommands {
             // FIXME: Removing child does not set priority correct with overlapping regions
             dimCache.getDimensionalRegion().addChild(child); // this also removes the child from the local parent
             child.setIsActive(false);
-            LocalRegions.ensureLowerRegionPriorityFor((CuboidRegion) child, RegionConfig.DEFAULT_REGION_PRIORITY.get());
+            LocalRegions.ensureLowerRegionPriorityFor((CuboidRegion) child, RegionConfig.getDefaultPriority());
             RegionDataManager.save();
             IFormattableTextComponent parentLink = buildRegionInfoLink(parent, LOCAL);
             IFormattableTextComponent notLongerChildLink = buildRegionInfoLink(child, LOCAL);
@@ -463,12 +540,12 @@ public class RegionCommands {
                     break;
             }
             // TODO: More general: Trigger for adding flags?
-            if (flag.name.contains("spawning")) {
+            if (flag.name.contains("spawning") && FlagConfig.removeEntitiesEnabled()) {
                 removeInvolvedEntities(src, region, flag);
             }
             RegionDataManager.save();
             // TODO: flag cmd info link
-            sendCmdFeedback(src.getSource(), new TranslationTextComponent("cli.msg.flags.added", buildFlagQuickInfo(iFlag),
+            sendCmdFeedback(src.getSource(), new TranslationTextComponent("cli.msg.flags.added", buildFlagInfoLink(region, iFlag, LOCAL),
                     buildRegionInfoLink(region, LOCAL))
                     .append(" ")
                     .append(buildRegionActionUndoLink(src.getInput(), ADD, REMOVE)));
@@ -665,7 +742,7 @@ public class RegionCommands {
         IFormattableTextComponent regionHierarchy = new TranslationTextComponent("cli.msg.info.region.hierarchy")
                 .append(": ")
                 .append(buildRegionParentLink(region))
-                .append(new StringTextComponent(RESET + ", "))
+                .append(new StringTextComponent(", ").withStyle(TextFormatting.RESET))
                 .append(buildRegionChildrenLink(region, LOCAL));
         sendCmdFeedback(src, regionHierarchy);
         // State: [State]
@@ -724,7 +801,6 @@ public class RegionCommands {
      * == Region [<name>] spatial properties ==
      * Location: [dimInfo]@[tpCoordinates]
      * Area: [spatialProperties]
-     *
      * @param src
      * @param region
      * @return
@@ -762,7 +838,7 @@ public class RegionCommands {
         }
         List<IFlag> flags = LocalRegions.getSortedFlags(region);
         List<IFormattableTextComponent> flagPagination = buildPaginationComponents(
-                buildFlagHeader(region, LOCAL),
+                buildRegionFlagInfoHeader(region, LOCAL),
                 buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), FLAG.toString()),
                 buildRemoveFlagEntries(region, flags, LOCAL),
                 pageNo,
@@ -792,12 +868,6 @@ public class RegionCommands {
         } catch (CommandSyntaxException e) {
             e.printStackTrace();
         }
-        return 0;
-    }
-
-    // TODO
-    private static int listRegionsAround(CommandSource source) {
-
         return 0;
     }
 
