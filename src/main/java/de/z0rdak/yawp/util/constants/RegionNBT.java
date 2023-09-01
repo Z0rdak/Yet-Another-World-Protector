@@ -32,7 +32,7 @@ public final class RegionNBT {
     public static final String MSG = "msg";
     public static final String FLAG_MSG = "flag_msg";
     public static final String FLAG_ACTIVE = "is_active";
-    public static final String IS_INVERTED = "inverted";
+    public static final String OVERRIDE = "override";
     public static final String FLAG_VALUE = "value";
     public static final String IS_DENIED = "isDenied";
     public static final String OWNERS = "owners";
