@@ -79,6 +79,10 @@ public interface IFlag extends INBTSerializable<CompoundTag>, Comparable<IFlag> 
      */
     void setIsActive(boolean active);
 
+    FlagMessage getFlagMsg();
+
+    void setFlagMsg(FlagMessage msg);
+
     /**
      * FIXME: should work, but hacky workaround
      * Returns whether the flag allows the flag action considering the optional arguments
