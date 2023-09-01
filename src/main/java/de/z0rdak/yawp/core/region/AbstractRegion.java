@@ -34,10 +34,13 @@ public abstract class AbstractRegion implements IProtectedRegion {
     protected String name;
     protected RegistryKey<World> dimension;
     protected RegionType regionType;
+
     protected FlagContainer flags;
     protected PlayerContainer owners;
     protected PlayerContainer members;
     protected boolean isActive;
+
+    protected boolean isMuted;
 
     @Nullable
     protected IProtectedRegion parent;
@@ -177,6 +180,17 @@ public abstract class AbstractRegion implements IProtectedRegion {
     public void setIsActive(boolean isActive) {
         this.isActive = isActive;
     }
+
+    @Override
+    public boolean isMuted() {
+        return false;
+    }
+
+    @Override
+    public void setIsMuted(boolean isMuted) {
+        this.isMuted = isMuted;
+    }
+
 
     @Override
     public void addMember(PlayerEntity player) {
@@ -363,9 +377,10 @@ public abstract class AbstractRegion implements IProtectedRegion {
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putString(NAME, this.name);
-        nbt.putString(DIM, dimension.location().toString());
+        nbt.putString(DIM, this.dimension.location().toString());
         nbt.putString(REGION_TYPE, this.regionType.type);
         nbt.putBoolean(ACTIVE, this.isActive);
+        nbt.putBoolean(MUTED, this.isMuted);
         nbt.put(FLAGS, this.flags.serializeNBT());
         nbt.put(OWNERS, this.owners.serializeNBT());
         nbt.put(MEMBERS, this.members.serializeNBT());
@@ -391,6 +406,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.name = nbt.getString(NAME);
         this.dimension = RegistryKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(nbt.getString(DIM)));
         this.isActive = nbt.getBoolean(ACTIVE);
+        this.isMuted = nbt.getBoolean(MUTED);
         this.regionType = RegionType.of(nbt.getString(REGION_TYPE));
         this.flags = new FlagContainer(nbt.getCompound(FLAGS));
         this.owners = new PlayerContainer(nbt.getCompound(OWNERS));

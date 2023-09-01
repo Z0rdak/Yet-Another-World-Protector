@@ -24,7 +24,6 @@ import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 public abstract class AbstractMarkableRegion extends AbstractRegion implements IMarkableRegion {
 
     protected int priority;
-    protected boolean isMuted;
     protected IMarkableArea area;
     protected AreaType areaType;
     protected BlockPos tpTarget;
@@ -33,7 +32,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         super(name, dimension, RegionType.LOCAL, owner);
         this.area = area;
         this.areaType = area.getAreaType();
-        this.priority = RegionConfig.DEFAULT_REGION_PRIORITY.get();
+        this.priority = RegionConfig.getDefaultPriority();
         this.children = new HashMap<>();
         if (parent != null) {
             this.setParent(parent);
@@ -156,11 +155,6 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     @Override
     public void setPriority(int priority) {
         this.priority = priority;
-    }
-
-    @Override
-    public void setIsMuted(boolean isMuted) {
-        this.isMuted = isMuted;
     }
 
     @Override
