@@ -13,6 +13,7 @@ public final class RegionNBT {
     public static final String PLAYERS = "players";
     public static final String FLAGS = "flags";
     public static final String MUTED = "muted";
+    public static final String DEFAULT = "default";
     public static final String AREA = "area";
     public static final String AREA_TYPE = "area_type";
     public static final String FLAG_TYPE = "flag_type";
@@ -27,6 +28,9 @@ public final class RegionNBT {
 
     public static final String FLAG = "flag";
     public static final String FLAG_NAME = "flag_name";
+
+    public static final String MSG = "msg";
+    public static final String FLAG_MSG = "flag_msg";
     public static final String FLAG_ACTIVE = "is_active";
     public static final String IS_INVERTED = "inverted";
     public static final String FLAG_VALUE = "value";
