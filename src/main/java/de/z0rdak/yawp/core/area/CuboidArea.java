@@ -49,6 +49,14 @@ public class CuboidArea extends AbstractArea {
                 && pos.getZ() >= this.area.minZ && pos.getZ() <= this.area.maxZ;
     }
 
+    // TODO: Get the lower pos and retain it as lower pos
+    public static CuboidArea expand(CuboidArea area, int min, int max) {
+        BlockPos p1 = area.getAreaP1();
+        BlockPos p2 = area.getAreaP2();
+        return new CuboidArea(new BlockPos(p1.getX(), min, p1.getZ()),
+                new BlockPos(p2.getX(), max, p2.getZ()));
+    }
+
     public boolean contains(CuboidArea inner) {
         return this.area.minX <= inner.area.minX && this.area.maxX >= inner.area.maxX
                 && this.area.minY <= inner.area.minY && this.area.maxY >= inner.area.maxY
