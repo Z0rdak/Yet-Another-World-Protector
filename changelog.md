@@ -1,5 +1,123 @@
-# [0.0.2.9-beta3] - 2023-08-12
+# [0.0.3.0-beta1] - 2023-09-01
+
+## Added
+
+* Add command to copy region properties
+* Add enhanced flag management
+* Add flag inheritance
+* Add new config options
+* Add the Global Region. It's the parent region of all Dimensional Regions. One region to rule them all.
+
+### Copy region properties
+
+* Add new command to copy properties from one Local Region to another Local Region:
+  * `/wp region <dim> <region> copy flags <src-dim> <src-region>`: copy all flags from `src-region` to `region`
+  * `/wp region <dim> <region> copy state <src-dim> <src-region>`: copy the region state from `src-region` and apply it
+    to `region`
+  * `/wp region <dim> <region> copy players [affiliation] <src-dim> <src-region>`: copy all players from `src-region`
+    to `region`. To copy only a specific affiliation (members, owners) add it as optional parameter
+  * `/wp region <dim> <region> copy teams [affiliation] <src-region>`: copy all teams from `src-region` to `region`. To
+    copy only a specific affiliation (members, owners) add it as optional parameter
+* Add new commands to copy properties from one Dimensional Region to another Dimensional Region
+  * `/wp dim <dim> <region> copy flags <src-dim> <src-region>`: copy all flags from `src-region` to `region`
+  * `/wp dim <dim> <region> copy state <src-dim> <src-region>`: copy the region state from `src-region` and apply it
+    to `region`
+  * `/wp dim <dim> <region> copy players [affiliation] <src-dim> <src-region>`: copy all players from `src-region`
+    to `region`. To copy only a specific affiliation (members, owners) add it as optional parameter
+  * `/wp dim <dim> <region> copy teams [affiliation] <src-region>`: copy all teams from `src-region` to `region`. To
+    copy only a specific affiliation (members, owners) add it as optional parameter
+
+### Enhanced Flags
+
+* Flags now have their own dedicated flag message which is shown when the flag is triggered.
+* It's now possible to mute flag messages for each individual flag (it is still possible to mute all flags for the
+  region).
+* Flags can be disabled to keep the flags in the region but disable the flag check. This is useful when you need to
+  disable a flag but don't want to lose the flag settings.
+* Flag messages can contain placeholders for:
+  * `{player}` - name of player
+  * `{flag}` - name of triggered flag
+  * `{region}` - name of involved region
+  * `{dimension}` - name of dimension
+  * `{pos}` - position of flag activation source [X=x, Y=y, Z=z]
+* Flag messages also can be formatted by using special placeholders:
+  * `{f:bold}` - TBD
+  * ...
+
+* Add commands for enhanced flag management:
+  * `/wp flag local <dim> <region> <flag> enable [true|false]` - enable/disable flag for checks
+  * `/wp flag local <dim> <region> <flag> invert [true|false]` - invert the flag state; enable it to override parent
+    region flags
+  * `/wp flag local <dim> <region> <flag> msg set "msg"` - set a new message for the flag. Check the wiki for a
+    description of possible placeholders for messages.
+  * `/wp flag local <dim> <region> <flag> msg clear` ...
+  * `/wp flag local <dim> <region> <flag> msg mute` ...
+  * `/wp flag dim ...` to manage flag properties for Dimensional Regions
+
+### Flag inheritance for regions
+
+* Child regions now inherit the flags of their parent regions. This means that every region will also inherit the flags
+  of the corresponding Dimensional region. Flags now need to be negated/inverted to override the flags of the parent
+  region. This feature comes with its own config option `enable_flag_inheritance` and is off (false) by default - to
+  keep backwards compatibility - set it to true, to enable flag inheritance.
+* Add interactive CLI support for enhanced flag management.
+
+### Config
+
+* `yawp-common.toml` - Add new permission config:
+  * `allow_region_tp`. Decides whether teleporting inside/outside a region is allowed for everyone. Useful when using
+    Waystones in regions for example.
+* `yawp-flags.toml` - Add new flag configs:
+  * `enable_flag_inheritance`: Toggles the inheritance of flags of parent regions.
+  * `remove_entities_for_spawning_flags`: Toggles the despawning of entities when using the `spawning-*` flags.
+  * `dim_flag_msg`: default flag msg config for Dimensional Regions
+  * `local_flag_msg`: default flag msg config for Local Regions
+
+* `yawp-flags.toml` - Add config section `[YAWP-default-flag-message-configuration]`:
+  * Contains default flag messages for all player related flags.
+  * They will override the more general default flag message.
+  * Setting a non-default flag message with the corresponding command will override the config values.
+
+### Global Region
+
+* The Global Region has the same properties as the Dimensional Regions but is not limited to one dimension.
+* Add new commands for management of the Global Region:
+  * `/wp global ...`.
+  * ...
+* Add interactive CLI support for the Global Region
+
+### Misc
+
+* Add new command to expand the area of a Local Region:
+  * `/wp region <dim> <region> area expand [yMin] [yMax]`.
+  * The optional parameters can be used to set a specific height.
+  * Omitting the parameters will set the region area to `expand 0 255` for 1.16.5 and `expand -64 320` for newer
+    versions.
+* Dimensional Regions now can be muted (as well as their flags, all or individually).
+* Add new language keys
+
+## Changed
+
+* Change flag pagination for regions to include a link to the flag info as well as some quick links.
+* Change Dimensional Region CLI to include support for muting regions.
+* Flags now have n internal category. This info will also be added to the wiki. The categories are a change to allow
+  some other features to be added in the future. The categories are not final and may still change.
+* Change command to update Local Region area:
+  * Old: `/wp region <dim> <region> area Cuboid <pos1> <pos2>`
+  * New: `/wp region <dim> <region> area set Cuboid <pos1> <pos2>`
+* Improved RegionMarker indicators for marked blocks. It's item name now shows colored indicators for
+  * the amount of blocks which needs to be marked for a valid area
+  * a selected teleport position
+* The RegionMarker now also prompts feedback for marked blocks and a valid area to the player.
+
 ## Fixed
+
+* Fix some cli typos
+
+# [0.0.2.9-beta3] - 2023-08-12
+
+## Fixed
+
 * [Forge] Fix place-blocks and no-walker-freeze flags not working together properly
 * [Fabric] Fix spawning-all flag destroying thrown out items
 * [Fabric] Fix inventory desync when placing a block with the `place-blocks` flag active
@@ -15,8 +133,9 @@
 ## Added
 * [Fabric] Add `mob-griefing`, `enderman-griefing` and `zombie-destruction` flag. Ported by petersv5 aka. ptefar - thanks a lot!
 ## Changed
-* Change default value for config `command_op_level` back to 4. This caused many players to struggle with setting up the mod in the first place.
-With the default 4 we assume that the player setting up the server is OP lvl 4 and thus admin.
+* Change default value for config `command_op_level` back to 4. This caused many players to struggle with setting up the
+  mod in the first place.
+  With the default 4 we assume that the player setting up the server is OP lvl 4 and thus admin.
 ## Fixed
 * [Forge] Replace mixin for `walker-freeze` flag with forge event. This should solve #85.
 # [0.0.2.8-beta2] - 2023-04-21
@@ -45,13 +164,15 @@ From now on this changelog will use the keep a changelog format: https://keepach
 * Spawning-related flags now despawns all entities in the Local Region, which are covered by the flag.
 * Spawning-related flags now despawns all entities in the Dimensional Region, which are covered by the flag (exluding entities in the Local Regions without the flag).
 ## Changed
+
 * CLI: All remove commands will now run the command immediately instead of suggesting it. (#63)
-* Breaking change: Unified flag naming. Replaced all `_` with `-`. Invalid flags will be removed automatically from your regions. (#64)
-Make sure to re-add the removed flags. Affected flags:
-    - `break_blocks` -> `break-blocks`
-    - `place_blocks` -> `place-blocks`
-    - `place_fluids` -> `place-fluids`
-    - `scoop_fluids` -> `scoop-fluids`
+* Breaking change: Unified flag naming. Replaced all `_` with `-`. Invalid flags will be removed automatically from your
+  regions. (#64)
+  Make sure to re-add the removed flags. Affected flags:
+  - `break_blocks` -> `break-blocks`
+  - `place_blocks` -> `place-blocks`
+  - `place_fluids` -> `place-fluids`
+  - `scoop_fluids` -> `scoop-fluids`
 ## Removed
 * Flag `entity-place`. It is replaced by the `enderman-griefing` flag, which covers picking and placing of blocks by endermen.
 ## Fixed
@@ -100,21 +221,22 @@ Make sure to re-add the removed flags. Affected flags:
 # 0.0.2.1-beta4 - Region overlapping hotfix
 ## Fixes
 * Fix overlapping regions not correctly considering priority and region member/ownership.
-From now on, regions with the highest priority always should be the deciding region regarding flags.
+  From now on, regions with the highest priority always should be the deciding region regarding flags.
 * Fix Local Regions not overwriting their parent region flags (either Dimensional or Local Regions).
-Local Regions show now disable flags from their parent regions, if they don't define the flags themselves.
-The following table show how flags are handled for region hierarchies:
-|Parent       | Child           | Result |
-|-------------|-----------------|--------|
-|flag set     | flag set        | deny   |
-|flag not set | flag set        | deny   |
-|flag set     | flag not set    | allow  |
-|flag set     | no child region | deny   |
+  Local Regions show now disable flags from their parent regions, if they don't define the flags themselves.
+  The following table show how flags are handled for region hierarchies:
+  |Parent | Child | Result |
+  |-------------|-----------------|--------|
+  |flag set | flag set | deny |
+  |flag not set | flag set | deny |
+  |flag set | flag not set | allow |
+  |flag set | no child region | deny |
 * Fix removing teams from regions not working properly
 # 0.0.2.0-beta4 - CLI pagination & new flags
 ## Additions
 * Add flag `use-elytra`. This flag prevents players from using the elytra for flying.
-Specifically, it prevents players from starting. It does not force players to land when they are flying in a zone with this flag.
+  Specifically, it prevents players from starting. It does not force players to land when they are flying in a zone with
+  this flag.
 * Add flag `no-flight`. This flag prevents players from flying in a region. It also forces players to fall.
 * Add flag `enter-dim` for Dimensional Regions. This flag prevents players from traveling (using a portal or teleporting) to the dimension which has this flag active.
 * Add flag `mob-griefing` to prevent mob griefing.
@@ -138,8 +260,8 @@ Specifically, it prevents players from starting. It does not force players to la
 * Add flag `use-entities` to prevent general entity interactions
 * Add flag `use-items` to prevent general item usage
 * Add flag `use-blocks` to prevent general block usage/interaction.
-This should, beside other things, prevent using modded containers in contradiction to the access-container flag,
-which only covers containers implementing vanilla mechanics.
+  This should, beside other things, prevent using modded containers in contradiction to the access-container flag,
+  which only covers containers implementing vanilla mechanics.
 * Add some sanity checks when setting region priority, so prevent mistakes for overlapping regions and region hierarchy
 ## Changes
 * Reworked header format (the lines with == ... ==) to be more consistent and add a self-link to each header for easier accessibility.
@@ -178,7 +300,7 @@ Rest assured, once the mod goes from beta to release, these kinds of changes reg
 * Add sub-command to give a player a RegionMarker: `/wp marker give [<player>]`.
 * Add sub-command to reset the state of a RegionMarker the player is holding: `/wp marker reset`.
 * Add flag for knock-back protection against players.
-To learn more about the priorities for overlapping regions and region hierarchy please visit the wiki.
+  To learn more about the priorities for overlapping regions and region hierarchy please visit the wiki.
 * Add flag `spawning-slime`, `spawning-villager`, `spawning-trader`, `drop-loot-player`. Visit the wiki for detailed information about the flags.
 ## Changes
 * Spherical Regions are for now disabled. They will come back later with other shapes.
@@ -201,11 +323,12 @@ To learn more about the priorities for overlapping regions and region hierarchy 
 # 0.0.1.0-beta2 - Local region preview
 ## Additions
 * Add first beta implementation of local regions.
-They come with two different area types: Cuboid and Sphere. More types will come soon!
-NOTE: The flag checks for local regions are still missing, but you are still able to set up your regions.
-They will be valid and working as soon as the checks are implemented in the next version.
-* Add CLI to manage local regions. You are able to manage all properties of local regions with commands and with the interactive CLI.
-For a comprehensive command overview take a look at the wiki.
+  They come with two different area types: Cuboid and Sphere. More types will come soon!
+  NOTE: The flag checks for local regions are still missing, but you are still able to set up your regions.
+  They will be valid and working as soon as the checks are implemented in the next version.
+* Add CLI to manage local regions. You are able to manage all properties of local regions with commands and with the
+  interactive CLI.
+  For a comprehensive command overview take a look at the wiki.
 * Add new config `allow_info_cmds` to enable the usage of informative region commands for all players.
 * Add new config `dim_default_flags`, replacing `default_flags` for default flags for new dimensional regions.
 ## Changes
