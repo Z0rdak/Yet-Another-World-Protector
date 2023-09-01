@@ -39,14 +39,14 @@
   * `{flag}` - name of triggered flag
   * `{region}` - name of involved region
   * `{dimension}` - name of dimension
-  * `{pos}` - position of flag activation source [X=x, Y=y, Z=z]
+  * `{pos}` - position of flag activation source \[X=x, Y=y, Z=z\]
 * Flag messages also can be formatted by using special placeholders:
   * `{f:bold}` - TBD
   * ...
 
 * Add commands for enhanced flag management:
   * `/wp flag local <dim> <region> <flag> enable [true|false]` - enable/disable flag for checks
-  * `/wp flag local <dim> <region> <flag> invert [true|false]` - invert the flag state; enable it to override parent
+  * `/wp flag local <dim> <region> <flag> override [true|false]` - sets the flag to override the same flag in parent region; enable it to override parent
     region flags
   * `/wp flag local <dim> <region> <flag> msg set "msg"` - set a new message for the flag. Check the wiki for a
     description of possible placeholders for messages.
@@ -57,9 +57,9 @@
 ### Flag inheritance for regions
 
 * Child regions now inherit the flags of their parent regions. This means that every region will also inherit the flags
-  of the corresponding Dimensional region. Flags now need to be negated/inverted to override the flags of the parent
-  region. This feature comes with its own config option `enable_flag_inheritance` and is off (false) by default - to
-  keep backwards compatibility - set it to true, to enable flag inheritance.
+  of the corresponding Dimensional region. Flags now need explicitly set to override the flags of the parent
+  region.
+* Change region flag pagination to include parent flags (in different color)
 * Add interactive CLI support for enhanced flag management.
 
 ### Config
