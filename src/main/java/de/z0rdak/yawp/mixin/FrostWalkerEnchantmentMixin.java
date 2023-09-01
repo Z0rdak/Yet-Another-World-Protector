@@ -22,7 +22,7 @@ public class FrostWalkerEnchantmentMixin {
     private static void onEntityMoved(LivingEntity entity, World world, BlockPos pos, int p_45022_, CallbackInfo info) {
         if (!world.isClientSide) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.dimension());
-            FlagCheckEvent flagCheckEvent = HandlerUtil.checkTargetEvent(pos, NO_WALKER_FREEZE, dimCache.getDimensionalRegion());
+            FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(pos, NO_WALKER_FREEZE, dimCache.getDimensionalRegion());
             if (flagCheckEvent.isDenied()) {
                 info.cancel();
             }
