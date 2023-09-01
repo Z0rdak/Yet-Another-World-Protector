@@ -14,6 +14,8 @@ import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
+import de.z0rdak.yawp.util.FlagCorrelation;
+import de.z0rdak.yawp.util.LocalRegions;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -24,6 +26,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
 import static de.z0rdak.yawp.util.CommandUtil.literal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -72,9 +75,9 @@ public final class FlagCommands {
                                 .then(Commands.argument(ENABLE.toString(), BoolArgumentType.bool())
                                         .executes(ctx -> setEnableState(ctx, getRegionArgument(ctx), getIFlagArgument(ctx), getEnableArgument(ctx))))
                         )
-                        .then(literal(NEGATE)
+                        .then(literal(OVERRIDE)
                                 .executes(ctx -> setInvertState(ctx, getRegionArgument(ctx), getIFlagArgument(ctx)))
-                                .then(Commands.argument(NEGATE.toString(), BoolArgumentType.bool())
+                                .then(Commands.argument(OVERRIDE.toString(), BoolArgumentType.bool())
                                         .executes(ctx -> setInvertState(ctx, getRegionArgument(ctx), getIFlagArgument(ctx), getNegationArgument(ctx))))
                         )
                         .then(literal(MSG)
@@ -110,9 +113,9 @@ public final class FlagCommands {
                                 .then(Commands.argument(ENABLE.toString(), BoolArgumentType.bool())
                                         .executes(ctx -> setGlobalEnableState(ctx, getFlagArgument(ctx), getEnableArgument(ctx))))
                         )
-                        .then(literal(NEGATE)
+                        .then(literal(OVERRIDE)
                                 .executes(ctx -> setGlobalInvertState(ctx, getFlagArgument(ctx)))
-                                .then(Commands.argument(NEGATE.toString(), BoolArgumentType.bool())
+                                .then(Commands.argument(OVERRIDE.toString(), BoolArgumentType.bool())
                                         .executes(ctx -> setGlobalInvertState(ctx, getFlagArgument(ctx), getNegationArgument(ctx))))
                         )
                         .then(literal(MSG)
@@ -184,9 +187,9 @@ public final class FlagCommands {
                                         .then(Commands.argument(ENABLE.toString(), BoolArgumentType.bool())
                                                 .executes(ctx -> setEnableState(ctx, getRegionArgument(ctx), getIFlagArgument(ctx), getEnableArgument(ctx))))
                                 )
-                                .then(literal(NEGATE)
+                                .then(literal(OVERRIDE)
                                         .executes(ctx -> setInvertState(ctx, getRegionArgument(ctx), getIFlagArgument(ctx)))
-                                        .then(Commands.argument(NEGATE.toString(), BoolArgumentType.bool())
+                                        .then(Commands.argument(OVERRIDE.toString(), BoolArgumentType.bool())
                                                 .executes(ctx -> setInvertState(ctx, getRegionArgument(ctx), getIFlagArgument(ctx), getNegationArgument(ctx))))
                                 )
                                 .then(literal(MSG)
@@ -203,15 +206,16 @@ public final class FlagCommands {
                                         .then(literal(CLEAR)
                                                 .executes(ctx -> setRegionFlagMsg(ctx, getRegionArgument(ctx), getIFlagArgument(ctx), FlagMessage.CONFIG_MSG))
                                         )
-
                                 )
                         )
                 );
     }
 
-
     private static int promptFlagInfo(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, IFlag flag) {
         MessageUtil.sendCmdFeedback(ctx.getSource(), MessageUtil.buildFlagInfoComponent(region, flag, RegionType.LOCAL));
+        List<FlagCorrelation> flags = new ArrayList<>();
+        LocalRegions.getFlagsRecursive(region, flags);
+
         return 0;
     }
 
@@ -291,15 +295,15 @@ public final class FlagCommands {
     }
 
     public static int setInvertState(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, IFlag flag) {
-        return setInvertState(ctx, region, flag, !flag.isInverted());
+        return setInvertState(ctx, region, flag, !flag.doesOverride());
     }
 
     public static int setInvertState(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, IFlag flag, boolean invert) {
         if (region.containsFlag(flag.getName())) {
-            flag.setInverted(invert);
+            flag.setOverride(invert);
             MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!invert), String.valueOf(invert));
             MutableComponent msg = new TranslatableComponent("cli.flag.invert.success.text",
-                    buildFlagInfoLink(region, flag, RegionType.LOCAL), flag.isInverted())
+                    buildFlagInfoLink(region, flag, RegionType.LOCAL), flag.doesOverride())
                     .append(" ")
                     .append(undoLink);
             MessageUtil.sendCmdFeedback(ctx.getSource(), msg);

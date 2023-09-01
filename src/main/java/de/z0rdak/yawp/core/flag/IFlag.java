@@ -56,14 +56,14 @@ public interface IFlag extends INBTSerializable<CompoundTag>, Comparable<IFlag> 
      *
      * @return true if the flag acts as a whitelist flag, false otherwise.
      */
-    boolean isInverted();
+    boolean doesOverride();
 
     /**
      * Set the inverted state of the flag.
      *
-     * @param inverted true sets flag to act like a whitelist flag, false sets flag to be a blacklist flag.
+     * @param override true sets flag to act like a whitelist flag, false sets flag to be a blacklist flag.
      */
-    void setInverted(boolean inverted);
+    void setOverride(boolean override);
 
     /**
      * Returns whether the flag is active in the region. <br>

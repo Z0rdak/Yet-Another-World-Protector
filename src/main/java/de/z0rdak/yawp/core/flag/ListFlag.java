@@ -30,7 +30,7 @@ public class ListFlag extends AbstractFlag {
     }
 
     public boolean allows(String key){
-        return this.containsKey(key) && isInverted();
+        return this.containsKey(key) && doesOverride();
     }
 
     @Override

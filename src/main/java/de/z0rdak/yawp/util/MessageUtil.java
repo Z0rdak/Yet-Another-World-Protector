@@ -591,11 +591,11 @@ public class MessageUtil {
                 throw new NotImplementedException("No yet implemented");
             case DIMENSION: {
                 String cmd = buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().location().toString(), flag.getName());
-                return buildFlagToggleLink(cmd, "invert", flag.isInverted(), NEGATE.toString());
+                return buildFlagToggleLink(cmd, "override", flag.doesOverride(), OVERRIDE.toString());
             }
             case LOCAL: {
                 String cmd = buildCommandStr(FLAG.toString(), CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag.getName());
-                return buildFlagToggleLink(cmd, "invert", flag.isInverted(), NEGATE.toString());
+                return buildFlagToggleLink(cmd, "override", flag.doesOverride(), OVERRIDE.toString());
             }
             case TEMPLATE:
                 throw new NotImplementedException("No supported yet");

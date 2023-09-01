@@ -115,12 +115,8 @@ public class CommandUtil {
         return BoolArgumentType.getBool(ctx, CommandConstants.ENABLE.toString());
     }
 
-    public static boolean getInvertArgument(CommandContext<CommandSourceStack> ctx) {
-        return BoolArgumentType.getBool(ctx, CommandConstants.INVERT.toString());
-    }
-
     public static boolean getNegationArgument(CommandContext<CommandSourceStack> ctx) {
-        return BoolArgumentType.getBool(ctx, CommandConstants.NEGATE.toString());
+        return BoolArgumentType.getBool(ctx, CommandConstants.OVERRIDE.toString());
     }
 
     public static int getPriorityArgument(CommandContext<CommandSourceStack> ctx) {
