@@ -167,7 +167,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
 
     public void invertFlag(String flag){
         if (this.containsFlag(flag)) {
-            this.flags.get(flag).setInverted(this.flags.get(flag).isInverted());
+            this.flags.get(flag).setOverride(this.flags.get(flag).doesOverride());
         }
     }
 
