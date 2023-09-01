@@ -38,7 +38,6 @@ public final class LocalRegions {
                 .filter(f -> !f.isActive())
                 .sorted()
                 .collect(Collectors.toList());
-        activeFlags.addAll(inActiveFlags);
         List<IFlag> flags = new ArrayList<>(activeFlags);
         flags.addAll(inActiveFlags);
         return flags;
