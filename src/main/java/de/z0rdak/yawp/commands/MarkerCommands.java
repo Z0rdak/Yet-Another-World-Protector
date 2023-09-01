@@ -25,7 +25,6 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Random;
@@ -97,7 +96,7 @@ public final class MarkerCommands {
                                 if (AbstractMarkableRegion.fullyContains(parentRegion.getArea(), region.getArea())) {
                                     dimCache.addRegion(region);
                                     parentRegion.addChild(region);
-                                    LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.DEFAULT_REGION_PRIORITY.get());
+                                    LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.getDefaultPriority());
                                     RegionDataManager.save();
                                     sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region, LOCAL)));
                                     return 0;
@@ -112,7 +111,7 @@ public final class MarkerCommands {
                         } else {
                             if (dimCache.hasOwner(player) || hasConfigPermission) {
                                 dimCache.addRegion(region);
-                                LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.DEFAULT_REGION_PRIORITY.get());
+                                LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.getDefaultPriority());
                                 RegionDataManager.save();
                                 sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region, LOCAL)));
                                 return 0;
@@ -173,7 +172,7 @@ public final class MarkerCommands {
             Player targetPlayer = src.getPlayerOrException();
             ItemStack markerStick = StickUtil.initMarkerNbt(Items.STICK.getDefaultInstance(), StickType.MARKER, targetPlayer.level.dimension());
             targetPlayer.addItem(markerStick);
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.stick.reset"));
+            sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.stick.success"));
         } catch (CommandSyntaxException e) {
             sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.stick.no-player").withStyle(RED));
             return 1;
