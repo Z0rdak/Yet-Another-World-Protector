@@ -109,7 +109,7 @@ public class IFlagArgumentType implements ArgumentType<String> {
                         .contains(REMOVE.toString());
                 List<String> flagsInRegion = region.getFlags()
                         .stream()
-                        .map(IFlag::getFlagIdentifier)
+                        .map(IFlag::getName)
                         .distinct()
                         .collect(Collectors.toList());
                 if (isRemoveCmd) {
