@@ -16,7 +16,7 @@ import net.minecraft.world.World;
 
 import java.util.Objects;
 
-import static net.minecraft.util.text.TextFormatting.ITALIC;
+import static net.minecraft.util.text.TextFormatting.*;
 
 public final class StickUtil {
 
@@ -111,14 +111,69 @@ public final class StickUtil {
         }
     }
 
+    private static final String MARKED_BLOCK_INDICATOR = "X";
+    private static final String UNMARKED_BLOCK_INDICATOR = "#";
+    private static final String TP_POS_INDICATOR = "TP";
+    private static final TextFormatting MARKED_BLOCK_COLOR = GREEN;
+    private static final TextFormatting UNMARKED_BLOCK_COLOR = RED;
+    private static final TextFormatting UNMARKED_POS_COLOR = AQUA;
+
     public static void setStickName(ItemStack stick, StickType type) {
-        String displayName = "";
         if (Objects.requireNonNull(type) == StickType.MARKER) {
             MarkerStick marker = new MarkerStick(getStickNBT(stick));
-            String validFlag = marker.isValidArea() ? (TextFormatting.GREEN + "*" + TextFormatting.GOLD) : "";
-            displayName = TextFormatting.GOLD + type.stickName + " (" + marker.getAreaType().areaType + "" + validFlag + ")";
+            boolean isTpPosSet = marker.getTeleportPos() != null;
+            IFormattableTextComponent markerIndicators = buildRegionMarkerIndicators(marker)
+                    .append(" ")
+                    .append(buildTpPosIndicator(isTpPosSet));
+            IFormattableTextComponent markerHoverName = buildStickName(marker)
+                    .append(" ")
+                    .append(markerIndicators);
+            stick.setHoverName(markerHoverName);
         }
-        stick.setHoverName(new StringTextComponent(displayName));
+    }
+
+    private static IFormattableTextComponent buildStickName(MarkerStick marker) {
+        IFormattableTextComponent stickName = new StringTextComponent(marker.getStickType().stickName).withStyle(GOLD);
+        IFormattableTextComponent areaType = new StringTextComponent(" (").append(marker.getAreaType().areaType).append(")");
+        return stickName.append(areaType);
+    }
+
+    /**
+     * @param isMarked
+     * @return [X] or [#]
+     */
+    private static IFormattableTextComponent buildMarkerIndicator(boolean isMarked) {
+        String indicator = isMarked ? MARKED_BLOCK_INDICATOR : UNMARKED_BLOCK_INDICATOR;
+        TextFormatting color = isMarked ? MARKED_BLOCK_COLOR : UNMARKED_BLOCK_COLOR;
+        IFormattableTextComponent indicatorComp = new StringTextComponent(indicator).withStyle(color);
+        IFormattableTextComponent closedResetComp = new StringTextComponent("]").withStyle(RESET);
+        return new StringTextComponent("[").append(indicatorComp).append(closedResetComp);
+    }
+
+    private static IFormattableTextComponent buildTpPosIndicator(boolean isMarked) {
+        TextFormatting color = isMarked ? MARKED_BLOCK_COLOR : UNMARKED_POS_COLOR;
+        IFormattableTextComponent indicatorComp = new StringTextComponent(TP_POS_INDICATOR).withStyle(color);
+        IFormattableTextComponent closedResetComp = new StringTextComponent("]").withStyle(RESET);
+        return new StringTextComponent("[").append(indicatorComp).append(closedResetComp);
+    }
+
+    /**
+     * RegionMarker [x][x] [TP]
+     *
+     * @param marker
+     * @return
+     */
+    private static IFormattableTextComponent buildRegionMarkerIndicators(MarkerStick marker) {
+        IFormattableTextComponent regionMarkerIndicators = new StringTextComponent("");
+        int maxBlocks = marker.getAreaType().maxBlocks;
+        int amountUnmarked = maxBlocks - marker.getMarkedBlocks().size();
+        for (int i = 0; i < marker.getMarkedBlocks().size(); i++) {
+            regionMarkerIndicators.append(buildMarkerIndicator(true));
+        }
+        for (int i = 0; i < amountUnmarked; i++) {
+            regionMarkerIndicators.append(buildMarkerIndicator(false));
+        }
+        return regionMarkerIndicators;
     }
 
     public static void setStickToolTip(ItemStack stick, StickType type) {
