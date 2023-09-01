@@ -14,8 +14,8 @@ import java.util.stream.Collectors;
 
 public class PlayerContainer implements IMemberContainer, INBTSerializable<CompoundNBT> {
 
-    private Set<String> teams;
-    private Map<UUID, String> players;
+    private final Set<String> teams;
+    private final Map<UUID, String> players;
 
     public PlayerContainer(CompoundNBT nbt){
         this();
@@ -63,6 +63,11 @@ public class PlayerContainer implements IMemberContainer, INBTSerializable<Compo
     @Override
     public void addPlayer(PlayerEntity player) {
         this.players.put(player.getUUID(), player.getScoreboardName());
+    }
+
+    @Override
+    public void addPlayer(UUID uuid, String name) {
+        this.players.put(uuid, name);
     }
 
     @Override
