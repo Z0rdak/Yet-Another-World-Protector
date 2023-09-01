@@ -26,7 +26,7 @@ abstract class PlayerEntityMixin extends LivingEntity {
     void injectElytraCheck(CallbackInfoReturnable<Boolean> cir) {
         if (!level.isClientSide) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(level.dimension());
-            FlagCheckEvent flagCheckEvent = HandlerUtil.checkTargetEvent(this.blockPosition(), USE_ELYTRA, dimCache.getDimensionalRegion());
+            FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(this.blockPosition(), USE_ELYTRA, dimCache.getDimensionalRegion());
             if (flagCheckEvent.isDenied()) {
                 cir.setReturnValue(false);
             }

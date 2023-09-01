@@ -25,7 +25,7 @@ public abstract class FireBlockMixin {
     private void onFireTick(BlockState state, ServerLevel world, BlockPos pos, Random rand, CallbackInfo info) {
         if (!world.isClientSide) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.dimension());
-            FlagCheckEvent flagCheckEvent = HandlerUtil.checkTargetEvent(pos, FIRE_TICK, dimCache.getDimensionalRegion());
+            FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(pos, FIRE_TICK, dimCache.getDimensionalRegion());
             if (flagCheckEvent.isDenied()) {
                 info.cancel();
             }

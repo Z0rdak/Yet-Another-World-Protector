@@ -19,8 +19,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.IGNITE_EXPLOSIVES;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.checkPlayerEvent;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.sendFlagDeniedMsg;
+import static de.z0rdak.yawp.handler.flags.HandlerUtil.checkEvent;
+import static de.z0rdak.yawp.handler.flags.HandlerUtil.sendFlagMsg;
 
 @Mixin(TntBlock.class)
 public class TntBlockMixin {
@@ -30,9 +30,9 @@ public class TntBlockMixin {
         ItemStack itemStack = player2.getItemInHand(hand);
         if (itemStack.sameItemStackIgnoreDurability(Items.FLINT_AND_STEEL.getDefaultInstance()) || itemStack.is(Items.FIRE_CHARGE)) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.dimension());
-            FlagCheckEvent flagCheck = checkPlayerEvent(player2, pos, IGNITE_EXPLOSIVES, dimCache.getDimensionalRegion());
+            FlagCheckEvent flagCheck = checkEvent(pos, IGNITE_EXPLOSIVES, dimCache.getDimensionalRegion(), player2);
             if (flagCheck.isDenied()) {
-                sendFlagDeniedMsg(flagCheck, player2);
+                sendFlagMsg(flagCheck);
                 cir.setReturnValue(InteractionResult.CONSUME);
             }
         }

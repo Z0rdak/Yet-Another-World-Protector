@@ -24,7 +24,7 @@ public class LeavesBlockMixin {
     private void spread(BlockState state, ServerLevel world, BlockPos pos, Random rnd, CallbackInfo info) {
         if (!world.isClientSide) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.dimension());
-            FlagCheckEvent flagCheckEvent = HandlerUtil.checkTargetEvent(pos, LEAF_DECAY, dimCache.getDimensionalRegion());
+            FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(pos, LEAF_DECAY, dimCache.getDimensionalRegion());
             if (flagCheckEvent.isDenied()) {
                 info.cancel();
             }
