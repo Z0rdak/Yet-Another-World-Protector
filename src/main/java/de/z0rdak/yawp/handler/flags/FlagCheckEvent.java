@@ -1,15 +1,16 @@
 package de.z0rdak.yawp.handler.flags;
 
+import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 
 import javax.annotation.Nullable;
 
 // TODO: FlagCheck for 'nested' flags (when boolean flag works with true and false) like secondary tool or use portal
+// TODO: Split in Event which holds the input data and is cancelable and in a result type which is used for processing flagMSg, etc
 @Cancelable
 public class FlagCheckEvent extends Event {
 
@@ -19,25 +20,32 @@ public class FlagCheckEvent extends Event {
     private boolean isDenied;
     private boolean isDeniedInDim;
     private boolean isDeniedLocal;
+    private final RegionFlag regionFlag;
+    private IFlag flag;
 
-    public RegionFlag getFlag() {
-        return flag;
+    public FlagCheckEvent(DimensionalRegion dimRegion, IMarkableRegion localRegion, RegionFlag regionFlag) {
+        this(dimRegion, localRegion, regionFlag, true, true, true);
     }
 
-    private final RegionFlag flag;
-
-
-    public FlagCheckEvent(DimensionalRegion dimRegion, IMarkableRegion localRegion, RegionFlag flag){
-        this(dimRegion, localRegion, flag, true, true, true);
-    }
-
-    public FlagCheckEvent(DimensionalRegion dimRegion, IMarkableRegion localRegion, RegionFlag flag, boolean isDenied, boolean isDeniedLocal, boolean isDeniedInDim){
+    public FlagCheckEvent(DimensionalRegion dimRegion, IMarkableRegion localRegion, RegionFlag regionFlag, boolean isDenied, boolean isDeniedLocal, boolean isDeniedInDim) {
         this.dimRegion = dimRegion;
         this.localRegion = localRegion;
-        this.flag = flag;
+        this.regionFlag = regionFlag;
         this.isDenied = isDenied;
         this.isDeniedLocal = isDeniedLocal;
         this.isDeniedInDim = isDeniedInDim;
+    }
+
+    public IFlag getFlag() {
+        return flag;
+    }
+
+    public void setFlag(IFlag flag) {
+        this.flag = flag;
+    }
+
+    public RegionFlag getRegionFlag() {
+        return regionFlag;
     }
 
     public boolean isDenied() {
@@ -70,20 +78,5 @@ public class FlagCheckEvent extends Event {
 
     public IMarkableRegion getLocalRegion() {
         return localRegion;
-    }
-
-    @Cancelable
-    public static class PlayerFlagEvent extends FlagCheckEvent {
-
-        public PlayerEntity getPlayer() {
-            return player;
-        }
-
-        private final PlayerEntity player;
-
-        public PlayerFlagEvent(PlayerEntity player, DimensionalRegion dimRegion, IMarkableRegion localRegion, RegionFlag flag) {
-            super(dimRegion, localRegion, flag);
-            this.player = player;
-        }
     }
 }
