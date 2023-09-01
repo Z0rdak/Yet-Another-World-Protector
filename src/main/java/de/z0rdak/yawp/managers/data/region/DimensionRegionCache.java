@@ -106,7 +106,7 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
     public Set<String> getDimFlagNames() {
         return this.dimensionalRegion.getFlags()
                 .stream()
-                .map(IFlag::getFlagIdentifier)
+                .map(IFlag::getName)
                 .collect(Collectors.toSet());
     }
 

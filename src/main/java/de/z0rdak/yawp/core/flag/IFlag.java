@@ -20,6 +20,7 @@ import net.minecraftforge.common.util.INBTSerializable;
  * Removes all blocks from blacklist
  * /rs flag remove <region> block-blacklist clear
  *
+ * /wp flag ... max-snow-layer-height 4
  * NumberFlag
  * /rs flag add <region> max-level 30
  * /rs flag add <region>
@@ -38,7 +39,7 @@ public interface IFlag extends INBTSerializable<CompoundTag>, Comparable<IFlag> 
      * @return unique name for flag.
      * @see RegionFlag
      */
-    String getFlagIdentifier();
+    String getName();
 
     /**
      * Returns the flag type of the flag.
@@ -46,7 +47,7 @@ public interface IFlag extends INBTSerializable<CompoundTag>, Comparable<IFlag> 
      * @return the flag type enum value of the flag.
      * @see FlagType
      */
-    FlagType getFlagType();
+    FlagType getType();
 
     /**
      * Returns whether the flag is inverted for flag checks. <br>

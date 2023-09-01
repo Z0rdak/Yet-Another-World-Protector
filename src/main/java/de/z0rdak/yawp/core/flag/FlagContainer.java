@@ -14,26 +14,16 @@ import static de.z0rdak.yawp.util.constants.RegionNBT.FLAG_TYPE;
  * [Key] FlagName -> [Value] IFlag <br>
  * E.g. "break_blocks" -> BooleanFlag {"value": false, ...}
  */
-public class FlagContainer extends HashMap<String, IFlag> implements INBTSerializable<CompoundTag> {
+public class FlagContainer extends HashMap<String, IFlag> implements INBTSerializable<CompoundTag>, IFlagContainer {
 
 
-    public FlagContainer(CompoundTag nbt){
+    public FlagContainer(CompoundTag nbt) {
         this();
         this.deserializeNBT(nbt);
     }
 
-    public FlagContainer(){
+    public FlagContainer() {
         super();
-    }
-
-    public FlagContainer(IFlag flag) {
-        this();
-        this.put(flag);
-    }
-
-    public FlagContainer(Set<IFlag> flags) {
-        this();
-        flags.forEach(this::put);
     }
 
     @Override
@@ -73,7 +63,7 @@ public class FlagContainer extends HashMap<String, IFlag> implements INBTSeriali
     }
 
     public void put(IFlag flag) {
-        this.put(flag.getFlagIdentifier(), flag);
+        this.put(flag.getName(), flag);
     }
 
     public boolean contains(RegionFlag flag) {
