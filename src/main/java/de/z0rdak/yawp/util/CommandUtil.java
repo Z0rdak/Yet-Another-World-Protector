@@ -9,11 +9,13 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.commands.CommandConstants;
 import de.z0rdak.yawp.commands.arguments.AreaArgumentType;
 import de.z0rdak.yawp.commands.arguments.DimensionCacheArgumentType;
+import de.z0rdak.yawp.commands.arguments.flag.IFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.flag.RegionFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.flag.FlagType;
+import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
@@ -36,6 +38,10 @@ public class CommandUtil {
         return DimensionCacheArgumentType.getDimRegion(ctx, CommandConstants.DIM.toString());
     }
 
+    public static DimensionRegionCache getSrcDimCacheArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return DimensionCacheArgumentType.getDimRegion(ctx, CommandConstants.SRC_DIM.toString());
+    }
+
     public static AreaType getAreaTypeArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         return AreaArgumentType.getAreaType(ctx);
     }
@@ -46,6 +52,10 @@ public class CommandUtil {
 
     public static IMarkableRegion getRegionArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         return RegionArgumentType.getRegion(ctx, REGION.toString());
+    }
+
+    public static IMarkableRegion getSourceRegionArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return RegionArgumentType.getSrcRegion(ctx, SRC_REGION.toString());
     }
 
     public static IMarkableRegion getChildRegionArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
@@ -68,6 +78,14 @@ public class CommandUtil {
         return RegionFlagArgumentType.getFlag(ctx, CommandConstants.FLAG.toString());
     }
 
+    public static IFlag getIFlagArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return IFlagArgumentType.getFlag(ctx, CommandConstants.FLAG.toString());
+    }
+
+    public static String getFlagMsgArgument(CommandContext<CommandSourceStack> ctx) {
+        return StringArgumentType.getString(ctx, CommandConstants.MSG.toString());
+    }
+
     public static FlagType getFlagTypeArgument(CommandContext<CommandSourceStack> ctx) {
         return FlagType.of(StringArgumentType.getString(ctx, CommandConstants.TYPE.toString()));
     }
@@ -88,8 +106,21 @@ public class CommandUtil {
         return !BoolArgumentType.getBool(ctx, CommandConstants.ALERT.toString());
     }
 
+    public static boolean getMuteArgument(CommandContext<CommandSourceStack> ctx) {
+        return BoolArgumentType.getBool(ctx, CommandConstants.MUTE.toString());
+    }
+
+
     public static boolean getEnableArgument(CommandContext<CommandSourceStack> ctx) {
         return BoolArgumentType.getBool(ctx, CommandConstants.ENABLE.toString());
+    }
+
+    public static boolean getInvertArgument(CommandContext<CommandSourceStack> ctx) {
+        return BoolArgumentType.getBool(ctx, CommandConstants.INVERT.toString());
+    }
+
+    public static boolean getNegationArgument(CommandContext<CommandSourceStack> ctx) {
+        return BoolArgumentType.getBool(ctx, CommandConstants.NEGATE.toString());
     }
 
     public static int getPriorityArgument(CommandContext<CommandSourceStack> ctx) {
@@ -107,12 +138,16 @@ public class CommandUtil {
 
     public static String revertCommand(String cmd, String toReplace, String reverted) {
         String revertedCmd = cmd.replace(toReplace, reverted);
-        return cmd.startsWith("/") ? revertedCmd : "/" + revertedCmd ;
+        return cmd.startsWith("/") ? revertedCmd : "/" + revertedCmd;
     }
 
     public static String buildCommandStr(String... cmdTokens) {
         String preamble = "/" + CommandPermissionConfig.BASE_CMD;
         String cmdStr = String.join(" ", cmdTokens);
         return preamble + " " + cmdStr;
+    }
+
+    public static String appendSubCommand(String cmd, String... subCommands) {
+        return cmd + " " + String.join(" ", subCommands);
     }
 }
