@@ -36,8 +36,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static de.z0rdak.yawp.util.constants.RegionNBT.DIMENSIONS;
-import static de.z0rdak.yawp.util.constants.RegionNBT.REGIONS;
+import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
 @Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER)
 public class RegionDataManager extends SavedData {
@@ -49,7 +48,7 @@ public class RegionDataManager extends SavedData {
     /**
      * The global region of this mod which all sets common rules/flags for all regions.
      */
-    private final static GlobalRegion globalRegion = new GlobalRegion();
+    private static GlobalRegion globalRegion = new GlobalRegion();
     /**
      * Singleton used to access methods to manage region data.
      */
@@ -114,11 +113,24 @@ public class RegionDataManager extends SavedData {
         }
     }
 
+    /**
+     * Method which gets called when a new RegionDataManager instance is created by loadRegionData.
+     *
+     * @param nbt compound region data read from disk to be deserialized for the region cache.
+     */
     public static RegionDataManager load(CompoundTag nbt) {
         RegionDataManager rdm = new RegionDataManager();
         rdm.dimCacheMap.clear();
+        CompoundTag globalNbt = nbt.getCompound(GLOBAL);
+        if (globalNbt.isEmpty()) {
+            globalRegion = new GlobalRegion();
+        } else {
+            globalRegion = new GlobalRegion(globalNbt);
+        }
+        rdm.dimCacheMap.clear();
         CompoundTag dimensionRegions = nbt.getCompound(DIMENSIONS);
-        YetAnotherWorldProtector.LOGGER.info(new TranslatableComponent("data.nbt.dimensions.load.amount", dimensionRegions.getAllKeys().size()).getString());
+        YetAnotherWorldProtector.LOGGER.info(new TranslatableComponent("Loading region(s) for " + dimensionRegions.getAllKeys().size() + " dimension(s)").getString());
+        // YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.load.amount", dimensionRegions.getAllKeys().size()).getString());
         // deserialize all region without parent and child references
         for (String dimKey : dimensionRegions.getAllKeys()) {
             rdm.dimensionDataNames.add(dimKey);
@@ -164,6 +176,29 @@ public class RegionDataManager extends SavedData {
             });
         }
         return rdm;
+    }
+
+    /**
+     * Method which gets called the region data is marked as dirty via the save/markDirty method.
+     *
+     * @param compound nbt data to be filled with the region information.
+     * @return the compound region nbt data to be saved to disk.
+     */
+    @Nonnull
+    @Override
+    public CompoundTag save(@Nonnull CompoundTag compound) {
+        compound.put(GLOBAL, globalRegion.serializeNBT());
+        CompoundTag dimRegionNbtData = new CompoundTag();
+        // YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.save.amount", this.getTotalRegionAmount(), dimCacheMap.keySet().size()).getString());
+        YetAnotherWorldProtector.LOGGER.info(new TranslatableComponent("Saving " + this.getTotalRegionAmount() + " region(s) for " + dimCacheMap.keySet().size() + " dimensions").getString());
+        for (Map.Entry<ResourceKey<Level>, DimensionRegionCache> entry : dimCacheMap.entrySet()) {
+            // YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.save.dim.amount", this.getRegionAmount(entry.getKey()), entry.getKey().location().toString()).getString());
+            YetAnotherWorldProtector.LOGGER.info(new TranslatableComponent("Saving " + this.getRegionAmount(entry.getKey()) + " region(s) for dimension '" + entry.getKey().location() + "'").getString());
+            String dimensionName = entry.getValue().getDimensionalRegion().getName();
+            dimRegionNbtData.put(dimensionName, entry.getValue().serializeNBT());
+        }
+        compound.put(DIMENSIONS, dimRegionNbtData);
+        return compound;
     }
 
     /**
@@ -215,26 +250,6 @@ public class RegionDataManager extends SavedData {
                             throw new NotImplementedException("");
                     }
                 });
-    }
-
-    /**
-     * Method which gets called the region data is marked as dirty via the save/markDirty method.
-     *
-     * @param compound nbt data to be filled with the region information.
-     * @return the compound region nbt data to be saved to disk.
-     */
-    @Nonnull
-    @Override
-    public CompoundTag save(@Nonnull CompoundTag compound) {
-        CompoundTag dimRegionNbtData = new CompoundTag();
-        YetAnotherWorldProtector.LOGGER.info(new TranslatableComponent("data.nbt.dimensions.save.amount", this.getTotalRegionAmount(), dimCacheMap.keySet().size()).getString());
-        for (Map.Entry<ResourceKey<Level>, DimensionRegionCache> entry : dimCacheMap.entrySet()) {
-            YetAnotherWorldProtector.LOGGER.info(new TranslatableComponent("data.nbt.dimensions.save.dim.amount", this.getRegionAmount(entry.getKey()), entry.getKey().location().toString()).getString());
-            String dimensionName = entry.getValue().getDimensionalRegion().getName();
-            dimRegionNbtData.put(dimensionName, entry.getValue().serializeNBT());
-        }
-        compound.put(DIMENSIONS, dimRegionNbtData);
-        return compound;
     }
 
     public int getTotalRegionAmount() {
