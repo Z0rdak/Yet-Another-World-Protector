@@ -9,10 +9,7 @@ import de.z0rdak.yawp.core.affiliation.AffiliationType;
 import de.z0rdak.yawp.core.affiliation.PlayerContainer;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
-import de.z0rdak.yawp.core.flag.BooleanFlag;
-import de.z0rdak.yawp.core.flag.FlagType;
 import de.z0rdak.yawp.core.flag.IFlag;
-import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -33,12 +30,11 @@ import org.apache.commons.lang3.NotImplementedException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
-import static de.z0rdak.yawp.config.server.RegionConfig.CLI_REGION_DEFAULT_PRIORITY_INC;
 import static de.z0rdak.yawp.core.region.RegionType.LOCAL;
+import static de.z0rdak.yawp.util.CommandUtil.appendSubCommand;
 import static de.z0rdak.yawp.util.CommandUtil.buildCommandStr;
 import static net.minecraft.util.text.TextFormatting.RESET;
 import static net.minecraft.util.text.TextFormatting.*;
@@ -51,11 +47,17 @@ public class MessageUtil {
     private MessageUtil() {
     }
 
+    public final static TextFormatting SUGGEST_COLOR = BLUE;
+    public final static TextFormatting TP_COLOR = GREEN;
+    public final static TextFormatting LINK_COLOR = AQUA;
+    public final static TextFormatting INACTIVE_LINK_COLOR = GRAY;
+    public final static TextFormatting ADD_CMD_COLOR = DARK_GREEN;
+    public final static TextFormatting REMOVE_CMD_COLOR = DARK_RED;
+    public static int FIRST_PAGE_IDX = 0;
+
     public static IFormattableTextComponent buildHeader(String translationKey) {
         return buildHeader(new TranslationTextComponent(translationKey));
     }
-
-    public final static TextFormatting SUGGEST_COLOR = BLUE;
 
     public static void sendCmdFeedback(CommandSource src, IFormattableTextComponent text) {
         try {
@@ -73,25 +75,13 @@ public class MessageUtil {
         sendCmdFeedback(src, new TranslationTextComponent(langKey));
     }
 
-    public final static TextFormatting TP_COLOR = GREEN;
-
     public static void sendMessage(PlayerEntity player, String translationKey) {
         player.sendMessage(new TranslationTextComponent(translationKey), player.getUUID());
     }
 
-    public static void sendDimFlagNotification(PlayerEntity player, RegionFlag flag) {
-        player.displayClientMessage(new TranslationTextComponent("flag.dim.player.msg.push.deny", flag.name), true);
+    public static void sendNotification(PlayerEntity player, IFormattableTextComponent msg) {
+        player.displayClientMessage(msg, true);
     }
-
-    public static void sendFlagNotification(PlayerEntity player, IMarkableRegion region, RegionFlag flag) {
-        player.displayClientMessage(new TranslationTextComponent("flag.local.player.msg.push.deny", region.getName(), flag.name), true);
-    }
-
-    public final static TextFormatting LINK_COLOR = AQUA;
-    public final static TextFormatting INACTIVE_LINK_COLOR = GRAY;
-    public final static TextFormatting ADD_CMD_COLOR = DARK_GREEN;
-    public final static TextFormatting REMOVE_CMD_COLOR = DARK_RED;
-    public static int FIRST_PAGE_IDX = 0;
 
     public static String buildTeleportCmd(String tpSource, BlockPos target) {
         return "tp " + tpSource + " " + target.getX() + " " + target.getY() + " " + target.getZ();
@@ -105,10 +95,17 @@ public class MessageUtil {
         return regionName + " @ [" + buildBlockPosTeleportLinkText(target) + "]";
     }
 
+    public static String shorterBlockPos(BlockPos target) {
+        return "[" + buildBlockPosTeleportLinkText(target) + "]";
+    }
+
+    public static String shortBlockPos(BlockPos target) {
+        return "[X=" + target.getX() + ", Y=" + target.getY() + ", Z=" + target.getZ() + "]";
+    }
+
     public static String buildBlockPosTeleportLinkText(BlockPos target) {
         return target.getX() + ", " + target.getY() + ", " + target.getZ();
     }
-
 
     public static String buildExecuteCommandString(RegistryKey<World> dim, String command) {
         return "/execute in " + dim.location() + " run " + command;
@@ -123,9 +120,9 @@ public class MessageUtil {
     }
 
     public static IFormattableTextComponent buildHeader(IFormattableTextComponent header) {
-        return new StringTextComponent(BOLD + "")
+        return new StringTextComponent(String.valueOf(BOLD))
                 .append(header)
-                .append(new StringTextComponent(BOLD + ""));
+                .append(new StringTextComponent(String.valueOf(BOLD)));
     }
 
     public static void sendMessage(PlayerEntity player, IFormattableTextComponent textComponent) {
@@ -177,6 +174,12 @@ public class MessageUtil {
         return blockPosTpLinkList;
     }
 
+    /**
+     * // TODO: Include link to suggest update area and tp pos set
+     *
+     * @param region
+     * @return
+     */
     public static IFormattableTextComponent buildRegionAreaDetailComponent(IMarkableRegion region) {
         IMarkableArea area = region.getArea();
         IFormattableTextComponent areaInfo = new StringTextComponent(area.getAreaType().areaType)
@@ -245,13 +248,14 @@ public class MessageUtil {
     }
 
     public static IFormattableTextComponent buildRegionPriorityComponent(IMarkableRegion region) {
-        String incPriorityCmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), INC.toString(), String.valueOf(CLI_REGION_DEFAULT_PRIORITY_INC.get()));
-        IFormattableTextComponent incLinkText = new TranslationTextComponent("cli.msg.info.region.state.priority.increase.link.text", CLI_REGION_DEFAULT_PRIORITY_INC.get());
-        IFormattableTextComponent incHoverText = new TranslationTextComponent("cli.msg.info.region.state.priority.increase.link.hover", CLI_REGION_DEFAULT_PRIORITY_INC.get());
+        int defaultPriorityInc = RegionConfig.getDefaultPriorityInc();
+        String incPriorityCmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), INC.toString(), String.valueOf(defaultPriorityInc));
+        IFormattableTextComponent incLinkText = new TranslationTextComponent("cli.msg.info.region.state.priority.increase.link.text", defaultPriorityInc);
+        IFormattableTextComponent incHoverText = new TranslationTextComponent("cli.msg.info.region.state.priority.increase.link.hover", defaultPriorityInc);
         IFormattableTextComponent increaseLink = buildExecuteCmdComponent(incLinkText, incHoverText, incPriorityCmd, RUN_COMMAND, ADD_CMD_COLOR);
-        String decPriorityCmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), DEC.toString(), String.valueOf(CLI_REGION_DEFAULT_PRIORITY_INC.get()));
-        IFormattableTextComponent decLinkText = new TranslationTextComponent("cli.msg.info.region.state.priority.decrease.link.text", CLI_REGION_DEFAULT_PRIORITY_INC.get());
-        IFormattableTextComponent decHoverText = new TranslationTextComponent("cli.msg.info.region.state.priority.decrease.link.hover", CLI_REGION_DEFAULT_PRIORITY_INC.get());
+        String decPriorityCmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), DEC.toString(), String.valueOf(defaultPriorityInc));
+        IFormattableTextComponent decLinkText = new TranslationTextComponent("cli.msg.info.region.state.priority.decrease.link.text", defaultPriorityInc);
+        IFormattableTextComponent decHoverText = new TranslationTextComponent("cli.msg.info.region.state.priority.decrease.link.hover", defaultPriorityInc);
         IFormattableTextComponent decreaseLink = buildExecuteCmdComponent(decLinkText, decHoverText, decPriorityCmd, RUN_COMMAND, REMOVE_CMD_COLOR);
         IFormattableTextComponent priorityValue = new StringTextComponent(String.valueOf(region.getPriority()));
         String setPriorityCmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), "");
@@ -470,55 +474,188 @@ public class MessageUtil {
         return players;
     }
 
+    /**
+     * Creates a TextComponent for flag removal, followed by the flag infos
+     *
+     * @param region
+     * @param flag
+     * @param regionType
+     * @return - [x] [flagname] [] [] []
+     */
     private static IFormattableTextComponent buildRemoveFlagEntry(IProtectedRegion region, IFlag flag, RegionType regionType) {
-        IFormattableTextComponent flagRemoveEntry = new StringTextComponent(" - ");
-        IFormattableTextComponent flagRemoveLink;
+        String cmd;
         switch (regionType) {
             case DIMENSION: {
-                String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), REMOVE.toString(), FLAG.toString(), flag.getFlagIdentifier());
-                IFormattableTextComponent hoverText = new TranslationTextComponent("cli.msg.dim.info.flag.remove.link.hover", flag.getFlagIdentifier(), region.getDim().location().toString());
-                IFormattableTextComponent linkText = new TranslationTextComponent("cli.link.remove");
-                flagRemoveLink = buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, REMOVE_CMD_COLOR);
+                cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), REMOVE.toString(), FLAG.toString(), flag.getName());
                 break;
             }
             case LOCAL: {
-                String cmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), REMOVE.toString(), FLAG.toString(), flag.getFlagIdentifier());
-                IFormattableTextComponent hoverText = new TranslationTextComponent("cli.msg.info.region.flag.remove.link.hover", flag.getFlagIdentifier(), region.getName());
-                IFormattableTextComponent linkText = new TranslationTextComponent("cli.link.remove");
-                flagRemoveLink = buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, REMOVE_CMD_COLOR);
+                cmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), REMOVE.toString(), FLAG.toString(), flag.getName());
                 break;
             }
             default:
                 throw new IllegalArgumentException();
         }
-        return flagRemoveEntry.append(flagRemoveLink).append(" ").append(buildFlagQuickInfo(flag));
+        IFormattableTextComponent hoverText = new TranslationTextComponent("cli.msg.info.region.flag.remove.link.hover", flag.getName(), region.getName());
+        IFormattableTextComponent linkText = new TranslationTextComponent("cli.link.remove");
+        IFormattableTextComponent flagRemoveLink = buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, REMOVE_CMD_COLOR);
+        return new StringTextComponent(" - ")
+                .append(flagRemoveLink)
+                .append(" ")
+                .append(buildFlagQuickActionComponent(region, flag, regionType, cmd));
     }
 
-    // TODO: Add command to toggle negated and active state, and add link here as well
-    public static IFormattableTextComponent buildFlagQuickInfo(IFlag flag) {
-        IFormattableTextComponent res;
-        if (Objects.requireNonNull(flag.getFlagType()) == FlagType.BOOLEAN_FLAG) {
-            BooleanFlag boolFlag = (BooleanFlag) flag;
-            IFormattableTextComponent flagName = new StringTextComponent(boolFlag.getFlagIdentifier());
-            IFormattableTextComponent flagInfo = new StringTextComponent("Flag state: Active=" + boolFlag.isActive() + ", negated=" + boolFlag.isInverted());
-            res = buildTextWithHoverMsg(flagName, flagInfo, ITALIC);
-        } else {
-            throw new IllegalStateException("Unexpected value: " + flag.getFlagType());
-        }
-        return res;
+    /**
+     * Creates a TextComponent with a Link for displaying the flag info. <br></br>
+     * Text: [flagname] [+] [~] [!] <br></br>
+     * Where <br></br>
+     * - [+] is a quick link to toggle the flag active state, <br></br>
+     * - [!] is a quick link to toggle the flag invert state, <br></br>
+     * - [~] is a quick link to toggle the flag mute state, <br></br>
+     *
+     * @param region
+     * @param flag
+     * @param regionType
+     * @param cmd
+     * @return text component for quick flag actions [flagname] [+] [~] [!]
+     */
+    private static IFormattableTextComponent buildFlagQuickActionComponent(IProtectedRegion region, IFlag flag, RegionType regionType, String cmd) {
+        return buildFlagInfoLink(region, flag, regionType)
+                .append(" ")
+                .append(buildFlagActiveToggleLink(region, regionType, flag))
+                .append(" ")
+                .append(buildFlagMuteToggleLink(region, regionType, flag))
+                .append(" ")
+                .append(buildFlagInvertToggleLink(region, regionType, flag));
     }
 
-    public static IFormattableTextComponent buildFlagCmdInfoLink(IProtectedRegion region, RegionType regionType, IFlag iflag) {
+    /**
+     * Creates a TextComponent for displaying the flag info  <br></br>
+     * Text: [$flag-name] <br></br>
+     * Link: /wp flag dim $dim $flag-name info  <br></br>
+     *
+     * @param region     involved in creating command link for
+     * @param flag       involved in creating command link for
+     * @param regionType region type for distinction
+     * @return TextComponent [$flag-name] with a link for the flag info
+     */
+    public static IFormattableTextComponent buildFlagInfoLink(IProtectedRegion region, IFlag flag, RegionType regionType) {
+        IFormattableTextComponent text = new StringTextComponent(flag.getName());
+        IFormattableTextComponent hoverText = new TranslationTextComponent("cli.flag.info.hover", flag.getName(), region.getName());
         switch (regionType) {
+            case GLOBAL: {
+                String cmd = buildCommandStr(FLAG.toString(), GLOBAL.toString(), flag.getName(), INFO.toString());
+                // return buildExecuteCmdComponent(text, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
+                throw new NotImplementedException("Not implemented yet!");
+            }
             case DIMENSION: {
-                String cmd = buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().location().toString());
+                String cmd = buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().location().toString(), INFO.toString());
+                return buildExecuteCmdComponent(text, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
-            break;
             case LOCAL: {
+                String cmd = buildCommandStr(FLAG.toString(), CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag.getName(), INFO.toString());
+                return buildExecuteCmdComponent(text, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
-            break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + regionType);
         }
-        return new StringTextComponent(iflag.getFlagIdentifier());
+    }
+
+    /**
+     * Builds the flag info component for the given flag and region. <br></br>
+     * == Flag info for [flagname] of [region] == <br></br>
+     * Enabled: [yes] <br></br>
+     * Inverted: [no] <br></br>
+     * Muted: [no] <br></br>
+     * Msg [set] [x]: 'msg' <br></br>
+     *
+     * @param region
+     * @param flag
+     * @param regionType
+     * @return == Flag info for [flagname] of [region] ==
+     */
+    public static IFormattableTextComponent buildFlagInfoComponent(IProtectedRegion region, IFlag flag, RegionType regionType) {
+        IFormattableTextComponent header = buildFlagInfoHeader(region, flag, regionType);
+        switch (regionType) {
+            case GLOBAL: {
+                throw new NotImplementedException("Not implemented yet!");
+            }
+            case DIMENSION: {
+
+                return header;
+            }
+            case LOCAL: {
+
+                return header;
+            }
+            default:
+                throw new IllegalStateException("Unexpected value: " + regionType);
+        }
+    }
+
+    public static IFormattableTextComponent buildFlagActiveToggleLink(IProtectedRegion region, RegionType regionType, IFlag flag) {
+        switch (regionType) {
+            case GLOBAL:
+                throw new NotImplementedException("No yet implemented");
+            case DIMENSION: {
+                String cmd = buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().location().toString(), flag.getName());
+                return buildFlagToggleLink(cmd, "enable", flag.isActive(), ENABLE.toString());
+            }
+            case LOCAL: {
+                String cmd = buildCommandStr(FLAG.toString(), CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag.getName());
+                return buildFlagToggleLink(cmd, "enable", flag.isActive(), ENABLE.toString());
+            }
+            case TEMPLATE:
+                throw new NotImplementedException("No supported yet");
+            default:
+                throw new IllegalStateException("Unexpected value: " + regionType);
+        }
+    }
+
+    public static IFormattableTextComponent buildFlagInvertToggleLink(IProtectedRegion region, RegionType regionType, IFlag flag) {
+        switch (regionType) {
+            case GLOBAL:
+                throw new NotImplementedException("No yet implemented");
+            case DIMENSION: {
+                String cmd = buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().location().toString(), flag.getName());
+                return buildFlagToggleLink(cmd, "invert", flag.isInverted(), NEGATE.toString());
+            }
+            case LOCAL: {
+                String cmd = buildCommandStr(FLAG.toString(), CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag.getName());
+                return buildFlagToggleLink(cmd, "invert", flag.isInverted(), NEGATE.toString());
+            }
+            case TEMPLATE:
+                throw new NotImplementedException("No supported yet");
+            default:
+                throw new IllegalStateException("Unexpected value: " + regionType);
+        }
+    }
+
+    public static IFormattableTextComponent buildFlagMuteToggleLink(IProtectedRegion region, RegionType regionType, IFlag flag) {
+        switch (regionType) {
+            case GLOBAL:
+                throw new NotImplementedException("No yet implemented");
+            case DIMENSION: {
+                String cmd = buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().location().toString(), flag.getName());
+                return buildFlagToggleLink(cmd, "msg.mute", !flag.getFlagMsg().isMuted(), MSG.toString(), MUTE.toString());
+            }
+            case LOCAL: {
+                String cmd = buildCommandStr(FLAG.toString(), CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag.getName());
+                return buildFlagToggleLink(cmd, "msg.mute", !flag.getFlagMsg().isMuted(), MSG.toString(), MUTE.toString());
+            }
+            case TEMPLATE:
+                throw new NotImplementedException("No supported yet");
+            default:
+                throw new IllegalStateException("Unexpected value: " + regionType);
+        }
+    }
+
+    private static IFormattableTextComponent buildFlagToggleLink(String cmd, String langKey, boolean toggleActiveState, String... subCmds) {
+        String cmdStr = appendSubCommand(cmd, subCmds);
+        IFormattableTextComponent linkText = new TranslationTextComponent("cli.flag." + langKey + ".link.text");
+        IFormattableTextComponent hoverText = new TranslationTextComponent("cli.flag." + langKey + ".link.hover");
+        TextFormatting color = toggleActiveState ? ADD_CMD_COLOR : REMOVE_CMD_COLOR;
+        return buildExecuteCmdComponent(linkText, hoverText, cmdStr, RUN_COMMAND, color);
     }
 
     public static List<IFormattableTextComponent> buildRemoveFlagEntries(IProtectedRegion region, List<IFlag> flags, RegionType regionType) {
@@ -790,7 +927,6 @@ public class MessageUtil {
                 : buildExecuteCmdComponent(linkText, hoverLink, command, RUN_COMMAND, LINK_COLOR);
     }
 
-
     public static List<IFormattableTextComponent> buildRemoveAffiliationEntries(IProtectedRegion region, List<String> affiliationNames, AffiliationType affiliationType, String affiliation, RegionType parentType) {
         return affiliationNames.stream().map(affiliate -> buildRemoveAffiliateEntry(region, affiliate, affiliationType, affiliation, parentType)).collect(Collectors.toList());
     }
@@ -895,7 +1031,7 @@ public class MessageUtil {
         return buildExecuteCmdComponent(revertLinkText, revertLinkHover, revertCmd, RUN_COMMAND, DARK_RED);
     }
 
-    public static IFormattableTextComponent buildFlagHeader(IProtectedRegion region, RegionType regionType) {
+    public static IFormattableTextComponent buildRegionFlagInfoHeader(IProtectedRegion region, RegionType regionType) {
         IFormattableTextComponent res;
         switch (regionType) {
             case DIMENSION:
@@ -903,6 +1039,24 @@ public class MessageUtil {
                 break;
             case LOCAL:
                 res = buildHeader(new TranslationTextComponent("cli.msg.info.header.in", buildFlagListLink(region, regionType), buildRegionInfoLink(region, regionType)));
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + regionType);
+        }
+        return res;
+    }
+
+    public static IFormattableTextComponent buildFlagInfoHeader(IProtectedRegion region, IFlag flag, RegionType regionType) {
+        IFormattableTextComponent res;
+        switch (regionType) {
+            case DIMENSION:
+                res = buildHeader(new TranslationTextComponent("cli.msg.info.header.flag.in", buildFlagInfoLink(region, flag, regionType), buildRegionInfoLink(region, regionType)));
+                break;
+            case LOCAL:
+                res = buildHeader(new TranslationTextComponent("cli.msg.info.header.flag.in", buildFlagInfoLink(region, flag, regionType), buildRegionInfoLink(region, regionType)));
+                break;
+            case GLOBAL:
+                res = buildHeader(new TranslationTextComponent("cli.msg.info.header.flag.in", buildFlagInfoLink(region, flag, regionType), buildRegionInfoLink(region, regionType)));
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + regionType);
