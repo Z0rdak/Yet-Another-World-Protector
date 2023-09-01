@@ -75,9 +75,9 @@ public final class PlayerFlagHandler {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(entityDim);
             if (dimCache != null) {
                 if (event.player.isFallFlying()) {
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(event.player, event.player.blockPosition(), NO_FLIGHT, dimCache.getDimensionalRegion());
+                    FlagCheckEvent flagCheckEvent = checkEvent(event.player.blockPosition(), NO_FLIGHT, dimCache.getDimensionalRegion(), event.player);
                     if (flagCheckEvent.isDenied()) {
-                        sendFlagDeniedMsg(flagCheckEvent);
+                        sendFlagMsg(flagCheckEvent);
                         event.player.stopFallFlying();
                     }
                 }
@@ -96,7 +96,7 @@ public final class PlayerFlagHandler {
                 ResourceKey<Level> entityDim = getEntityDim(attacker);
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(entityDim);
                 if (dimCache != null) {
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(attacker, target.blockPosition(), MELEE_PLAYERS, dimCache.getDimensionalRegion());
+                    FlagCheckEvent flagCheckEvent = checkEvent(target.blockPosition(), MELEE_PLAYERS, dimCache.getDimensionalRegion(), attacker);
                     handleAndSendMsg(event, flagCheckEvent);
                 }
             }
@@ -116,22 +116,22 @@ public final class PlayerFlagHandler {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(entityDim);
             if (dimCache != null) {
                 if (isAnimal(eventEntity)) {
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, eventEntity.blockPosition(), MELEE_ANIMALS, dimCache.getDimensionalRegion());
+                    FlagCheckEvent flagCheckEvent = checkEvent(eventEntity.blockPosition(), MELEE_ANIMALS, dimCache.getDimensionalRegion(), player);
                     handleAndSendMsg(event, flagCheckEvent);
                     return;
                 }
                 if (isMonster(eventEntity)) {
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, eventEntity.blockPosition(), MELEE_MONSTERS, dimCache.getDimensionalRegion());
+                    FlagCheckEvent flagCheckEvent = checkEvent(eventEntity.blockPosition(), MELEE_MONSTERS, dimCache.getDimensionalRegion(), player);
                     handleAndSendMsg(event, flagCheckEvent);
                     return;
                 }
                 if (event.getTarget() instanceof Villager) {
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, eventEntity.blockPosition(), MELEE_VILLAGERS, dimCache.getDimensionalRegion());
+                    FlagCheckEvent flagCheckEvent = checkEvent(eventEntity.blockPosition(), MELEE_VILLAGERS, dimCache.getDimensionalRegion(), player);
                     handleAndSendMsg(event, flagCheckEvent);
                     return;
                 }
                 if (event.getTarget() instanceof WanderingTrader) {
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, eventEntity.blockPosition(), MELEE_WANDERING_TRADER, dimCache.getDimensionalRegion());
+                    FlagCheckEvent flagCheckEvent = checkEvent(eventEntity.blockPosition(), MELEE_WANDERING_TRADER, dimCache.getDimensionalRegion(), player);
                     handleAndSendMsg(event, flagCheckEvent);
                 }
             }
@@ -144,7 +144,7 @@ public final class PlayerFlagHandler {
         if (isServerSide(event)) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
             if (dimCache != null) {
-                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(event.getPlayer(), event.getEntity().blockPosition(), ITEM_PICKUP, dimCache.getDimensionalRegion());
+                FlagCheckEvent flagCheckEvent = checkEvent(event.getEntity().blockPosition(), ITEM_PICKUP, dimCache.getDimensionalRegion(), event.getPlayer());
                 handleAndSendMsg(event, flagCheckEvent);
             }
         }
@@ -160,7 +160,7 @@ public final class PlayerFlagHandler {
                     if (event.getParentA() instanceof Villager) {
                         // TODO: Test on Villagers and add extra flag
                     }
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(event.getCausedByPlayer(), event.getParentB().blockPosition(), ANIMAL_BREEDING, dimCache.getDimensionalRegion());
+                    FlagCheckEvent flagCheckEvent = checkEvent(event.getParentB().blockPosition(), ANIMAL_BREEDING, dimCache.getDimensionalRegion(), event.getCausedByPlayer());
                     handleAndSendMsg(event, flagCheckEvent);
                 }
             }
@@ -180,7 +180,7 @@ public final class PlayerFlagHandler {
                 Animal animal = event.getAnimal();
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
                 if (dimCache != null) {
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getAnimal().blockPosition(), ANIMAL_TAMING, dimCache.getDimensionalRegion());
+                    FlagCheckEvent flagCheckEvent = checkEvent(event.getAnimal().blockPosition(), ANIMAL_TAMING, dimCache.getDimensionalRegion(), player);
                     handleAndSendMsg(event, flagCheckEvent);
                 }
             }
@@ -193,7 +193,7 @@ public final class PlayerFlagHandler {
             Player player = event.getPlayer();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
             if (dimCache != null) {
-                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getPlayer().blockPosition(), LEVEL_FREEZE, dimCache.getDimensionalRegion());
+                FlagCheckEvent flagCheckEvent = checkEvent(event.getPlayer().blockPosition(), LEVEL_FREEZE, dimCache.getDimensionalRegion(), player);
                 handleAndSendMsg(event, flagCheckEvent);
             }
         }
@@ -205,7 +205,7 @@ public final class PlayerFlagHandler {
             Player player = event.getPlayer();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
             if (dimCache != null) {
-                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getPlayer().blockPosition(), XP_FREEZE, dimCache.getDimensionalRegion());
+                FlagCheckEvent flagCheckEvent = checkEvent(event.getPlayer().blockPosition(), XP_FREEZE, dimCache.getDimensionalRegion(), player);
                 handleAndSendMsg(event, flagCheckEvent);
                 if (flagCheckEvent.isDenied()) {
                     // TODO: Test whether this is needed?
@@ -221,7 +221,7 @@ public final class PlayerFlagHandler {
             Player player = event.getPlayer();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
             if (dimCache != null) {
-                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getPlayer().blockPosition(), XP_PICKUP, dimCache.getDimensionalRegion());
+                FlagCheckEvent flagCheckEvent = checkEvent(event.getPlayer().blockPosition(), XP_PICKUP, dimCache.getDimensionalRegion(), player);
                 handleAndSendMsg(event, flagCheckEvent);
                 if (flagCheckEvent.isDenied()) {
                     event.getOrb().remove(Entity.RemovalReason.DISCARDED);
@@ -241,9 +241,9 @@ public final class PlayerFlagHandler {
                 if (dimCache != null) {
                     Player playerTarget = (Player) hurtEntity;
                     Player playerSource = (Player) dmgSourceEntity;
-                    FlagCheckEvent flagCheckEvent = checkTargetEvent(playerTarget.blockPosition(), NO_PVP, dimCache.getDimensionalRegion());
+                    FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(playerTarget.blockPosition(), NO_PVP, dimCache.getDimensionalRegion());
                     if (flagCheckEvent.isDenied()) {
-                        sendFlagDeniedMsg(flagCheckEvent, playerSource);
+                        sendFlagMsg(new PlayerFlagEvent(flagCheckEvent, playerSource));
                         event.setAmount(0f);
                         event.setCanceled(true);
                     }
@@ -253,7 +253,6 @@ public final class PlayerFlagHandler {
     }
 
     @SubscribeEvent
-    @TargetFocusedFlag(flag = INVINCIBLE)
     public static void onPlayerHurt(LivingHurtEvent event) {
         if (isServerSide(event)) {
             Entity hurtEntity = event.getEntityLiving();
@@ -261,7 +260,7 @@ public final class PlayerFlagHandler {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(hurtEntity));
                 if (dimCache != null) {
                     Player playerTarget = (Player) hurtEntity;
-                    FlagCheckEvent flagCheckEvent = checkTargetEvent(playerTarget.blockPosition(), INVINCIBLE, dimCache.getDimensionalRegion());
+                    FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(playerTarget.blockPosition(), INVINCIBLE, dimCache.getDimensionalRegion());
                     if (flagCheckEvent.isDenied()) {
                         event.setAmount(0f);
                         event.setCanceled(true);
@@ -285,9 +284,9 @@ public final class PlayerFlagHandler {
                     if (event.getEntityLiving() instanceof Player dmgTarget) {
                         Player dmgSource = ((Player) dmgSourceEntity);
                         // another check for PVP - this does not prevent knock-back? but prevents dmg
-                        FlagCheckEvent flagCheckEvent = checkTargetEvent(dmgTarget.blockPosition(), MELEE_PLAYERS, dimCache.getDimensionalRegion());
+                        FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(dmgTarget.blockPosition(), MELEE_PLAYERS, dimCache.getDimensionalRegion());
                         if (flagCheckEvent.isDenied()) {
-                            sendFlagDeniedMsg(flagCheckEvent, dmgSource);
+                            sendFlagMsg(new PlayerFlagEvent(flagCheckEvent, dmgSource));
                             event.setAmount(0f);
                             event.setCanceled(true);
                         }
@@ -298,19 +297,18 @@ public final class PlayerFlagHandler {
     }
 
     @SubscribeEvent
-    @TargetFocusedFlag(flag = KNOCKBACK_PLAYERS)
     public static void onPlayerKnockback(LivingKnockBackEvent event) {
         if (isServerSide(event)) {
             if (event.getEntityLiving() instanceof Player) {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
                 if (dimCache != null) {
                     Player dmgTarget = (Player) event.getEntityLiving();
-                    FlagCheckEvent flagCheckEvent = checkTargetEvent(dmgTarget.blockPosition(), KNOCKBACK_PLAYERS, dimCache.getDimensionalRegion());
+                    FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(dmgTarget.blockPosition(), KNOCKBACK_PLAYERS, dimCache.getDimensionalRegion());
                     if (flagCheckEvent.isDenied()) {
                         event.setCanceled(true);
                         event.setStrength(0);
                     }
-                    flagCheckEvent = checkTargetEvent(dmgTarget.blockPosition(), INVINCIBLE, dimCache.getDimensionalRegion());
+                    flagCheckEvent = HandlerUtil.checkEvent(dmgTarget.blockPosition(), INVINCIBLE, dimCache.getDimensionalRegion());
                     if (flagCheckEvent.isDenied()) {
                         event.setCanceled(true);
                         event.setStrength(0);
@@ -326,7 +324,7 @@ public final class PlayerFlagHandler {
             Player player = event.getPlayer();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
             if (dimCache != null) {
-                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getPos(), BREAK_BLOCKS, dimCache.getDimensionalRegion());
+                FlagCheckEvent flagCheckEvent = checkEvent(event.getPos(), BREAK_BLOCKS, dimCache.getDimensionalRegion(), player);
                 handleAndSendMsg(event, flagCheckEvent);
             }
         }
@@ -338,7 +336,7 @@ public final class PlayerFlagHandler {
             if (event.getEntity() != null && event.getEntity() instanceof Player player) {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
                 if (dimCache != null) {
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getPos(), PLACE_BLOCKS, dimCache.getDimensionalRegion());
+                    FlagCheckEvent flagCheckEvent = checkEvent(event.getPos(), PLACE_BLOCKS, dimCache.getDimensionalRegion(), player);
                     handleAndSendMsg(event, flagCheckEvent);
                 }
             }
@@ -361,7 +359,7 @@ public final class PlayerFlagHandler {
                     return target.getType().getRegistryName() != null && target.getType().getRegistryName().equals(entityResourceLocation);
                 });
                 if (isBlockEntityCovered) {
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getTarget().blockPosition(), BREAK_BLOCKS, dimCache.getDimensionalRegion());
+                    FlagCheckEvent flagCheckEvent = checkEvent(event.getTarget().blockPosition(), BREAK_BLOCKS, dimCache.getDimensionalRegion(), player);
                     handleAndSendMsg(event, flagCheckEvent);
                 }
             }
@@ -378,14 +376,14 @@ public final class PlayerFlagHandler {
                 if (tntEntity.getOwner() instanceof Player player) {
                     DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
                     if (dimCache != null) {
-                        FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, new BlockPos(explosion.getPosition()), IGNITE_EXPLOSIVES, dimCache.getDimensionalRegion());
+                        FlagCheckEvent flagCheckEvent = checkEvent(new BlockPos(explosion.getPosition()), IGNITE_EXPLOSIVES, dimCache.getDimensionalRegion(), player);
                         handleAndSendMsg(event, flagCheckEvent);
                     }
                 }
             }
             if (explosion.getSourceMob() instanceof Monster monster) {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(monster));
-                FlagCheckEvent flagCheck = checkTargetEvent(new BlockPos(explosion.getPosition()), MOB_GRIEFING, dimCache.getDimensionalRegion());
+                FlagCheckEvent flagCheck = HandlerUtil.checkEvent(new BlockPos(explosion.getPosition()), MOB_GRIEFING, dimCache.getDimensionalRegion());
                 if (flagCheck.isDenied()) {
                     event.setCanceled(flagCheck.isDenied());
                 }
@@ -400,7 +398,8 @@ public final class PlayerFlagHandler {
             ResourceKey<Level> entityDim = getEntityDim(event.getPlayer());
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(entityDim);
             if (dimCache != null) {
-                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getPos(), USE_BONEMEAL, dimCache.getDimensionalRegion());
+
+                FlagCheckEvent flagCheckEvent = checkEvent(event.getPos(), USE_BONEMEAL, dimCache.getDimensionalRegion(), player);
                 handleAndSendMsg(event, flagCheckEvent);
             }
         }
@@ -415,12 +414,12 @@ public final class PlayerFlagHandler {
                 if (event instanceof EntityTeleportEvent.EnderPearl enderPearlEvent) {
                     Player player = enderPearlEvent.getPlayer();
 
-                    FlagCheckEvent.PlayerFlagEvent enderPearlToRegionFlagCheck = checkPlayerEvent(player, new BlockPos(event.getTarget()), USE_ENDERPEARL_TO_REGION, dimCache.getDimensionalRegion());
+                    FlagCheckEvent enderPearlToRegionFlagCheck = checkEvent(new BlockPos(event.getTarget()), USE_ENDERPEARL_TO_REGION, dimCache.getDimensionalRegion(), player);
                     if (handleAndSendMsg(event, enderPearlToRegionFlagCheck)) {
                         return;
                     }
 
-                    FlagCheckEvent.PlayerFlagEvent enderPearlFromRegionFlagCheck = checkPlayerEvent(player, player.blockPosition(), USE_ENDERPEARL_FROM_REGION, dimCache.getDimensionalRegion());
+                    FlagCheckEvent enderPearlFromRegionFlagCheck = checkEvent(player.blockPosition(), USE_ENDERPEARL_FROM_REGION, dimCache.getDimensionalRegion(), player);
                     if (handleAndSendMsg(event, enderPearlFromRegionFlagCheck)) {
                     }
 
@@ -440,7 +439,7 @@ public final class PlayerFlagHandler {
             Player player = event.getPlayer();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
             if (dimCache != null) {
-                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getPos(), TOOL_SECONDARY_USE, dimCache.getDimensionalRegion());
+                FlagCheckEvent flagCheckEvent = checkEvent(event.getPos(), TOOL_SECONDARY_USE, dimCache.getDimensionalRegion(), player);
                 if (handleAndSendMsg(event, flagCheckEvent)) {
                     // FIXME: [next update]: how about all TOOL_SECONDARY_USE is denied but one of the following is allowed?
                     // this kind of check is not uncommon. See onPlayerRightClickBlock e.g.
@@ -448,15 +447,15 @@ public final class PlayerFlagHandler {
                 }
                 // TODO: Events for ToolActions
                 if (event.getToolAction().equals(ToolActions.AXE_STRIP)) {
-                    flagCheckEvent = checkPlayerEvent(player, event.getPos(), AXE_STRIP, dimCache.getDimensionalRegion());
+                    flagCheckEvent = checkEvent(event.getPos(), AXE_STRIP, dimCache.getDimensionalRegion(), player);
                     handleAndSendMsg(event, flagCheckEvent);
                 }
                 if (event.getToolAction().equals(ToolActions.HOE_TILL)) {
-                    flagCheckEvent = checkPlayerEvent(player, event.getPos(), HOE_TILL, dimCache.getDimensionalRegion());
+                    flagCheckEvent = checkEvent(event.getPos(), HOE_TILL, dimCache.getDimensionalRegion(), player);
                     handleAndSendMsg(event, flagCheckEvent);
                 }
                 if (event.getToolAction().equals(ToolActions.SHOVEL_FLATTEN)) {
-                    flagCheckEvent = checkPlayerEvent(player, event.getPos(), SHOVEL_PATH, dimCache.getDimensionalRegion());
+                    flagCheckEvent = checkEvent(event.getPos(), SHOVEL_PATH, dimCache.getDimensionalRegion(), player);
                     handleAndSendMsg(event, flagCheckEvent);
                 }
             }
@@ -480,13 +479,13 @@ public final class PlayerFlagHandler {
                 BlockHitResult pos = event.getHitVec();
                 if (pos != null && pos.getType() == HitResult.Type.BLOCK) {
                     if (player.isShiftKeyDown() && hasEmptyHands || !player.isShiftKeyDown()) {
-                        FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getPos(), USE_BLOCKS, dimCache.getDimensionalRegion());
+                        FlagCheckEvent flagCheckEvent = checkEvent(pos.getBlockPos(), USE_BLOCKS, dimCache.getDimensionalRegion(), player);
                         handleAndSendMsg(event, flagCheckEvent);
                     }
                 }
 
                 if (!hasEmptyHands) {
-                    FlagCheckEvent.PlayerFlagEvent useItemCheck = checkPlayerEvent(player, event.getPos(), USE_ITEMS, dimCache.getDimensionalRegion());
+                    FlagCheckEvent useItemCheck = checkEvent(event.getPos(), USE_ITEMS, dimCache.getDimensionalRegion(), player);
                     handleAndSendMsg(event, useItemCheck);
                 }
 
@@ -494,14 +493,14 @@ public final class PlayerFlagHandler {
                 // check for ender chest access
                 if (isEnderChest) {
                     if (player.isShiftKeyDown() && hasEmptyHands || !player.isShiftKeyDown()) {
-                        FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, targetEntity.getBlockPos(), ENDER_CHEST_ACCESS, dimCache.getDimensionalRegion());
+                        FlagCheckEvent flagCheckEvent = checkEvent(targetEntity.getBlockPos(), ENDER_CHEST_ACCESS, dimCache.getDimensionalRegion(), player);
                         handleAndSendMsg(event, flagCheckEvent);
                     }
                 }
                 // check for container access
                 if (isContainer) {
                     if (player.isShiftKeyDown() && hasEmptyHands || !player.isShiftKeyDown()) {
-                        FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, targetEntity.getBlockPos(), CONTAINER_ACCESS, dimCache.getDimensionalRegion());
+                        FlagCheckEvent flagCheckEvent = checkEvent(targetEntity.getBlockPos(), CONTAINER_ACCESS, dimCache.getDimensionalRegion(), player);
                         handleAndSendMsg(event, flagCheckEvent);
                     }
                 }
@@ -518,7 +517,7 @@ public final class PlayerFlagHandler {
             if (dimCache != null) {
                 boolean isMinecartContainer = event.getTarget() instanceof AbstractMinecartContainer;
                 if (isMinecartContainer) {
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getTarget().blockPosition(), CONTAINER_ACCESS, dimCache.getDimensionalRegion());
+                    FlagCheckEvent flagCheckEvent = checkEvent(event.getTarget().blockPosition(), CONTAINER_ACCESS, dimCache.getDimensionalRegion(), player);
                     handleAndSendMsg(event, flagCheckEvent);
                 }
             }
@@ -531,11 +530,11 @@ public final class PlayerFlagHandler {
             Player player = event.getPlayer();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
             if (dimCache != null) {
-                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getTarget().blockPosition(), USE_ENTITIES, dimCache.getDimensionalRegion());
+                FlagCheckEvent flagCheckEvent = checkEvent(event.getTarget().blockPosition(), USE_ENTITIES, dimCache.getDimensionalRegion(), player);
                 handleAndSendMsg(event, flagCheckEvent);
 
                 if (!hasEmptyHands(player)) {
-                    FlagCheckEvent.PlayerFlagEvent useItemCheck = checkPlayerEvent(player, event.getPos(), USE_ITEMS, dimCache.getDimensionalRegion());
+                    FlagCheckEvent useItemCheck = checkEvent(event.getPos(), USE_ITEMS, dimCache.getDimensionalRegion(), player);
                     handleAndSendMsg(event, useItemCheck);
                 }
             }
@@ -553,11 +552,11 @@ public final class PlayerFlagHandler {
             Player player = event.getPlayer();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
             if (dimCache != null) {
-                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getTarget().blockPosition(), USE_ENTITIES, dimCache.getDimensionalRegion());
+                FlagCheckEvent flagCheckEvent = checkEvent(event.getTarget().blockPosition(), USE_ENTITIES, dimCache.getDimensionalRegion(), player);
                 handleAndSendMsg(event, flagCheckEvent);
 
                 if (!hasEmptyHands(player)) {
-                    FlagCheckEvent.PlayerFlagEvent useItemCheck = checkPlayerEvent(player, event.getPos(), USE_ENTITIES, dimCache.getDimensionalRegion());
+                    FlagCheckEvent useItemCheck = checkEvent(event.getPos(), USE_ENTITIES, dimCache.getDimensionalRegion(), player);
                     handleAndSendMsg(event, useItemCheck);
                 }
             }
@@ -572,11 +571,11 @@ public final class PlayerFlagHandler {
             if (dimCache != null) {
 
                 if (!hasEmptyHands(player)) {
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getPos(), USE_ENTITIES, dimCache.getDimensionalRegion());
+                    FlagCheckEvent flagCheckEvent = checkEvent(event.getPos(), USE_ENTITIES, dimCache.getDimensionalRegion(), player);
                     handleAndSendMsg(event, flagCheckEvent);
                 }
 
-                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getPos(), USE_ITEMS, dimCache.getDimensionalRegion());
+                FlagCheckEvent flagCheckEvent = checkEvent(event.getPos(), USE_ITEMS, dimCache.getDimensionalRegion(), player);
                 handleAndSendMsg(event, flagCheckEvent);
             }
         }
@@ -601,7 +600,7 @@ public final class PlayerFlagHandler {
                     List<Player> players = event.getWorld().getEntities(EntityType.PLAYER, areaAbovePressurePlate, (player) -> true);
                     boolean isCanceledForOne = false;
                     for (Player player : players) {
-                        FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getPos(), USE_BLOCKS, dimCache.getDimensionalRegion());
+                        FlagCheckEvent flagCheckEvent = checkEvent(event.getPos(), USE_BLOCKS, dimCache.getDimensionalRegion(), player);
                         isCanceledForOne = isCanceledForOne || handleAndSendMsg(event, flagCheckEvent);
                         event.setCanceled(isCanceledForOne);
                     }
@@ -627,7 +626,7 @@ public final class PlayerFlagHandler {
                 int bucketItemMaxStackCount = event.getEmptyBucket().getMaxStackSize();
                 // placing fluid
                 if (bucketItemMaxStackCount == 1) {
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, targetPos, PLACE_FLUIDS, dimCache.getDimensionalRegion());
+                    FlagCheckEvent flagCheckEvent = checkEvent(targetPos, PLACE_FLUIDS, dimCache.getDimensionalRegion(), player);
                     handleAndSendMsg(event, flagCheckEvent);
                 }
                 // scooping fluid (breaking fluid)
@@ -644,7 +643,7 @@ public final class PlayerFlagHandler {
                             isFluid = ForgeRegistries.FLUIDS.tags().getTagNames().anyMatch(tag -> blockState.getFluidState().is(tag));
                         }
                         if (isWaterlogged || isFluid) {
-                            FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, targetPos, SCOOP_FLUIDS, dimCache.getDimensionalRegion());
+                            FlagCheckEvent flagCheckEvent = checkEvent(targetPos, SCOOP_FLUIDS, dimCache.getDimensionalRegion(), player);
                             handleAndSendMsg(event, flagCheckEvent);
                         }
                     }
@@ -663,7 +662,7 @@ public final class PlayerFlagHandler {
             ServerPlayer player = event.getPlayer();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
             if (dimCache != null) {
-                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, player.blockPosition(), SEND_MESSAGE, dimCache.getDimensionalRegion());
+                FlagCheckEvent flagCheckEvent = checkEvent(player.blockPosition(), SEND_MESSAGE, dimCache.getDimensionalRegion(), player);
                 handleAndSendMsg(event, flagCheckEvent);
             }
         }
@@ -678,7 +677,7 @@ public final class PlayerFlagHandler {
             Player player = event.getParseResults().getContext().getSource().getPlayerOrException();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
             if (dimCache != null) {
-                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, player.blockPosition(), EXECUTE_COMMAND, dimCache.getDimensionalRegion());
+                FlagCheckEvent flagCheckEvent = checkEvent(player.blockPosition(), EXECUTE_COMMAND, dimCache.getDimensionalRegion(), player);
                 handleAndSendMsg(event, flagCheckEvent);
             }
         } catch (CommandSyntaxException e) {
@@ -695,9 +694,10 @@ public final class PlayerFlagHandler {
             if (dimCache != null) {
                 Player player = event.getPlayer();
                 event.getSleepingLocation().ifPresent((pos) -> {
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, pos, SLEEP, dimCache.getDimensionalRegion());
+                    FlagCheckEvent flagCheckEvent = checkEvent(pos, SLEEP, dimCache.getDimensionalRegion(), player);
                     // FIXME: Msg is default from sleep deny
-                    if (sendFlagDeniedMsg(flagCheckEvent)) {
+                    if (flagCheckEvent.isDenied()) {
+                        sendFlagMsg(flagCheckEvent);
                         event.setResult(Event.Result.DENY);
                     }
                 });
@@ -713,7 +713,7 @@ public final class PlayerFlagHandler {
                 BlockPos newSpawn = event.getNewSpawn();
                 Player player = event.getPlayer();
                 if (newSpawn != null) {
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, newSpawn, SET_SPAWN, dimCache.getDimensionalRegion());
+                    FlagCheckEvent flagCheckEvent = checkEvent(newSpawn, SET_SPAWN, dimCache.getDimensionalRegion(), player);
                     handleAndSendMsg(event, flagCheckEvent);
                 }
             }
@@ -729,7 +729,7 @@ public final class PlayerFlagHandler {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
             if (dimCache != null) {
                 Player player = event.getPlayer();
-                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, event.getEntityItem().blockPosition(), ITEM_DROP, dimCache.getDimensionalRegion());
+                FlagCheckEvent flagCheckEvent = checkEvent(event.getEntityItem().blockPosition(), ITEM_DROP, dimCache.getDimensionalRegion(), player);
                 if (handleAndSendMsg(event, flagCheckEvent)) {
                     // FIXME: Does not proper refund items?
                     player.addItem(event.getEntityItem().getItem());
@@ -750,7 +750,7 @@ public final class PlayerFlagHandler {
             if (dimCache != null) {
                 if (event.getEntityMounting() instanceof Player player) {
                     if (event.isMounting()) {
-                        FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, entityBeingMounted.blockPosition(), ANIMAL_MOUNTING, dimCache.getDimensionalRegion());
+                        FlagCheckEvent flagCheckEvent = checkEvent(entityBeingMounted.blockPosition(), ANIMAL_MOUNTING, dimCache.getDimensionalRegion(), player);
                         handleAndSendMsg(event, flagCheckEvent);
                     }
                     if (event.isDismounting()) {
