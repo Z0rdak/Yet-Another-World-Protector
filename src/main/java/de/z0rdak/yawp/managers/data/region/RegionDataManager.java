@@ -36,8 +36,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static de.z0rdak.yawp.util.constants.RegionNBT.DIMENSIONS;
-import static de.z0rdak.yawp.util.constants.RegionNBT.REGIONS;
+import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
 @EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER)
 public class RegionDataManager extends WorldSavedData {
@@ -53,7 +52,7 @@ public class RegionDataManager extends WorldSavedData {
     /**
      * The global region of this mod which all sets common rules/flags for all regions.
      */
-    private final static GlobalRegion globalRegion = new GlobalRegion();
+    private static GlobalRegion globalRegion = new GlobalRegion();
     /**
      * Singleton used to access methods to manage region data.
      */
@@ -126,6 +125,12 @@ public class RegionDataManager extends WorldSavedData {
      */
     @Override
     public void load(CompoundNBT nbt) {
+        CompoundNBT globalNbt = nbt.getCompound(GLOBAL);
+        if (globalNbt.isEmpty()) {
+            globalRegion = new GlobalRegion();
+        } else {
+            globalRegion = new GlobalRegion(globalNbt);
+        }
         dimCacheMap.clear();
         CompoundNBT dimensionRegions = nbt.getCompound(DIMENSIONS);
         YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("Loading region(s) for " + dimensionRegions.getAllKeys().size() + " dimension(s)").getString());
@@ -188,6 +193,7 @@ public class RegionDataManager extends WorldSavedData {
     @Nonnull
     @Override
     public CompoundNBT save(@Nonnull CompoundNBT compound) {
+        compound.put(GLOBAL, globalRegion.serializeNBT());
         CompoundNBT dimRegionNbtData = new CompoundNBT();
         // YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.save.amount", this.getTotalRegionAmount(), dimCacheMap.keySet().size()).getString());
         YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("Saving " + this.getTotalRegionAmount() + " region(s) for " + dimCacheMap.keySet().size() + " dimensions").getString());
