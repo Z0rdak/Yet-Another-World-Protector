@@ -15,12 +15,12 @@ public class GlobalRegion extends AbstractRegion {
     public static final ResourceLocation GLOBAL = new ResourceLocation("yawp", "global");
     public static final RegistryKey<World> GLOBAL_DIMENSION = RegistryKey.create(Registry.DIMENSION_REGISTRY, GLOBAL);
 
-    protected GlobalRegion(CompoundNBT nbt) {
+    public GlobalRegion(CompoundNBT nbt) {
         super(nbt);
     }
 
     public GlobalRegion() {
-        this("global", RegionType.GLOBAL);
+        this(GLOBAL.toString(), RegionType.GLOBAL);
     }
 
     protected GlobalRegion(String name, RegionType type) {
@@ -33,7 +33,8 @@ public class GlobalRegion extends AbstractRegion {
 
     @Override
     public boolean setParent(@Nonnull IProtectedRegion parent) {
-        throw new IllegalRegionStateException("Attempt to set parent for global region");
+        // throw new IllegalRegionStateException("Attempt to set parent for global region");
+        return false;
     }
 
     @Nullable
