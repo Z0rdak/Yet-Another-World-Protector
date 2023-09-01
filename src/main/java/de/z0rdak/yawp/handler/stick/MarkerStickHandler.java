@@ -14,11 +14,16 @@ import de.z0rdak.yawp.util.StickUtil;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.util.text.event.ClickEvent;
 import net.minecraftforge.event.entity.player.AnvilRepairEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 
-import static de.z0rdak.yawp.util.MessageUtil.sendMessage;
+import static de.z0rdak.yawp.commands.CommandConstants.CREATE;
+import static de.z0rdak.yawp.commands.CommandConstants.MARKER;
+import static de.z0rdak.yawp.util.CommandUtil.buildCommandStr;
+import static de.z0rdak.yawp.util.MessageUtil.*;
 import static de.z0rdak.yawp.util.StickUtil.*;
 
 public class MarkerStickHandler {
@@ -27,22 +32,33 @@ public class MarkerStickHandler {
         MarkerStick marker = new MarkerStick(involvedItem.getTag().getCompound(STICK));
         AreaType areaType = marker.getAreaType();
         if (areaType == null) {
-            YetAnotherWorldProtector.LOGGER.warn("Unknown area type on marking - should really not happening");
-            return;
+            YetAnotherWorldProtector.LOGGER.error("Unknown area type on marking - should really not happening");
+            throw new IllegalArgumentException("Unexpected value. AreaType is null");
         }
         if (event.getPlayer().isShiftKeyDown()) {
             marker.setTeleportPos(event.getPos());
             involvedItem.getTag().put(STICK, marker.serializeNBT());
+            setStickName(involvedItem, StickType.MARKER);
+            sendMessage(event.getPlayer(), new TranslationTextComponent("cli.marker.create.mark.tp-pos", shortBlockPos(event.getPos())));
             return;
         }
         // add block to NBT list
         marker.addMarkedBlock(event.getPos());
+        int blockNo = (marker.getMarkedBlocks().size() % marker.getAreaType().neededBlocks) + 1;
+        sendMessage(event.getPlayer(), new TranslationTextComponent("cli.marker.create.mark.block", blockNo, shortBlockPos(event.getPos())));
         // check whether marked blocks form a valid marked area
-        marker.checkValidArea();
+        boolean hasValidArea = marker.checkValidArea();
         involvedItem.getTag().put(STICK, marker.serializeNBT());
         setStickName(involvedItem, StickType.MARKER);
+        if (hasValidArea) {
+            // send info about valid area and how to create a region
+            IFormattableTextComponent cmdText = new TranslationTextComponent("cli.marker.create.link.text");
+            IFormattableTextComponent cmdHoverText = new TranslationTextComponent("cli.marker.create.link.hover");
+            String cmd = buildCommandStr(MARKER.toString(), CREATE.toString(), "");
+            IFormattableTextComponent markerCmdSuggestionLink = buildExecuteCmdComponent(cmdText, cmdHoverText, cmd, ClickEvent.Action.SUGGEST_COMMAND, SUGGEST_COLOR);
+            sendMessage(event.getPlayer(), new TranslationTextComponent("cli.marker.create.mark.valid", markerCmdSuggestionLink));
+        }
     }
-
 
     /**
      * Create a region from the NBT data of the renamed region marker.
@@ -62,7 +78,7 @@ public class MarkerStickHandler {
                     DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.getCommandSenderWorld().dimension());
                     if (dimCache != null){
                         dimCache.addRegion(region);
-                        LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.DEFAULT_REGION_PRIORITY.get());
+                        LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.getDefaultPriority());
                         marker.reset();
                         outputItem.getTag().put(STICK, marker.serializeNBT());
                         setStickName(outputItem, type);
@@ -72,13 +88,13 @@ public class MarkerStickHandler {
                         sendMessage(player, new TranslationTextComponent("Player dimension not matching marker data"));
                     }
                 } else {
-                    player.sendMessage(new TranslationTextComponent("Invalid region type"), player.getUUID());
+                    sendMessage(player, new TranslationTextComponent("Invalid region type"));
                 }
             } else {
-                player.sendMessage(new TranslationTextComponent("Could not create region"), player.getUUID());
+                sendMessage(player, new TranslationTextComponent("Could not create region"));
             }
         } else {
-            player.sendMessage(new TranslationTextComponent("Invalid stick type / NBT data"), player.getUUID());
+            sendMessage(player, new TranslationTextComponent("Invalid stick type / NBT data"));
         }
     }
 
