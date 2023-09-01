@@ -287,7 +287,7 @@ public class RegionDataManager extends WorldSavedData {
         if (dimCache != null) {
             return dimCache.getDimensionalRegion().getFlags()
                     .stream()
-                    .map(IFlag::getFlagIdentifier)
+                    .map(IFlag::getName)
                     .collect(Collectors.toList());
         }
         return new ArrayList<>();
