@@ -49,7 +49,7 @@ public class WorldFlagHandler {
         if (isServerSide(event)) {
             Entity poorEntity = event.getEntity();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(poorEntity));
-            FlagCheckEvent flagCheckEvent = checkTargetEvent(poorEntity.blockPosition(), LIGHTNING_PROT, dimCache.getDimensionalRegion());
+            FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(poorEntity.blockPosition(), LIGHTNING_PROT, dimCache.getDimensionalRegion());
             event.setCanceled(flagCheckEvent.isDenied());
             if (flagCheckEvent.isDenied()) {
                 event.getLightning().remove();
@@ -84,7 +84,7 @@ public class WorldFlagHandler {
         World world = (World) event.getWorld();
         if (isServerSide(event)) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.dimension());
-            FlagCheckEvent flagCheckEvent = checkTargetEvent(event.getPos(), SPAWN_PORTAL, dimCache.getDimensionalRegion());
+            FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(event.getPos(), SPAWN_PORTAL, dimCache.getDimensionalRegion());
             event.setCanceled(flagCheckEvent.isDenied());
         }
     }
@@ -101,41 +101,41 @@ public class WorldFlagHandler {
         if (isServerSide(event.getEntity())) {
             Entity entity = event.getEntity();
             DimensionalRegion dimRegion = RegionDataManager.get().cacheFor(getEntityDim(entity)).getDimensionalRegion();
-            FlagCheckEvent flagCheckEvent = checkTargetEvent(entity.blockPosition(), USE_PORTAL, dimRegion);
+            FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(entity.blockPosition(), USE_PORTAL, dimRegion);
             event.setCanceled(flagCheckEvent.isDenied());
             if (event.isCanceled()) {
                 if (entity instanceof PlayerEntity) {
-                    sendFlagDeniedMsg(flagCheckEvent, (PlayerEntity) entity);
+                    sendFlagMsg(new PlayerFlagEvent(flagCheckEvent, (PlayerEntity) entity));
                 }
                 return;
             }
             if (entity instanceof PlayerEntity) {
-                FlagCheckEvent.PlayerFlagEvent playerFlagCheckEvent = checkPlayerEvent((PlayerEntity) entity, entity.blockPosition(), USE_PORTAL_PLAYERS, dimRegion);
+                FlagCheckEvent playerFlagCheckEvent = checkEvent(entity.blockPosition(), USE_PORTAL_PLAYERS, dimRegion, (PlayerEntity) entity);
                 handleAndSendMsg(event, playerFlagCheckEvent);
             } else {
 
                 if (entity instanceof ItemEntity) {
-                    flagCheckEvent = checkTargetEvent(entity.blockPosition(), USE_PORTAL_ITEMS, dimRegion);
+                    flagCheckEvent = HandlerUtil.checkEvent(entity.blockPosition(), USE_PORTAL_ITEMS, dimRegion);
                     event.setCanceled(flagCheckEvent.isDenied());
                     return;
                 }
                 if (isAnimal(entity)) {
-                    flagCheckEvent = checkTargetEvent(entity.blockPosition(), USE_PORTAL_ANIMALS, dimRegion);
+                    flagCheckEvent = HandlerUtil.checkEvent(entity.blockPosition(), USE_PORTAL_ANIMALS, dimRegion);
                     event.setCanceled(flagCheckEvent.isDenied());
                     return;
                 }
                 if (isMonster(entity)) {
-                    flagCheckEvent = checkTargetEvent(entity.blockPosition(), USE_PORTAL_MONSTERS, dimRegion);
+                    flagCheckEvent = HandlerUtil.checkEvent(entity.blockPosition(), USE_PORTAL_MONSTERS, dimRegion);
                     event.setCanceled(flagCheckEvent.isDenied());
                     return;
                 }
                 if (entity instanceof AbstractVillagerEntity) {
-                    flagCheckEvent = checkTargetEvent(entity.blockPosition(), USE_PORTAL_VILLAGERS, dimRegion);
+                    flagCheckEvent = HandlerUtil.checkEvent(entity.blockPosition(), USE_PORTAL_VILLAGERS, dimRegion);
                     event.setCanceled(flagCheckEvent.isDenied());
                     return;
                 }
                 if (entity instanceof AbstractMinecartEntity) {
-                    flagCheckEvent = checkTargetEvent(entity.blockPosition(), USE_PORTAL_MINECARTS, dimRegion);
+                    flagCheckEvent = HandlerUtil.checkEvent(entity.blockPosition(), USE_PORTAL_MINECARTS, dimRegion);
                     event.setCanceled(flagCheckEvent.isDenied());
                 }
             }
@@ -157,7 +157,7 @@ public class WorldFlagHandler {
                     double tpPosScale = DimensionType.getTeleportationScale(player.level.dimensionType(), targetServerLevel.dimensionType());
                     BlockPos targetPos = worldborder.clampToBounds(player.getX() * tpPosScale, player.getY(), player.getZ() * tpPosScale);
                      */
-                    FlagCheckEvent.PlayerFlagEvent playerFlagCheckEvent = new FlagCheckEvent.PlayerFlagEvent(player, dimRegion, null, ENTER_DIM);
+                    PlayerFlagEvent playerFlagCheckEvent = new PlayerFlagEvent(player, dimRegion, null, ENTER_DIM);
                     playerFlagCheckEvent.setDeniedLocal(false);
                     if (dimRegion.isActive()) {
                         if (dimRegion.containsFlag(ENTER_DIM) && !dimRegion.permits(player)) {
