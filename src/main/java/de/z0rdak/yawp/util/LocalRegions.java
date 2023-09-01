@@ -124,7 +124,6 @@ public final class LocalRegions {
                 .collect(Collectors.toList());
     }
 
-    @Nullable
     public static IMarkableRegion getInvolvedRegionFor(BlockPos position, ResourceKey<Level> dim) {
         List<IMarkableRegion> regionsForPos = getInvolvedRegionsFor(position, dim);
         if (regionsForPos.isEmpty()) {
@@ -143,43 +142,6 @@ public final class LocalRegions {
                 // position check should always be the last check to do, because it is the most computation expensive
                 .filter(region -> region.contains(position))
                 .collect(Collectors.toList());
-    }
-
-    public static List<IMarkableRegion> getInvolvedRegionsFor(BlockPos position, Player player, ResourceKey<Level> dim) {
-        return RegionDataManager.get().getRegionsFor(dim).stream()
-                .filter(IMarkableRegion::isActive)
-                //.filter(region -> !region.permits(player))
-                // position check should always be the last check to do, because it is the most computation expensive
-                .filter(region -> region.contains(position))
-                .collect(Collectors.toList());
-    }
-
-    @Nullable
-    public static IMarkableRegion getInvolvedRegionFor(RegionFlag flag, BlockPos position, ResourceKey<Level> dim) {
-        List<IMarkableRegion> regionsForPos = getInvolvedRegionsFor(flag, position, dim);
-        if (regionsForPos.isEmpty()) {
-            return null;
-        } else {
-            return Collections.max(regionsForPos, Comparator.comparing(IMarkableRegion::getPriority));
-        }
-    }
-
-    public static IMarkableRegion getInvolvedRegionFor(RegionFlag flag, BlockPos position, Player player, ResourceKey<Level> dim) {
-        List<IMarkableRegion> regionsForPos = getInvolvedRegionsFor(flag, position, player, dim);
-        if (regionsForPos.isEmpty()) {
-            return null;
-        } else {
-            return Collections.max(regionsForPos, Comparator.comparing(IMarkableRegion::getPriority));
-        }
-    }
-
-    public static IMarkableRegion getInvolvedRegionFor(BlockPos position, Player player, ResourceKey<Level> dim) {
-        List<IMarkableRegion> regionsForPos = getInvolvedRegionsFor(position, player, dim);
-        if (regionsForPos.isEmpty()) {
-            return null;
-        } else {
-            return Collections.max(regionsForPos, Comparator.comparing(IMarkableRegion::getPriority));
-        }
     }
 
     /**
