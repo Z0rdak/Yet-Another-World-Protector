@@ -3,7 +3,6 @@ package de.z0rdak.yawp.core.flag;
 import net.minecraft.nbt.CompoundNBT;
 
 import static de.z0rdak.yawp.core.flag.FlagType.BOOLEAN_FLAG;
-import static de.z0rdak.yawp.util.constants.RegionNBT.FLAG_VALUE;
 
 /**
  * A simple boolean state flag.
@@ -16,8 +15,8 @@ public class BooleanFlag extends AbstractFlag {
         this.deserializeNBT(nbt);
     }
 
-    public BooleanFlag(String flag, boolean isAllowed) {
-        super(flag, BOOLEAN_FLAG, isAllowed);
+    public BooleanFlag(String flag, boolean override) {
+        super(flag, BOOLEAN_FLAG, override);
     }
 
     public BooleanFlag(RegionFlag flag) {
@@ -37,6 +36,6 @@ public class BooleanFlag extends AbstractFlag {
 
     @Override
     public boolean isAllowed(Object... args) {
-        return isActive() && (this.isInverted());
+        return isActive() && (this.doesOverride());
     }
 }
