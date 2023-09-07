@@ -19,21 +19,22 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.IGNITE_EXPLOSIVES;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.checkEvent;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.sendFlagMsg;
+import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
 
 @Mixin(TNTBlock.class)
 public class TntBlockMixin {
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true, allow = 1)
     public void onUseFlintAndSteel(BlockState state, World world, BlockPos pos, PlayerEntity player2, Hand hand, BlockRayTraceResult hit, CallbackInfoReturnable<ActionResultType> cir) {
-        ItemStack itemStack = player2.getItemInHand(hand);
-        if (itemStack.sameItemStackIgnoreDurability(Items.FLINT_AND_STEEL.getDefaultInstance()) || itemStack.sameItem(Items.FIRE_CHARGE.getDefaultInstance())) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.dimension());
-            FlagCheckEvent flagCheck = checkEvent(pos, IGNITE_EXPLOSIVES, dimCache.getDimensionalRegion(), player2);
-            if (flagCheck.isDenied()) {
-                sendFlagMsg(flagCheck);
-                cir.setReturnValue(ActionResultType.CONSUME);
+        if (!world.isClientSide) {
+            ItemStack itemStack = player2.getItemInHand(hand);
+            if (itemStack.sameItemStackIgnoreDurability(Items.FLINT_AND_STEEL.getDefaultInstance()) || itemStack.sameItem(Items.FIRE_CHARGE.getDefaultInstance())) {
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.dimension());
+                FlagCheckEvent flagCheck = checkEvent(pos, IGNITE_EXPLOSIVES, dimCache.getDimensionalRegion(), player2);
+                if (flagCheck.isDenied()) {
+                    sendFlagMsg(flagCheck);
+                    cir.setReturnValue(ActionResultType.CONSUME);
+                }
             }
         }
     }
