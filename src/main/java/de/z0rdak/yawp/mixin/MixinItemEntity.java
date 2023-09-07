@@ -20,8 +20,11 @@ public abstract class MixinItemEntity extends Entity {
     @Nullable
     @Override
     public Entity changeDimension(ServerWorld server) {
-        if (!ForgeHooks.onTravelToDimension(this, server.dimension())) {
-            return null;
+        if (!server.isClientSide) {
+            if (!ForgeHooks.onTravelToDimension(this, server.dimension())) {
+                return null;
+            }
+            return super.changeDimension(server);
         }
         return super.changeDimension(server);
     }
