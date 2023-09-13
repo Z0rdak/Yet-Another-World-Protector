@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.core.region;
 
-import de.z0rdak.yawp.core.affiliation.PlayerContainer;
+import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
@@ -8,7 +8,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.scores.Team;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nullable;
@@ -52,29 +51,25 @@ public interface IProtectedRegion extends INBTSerializable<CompoundTag> {
 
     void updateFlag(IFlag flag);
 
-    void addMember(Player player);
+    void addPlayer(Player player, String group);
 
-    void addMember(Team team);
+    void addTeam(String teamName, String group);
 
-    void addOwner(Player player);
+    void removeTeam(String teamName, String group);
 
-    void addOwner(Team team);
+    void removePlayer(UUID playerUuid, String group);
 
-    void removeMember(Player player);
+    boolean hasTeam(String teamName, String group);
 
-    void removeOwner(Player player);
+    boolean hasPlayer(UUID playerUuid, String group);
 
-    void removeMember(Team team);
+    PlayerContainer getGroup(String group);
 
-    void removeOwner(Team team);
+    boolean permits(Player player);
 
-    boolean hasOwner(String teamName);
+    boolean isInGroup(Player player, String group);
 
-    boolean hasOwner(UUID playerUuid);
-
-    boolean hasMember(String teamName);
-
-    boolean hasMember(UUID playerUuid);
+    boolean disallows(Player player);
 
     boolean isActive();
 
@@ -83,12 +78,6 @@ public interface IProtectedRegion extends INBTSerializable<CompoundTag> {
     boolean isMuted();
 
     void setIsMuted(boolean isMuted);
-
-    PlayerContainer getMembers();
-
-    PlayerContainer getOwners();
-
-    boolean permits(Player player);
 
     @Nullable
     IProtectedRegion getParent();
