@@ -16,7 +16,7 @@ import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 /**
  * Eventhandler to track players near regions to handle entering and leaving regions without much overhead.
  */
-@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER, bus = FORGE)
+@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, bus = FORGE)
 public class ServerPlayerEventHandler {
 
     private static MinecraftServer server;
