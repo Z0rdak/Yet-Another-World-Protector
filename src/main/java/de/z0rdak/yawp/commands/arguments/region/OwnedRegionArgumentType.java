@@ -9,12 +9,13 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.commands.RegionCommands;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import de.z0rdak.yawp.util.CommandUtil;
+import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.util.MessageUtil;
 import de.z0rdak.yawp.util.StickType;
 import de.z0rdak.yawp.util.StickUtil;
@@ -53,7 +54,7 @@ public class OwnedRegionArgumentType implements ArgumentType<String> {
 
     public static IMarkableRegion getRegion(CommandContext<CommandSourceStack> context, String argName) throws CommandSyntaxException {
         String regionName = context.getArgument(argName, String.class);
-        DimensionRegionCache dimCache = CommandUtil.getDimCacheArgument(context);
+        DimensionRegionCache dimCache = ArgumentUtil.getDimCacheArgument(context);
         IMarkableRegion region = dimCache.getRegion(regionName);
         if (region != null) {
             return region;
@@ -107,7 +108,7 @@ public class OwnedRegionArgumentType implements ArgumentType<String> {
                             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.level.dimension());
                             List<String> ownedRegions = dimCache.getRegions()
                                     .stream()
-                                    .filter(r -> r.hasOwner(player.getUUID()))
+                                    .filter(r -> r.hasPlayer(player.getUUID(), RegionCommands.OWNER))
                                     .filter(r -> ((CuboidArea) r.getArea()).contains(markedArea))
                                     .map(IMarkableRegion::getName)
                                     .collect(Collectors.toList());

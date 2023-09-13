@@ -14,7 +14,7 @@ import de.z0rdak.yawp.core.region.AbstractRegion;
 import de.z0rdak.yawp.core.region.CuboidRegion;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
-import de.z0rdak.yawp.util.CommandUtil;
+import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -85,9 +85,9 @@ public class AddRegionChildArgumentType implements ArgumentType<String> {
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         if (context.getSource() instanceof CommandSourceStack src) {
             try {
-                DimensionRegionCache dimCache = CommandUtil.getDimCacheArgument((CommandContext<CommandSourceStack>) context);
+                DimensionRegionCache dimCache = ArgumentUtil.getDimCacheArgument((CommandContext<CommandSourceStack>) context);
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                CuboidRegion region = (CuboidRegion) CommandUtil.getRegionArgument((CommandContext<CommandSourceStack>) context);
+                CuboidRegion region = (CuboidRegion) ArgumentUtil.getRegionArgument((CommandContext<CommandSourceStack>) context);
                 List<String> potentialChildrenNames = dimRegion.getChildren().values()
                         .stream()
                         .map(r -> (CuboidRegion) r)
