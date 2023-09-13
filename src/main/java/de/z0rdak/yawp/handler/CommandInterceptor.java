@@ -5,6 +5,7 @@ import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.commands.RegionCommands;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -36,7 +37,7 @@ import static de.z0rdak.yawp.util.MessageUtil.sendCmdFeedback;
 import static net.minecraft.ChatFormatting.RED;
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 
-@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER, bus = FORGE)
+@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, bus = FORGE)
 public class CommandInterceptor {
 
     /**
@@ -86,13 +87,12 @@ public class CommandInterceptor {
                 }
                 IMarkableRegion region = dimCache.getRegion(regionName);
                 try {
-                    if (src.getEntity() instanceof Player) {
+                    if (src.getEntity() instanceof Player && region != null) {
                         ServerPlayer player = src.getPlayerOrException();
                         boolean hasConfigPermission = hasPlayerPermission(player);
-                        boolean isOwner = region.hasOwner(player.getUUID()) || (player.getTeam() != null && region.hasOwner(player.getTeam().getName()));
-                        boolean isOwnerOfParent = region.getParent() != null && region.getParent().hasOwner(player.getUUID())
-                                || (player.getTeam() != null && region.getParent().hasOwner(player.getTeam().getName()));
-                        boolean containsInfoCmd = nodeNames.contains(INFO.toString()) || nodeNames.contains(LIST.toString()) || nodeNames.contains(SPATIAL.toString());
+                        boolean isOwner = region.isInGroup(player, RegionCommands.OWNER);
+                        boolean isOwnerOfParent = region.getParent() != null && region.getParent().isInGroup(player, RegionCommands.OWNER);
+                        boolean containsInfoCmd = nodeNames.contains(INFO.toString()) || nodeNames.contains(LIST.toString()) || nodeNames.contains(AREA.toString());
 
                         // /wp region <dim> <region> info|list|spatial|state
                         if (cmdNodes.size() == 4 || (cmdNodes.size() > 4 && containsInfoCmd) || cmdNodes.size() == 5 && nodeNames.get(4).equals(STATE.toString())) {
