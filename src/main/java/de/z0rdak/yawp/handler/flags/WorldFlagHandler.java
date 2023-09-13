@@ -32,7 +32,7 @@ import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
  * Contains event handler for flags not directly related to player actions.
  * E.g.
  */
-@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER, bus = FORGE)
+@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, bus = FORGE)
 public class WorldFlagHandler {
 
     private WorldFlagHandler() {
