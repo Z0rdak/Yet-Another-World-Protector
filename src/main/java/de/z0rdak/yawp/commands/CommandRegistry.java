@@ -4,14 +4,13 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
-import de.z0rdak.yawp.util.CommandUtil;
+import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.ClickEvent;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -21,7 +20,7 @@ import static net.minecraft.util.text.TextFormatting.AQUA;
 import static net.minecraft.util.text.TextFormatting.GREEN;
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 
-@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER, bus = FORGE)
+@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, bus = FORGE)
 public final class CommandRegistry {
 
     private CommandRegistry() {
@@ -46,17 +45,18 @@ public final class CommandRegistry {
     private static LiteralArgumentBuilder<CommandSource> buildCommands(String baseCmd) {
         return Commands.literal(baseCmd)
                 .executes(ctx -> promptHelp(ctx.getSource()))
-                .then(CommandUtil.literal(CommandConstants.HELP)
+                .then(ArgumentUtil.literal(CommandConstants.HELP)
                         .executes(ctx -> promptHelp(ctx.getSource())))
-                .then(DimensionCommands.build())
                 .then(FlagCommands.build())
                 .then(MarkerCommands.build())
+                .then(GlobalCommands.build())
+                .then(DimensionCommands.build())
                 .then(RegionCommands.build());
     }
 
     private static int promptHelp(CommandSource src) {
         sendCmdFeedback(src, buildHeader("cli.msg.help.header"));
-        String command = CommandUtil.buildCommandStr(CommandConstants.DIM.toString());
+        String command = ArgumentUtil.buildCommandStr(CommandConstants.DIM.toString());
         IFormattableTextComponent cmdStr = new TranslationTextComponent("cli.msg.help.1", CommandPermissionConfig.BASE_CMD);
         sendCmdFeedback(src, buildExecuteCmdComponent(
                 new StringTextComponent("=> "),
