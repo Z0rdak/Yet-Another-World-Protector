@@ -92,7 +92,6 @@ public final class LocalRegions {
         return RegionDataManager.get().getRegionsFor(dim).stream()
                 .filter(IMarkableRegion::isActive)
                 .filter(region -> region.containsFlag(flag) && region.getFlag(flag.name).isActive())
-                // position check should always be the last check to do, because it is the most computation expensive
                 .filter(region -> region.contains(position))
                 .collect(Collectors.toList());
     }
@@ -101,7 +100,6 @@ public final class LocalRegions {
         return RegionDataManager.get().getRegionsFor(dim).stream()
                 .filter(IMarkableRegion::isActive)
                 .filter(region -> !region.containsFlag(flag))
-                // position check should always be the last check to do, because it is the most computation expensive
                 .filter(region -> region.contains(position))
                 .collect(Collectors.toList());
     }
@@ -119,7 +117,6 @@ public final class LocalRegions {
     public static List<IMarkableRegion> getInvolvedRegionsFor(BlockPos position, ResourceKey<Level> dim) {
         return RegionDataManager.get().getRegionsFor(dim).stream()
                 .filter(IMarkableRegion::isActive)
-                // position check should always be the last check to do, because it is the most computation expensive
                 .filter(region -> region.contains(position))
                 .collect(Collectors.toList());
     }
@@ -131,6 +128,52 @@ public final class LocalRegions {
         } else {
             return Collections.max(regionsForPos, Comparator.comparing(IMarkableRegion::getPriority));
         }
+    }
+
+    public static IMarkableRegion getInvolvedRegion(BlockPos pos, RegistryKey<World> dim) {
+        IMarkableRegion region = getInvolvedRegionFor(pos, dim);
+        List<FlagCorrelation> flags = getFlagsRecursive(region, new ArrayList<>());
+        return null;
+    }
+
+    public static IMarkableRegion getInvolvedRegionWithParentFlags(BlockPos pos, RegistryKey<World> dim) {
+        IMarkableRegion region = getInvolvedRegionFor(pos, dim);
+        List<IFlag> flags = getFlags(region, new ArrayList<>());
+
+        return null;
+    }
+
+    /**
+     * Gets all active flags of the given region including all it's parents.
+     * @param region the region to get active flags
+     * @param carry list holding information about region flags
+     * @return a list of all active flags of the given region including its parents.
+     */
+    public static List<FlagCorrelation> getFlagsRecursive(IProtectedRegion region, List<FlagCorrelation> carry) {
+        if (region == null) {
+            return carry;
+        }
+        List<FlagCorrelation> parentFlags = region.getFlags().stream()
+                .filter(IFlag::isActive)
+                .map(f -> new FlagCorrelation(region, getRegionType(region), f))
+                .collect(Collectors.toList());
+        carry.addAll(parentFlags);
+        return getFlagsRecursive(region.getParent(), carry);
+    }
+
+    public static List<IFlag> getFlags(IProtectedRegion region, List<IFlag> carry) {
+        if (region == null) {
+            return carry;
+        }
+        List<IFlag> parentFlags = region.getFlags().stream()
+                .filter(IFlag::isActive)
+                .collect(Collectors.toList());
+        carry.addAll(parentFlags);
+        return getFlags(region.getParent(), carry);
+    }
+
+    public static RegionType getRegionType(IProtectedRegion region) {
+        return region instanceof DimensionalRegion ? RegionType.DIMENSION : region instanceof IMarkableRegion ? RegionType.LOCAL : RegionType.GLOBAL;
     }
 
     // TODO: Start from dimRegion with only the parents, so possible regions to check are far less
