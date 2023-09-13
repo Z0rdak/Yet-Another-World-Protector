@@ -12,7 +12,7 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import de.z0rdak.yawp.util.CommandUtil;
+import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
@@ -65,7 +65,7 @@ public class RegionArgumentType implements ArgumentType<String> {
 
     public static IMarkableRegion getRegion(CommandContext<CommandSource> context, String argName) throws CommandSyntaxException {
         String regionName = context.getArgument(argName, String.class);
-        DimensionRegionCache dimCache = CommandUtil.getDimCacheArgument(context);
+        DimensionRegionCache dimCache = ArgumentUtil.getDimCacheArgument(context);
         if (!dimCache.contains(regionName)) {
             MessageUtil.sendCmdFeedback(context.getSource(), new StringTextComponent("No region with name '" + regionName + "' defined in dim '" + dimCache.dimensionKey().location() + "'"));
             throw ERROR_INVALID_VALUE.create(regionName);
@@ -81,7 +81,7 @@ public class RegionArgumentType implements ArgumentType<String> {
 
     public static IMarkableRegion getSrcRegion(CommandContext<CommandSource> context, String argName) throws CommandSyntaxException {
         String regionName = context.getArgument(argName, String.class);
-        DimensionRegionCache dimCache = CommandUtil.getSrcDimCacheArgument(context);
+        DimensionRegionCache dimCache = ArgumentUtil.getSrcDimCacheArgument(context);
         if (!dimCache.contains(regionName)) {
             MessageUtil.sendCmdFeedback(context.getSource(), new StringTextComponent("No region with name '" + regionName + "' defined in dim '" + dimCache.dimensionKey().location() + "'"));
             throw ERROR_INVALID_VALUE.create(regionName);
@@ -114,7 +114,7 @@ public class RegionArgumentType implements ArgumentType<String> {
         if (context.getSource() instanceof CommandSource) {
             CommandSource src = (CommandSource) context.getSource();
             try {
-                DimensionRegionCache dimCache = CommandUtil.getDimCacheArgument((CommandContext<CommandSource>) context);
+                DimensionRegionCache dimCache = ArgumentUtil.getDimCacheArgument((CommandContext<CommandSource>) context);
                 Collection<String> regionNames = dimCache.getRegionNames();
                 if (regionNames.isEmpty()) {
                     MessageUtil.sendCmdFeedback(src, new StringTextComponent("No regions defined in dim '" + dimCache.dimensionKey().location() + "'"));
@@ -134,7 +134,7 @@ public class RegionArgumentType implements ArgumentType<String> {
         if (context.getSource() instanceof CommandSource) {
             CommandSource src = (CommandSource) context.getSource();
             try {
-                DimensionRegionCache dimCache = CommandUtil.getSrcDimCacheArgument((CommandContext<CommandSource>) context);
+                DimensionRegionCache dimCache = ArgumentUtil.getSrcDimCacheArgument((CommandContext<CommandSource>) context);
                 Collection<String> regionNames = dimCache.getRegionNames();
                 if (regionNames.isEmpty()) {
                     MessageUtil.sendCmdFeedback(src, new StringTextComponent("No regions defined in dim '" + dimCache.dimensionKey().location() + "'"));
