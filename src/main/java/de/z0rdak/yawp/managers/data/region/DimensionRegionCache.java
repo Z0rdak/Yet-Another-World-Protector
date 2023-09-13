@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.managers.data.region;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import de.z0rdak.yawp.core.affiliation.PlayerContainer;
+import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.*;
@@ -146,15 +146,15 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
     }
 
     public boolean hasOwner(PlayerEntity player) {
-        PlayerContainer owners = this.dimensionalRegion.getOwners();
-        return owners.containsPlayer(player.getUUID())
-                || (player.getTeam() != null && owners.containsTeam(player.getTeam()));
+        PlayerContainer owners = this.dimensionalRegion.getGroup(OWNERS);
+        return owners.hasPlayer(player.getUUID())
+                || (player.getTeam() != null && owners.hasTeam(player.getTeam().getName()));
     }
 
     public boolean hasMember(PlayerEntity player) {
-        PlayerContainer members = this.dimensionalRegion.getMembers();
-        return members.containsPlayer(player.getUUID())
-                || (player.getTeam() != null && members.containsTeam(player.getTeam()));
+        PlayerContainer members = this.dimensionalRegion.getGroup(MEMBERS);
+        return members.hasPlayer(player.getUUID())
+                || (player.getTeam() != null && members.hasTeam(player.getTeam().getName()));
     }
 
     public static IMarkableRegion deserializeLocalRegion(AreaType areaType, CompoundNBT regionNbt) {
