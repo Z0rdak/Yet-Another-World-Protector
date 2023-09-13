@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
-@EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER)
+@EventBusSubscriber(modid = YetAnotherWorldProtector.MODID)
 public class RegionDataManager extends WorldSavedData {
 
     /**

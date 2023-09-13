@@ -21,7 +21,7 @@ import java.util.Objects;
 import static de.z0rdak.yawp.util.StickUtil.*;
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 
-@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER, bus = FORGE)
+@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, bus = FORGE)
 public class StickInteractionHandler {
 
     private StickInteractionHandler() {
