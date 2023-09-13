@@ -11,7 +11,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.util.CommandUtil;
+import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
@@ -75,7 +75,7 @@ public class RemoveRegionChildArgumentType implements ArgumentType<String> {
         if (context.getSource() instanceof CommandSource) {
             CommandSource src = (CommandSource) context.getSource();
             try {
-                IMarkableRegion region = CommandUtil.getRegionArgument((CommandContext<CommandSource>) context);
+                IMarkableRegion region = ArgumentUtil.getRegionArgument((CommandContext<CommandSource>) context);
                 List<String> childNames = region.getChildren()
                         .values()
                         .stream()

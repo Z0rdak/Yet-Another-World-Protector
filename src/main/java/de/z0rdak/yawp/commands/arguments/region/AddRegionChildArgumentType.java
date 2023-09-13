@@ -12,17 +12,15 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
-import de.z0rdak.yawp.util.CommandUtil;
+import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -80,9 +78,9 @@ public class AddRegionChildArgumentType implements ArgumentType<String> {
         if (context.getSource() instanceof CommandSource) {
             CommandSource src = (CommandSource) context.getSource();
             try {
-                DimensionRegionCache dimCache = CommandUtil.getDimCacheArgument((CommandContext<CommandSource>) context);
+                DimensionRegionCache dimCache = ArgumentUtil.getDimCacheArgument((CommandContext<CommandSource>) context);
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                CuboidRegion region = (CuboidRegion) CommandUtil.getRegionArgument((CommandContext<CommandSource>) context);
+                CuboidRegion region = (CuboidRegion) ArgumentUtil.getRegionArgument((CommandContext<CommandSource>) context);
                 List<String> potentialChildrenNames = dimRegion.getChildren().values()
                         .stream()
                         .map(r -> (CuboidRegion)r)

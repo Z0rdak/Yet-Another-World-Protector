@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.REMOVE;
-import static de.z0rdak.yawp.util.CommandUtil.getRegionArgument;
+import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.getRegionArgument;
 
 public class IFlagArgumentType implements ArgumentType<String> {
 
