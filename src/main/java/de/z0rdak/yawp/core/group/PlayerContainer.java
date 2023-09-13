@@ -1,4 +1,4 @@
-package de.z0rdak.yawp.core.affiliation;
+package de.z0rdak.yawp.core.group;
 
 import de.z0rdak.yawp.util.constants.RegionNBT;
 import net.minecraft.nbt.CompoundTag;
@@ -46,23 +46,13 @@ public class PlayerContainer implements IMemberContainer, INBTSerializable<Compo
     }
 
     @Override
-    public boolean containsPlayer(UUID playerUUID) {
+    public boolean hasPlayer(UUID playerUUID) {
         return this.players.containsKey(playerUUID);
     }
 
     @Override
-    public boolean containsTeam(String team) {
+    public boolean hasTeam(String team) {
         return this.teams.contains(team);
-    }
-
-    @Override
-    public boolean containsTeam(Team team) {
-        return this.teams.contains(team.getName());
-    }
-
-    @Override
-    public void addPlayer(Player player) {
-        this.players.put(player.getUUID(), player.getScoreboardName());
     }
 
     @Override
@@ -76,13 +66,8 @@ public class PlayerContainer implements IMemberContainer, INBTSerializable<Compo
     }
 
     @Override
-    public void addTeam(Team team) {
-        this.teams.add(team.getName());
-    }
-
-    @Override
-    public void removePlayer(Player player) {
-        this.players.remove(player.getUUID());
+    public void clearPlayers() {
+        this.players.clear();
     }
 
     @Override
@@ -96,8 +81,8 @@ public class PlayerContainer implements IMemberContainer, INBTSerializable<Compo
     }
 
     @Override
-    public void removeTeam(Team team) {
-        this.teams.remove(team.getName());
+    public void clearTeams() {
+        this.teams.clear();
     }
 
     @Override
