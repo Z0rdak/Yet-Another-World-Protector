@@ -27,24 +27,11 @@ public class MarkerStick extends AbstractStick implements INBTSerializable<Compo
     private boolean isValidArea;
     private List<BlockPos> markedBlocks;
 
-    public MarkerStick(AreaType areaType, boolean isValidArea, List<BlockPos> markedBlocks, RegistryKey<World> dim) {
-        this(areaType, isValidArea, markedBlocks, dim, null);
-    }
-
-    public MarkerStick(AreaType areaType, boolean isValidArea, List<BlockPos> markedBlocks, RegistryKey<World> dim, BlockPos tpPos) {
-        super(StickType.MARKER);
-        this.areaType = areaType;
-        this.isValidArea = isValidArea;
-        this.markedBlocks = markedBlocks;
-        this.dimension = dim;
-        this.teleportPos = tpPos;
-    }
-
     public MarkerStick(RegistryKey<World> dim) {
         super(StickType.MARKER);
         this.areaType = AreaType.CUBOID;
         this.isValidArea = false;
-        this.markedBlocks = new ArrayList<>();
+        this.markedBlocks = new ArrayList<>(this.areaType.maxBlocks);
         this.dimension = dim;
         this.teleportPos = null;
     }
@@ -60,7 +47,7 @@ public class MarkerStick extends AbstractStick implements INBTSerializable<Compo
     }
 
     public void reset() {
-        this.markedBlocks = new ArrayList<>();
+        this.markedBlocks = new ArrayList<>(this.areaType.maxBlocks);
         this.isValidArea = false;
         this.teleportPos = null;
     }
@@ -143,7 +130,7 @@ public class MarkerStick extends AbstractStick implements INBTSerializable<Compo
         this.dimension = RegistryKey.create(Registry.DIMENSION_REGISTRY,
                 new ResourceLocation(nbt.getString(DIM)));
         ListNBT markedBlocksNBT = nbt.getList(MARKED_BLOCKS, Constants.NBT.TAG_COMPOUND);
-        this.markedBlocks = new ArrayList<>();
+        this.markedBlocks = new ArrayList<>(this.areaType.maxBlocks);
         markedBlocksNBT.forEach(block -> this.markedBlocks.add(NBTUtil.readBlockPos((CompoundNBT) block)));
     }
 }
