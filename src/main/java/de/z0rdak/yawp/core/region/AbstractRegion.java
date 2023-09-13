@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.core.region;
 
-import de.z0rdak.yawp.core.affiliation.PlayerContainer;
+import de.z0rdak.yawp.commands.RegionCommands;
+import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
@@ -8,7 +9,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
-import net.minecraft.scoreboard.Team;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
@@ -34,14 +34,10 @@ public abstract class AbstractRegion implements IProtectedRegion {
     protected String name;
     protected RegistryKey<World> dimension;
     protected RegionType regionType;
-
     protected FlagContainer flags;
-    protected PlayerContainer owners;
-    protected PlayerContainer members;
+    protected Map<String, PlayerContainer> groups;
     protected boolean isActive;
-
     protected boolean isMuted;
-
     @Nullable
     protected IProtectedRegion parent;
     protected String parentName;
@@ -54,8 +50,9 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.parentName = null;
         this.parent = null;
         this.flags = new FlagContainer();
-        this.members = new PlayerContainer();
-        this.owners = new PlayerContainer();
+        this.groups = new HashMap<>();
+        this.groups.put(MEMBERS, new PlayerContainer());
+        this.groups.put(OWNERS, new PlayerContainer());
         this.deserializeNBT(nbt);
     }
 
@@ -63,8 +60,9 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.name = name;
         this.regionType = type;
         this.flags = new FlagContainer();
-        this.members = new PlayerContainer();
-        this.owners = new PlayerContainer();
+        this.groups = new HashMap<>();
+        this.groups.put(MEMBERS, new PlayerContainer());
+        this.groups.put(OWNERS, new PlayerContainer());
         this.isActive = true;
         this.children = new HashMap<>();
     }
@@ -75,14 +73,14 @@ public abstract class AbstractRegion implements IProtectedRegion {
         return parentName;
     }
 
-    // TODO: Check constructors with new parameter
     protected AbstractRegion(String name, RegistryKey<World> dimension, RegionType type) {
         this.name = name;
         this.dimension = dimension;
         this.regionType = type;
         this.flags = new FlagContainer();
-        this.members = new PlayerContainer();
-        this.owners = new PlayerContainer();
+        this.groups = new HashMap<>();
+        this.groups.put(MEMBERS, new PlayerContainer());
+        this.groups.put(OWNERS, new PlayerContainer());
         this.children = new HashMap<>();
         this.isActive = true;
     }
@@ -95,14 +93,14 @@ public abstract class AbstractRegion implements IProtectedRegion {
     protected AbstractRegion(String name, RegionType regionType, PlayerEntity owner) {
         this(name, regionType);
         if (owner != null) {
-            this.owners.addPlayer(owner);
+            this.groups.get(OWNERS).addPlayer(owner.getUUID(), owner.getScoreboardName());
         }
     }
 
     protected AbstractRegion(String name, RegistryKey<World> dimension, RegionType regionType, PlayerEntity owner) {
         this(name, dimension, regionType);
         if (owner != null) {
-            this.owners.addPlayer(owner);
+            this.groups.get(OWNERS).addPlayer(owner.getUUID(), owner.getScoreboardName());
         }
     }
 
@@ -191,79 +189,48 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.isMuted = isMuted;
     }
 
-
     @Override
-    public void addMember(PlayerEntity player) {
-        this.members.addPlayer(player);
+    public void addPlayer(PlayerEntity player, String group) {
+        this.getGroup(group).addPlayer(player.getUUID(), player.getScoreboardName());
     }
 
     @Override
-    public void addMember(Team team) {
-        this.members.addTeam(team);
-    }
-
-
-    @Override
-    public void addOwner(PlayerEntity player) {
-        this.owners.addPlayer(player);
+    public void addTeam(String teamName, String group) {
+        this.getGroup(group).addTeam(teamName);
     }
 
     @Override
-    public void addOwner(Team team) {
-        this.owners.addTeam(team);
+    public void removeTeam(String teamName, String group) {
+        this.getGroup(group).removeTeam(teamName);
     }
 
     @Override
-    public void removeMember(PlayerEntity player) {
-        this.members.removePlayer(player);
-
+    public void removePlayer(UUID playerUuid, String group) {
+        this.getGroup(group).removePlayer(playerUuid);
     }
 
     @Override
-    public void removeMember(Team team) {
-        this.members.removeTeam(team.getName());
-
+    public boolean hasTeam(String teamName, String group) {
+        return this.getGroup(group).hasTeam(teamName);
     }
 
     @Override
-    public void removeOwner(PlayerEntity player) {
-        this.owners.removePlayer(player);
+    public boolean hasPlayer(UUID playerUuid, String group) {
+        return this.getGroup(group).hasPlayer(playerUuid);
     }
 
+    /**
+     * Gets the container for the provided group. Creates a new one if none is existent.
+     * @param group
+     * @return
+     */
     @Override
-    public void removeOwner(Team team) {
-        this.owners.removeTeam(team);
-
-    }
-
-    @Override
-    public boolean hasOwner(String teamName) {
-        return this.owners.containsTeam(teamName);
-    }
-
-    @Override
-    public boolean hasOwner(UUID playerUuid) {
-        return this.owners.containsPlayer(playerUuid);
-    }
-
-    @Override
-    public boolean hasMember(String teamName) {
-        return this.members.containsTeam(teamName);
-    }
-
-    @Override
-    public boolean hasMember(UUID playerUuid) {
-        return this.members.containsPlayer(playerUuid);
-    }
-
-    @Override
-    public PlayerContainer getMembers() {
-        return this.members;
-    }
-
-    @Override
-    public PlayerContainer getOwners() {
-        return owners;
+    public PlayerContainer getGroup(String group) {
+        if (!this.groups.containsKey(group)) {
+            // FIXME: return null instead to signal non-existing group? or manage them properly
+           return this.groups.put(group, new PlayerContainer());
+        }
+        return this.groups.get(group);
     }
 
     /**
@@ -276,11 +243,18 @@ public abstract class AbstractRegion implements IProtectedRegion {
      */
     @Override
     public boolean permits(PlayerEntity player) {
-        boolean isOwner = this.owners.containsPlayer(player.getUUID())
-                || (player.getTeam() != null && this.owners.containsTeam(player.getTeam().getName()));
-        boolean isMember = this.members.containsPlayer(player.getUUID())
-                || (player.getTeam() != null && this.members.containsTeam(player.getTeam().getName()));
-        return isOwner || isMember;
+        return isInGroup(player, RegionCommands.OWNER) || isInGroup(player, RegionCommands.MEMBER);
+    }
+
+    public boolean isInGroup(PlayerEntity player, String group) {
+        return this.groups.get(group).hasPlayer(player.getUUID())
+                || (player.getTeam() != null && this.groups.get(group).hasTeam(player.getTeam().getName()));
+    }
+
+
+    @Override
+    public boolean disallows(PlayerEntity player) {
+        return !permits(player);
     }
 
     /**
@@ -382,8 +356,8 @@ public abstract class AbstractRegion implements IProtectedRegion {
         nbt.putBoolean(ACTIVE, this.isActive);
         nbt.putBoolean(MUTED, this.isMuted);
         nbt.put(FLAGS, this.flags.serializeNBT());
-        nbt.put(OWNERS, this.owners.serializeNBT());
-        nbt.put(MEMBERS, this.members.serializeNBT());
+        nbt.put(OWNERS, this.groups.get(OWNERS).serializeNBT());
+        nbt.put(MEMBERS, this.groups.get(MEMBERS).serializeNBT());
         if (this.parent != null) {
             nbt.putString(PARENT, this.parent.getName());
         } else {
@@ -409,8 +383,9 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.isMuted = nbt.getBoolean(MUTED);
         this.regionType = RegionType.of(nbt.getString(REGION_TYPE));
         this.flags = new FlagContainer(nbt.getCompound(FLAGS));
-        this.owners = new PlayerContainer(nbt.getCompound(OWNERS));
-        this.members = new PlayerContainer(nbt.getCompound(MEMBERS));
+        this.groups = new HashMap<>();
+        this.groups.put(OWNERS, new PlayerContainer(nbt.getCompound(OWNERS)));
+        this.groups.put(MEMBERS, new PlayerContainer(nbt.getCompound(MEMBERS)));
         if (this.parent == null) {
             // deserialize parent only if present and if this is no instance of GlobalRegion
             if (nbt.contains(PARENT, Constants.NBT.TAG_STRING) && !(this instanceof GlobalRegion)) {

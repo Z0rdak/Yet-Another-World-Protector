@@ -1,12 +1,11 @@
 package de.z0rdak.yawp.core.region;
 
-import de.z0rdak.yawp.core.affiliation.PlayerContainer;
+import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.scoreboard.Team;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -52,29 +51,25 @@ public interface IProtectedRegion extends INBTSerializable<CompoundNBT> {
 
     void updateFlag(IFlag flag);
 
-    void addMember(PlayerEntity player);
+    void addPlayer(PlayerEntity player, String group);
 
-    void addMember(Team team);
+    void addTeam(String teamName, String group);
 
-    void addOwner(PlayerEntity player);
+    void removeTeam(String teamName, String group);
 
-    void addOwner(Team team);
+    void removePlayer(UUID playerUuid, String group);
 
-    void removeMember(PlayerEntity player);
+    boolean hasTeam(String teamName, String group);
 
-    void removeOwner(PlayerEntity player);
+    boolean hasPlayer(UUID playerUuid, String group);
 
-    void removeMember(Team team);
+    PlayerContainer getGroup(String group);
 
-    void removeOwner(Team team);
+    boolean permits(PlayerEntity player);
 
-    boolean hasOwner(String teamName);
+    boolean isInGroup(PlayerEntity player, String group);
 
-    boolean hasOwner(UUID playerUuid);
-
-    boolean hasMember(String teamName);
-
-    boolean hasMember(UUID playerUuid);
+    boolean disallows(PlayerEntity player);
 
     boolean isActive();
 
@@ -83,12 +78,6 @@ public interface IProtectedRegion extends INBTSerializable<CompoundNBT> {
     boolean isMuted();
 
     void setIsMuted(boolean isMuted);
-
-    PlayerContainer getMembers();
-
-    PlayerContainer getOwners();
-
-    boolean permits(PlayerEntity player);
 
     @Nullable
     IProtectedRegion getParent();
