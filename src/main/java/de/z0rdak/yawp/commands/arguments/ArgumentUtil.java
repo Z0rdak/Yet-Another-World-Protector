@@ -1,4 +1,4 @@
-package de.z0rdak.yawp.util;
+package de.z0rdak.yawp.commands.arguments;
 
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -17,8 +17,11 @@ import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.flag.FlagType;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
+import de.z0rdak.yawp.core.region.DimensionalRegion;
+import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
+import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.EntityArgument;
@@ -28,7 +31,7 @@ import net.minecraft.scoreboard.ScorePlayerTeam;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 
-public class CommandUtil {
+public class ArgumentUtil {
 
     public static LiteralArgumentBuilder<CommandSource> literal(CommandConstants constant) {
         return Commands.literal(constant.toString());
@@ -36,6 +39,14 @@ public class CommandUtil {
 
     public static DimensionRegionCache getDimCacheArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
         return DimensionCacheArgumentType.getDimRegion(ctx, CommandConstants.DIM.toString());
+    }
+
+    public static DimensionalRegion getDimRegionFromArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
+        return DimensionCacheArgumentType.getDimRegion(ctx, CommandConstants.DIM.toString()).getDimensionalRegion();
+    }
+
+    public static GlobalRegion getGlobalRegion() {
+        return RegionDataManager.get().getGlobalRegion();
     }
 
     public static DimensionRegionCache getSrcDimCacheArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
@@ -90,8 +101,8 @@ public class CommandUtil {
         return FlagType.of(StringArgumentType.getString(ctx, CommandConstants.TYPE.toString()));
     }
 
-    public static String getAffiliationArgument(CommandContext<CommandSource> ctx) {
-        return StringArgumentType.getString(ctx, CommandConstants.AFFILIATION.toString());
+    public static String getGroupArgument(CommandContext<CommandSource> ctx) {
+        return StringArgumentType.getString(ctx, CommandConstants.GROUP.toString());
     }
 
     public static ServerPlayerEntity getOwnerArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
