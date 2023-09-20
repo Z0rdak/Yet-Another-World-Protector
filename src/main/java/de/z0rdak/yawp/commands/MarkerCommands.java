@@ -32,7 +32,7 @@ import java.util.Random;
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.DimensionCommands.regionNameSuggestions;
 import static de.z0rdak.yawp.core.region.RegionType.LOCAL;
-import static de.z0rdak.yawp.util.CommandUtil.*;
+import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.MessageUtil.buildRegionInfoLink;
 import static de.z0rdak.yawp.util.MessageUtil.sendCmdFeedback;
 import static de.z0rdak.yawp.util.StickUtil.STICK;
@@ -92,7 +92,7 @@ public final class MarkerCommands {
                         boolean hasConfigPermission = CommandPermissionConfig.hasPlayerPermission(player);
                         if (parentRegion != null) {
                             // should only be a region which has player as owner at this point due to the OwnerRegionArgumentType suggestions
-                            if (parentRegion.hasOwner(player.getUUID()) || hasConfigPermission) {
+                            if (parentRegion.hasPlayer(player.getUUID(), RegionCommands.OWNER) || hasConfigPermission) {
                                 if (AbstractMarkableRegion.fullyContains(parentRegion.getArea(), region.getArea())) {
                                     dimCache.addRegion(region);
                                     parentRegion.addChild(region);
