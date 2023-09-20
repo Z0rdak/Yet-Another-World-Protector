@@ -2,7 +2,6 @@ package de.z0rdak.yawp.config.server;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.core.flag.FlagCategory;
-import de.z0rdak.yawp.core.flag.FlagMessage;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import net.minecraftforge.common.ForgeConfigSpec;
 
@@ -19,6 +18,7 @@ public class FlagConfig {
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> BREAK_FLAG_ENTITY_TAGS;
     private static final ForgeConfigSpec.ConfigValue<String> LOCAL_DEFAULT_FLAG_MSG;
     private static final ForgeConfigSpec.ConfigValue<String> DIM_DEFAULT_FLAG_MSG;
+    private static final ForgeConfigSpec.ConfigValue<String> GLOBAL_DEFAULT_FLAG_MSG;
     private static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_FLAG_INHERITANCE;
     private static final SortedMap<RegionFlag, ForgeConfigSpec.ConfigValue<String>> DEFAULT_FLAG_MESSAGES = new TreeMap<>();
 
@@ -48,6 +48,10 @@ public class FlagConfig {
         DIM_DEFAULT_FLAG_MSG = BUILDER
                 .comment("Default flag message for Dimensional Regions. Displayed when a flag action is denied.")
                 .define(Collections.singletonList("dim_flag_msg"), "[{region}]: The '{flag}' flag denies this action in this dimension!");
+
+        GLOBAL_DEFAULT_FLAG_MSG = BUILDER
+                .comment("Default flag message for the Global Region. Displayed when a flag action is denied.")
+                .define(Collections.singletonList("global_flag_msg"), "[This action is globally denied because of the '{flag}' flag!");
 
         ENABLE_FLAG_INHERITANCE = BUILDER.comment("Enable flag inheritance.")
                 .define("enable_flag_inheritance", false);
@@ -108,16 +112,12 @@ public class FlagConfig {
         return DIM_DEFAULT_FLAG_MSG.get();
     }
 
+    public static String getRawGlobalFlagMsg() {
+        return GLOBAL_DEFAULT_FLAG_MSG.get();
+    }
+
     public static String getRawLocalFlagMsg() {
         return LOCAL_DEFAULT_FLAG_MSG.get();
-    }
-
-    public static FlagMessage getLocalFlagMsg() {
-        return new FlagMessage(getRawLocalFlagMsg());
-    }
-
-    public static FlagMessage getDimFlagMsg() {
-        return new FlagMessage(getRawDimFlagMsg());
     }
 
     private static boolean isValidEntityEntry(Object entity) {
