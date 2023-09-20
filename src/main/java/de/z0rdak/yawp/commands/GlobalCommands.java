@@ -217,7 +217,7 @@ public class GlobalCommands {
         // [n dimensions(s)]
         sendCmdFeedback(src, buildInfoComponent("cli.msg.info.dim.region", buildRegionChildrenLink(globalRegion, RegionType.GLOBAL)));
         // Groups: [owners], [members], [<listAffiliations>]
-        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.affiliation", buildAffiliationLinks(globalRegion, RegionType.GLOBAL)));
+        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.group", buildGroupLinks(globalRegion, RegionType.GLOBAL)));
         // Flags: [n flag(s)] [+]
         sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.flag", buildFlagListLink(globalRegion, RegionType.GLOBAL)));
         // State: [activated]
