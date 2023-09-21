@@ -24,6 +24,8 @@ public class FlagConfig {
 
     private static final String DEFAULT_FLAG_MSG_PATH = "YAWP-default-flag-message-configuration";
 
+    private static final String DEFAULT_PLAYER_SPECIFIC_MSG = "The '{flag}' flag denies this action here!";
+
     static {
         final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
@@ -64,9 +66,9 @@ public class FlagConfig {
                 .stream()
                 .sorted(Comparator.comparing(f -> f.name))
                 .forEach(flag -> {
-                            ForgeConfigSpec.ConfigValue<String> flagMsgConfig = BUILDER
-                                    .comment("Default flag message for flag '" + flag.name + "'.")
-                                    .define(Collections.singletonList(flag.name), "The '{flag}' flag denies this action here!");
+                    ForgeConfigSpec.ConfigValue<String> flagMsgConfig = BUILDER
+                            .comment("Default flag message for flag '" + flag.name + "'.")
+                            .define(Collections.singletonList(flag.name), DEFAULT_PLAYER_SPECIFIC_MSG);
                             DEFAULT_FLAG_MESSAGES.put(flag, flagMsgConfig);
                         }
                 );
@@ -74,7 +76,6 @@ public class FlagConfig {
 
         CONFIG_SPEC = BUILDER.build();
     }
-
 
     public static boolean isFlagInheritanceEnabled() {
         return ENABLE_FLAG_INHERITANCE.get();
@@ -118,6 +119,14 @@ public class FlagConfig {
 
     public static String getRawLocalFlagMsg() {
         return LOCAL_DEFAULT_FLAG_MSG.get();
+    }
+
+    public static boolean isDefinedInConfig(RegionFlag regionFlag) {
+        return DEFAULT_FLAG_MESSAGES.containsKey(regionFlag);
+    }
+
+    public static boolean hasDefaultFlagMsg(RegionFlag regionFlag) {
+        return isDefinedInConfig(regionFlag) && DEFAULT_FLAG_MESSAGES.get(regionFlag).get().equals(DEFAULT_PLAYER_SPECIFIC_MSG);
     }
 
     private static boolean isValidEntityEntry(Object entity) {
