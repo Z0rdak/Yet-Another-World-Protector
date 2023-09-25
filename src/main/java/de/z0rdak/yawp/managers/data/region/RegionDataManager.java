@@ -78,6 +78,10 @@ public class RegionDataManager extends SavedData {
         return Collections.unmodifiableSet(regionDataCache.dimensionDataNames);
     }
 
+    public static List<DimensionRegionCache> getDimensionCaches() {
+        return Collections.unmodifiableList(new ArrayList<>(regionDataCache.dimCacheMap.values()));
+    }
+
     public static RegionDataManager get() {
         if (regionDataCache == null) {
             MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
@@ -123,9 +127,11 @@ public class RegionDataManager extends SavedData {
         rdm.dimCacheMap.clear();
         CompoundTag globalNbt = nbt.getCompound(GLOBAL);
         if (globalNbt.isEmpty()) {
+            YetAnotherWorldProtector.LOGGER.info(new TranslatableComponent("Missing global region data. Initializing new data. (Ignore this for the first server start)").getString());
             globalRegion = new GlobalRegion();
         } else {
             globalRegion = new GlobalRegion(globalNbt);
+            YetAnotherWorldProtector.LOGGER.info(new TranslatableComponent("Loaded global region data").getString());
         }
         rdm.dimCacheMap.clear();
         CompoundTag dimensionRegions = nbt.getCompound(DIMENSIONS);
@@ -265,6 +271,10 @@ public class RegionDataManager extends SavedData {
         return dimCacheMap.keySet().stream()
                 .map(entry -> entry.location().toString())
                 .collect(Collectors.toList());
+    }
+
+    public GlobalRegion getGlobalRegion() {
+        return globalRegion;
     }
 
     public int getDimensionAmount() {
