@@ -20,7 +20,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.DimensionSavedDataManager;
 import net.minecraft.world.storage.WorldSavedData;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -80,6 +79,10 @@ public class RegionDataManager extends WorldSavedData {
         return Collections.unmodifiableSet(dimensionDataNames);
     }
 
+    public static List<DimensionRegionCache> getDimensionCaches() {
+        return Collections.unmodifiableList(new ArrayList<>(dimCacheMap.values()));
+    }
+
     public static RegionDataManager get() {
         if (regionDataCache == null) {
             MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
@@ -127,9 +130,11 @@ public class RegionDataManager extends WorldSavedData {
     public void load(CompoundNBT nbt) {
         CompoundNBT globalNbt = nbt.getCompound(GLOBAL);
         if (globalNbt.isEmpty()) {
+            YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("Missing global region data. Initializing new data. (Ignore this for the first server start)").getString());
             globalRegion = new GlobalRegion();
         } else {
             globalRegion = new GlobalRegion(globalNbt);
+            YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("Loaded global region data").getString());
         }
         dimCacheMap.clear();
         CompoundNBT dimensionRegions = nbt.getCompound(DIMENSIONS);
@@ -260,6 +265,10 @@ public class RegionDataManager extends WorldSavedData {
         return dimCacheMap.keySet().stream()
                 .map(entry -> entry.location().toString())
                 .collect(Collectors.toList());
+    }
+
+    public GlobalRegion getGlobalRegion() {
+        return globalRegion;
     }
 
     public Collection<IMarkableRegion> getRegionsFor(RegistryKey<World> dim) {
