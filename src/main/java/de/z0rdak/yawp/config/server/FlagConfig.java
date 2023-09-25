@@ -129,6 +129,10 @@ public class FlagConfig {
         return isDefinedInConfig(regionFlag) && DEFAULT_FLAG_MESSAGES.get(regionFlag).get().equals(DEFAULT_PLAYER_SPECIFIC_MSG);
     }
 
+    public static boolean hasCustomFlagMsg(RegionFlag regionFlag) {
+        return isDefinedInConfig(regionFlag) && !DEFAULT_FLAG_MESSAGES.get(regionFlag).get().equals(DEFAULT_PLAYER_SPECIFIC_MSG);
+    }
+
     private static boolean isValidEntityEntry(Object entity) {
         return true;
     }
