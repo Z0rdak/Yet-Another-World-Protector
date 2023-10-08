@@ -13,7 +13,7 @@ the [WorldGuard](https://dev.bukkit.org/projects/worldguard) plugin.
 
 Join our discord if you have any questions or suggestions: [YAWP Discord](https://discord.gg/d7hArKCUtm)
 
-![](yawp-feature-1.png)
+![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/yawp-feature-1.png)
 
 ***The mod is currently in its beta state, with many features not yet implemented but to come. These features will
 include most of the things you know from WorldProtector and WorldGuard.***
@@ -22,7 +22,7 @@ This mod will be released for Minecraft versions 1.16.5+. If you are living in t
 for Minecraft 1.12.2, I suggest looking into
 using [WorldDefender](https://www.curseforge.com/minecraft/mc-mods/world-defender).
 
-![](yawp-feature-3.png "Region types")
+![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/yawp-feature-3.png "Region types")
 
 In YAWP there are three different kinds of regions to protect your server:
 
@@ -79,11 +79,11 @@ is hinted by the hover text.
 Regions can only be managed by their owners, or by players which have the required OP level or have an entry in the
 configuration. For more information, visit the wiki.
 
-![](yawp-feature-4.png "Region hierarchy")
+![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/yawp-feature-4.png "Region hierarchy")
 
 TBD
 
-![](yawp-feature-5.png "Region groups")
+![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/yawp-feature-5.png "Region groups")
 
 Regions have owners and normal members. Owners are allowed to manage the region and bypass the flags, members are
 only allowed to bypass the flags set in the region.
@@ -93,7 +93,7 @@ Owners and Members can be individual players or a [team](https://minecraft.fando
 Groups allow you assign specific region permissions to different players and teams. Currently, there are only two
 default groups: **owners** and **members**.
 
-![](yawp-feature-6.png "")
+![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/yawp-feature-6.png "")
 
 - **Owners** can manage their region themselves and add other players/teams to the region. They can also create their
   own sub-regions within their region, manage flags, ect. and of course owners bypass flags.
@@ -105,7 +105,7 @@ update, so you can define your own groups and permissions.
 
 If you have trouble with setting up regions, visit the discord for help.
 
-![](yawp-feature-7.png "")
+![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/yawp-feature-7.png "")
 
 You can add rules to Regions with flags. If the flag is defined, it prevents the defined action associated with the
 flag.
@@ -119,23 +119,23 @@ here: [Flag suggestions](https://github.com/Z0rdak/Yet-Another-World-Protector/i
 There will also be more complex flags in the future. Like *ListFlag* which will allow you to define a list of allowed
 blocks/entities/.. which are forbidden in the context of a flag.
 
-![](yawp-feature-2.png "Interactive CLI")
+![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/yawp-feature-2.png "Interactive CLI")
 
 * Pagination for more easy management of flags, players, regions, etc.
 
-![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/1.16.x/web-resources/yawp-cli-pagination.png "Pagination")
+![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/yawp-cli-pagination.png "Pagination")
 
 * Local Region CLI
 
-![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/1.16.x/web-resources/local-interactive-cli-info.png)
+![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/local-interactive-cli-info.png)
 
-![](yawp-feature-8.png)
+![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/yawp-feature-8.png)
 
 The commands of mod are also designed to be used by the server console and can be executed by command blocks.
 
 This allows you to automate region setups, add/remove players, enable or disable regions, etc.
 
-![](yawp-feature-9.png)
+![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/yawp-feature-9.png)
 
 The client side installation of the mod provides language support (I18n) in form of a resource pack. Currently, english,
 german and russian language is supported.
@@ -144,7 +144,7 @@ Starting with mod version 0.0.2.9-beta2 and Minecraft Version 1.19.4, YAWP provi
 
 If your language is not yet supported, feel free to reach out to me via discord or issue a pull request via github! :)
 
-![](yawp-feature-10.png)
+![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/yawp-feature-10.png)
 
 The configuration of the mod allows you to control which is allowed to use the mod, sets default flags for Local and
 Dimension Regions, command line interface options, etc.
@@ -158,7 +158,7 @@ The configuration is split in different files, covering different topics.
 Since YAWP is a server-side mod, the config for it is found in the directory `/serverconfig` in your minecraft world
 directory.
 
-![](yawp-feature-11.png)
+![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/yawp-feature-11.png)
 
 The documentation of the mod is small but growing. I am trying to keep up with the content. You cant find the
 documentation/wiki [here](https://github.com/Z0rdak/Yet-Another-World-Protector/wiki).
