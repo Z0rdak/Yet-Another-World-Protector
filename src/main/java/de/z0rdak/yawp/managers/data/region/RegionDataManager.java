@@ -17,6 +17,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -43,7 +44,7 @@ import static de.z0rdak.yawp.util.constants.RegionNBT.REGIONS;
 public class RegionDataManager extends SavedData {
 
     /**
-     * Name which is used for the file to store the NBT data: yawp-dimensions.dat
+     * Name which is used for the file to store the NBT data: yawp-dimensions.dat.old
      */
     private static final String DATA_NAME = YetAnotherWorldProtector.MODID + "-dimensions";
     /**
@@ -86,7 +87,8 @@ public class RegionDataManager extends SavedData {
                 ServerLevel overworld = server.overworld();
                 if (!overworld.isClientSide) {
                     DimensionDataStorage storage = overworld.getDataStorage();
-                    regionDataCache = storage.computeIfAbsent(RegionDataManager::load, RegionDataManager::new, DATA_NAME);
+                    Factory<RegionDataManager> rdmt = new Factory<>(RegionDataManager::new, RegionDataManager::load, DataFixTypes.SAVED_DATA_MAP_DATA);
+                    regionDataCache = storage.computeIfAbsent(rdmt, DATA_NAME);
                 }
             }
         }
@@ -104,7 +106,8 @@ public class RegionDataManager extends SavedData {
             ServerLevel world = Objects.requireNonNull(event.getServer().overworld());
             if (!world.isClientSide) {
                 DimensionDataStorage storage = world.getDataStorage();
-                RegionDataManager data = storage.computeIfAbsent(RegionDataManager::load, RegionDataManager::new, DATA_NAME);
+                Factory<RegionDataManager> rdmt = new Factory<>(RegionDataManager::new, RegionDataManager::load, DataFixTypes.SAVED_DATA_MAP_DATA);
+                RegionDataManager data = storage.computeIfAbsent(rdmt, DATA_NAME);
                 storage.set(DATA_NAME, data);
                 regionDataCache = data;
                 YetAnotherWorldProtector.LOGGER.info(Component.translatableWithFallback("data.nbt.dimensions.load.success", "Loaded %s region(s) for %s dimension(s)", data.getTotalRegionAmount(), data.getDimensionAmount()).getString());
