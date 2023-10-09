@@ -9,6 +9,7 @@ import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
+import net.minecraft.datafixer.DataFixTypes;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -16,7 +17,6 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -77,7 +77,8 @@ public class RegionDataManager extends PersistentState {
                 ServerWorld overworld = serverInstance.getOverworld();
                 if (!overworld.isClient) {
                     PersistentStateManager storage = overworld.getPersistentStateManager();
-                    regionDataCache = storage.getOrCreate(RegionDataManager::load, RegionDataManager::new, DATA_NAME);
+                    Type<RegionDataManager> rdmt = new Type<>(RegionDataManager::new, RegionDataManager::load, DataFixTypes.SAVED_DATA_MAP_DATA);
+                    regionDataCache = storage.getOrCreate(rdmt, DATA_NAME);
                 }
             }
         }
@@ -106,7 +107,8 @@ public class RegionDataManager extends PersistentState {
             }
             if (!serverWorld.isClient && serverWorld.getRegistryKey().getValue().equals(new Identifier("minecraft:overworld"))) {
                 PersistentStateManager storage = serverWorld.getPersistentStateManager();
-                RegionDataManager data = storage.getOrCreate(RegionDataManager::load, RegionDataManager::new, DATA_NAME);
+                Type<RegionDataManager> rdmt = new Type<>(RegionDataManager::new, RegionDataManager::load, DataFixTypes.SAVED_DATA_MAP_DATA);
+                RegionDataManager data = storage.getOrCreate(rdmt, DATA_NAME);
                 storage.set(DATA_NAME, data);
                 regionDataCache = data;
                 YetAnotherWorldProtector.LOGGER.info(Text.translatableWithFallback("data.nbt.dimensions.load.success", "Loaded %s region(s) for %s dimension(s)", data.getTotalRegionAmount(), data.getDimensionAmount()).getString());
