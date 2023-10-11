@@ -28,6 +28,8 @@ import de.z0rdak.yawp.util.LocalRegions;
 import de.z0rdak.yawp.util.StickException;
 import de.z0rdak.yawp.util.StickType;
 import de.z0rdak.yawp.util.StickUtil;
+import de.z0rdak.yawp.util.WorldEditLinkUtil;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.BlockPosArgumentType;
 import net.minecraft.command.argument.DimensionArgumentType;
@@ -634,6 +636,9 @@ public class RegionCommands {
         sendCmdFeedback(src, regionHierarchy);
         // State: [State]
         sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.state", "State", buildRegionStateLink(region)));
+        if (FabricLoader.getInstance().isModLoaded("worldedit") ) {
+            WorldEditLinkUtil.regionToWorldEdit(src, region);
+        }
         return 0;
     }
 

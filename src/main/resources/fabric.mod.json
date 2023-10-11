@@ -29,5 +29,8 @@
     "forgeconfigapiport": "*",
     "fabric": "*",
     "minecraft": "1.20.x"
+  },
+  "suggests": {
+    "worldedit": ">=7.2.15"
   }
 }
