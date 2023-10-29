@@ -1,17 +1,22 @@
 package de.z0rdak.yawp.commands.arguments.flag;
 
+import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
+import de.z0rdak.yawp.core.region.IProtectedRegion;
+import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -24,8 +29,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static de.z0rdak.yawp.commands.CommandConstants.FLAG;
 import static de.z0rdak.yawp.commands.CommandConstants.REMOVE;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.getRegionArgument;
+import static de.z0rdak.yawp.config.server.CommandPermissionConfig.BASE_CMD;
 
 public class IFlagArgumentType implements ArgumentType<String> {
 
@@ -102,6 +109,73 @@ public class IFlagArgumentType implements ArgumentType<String> {
             try {
                 List<String> flagToSuggest;
                 IMarkableRegion region = getRegionArgument((CommandContext<CommandSourceStack>) context);
+                boolean isRemoveCmd = context.getNodes()
+                        .stream()
+                        .map(node -> node.getNode().getName())
+                        .collect(Collectors.toSet())
+                        .contains(REMOVE.toString());
+                List<String> flagsInRegion = region.getFlags()
+                        .stream()
+                        .map(IFlag::getName)
+                        .distinct()
+                        .collect(Collectors.toList());
+                if (isRemoveCmd) {
+                    // Only show existing flags
+                    flagToSuggest = flagsInRegion;
+                } else {
+                    // show flags not in region
+                    List<String> allFlags = RegionFlag.getFlagNames();
+                    allFlags.removeAll(flagsInRegion);
+                    flagToSuggest = allFlags;
+                }
+                if (isRemoveCmd && flagToSuggest.isEmpty()) {
+                    MessageUtil.sendCmdFeedback(src, new TextComponent("No flags defined in region '" + region.getName() + "'!"));
+                    return Suggestions.empty();
+                }
+                if (!isRemoveCmd && flagToSuggest.isEmpty()) {
+                    MessageUtil.sendCmdFeedback(src, new TextComponent("Region '" + region.getName() + "' already contains all flags!"));
+                    return Suggestions.empty();
+                }
+                return SharedSuggestionProvider.suggest(flagToSuggest, builder);
+            } catch (CommandSyntaxException e) {
+                throw new RuntimeException(e);
+            }
+
+        } else {
+            return Suggestions.empty();
+        }
+    }
+
+    public static <S> RegionType getRegionType(CommandContext<S> context) {
+        List<ParsedCommandNode<S>> nodes = context.getNodes();
+        if (nodes.size() >= 2) {
+            String baseCmd = nodes.get(0).getNode().getName();
+            if (baseCmd.equals(BASE_CMD)) {
+                String regionTypeLiteral = nodes.get(1).getNode().getName();
+                RegionType regionType = RegionType.of(regionTypeLiteral);
+                boolean isFlagSubCmd = regionTypeLiteral.equals(FLAG.toString()) && nodes.size() >= 3;
+                if (regionType == null && isFlagSubCmd) {
+                    String flagRegionTypeLiteral = nodes.get(2).getNode().getName();
+                    return RegionType.of(flagRegionTypeLiteral);
+                }
+            }
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <S> CompletableFuture<Suggestions> listSuggestionsFor(CommandContext<S> context, SuggestionsBuilder builder) throws CommandSyntaxException {
+        RegionType regionType = IFlagArgumentType.getRegionType(context);
+        if (regionType == null) {
+            LiteralMessage invalidRegionTypeSupplied = new LiteralMessage("Invalid region type supplied");
+            throw new CommandSyntaxException(new SimpleCommandExceptionType(invalidRegionTypeSupplied), invalidRegionTypeSupplied);
+        }
+
+        if (context.getSource() instanceof CommandSourceStack) {
+            CommandSourceStack src = (CommandSourceStack) context.getSource();
+            try {
+                IProtectedRegion region = RegionArgumentType.getRegion((CommandContext<CommandSourceStack>) context, regionType);
+                List<String> flagToSuggest;
                 boolean isRemoveCmd = context.getNodes()
                         .stream()
                         .map(node -> node.getNode().getName())
