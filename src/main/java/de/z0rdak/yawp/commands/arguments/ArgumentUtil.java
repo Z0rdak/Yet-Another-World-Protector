@@ -7,8 +7,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.commands.CommandConstants;
-import de.z0rdak.yawp.commands.arguments.AreaArgumentType;
-import de.z0rdak.yawp.commands.arguments.DimensionCacheArgumentType;
 import de.z0rdak.yawp.commands.arguments.flag.IFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.flag.RegionFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
@@ -17,9 +15,7 @@ import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.flag.FlagType;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.core.region.DimensionalRegion;
-import de.z0rdak.yawp.core.region.GlobalRegion;
-import de.z0rdak.yawp.core.region.IMarkableRegion;
+import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.command.CommandSource;
@@ -63,6 +59,10 @@ public class ArgumentUtil {
 
     public static IMarkableRegion getRegionArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
         return RegionArgumentType.getRegion(ctx, REGION.toString());
+    }
+
+    public static IProtectedRegion getRegion(CommandContext<CommandSource> ctx, RegionType regionType) throws CommandSyntaxException {
+        return RegionArgumentType.getRegion(ctx, regionType);
     }
 
     public static IMarkableRegion getSourceRegionArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
