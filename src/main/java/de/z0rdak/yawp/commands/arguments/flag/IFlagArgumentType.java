@@ -14,7 +14,8 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.core.region.IMarkableRegion;
+import de.z0rdak.yawp.core.region.IProtectedRegion;
+import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.util.MessageUtil;
@@ -23,16 +24,16 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static de.z0rdak.yawp.commands.CommandConstants.FLAG;
+import static de.z0rdak.yawp.commands.CommandConstants.ADD;
 import static de.z0rdak.yawp.commands.CommandConstants.REMOVE;
-import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.getRegionArgument;
-import static de.z0rdak.yawp.config.server.CommandPermissionConfig.BASE_CMD;
 
 public class IFlagArgumentType implements ArgumentType<String> {
 
@@ -72,6 +73,11 @@ public class IFlagArgumentType implements ArgumentType<String> {
         }
     }
 
+    @Override
+    public Collection<String> getExamples() {
+        return EXAMPLES;
+    }
+
     /**
      * Using this as an actual argument does not work on a server-side only mod,
      * because it needs to be registered in the corresponding registry.
@@ -80,15 +86,11 @@ public class IFlagArgumentType implements ArgumentType<String> {
         return new IFlagArgumentType();
     }
 
-    @Override
-    public Collection<String> getExamples() {
-        return EXAMPLES;
-    }
-
     public static IFlag getFlag(CommandContext<CommandSourceStack> context, String argName) throws CommandSyntaxException {
+        RegionType regionType = RegionArgumentType.getRegionType(context);
         String flagIdentifier = context.getArgument(argName, String.class);
-        if (RegionFlag.contains(flagIdentifier)) {
-            IMarkableRegion region = getRegionArgument(context);
+        if (RegionFlag.contains(flagIdentifier) && regionType != null) {
+            IProtectedRegion region = RegionArgumentType.getRegion(context, regionType);
             if (region.containsFlag(flagIdentifier)) {
                 return region.getFlag(flagIdentifier);
             } else {
@@ -102,104 +104,61 @@ public class IFlagArgumentType implements ArgumentType<String> {
         }
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        if (context.getSource() instanceof CommandSourceStack src) {
-            try {
-                List<String> flagToSuggest;
-                IMarkableRegion region = getRegionArgument((CommandContext<CommandSourceStack>) context);
-                boolean isRemoveCmd = context.getNodes()
-                        .stream()
-                        .map(node -> node.getNode().getName())
-                        .collect(Collectors.toSet())
-                        .contains(REMOVE.toString());
-                List<String> flagsInRegion = region.getFlags()
-                        .stream()
-                        .map(IFlag::getName)
-                        .distinct()
-                        .collect(Collectors.toList());
-                if (isRemoveCmd) {
-                    // Only show existing flags
-                    flagToSuggest = flagsInRegion;
-                } else {
-                    // show flags not in region
-                    List<String> allFlags = RegionFlag.getFlagNames();
-                    allFlags.removeAll(flagsInRegion);
-                    flagToSuggest = allFlags;
-                }
-                if (isRemoveCmd && flagToSuggest.isEmpty()) {
-                    MessageUtil.sendCmdFeedback(src, new TextComponent("No flags defined in region '" + region.getName() + "'!"));
-                    return Suggestions.empty();
-                }
-                if (!isRemoveCmd && flagToSuggest.isEmpty()) {
-                    MessageUtil.sendCmdFeedback(src, new TextComponent("Region '" + region.getName() + "' already contains all flags!"));
-                    return Suggestions.empty();
-                }
-                return SharedSuggestionProvider.suggest(flagToSuggest, builder);
-            } catch (CommandSyntaxException e) {
-                throw new RuntimeException(e);
-            }
+    private <S> FlagEditType getEditType(CommandContext<S> context) {
+        Set<String> nodes = context.getNodes()
+                .stream()
+                .map(node -> node.getNode().getName())
+                .collect(Collectors.toSet());
+        if (nodes.contains(ADD.toString())) {
+            return FlagEditType.ADD;
+        }
+        if (nodes.contains(REMOVE.toString())) {
+            return FlagEditType.REMOVE;
+        }
+        return FlagEditType.UNSET;
+    }
 
-        } else {
+    private <S> List<String> getSuggestionFlags(FlagEditType flagEditType, IProtectedRegion region) throws CommandSyntaxException {
+        List<String> flagsInRegion = region.getFlags()
+                .stream()
+                .map(IFlag::getName)
+                .distinct()
+                .collect(Collectors.toList());
+        switch (flagEditType) {
+            case ADD: // show flags not in region
+                List<String> flags = RegionFlag.getFlagNames();
+                flags.removeAll(flagsInRegion);
+                return flags;
+            case REMOVE: // Only show existing flags
+                return flagsInRegion;
+            case UNSET:
+            default:
+                return new ArrayList<>();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
+        RegionType regionType = RegionArgumentType.getRegionType(context);
+        boolean isCommandSource = context.getSource() instanceof CommandSourceStack;
+        if (regionType == null) {
+            if (isCommandSource) {
+                MessageUtil.sendCmdFeedback((CommandSourceStack) context.getSource(), new TextComponent("Invalid region type supplied"));
+            }
             return Suggestions.empty();
         }
-    }
-
-    public static <S> RegionType getRegionType(CommandContext<S> context) {
-        List<ParsedCommandNode<S>> nodes = context.getNodes();
-        if (nodes.size() >= 2) {
-            String baseCmd = nodes.get(0).getNode().getName();
-            if (baseCmd.equals(BASE_CMD)) {
-                String regionTypeLiteral = nodes.get(1).getNode().getName();
-                RegionType regionType = RegionType.of(regionTypeLiteral);
-                boolean isFlagSubCmd = regionTypeLiteral.equals(FLAG.toString()) && nodes.size() >= 3;
-                if (regionType == null && isFlagSubCmd) {
-                    String flagRegionTypeLiteral = nodes.get(2).getNode().getName();
-                    return RegionType.of(flagRegionTypeLiteral);
-                }
-            }
-        }
-        return null;
-    }
-
-    @SuppressWarnings("unchecked")
-    public <S> CompletableFuture<Suggestions> listSuggestionsFor(CommandContext<S> context, SuggestionsBuilder builder) throws CommandSyntaxException {
-        RegionType regionType = IFlagArgumentType.getRegionType(context);
-        if (regionType == null) {
-            LiteralMessage invalidRegionTypeSupplied = new LiteralMessage("Invalid region type supplied");
-            throw new CommandSyntaxException(new SimpleCommandExceptionType(invalidRegionTypeSupplied), invalidRegionTypeSupplied);
-        }
-
-        if (context.getSource() instanceof CommandSourceStack) {
+        if (isCommandSource) {
             CommandSourceStack src = (CommandSourceStack) context.getSource();
             try {
                 IProtectedRegion region = RegionArgumentType.getRegion((CommandContext<CommandSourceStack>) context, regionType);
-                List<String> flagToSuggest;
-                boolean isRemoveCmd = context.getNodes()
-                        .stream()
-                        .map(node -> node.getNode().getName())
-                        .collect(Collectors.toSet())
-                        .contains(REMOVE.toString());
-                List<String> flagsInRegion = region.getFlags()
-                        .stream()
-                        .map(IFlag::getName)
-                        .distinct()
-                        .collect(Collectors.toList());
-                if (isRemoveCmd) {
-                    // Only show existing flags
-                    flagToSuggest = flagsInRegion;
-                } else {
-                    // show flags not in region
-                    List<String> allFlags = RegionFlag.getFlagNames();
-                    allFlags.removeAll(flagsInRegion);
-                    flagToSuggest = allFlags;
-                }
-                if (isRemoveCmd && flagToSuggest.isEmpty()) {
+                FlagEditType flagEditType = getEditType(context);
+                List<String> flagToSuggest = getSuggestionFlags(flagEditType, region);
+                if (flagEditType == FlagEditType.REMOVE && flagToSuggest.isEmpty()) {
                     MessageUtil.sendCmdFeedback(src, new TextComponent("No flags defined in region '" + region.getName() + "'!"));
                     return Suggestions.empty();
                 }
-                if (!isRemoveCmd && flagToSuggest.isEmpty()) {
+                if (flagEditType == FlagEditType.ADD && flagToSuggest.isEmpty()) {
                     MessageUtil.sendCmdFeedback(src, new TextComponent("Region '" + region.getName() + "' already contains all flags!"));
                     return Suggestions.empty();
                 }
