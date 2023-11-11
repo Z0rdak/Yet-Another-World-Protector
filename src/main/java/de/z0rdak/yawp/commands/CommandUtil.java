@@ -9,8 +9,10 @@ import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.group.GroupType;
 import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.handler.flags.HandlerUtil;
+import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
+import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ExperienceOrbEntity;
@@ -26,15 +28,14 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.commons.lang3.NotImplementedException;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.ADD;
 import static de.z0rdak.yawp.commands.CommandConstants.REMOVE;
+import static de.z0rdak.yawp.commands.RegionCommands.MEMBER;
+import static de.z0rdak.yawp.commands.RegionCommands.OWNER;
 import static de.z0rdak.yawp.util.MessageUtil.*;
 
 public class CommandUtil {
@@ -228,17 +229,77 @@ public class CommandUtil {
         if (region.containsFlag(flag)) {
             region.removeFlag(flag.name);
             RegionDataManager.save();
-            TranslationTextComponent msg = new TranslationTextComponent("cli.msg.flag.removed", flag.name,
+            IFormattableTextComponent msg = new TranslationTextComponent("cli.msg.flag.removed", flag.name,
                     buildRegionInfoLink(region, regionType));
             IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), REMOVE, ADD);
             sendCmdFeedback(ctx.getSource(), msg.append(" ").append(undoLink));
             return 0;
         } else {
-            TranslationTextComponent msg = new TranslationTextComponent("cli.msg.flag.not-present", flag.name,
+            IFormattableTextComponent msg = new TranslationTextComponent("cli.msg.flag.not-present", flag.name,
                     buildRegionInfoLink(region, regionType));
             sendCmdFeedback(ctx.getSource(), msg);
             return 1;
         }
+    }
+
+    // TODO: Lang keys
+    public static int clearFlags(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionType regionType) {
+        int amount = region.getFlags().size();
+        if (amount == 0) {
+            IFormattableTextComponent feedbackMsg = new TranslationTextComponent("cli.msg.region.info.flags.empty", buildRegionInfoLink(region, regionType));
+            sendCmdFeedback(ctx.getSource(), feedbackMsg);
+            return 1;
+        }
+        Collection<IFlag> flags = region.getFlags();
+        // TODO: Undo action - this would require a addFlag command which allows to add multiple
+        region.getFlags().clear();
+        IFormattableTextComponent feedbackMsg = new TranslationTextComponent("cli.msg.info.flags.cleared", buildRegionInfoLink(region, regionType), amount);
+        sendCmdFeedback(ctx.getSource(), feedbackMsg);
+        RegionDataManager.save();
+        return 0;
+    }
+
+    public static int clearPlayers(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionType regionType) {
+        return clearPlayers(ctx, region, MEMBER, regionType) + clearPlayers(ctx, region, OWNER, regionType);
+    }
+
+    public static int clearPlayers(CommandContext<CommandSource> ctx, IProtectedRegion region, String groupName, RegionType regionType) {
+        // TODO: Undo action - this would require a addplayer command which allows to add multiple (offline)
+        int amount = region.getGroup(groupName).getPlayers().size();
+        if (amount == 0) {
+            IFormattableTextComponent feedbackMsg = new TranslationTextComponent("cli.msg.region.info.players.empty", buildRegionInfoLink(region, regionType), groupName);
+            sendCmdFeedback(ctx.getSource(), feedbackMsg);
+            return 1;
+        }
+        region.getGroup(groupName).clearPlayers();
+        IFormattableTextComponent feedbackMsg = new TranslationTextComponent("cli.msg.region.info.players.cleared", buildRegionInfoLink(region, regionType), amount, groupName);
+        sendCmdFeedback(ctx.getSource(), feedbackMsg);
+        RegionDataManager.save();
+        return 0;
+    }
+
+    public static int clearTeams(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionType regionType) {
+        return clearPlayers(ctx, region, MEMBER, regionType) + clearPlayers(ctx, region, OWNER, regionType);
+    }
+
+    public static int clearTeams(CommandContext<CommandSource> ctx, IProtectedRegion region, String groupName, RegionType regionType) {
+        // TODO: Undo action
+        int amount = region.getGroup(groupName).getTeams().size();
+        if (amount == 0) {
+            IFormattableTextComponent feedbackMsg = new TranslationTextComponent("cli.msg.region.info.teams.empty", buildRegionInfoLink(region, regionType), groupName);
+            sendCmdFeedback(ctx.getSource(), feedbackMsg);
+            return 1;
+        }
+        region.getGroup(groupName).clearTeams();
+        IFormattableTextComponent feedbackMsg = new TranslationTextComponent("cli.msg.region.info.teams.cleared", buildRegionInfoLink(region, regionType), amount, groupName);
+        sendCmdFeedback(ctx.getSource(), feedbackMsg);
+        RegionDataManager.save();
+        return 0;
+    }
+
+
+    public static int clearAffiliation(CommandContext<CommandSource> ctx, IProtectedRegion region, String groupName, RegionType regionType) {
+        return CommandUtil.clearTeams(ctx, region, groupName, regionType) + CommandUtil.clearPlayers(ctx, region, groupName, regionType);
     }
 
     public static int addRegionFlag(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionType regionType, RegionFlag flag) {
@@ -261,13 +322,13 @@ public class CommandUtil {
             region.addFlag(iFlag);
             RegionDataManager.save();
             IFormattableTextComponent flagLink = buildFlagInfoLink(region, iFlag, regionType);
-            TranslationTextComponent msg = new TranslationTextComponent("cli.msg.flags.added",
+            IFormattableTextComponent msg = new TranslationTextComponent("cli.msg.flag.added",
                     flagLink, buildRegionInfoLink(region, regionType));
             IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), ADD, REMOVE);
             sendCmdFeedback(ctx.getSource(), msg.append(" ").append(undoLink));
             return 0;
         } else {
-            TranslationTextComponent msg = new TranslationTextComponent("cli.msg.flag.present", flag.name,
+            IFormattableTextComponent msg = new TranslationTextComponent("cli.msg.flag.present", flag.name,
                     buildRegionInfoLink(region, regionType));
             sendCmdFeedback(ctx.getSource(), msg);
             return 1;
