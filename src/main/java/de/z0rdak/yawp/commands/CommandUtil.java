@@ -1,6 +1,9 @@
 package de.z0rdak.yawp.commands;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import de.z0rdak.yawp.commands.arguments.flag.RegionFlagArgumentType;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.flag.BooleanFlag;
@@ -14,12 +17,17 @@ import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.command.ISuggestionProvider;
+import net.minecraft.command.arguments.EntityArgument;
+import net.minecraft.command.arguments.TeamArgument;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ExperienceOrbEntity;
 import net.minecraft.entity.merchant.villager.WanderingTraderEntity;
 import net.minecraft.entity.monster.SlimeEntity;
 import net.minecraft.entity.passive.GolemEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -29,16 +37,95 @@ import net.minecraft.world.server.ServerWorld;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static de.z0rdak.yawp.commands.CommandConstants.ADD;
-import static de.z0rdak.yawp.commands.CommandConstants.REMOVE;
-import static de.z0rdak.yawp.commands.RegionCommands.MEMBER;
-import static de.z0rdak.yawp.commands.RegionCommands.OWNER;
+import static de.z0rdak.yawp.commands.CommandConstants.*;
+import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.MessageUtil.*;
 
 public class CommandUtil {
+
+    public final static String MEMBER = "members";
+    public final static String OWNER = "owners";
+    public final static List<String> GROUP_LIST = Arrays.asList(MEMBER, OWNER);
+
+    public static LiteralArgumentBuilder<CommandSource> buildClearSubCommand(Function<CommandContext<CommandSource>, IProtectedRegion> regionSupplier, RegionType regionType) {
+        return literal(CLEAR)
+                .then(literal(FLAGS)
+                        .executes(ctx -> CommandUtil.clearFlags(ctx, regionSupplier.apply(ctx), regionType))
+                )
+                .then(literal(PLAYERS)
+                        .executes(ctx -> CommandUtil.clearPlayers(ctx, regionSupplier.apply(ctx), regionType))
+                        .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
+                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(GROUP_LIST, builder))
+                                .executes(ctx -> CommandUtil.clearPlayers(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx), regionType)))
+                )
+                .then(literal(TEAMS)
+                        .executes(ctx -> CommandUtil.clearTeams(ctx, regionSupplier.apply(ctx), regionType))
+                        .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
+                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(GROUP_LIST, builder))
+                                .executes(ctx -> CommandUtil.clearTeams(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx), regionType)))
+                )
+                .then(literal(GROUP)
+                        .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
+                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(GROUP_LIST, builder))
+                                .executes(ctx -> CommandUtil.clearAffiliation(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx), regionType)))
+                );
+    }
+
+    public static LiteralArgumentBuilder<CommandSource> buildRemoveSubCommand(Function<CommandContext<CommandSource>, IProtectedRegion> regionSupplier, RegionType regionType) {
+        return literal(REMOVE)
+                .then(literal(PLAYER)
+                        .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
+                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(GROUP_LIST, builder))
+                                .then(Commands.argument(PLAYER.toString(), EntityArgument.players())
+                                        .executes(ctx -> removePlayer(ctx, getPlayersArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx), regionType))))
+                        .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
+                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(GROUP_LIST, builder))
+                                .then(Commands.argument(PLAYER.toString(), EntityArgument.players())
+                                        .executes(ctx -> removePlayer(ctx, getPlayersArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx), regionType)))))
+                .then(literal(TEAM)
+                        .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
+                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(GROUP_LIST, builder))
+                                .then(Commands.argument(TEAM.toString(), TeamArgument.team())
+                                        .executes(ctx -> removeTeam(ctx, getTeamArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx), regionType))))
+                        .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
+                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(GROUP_LIST, builder))
+                                .then(Commands.argument(TEAM.toString(), TeamArgument.team())
+                                        .executes(ctx -> removeTeam(ctx, getTeamArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx), regionType)))))
+                .then(literal(FLAG)
+                        .then(Commands.argument(FLAG.toString(), StringArgumentType.greedyString())
+                                .suggests((ctx, builder) -> RegionFlagArgumentType.flag().listSuggestions(ctx, builder))
+                                .executes(ctx -> removeFlag(ctx, regionSupplier.apply(ctx), getFlagArguments(ctx), regionType))));
+    }
+
+    public static LiteralArgumentBuilder<CommandSource> buildAddSubCommand(Function<CommandContext<CommandSource>, IProtectedRegion> regionSupplier, RegionType regionType) {
+        return literal(ADD)
+                .then(literal(PLAYER)
+                        .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
+                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(GROUP_LIST, builder))
+                                .then(Commands.argument(PLAYER.toString(), EntityArgument.players())
+                                        .executes(ctx -> addPlayer(ctx, getPlayersArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx), regionType))))
+                        .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
+                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(GROUP_LIST, builder))
+                                .then(Commands.argument(PLAYER.toString(), EntityArgument.players())
+                                        .executes(ctx -> addPlayer(ctx, getPlayersArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx), regionType)))))
+                .then(literal(TEAM)
+                        .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
+                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(GROUP_LIST, builder))
+                                .then(Commands.argument(TEAM.toString(), TeamArgument.team())
+                                        .executes(ctx -> addTeam(ctx, getTeamArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx), regionType))))
+                        .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
+                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(GROUP_LIST, builder))
+                                .then(Commands.argument(TEAM.toString(), TeamArgument.team())
+                                        .executes(ctx -> addTeam(ctx, getTeamArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx), regionType)))))
+                .then(literal(FLAG)
+                        .then(Commands.argument(FLAG.toString(), StringArgumentType.greedyString())
+                                .suggests((ctx, builder) -> RegionFlagArgumentType.flag().listSuggestions(ctx, builder))
+                                .executes(ctx -> addFlag(ctx, regionSupplier.apply(ctx), getFlagArguments(ctx), RegionType.LOCAL))));
+    }
 
     /**
      * Prompt the common region state to the command issuer.
@@ -58,7 +145,7 @@ public class CommandUtil {
      * Teams: [m team(s)][+]
      */
     public static int promptGroupLinks(CommandContext<CommandSource> ctx, IProtectedRegion region, String group, RegionType regionType) {
-        if (!RegionCommands.GROUP_LIST.contains(group)) {
+        if (!GROUP_LIST.contains(group)) {
             sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.global.info.group.invalid", group).withStyle(TextFormatting.RED));
             return -1;
         }
@@ -83,7 +170,7 @@ public class CommandUtil {
     }
 
     public static int promptGroupList(CommandContext<CommandSource> ctx, String cmd, IProtectedRegion region, String group, GroupType groupType, RegionType regionType, int pageNo) {
-        if (!RegionCommands.GROUP_LIST.contains(group)) {
+        if (!GROUP_LIST.contains(group)) {
             sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.region.info.group.invalid", group).withStyle(TextFormatting.RED));
             return -1;
         }
@@ -125,8 +212,8 @@ public class CommandUtil {
         return 0;
     }
 
-    public static int removeTeam(CommandContext<CommandSource> src, Team team, IProtectedRegion region, RegionType regionType, String group) {
-        if (!RegionCommands.GROUP_LIST.contains(group)) {
+    public static int removeTeam(CommandContext<CommandSource> src, Team team, IProtectedRegion region, String group, RegionType regionType) {
+        if (!GROUP_LIST.contains(group)) {
             sendCmdFeedback(src.getSource(), new TranslationTextComponent("cli.msg.region.info.group.invalid", group).withStyle(TextFormatting.RED));
             return -1;
         }
@@ -148,8 +235,17 @@ public class CommandUtil {
         return 1;
     }
 
+    public static int removePlayer(CommandContext<CommandSource> ctx, Collection<ServerPlayerEntity> players, IProtectedRegion region, String group, RegionType regionType) {
+        players.forEach(player -> CommandUtil.removePlayer(ctx, player, region, regionType, group));
+        return 0;
+    }
+
+    public static int removePlayer(CommandContext<CommandSource> ctx, String playerName, IProtectedRegion region, String group, RegionType regionType) {
+        return CommandUtil.removePlayer(ctx, playerName, region, regionType, group);
+    }
+
     public static int removePlayer(CommandContext<CommandSource> src, PlayerEntity player, IProtectedRegion region, RegionType regionType, String group) {
-        if (!RegionCommands.GROUP_LIST.contains(group)) {
+        if (!GROUP_LIST.contains(group)) {
             sendCmdFeedback(src.getSource(), new TranslationTextComponent("cli.msg.region.info.group.invalid", group).withStyle(TextFormatting.RED));
             return -1;
         }
@@ -172,15 +268,22 @@ public class CommandUtil {
     }
 
     public static int removePlayer(CommandContext<CommandSource> ctx, String playerName, IProtectedRegion region, RegionType regionType, String group) {
+        // TODO
         return -1;
     }
 
     public static int removePlayer(CommandContext<CommandSource> ctx, UUID playerUuid, IProtectedRegion region, RegionType regionType, String group) {
+        // TODO
         return -1;
     }
 
+    public static int addPlayer(CommandContext<CommandSource> ctx, Collection<ServerPlayerEntity> players, IProtectedRegion region, String group, RegionType regionType) {
+        players.forEach(player -> CommandUtil.addPlayer(ctx, player, region, regionType, group));
+        return 0;
+    }
+
     public static int addPlayer(CommandContext<CommandSource> src, PlayerEntity player, IProtectedRegion region, RegionType regionType, String group) {
-        if (!RegionCommands.GROUP_LIST.contains(group)) {
+        if (!GROUP_LIST.contains(group)) {
             sendCmdFeedback(src.getSource(), new TranslationTextComponent("cli.msg.region.info.group.invalid", group).withStyle(TextFormatting.RED));
             return -1;
         }
@@ -201,8 +304,8 @@ public class CommandUtil {
         return 1;
     }
 
-    public static int addTeam(CommandContext<CommandSource> ctx, Team team, IProtectedRegion region, RegionType regionType, String group) {
-        if (!RegionCommands.GROUP_LIST.contains(group)) {
+    public static int addTeam(CommandContext<CommandSource> ctx, Team team, IProtectedRegion region, String group, RegionType regionType) {
+        if (!GROUP_LIST.contains(group)) {
             sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.region.info.group.invalid", group).withStyle(TextFormatting.RED));
             return -1;
         }
@@ -222,6 +325,11 @@ public class CommandUtil {
                 teamHoverInfo, buildRegionInfoLink(region, regionType), group);
         sendCmdFeedback(ctx.getSource(), msg);
         return 1;
+    }
+
+    public static int removeFlag(CommandContext<CommandSource> ctx, IProtectedRegion region, Set<RegionFlag> flags, RegionType regionType) {
+        flags.forEach(flag -> CommandUtil.removeRegionFlag(ctx, region, regionType, flag));
+        return 0;
     }
 
 
@@ -302,7 +410,12 @@ public class CommandUtil {
         return CommandUtil.clearTeams(ctx, region, groupName, regionType) + CommandUtil.clearPlayers(ctx, region, groupName, regionType);
     }
 
-    public static int addRegionFlag(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionType regionType, RegionFlag flag) {
+    public static int addFlag(CommandContext<CommandSource> ctx, IProtectedRegion region, Set<RegionFlag> flags, RegionType regionType) {
+        flags.forEach(flag -> CommandUtil.addRegionFlag(ctx, region, flag, regionType));
+        return 0;
+    }
+
+    public static int addRegionFlag(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionFlag flag, RegionType regionType) {
         if (!region.containsFlag(flag)) {
             IFlag iFlag;
             switch (flag.type) {
