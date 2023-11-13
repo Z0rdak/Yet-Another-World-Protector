@@ -18,8 +18,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -75,45 +74,61 @@ public class RegionFlagArgumentType implements ArgumentType<String> {
         }
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        if (context.getSource() instanceof CommandSourceStack src) {
-            try {
-                CuboidRegion region = (CuboidRegion) ArgumentUtil.getRegionArgument((CommandContext<CommandSourceStack>) context);
-                List<String> flagNames = RegionFlag.getFlagNames();
-
-                String input = context.getInput();
-                if (input.contains("add")) {
-                    flagNames = flagNames.stream()
-                            .filter(flagName -> !region.containsFlag(flagName))
-                            .collect(Collectors.toList());
-                }
-                if (input.contains("remove")) {
-                    flagNames = flagNames.stream()
-                            .filter(region::containsFlag)
-                            .collect(Collectors.toList());
-                }
-                if (flagNames.isEmpty()) {
-                    if (input.contains("add")) {
-                        MessageUtil.sendCmdFeedback(src, new TextComponent("There are no flag left to add for this region '" + region.getName() + "'."));
+    public static Set<RegionFlag> getFlags(CommandContext<CommandSourceStack> context, String argName) throws CommandSyntaxException {
+        String flagIdentifiers = context.getArgument(argName, String.class);
+        Set<String> flagsList = new HashSet<>(Arrays.asList(flagIdentifiers.split(" ")));
+        Set<RegionFlag> regionFlags = flagsList.stream()
+                .filter(flag -> {
+                    if (RegionFlag.contains(flag))
+                        return true;
+                    else {
+                        MessageUtil.sendCmdFeedback(context.getSource(), new TextComponent("Invalid flag identifier: '" + flag + "'!"));
+                        return false;
                     }
-                    if (input.contains("remove")) {
-                        MessageUtil.sendCmdFeedback(src, new TextComponent("Region '" + region.getName() + "' does not contain any flags."));
-                    }
-                    return Suggestions.empty();
-                }
-                return SharedSuggestionProvider.suggest(flagNames, builder);
-            } catch (CommandSyntaxException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            return Suggestions.empty();
+                })
+                .map(RegionFlag::fromId)
+                .collect(Collectors.toSet());
+        if (regionFlags.isEmpty()) {
+            throw ERROR_INVALID_VALUE.create(flagIdentifiers);
         }
+        return regionFlags;
     }
 
     @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
+        if (context.getSource() instanceof CommandSourceStack src) {
+            CuboidRegion region = (CuboidRegion) ArgumentUtil.getRegionArgument((CommandContext<CommandSourceStack>) context);
+            List<String> flagNames = RegionFlag.getFlagNames();
+
+            String input = context.getInput();
+            if (input.contains("add")) {
+                flagNames = flagNames.stream()
+                        .filter(flagName -> !region.containsFlag(flagName))
+                        .collect(Collectors.toList());
+            }
+            if (input.contains("remove")) {
+                flagNames = flagNames.stream()
+                        .filter(region::containsFlag)
+                        .collect(Collectors.toList());
+            }
+            if (flagNames.isEmpty()) {
+                if (input.contains("add")) {
+                    MessageUtil.sendCmdFeedback(src, new TextComponent("There are no flag left to add for this region '" + region.getName() + "'."));
+                }
+                if (input.contains("remove")) {
+                    MessageUtil.sendCmdFeedback(src, new TextComponent("Region '" + region.getName() + "' does not contain any flags."));
+                }
+                return Suggestions.empty();
+            }
+            return SharedSuggestionProvider.suggest(flagNames, builder);
+        } else {
+            return Suggestions.empty();
+        }
     }
 }
