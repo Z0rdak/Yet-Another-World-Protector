@@ -382,6 +382,10 @@ public class MessageUtil {
     public static IFormattableTextComponent buildRegionInfoLink(IProtectedRegion region, RegionType type) {
         IFormattableTextComponent res;
         switch (type) {
+            case GLOBAL: {
+                String command = buildCommandStr(GLOBAL.toString(), INFO.toString());
+                return buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, LINK_COLOR);
+            }
             case DIMENSION: {
                 String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), INFO.toString());
                 IFormattableTextComponent hoverText = new TranslationTextComponent("cli.msg.dim.info");
@@ -412,6 +416,10 @@ public class MessageUtil {
     public static IFormattableTextComponent buildRegionOverviewHeader(IProtectedRegion region, RegionType type) {
         IFormattableTextComponent res;
         switch (type) {
+            case GLOBAL: {
+                IFormattableTextComponent clipBoardDumpLink = buildExecuteCmdComponent("cli.msg.global.overview.header.dump.link.text", "cli.msg.global.overview.header.dump.link.hover", region.serializeNBT().getPrettyDisplay().getString(), ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
+                return buildHeader(new TranslationTextComponent("cli.msg.info.header.for", clipBoardDumpLink, buildRegionInfoLink(region, RegionType.GLOBAL)));
+            }
             case DIMENSION: {
                 IFormattableTextComponent clipBoardDumpLink = buildExecuteCmdComponent("cli.msg.dim.overview.header.dump.link.text", "cli.msg.dim.overview.header.dump.link.hover", region.serializeNBT().getPrettyDisplay().getString(), ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
                 res = buildHeader(new TranslationTextComponent("cli.msg.info.header.for", clipBoardDumpLink, buildRegionInfoLink(region, RegionType.DIMENSION)));
@@ -436,6 +444,10 @@ public class MessageUtil {
         IFormattableTextComponent linkText = new TranslationTextComponent("cli.msg.info.region.affiliation.player.list.link.text", players.getPlayers().size());
         IFormattableTextComponent res;
         switch (regionType) {
+            case GLOBAL: {
+                String cmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), group, PLAYER.toString());
+                return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
+            }
             case DIMENSION: {
                 String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), affiliation, PLAYER.toString());
                 res = buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
@@ -460,6 +472,10 @@ public class MessageUtil {
         IFormattableTextComponent linkText = new TranslationTextComponent("cli.msg.info.region.affiliation.team.list.link.text", teams.getTeams().size());
         IFormattableTextComponent res;
         switch (regionType) {
+            case GLOBAL: {
+                String cmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), GROUP.toString(), group, TEAM.toString());
+                return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
+            }
             case DIMENSION: {
                 String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), affiliation, TEAM.toString());
                 res = buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
@@ -482,6 +498,10 @@ public class MessageUtil {
         String subCmd = " " + affiliationType.name + " " + affiliation + " ";
         IFormattableTextComponent res;
         switch (regionType) {
+            case GLOBAL: {
+                String cmd = buildCommandStr(GLOBAL.toString()) + " " + subCmd;
+                return buildExecuteCmdComponent(linkText, hoverText, cmd, SUGGEST_COMMAND, ADD_CMD_COLOR);
+            }
             case LOCAL: {
                 String cmd = buildRegionCmdStr(region, ADD) + subCmd;
                 res = buildExecuteCmdComponent(linkText, hoverText, cmd, SUGGEST_COMMAND, ADD_CMD_COLOR);
@@ -535,6 +555,10 @@ public class MessageUtil {
         IFormattableTextComponent hoverText = new TranslationTextComponent("cli.msg.info.region.affiliation.list.link.hover", affiliation, region.getName());
         IFormattableTextComponent res;
         switch (regionType) {
+            case GLOBAL: {
+                String cmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), group);
+                return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
+            }
             case LOCAL: {
                 String cmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), affiliation);
                 res = buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
@@ -588,6 +612,10 @@ public class MessageUtil {
     private static IFormattableTextComponent buildRemoveFlagEntry(IProtectedRegion region, IFlag flag, RegionType regionType) {
         String cmd;
         switch (regionType) {
+            case GLOBAL: {
+                cmd = buildCommandStr(GLOBAL.toString(), REMOVE.toString(), FLAG.toString(), flag.getName());
+                break;
+            }
             case DIMENSION: {
                 cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), REMOVE.toString(), FLAG.toString(), flag.getName());
                 break;
