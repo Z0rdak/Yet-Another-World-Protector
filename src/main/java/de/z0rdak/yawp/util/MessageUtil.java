@@ -3,20 +3,27 @@ package de.z0rdak.yawp.util;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.CommandConstants;
+import de.z0rdak.yawp.commands.RegionCommands;
+import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
+import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
-import de.z0rdak.yawp.core.affiliation.AffiliationType;
-import de.z0rdak.yawp.core.affiliation.PlayerContainer;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.IFlag;
-import de.z0rdak.yawp.core.region.*;
+import de.z0rdak.yawp.core.group.GroupType;
+import de.z0rdak.yawp.core.group.PlayerContainer;
+import de.z0rdak.yawp.core.region.DimensionalRegion;
+import de.z0rdak.yawp.core.region.IMarkableRegion;
+import de.z0rdak.yawp.core.region.IProtectedRegion;
+import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceKey;
@@ -29,14 +36,13 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
+import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.core.region.RegionType.LOCAL;
-import static de.z0rdak.yawp.util.CommandUtil.appendSubCommand;
-import static de.z0rdak.yawp.util.CommandUtil.buildCommandStr;
 import static net.minecraft.ChatFormatting.RESET;
 import static net.minecraft.ChatFormatting.*;
 import static net.minecraft.network.chat.ClickEvent.Action.RUN_COMMAND;
@@ -165,6 +171,9 @@ public class MessageUtil {
         return playerName;
     }
 
+    /***
+     * [X,Y,Z], ..., [X,Y,Z]
+     */
     public static MutableComponent buildBlockPosTpLinks(IMarkableRegion region) {
         List<MutableComponent> tpLinks = region.getArea().getMarkedBlocks()
                 .stream()
@@ -176,27 +185,28 @@ public class MessageUtil {
     }
 
     /**
-     * // TODO: Include link to suggest update area and tp pos set
-     *
-     * @param region
-     * @return
+     * Location: [dimInfo] @ [tpCoordinates]
+     */
+    public static MutableComponent buildDimensionTeleportLink(IMarkableRegion region) {
+        String executeCmdStr = buildDimTeleportCmd(region.getDim(), "@s", region.getTpTarget());
+        MutableComponent cmdLinkText = new TextComponent(buildTeleportLinkText(region.getDim(), region.getTpTarget()));
+        MutableComponent teleportCmdHoverText = new TranslatableComponent("cli.msg.info.region.area.location.teleport", region.getName(), region.getDim().location().toString());
+        return buildExecuteCmdComponent(cmdLinkText, teleportCmdHoverText, executeCmdStr, RUN_COMMAND, TP_COLOR);
+    }
+
+    /**
+     * Area: Cuboid, Size: X=69, Y=10, Z=42 [<=expand=>] [<=max=>]
      */
     public static MutableComponent buildRegionAreaDetailComponent(IMarkableRegion region) {
         IMarkableArea area = region.getArea();
-        MutableComponent areaInfo = new TextComponent(area.getAreaType().areaType)
-                .append("\n");
+        MutableComponent areaInfo = new TextComponent("(" + area.getAreaType().areaType + ")");
         switch (area.getAreaType()) {
             case CUBOID: {
                 CuboidArea cuboidArea = (CuboidArea) area;
-                MutableComponent sizeInfo = new TranslatableComponent("cli.msg.info.region.spatial.area.size")
-                        .append(": ")
-                        .append("X=" + cuboidArea.getXsize() + ", Y=" + cuboidArea.getYsize() + ", Z=" + cuboidArea.getZsize());
-                MutableComponent markedBlocksInfo = new TranslatableComponent("cli.msg.info.region.spatial.area.blocks")
-                        .append(": ")
-                        .append(buildBlockPosTpLinks(region));
-                areaInfo.append(sizeInfo).append("\n")
-                        .append(markedBlocksInfo);
-                return areaInfo;
+                MutableComponent sizeInfo = buildAreaAxisInfoComponent(cuboidArea, Direction.Axis.X).append(", ")
+                        .append(buildAreaAxisInfoComponent(cuboidArea, Direction.Axis.Y)).append(", ")
+                        .append(buildAreaAxisInfoComponent(cuboidArea, Direction.Axis.Z)).append(", ");
+                return areaInfo.append(" ").append(sizeInfo).append(buildRegionAreaExpandLink(region));
             }
             case CYLINDER:
                 throw new NotImplementedException("cylinder");
@@ -209,6 +219,99 @@ public class MessageUtil {
             default:
                 throw new IllegalArgumentException("Invalid area type");
         }
+    }
+
+    /**
+     * Axis=N
+     */
+    private static MutableComponent buildAreaAxisInfoComponent(CuboidArea cuboidArea, Direction.Axis axis) {
+        int min = (int) Math.floor(cuboidArea.getArea().min(axis));
+        int max = (int) Math.floor(cuboidArea.getArea().max(axis));
+        String axisName = axis.getName().toUpperCase();
+        return buildTextWithHoverMsg(
+                new TextComponent(axisName + "=" + Math.abs(max - min)),
+                new TextComponent(axisName + ": " + min + " - " + max), WHITE);
+    }
+
+    /**
+     * [<=expand=>] [<=max=>]
+     */
+    public static MutableComponent buildRegionAreaExpandLink(IMarkableRegion region) {
+        int minBlockHeight = 0;
+        int maxBlockHeight = 255;
+        MutableComponent linkText = new TranslatableComponent("cli.msg.info.region.area.area.expand.link.text");
+        MutableComponent linkHover = new TranslatableComponent("cli.msg.info.region.area.area.expand.link.hover");
+        String expandCmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), AREA.toString(), EXPAND.toString());
+        switch (region.getArea().getAreaType()) {
+            case CUBOID: {
+                CuboidArea cuboidArea = (CuboidArea) region.getArea();
+                int areaLowerLimit = (int) Math.floor(cuboidArea.getArea().minZ);
+                int areaUpperLimit = (int) Math.floor(cuboidArea.getArea().maxZ);
+                // [<=expand=>]
+                String expandCmdSuggestion = appendSubCommand(expandCmd, String.valueOf(areaLowerLimit), String.valueOf(areaUpperLimit));
+                MutableComponent expandLink = buildExecuteCmdComponent(linkText, linkHover, expandCmdSuggestion, SUGGEST_COMMAND, LINK_COLOR);
+                // [<=max=>]
+                MutableComponent maxExpandLinkText = new TranslatableComponent("cli.msg.info.region.area.area.expand-max.link.text");
+                MutableComponent maxExpandLinkHover = new TranslatableComponent("cli.msg.info.region.area.area.expand-max.link.hover");
+                String maxExpandCmd = appendSubCommand(expandCmd, String.valueOf(minBlockHeight), String.valueOf(maxBlockHeight));
+                MutableComponent maxExpandLink = buildExecuteCmdComponent(maxExpandLinkText, maxExpandLinkHover, maxExpandCmd, RUN_COMMAND, LINK_COLOR);
+                return expandLink.append(" ").append(maxExpandLink);
+            }
+            case CYLINDER:
+                throw new NotImplementedException("cylinder");
+            case SPHERE:
+                throw new NotImplementedException("sphere");
+            case POLYGON_3D:
+                throw new NotImplementedException("polygon");
+            case PRISM:
+                throw new NotImplementedException("prism");
+            default:
+                throw new IllegalArgumentException("Invalid area type");
+        }
+    }
+
+    /**
+     * Marked Blocks: [X,Y,Z], ..., [X,Y,Z] [Set] [Show]
+     */
+    public static MutableComponent buildRegionAreaMarkingComponent(IMarkableRegion region) {
+        switch (region.getArea().getAreaType()) {
+            case CUBOID: {
+                CuboidArea cuboidArea = (CuboidArea) region.getArea();
+                String areaCmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), AREA.toString());
+                MutableComponent setAreaLinkText = new TranslatableComponent("cli.msg.info.region.area.area.set.link");
+                MutableComponent setAreaLinkHover = new TranslatableComponent("cli.msg.info.region.area.area.set.hover", region.getName());
+                String blocks = String.join(" ", cuboidArea.getMarkedBlocks().stream()
+                        .map(MessageUtil::buildBlockCoordinateStr)
+                        .collect(Collectors.toSet()));
+                String setArea = appendSubCommand(areaCmd, SET.toString(), region.getArea().getAreaType().areaType, blocks);
+                MutableComponent setAreaLink = buildExecuteCmdComponent(setAreaLinkText, setAreaLinkHover, setArea, SUGGEST_COMMAND, LINK_COLOR);
+
+                MutableComponent showAreaLinkText = new TranslatableComponent("cli.msg.info.region.area.area.show.link");
+                MutableComponent showAreaLinkHover = new TranslatableComponent("cli.msg.info.region.area.area.show.hover", region.getName());
+                String showArea = appendSubCommand(areaCmd, "show");
+                MutableComponent showAreaLink = buildExecuteCmdComponent(showAreaLinkText, showAreaLinkHover, showArea, RUN_COMMAND, LINK_COLOR);
+                return buildBlockPosTpLinks(region).append(" ").append(setAreaLink).append(" ");//.append(showAreaLink);
+            }
+            case CYLINDER:
+                throw new NotImplementedException("cylinder");
+            case SPHERE:
+                throw new NotImplementedException("sphere");
+            case POLYGON_3D:
+                throw new NotImplementedException("polygon");
+            case PRISM:
+                throw new NotImplementedException("prism");
+            default:
+                throw new IllegalArgumentException("Invalid area type");
+        }
+    }
+
+    /**
+     * TP-Anchor: [X,Y,Z] [Set]
+     */
+    public static MutableComponent buildRegionAreaTpComponent(IMarkableRegion region) {
+        MutableComponent regionTpLink = buildRegionTeleportLink(region);
+        MutableComponent setTpLink = buildRegionSetTpLink(region);
+        return regionTpLink.append(" ").append(setTpLink);
     }
 
     public static MutableComponent buildTextWithHoverMsg(MutableComponent text, MutableComponent hoverText, ChatFormatting color) {
