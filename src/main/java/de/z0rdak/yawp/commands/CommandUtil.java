@@ -566,4 +566,68 @@ public class CommandUtil {
     private static boolean isInRegionWithoutFlag(ServerWorld level, RegionFlag flag, Entity e) {
         return LocalRegions.getRegionWithoutFlag(flag, e.blockPosition(), level.dimension()) == null;
     }
+
+    public static int promptRegionInfo(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionType regionType) {
+        // == Region [<name>] overview ==
+        sendCmdFeedback(ctx.getSource(), buildRegionOverviewHeader(region, regionType));
+        // Flags: [n flag(s)][+]
+        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.flag", buildFlagListLink(region, regionType)));
+        if (regionType == RegionType.LOCAL) {
+            IMarkableRegion markableRegion = (IMarkableRegion) region;
+            // Area: [Area]
+            sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.area", buildRegionAreaLink(markableRegion)));
+        }
+        // Groups: [owners], [members], [<listAffiliations>]
+        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.group", buildGroupLinks(region, regionType)));
+
+        promptRegionChildrenInfo(ctx, region, regionType);
+        // State: [State]
+        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state", buildRegionStateLink(region, regionType)));
+        return 0;
+    }
+
+    public static void promptRegionChildrenInfo(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionType regionType) {
+
+        switch (regionType) {
+            case GLOBAL: {
+                // [n dimensions(s)]
+                sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.dim.region", buildRegionChildrenLink(region, RegionType.GLOBAL)));
+            }
+            break;
+            case DIMENSION: {
+                // Regions: [global], [n children], [n regions][+],
+                MessageUtil.buildRegionChildrenLink(region, regionType);
+
+                IFormattableTextComponent globalRegionLink = buildRegionInfoLink(region, RegionType.GLOBAL, new TranslationTextComponent("cli.msg.info.region.global.link.hover"));
+
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(region.getDim());
+
+                IFormattableTextComponent regionsAndChildren = new TranslationTextComponent("cli.msg.dim.info.region")
+                        .append(": ")
+                        .append(globalRegionLink)
+                        .append(new StringTextComponent(", ").withStyle(TextFormatting.RESET))
+                        .append(buildRegionChildrenLink(region, regionType))
+                        .append(new StringTextComponent(", ").withStyle(TextFormatting.RESET))
+                        .append(buildDimRegionsLink(dimCache));
+                sendCmdFeedback(ctx.getSource(), regionsAndChildren);
+            }
+            break;
+            case LOCAL: {
+                // Hierarchy: [parent][x], [n children][+]
+                IFormattableTextComponent regionHierarchy = new TranslationTextComponent("cli.msg.info.region.hierarchy")
+                        .append(": ")
+                        .append(buildRegionInfoLink(region, regionType, new TranslationTextComponent("cli.msg.info.region.link.text", region.getName())))
+                        .append(buildParentClearLink((IMarkableRegion) region))
+                        .append(new StringTextComponent(", ").withStyle(TextFormatting.RESET))
+                        .append(buildRegionChildrenLink(region, regionType));
+                sendCmdFeedback(ctx.getSource(), regionHierarchy);
+            }
+            break;
+            case TEMPLATE:
+                break;
+            default:
+                throw new IllegalArgumentException("");
+        }
+    }
+
 }
