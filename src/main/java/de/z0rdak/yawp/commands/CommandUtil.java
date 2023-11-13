@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.commands;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -127,6 +128,30 @@ public class CommandUtil {
                                 .executes(ctx -> addFlag(ctx, regionSupplier.apply(ctx), getFlagArguments(ctx), RegionType.LOCAL))));
     }
 
+    public static LiteralArgumentBuilder<CommandSource> buildListSubCommand(Function<CommandContext<CommandSource>, IProtectedRegion> regionSupplier, RegionType regionType) {
+        return literal(LIST)
+                .then(literal(FLAG)
+                        .executes(ctx -> promptFlagList(ctx, regionSupplier.apply(ctx), 0, regionType))
+                        .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
+                                .executes(ctx -> promptFlagList(ctx, regionSupplier.apply(ctx), getPageNoArgument(ctx), regionType))))
+                .then(literal(GROUP)
+                        .then(Commands.argument(GROUP.toString(), StringArgumentType.string())
+                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(RegionCommands.GROUP_LIST, builder))
+                                .executes(ctx -> CommandUtil.promptGroupLinks(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx), regionType))
+                                .then(literal(TEAM)
+                                        .executes(ctx -> CommandUtil.promptGroupList(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx), GroupType.TEAM, 0, regionType))
+                                        .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
+                                                .executes(ctx -> CommandUtil.promptGroupList(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx), GroupType.TEAM, getPageNoArgument(ctx), regionType)))
+                                )
+                                .then(literal(PLAYER)
+                                        .executes(ctx -> CommandUtil.promptGroupList(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx), GroupType.PLAYER, 0, regionType))
+                                        .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
+                                                .executes(ctx -> CommandUtil.promptGroupList(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx), GroupType.PLAYER, getPageNoArgument(ctx), regionType)))
+                                )
+                        )
+                );
+    }
+
     /**
      * Prompt the common region state to the command issuer.
      * == [state] for [<name>] ==
@@ -155,21 +180,46 @@ public class CommandUtil {
         return 0;
     }
 
-    public static int promptFlagList(CommandContext<CommandSource> ctx, String cmd, IProtectedRegion region, RegionType type, int pageNo) {
+    public static int promptFlagList(CommandContext<CommandSource> ctx, IProtectedRegion region, int pageNo, RegionType regionType) {
+        String cmd = "";
+        switch (regionType) {
+            case GLOBAL:
+                cmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), FLAG.toString());
+                break;
+            case DIMENSION:
+                cmd = buildCommandStr(DIM.toString(), region.getName(), LIST.toString(), FLAG.toString());
+                break;
+            case LOCAL:
+                cmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), FLAG.toString());
+                break;
+        }
         List<IFlag> flags = LocalRegions.getSortedFlags(region);
         if (flags.isEmpty()) {
-            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.flag.empty", buildRegionInfoLink(region, type)));
+            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.flag.empty", buildRegionInfoLink(region, regionType)));
             return 1;
         }
         List<IFormattableTextComponent> flagPagination = buildPaginationComponents(
-                buildRegionFlagInfoHeader(region, type),
-                cmd, buildRemoveFlagEntries(region, flags, type), pageNo,
-                new StringTextComponent(" - ").append(buildAddFlagLink(region, type)));
+                buildRegionFlagInfoHeader(region, regionType),
+                cmd, buildRemoveFlagEntries(region, flags, regionType), pageNo,
+                new StringTextComponent(" - ").append(buildAddFlagLink(region, regionType)));
         flagPagination.forEach(line -> sendCmdFeedback(ctx.getSource(), line));
         return 0;
     }
 
-    public static int promptGroupList(CommandContext<CommandSource> ctx, String cmd, IProtectedRegion region, String group, GroupType groupType, RegionType regionType, int pageNo) {
+    public static int promptGroupList(CommandContext<CommandSource> ctx, IProtectedRegion region, String group, GroupType groupType, int pageNo, RegionType regionType) {
+        String cmd = "";
+        String dim = region.getDim().location().toString();
+        switch (regionType) {
+            case GLOBAL:
+                cmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), GROUP.toString(), group, groupType.name);
+                break;
+            case DIMENSION:
+                cmd = buildCommandStr(DIM.toString(), dim, LIST.toString(), GROUP.toString(), group, groupType.name);
+                break;
+            case LOCAL:
+                cmd = buildCommandStr(REGION.toString(), dim, region.getName(), LIST.toString(), GROUP.toString(), group, groupType.name);
+                break;
+        }
         if (!GROUP_LIST.contains(group)) {
             sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.region.info.group.invalid", group).withStyle(TextFormatting.RED));
             return -1;
