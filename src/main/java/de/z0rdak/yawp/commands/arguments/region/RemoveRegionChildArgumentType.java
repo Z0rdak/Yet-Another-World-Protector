@@ -9,9 +9,9 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -79,21 +79,17 @@ public class RemoveRegionChildArgumentType implements ArgumentType<String> {
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         if (context.getSource() instanceof CommandSourceStack src) {
-            try {
-                IMarkableRegion region = ArgumentUtil.getRegionArgument((CommandContext<CommandSourceStack>) context);
-                List<String> childNames = region.getChildren()
-                        .values()
-                        .stream()
-                        .map(IProtectedRegion::getName)
-                        .collect(Collectors.toList());
-                if (childNames.isEmpty()) {
-                    MessageUtil.sendCmdFeedback(src, new TextComponent("Region '" + region.getName() + "' has no children."));
-                    return Suggestions.empty();
-                }
-                return SharedSuggestionProvider.suggest(childNames, builder);
-            } catch (CommandSyntaxException e) {
-                throw new RuntimeException(e);
+            IMarkableRegion region = ArgumentUtil.getRegionArgument((CommandContext<CommandSourceStack>) context);
+            List<String> childNames = region.getChildren()
+                    .values()
+                    .stream()
+                    .map(IProtectedRegion::getName)
+                    .collect(Collectors.toList());
+            if (childNames.isEmpty()) {
+                MessageUtil.sendCmdFeedback(src, new TextComponent("Region '" + region.getName() + "' has no children."));
+                return Suggestions.empty();
             }
+            return SharedSuggestionProvider.suggest(childNames, builder);
         } else {
             return Suggestions.empty();
         }

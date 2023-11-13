@@ -165,17 +165,13 @@ public class RegionArgumentType implements ArgumentType<String> {
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         if (context.getSource() instanceof CommandSourceStack) {
             CommandSourceStack src = (CommandSourceStack) context.getSource();
-            try {
-                DimensionRegionCache dimCache = ArgumentUtil.getDimCacheArgument((CommandContext<CommandSourceStack>) context);
-                Collection<String> regionNames = dimCache.getRegionNames();
-                if (regionNames.isEmpty()) {
-                    MessageUtil.sendCmdFeedback(src, new TextComponent("No regions defined in dim '" + dimCache.dimensionKey().location() + "'"));
-                    return Suggestions.empty();
-                }
-                return SharedSuggestionProvider.suggest(regionNames, builder);
-            } catch (CommandSyntaxException e) {
+            DimensionRegionCache dimCache = ArgumentUtil.getDimCacheArgument((CommandContext<CommandSourceStack>) context);
+            Collection<String> regionNames = dimCache.getRegionNames();
+            if (regionNames.isEmpty()) {
+                MessageUtil.sendCmdFeedback(src, new TextComponent("No regions defined in dim '" + dimCache.dimensionKey().location() + "'"));
                 return Suggestions.empty();
             }
+            return SharedSuggestionProvider.suggest(regionNames, builder);
         } else {
             return Suggestions.empty();
         }
