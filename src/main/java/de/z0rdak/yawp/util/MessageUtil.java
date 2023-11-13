@@ -1086,6 +1086,9 @@ public class MessageUtil {
     public static MutableComponent buildRegionFlagInfoHeader(IProtectedRegion region, RegionType regionType) {
         MutableComponent res;
         switch (regionType) {
+            case GLOBAL:
+                res = buildHeader(new TranslationTextComponent("cli.msg.info.header.in", buildFlagListLink(region, regionType), buildRegionInfoLink(region, regionType)));
+                break;
             case DIMENSION:
                 res = buildHeader(new TranslatableComponent("cli.msg.info.header.in", buildFlagListLink(region, regionType), buildRegionInfoLink(region, regionType)));
                 break;
