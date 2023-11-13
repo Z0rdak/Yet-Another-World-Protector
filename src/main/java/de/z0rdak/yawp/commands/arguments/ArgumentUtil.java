@@ -6,6 +6,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.CommandConstants;
 import de.z0rdak.yawp.commands.arguments.flag.IFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.flag.RegionFlagArgumentType;
@@ -25,6 +26,9 @@ import net.minecraft.command.arguments.TeamArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 
+import java.util.Collection;
+import java.util.Set;
+
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 
 public class ArgumentUtil {
@@ -33,8 +37,13 @@ public class ArgumentUtil {
         return Commands.literal(constant.toString());
     }
 
-    public static DimensionRegionCache getDimCacheArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
-        return DimensionCacheArgumentType.getDimRegion(ctx, CommandConstants.DIM.toString());
+    public static DimensionRegionCache getDimCacheArgument(CommandContext<CommandSource> ctx) {
+        try {
+            return DimensionCacheArgumentType.getDimRegion(ctx, CommandConstants.DIM.toString());
+        } catch (CommandSyntaxException e) {
+            YetAnotherWorldProtector.LOGGER.error(e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
     public static DimensionalRegion getDimRegionFromArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
@@ -57,8 +66,13 @@ public class ArgumentUtil {
         return StringArgumentType.getString(ctx, REGION.toString());
     }
 
-    public static IMarkableRegion getRegionArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
-        return RegionArgumentType.getRegion(ctx, REGION.toString());
+    public static IMarkableRegion getRegionArgument(CommandContext<CommandSource> ctx) {
+        try {
+            return RegionArgumentType.getRegion(ctx, REGION.toString());
+        } catch (CommandSyntaxException e) {
+            YetAnotherWorldProtector.LOGGER.error(e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
     public static IProtectedRegion getRegion(CommandContext<CommandSource> ctx, RegionType regionType) throws CommandSyntaxException {
@@ -81,12 +95,21 @@ public class ArgumentUtil {
         return EntityArgument.getPlayer(ctx, CommandConstants.PLAYER.toString());
     }
 
+    public static Collection<ServerPlayerEntity> getPlayersArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
+        return EntityArgument.getPlayers(ctx, CommandConstants.PLAYER.toString());
+    }
+
+
     public static String getFlagNameArgument(CommandContext<CommandSource> ctx) {
         return StringArgumentType.getString(ctx, CommandConstants.FLAG.toString());
     }
 
     public static RegionFlag getFlagArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
         return RegionFlagArgumentType.getFlag(ctx, CommandConstants.FLAG.toString());
+    }
+
+    public static Set<RegionFlag> getFlagArguments(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
+        return RegionFlagArgumentType.getFlags(ctx, CommandConstants.FLAG.toString());
     }
 
     public static IFlag getIFlagArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
@@ -154,7 +177,15 @@ public class ArgumentUtil {
         return preamble + " " + cmdStr;
     }
 
+    public static String buildSubCmdStr(String... cmdTokens) {
+        return String.join(" ", cmdTokens);
+    }
+
     public static String appendSubCommand(String cmd, String... subCommands) {
         return cmd + " " + String.join(" ", subCommands);
+    }
+
+    public static String appendSubCommand(String cmd, String subCmd) {
+        return cmd + " " + subCmd;
     }
 }

@@ -9,10 +9,12 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import de.z0rdak.yawp.core.area.CuboidArea;
-import de.z0rdak.yawp.core.region.*;
-import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
+import de.z0rdak.yawp.core.area.CuboidArea;
+import de.z0rdak.yawp.core.region.AbstractRegion;
+import de.z0rdak.yawp.core.region.CuboidRegion;
+import de.z0rdak.yawp.core.region.DimensionalRegion;
+import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
@@ -77,25 +79,21 @@ public class AddRegionChildArgumentType implements ArgumentType<String> {
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         if (context.getSource() instanceof CommandSource) {
             CommandSource src = (CommandSource) context.getSource();
-            try {
-                DimensionRegionCache dimCache = ArgumentUtil.getDimCacheArgument((CommandContext<CommandSource>) context);
-                DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                CuboidRegion region = (CuboidRegion) ArgumentUtil.getRegionArgument((CommandContext<CommandSource>) context);
-                List<String> potentialChildrenNames = dimRegion.getChildren().values()
-                        .stream()
-                        .map(r -> (CuboidRegion)r)
-                        .filter(r -> !r.getName().equals(region.getName()))
-                        .filter(r -> ((CuboidArea)region.getArea()).contains((CuboidArea) r.getArea()))
-                        .map(AbstractRegion::getName)
-                        .collect(Collectors.toList());
-                if (potentialChildrenNames.isEmpty()) {
-                    MessageUtil.sendCmdFeedback(src, new StringTextComponent("There are no valid child regions for region '" + region.getName() + "'."));
-                    return Suggestions.empty();
-                }
-                return ISuggestionProvider.suggest(potentialChildrenNames, builder);
-            } catch (CommandSyntaxException e) {
-                throw new RuntimeException(e);
+            DimensionRegionCache dimCache = ArgumentUtil.getDimCacheArgument((CommandContext<CommandSource>) context);
+            DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
+            CuboidRegion region = (CuboidRegion) ArgumentUtil.getRegionArgument((CommandContext<CommandSource>) context);
+            List<String> potentialChildrenNames = dimRegion.getChildren().values()
+                    .stream()
+                    .map(r -> (CuboidRegion) r)
+                    .filter(r -> !r.getName().equals(region.getName()))
+                    .filter(r -> ((CuboidArea) region.getArea()).contains((CuboidArea) r.getArea()))
+                    .map(AbstractRegion::getName)
+                    .collect(Collectors.toList());
+            if (potentialChildrenNames.isEmpty()) {
+                MessageUtil.sendCmdFeedback(src, new StringTextComponent("There are no valid child regions for region '" + region.getName() + "'."));
+                return Suggestions.empty();
             }
+            return ISuggestionProvider.suggest(potentialChildrenNames, builder);
         } else {
             return Suggestions.empty();
         }
