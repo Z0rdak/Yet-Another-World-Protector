@@ -723,6 +723,41 @@ public class MessageUtil {
         }
     }
 
+    public static MutableComponent buildFlagMessageEditLink(IProtectedRegion region, RegionType regionType, IFlag flag) {
+        // TODO: consider player flag specific messages
+        // TODO: build clear link when not default and use it
+        // TODO: use different text than quick action text
+        boolean hasDefaultMsg = flag.getFlagMsg().isDefault();
+        MutableComponent flagMsgText = new TranslatableComponent("cli.info.flag.state.msg.text.link.text", flag.getFlagMsg().getMsg());
+        MutableComponent hoverText = new TranslatableComponent("cli.info.flag.state.msg.text.link.hover",
+                buildFlagInfoLink(region, flag, regionType), buildRegionInfoLink(region, regionType));
+        switch (regionType) {
+            case GLOBAL: {
+                String cmd = buildCommandStr(FLAG.toString(), GLOBAL.toString(), flag.getName(), flag.getFlagMsg().getMsg());
+                if (hasDefaultMsg) {
+                    flagMsgText = new TextComponent(FlagConfig.getRawGlobalFlagMsg());
+                }
+                return buildExecuteCmdComponent(flagMsgText, hoverText, cmd, SUGGEST_COMMAND, LINK_COLOR);
+            }
+            case DIMENSION: {
+                String cmd = buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().location().toString(), flag.getName(), flag.getFlagMsg().getMsg());
+                if (hasDefaultMsg) {
+                    flagMsgText = new TextComponent(FlagConfig.getRawDimFlagMsg());
+                }
+                return buildExecuteCmdComponent(flagMsgText, hoverText, cmd, SUGGEST_COMMAND, LINK_COLOR);
+            }
+            case LOCAL: {
+                String cmd = buildCommandStr(FLAG.toString(), LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag.getName(), flag.getFlagMsg().getMsg());
+                if (hasDefaultMsg) {
+                    flagMsgText = new TextComponent(FlagConfig.getRawLocalFlagMsg());
+                }
+                return buildExecuteCmdComponent(flagMsgText, hoverText, cmd, SUGGEST_COMMAND, LINK_COLOR);
+            }
+            default:
+                throw new IllegalStateException("Unexpected value: " + regionType);
+        }
+    }
+
     private static MutableComponent buildFlagToggleLink(String cmd, String langKey, boolean toggleActiveState, String... subCmds) {
         String cmdStr = appendSubCommand(cmd, subCmds);
         MutableComponent linkText = new TranslatableComponent("cli.flag." + langKey + ".link.text");
@@ -749,7 +784,7 @@ public class MessageUtil {
         MutableComponent regionRemoveLink = switch (parentType) {
             case GLOBAL: {
                 YetAnotherWorldProtector.LOGGER.info("reseting global region - just kidding its not implemented yet");
-                return new StringTextComponent("");
+                return new TextComponent("");
                 //throw new NotImplementedException("todo");
             }
             case DIMENSION -> {
