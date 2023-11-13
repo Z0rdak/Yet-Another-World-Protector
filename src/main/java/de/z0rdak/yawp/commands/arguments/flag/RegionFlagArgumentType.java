@@ -18,8 +18,7 @@ import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -60,6 +59,49 @@ public class RegionFlagArgumentType implements ArgumentType<String> {
         }
     }
 
+    public static Set<RegionFlag> getFlags(CommandContext<CommandSource> context, String argName) throws CommandSyntaxException {
+        String flagIdentifiers = context.getArgument(argName, String.class);
+        Set<String> flagsList = new HashSet<>(Arrays.asList(flagIdentifiers.split(" ")));
+        Set<RegionFlag> regionFlags = flagsList.stream()
+                .filter(flag -> {
+                    if (RegionFlag.contains(flag))
+                        return true;
+                    else {
+                        MessageUtil.sendCmdFeedback(context.getSource(), new StringTextComponent("Invalid flag identifier: '" + flag + "'!"));
+                        return false;
+                    }
+                })
+                .map(RegionFlag::fromId)
+                .collect(Collectors.toSet());
+        if (regionFlags.isEmpty()) {
+            throw ERROR_INVALID_VALUE.create(flagIdentifiers);
+        }
+        return regionFlags;
+    }
+
+    /**
+     * Using this as an actual argument does not work on a server-side only mod,
+     * because it needs to be registered in the corresponding registry.
+     */
+    public static RegionFlagArgumentType flag() {
+        return new RegionFlagArgumentType();
+    }
+
+    public static RegionFlag getFlag(CommandContext<CommandSource> context, String argName) throws CommandSyntaxException {
+        String flagIdentifier = context.getArgument(argName, String.class);
+        if (RegionFlag.contains(flagIdentifier)) {
+            return RegionFlag.fromId(flagIdentifier);
+        } else {
+            MessageUtil.sendCmdFeedback(context.getSource(), new StringTextComponent("Invalid flag identifier: '" + flagIdentifier + "'!"));
+            throw ERROR_INVALID_VALUE.create(flagIdentifier);
+        }
+    }
+
+    @Override
+    public Collection<String> getExamples() {
+        return EXAMPLES;
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
@@ -95,29 +137,6 @@ public class RegionFlagArgumentType implements ArgumentType<String> {
             }
         } else {
             return Suggestions.empty();
-        }
-    }
-
-    @Override
-    public Collection<String> getExamples() {
-        return EXAMPLES;
-    }
-
-    /**
-     * Using this as an actual argument does not work on a server-side only mod,
-     * because it needs to be registered in the corresponding registry.
-     */
-    public static RegionFlagArgumentType flag() {
-        return new RegionFlagArgumentType();
-    }
-
-    public static RegionFlag getFlag(CommandContext<CommandSource> context, String argName) throws CommandSyntaxException {
-        String flagIdentifier = context.getArgument(argName, String.class);
-        if (RegionFlag.contains(flagIdentifier)) {
-            return RegionFlag.fromId(flagIdentifier);
-        } else {
-            MessageUtil.sendCmdFeedback(context.getSource(), new StringTextComponent("Invalid flag identifier: '" + flagIdentifier + "'!"));
-            throw ERROR_INVALID_VALUE.create(flagIdentifier);
         }
     }
 }
