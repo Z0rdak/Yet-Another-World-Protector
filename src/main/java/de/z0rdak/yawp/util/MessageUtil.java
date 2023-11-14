@@ -163,7 +163,7 @@ public class MessageUtil {
         MutableComponent playerName = new TextComponent(team.getName());
         playerName.setStyle(playerName.getStyle()
                 .withColor(LINK_COLOR)
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableComponent("cli.msg.info.region.affiliation.link.hover")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableComponent("cli.msg.info.region.group.link.hover")))
                 .withClickEvent(new ClickEvent(RUN_COMMAND, "/team list " + team.getName())));
         return playerName;
     }
@@ -381,7 +381,7 @@ public class MessageUtil {
         return buildRegionInfoLink(region, type, new TranslatableComponent("cli.msg.info.region.link.hover", region.getName()));
     }
 
-    public static MutableComponent buildRegionInfoLink(IProtectedRegion region, RegionType type, IFormattableTextComponent hoverText) {
+    public static MutableComponent buildRegionInfoLink(IProtectedRegion region, RegionType type, MutableComponent hoverText) {
         MutableComponent linkText = new TextComponent(region.getName());
         switch (type) {
             case GLOBAL -> {
@@ -429,21 +429,21 @@ public class MessageUtil {
      * Players: [n player(s)] [+]
      * // TODO:
      */
-    public static MutableComponent buildPlayerListLink(IProtectedRegion region, PlayerContainer players, String affiliation, RegionType regionType) {
-        MutableComponent hoverText = new TranslatableComponent("cli.msg.info.region.affiliation.player.list.link.hover", affiliation, region.getName());
-        MutableComponent linkText = new TranslatableComponent("cli.msg.info.region.affiliation.player.list.link.text", players.getPlayers().size());
-        return switch (regionType) {
-            case GLOBAL -> {
+    public static MutableComponent buildPlayerListLink(IProtectedRegion region, PlayerContainer players, String group, RegionType regionType) {
+        MutableComponent hoverText = new TranslatableComponent("cli.msg.info.region.group.player.list.link.hover", group, region.getName());
+        MutableComponent linkText = new TranslatableComponent("cli.msg.info.region.group.player.list.link.text", players.getPlayers().size());
+        switch (regionType) {
+            case GLOBAL: {
                 String cmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), group, PLAYER.toString());
                 yield buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
-            case DIMENSION -> {
-                String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), affiliation, PLAYER.toString());
-                yield buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
+            case DIMENSION: {
+                String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), group, PLAYER.toString());
+                return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
-            case LOCAL -> {
-                String cmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), affiliation, PLAYER.toString());
-                yield buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
+            case LOCAL: {
+                String cmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), group, PLAYER.toString());
+                return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
             default -> throw new IllegalArgumentException();
         };
@@ -453,121 +453,116 @@ public class MessageUtil {
      * Teams: [n team(s)] [+]
      * // TODO:
      */
-    public static MutableComponent buildTeamListLink(IProtectedRegion region, PlayerContainer teams, String affiliation, RegionType regionType) {
-        MutableComponent hoverText = new TranslatableComponent("cli.msg.info.region.affiliation.team.list.link.hover", affiliation, region.getName());
-        MutableComponent linkText = new TranslatableComponent("cli.msg.info.region.affiliation.team.list.link.text", teams.getTeams().size());
-        return switch (regionType) {
+    // TODO: Link building could be generalized if the command structure would be always the same except the region specific parts
+    public static MutableComponent buildTeamListLink(IProtectedRegion region, PlayerContainer teams, String group, RegionType regionType) {
+        MutableComponent hoverText = new TranslatableComponent("cli.msg.info.region.group.team.list.link.hover", group, region.getName());
+        MutableComponent linkText = new TranslatableComponent("cli.msg.info.region.group.team.list.link.text", teams.getTeams().size());
+        switch (regionType) {
             case GLOBAL: {
                 String cmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), GROUP.toString(), group, TEAM.toString());
                 return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
-            case DIMENSION -> {
-                String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), affiliation, TEAM.toString());
-                yield buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
+            case DIMENSION: {
+                String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), GROUP.toString(), group, TEAM.toString());
+                return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
-            case LOCAL -> {
-                String cmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), affiliation, TEAM.toString());
-                yield buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
+            case LOCAL: {
+                String cmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), GROUP.toString(), group, TEAM.toString());
+                return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
-            default -> throw new IllegalArgumentException();
-        };
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
-    public static MutableComponent buildAddAffiliateLink(IProtectedRegion region, String affiliation, AffiliationType affiliationType, RegionType regionType) {
+    public static MutableComponent buildAddToGroupLink(IProtectedRegion region, String group, GroupType groupType, RegionType regionType) {
         MutableComponent linkText = new TranslatableComponent("cli.link.add");
-        MutableComponent hoverText = new TranslatableComponent("cli.msg.info.region.affiliation." + affiliationType.name + ".add.link.hover", affiliation, region.getName());
-        String subCmd = " " + affiliationType.name + " " + affiliation + " ";
-        return switch (regionType) {
+        MutableComponent hoverText = new TranslatableComponent("cli.msg.info.region.group." + groupType.name + ".add.link.hover", group, region.getName());
+        String subCmd = buildSubCmdStr(ADD.toString(), GROUP.toString(), groupType.name, group, "");
+        ;
+        switch (regionType) {
             case GLOBAL: {
                 String cmd = buildCommandStr(GLOBAL.toString()) + " " + subCmd;
                 return buildExecuteCmdComponent(linkText, hoverText, cmd, SUGGEST_COMMAND, ADD_CMD_COLOR);
             }
-            case LOCAL -> {
-                String cmd = buildRegionCmdStr(region, ADD) + subCmd;
-                yield buildExecuteCmdComponent(linkText, hoverText, cmd, SUGGEST_COMMAND, ADD_CMD_COLOR);
+            case LOCAL: {
+                String cmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName()) + " " + subCmd;
+                return buildExecuteCmdComponent(linkText, hoverText, cmd, SUGGEST_COMMAND, ADD_CMD_COLOR);
             }
-            case DIMENSION -> {
-                String cmd = buildDimCmdStr(region, ADD) + subCmd;
-                yield buildExecuteCmdComponent(linkText, hoverText, cmd, SUGGEST_COMMAND, ADD_CMD_COLOR);
+            case DIMENSION: {
+                String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString()) + " " + subCmd;
+                return buildExecuteCmdComponent(linkText, hoverText, cmd, SUGGEST_COMMAND, ADD_CMD_COLOR);
             }
-            default -> throw new IllegalArgumentException();
-        };
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
-    public static MutableComponent buildAffiliationLinks(IProtectedRegion region, RegionType regionType) {
-        MutableComponent affiliationLinks = new TextComponent("");
-        List<String> affiliations = Arrays.asList("owner", "member");
-        affiliations.forEach(affiliation -> {
-            switch (affiliation) {
-                case "owner": {
-                    int affiliationSize = region.getOwners().getPlayers().size() + region.getOwners().getTeams().size();
-                    affiliationLinks.append(buildAffiliationLink(region, affiliation, affiliationSize, regionType)).append(" ");
-                }
-                break;
-                case "member": {
-                    int affiliationSize = region.getMembers().getPlayers().size() + region.getMembers().getTeams().size();
-                    affiliationLinks.append(buildAffiliationLink(region, affiliation, affiliationSize, regionType)).append(" ");
-                }
-                break;
-            }
-        });
-        return affiliationLinks;
+    public static MutableComponent buildGroupLinks(IProtectedRegion region, RegionType regionType) {
+        return getGroupsForRegion(region, regionType).stream()
+                .map(group -> buildGroupLink(region, group, getGroupSize(region, group), regionType))
+                .reduce(new TextComponent(""), (link1, link2) -> link1.append(" ").append(link2));
     }
 
-    public static MutableComponent buildAffiliationHeader(IProtectedRegion region, String affiliation, RegionType regionType) {
-        int amountOwners = (region.getOwners().getTeams().size() + region.getOwners().getPlayers().size());
-        int amountMembers = (region.getMembers().getTeams().size() + region.getMembers().getPlayers().size());
-        int affiliationSize = affiliation.equals("owner") ? amountOwners : amountMembers;
-        MutableComponent affiliationLink = buildAffiliationLink(region, affiliation, affiliationSize, regionType);
-        return buildHeader(new TranslatableComponent("cli.msg.info.header.in", affiliationLink, buildRegionInfoLink(region, regionType)));
+    public static List<String> getGroupsForRegion(IProtectedRegion region, RegionType regionType) {
+        return RegionCommands.GROUP_LIST;
     }
 
-    public static MutableComponent buildAffiliationHeader(IProtectedRegion region, String affiliation, AffiliationType affiliationType, RegionType regionType) {
-        return new TranslatableComponent("cli.msg.info.region.affiliation." + affiliationType.name + ".list", buildRegionInfoLink(region, regionType), affiliation);
+    private static int getGroupSize(IProtectedRegion region, String groupName) {
+        PlayerContainer group = region.getGroup(groupName);
+        return group.getPlayers().size() + group.getTeams().size();
     }
 
-    public static MutableComponent buildAffiliationLink(IProtectedRegion region, String affiliation, int affiliationSize, RegionType regionType) {
-        MutableComponent linkText = new TranslatableComponent("cli.msg.info.region.affiliation.list.link.text", affiliationSize, affiliation);
-        MutableComponent hoverText = new TranslatableComponent("cli.msg.info.region.affiliation.list.link.hover", affiliation, region.getName());
-        return switch (regionType) {
+    public static MutableComponent buildGroupHeader(IProtectedRegion region, String group, RegionType regionType) {
+        MutableComponent groupLink = buildGroupLink(region, group, getGroupSize(region, group), regionType);
+        return buildHeader(new TranslatableComponent("cli.msg.info.header.in", groupLink, buildRegionInfoLink(region, regionType)));
+    }
+
+    public static MutableComponent buildGroupHeader(IProtectedRegion region, String affiliation, GroupType groupType, RegionType regionType) {
+        return new TranslatableComponent("cli.msg.info.region.group." + groupType.name + ".list", buildRegionInfoLink(region, regionType), affiliation);
+    }
+
+    public static MutableComponent buildGroupLink(IProtectedRegion region, String group, int groupSie, RegionType regionType) {
+        MutableComponent linkText = new TranslatableComponent("cli.msg.info.region.group.list.link.text", groupSie, group);
+        MutableComponent hoverText = new TranslatableComponent("cli.msg.info.region.group.list.link.hover", group, region.getName());
+        switch (regionType) {
             case GLOBAL: {
                 String cmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), group);
                 return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
-            case LOCAL -> {
-                String cmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), affiliation);
-                yield buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
+            case LOCAL: {
+                String cmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), group);
+                return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
-            case DIMENSION -> {
-                String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), affiliation);
-                yield buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
+            case DIMENSION: {
+                String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), group);
+                return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
-            default -> throw new IllegalArgumentException();
-        };
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
-    // TODO: combine team and player list link
-    public static MutableComponent buildAffiliationTeamListLink(IProtectedRegion region, String affiliation, RegionType regionType) {
+    public static MutableComponent buildGroupTeamListLink(IProtectedRegion region, String group, RegionType regionType) {
         // Teams: [n team(s)] [+]
-        PlayerContainer playerContainer = affiliation.equals("owner") ? region.getOwners() : region.getMembers();
-        MutableComponent teams = new TranslatableComponent("cli.msg.info.region.affiliation.team").append(": ");
-        MutableComponent teamAddLink = buildAddAffiliateLink(region, affiliation, AffiliationType.TEAM, regionType);
+        PlayerContainer playerContainer = region.getGroup(group);
+        MutableComponent teams = new TranslatableComponent("cli.msg.info.region.group.team").append(": ");
+        MutableComponent teamAddLink = buildAddToGroupLink(region, group, GroupType.TEAM, regionType);
         MutableComponent teamListLink = playerContainer.hasTeams()
-                ? buildTeamListLink(region, playerContainer, affiliation, regionType)
-                : new TranslatableComponent("cli.msg.info.region.affiliation.team.list.link.text", playerContainer.getTeams().size());
+                ? buildTeamListLink(region, playerContainer, group, regionType)
+                : new TranslatableComponent("cli.msg.info.region.group.team.list.link.text", playerContainer.getTeams().size());
         teams.append(teamListLink).append(teamAddLink);
         return teams;
     }
 
-    // TODO: combine team and player list link
-    public static MutableComponent buildAffiliationPlayerListLink(IProtectedRegion region, String affiliation, RegionType regionType) {
+    public static MutableComponent buildGroupPlayerListLink(IProtectedRegion region, String group, RegionType regionType) {
         // Players: [n player(s)] [+]
-        PlayerContainer playerContainer = affiliation.equals("owner") ? region.getOwners() : region.getMembers();
-        MutableComponent players = new TranslatableComponent("cli.msg.info.region.affiliation.player").append(": ");
-        MutableComponent playersAddLink = buildAddAffiliateLink(region, affiliation, AffiliationType.PLAYER, regionType);
+        PlayerContainer playerContainer = region.getGroup(group);
+        MutableComponent players = new TranslatableComponent("cli.msg.info.region.group.player").append(": ");
+        MutableComponent playersAddLink = buildAddToGroupLink(region, group, GroupType.PLAYER, regionType);
         MutableComponent playerListLink = playerContainer.hasPlayers()
-                ? buildPlayerListLink(region, playerContainer, affiliation, regionType)
-                : new TranslatableComponent("cli.msg.info.region.affiliation.player.list.link.text", playerContainer.getPlayers().size());
+                ? buildPlayerListLink(region, playerContainer, group, regionType)
+                : new TranslatableComponent("cli.msg.info.region.group.player.list.link.text", playerContainer.getPlayers().size());
         players.append(playerListLink).append(playersAddLink);
         return players;
     }
@@ -849,7 +844,7 @@ public class MessageUtil {
         }
         boolean hasMultiplePages = numberOfPages > 1;
 
-        IFormattableTextComponent paginationControl = buildPaginationControl(
+        MutableComponent paginationControl = buildPaginationControl(
                 buildFirstLinkArrow(cmd, pageNo, hasMultiplePages),
                 buildPrevLinkArrow(cmd, pageNo, hasMultiplePages),
                 pageNo, numberOfPages,
@@ -1107,21 +1102,20 @@ public class MessageUtil {
                 : buildExecuteCmdComponent(linkText, hoverLink, command, RUN_COMMAND, LINK_COLOR);
     }
 
-    public static List<MutableComponent> buildRemoveAffiliationEntries(IProtectedRegion region, List<String> affiliationNames, AffiliationType affiliationType, String affiliation, RegionType parentType) {
-        return affiliationNames.stream().map(affiliate -> buildRemoveAffiliateEntry(region, affiliate, affiliationType, affiliation, parentType)).collect(Collectors.toList());
+    public static List<MutableComponent> buildRemoveGroupEntries(IProtectedRegion region, List<String> affiliationNames, GroupType groupType, String affiliation, RegionType parentType) {
+        return affiliationNames.stream().map(group -> buildRemoveGroupEntry(region, group, groupType, affiliation, parentType)).collect(Collectors.toList());
     }
 
-    public static MutableComponent buildRemoveAffiliateEntry(IProtectedRegion region, String affiliateName, AffiliationType affiliationType, String affiliation, RegionType regionType) {
+    public static MutableComponent buildRemoveGroupEntry(IProtectedRegion region, String groupName, GroupType groupType, String affiliation, RegionType regionType) {
         MutableComponent linkText = new TranslatableComponent("cli.link.remove");
-        MutableComponent hoverText = new TranslatableComponent("cli.msg.info.region.affiliation." + affiliationType.name + ".remove.link.hover", affiliateName, region.getName());
+        MutableComponent hoverText = new TranslatableComponent("cli.msg.info.region.group." + groupType.name + ".remove.link.hover", groupName, region.getName());
         MutableComponent regionRemoveLink = switch (regionType) {
-            case GLOBAL: {
-                String command = buildCommandStr(GLOBAL.toString(), REMOVE.toString(), groupType.name, affiliation, affiliateName);
-                regionRemoveLink = buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, REMOVE_CMD_COLOR);
-                break;
+            case GLOBAL -> {
+                String command = buildCommandStr(GLOBAL.toString(), REMOVE.toString(), groupType.name, affiliation, groupName);
+                yield buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, REMOVE_CMD_COLOR);
             }
             case DIMENSION -> {
-                String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), REMOVE.toString(), affiliationType.name, affiliation, affiliateName);
+                String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), REMOVE.toString(), groupType.name, affiliation, groupName);
                 yield buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, REMOVE_CMD_COLOR);
             }
             case LOCAL -> {
@@ -1132,56 +1126,38 @@ public class MessageUtil {
         };
         return new TextComponent(" - ")
                 .append(regionRemoveLink).append(" ")
-                .append(buildAffiliateInfo(region, affiliateName, affiliationType));
+                .append(buildGroupInfo(region, groupName, groupType));
     }
 
-    public static MutableComponent buildAffiliateInfo(IProtectedRegion region, String affiliateName, AffiliationType affiliationType) {
-        return switch (affiliationType) {
+    public static MutableComponent buildGroupInfo(IProtectedRegion region, String groupName, GroupType groupType) {
+        return switch (groupType) {
             case PLAYER -> {
-                Player player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByName(affiliateName);
+                Player player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByName(groupName);
                 yield player == null
-                        ? new TextComponent(affiliateName).withStyle(GRAY).append(" ").append(new TranslatableComponent("cli.msg.info.player.list.entry.offline"))
+                        ? new TextComponent(groupName).withStyle(GRAY).append(" ").append(new TranslatableComponent("cli.msg.info.player.list.entry.offline"))
                         : buildPlayerHoverComponent(player);
             }
             case TEAM -> {
                 ServerLevel level = ServerLifecycleHooks.getCurrentServer().getLevel(region.getDim());
                 if (level != null) {
-                    Team team = level.getScoreboard().getPlayerTeam(affiliateName);
-                    yield team == null ? new TextComponent(affiliateName) : buildTeamHoverComponent(team);
+                    Team team = level.getScoreboard().getPlayerTeam(groupName);
+                    yield team == null ? new TextComponent(groupName) : buildTeamHoverComponent(team);
                 } else {
-                    yield new TextComponent(affiliateName);
+                    yield new TextComponent(groupName);
                 }
             }
         };
     }
 
-    public static List<String> getAffiliateList(IProtectedRegion region, String affiliation, AffiliationType affiliationType) {
-        List<String> associateNames = new ArrayList<>();
-        switch (affiliation) {
-            case "owner":
-                switch (affiliationType) {
-                    case PLAYER:
-                        associateNames = region.getOwners().getPlayers().values().stream().sorted().collect(Collectors.toList());
-                        break;
-                    case TEAM:
-                        associateNames = region.getOwners().getTeams().stream().sorted().collect(Collectors.toList());
-                        break;
-                }
-                break;
-            case "member":
-                switch (affiliationType) {
-                    case PLAYER:
-                        associateNames = region.getMembers().getPlayers().values().stream().sorted().collect(Collectors.toList());
-                        break;
-                    case TEAM:
-                        associateNames = region.getMembers().getTeams().stream().sorted().collect(Collectors.toList());
-                        break;
-                }
-                break;
+    public static List<String> getGroupList(IProtectedRegion region, String group, GroupType groupType) {
+        switch (groupType) {
+            case PLAYER:
+                return region.getGroup(group).getPlayers().values().stream().sorted().collect(Collectors.toList());
+            case TEAM:
+                return region.getGroup(group).getTeams().stream().sorted().collect(Collectors.toList());
             default:
-                break;
+                return new ArrayList<>();
         }
-        return associateNames;
     }
 
 
