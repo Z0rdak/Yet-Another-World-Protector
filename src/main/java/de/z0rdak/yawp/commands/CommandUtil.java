@@ -72,7 +72,7 @@ public class CommandUtil {
                 .then(literal(GROUP)
                         .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
                                 .suggests((ctx, builder) -> ISuggestionProvider.suggest(GROUP_LIST, builder))
-                                .executes(ctx -> CommandUtil.clearAffiliation(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx), regionType)))
+                                .executes(ctx -> CommandUtil.clearGroups(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx), regionType)))
                 );
     }
 
@@ -272,14 +272,12 @@ public class CommandUtil {
         if (region.getGroup(group).hasTeam(team.getName())) {
             region.removeTeam(team.getName(), group);
             RegionDataManager.save();
-            // TODO: group in msg
-            TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.team.removed", group, teamInfo,
+            TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.team.removed", team.getName(), group, teamInfo,
                     buildRegionInfoLink(region, regionType));
             sendCmdFeedback(src.getSource(), msg.append(" ").append(undoLink));
             return 0;
         }
-        // TODO: group in msg
-        TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.team.not-present", group, teamInfo,
+        TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.team.not-present", team.getName(), group, teamInfo,
                 buildRegionInfoLink(region, regionType));
         sendCmdFeedback(src.getSource(), msg);
         return 1;
@@ -303,15 +301,13 @@ public class CommandUtil {
         IFormattableTextComponent playerInfo = buildAffiliateInfo(region, player.getScoreboardName(), GroupType.PLAYER);
         if (region.getGroup(group).hasPlayer(player.getUUID())) {
             region.removePlayer(player.getUUID(), group);
-            // TODO: group in msg
-            TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.player.removed", group, playerInfo,
+            TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.player.removed", player.getScoreboardName(), group, playerInfo,
                     buildRegionInfoLink(region, regionType));
             sendCmdFeedback(src.getSource(), msg.append(" ").append(undoLink));
             RegionDataManager.save();
             return 0;
         }
-        // TODO: group in msg
-        TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.player.not-present", group, playerInfo,
+        TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.player.not-present", player.getScoreboardName(), group, playerInfo,
                 buildRegionInfoLink(region, regionType));
         sendCmdFeedback(src.getSource(), msg);
         return 1;
@@ -337,19 +333,18 @@ public class CommandUtil {
             sendCmdFeedback(src.getSource(), new TranslationTextComponent("cli.msg.region.info.group.invalid", group).withStyle(TextFormatting.RED));
             return -1;
         }
+        IFormattableTextComponent regionInfoLink = buildRegionInfoLink(region, regionType);
         IFormattableTextComponent undoLink = buildRegionActionUndoLink(src.getInput(), ADD, REMOVE);
         if (!region.hasPlayer(player.getUUID(), group)) {
             region.addPlayer(player, group);
             RegionDataManager.save();
-            // TODO: group in msg
             TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.player.added",
-                    player.getScoreboardName(), group, buildRegionInfoLink(region, regionType));
+                    player.getScoreboardName(), group, regionInfoLink);
             sendCmdFeedback(src.getSource(), msg.append(" ").append(undoLink));
             return 0;
         }
-        // TODO: group in msg
         TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.player.present",
-                player.getScoreboardName(), buildRegionInfoLink(region, regionType));
+                player.getScoreboardName(), group, regionInfoLink);
         sendCmdFeedback(src.getSource(), msg);
         return 1;
     }
@@ -359,20 +354,19 @@ public class CommandUtil {
             sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.region.info.group.invalid", group).withStyle(TextFormatting.RED));
             return -1;
         }
+        IFormattableTextComponent regionInfoLink = buildRegionInfoLink(region, regionType);
         IFormattableTextComponent teamHoverInfo = buildTeamHoverComponent(team);
         if (!region.hasTeam(team.getName(), group)) {
             region.addTeam(team.getName(), group);
             RegionDataManager.save();
             IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), ADD, REMOVE);
-            // TODO: group in msg
             TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.team.added",
-                    teamHoverInfo, region.getDim().location().toString(), group);
+                    teamHoverInfo, group, regionInfoLink);
             sendCmdFeedback(ctx.getSource(), msg.append(" ").append(undoLink));
             return 0;
         }
-        // TODO: group in msg
         TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.team.present",
-                teamHoverInfo, buildRegionInfoLink(region, regionType), group);
+                teamHoverInfo, team.getName(), regionInfoLink, group);
         sendCmdFeedback(ctx.getSource(), msg);
         return 1;
     }
@@ -400,18 +394,16 @@ public class CommandUtil {
         }
     }
 
-    // TODO: Lang keys
     public static int clearFlags(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionType regionType) {
         int amount = region.getFlags().size();
         if (amount == 0) {
-            IFormattableTextComponent feedbackMsg = new TranslationTextComponent("cli.msg.region.info.flags.empty", buildRegionInfoLink(region, regionType));
+            IFormattableTextComponent feedbackMsg = new TranslationTextComponent("cli.msg.region.info.flag.empty", buildRegionInfoLink(region, regionType));
             sendCmdFeedback(ctx.getSource(), feedbackMsg);
             return 1;
         }
-        Collection<IFlag> flags = region.getFlags();
-        // TODO: Undo action - this would require a addFlag command which allows to add multiple
+        Collection<IFlag> flags = region.getFlags(); // TODO: Undo action link
         region.getFlags().clear();
-        IFormattableTextComponent feedbackMsg = new TranslationTextComponent("cli.msg.info.flags.cleared", buildRegionInfoLink(region, regionType), amount);
+        IFormattableTextComponent feedbackMsg = new TranslationTextComponent("cli.msg.info.region.flag.cleared", amount, buildRegionInfoLink(region, regionType));
         sendCmdFeedback(ctx.getSource(), feedbackMsg);
         RegionDataManager.save();
         return 0;
@@ -422,7 +414,6 @@ public class CommandUtil {
     }
 
     public static int clearPlayers(CommandContext<CommandSource> ctx, IProtectedRegion region, String groupName, RegionType regionType) {
-        // TODO: Undo action - this would require a addplayer command which allows to add multiple (offline)
         int amount = region.getGroup(groupName).getPlayers().size();
         if (amount == 0) {
             IFormattableTextComponent feedbackMsg = new TranslationTextComponent("cli.msg.region.info.players.empty", buildRegionInfoLink(region, regionType), groupName);
@@ -441,7 +432,6 @@ public class CommandUtil {
     }
 
     public static int clearTeams(CommandContext<CommandSource> ctx, IProtectedRegion region, String groupName, RegionType regionType) {
-        // TODO: Undo action
         int amount = region.getGroup(groupName).getTeams().size();
         if (amount == 0) {
             IFormattableTextComponent feedbackMsg = new TranslationTextComponent("cli.msg.region.info.teams.empty", buildRegionInfoLink(region, regionType), groupName);
@@ -456,7 +446,7 @@ public class CommandUtil {
     }
 
 
-    public static int clearAffiliation(CommandContext<CommandSource> ctx, IProtectedRegion region, String groupName, RegionType regionType) {
+    public static int clearGroups(CommandContext<CommandSource> ctx, IProtectedRegion region, String groupName, RegionType regionType) {
         return CommandUtil.clearTeams(ctx, region, groupName, regionType) + CommandUtil.clearPlayers(ctx, region, groupName, regionType);
     }
 
