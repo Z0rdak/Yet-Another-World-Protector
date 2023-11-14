@@ -327,20 +327,26 @@ public class MessageUtil {
                 .append(new TranslationTextComponent(translationKey));
     }
 
-    public static String buildDimCmdStr(IProtectedRegion region, CommandConstants constant) {
-        return CommandUtil.buildCommandStr(DIM.toString(), region.getDim().location().toString(), constant.toString());
-    }
-
-    public static String buildRegionCmdStr(IProtectedRegion region, CommandConstants constant) {
-        return CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), constant.toString());
-    }
-
-    public static IFormattableTextComponent buildRegionEnableComponent(IMarkableRegion region) {
-        String cmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), ENABLE.toString());
+    public static IFormattableTextComponent buildRegionEnableComponent(IProtectedRegion region, RegionType type) {
         String linkTextKey = "cli.msg.info.region.state.enable." + region.isActive() + ".link.text";
         String hoverTextKey = "cli.msg.info.region.state.enable." + !region.isActive() + ".link.hover";
         TextFormatting color = region.isActive() ? ADD_CMD_COLOR : REMOVE_CMD_COLOR;
-        return buildExecuteCmdComponent(linkTextKey, hoverTextKey, cmd, RUN_COMMAND, color);
+        switch (type) {
+            case GLOBAL: {
+                String cmd = ArgumentUtil.buildCommandStr(GLOBAL.toString(), STATE.toString(), ENABLE.toString());
+                return buildExecuteCmdComponent(linkTextKey, hoverTextKey, cmd, RUN_COMMAND, color);
+            }
+            case DIMENSION: {
+                String cmd = ArgumentUtil.buildCommandStr(DIM.toString(), region.getDim().location().toString(), STATE.toString(), ENABLE.toString());
+                return buildExecuteCmdComponent(linkTextKey, hoverTextKey, cmd, RUN_COMMAND, color);
+            }
+            case LOCAL: {
+                String cmd = ArgumentUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), ENABLE.toString());
+                return buildExecuteCmdComponent(linkTextKey, hoverTextKey, cmd, RUN_COMMAND, color);
+            }
+            default:
+                throw new IllegalStateException("Unexpected value: " + type);
+        }
     }
 
     public static IFormattableTextComponent buildRegionPriorityComponent(IMarkableRegion region) {
@@ -364,12 +370,26 @@ public class MessageUtil {
                 .append(decreaseLink);
     }
 
-    public static IFormattableTextComponent buildRegionAlertComponentLink(IMarkableRegion region) {
-        String cmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), ALERT.toString());
+    public static IFormattableTextComponent buildRegionAlertToggleLink(IProtectedRegion region, RegionType type) {
         String linkTextKey = "cli.msg.info.region.state.alert." + !region.isMuted() + ".link.text";
         String hoverTextKey = "cli.msg.info.region.state.alert." + region.isMuted() + ".link.hover";
         TextFormatting color = region.isMuted() ? REMOVE_CMD_COLOR : ADD_CMD_COLOR;
-        return buildExecuteCmdComponent(linkTextKey, hoverTextKey, cmd, RUN_COMMAND, color);
+        switch (type) {
+            case GLOBAL: {
+                String cmd = ArgumentUtil.buildCommandStr(GLOBAL.toString(), MSG.toString(), MUTE.toString());
+                return buildExecuteCmdComponent(linkTextKey, hoverTextKey, cmd, RUN_COMMAND, color);
+            }
+            case DIMENSION: {
+                String cmd = ArgumentUtil.buildCommandStr(DIM.toString(), region.getDim().location().toString(), STATE.toString(), MSG.toString(), MUTE.toString());
+                return buildExecuteCmdComponent(linkTextKey, hoverTextKey, cmd, RUN_COMMAND, color);
+            }
+            case LOCAL: {
+                String cmd = ArgumentUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), MSG.toString(), MUTE.toString());
+                return buildExecuteCmdComponent(linkTextKey, hoverTextKey, cmd, RUN_COMMAND, color);
+            }
+            default:
+                throw new IllegalStateException("Unexpected value: " + type);
+        }
     }
 
     public static IFormattableTextComponent buildRegionInfoLink(IProtectedRegion region, RegionType type) {
@@ -1051,26 +1071,46 @@ public class MessageUtil {
         return flagLink;
     }
 
-    public static IFormattableTextComponent buildDimAddFlagLink(IProtectedRegion dimRegion) {
-        String command = buildCommandStr(DIM.toString(), dimRegion.getDim().location().toString(), ADD.toString(), FLAG.toString(), "");
-        IFormattableTextComponent hoverText = new TranslationTextComponent("cli.msg.dim.flag.add.link.hover", dimRegion.getDim().location().toString());
+    public static IFormattableTextComponent buildAddFlagLink(IProtectedRegion region, RegionType regionType) {
+        IFormattableTextComponent hoverText = new TranslationTextComponent("cli.msg.info.region.flag.add.link.hover", region.getName());
         IFormattableTextComponent linkText = new TranslationTextComponent("cli.link.add");
-        return buildExecuteCmdComponent(linkText, hoverText, command, SUGGEST_COMMAND, ADD_CMD_COLOR);
+        switch (regionType) {
+            case GLOBAL: {
+                String command = buildCommandStr(GLOBAL.toString(), ADD.toString(), FLAG.toString(), "");
+                return buildExecuteCmdComponent(linkText, hoverText, command, SUGGEST_COMMAND, ADD_CMD_COLOR);
+            }
+            case DIMENSION: {
+                String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), ADD.toString(), FLAG.toString(), "");
+                return buildExecuteCmdComponent(linkText, hoverText, command, SUGGEST_COMMAND, ADD_CMD_COLOR);
+            }
+            case LOCAL: {
+                String addCmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), ADD.toString(), FLAG.toString(), "");
+                return buildExecuteCmdComponent(linkText, hoverText, addCmd, SUGGEST_COMMAND, ADD_CMD_COLOR);
+            }
+            default:
+                throw new IllegalStateException("Unexpected value: " + regionType);
+        }
     }
 
-    public static IFormattableTextComponent buildRegionAddFlagLink(IProtectedRegion region) {
-        String addCmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), ADD.toString(), FLAG.toString(), "");
-        IFormattableTextComponent flagAddHoverText = new TranslationTextComponent("cli.msg.info.region.flag.add.link.hover", region.getName());
-        IFormattableTextComponent flagAddLinkText = new TranslationTextComponent("cli.link.add");
-        IFormattableTextComponent addFlag = buildExecuteCmdComponent(flagAddLinkText, flagAddHoverText, addCmd, SUGGEST_COMMAND, ADD_CMD_COLOR);
-        return addFlag;
-    }
-
-    public static IFormattableTextComponent buildRegionStateLink(IMarkableRegion region) {
-        String showStateCmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString());
-        IFormattableTextComponent stateLinkText = new TranslationTextComponent("cli.msg.info.region.state.link.text");
-        IFormattableTextComponent stateHoverText = new TranslationTextComponent("cli.msg.info.region.state.link.hover", region.getName());
-        return buildExecuteCmdComponent(stateLinkText, stateHoverText, showStateCmd, RUN_COMMAND, LINK_COLOR);
+    public static IFormattableTextComponent buildRegionStateLink(IProtectedRegion region, RegionType regionType) {
+        IFormattableTextComponent linkText = new TranslationTextComponent("cli.msg.info.region.state.link.text");
+        IFormattableTextComponent hoverText = new TranslationTextComponent("cli.msg.info.region.state.link.hover", region.getName());
+        switch (regionType) {
+            case GLOBAL: {
+                String command = buildCommandStr(GLOBAL.toString(), STATE.toString());
+                return buildExecuteCmdComponent(linkText, hoverText, command, SUGGEST_COMMAND, ADD_CMD_COLOR);
+            }
+            case DIMENSION: {
+                String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), STATE.toString());
+                return buildExecuteCmdComponent(linkText, hoverText, command, SUGGEST_COMMAND, ADD_CMD_COLOR);
+            }
+            case LOCAL: {
+                String showStateCmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString());
+                return buildExecuteCmdComponent(linkText, hoverText, showStateCmd, RUN_COMMAND, LINK_COLOR);
+            }
+            default:
+                throw new IllegalStateException("Unexpected value: " + regionType);
+        }
     }
 
     public static IFormattableTextComponent buildStateLink(IProtectedRegion region) {
