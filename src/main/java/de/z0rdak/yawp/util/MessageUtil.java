@@ -333,15 +333,15 @@ public class MessageUtil {
     }
 
     public static String buildDimCmdStr(IProtectedRegion region, CommandConstants constant) {
-        return CommandUtil.buildCommandStr(DIM.toString(), region.getDim().location().toString(), constant.toString());
+        return ArgumentUtil.buildCommandStr(DIM.toString(), region.getDim().location().toString(), constant.toString());
     }
 
     public static String buildRegionCmdStr(IProtectedRegion region, CommandConstants constant) {
-        return CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), constant.toString());
+        return ArgumentUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), constant.toString());
     }
 
     public static MutableComponent buildRegionEnableComponent(IMarkableRegion region) {
-        String cmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), ENABLE.toString());
+        String cmd = ArgumentUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), ENABLE.toString());
         String linkTextKey = "cli.msg.info.region.state.enable." + region.isActive() + ".link.text";
         String hoverTextKey = "cli.msg.info.region.state.enable." + !region.isActive() + ".link.hover";
         ChatFormatting color = region.isActive() ? ADD_CMD_COLOR : REMOVE_CMD_COLOR;
@@ -370,7 +370,7 @@ public class MessageUtil {
     }
 
     public static MutableComponent buildRegionAlertComponentLink(IMarkableRegion region) {
-        String cmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), ALERT.toString());
+        String cmd = ArgumentUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), ALERT.toString());
         String linkTextKey = "cli.msg.info.region.state.alert." + !region.isMuted() + ".link.text";
         String hoverTextKey = "cli.msg.info.region.state.alert." + region.isMuted() + ".link.hover";
         ChatFormatting color = region.isMuted() ? REMOVE_CMD_COLOR : ADD_CMD_COLOR;
@@ -849,20 +849,14 @@ public class MessageUtil {
         }
         boolean hasMultiplePages = numberOfPages > 1;
 
-        MutableComponent first = hasMultiplePages && pageNo != FIRST_PAGE_IDX
-                ? buildExecuteCmdComponent(new TranslatableComponent("cli.msg.info.pagination.first.text"), new TranslatableComponent("cli.msg.info.pagination.first.hover"), buildPageCommand(cmd, FIRST_PAGE_IDX), RUN_COMMAND, LINK_COLOR)
-                : ComponentUtils.wrapInSquareBrackets(new TranslatableComponent("cli.msg.info.pagination.first.text")).withStyle(INACTIVE_LINK_COLOR);
-        MutableComponent prev = hasMultiplePages && pageNo > FIRST_PAGE_IDX
-                ? buildExecuteCmdComponent(new TranslatableComponent("cli.msg.info.pagination.previous.text"), new TranslatableComponent("cli.msg.info.pagination.previous.hover"), buildPageCommand(cmd, Math.max(pageNo - 1, FIRST_PAGE_IDX)), RUN_COMMAND, LINK_COLOR)
-                : ComponentUtils.wrapInSquareBrackets(new TranslatableComponent("cli.msg.info.pagination.previous.text")).withStyle(INACTIVE_LINK_COLOR);
-        MutableComponent next = hasMultiplePages && pageNo < numberOfPages - 1
-                ? buildExecuteCmdComponent(new TranslatableComponent("cli.msg.info.pagination.next.text"), new TranslatableComponent("cli.msg.info.pagination.next.hover"), buildPageCommand(cmd, Math.min(pageNo + 1, numberOfPages - 1)), RUN_COMMAND, LINK_COLOR)
-                : ComponentUtils.wrapInSquareBrackets(new TranslatableComponent("cli.msg.info.pagination.next.text")).withStyle(INACTIVE_LINK_COLOR);
-        MutableComponent last = hasMultiplePages && pageNo < numberOfPages - 1
-                ? buildExecuteCmdComponent(new TranslatableComponent("cli.msg.info.pagination.last.text"), new TranslatableComponent("cli.msg.info.pagination.last.hover"), buildPageCommand(cmd, numberOfPages - 1), RUN_COMMAND, LINK_COLOR)
-                : ComponentUtils.wrapInSquareBrackets(new TranslatableComponent("cli.msg.info.pagination.last.text")).withStyle(INACTIVE_LINK_COLOR);
+        IFormattableTextComponent paginationControl = buildPaginationControl(
+                buildFirstLinkArrow(cmd, pageNo, hasMultiplePages),
+                buildPrevLinkArrow(cmd, pageNo, hasMultiplePages),
+                pageNo, numberOfPages,
+                buildNextLinkArrow(cmd, pageNo, numberOfPages, hasMultiplePages),
+                buildLastLinkArrow(cmd, pageNo, numberOfPages, hasMultiplePages)
+        );
 
-        MutableComponent paginationControl = buildPaginationControl(first, prev, pageNo, numberOfPages, next, last);
         int from = pageNo * RegionConfig.getPaginationSize();
         int to = Math.min(RegionConfig.getPaginationSize() + (RegionConfig.getPaginationSize() * pageNo), entries.size());
         List<MutableComponent> entriesForPage = entries.subList(from, to);
@@ -879,7 +873,31 @@ public class MessageUtil {
         return paginationComponents;
     }
 
-    public static MutableComponent buildPaginationControl(MutableComponent front, MutableComponent back, int pageNo, int maxPage, MutableComponent forward, MutableComponent last) {
+    private static MutableComponent buildLastLinkArrow(String cmd, int pageNo, int numberOfPages, boolean hasMultiplePages) {
+        return hasMultiplePages && pageNo < numberOfPages - 1
+                ? buildExecuteCmdComponent(new TranslatableComponent("cli.msg.info.pagination.last.text"), new TranslatableComponent("cli.msg.info.pagination.last.hover"), buildPageCommand(cmd, numberOfPages - 1), RUN_COMMAND, LINK_COLOR)
+                : ComponentUtils.wrapInSquareBrackets(new TranslatableComponent("cli.msg.info.pagination.last.text")).withStyle(INACTIVE_LINK_COLOR);
+    }
+
+    private static MutableComponent buildNextLinkArrow(String cmd, int pageNo, int numberOfPages, boolean hasMultiplePages) {
+        return hasMultiplePages && pageNo < numberOfPages - 1
+                ? buildExecuteCmdComponent(new TranslatableComponent("cli.msg.info.pagination.next.text"), new TranslatableComponent("cli.msg.info.pagination.next.hover"), buildPageCommand(cmd, Math.min(pageNo + 1, numberOfPages - 1)), RUN_COMMAND, LINK_COLOR)
+                : ComponentUtils.wrapInSquareBrackets(new TranslatableComponent("cli.msg.info.pagination.next.text")).withStyle(INACTIVE_LINK_COLOR);
+    }
+
+    private static MutableComponent buildPrevLinkArrow(String cmd, int pageNo, boolean hasMultiplePages) {
+        return hasMultiplePages && pageNo > FIRST_PAGE_IDX
+                ? buildExecuteCmdComponent(new TranslatableComponent("cli.msg.info.pagination.previous.text"), new TranslatableComponent("cli.msg.info.pagination.previous.hover"), buildPageCommand(cmd, Math.max(pageNo - 1, FIRST_PAGE_IDX)), RUN_COMMAND, LINK_COLOR)
+                : ComponentUtils.wrapInSquareBrackets(new TranslatableComponent("cli.msg.info.pagination.previous.text")).withStyle(INACTIVE_LINK_COLOR);
+    }
+
+    private static MutableComponent buildFirstLinkArrow(String cmd, int pageNo, boolean hasMultiplePages) {
+        return hasMultiplePages && pageNo != FIRST_PAGE_IDX
+                ? buildExecuteCmdComponent(new TranslatableComponent("cli.msg.info.pagination.first.text"), new TranslatableComponent("cli.msg.info.pagination.first.hover"), buildPageCommand(cmd, FIRST_PAGE_IDX), RUN_COMMAND, LINK_COLOR)
+                : ComponentUtils.wrapInSquareBrackets(new TranslatableComponent("cli.msg.info.pagination.first.text")).withStyle(INACTIVE_LINK_COLOR);
+    }
+
+    private static MutableComponent buildPaginationControl(MutableComponent front, MutableComponent back, int pageNo, int maxPage, MutableComponent forward, MutableComponent last) {
         // [<<]  [<]  x/n  [>]  [>>]
         MutableComponent pageIndicator = new TextComponent((pageNo + 1) + "/" + (maxPage));
         pageIndicator.setStyle(pageIndicator.getStyle().withColor(RESET).withHoverEvent(null).withClickEvent(null));
@@ -1045,7 +1063,7 @@ public class MessageUtil {
     }
 
     public static MutableComponent buildStateLink(IProtectedRegion region) {
-        String command = CommandUtil.buildCommandStr(DIM.toString(), region.getDim().location().toString(), ENABLE.toString());
+        String command = ArgumentUtil.buildCommandStr(DIM.toString(), region.getDim().location().toString(), ENABLE.toString());
         String onClickAction = region.isActive() ? "deactivate" : "activate";
         String hoverText = "cli.msg.info.state." + onClickAction;
         String linkText = "cli.msg.info.state.link." + (region.isActive() ? "activate" : "deactivate");
