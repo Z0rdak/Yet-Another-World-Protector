@@ -319,13 +319,6 @@ public class MessageUtil {
         return bracketedText;
     }
 
-    public static IFormattableTextComponent buildDimensionTeleportLink(IMarkableRegion region) {
-        String cmdLinkText = buildTeleportLinkText(region.getDim(), region.getTpTarget());
-        String executeCmdStr = buildDimTeleportCmd(region.getDim(), "@s", region.getTpTarget());
-        IFormattableTextComponent teleportCmdHoverText = new TranslationTextComponent("cli.msg.info.region.spatial.location.teleport", region.getName(), region.getDim().location().toString());
-        return buildExecuteCmdComponent(new StringTextComponent(cmdLinkText), teleportCmdHoverText, executeCmdStr, RUN_COMMAND, TP_COLOR);
-    }
-
     public static IFormattableTextComponent buildHelpSuggestionLink(String translationKey, CommandConstants baseCmd, CommandConstants cmd) {
         String command = "/" + CommandPermissionConfig.BASE_CMD + " " + baseCmd + " " + cmd + " ";
         return new StringTextComponent(" ")
