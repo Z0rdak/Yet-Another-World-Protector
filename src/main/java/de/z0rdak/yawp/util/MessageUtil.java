@@ -413,10 +413,10 @@ public class MessageUtil {
         };
     }
 
-    public static MutableComponent buildRegionSpatialPropLink(IMarkableRegion region) {
-        String showSpatialPropLink = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), SPATIAL.toString());
-        MutableComponent spatialPropLinkText = new TranslatableComponent("cli.msg.info.region.spatial.link.text");
-        MutableComponent spatialPropHoverText = new TranslatableComponent("cli.msg.info.region.spatial.link.hover", region.getName());
+    public static MutableComponent buildRegionAreaLink(IMarkableRegion region) {
+        String showSpatialPropLink = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), AREA.toString());
+        MutableComponent spatialPropLinkText = new TranslatableComponent("cli.msg.info.region.area.link.text");
+        MutableComponent spatialPropHoverText = new TranslatableComponent("cli.msg.info.region.area.link.hover", region.getName());
         return buildExecuteCmdComponent(spatialPropLinkText, spatialPropHoverText, showSpatialPropLink, RUN_COMMAND, LINK_COLOR);
     }
 
@@ -1113,8 +1113,8 @@ public class MessageUtil {
 
     public static MutableComponent buildDimensionalBlockTpLink(ResourceKey<Level> dim, BlockPos target) {
         String teleportCmd = buildDimTeleportCmd(dim, "@s", target);
-        return buildExecuteCmdComponent(buildBlockPosTeleportLinkText(target),
-                "cli.msg.info.region.spatial.location.teleport.link.hover", teleportCmd, RUN_COMMAND, TP_COLOR);
+        return buildExecuteCmdComponent(buildBlockPosLinkText(target),
+                "cli.msg.info.region.area.location.teleport.link.hover", teleportCmd, RUN_COMMAND, TP_COLOR);
     }
 
     public static MutableComponent buildDimSuggestRegionRemovalLink(IMarkableRegion region) {
@@ -1151,7 +1151,7 @@ public class MessageUtil {
                 yield buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, REMOVE_CMD_COLOR);
             }
             case LOCAL -> {
-                String command = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), REMOVE.toString(), affiliationType.name, affiliation, affiliateName);
+                String command = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), REMOVE.toString(), groupType.name, affiliation, groupName);
                 yield buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, REMOVE_CMD_COLOR);
             }
             default -> throw new IllegalArgumentException();
