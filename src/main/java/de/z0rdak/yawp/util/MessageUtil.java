@@ -1124,8 +1124,16 @@ public class MessageUtil {
 
     public static MutableComponent buildRegionTeleportLink(IMarkableRegion region) {
         String teleportCmd = buildDimTeleportCmd(region.getDim(), "@s", region.getTpTarget());
-        return buildExecuteCmdComponent(buildBlockPosTeleportLinkText(region.getTpTarget()),
-                "cli.msg.region.info.tp.link.hover", teleportCmd, RUN_COMMAND, TP_COLOR);
+        IFormattableTextComponent textInfo = new StringTextComponent(buildBlockPosLinkText(region.getTpTarget()));
+        IFormattableTextComponent hoverInfo = new TranslationTextComponent("cli.msg.info.region.area.area.tp.hover", region.getName());
+        return buildExecuteCmdComponent(textInfo, hoverInfo, teleportCmd, RUN_COMMAND, TP_COLOR);
+    }
+
+    public static IFormattableTextComponent buildRegionSetTpLink(IMarkableRegion region) {
+        String teleportCmd = buildDimTeleportCmd(region.getDim(), "@s", region.getTpTarget());
+        TranslationTextComponent linkText = new TranslationTextComponent("cli.msg.info.region.area.area.tp.link");
+        TranslationTextComponent hoverText = new TranslationTextComponent("cli.msg.info.region.area.area.tp.hover", region.getName());
+        return buildExecuteCmdComponent(linkText, hoverText, teleportCmd, SUGGEST_COMMAND, LINK_COLOR);
     }
 
     public static MutableComponent buildDimensionalBlockTpLink(ResourceKey<Level> dim, BlockPos target) {
