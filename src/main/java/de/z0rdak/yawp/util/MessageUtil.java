@@ -686,18 +686,21 @@ public class MessageUtil {
      * @param regionType
      * @return == Flag info for [flagname] of [region] ==
      */
-    public static IFormattableTextComponent buildFlagInfoComponent(IProtectedRegion region, IFlag flag, RegionType regionType) {
+    // TODO:
+    public static IFormattableTextComponent buildFlagInfoComponent(IProtectedRegion region, RegionType regionType, IFlag flag) {
         IFormattableTextComponent header = buildFlagInfoHeader(region, flag, regionType);
         switch (regionType) {
             case GLOBAL: {
-                throw new NotImplementedException("Not implemented yet!");
+                buildInfoComponent("cli.info.flag.state.enable", buildFlagActiveToggleLink(region, regionType, flag));
+                buildInfoComponent("cli.info.flag.state.override", buildFlagInvertToggleLink(region, regionType, flag));
+                buildInfoComponent("cli.info.flag.state.msg.mute", buildFlagMuteToggleLink(region, regionType, flag));
+                buildInfoComponent("cli.info.flag.state.msg.text", buildFlagMessageEditLink(region, regionType, flag));
+                return header;
             }
             case DIMENSION: {
-
                 return header;
             }
             case LOCAL: {
-
                 return header;
             }
             default:
