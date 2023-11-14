@@ -378,22 +378,23 @@ public class MessageUtil {
     }
 
     public static MutableComponent buildRegionInfoLink(IProtectedRegion region, RegionType type) {
-        return switch (type) {
-            case GLOBAL: {
+        return buildRegionInfoLink(region, type, new TranslatableComponent("cli.msg.info.region.link.hover", region.getName()));
+    }
+
+    public static MutableComponent buildRegionInfoLink(IProtectedRegion region, RegionType type, IFormattableTextComponent hoverText) {
+        MutableComponent linkText = new TextComponent(region.getName());
+        switch (type) {
+            case GLOBAL -> {
                 String command = buildCommandStr(GLOBAL.toString(), INFO.toString());
                 return buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, LINK_COLOR);
             }
             case DIMENSION -> {
                 String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), INFO.toString());
-                MutableComponent hoverText = new TranslatableComponent("cli.msg.dim.info");
-                MutableComponent linkText = new TextComponent(region.getDim().location().toString());
-                yield buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, LINK_COLOR);
+                return buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, LINK_COLOR);
             }
             case LOCAL -> {
                 String cmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), INFO.toString());
-                MutableComponent regionInfoLinkText = new TextComponent(region.getName());
-                MutableComponent regionInfoLinkHover = new TranslatableComponent("cli.msg.info.region", region.getName());
-                yield buildExecuteCmdComponent(regionInfoLinkText, regionInfoLinkHover, cmd, RUN_COMMAND, LINK_COLOR);
+                return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
             default -> throw new IllegalStateException("Unexpected value: " + type);
         };
@@ -408,9 +409,9 @@ public class MessageUtil {
 
     public static MutableComponent buildRegionOverviewHeader(IProtectedRegion region, RegionType type) {
         return switch (type) {
-            case GLOBAL: {
-                IFormattableTextComponent clipBoardDumpLink = buildExecuteCmdComponent("cli.msg.global.overview.header.dump.link.text", "cli.msg.global.overview.header.dump.link.hover", region.serializeNBT().getPrettyDisplay().getString(), ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
-                return buildHeader(new TranslationTextComponent("cli.msg.info.header.for", clipBoardDumpLink, buildRegionInfoLink(region, RegionType.GLOBAL)));
+            case GLOBAL -> {
+                MutableComponent clipBoardDumpLink = buildExecuteCmdComponent("cli.msg.global.overview.header.dump.link.text", "cli.msg.global.overview.header.dump.link.hover", region.serializeNBT().getPrettyDisplay().getString(), ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
+                yield buildHeader(new TranslatableComponent("cli.msg.info.header.for", clipBoardDumpLink, buildRegionInfoLink(region, RegionType.GLOBAL)));
             }
             case DIMENSION -> {
                 MutableComponent clipBoardDumpLink = buildExecuteCmdComponent("cli.msg.dim.overview.header.dump.link.text", "cli.msg.dim.overview.header.dump.link.hover", NbtUtils.prettyPrint(region.serializeNBT()), ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
@@ -432,9 +433,9 @@ public class MessageUtil {
         MutableComponent hoverText = new TranslatableComponent("cli.msg.info.region.affiliation.player.list.link.hover", affiliation, region.getName());
         MutableComponent linkText = new TranslatableComponent("cli.msg.info.region.affiliation.player.list.link.text", players.getPlayers().size());
         return switch (regionType) {
-            case GLOBAL: {
+            case GLOBAL -> {
                 String cmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), group, PLAYER.toString());
-                return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
+                yield buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
             case DIMENSION -> {
                 String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), affiliation, PLAYER.toString());
