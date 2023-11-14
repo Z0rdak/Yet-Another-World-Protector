@@ -424,15 +424,15 @@ public class MessageUtil {
     public static MutableComponent buildRegionOverviewHeader(IProtectedRegion region, RegionType type) {
         switch (type) {
             case GLOBAL: {
-                MutableComponent clipBoardDumpLink = buildExecuteCmdComponent("cli.msg.global.overview.header.dump.link.text", "cli.msg.global.overview.header.dump.link.hover", region.serializeNBT().getPrettyDisplay().getString(), ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
+                MutableComponent clipBoardDumpLink = buildExecuteCmdComponent("cli.msg.global.overview.header.dump.link.text", "cli.msg.global.overview.header.dump.link.hover", NbtUtils.prettyPrint(region.serializeNBT()), ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
                 return buildHeader(new TranslatableComponent("cli.msg.info.header.for", clipBoardDumpLink, buildRegionInfoLink(region, RegionType.GLOBAL)));
             }
             case DIMENSION: {
-                MutableComponent clipBoardDumpLink = buildExecuteCmdComponent("cli.msg.dim.overview.header.dump.link.text", "cli.msg.dim.overview.header.dump.link.hover", region.serializeNBT().getPrettyDisplay().getString(), ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
+                MutableComponent clipBoardDumpLink = buildExecuteCmdComponent("cli.msg.dim.overview.header.dump.link.text", "cli.msg.dim.overview.header.dump.link.hover", NbtUtils.prettyPrint(region.serializeNBT()), ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
                 return buildHeader(new TranslatableComponent("cli.msg.info.header.for", clipBoardDumpLink, buildRegionInfoLink(region, RegionType.DIMENSION)));
             }
             case LOCAL: {
-                MutableComponent clipBoardDumpLink = buildExecuteCmdComponent("cli.msg.local.overview.header.dump.link.text", "cli.msg.local.overview.header.dump.link.hover", region.serializeNBT().getPrettyDisplay().getString(), ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
+                MutableComponent clipBoardDumpLink = buildExecuteCmdComponent("cli.msg.local.overview.header.dump.link.text", "cli.msg.local.overview.header.dump.link.hover", NbtUtils.prettyPrint(region.serializeNBT()), ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
                 return buildHeader(new TranslatableComponent("cli.msg.info.header.for", clipBoardDumpLink, buildRegionInfoLink(region, LOCAL)));
             }
             default:
@@ -686,18 +686,21 @@ public class MessageUtil {
      * @param regionType
      * @return == Flag info for [flagname] of [region] ==
      */
-    public static MutableComponent buildFlagInfoComponent(IProtectedRegion region, IFlag flag, RegionType regionType) {
+    // TODO:
+    public static MutableComponent buildFlagInfoComponent(IProtectedRegion region, RegionType regionType, IFlag flag) {
         MutableComponent header = buildFlagInfoHeader(region, flag, regionType);
         switch (regionType) {
             case GLOBAL: {
-                throw new NotImplementedException("Not implemented yet!");
+                buildInfoComponent("cli.info.flag.state.enable", buildFlagActiveToggleLink(region, regionType, flag));
+                buildInfoComponent("cli.info.flag.state.override", buildFlagInvertToggleLink(region, regionType, flag));
+                buildInfoComponent("cli.info.flag.state.msg.mute", buildFlagMuteToggleLink(region, regionType, flag));
+                buildInfoComponent("cli.info.flag.state.msg.text", buildFlagMessageEditLink(region, regionType, flag));
+                return header;
             }
             case DIMENSION: {
-
                 return header;
             }
             case LOCAL: {
-
                 return header;
             }
             default:
