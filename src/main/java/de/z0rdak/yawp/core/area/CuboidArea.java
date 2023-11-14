@@ -27,8 +27,8 @@ public class CuboidArea extends AbstractArea {
 
     public CuboidArea(BlockPos p1, BlockPos p2) {
         this(new AxisAlignedBB(p1, p2));
-        this.p1 = p1;
-        this.p2 = p2;
+        this.p1 = AreaUtil.getLowerPos(p1, p2);
+        this.p2 = AreaUtil.getHigherPos(p1, p2);
     }
 
     public CuboidArea(List<BlockPos> blocks){
@@ -49,7 +49,6 @@ public class CuboidArea extends AbstractArea {
                 && pos.getZ() >= this.area.minZ && pos.getZ() <= this.area.maxZ;
     }
 
-    // TODO: Get the lower pos and retain it as lower pos
     public static CuboidArea expand(CuboidArea area, int min, int max) {
         BlockPos p1 = area.getAreaP1();
         BlockPos p2 = area.getAreaP2();
