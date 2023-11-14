@@ -20,11 +20,33 @@ public final class AreaUtil {
                 + Math.pow(a.getZ(), 2));
     }
 
-    public static String blockPosStr(BlockPos pos){
+    public static String blockPosStr(BlockPos pos) {
         return new StringJoiner(", ", "[", "]")
                 .add(pos.getX() + "")
                 .add(pos.getY() + "")
                 .add(pos.getZ() + "")
                 .toString();
+    }
+
+    public static BlockPos getLowerPos(BlockPos pos1, BlockPos pos2) {
+        int z1 = pos1.getZ();
+        int z2 = pos2.getZ();
+
+        if (z1 < z2) {
+            return pos1;
+        } else {
+            return pos2;
+        }
+    }
+
+    public static BlockPos getHigherPos(BlockPos pos1, BlockPos pos2) {
+        int z1 = pos1.getZ();
+        int z2 = pos2.getZ();
+
+        if (z1 > z2) {
+            return pos1;
+        } else {
+            return pos2;
+        }
     }
 }
