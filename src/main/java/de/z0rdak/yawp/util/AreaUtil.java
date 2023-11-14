@@ -22,9 +22,9 @@ public final class AreaUtil {
 
     public static String blockPosStr(BlockPos pos) {
         return new StringJoiner(", ", "[", "]")
-                .add(pos.getX() + "")
-                .add(pos.getY() + "")
-                .add(pos.getZ() + "")
+                .add(String.valueOf(pos.getX()))
+                .add(String.valueOf(pos.getY()))
+                .add(String.valueOf(pos.getZ()))
                 .toString();
     }
 
