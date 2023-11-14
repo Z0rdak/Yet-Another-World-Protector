@@ -90,7 +90,11 @@ public class MessageUtil {
     }
 
     public static String buildTeleportCmd(String tpSource, BlockPos target) {
-        return "tp " + tpSource + " " + target.getX() + " " + target.getY() + " " + target.getZ();
+        return "tp " + tpSource + " " + buildBlockCoordinateStr(target);
+    }
+
+    public static String buildBlockCoordinateStr(BlockPos target) {
+        return target.getX() + " " + target.getY() + " " + target.getZ();
     }
 
     public static String buildTeleportLinkText(RegistryKey<World> dim, BlockPos target) {
@@ -98,18 +102,14 @@ public class MessageUtil {
     }
 
     public static String buildTeleportLinkText(String regionName, BlockPos target) {
-        return regionName + " @ [" + buildBlockPosTeleportLinkText(target) + "]";
-    }
-
-    public static String shorterBlockPos(BlockPos target) {
-        return "[" + buildBlockPosTeleportLinkText(target) + "]";
+        return regionName + " @ [" + buildBlockPosLinkText(target) + "]";
     }
 
     public static String shortBlockPos(BlockPos target) {
         return "[X=" + target.getX() + ", Y=" + target.getY() + ", Z=" + target.getZ() + "]";
     }
 
-    public static String buildBlockPosTeleportLinkText(BlockPos target) {
+    public static String buildBlockPosLinkText(BlockPos target) {
         return target.getX() + ", " + target.getY() + ", " + target.getZ();
     }
 
