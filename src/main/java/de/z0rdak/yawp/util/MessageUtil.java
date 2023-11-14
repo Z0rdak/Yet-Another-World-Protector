@@ -1032,6 +1032,8 @@ public class MessageUtil {
     }
 
     public static MutableComponent buildFlagListLink(IProtectedRegion region, RegionType type) {
+        MutableComponent flagListLinkText = new TranslatableComponent("cli.msg.info.region.flag.link.text", region.getFlags().size());
+        MutableComponent flagListHoverText = new TranslatableComponent("cli.msg.info.region.flag.link.hover", region.getName());
         return switch (type) {
             case GLOBAL -> {
                 String flagListCmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), FLAG.toString());
@@ -1043,19 +1045,22 @@ public class MessageUtil {
             }
             case DIMENSION -> {
                 String flagListCmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), FLAG.toString());
-                MutableComponent flagListLinkText = new TranslatableComponent("cli.msg.info.region.flag.link.text", region.getFlags().size());
-                MutableComponent flagListHoverText = new TranslatableComponent("cli.msg.dim.flag.list.link.hover", region.getName());
-                MutableComponent dimFlagListLink = buildExecuteCmdComponent(flagListLinkText, flagListHoverText, flagListCmd, RUN_COMMAND, LINK_COLOR);
-                yield dimFlagListLink.append(buildDimAddFlagLink(region));
+                MutableComponent flagListLink = buildExecuteCmdComponent(flagListLinkText, flagListHoverText, flagListCmd, RUN_COMMAND, LINK_COLOR);
+                if (region.getFlags().isEmpty()) {
+                    flagListLink = flagListLinkText;
+                }
+                yield flagListLink.append(" ").append(buildAddFlagLink(region, type));
             }
             case LOCAL -> {
                 String listCmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), FLAG.toString());
-                MutableComponent flagListLinkText = new TranslatableComponent("cli.msg.info.region.flag.link.text", region.getFlags().size());
-                MutableComponent flagListHoverText = new TranslatableComponent("cli.msg.info.region.flag.link.hover", region.getName());
                 MutableComponent flagListLink = buildExecuteCmdComponent(flagListLinkText, flagListHoverText, listCmd, RUN_COMMAND, LINK_COLOR);
-                yield flagListLink.append(buildRegionAddFlagLink(region));
+                if (region.getFlags().isEmpty()) {
+                    flagListLink = flagListLinkText;
+                }
+                yield flagListLink.append(" ").append(buildAddFlagLink(region, type));
             }
-            default -> throw new IllegalStateException("Unexpected value: " + type);
+            default ->
+                throw new IllegalStateException("Unexpected value: " + type);
         };
     }
 
