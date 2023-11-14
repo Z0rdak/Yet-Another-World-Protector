@@ -268,7 +268,7 @@ public class CommandUtil {
             return -1;
         }
         IFormattableTextComponent undoLink = buildRegionActionUndoLink(src.getInput(), REMOVE, ADD);
-        IFormattableTextComponent teamInfo = buildAffiliateInfo(region, team.getName(), GroupType.TEAM);
+        IFormattableTextComponent teamInfo = buildGroupInfo(region, team.getName(), GroupType.TEAM);
         if (region.getGroup(group).hasTeam(team.getName())) {
             region.removeTeam(team.getName(), group);
             RegionDataManager.save();
@@ -298,7 +298,7 @@ public class CommandUtil {
             return -1;
         }
         IFormattableTextComponent undoLink = buildRegionActionUndoLink(src.getInput(), REMOVE, ADD);
-        IFormattableTextComponent playerInfo = buildAffiliateInfo(region, player.getScoreboardName(), GroupType.PLAYER);
+        IFormattableTextComponent playerInfo = buildGroupInfo(region, player.getScoreboardName(), GroupType.PLAYER);
         if (region.getGroup(group).hasPlayer(player.getUUID())) {
             region.removePlayer(player.getUUID(), group);
             TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.player.removed", player.getScoreboardName(), group, playerInfo,
