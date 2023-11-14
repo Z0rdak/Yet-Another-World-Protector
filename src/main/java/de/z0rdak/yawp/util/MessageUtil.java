@@ -380,7 +380,11 @@ public class MessageUtil {
     }
 
     public static IFormattableTextComponent buildRegionInfoLink(IProtectedRegion region, RegionType type) {
-        IFormattableTextComponent res;
+        return buildRegionInfoLink(region, type, new TranslationTextComponent("cli.msg.info.region.link.hover", region.getName()));
+    }
+
+    public static IFormattableTextComponent buildRegionInfoLink(IProtectedRegion region, RegionType type, IFormattableTextComponent hoverText) {
+        IFormattableTextComponent linkText = new StringTextComponent(region.getName());
         switch (type) {
             case GLOBAL: {
                 String command = buildCommandStr(GLOBAL.toString(), INFO.toString());
@@ -388,17 +392,11 @@ public class MessageUtil {
             }
             case DIMENSION: {
                 String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), INFO.toString());
-                IFormattableTextComponent hoverText = new TranslationTextComponent("cli.msg.dim.info");
-                IFormattableTextComponent linkText = new StringTextComponent(region.getDim().location().toString());
-                res = buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, LINK_COLOR);
-                break;
+                return buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, LINK_COLOR);
             }
             case LOCAL: {
                 String cmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), INFO.toString());
-                IFormattableTextComponent regionInfoLinkText = new StringTextComponent(region.getName());
-                IFormattableTextComponent regionInfoLinkHover = new TranslationTextComponent("cli.msg.info.region", region.getName());
-                res = buildExecuteCmdComponent(regionInfoLinkText, regionInfoLinkHover, cmd, RUN_COMMAND, LINK_COLOR);
-                break;
+                return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
             default:
                 throw new IllegalStateException("Unexpected value: " + type);
