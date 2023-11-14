@@ -352,16 +352,16 @@ public class MessageUtil {
 
     public static IFormattableTextComponent buildRegionPriorityComponent(IMarkableRegion region) {
         int defaultPriorityInc = RegionConfig.getDefaultPriorityInc();
-        String incPriorityCmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), INC.toString(), String.valueOf(defaultPriorityInc));
+        String incPriorityCmd = ArgumentUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), INC.toString(), String.valueOf(defaultPriorityInc));
         IFormattableTextComponent incLinkText = new TranslationTextComponent("cli.msg.info.region.state.priority.increase.link.text", defaultPriorityInc);
         IFormattableTextComponent incHoverText = new TranslationTextComponent("cli.msg.info.region.state.priority.increase.link.hover", defaultPriorityInc);
         IFormattableTextComponent increaseLink = buildExecuteCmdComponent(incLinkText, incHoverText, incPriorityCmd, RUN_COMMAND, ADD_CMD_COLOR);
-        String decPriorityCmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), DEC.toString(), String.valueOf(defaultPriorityInc));
+        String decPriorityCmd = ArgumentUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), DEC.toString(), String.valueOf(defaultPriorityInc));
         IFormattableTextComponent decLinkText = new TranslationTextComponent("cli.msg.info.region.state.priority.decrease.link.text", defaultPriorityInc);
         IFormattableTextComponent decHoverText = new TranslationTextComponent("cli.msg.info.region.state.priority.decrease.link.hover", defaultPriorityInc);
         IFormattableTextComponent decreaseLink = buildExecuteCmdComponent(decLinkText, decHoverText, decPriorityCmd, RUN_COMMAND, REMOVE_CMD_COLOR);
         IFormattableTextComponent priorityValue = new StringTextComponent(String.valueOf(region.getPriority()));
-        String setPriorityCmd = CommandUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), "");
+        String setPriorityCmd = ArgumentUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), "");
         IFormattableTextComponent setPriorityLinkText = new TranslationTextComponent("cli.msg.info.region.state.priority.set.link.text");
         IFormattableTextComponent setPriorityHoverText = new TranslationTextComponent("cli.msg.info.region.state.priority.set.link.hover");
         IFormattableTextComponent setPriorityLink = buildExecuteCmdComponent(setPriorityLinkText, setPriorityHoverText, setPriorityCmd, SUGGEST_COMMAND, SUGGEST_COLOR);
@@ -1228,14 +1228,14 @@ public class MessageUtil {
     }
 
     public static IFormattableTextComponent buildRegionActionUndoLink(String cmd, CommandConstants toReplace, CommandConstants replacement) {
-        String revertCmd = CommandUtil.revertCommand(cmd, toReplace, replacement);
+        String revertCmd = ArgumentUtil.revertCommand(cmd, toReplace, replacement);
         IFormattableTextComponent revertLinkText = new TranslationTextComponent("cli.link.action.undo.text");
         IFormattableTextComponent revertLinkHover = new TranslationTextComponent("cli.link.action.undo.hover");
         return buildExecuteCmdComponent(revertLinkText, revertLinkHover, revertCmd, RUN_COMMAND, DARK_RED);
     }
 
     public static IFormattableTextComponent buildRegionActionUndoLink(String cmd, String toReplace, String replacement) {
-        String revertCmd = CommandUtil.revertCommand(cmd, toReplace, replacement);
+        String revertCmd = ArgumentUtil.revertCommand(cmd, toReplace, replacement);
         IFormattableTextComponent revertLinkText = new TranslationTextComponent("cli.link.action.undo.text");
         IFormattableTextComponent revertLinkHover = new TranslationTextComponent("cli.link.action.undo.hover");
         return buildExecuteCmdComponent(revertLinkText, revertLinkHover, revertCmd, RUN_COMMAND, DARK_RED);
