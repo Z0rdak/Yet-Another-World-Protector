@@ -317,13 +317,6 @@ public class MessageUtil {
         return bracketedText;
     }
 
-    public static MutableComponent buildDimensionTeleportLink(IMarkableRegion region) {
-        String cmdLinkText = buildTeleportLinkText(region.getDim(), region.getTpTarget());
-        String executeCmdStr = buildDimTeleportCmd(region.getDim(), "@s", region.getTpTarget());
-        MutableComponent teleportCmdHoverText = new TranslatableComponent("cli.msg.info.region.spatial.location.teleport", region.getName(), region.getDim().location().toString());
-        return buildExecuteCmdComponent(new TextComponent(cmdLinkText), teleportCmdHoverText, executeCmdStr, RUN_COMMAND, TP_COLOR);
-    }
-
     public static MutableComponent buildHelpSuggestionLink(String translationKey, CommandConstants baseCmd, CommandConstants cmd) {
         String command = "/" + CommandPermissionConfig.BASE_CMD + " " + baseCmd + " " + cmd + " ";
         return new TextComponent(" ")
@@ -432,18 +425,18 @@ public class MessageUtil {
     public static MutableComponent buildPlayerListLink(IProtectedRegion region, PlayerContainer players, String group, RegionType regionType) {
         MutableComponent hoverText = new TranslatableComponent("cli.msg.info.region.group.player.list.link.hover", group, region.getName());
         MutableComponent linkText = new TranslatableComponent("cli.msg.info.region.group.player.list.link.text", players.getPlayers().size());
-        switch (regionType) {
-            case GLOBAL: {
+        return switch (regionType) {
+            case GLOBAL -> {
                 String cmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), group, PLAYER.toString());
                 yield buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
-            case DIMENSION: {
+            case DIMENSION -> {
                 String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), group, PLAYER.toString());
-                return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
+                yield buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
-            case LOCAL: {
+            case LOCAL -> {
                 String cmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), group, PLAYER.toString());
-                return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
+                yield buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
             default -> throw new IllegalArgumentException();
         };
