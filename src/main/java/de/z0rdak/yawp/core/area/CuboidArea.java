@@ -3,12 +3,19 @@ package de.z0rdak.yawp.core.area;
 import de.z0rdak.yawp.util.AreaUtil;
 import de.z0rdak.yawp.util.constants.AreaNBT;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.Direction;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.phys.AABB;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static de.z0rdak.yawp.util.AreaUtil.blocksBetweenOnAxis;
 
 /**
  * Represents and wraps a simple AxisAlignedBB.
@@ -118,4 +125,45 @@ public class CuboidArea extends AbstractArea {
     public List<BlockPos> getMarkedBlocks() {
         return Arrays.asList(this.p1, this.p2);
     }
+
+    /**
+     * TODO: WIP - this only returns the frame
+     *                  Z+
+     *        p7-----p8
+     *       /|      /|
+     *  Y+  p5------p6|
+     *      | |     | |
+     *      | p3----|-p4
+     *      |/      |/
+     *      p1------p2  X+
+     *
+     * @return outer frame as set of BlockPos of cuboid area
+     */
+    @Override
+    public Set<BlockPos> getHull() {
+        BlockPos p1 = new BlockPos(this.area.minX, this.area.minY, this.area.minZ);
+        BlockPos p2 = new BlockPos(this.area.maxX, this.area.minY, this.area.minZ);
+        BlockPos p3 = new BlockPos(this.area.minX, this.area.minY, this.area.maxZ);
+        BlockPos p4 = new BlockPos(this.area.maxX, this.area.minY, this.area.maxZ);
+        BlockPos p5 = new BlockPos(this.area.minX, this.area.maxY, this.area.minZ);
+        BlockPos p6 = new BlockPos(this.area.maxX, this.area.maxY, this.area.minZ);
+        BlockPos p7 = new BlockPos(this.area.minX, this.area.maxY, this.area.maxZ);
+        BlockPos p8 = new BlockPos(this.area.maxX, this.area.maxY, this.area.maxZ);
+        Set<BlockPos> p12 = blocksBetweenOnAxis(p1, p2, Direction.Axis.X);
+        Set<BlockPos> p34 = blocksBetweenOnAxis(p3, p4, Direction.Axis.X);
+        Set<BlockPos> p56 = blocksBetweenOnAxis(p5, p6, Direction.Axis.X);
+        Set<BlockPos> p78 = blocksBetweenOnAxis(p7, p8, Direction.Axis.X);
+        Set<BlockPos> p15 = blocksBetweenOnAxis(p1, p5, Direction.Axis.Y);
+        Set<BlockPos> p26 = blocksBetweenOnAxis(p2, p6, Direction.Axis.Y);
+        Set<BlockPos> p37 = blocksBetweenOnAxis(p3, p7, Direction.Axis.Y);
+        Set<BlockPos> p48 = blocksBetweenOnAxis(p4, p8, Direction.Axis.Y);
+        Set<BlockPos> p13 = blocksBetweenOnAxis(p1, p3, Direction.Axis.Z);
+        Set<BlockPos> p24 = blocksBetweenOnAxis(p2, p4, Direction.Axis.Z);
+        Set<BlockPos> p57 = blocksBetweenOnAxis(p5, p7, Direction.Axis.Z);
+        Set<BlockPos> p68 = blocksBetweenOnAxis(p6, p8, Direction.Axis.Z);
+        return Stream.of(p12, p34, p56, p78, p15, p26, p37, p48, p13, p24, p57, p68)
+                .flatMap(Set::stream)
+                .collect(Collectors.toSet());
+
 }
+    }
