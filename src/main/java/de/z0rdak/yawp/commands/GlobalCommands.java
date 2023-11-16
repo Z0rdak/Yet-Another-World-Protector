@@ -13,6 +13,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 
 import java.util.List;
 
@@ -53,27 +54,18 @@ public class GlobalCommands {
                                 .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
                                         .executes(ctx -> promptDimensionalRegions(ctx, getGlobalRegion(), getPageNoArgument(ctx))))
                         )
-                );
-    }
-
-    private static int setActiveState(CommandContext<CommandSource> ctx, IProtectedRegion region, boolean activate) {
-        return CommandUtil.setActiveState(ctx, region, RegionType.GLOBAL, activate);
-    }
-
-    private static int setActiveState(CommandContext<CommandSource> ctx, IProtectedRegion region) {
-        return setActiveState(ctx, region, !region.isActive());
-    }
-
-    private static int setAlertState(CommandContext<CommandSource> ctx, IProtectedRegion region, boolean showAlert) {
-        return CommandUtil.setAlertState(ctx, region, RegionType.GLOBAL, showAlert);
-    }
-
-    private static int setAlertState(CommandContext<CommandSource> ctx, IProtectedRegion region) {
-        return setAlertState(ctx, region, !region.isMuted());
+                )
+                .then(literal(RESET).executes(GlobalCommands::resetGlobalRegion));
     }
 
     private static int promptRegionState(CommandContext<CommandSource> ctx, IProtectedRegion region) {
         CommandUtil.promptRegionState(ctx, region, RegionType.GLOBAL);
+        return 0;
+    }
+
+    public static int resetGlobalRegion(CommandContext<CommandSource> ctx) {
+        RegionDataManager.get().resetGlobalRegion();
+        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.global.reset", buildRegionInfoLink(getGlobalRegion(), RegionType.GLOBAL)));
         return 0;
     }
 
