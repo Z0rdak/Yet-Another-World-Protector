@@ -158,10 +158,11 @@ public class CommandUtil {
      * Enabled: [true|false]
      * Alert: [on|off]
      */
-    public static void promptRegionState(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionType regionType) {
+    public static int promptRegionState(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionType regionType) {
         sendCmdFeedback(ctx.getSource(), buildHeader(new TranslationTextComponent("cli.msg.info.header.for", buildRegionStateLink(region, regionType), buildRegionInfoLink(region, regionType))));
         sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.enable", buildRegionEnableComponent(region, regionType)));
         sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.alert", buildRegionAlertToggleLink(region, regionType)));
+        return 0;
     }
 
     /**
