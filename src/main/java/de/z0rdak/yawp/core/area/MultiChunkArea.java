@@ -7,9 +7,11 @@ import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraftforge.common.util.Constants;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MultiChunkArea extends AbstractArea {
@@ -60,5 +62,10 @@ public class MultiChunkArea extends AbstractArea {
     @Override
     public List<BlockPos> getMarkedBlocks() {
         return this.chunks.stream().map(ChunkPos::getWorldPosition).collect(Collectors.toList());
+    }
+
+    @Override
+    public Set<BlockPos> getHull() {
+        throw new NotImplementedException("ChunkArea.getHull() not implemented yet");
     }
 }
