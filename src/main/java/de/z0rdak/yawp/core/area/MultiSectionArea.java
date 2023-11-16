@@ -7,8 +7,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MultiSectionArea extends AbstractArea {
@@ -63,6 +65,11 @@ public class MultiSectionArea extends AbstractArea {
     @Override
     public List<BlockPos> getMarkedBlocks() {
         return this.sections.stream().map(SectionPos::origin).collect(Collectors.toList());
+    }
+
+    @Override
+    public Set<BlockPos> getHull() {
+        throw new NotImplementedException("ChunkArea.getHull() not implemented yet");
     }
 
 }

@@ -6,6 +6,7 @@ import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class PrismArea extends AbstractArea {
 
@@ -49,5 +50,10 @@ public class PrismArea extends AbstractArea {
     @Override
     public List<BlockPos> getMarkedBlocks() {
         return this.blockNodes;
+    }
+
+    @Override
+    public Set<BlockPos> getHull() {
+        throw new NotImplementedException("ChunkArea.getHull() not implemented yet");
     }
 }

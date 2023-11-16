@@ -5,6 +5,9 @@ import de.z0rdak.yawp.util.AreaUtil;
 import de.z0rdak.yawp.util.constants.AreaNBT;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import org.apache.commons.lang3.NotImplementedException;
+
+import java.util.Set;
 
 import static de.z0rdak.yawp.util.AreaUtil.distance;
 import static de.z0rdak.yawp.util.AreaUtil.length;
@@ -59,6 +62,11 @@ public class VerticalCylinderArea extends CenteredArea {
         return isBetweenPlanes && isInsideSurface;
     }
 
+    @Override
+    public Set<BlockPos> getHull() {
+        throw new NotImplementedException("ChunkArea.getHull() not implemented yet");
+    }
+
     public int getDistance() {
         return distance;
     }
@@ -67,7 +75,7 @@ public class VerticalCylinderArea extends CenteredArea {
         return radius;
     }
 
-    public BlockPos multiply(BlockPos p1, BlockPos p2){
+    public BlockPos multiply(BlockPos p1, BlockPos p2) {
         return new BlockPos(p1.getX() * p2.getX(), p1.getY() * p2.getY(), p1.getZ() * p2.getZ());
     }
 

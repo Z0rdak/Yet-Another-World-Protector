@@ -11,6 +11,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 public class Polygon3DArea extends AbstractArea {
 
@@ -102,5 +103,10 @@ public class Polygon3DArea extends AbstractArea {
     @Override
     public List<BlockPos> getMarkedBlocks() {
         return this.positions;
+    }
+
+    @Override
+    public Set<BlockPos> getHull() {
+        throw new NotImplementedException("ChunkArea.getHull() not implemented yet");
     }
 }
