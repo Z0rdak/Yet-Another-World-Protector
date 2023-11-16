@@ -6,6 +6,7 @@ import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 // TODO: Create abstraction for prism and polygon area with a list of blocks (maybe cuboid fits here too?)
 public class PrismArea extends AbstractArea {
@@ -50,5 +51,10 @@ public class PrismArea extends AbstractArea {
     @Override
     public List<BlockPos> getMarkedBlocks() {
         return this.blockNodes;
+    }
+
+    @Override
+    public Set<BlockPos> getHull() {
+        throw new NotImplementedException("ChunkArea.getHull() not implemented yet");
     }
 }
