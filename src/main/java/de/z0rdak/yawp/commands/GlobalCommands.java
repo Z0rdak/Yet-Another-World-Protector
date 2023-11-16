@@ -25,7 +25,6 @@ public class GlobalCommands {
     private GlobalCommands() {
     }
 
-    // TODO: RESET
     public static LiteralArgumentBuilder<CommandSource> build() {
         return literal(GLOBAL)
                 .executes(ctx -> CommandUtil.promptRegionInfo(ctx, getGlobalRegion(), RegionType.GLOBAL))
@@ -38,14 +37,14 @@ public class GlobalCommands {
                 .then(literal(STATE)
                         .executes(ctx -> promptRegionState(ctx, getGlobalRegion()))
                         .then(literal(ALERT)
-                                .executes(ctx -> setAlertState(ctx, getGlobalRegion()))
+                                .executes(ctx -> CommandUtil.setAlertState(ctx, getGlobalRegion(), RegionType.GLOBAL, !getGlobalRegion().isMuted()))
                                 .then(Commands.argument(ALERT.toString(), BoolArgumentType.bool())
-                                        .executes(ctx -> setAlertState(ctx, getGlobalRegion(), getAlertArgument(ctx))))
+                                        .executes(ctx -> CommandUtil.setAlertState(ctx, getGlobalRegion(), RegionType.GLOBAL, getAlertArgument(ctx))))
                         )
                         .then(literal(ENABLE)
-                                .executes(ctx -> setActiveState(ctx, getGlobalRegion()))
+                                .executes(ctx -> CommandUtil.setActiveState(ctx, getGlobalRegion(), RegionType.GLOBAL, !getGlobalRegion().isActive()))
                                 .then(Commands.argument(ENABLE.toString(), BoolArgumentType.bool())
-                                        .executes(ctx -> setActiveState(ctx, getGlobalRegion(), getEnableArgument(ctx))))
+                                        .executes(ctx -> CommandUtil.setActiveState(ctx, getGlobalRegion(), RegionType.GLOBAL, getEnableArgument(ctx))))
                         )
                 )
                 .then(literal(LIST)
