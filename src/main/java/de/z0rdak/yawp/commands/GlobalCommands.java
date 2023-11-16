@@ -59,8 +59,7 @@ public class GlobalCommands {
     }
 
     private static int promptRegionState(CommandContext<CommandSource> ctx, IProtectedRegion region) {
-        CommandUtil.promptRegionState(ctx, region, RegionType.GLOBAL);
-        return 0;
+        return CommandUtil.promptRegionState(ctx, region, RegionType.GLOBAL);
     }
 
     public static int resetGlobalRegion(CommandContext<CommandSource> ctx) {
