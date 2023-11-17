@@ -277,6 +277,11 @@ public class RegionDataManager extends SavedData {
         return globalRegion;
     }
 
+    public void resetGlobalRegion() {
+        globalRegion = new GlobalRegion();
+        save();
+    }
+
     public int getDimensionAmount() {
         return dimCacheMap.keySet().size();
     }
