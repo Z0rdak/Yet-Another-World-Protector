@@ -3,7 +3,6 @@ package de.z0rdak.yawp.managers.data.region;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.flag.BooleanFlag;
-import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.GlobalRegion;
@@ -31,7 +30,6 @@ import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import org.apache.commons.lang3.NotImplementedException;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -280,17 +278,6 @@ public class RegionDataManager extends WorldSavedData {
         return cacheFor(dim).getRegions();
     }
 
-    @Nullable
-    public IMarkableRegion getRegionIn(String regionName, RegistryKey<World> dim) {
-        if (dimCacheMap.containsKey(dim)) {
-            DimensionRegionCache cache = dimCacheMap.get(dim);
-            if (cache.contains(regionName)) {
-                return cache.get(regionName);
-            }
-        }
-        return null;
-    }
-
     public boolean containsCacheFor(RegistryKey<World> dim) {
         return dimCacheMap.containsKey(dim);
     }
@@ -301,16 +288,6 @@ public class RegionDataManager extends WorldSavedData {
             save();
         }
         return dimCacheMap.get(dim);
-    }
-
-    public List<String> getFlagsIdsForDim(DimensionRegionCache dimCache) {
-        if (dimCache != null) {
-            return dimCache.getDimensionalRegion().getFlags()
-                    .stream()
-                    .map(IFlag::getName)
-                    .collect(Collectors.toList());
-        }
-        return new ArrayList<>();
     }
 
     public DimensionRegionCache newCacheFor(RegistryKey<World> dim) {
