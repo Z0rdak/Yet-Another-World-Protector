@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import de.z0rdak.yawp.commands.arguments.flag.RegionFlagArgumentType;
+import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.flag.BooleanFlag;
@@ -20,6 +21,7 @@ import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
+import net.minecraft.command.arguments.DimensionArgument;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.command.arguments.TeamArgument;
 import net.minecraft.entity.Entity;
@@ -149,6 +151,43 @@ public class CommandUtil {
                                                 .executes(ctx -> CommandUtil.promptGroupList(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx), GroupType.PLAYER, getPageNoArgument(ctx), regionType)))
                                 )
                         )
+                );
+    }
+
+    public static LiteralArgumentBuilder<CommandSource> buildCopySubCommand(Function<CommandContext<CommandSource>, IProtectedRegion> srcSupplier, RegionType srcRegionType) {
+        return literal(COPY)
+                .then(literal(FLAGS)
+                        .then(literal(TO_LOCAL)
+                                .then(Commands.argument(TARGET_DIM.toString(), DimensionArgument.dimension())
+                                        .then(Commands.argument(TARGET_REGION.toString(), StringArgumentType.word())
+                                                .suggests((ctx, builder) -> RegionArgumentType.region().listSrcRegions(ctx, builder))
+                                                .executes(ctx -> copyRegionFlags(ctx, srcSupplier.apply(ctx), getTargetLocalRegionArgument(ctx), srcRegionType, RegionType.LOCAL)))))
+                        .then(literal(TO_DIM)
+                                .then(Commands.argument(TARGET_DIM.toString(), DimensionArgument.dimension())
+                                        .executes(ctx -> copyRegionFlags(ctx, srcSupplier.apply(ctx), getTargetDimRegionArgument(ctx).getDimensionalRegion(), srcRegionType, RegionType.DIMENSION))))
+                )
+                .then(literal(PLAYERS)
+                        .then(literal(TO_LOCAL)
+                                .then(Commands.argument(TARGET_DIM.toString(), DimensionArgument.dimension())
+                                        .then(Commands.argument(TARGET_REGION.toString(), StringArgumentType.word())
+                                                .suggests((ctx, builder) -> RegionArgumentType.region().listSrcRegions(ctx, builder))
+                                                .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> ISuggestionProvider.suggest(GROUP_LIST, builder))
+                                                        .executes(ctx -> copyRegionPlayers(ctx, srcSupplier.apply(ctx), getTargetLocalRegionArgument(ctx), getGroupArgument(ctx), srcRegionType, RegionType.LOCAL))))))
+                        .then(literal(TO_DIM)
+                                .then(Commands.argument(TARGET_DIM.toString(), DimensionArgument.dimension())
+                                        .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
+                                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(GROUP_LIST, builder))
+                                                .executes(ctx -> copyRegionPlayers(ctx, srcSupplier.apply(ctx), getTargetDimRegionArgument(ctx).getDimensionalRegion(), getGroupArgument(ctx), srcRegionType, RegionType.DIMENSION))))))
+                .then(literal(STATE)
+                        .then(literal(TO_LOCAL)
+                                .then(Commands.argument(TARGET_DIM.toString(), DimensionArgument.dimension())
+                                        .then(Commands.argument(TARGET_REGION.toString(), StringArgumentType.word())
+                                                .suggests((ctx, builder) -> RegionArgumentType.region().listSrcRegions(ctx, builder))
+                                                .executes(ctx -> copyRegionState(ctx, srcSupplier.apply(ctx), getTargetLocalRegionArgument(ctx), srcRegionType, RegionType.LOCAL)))))
+                        .then(literal(TO_DIM)
+                                .then(Commands.argument(TARGET_DIM.toString(), DimensionArgument.dimension())
+                                        .executes(ctx -> copyRegionState(ctx, srcSupplier.apply(ctx), getTargetDimRegionArgument(ctx).getDimensionalRegion(), srcRegionType, RegionType.DIMENSION))))
                 );
     }
 
@@ -393,6 +432,42 @@ public class CommandUtil {
             sendCmdFeedback(ctx.getSource(), msg);
             return 1;
         }
+    }
+
+    public static int copyRegionFlags(CommandContext<CommandSource> ctx, IProtectedRegion srcRegion, IProtectedRegion region, RegionType srcRegiontype, RegionType targetRegiontype) {
+        srcRegion.getFlags().forEach(region::addFlag);
+        RegionDataManager.save();
+        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("Copied flags from region %s to %s", buildRegionInfoLink(srcRegion, srcRegiontype), buildRegionInfoLink(region, targetRegiontype)));
+        return 0;
+    }
+
+    public static int copyRegionState(CommandContext<CommandSource> ctx, IProtectedRegion region, IProtectedRegion srcRegion, RegionType srcRegiontype, RegionType targetRegiontype) {
+        region.setIsActive(srcRegion.isActive());
+        region.setIsMuted(srcRegion.isMuted());
+        if (region instanceof IMarkableRegion && srcRegion instanceof IMarkableRegion) {
+            IMarkableRegion regionTarget = (IMarkableRegion) region;
+            IMarkableRegion regionSource = (IMarkableRegion) srcRegion;
+            regionTarget.setPriority(regionSource.getPriority());
+        }
+        RegionDataManager.save();
+        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("Copied state from region %s to %s", buildRegionInfoLink(srcRegion, srcRegiontype), buildRegionInfoLink(region, targetRegiontype)));
+        return 0;
+    }
+
+    public static int copyRegionPlayers(CommandContext<CommandSource> ctx, IProtectedRegion region, IProtectedRegion srcRegion, String group, RegionType srcRegiontype, RegionType targetRegiontype) {
+        if (!srcRegion.getGroup(group).getPlayers().isEmpty()) {
+            srcRegion.getGroup(group).getPlayers().forEach((uuid, name) -> region.getGroup(group).addPlayer(uuid, name));
+            RegionDataManager.save();
+            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("Copied players of group '%s' from %s to %s", group, buildRegionInfoLink(srcRegion, srcRegiontype), buildRegionInfoLink(region, targetRegiontype)));
+            return 0;
+        }
+        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("No players of group '%s' in %s", group, buildRegionInfoLink(srcRegion, srcRegiontype)));
+        return 1;
+    }
+
+    public static int copyRegionPlayers(CommandContext<CommandSource> ctx, IProtectedRegion region, IProtectedRegion srcRegion, RegionType srcRegiontype, RegionType targetRegiontype) {
+        return copyRegionPlayers(ctx, region, srcRegion, CommandConstants.MEMBER.toString(), srcRegiontype, targetRegiontype)
+                + copyRegionPlayers(ctx, region, srcRegion, CommandConstants.OWNER.toString(), srcRegiontype, targetRegiontype);
     }
 
     public static int clearFlags(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionType regionType) {
