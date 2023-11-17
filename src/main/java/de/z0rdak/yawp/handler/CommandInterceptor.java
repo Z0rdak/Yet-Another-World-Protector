@@ -2,7 +2,6 @@ package de.z0rdak.yawp.handler;
 
 import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.context.ParsedArgument;
-import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.CommandUtil;
@@ -43,33 +42,62 @@ public class CommandInterceptor {
     @SubscribeEvent
     public static void handleModCommandPermission(CommandEvent event) {
         CommandContextBuilder<CommandSourceStack> cmdContext = event.getParseResults().getContext();
-        CommandSourceStack src = cmdContext.getSource();
-        List<ParsedCommandNode<CommandSourceStack>> cmdNodes = cmdContext.getNodes();
-        if (cmdNodes.size() > 2) {
-            String baseCmd = cmdNodes.get(0).getNode().getName();
-            if (baseCmd.equals(BASE_CMD)) {
-                YetAnotherWorldProtector.LOGGER.debug("Executed command: '" + event.getParseResults().getReader().getString() + "' by '" + src.getTextName() + "'.");
-                String subCmd = cmdNodes.get(1).getNode().getName();
-                switch (subCmd) {
-                    case "region":
-                        handleRegionCmdExecution(event);
-                        break;
-                    case "dim":
-                        handleDimCommandExecution(event);
-                        break;
-                }
-            }
+        List<String> nodeNames = cmdContext.getNodes().stream().map(node -> node.getNode().getName()).collect(Collectors.toList());
+        if (nodeNames.size() > 0 && nodeNames.get(0) != null && !nodeNames.get(0).equals(BASE_CMD)) {
+            return;
         }
+        if (nodeNames.size() > 2) {
+            YetAnotherWorldProtector.LOGGER.debug("Executed command: '" + event.getParseResults().getReader().getString() + "' by '" + cmdContext.getSource().getTextName() + "'.");
+            String subCmd = nodeNames.get(1);
+            int cancelExecutionResultCode = 0;
+            switch (subCmd) {
+                case "region":
+                    cancelExecutionResultCode = handleRegionCmdExecution(cmdContext, nodeNames);
+                    break;
+                case "dim":
+                    cancelExecutionResultCode = handleDimCommandExecution(cmdContext, nodeNames);
+                    break;
+                case "global":
+                    cancelExecutionResultCode = verifyGlobalCommandPermission(cmdContext, nodeNames);
+                    break;
+                case "flag":
+                    cancelExecutionResultCode = verifyFlagCommandPermission(cmdContext, nodeNames);
+                    break;
+                case "marker":
+                    cancelExecutionResultCode = verifyMarkerCommandPermission(cmdContext, nodeNames);
+                    break;
+            }
+            event.setCanceled(cancelExecutionResultCode != 0);
+        }
+
     }
 
-    public static void handleRegionCmdExecution(CommandEvent event) {
-        CommandContextBuilder<CommandSourceStack> cmdContext = event.getParseResults().getContext();
+    /**
+     * TODO: Implement
+     *  /wp marker reset|give|create
+     */
+    private static int verifyMarkerCommandPermission(CommandContextBuilder<CommandSourceStack> cmdContext, List<String> nodeNames) {
         CommandSourceStack src = cmdContext.getSource();
-        List<ParsedCommandNode<CommandSourceStack>> cmdNodes = cmdContext.getNodes();
-        List<String> nodeNames = cmdNodes.stream().map(node -> node.getNode().getName()).collect(Collectors.toList());
+        return 0;
+    }
+
+    // TODO: Implement
+    private static int verifyFlagCommandPermission(CommandContextBuilder<CommandSourceStack> cmdContext, List<String> nodeNames) {
+        CommandSourceStack src = cmdContext.getSource();
+        return 0;
+    }
+
+    // TODO: Implement
+    private static int verifyGlobalCommandPermission(CommandContextBuilder<CommandSourceStack> cmdContext, List<String> nodeNames) {
+        CommandSourceStack src = cmdContext.getSource();
+        return 0;
+    }
+
+    public static int handleRegionCmdExecution(CommandContextBuilder<CommandSourceStack> cmdContext, List<String> nodeNames) {
+        CommandSourceStack src = cmdContext.getSource();
         // /wp region <dim> <region> -> Missing region param
         if (!cmdContext.getArguments().containsKey(REGION.toString())) {
-            return;
+            return 0;
         }
         ParsedArgument<CommandSourceStack, ?> regionArg = cmdContext.getArguments().get(REGION.toString());
         if (regionArg != null && regionArg.getResult() instanceof String regionName) {
@@ -79,8 +107,7 @@ public class CommandInterceptor {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
                 if (!dimCache.contains(regionName)) {
                     MessageUtil.sendCmdFeedback(cmdContext.getSource(), new TextComponent("No region with name '" + regionName + "' defined in dim '" + dimCache.dimensionKey().location() + "'"));
-                    event.setCanceled(true);
-                    return;
+                    return 1;
                 }
                 IMarkableRegion region = dimCache.getRegion(regionName);
                 try {
@@ -92,32 +119,33 @@ public class CommandInterceptor {
                         boolean containsInfoCmd = nodeNames.contains(INFO.toString()) || nodeNames.contains(LIST.toString()) || nodeNames.contains(AREA.toString());
 
                         // /wp region <dim> <region> info|list|spatial|state
-                        if (cmdNodes.size() == 4 || (cmdNodes.size() > 4 && containsInfoCmd) || cmdNodes.size() == 5 && nodeNames.get(4).equals(STATE.toString())) {
-                            event.setCanceled(!(isOwner || AllowInfoCmds() || hasConfigPermission));
-                            if (event.isCanceled()) {
+                        if (nodeNames.size() == 4 || (nodeNames.size() > 4 && containsInfoCmd) || nodeNames.size() == 5 && nodeNames.get(4).equals(STATE.toString())) {
+                            boolean cancelEvent = !(isOwner || AllowInfoCmds() || hasConfigPermission);
+                            if (cancelEvent) {
                                 sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.info.deny", buildRegionInfoLink(region)));
+                                return 1;
                             }
-                            return;
+                            return 0;
                         }
                         // check if player is owner of parent region or has permission to update region area
-                        if (cmdNodes.size() > 4 && nodeNames.contains(AREA.toString())) {
+                        if (nodeNames.size() > 4 && nodeNames.contains(AREA.toString())) {
                             if (!isOwnerOfParent && isOwner && !hasConfigPermission) {
                                 YetAnotherWorldProtector.LOGGER.info("Player not allowed to manage region '" + region.getName() + "'");
                                 sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region)));
-                                event.setCanceled(true);
+                                return 1;
                             }
                         }
                         // check permission for other commands
                         if (!isOwner && !hasConfigPermission) {
                             YetAnotherWorldProtector.LOGGER.info("Player not allowed to manage region '" + region.getName() + "'");
                             sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region)));
-                            event.setCanceled(true);
+                            return 1;
                         }
                     } else {
                         if (!hasPermission(src)) {
                             YetAnotherWorldProtector.LOGGER.info("' " + src.getTextName() + "' is not allowed to manage region: '" + region.getName() + "' in dim '" + region.getDim().location() + "'!");
                             sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.modify.local.deny", buildRegionInfoLink(region)));
-                            event.setCanceled(true);
+                            return 1;
                         }
                     }
                 } catch (CommandSyntaxException e) {
@@ -125,16 +153,14 @@ public class CommandInterceptor {
                 }
             }
         }
+        return 0;
     }
 
-    public static void handleDimCommandExecution(CommandEvent event) {
-        CommandContextBuilder<CommandSourceStack> cmdContext = event.getParseResults().getContext();
+    public static int handleDimCommandExecution(CommandContextBuilder<CommandSourceStack> cmdContext, List<String> nodeNames) {
         CommandSourceStack src = cmdContext.getSource();
-        List<ParsedCommandNode<CommandSourceStack>> cmdNodes = cmdContext.getNodes();
-        List<String> nodeNames = cmdNodes.stream().map(node -> node.getNode().getName()).collect(Collectors.toList());
         // /wp region <dim> <region> -> Missing dim argument
         if (!cmdContext.getArguments().containsKey(DIM.toString())) {
-            return;
+            return 0;
         }
         ParsedArgument<CommandSourceStack, ?> dimParsedArgument = cmdContext.getArguments().get(DIM.toString());
         if (dimParsedArgument != null && dimParsedArgument.getResult() instanceof ResourceLocation dimResLoc) {
@@ -146,35 +172,37 @@ public class CommandInterceptor {
                         ServerPlayer player = src.getPlayerOrException();
                         boolean hasConfigPermission = hasPlayerPermission(player);
                         boolean isOwner = dimCache.hasOwner(player);
-
                         // check for info cmd permission
                         boolean isInfoCmd = (nodeNames.size() > 3 && nodeNames.contains(INFO.toString()) || nodeNames.contains(LIST.toString()));
                         if (nodeNames.size() == 3 || isInfoCmd) {
-                            event.setCanceled(!(isOwner || AllowInfoCmds() || hasConfigPermission));
-                            if (event.isCanceled()) {
+                            boolean cancelEvent = !(isOwner || AllowInfoCmds() || hasConfigPermission);
+                            if (cancelEvent) {
                                 sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.info.deny", buildRegionInfoLink(dimCache.getDimensionalRegion())));
+                                return 1;
                             }
-                            return;
+                            return 0;
                         }
                         // check permission for other commands
                         if (!isOwner && !hasConfigPermission) {
                             YetAnotherWorldProtector.LOGGER.info("Player not allowed to manage dim");
                             sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.modify.dim.deny", buildRegionInfoLink(dimCache.getDimensionalRegion())));
-                            event.setCanceled(true);
+                            return 1;
                         }
                     } else {
                         sendCmdFeedback(src, new TextComponent("Dimension not found in region data").withStyle(RED));
+                        return 0;
                     }
                 } else {
                     if (!hasPermission(src)) {
                         YetAnotherWorldProtector.LOGGER.info("' " + src.getTextName() + "' is not allowed to manage dim");
-                        event.setCanceled(true);
                         sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.modify.dim.deny", buildRegionInfoLink(dimCache.getDimensionalRegion())));
+                        return 1;
                     }
                 }
             } catch (CommandSyntaxException e) {
                 YetAnotherWorldProtector.LOGGER.error(e);
             }
         }
+        return 0;
     }
 }
