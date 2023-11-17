@@ -13,12 +13,12 @@ import net.minecraft.world.level.Level;
 public final class DimensionalRegion extends AbstractRegion {
 
     public DimensionalRegion(ResourceKey<Level> dimensionKey) {
-        super(dimensionKey.location().toString(), RegionType.DIMENSION);
+        super(dimensionKey.location().toString(), dimensionKey, RegionType.DIMENSION);
         this.dimension = dimensionKey;
     }
 
     public DimensionalRegion(ResourceKey<Level> dimensionKey, IProtectedRegion parent) {
-        super(dimensionKey.location().toString(), RegionType.DIMENSION);
+        super(dimensionKey.location().toString(), dimensionKey, RegionType.DIMENSION);
         this.dimension = dimensionKey;
         if (!(parent instanceof GlobalRegion)) {
             throw new IllegalArgumentException("Illegal parent region for dimensional region");

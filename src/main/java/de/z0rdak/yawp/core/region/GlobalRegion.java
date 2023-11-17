@@ -27,10 +27,6 @@ public class GlobalRegion extends AbstractRegion {
         super(name, GLOBAL_DIMENSION, type);
     }
 
-    protected GlobalRegion(String name, RegionType regionType, Player owner) {
-        super(name, GLOBAL_DIMENSION, regionType, owner);
-    }
-
     @Override
     public boolean setParent(@Nonnull IProtectedRegion parent) {
         // throw new IllegalRegionStateException("Attempt to set parent for global region");
