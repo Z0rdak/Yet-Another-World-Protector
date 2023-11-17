@@ -105,10 +105,13 @@
 
 ## Changed
 
+* YAWP can now be used in single-player (open to LAN) worlds. It is still a server-side only mod, but now also works on
+  integrated servers / LAN worlds.
 * Change flag pagination for regions to include a link to the flag info as well as some quick links.
 * Change Dimensional Region CLI to include support for muting regions.
-* Flags now have n internal category. This info will also be added to the wiki. The categories are a change to allow
+* Flags now have an internal category. This info will also be added to the wiki. The categories are a change to allow
   some other features to be added in the future. The categories are not final and may still change.
+* Rename spatial properties to area properties. This change also involves some commands and language keys.
 * Change command to update Local Region area:
   * Old: `/wp region <dim> <region> area Cuboid <pos1> <pos2>`
   * New: `/wp region <dim> <region> area set Cuboid <pos1> <pos2>`
@@ -116,6 +119,10 @@
   * the amount of blocks which needs to be marked for a valid area
   * a selected teleport position
 * The RegionMarker now also prompts feedback for marked blocks and a valid area to the player.
+* Rename affiliation to groups. This change also involves some commands and language keys.
+* Change commands to manage groups (former known as affiliations):
+  * New: `/wp region <dim> <region> add|list|remove group player|team <member|owner> ...`
+  * Old: `/wp region <dim> <region> add|list|remove player|team <member|owner> ...`
 
 ## Fixed
 
