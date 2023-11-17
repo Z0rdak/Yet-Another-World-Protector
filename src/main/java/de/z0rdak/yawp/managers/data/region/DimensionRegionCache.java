@@ -1,9 +1,8 @@
 package de.z0rdak.yawp.managers.data.region;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.core.area.AreaType;
-import de.z0rdak.yawp.core.flag.IFlag;
+import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.core.region.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -14,8 +13,10 @@ import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nullable;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
@@ -99,17 +100,6 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
         return regionsInDimension.get(regionName);
     }
 
-    public Set<String> getDimFlagNames() {
-        return this.dimensionalRegion.getFlags()
-                .stream()
-                .map(IFlag::getName)
-                .collect(Collectors.toSet());
-    }
-
-    public List<IFlag> getDimFlags() {
-        return new ArrayList<>(this.dimensionalRegion.getFlags());
-    }
-
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
@@ -149,12 +139,6 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
         PlayerContainer owners = this.dimensionalRegion.getGroup(OWNERS);
         return owners.hasPlayer(player.getUUID())
                 || (player.getTeam() != null && owners.hasTeam(player.getTeam().getName()));
-    }
-
-    public boolean hasMember(PlayerEntity player) {
-        PlayerContainer members = this.dimensionalRegion.getGroup(MEMBERS);
-        return members.hasPlayer(player.getUUID())
-                || (player.getTeam() != null && members.hasTeam(player.getTeam().getName()));
     }
 
     public static IMarkableRegion deserializeLocalRegion(AreaType areaType, CompoundNBT regionNbt) {
