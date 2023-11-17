@@ -6,7 +6,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.command.CommandSource;
@@ -28,24 +27,24 @@ public class GlobalCommands {
 
     public static LiteralArgumentBuilder<CommandSource> build() {
         return literal(GLOBAL)
-                .executes(ctx -> CommandUtil.promptRegionInfo(ctx, getGlobalRegion(), RegionType.GLOBAL))
+                .executes(ctx -> CommandUtil.promptRegionInfo(ctx, getGlobalRegion()))
                 .then(literal(INFO)
-                        .executes(ctx -> CommandUtil.promptRegionInfo(ctx, getGlobalRegion(), RegionType.GLOBAL)))
-                .then(CommandUtil.buildClearSubCommand((ctx) -> getGlobalRegion(), RegionType.GLOBAL))
-                .then(CommandUtil.buildListSubCommand((ctx) -> getGlobalRegion(), RegionType.GLOBAL))
-                .then(CommandUtil.buildAddSubCommand((ctx) -> getGlobalRegion(), RegionType.GLOBAL))
-                .then(CommandUtil.buildRemoveSubCommand((ctx) -> getGlobalRegion(), RegionType.GLOBAL))
+                        .executes(ctx -> CommandUtil.promptRegionInfo(ctx, getGlobalRegion())))
+                .then(CommandUtil.buildClearSubCommand((ctx) -> getGlobalRegion()))
+                .then(CommandUtil.buildListSubCommand((ctx) -> getGlobalRegion()))
+                .then(CommandUtil.buildAddSubCommand((ctx) -> getGlobalRegion()))
+                .then(CommandUtil.buildRemoveSubCommand((ctx) -> getGlobalRegion()))
                 .then(literal(STATE)
                         .executes(ctx -> promptRegionState(ctx, getGlobalRegion()))
                         .then(literal(ALERT)
-                                .executes(ctx -> CommandUtil.setAlertState(ctx, getGlobalRegion(), RegionType.GLOBAL, !getGlobalRegion().isMuted()))
+                                .executes(ctx -> CommandUtil.setAlertState(ctx, getGlobalRegion(), !getGlobalRegion().isMuted()))
                                 .then(Commands.argument(ALERT.toString(), BoolArgumentType.bool())
-                                        .executes(ctx -> CommandUtil.setAlertState(ctx, getGlobalRegion(), RegionType.GLOBAL, getAlertArgument(ctx))))
+                                        .executes(ctx -> CommandUtil.setAlertState(ctx, getGlobalRegion(), getAlertArgument(ctx))))
                         )
                         .then(literal(ENABLE)
-                                .executes(ctx -> CommandUtil.setActiveState(ctx, getGlobalRegion(), RegionType.GLOBAL, !getGlobalRegion().isActive()))
+                                .executes(ctx -> CommandUtil.setActiveState(ctx, getGlobalRegion(), !getGlobalRegion().isActive()))
                                 .then(Commands.argument(ENABLE.toString(), BoolArgumentType.bool())
-                                        .executes(ctx -> CommandUtil.setActiveState(ctx, getGlobalRegion(), RegionType.GLOBAL, getEnableArgument(ctx))))
+                                        .executes(ctx -> CommandUtil.setActiveState(ctx, getGlobalRegion(), getEnableArgument(ctx))))
                         )
                 )
                 .then(literal(LIST)
@@ -59,21 +58,21 @@ public class GlobalCommands {
     }
 
     private static int promptRegionState(CommandContext<CommandSource> ctx, IProtectedRegion region) {
-        return CommandUtil.promptRegionState(ctx, region, RegionType.GLOBAL);
+        return CommandUtil.promptRegionState(ctx, region);
     }
 
     public static int resetGlobalRegion(CommandContext<CommandSource> ctx) {
         RegionDataManager.get().resetGlobalRegion();
-        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.global.reset", buildRegionInfoLink(getGlobalRegion(), RegionType.GLOBAL)));
+        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.global.reset", buildRegionInfoLink(getGlobalRegion())));
         return 0;
     }
 
     private static int promptDimensionalRegions(CommandContext<CommandSource> ctx, GlobalRegion region, int pageNo) {
         List<DimensionRegionCache> dimCaches = RegionDataManager.getDimensionCaches();
         List<IFormattableTextComponent> regionPagination = buildPaginationComponents(
-                buildRegionListHeader(region, RegionType.GLOBAL),
+                buildRegionListHeader(region),
                 buildCommandStr(GLOBAL.toString(), LIST.toString(), DIM.toString()),
-                buildResetDimensionalRegionEntries(region, dimCaches, RegionType.GLOBAL),
+                buildResetDimensionalRegionEntries(region, dimCaches),
                 pageNo,
                 // empty string, since there is now manual creation of dimensional regions
                 new StringTextComponent(""));
