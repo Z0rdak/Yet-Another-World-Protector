@@ -54,10 +54,6 @@ public class ArgumentUtil {
         return RegionDataManager.get().getGlobalRegion();
     }
 
-    public static DimensionRegionCache getSrcDimCacheArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        return DimensionCacheArgumentType.getDimRegion(ctx, CommandConstants.SRC_DIM.toString());
-    }
-
     public static AreaType getAreaTypeArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         return AreaArgumentType.getAreaType(ctx);
     }
@@ -79,9 +75,14 @@ public class ArgumentUtil {
         return RegionArgumentType.getRegion(ctx, regionType);
     }
 
-    public static IMarkableRegion getSourceRegionArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        return RegionArgumentType.getSrcRegion(ctx, SRC_REGION.toString());
+    public static IProtectedRegion getTargetLocalRegionArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return RegionArgumentType.getSrcRegion(ctx, TARGET_REGION.toString());
     }
+
+    public static DimensionRegionCache getTargetDimRegionArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return DimensionCacheArgumentType.getDimRegion(ctx, TARGET_DIM.toString());
+    }
+
 
     public static IMarkableRegion getChildRegionArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         return RegionArgumentType.getRegion(ctx, CHILD.toString());
