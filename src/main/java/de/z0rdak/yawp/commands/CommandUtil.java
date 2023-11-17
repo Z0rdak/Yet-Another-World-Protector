@@ -12,7 +12,9 @@ import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.group.GroupType;
-import de.z0rdak.yawp.core.region.*;
+import de.z0rdak.yawp.core.region.IMarkableRegion;
+import de.z0rdak.yawp.core.region.IProtectedRegion;
+import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.handler.flags.HandlerUtil;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -32,10 +34,14 @@ import net.minecraft.entity.passive.GolemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.scoreboard.Team;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -47,6 +53,7 @@ import java.util.stream.Collectors;
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.MessageUtil.*;
+import static de.z0rdak.yawp.util.constants.RegionNBT.DIM;
 
 public class CommandUtil {
 
@@ -138,7 +145,7 @@ public class CommandUtil {
                                 .executes(ctx -> promptFlagList(ctx, regionSupplier.apply(ctx), getPageNoArgument(ctx)))))
                 .then(literal(GROUP)
                         .then(Commands.argument(GROUP.toString(), StringArgumentType.string())
-                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(RegionCommands.GROUP_LIST, builder))
+                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(CommandUtil.GROUP_LIST, builder))
                                 .executes(ctx -> CommandUtil.promptGroupLinks(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx)))
                                 .then(literal(TEAM)
                                         .executes(ctx -> CommandUtil.promptGroupList(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx), GroupType.TEAM, 0))
@@ -559,23 +566,23 @@ public class CommandUtil {
         }
     }
 
-    public static void removeInvolvedEntities(CommandContext<CommandSource> src, IProtectedRegion region, RegionFlag flag) {
-        // FIXME: Level is where the command source is, not the target level of the region
-        ServerWorld level = src.getSource().getLevel();
-        Predicate<? super Entity> entityFilter = getEntityFilterForFlag(flag);
-        if (region instanceof DimensionalRegion) {
-            List<Entity> entities = getEntitiesToRemove(level, entityFilter, flag);
-            entities.forEach(level::despawn);
-        }
-        if (region instanceof IMarkableRegion) {
-            List<Entity> entities = getEntitiesToRemove(level, (IMarkableRegion) region, entityFilter);
-            entities.forEach(level::despawn);
-        }
-        if (region instanceof GlobalRegion) {
-            Map<ServerWorld, List<Entity>> entities = getEntitiesToRemove((GlobalRegion) region, entityFilter);
-            entities.forEach((world, entityList) -> {
-                entityList.forEach(world::despawn);
-            });
+    public static void removeInvolvedEntities(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionFlag flag) {
+        RegistryKey<World> dimKey = RegistryKey.create(Registry.DIMENSION_REGISTRY, region.getDim().location());
+        MinecraftServer server = ctx.getSource().getServer();
+        ServerWorld regionWorld = server.getLevel(dimKey);
+        if (regionWorld != null) {
+            Predicate<? super Entity> entityFilter = getEntityFilterForFlag(flag);
+            switch (region.getRegionType()) {
+                case GLOBAL:
+                    server.getAllLevels().forEach(world -> getEntitiesToRemove(world, entityFilter, flag).forEach(world::despawn));
+                    break;
+                case DIMENSION:
+                    getEntitiesToRemove(regionWorld, entityFilter, flag).forEach(regionWorld::despawn);
+                    break;
+                case LOCAL:
+                    getEntitiesToRemove(regionWorld, (IMarkableRegion) region, entityFilter).forEach(regionWorld::despawn);
+                    break;
+            }
         }
     }
 
@@ -603,23 +610,22 @@ public class CommandUtil {
         }
     }
 
+    /**
+     * TODO: make this work with areas of different shapes by manually implementing it. <br>
+     * Use the predicate to determine if the entity is within the region
+     * ...area.intersects(entity.getBoundingBox()) ...
+     */
     private static List<Entity> getEntitiesToRemove(ServerWorld level, IMarkableRegion region, Predicate<? super Entity> entityFilter) {
-        // TODO: make this work with areas of different shapes by manually implementing it
-        // TODO: Use the predicate to determine if the entity is within the region
-        // area.intersects(entity.getBoundingBox()) ...
         return level.getEntities((Entity) null, ((CuboidArea) region.getArea()).getArea(), entityFilter);
     }
 
-    private static Map<ServerWorld, List<Entity>> getEntitiesToRemove(GlobalRegion region, Predicate<? super Entity> entityFilter) {
-        // TODO: Exclude entities from Local Regions or DimensionalRegions with flag
-        return new HashMap<>();
-    }
-
+    /**
+     * TODO: after flags can be negated (either flag is not existent or deactivated...)
+     */
     private static List<Entity> getEntitiesToRemove(ServerWorld level, Predicate<? super Entity> entityFilter, RegionFlag flag) {
         List<Entity> entities = level.getEntities(null, entityFilter);
-        // don't consider entities, which are currently in a Local Region which doesn't have the flag
-        // FIXME: after flags can be negated (either flag is not existent or deactivated...)
         return entities.stream()
+                // don't consider entities, which are currently in a Local Region which doesn't have the flag
                 .filter(e -> isInRegionWithoutFlag(level, flag, e))
                 .collect(Collectors.toList());
     }
@@ -648,7 +654,6 @@ public class CommandUtil {
     }
 
     public static void promptRegionChildrenInfo(CommandContext<CommandSource> ctx, IProtectedRegion region) {
-
         switch (region.getRegionType()) {
             case GLOBAL: {
                 // [n dimensions(s)]
@@ -687,7 +692,7 @@ public class CommandUtil {
             case TEMPLATE:
                 break;
             default:
-                throw new IllegalArgumentException("");
+                throw new IllegalStateException("Unexpected value: " + region.getRegionType());
         }
     }
 
