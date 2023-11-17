@@ -76,7 +76,7 @@ public class ArgumentUtil {
     }
 
     public static IProtectedRegion getTargetLocalRegionArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        return RegionArgumentType.getSrcRegion(ctx, TARGET_REGION.toString());
+        return RegionArgumentType.getTargetRegion(ctx, TARGET_REGION.toString());
     }
 
     public static DimensionRegionCache getTargetDimRegionArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
