@@ -1,9 +1,8 @@
 package de.z0rdak.yawp.managers.data.region;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.core.area.AreaType;
-import de.z0rdak.yawp.core.flag.IFlag;
+import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.core.region.*;
 
 import net.minecraft.nbt.CompoundTag;
@@ -18,8 +17,10 @@ import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nullable;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
@@ -101,17 +102,6 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
 
     public IMarkableRegion get(String regionName) {
         return regionsInDimension.get(regionName);
-    }
-
-    public Set<String> getDimFlagNames() {
-        return this.dimensionalRegion.getFlags()
-                .stream()
-                .map(IFlag::getName)
-                .collect(Collectors.toSet());
-    }
-
-    public List<IFlag> getDimFlags() {
-        return new ArrayList<>(this.dimensionalRegion.getFlags());
     }
 
     @Override
