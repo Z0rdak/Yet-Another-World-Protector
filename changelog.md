@@ -1,4 +1,4 @@
-# [0.0.3.0-beta1] - 2023-09-01
+# [0.0.3.0-beta1] - 2023-12-15
 
 ## Added
 
@@ -11,21 +11,28 @@
 ### Copy region properties
 
 * Add new command to copy properties from one Local Region to another Local Region:
-  * `/wp region <dim> <region> copy flags <src-dim> <src-region>`: copy all flags from `src-region` to `region`
-  * `/wp region <dim> <region> copy state <src-dim> <src-region>`: copy the region state from `src-region` and apply it
-    to `region`
-  * `/wp region <dim> <region> copy players [affiliation] <src-dim> <src-region>`: copy all players from `src-region`
-    to `region`. To copy only a specific affiliation (members, owners) add it as optional parameter
-  * `/wp region <dim> <region> copy teams [affiliation] <src-region>`: copy all teams from `src-region` to `region`. To
-    copy only a specific affiliation (members, owners) add it as optional parameter
+  * `/wp dim <dim> <region> copy flags to-local <target-dim> <target-region>`: copy all flags from `region`
+    to `target-region`
+  * `/wp dim <dim> <region> copy flags to-dim <target-dim>`: copy all flags from `region` to `target-dim`
+  * `/wp dim <dim> <region> copy state to-local <target-dim> <target-region>`: copy the region state from `region` and
+    apply it to `target-region`
+  * `/wp dim <dim> <region> copy state to-dim <target-dim>`: copy the region state from `region` and apply it
+    to `target-dim`
+  * `/wp dim <dim> <region> copy players to-local <target-dim> <target-region> [group] `: copy all players from `region`
+    to `target-region`. To copy only a specific group (members, owners) add it as optional parameter
+  * `/wp dim <dim> <region> copy players to-dim <target-dim> [group] `: copy all players from `region` to `target-dim`.
+    To copy only a specific group (members, owners) add it as optional parameter
+
 * Add new commands to copy properties from one Dimensional Region to another Dimensional Region
-  * `/wp dim <dim> <region> copy flags <src-dim> <src-region>`: copy all flags from `src-region` to `region`
-  * `/wp dim <dim> <region> copy state <src-dim> <src-region>`: copy the region state from `src-region` and apply it
-    to `region`
-  * `/wp dim <dim> <region> copy players [affiliation] <src-dim> <src-region>`: copy all players from `src-region`
-    to `region`. To copy only a specific affiliation (members, owners) add it as optional parameter
-  * `/wp dim <dim> <region> copy teams [affiliation] <src-region>`: copy all teams from `src-region` to `region`. To
-    copy only a specific affiliation (members, owners) add it as optional parameter
+  * `/wp dim <dim> copy flags to-local <target-dim> <target-region>`: copy all flags from `dim` to `target-region`
+  * `/wp dim <dim> copy flags to-dim <target-dim>`: copy all flags from `dim` to `target-dim`
+  * `/wp dim <dim> copy state to-local <target-dim> <target-region>`: copy the region state from `dim` and apply it
+    to `target-region`
+  * `/wp dim <dim> copy state to-dim <target-dim>`: copy the region state from `dim` and apply it to `target-dim`
+  * `/wp dim <dim> copy players to-local <target-dim> <target-region> [group] `: copy all players from `dim`
+    to `target-region`. To copy only a specific group (members, owners) add it as optional parameter
+  * `/wp dim <dim> copy players to-dim <target-dim> [group] `: copy all players from `dim` to `target-dim`. To copy only
+    a specific group (members, owners) add it as optional parameter
 
 ### Enhanced Flags
 
