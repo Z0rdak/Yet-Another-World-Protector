@@ -100,15 +100,15 @@ public class DimensionCommands {
                                                 //        .suggests((ctx, builder) -> AreaArgumentType.areaType().listSuggestions(ctx, builder))
                                                 //        .executes(ctx -> createRegion(ctx.getSource(), getRegionNameArgument(ctx), getDimCacheArgument(ctx), getAreaTypeArgument(ctx))))
                                                 .then(Commands.literal(AreaType.CUBOID.areaType)
-                                                        .then(Commands.argument("pos1", BlockPosArgument.blockPos())
-                                                                .then(Commands.argument("pos2", BlockPosArgument.blockPos())
+                                                        .then(Commands.argument(POS1.toString(), BlockPosArgument.blockPos())
+                                                                .then(Commands.argument(POS2.toString(), BlockPosArgument.blockPos())
                                                                         .executes(ctx -> createCuboidRegion(ctx, getRegionNameArgument(ctx), getDimCacheArgument(ctx),
-                                                                                BlockPosArgument.getOrLoadBlockPos(ctx, "pos1"),
-                                                                                BlockPosArgument.getOrLoadBlockPos(ctx, "pos2"), null))
+                                                                                BlockPosArgument.getOrLoadBlockPos(ctx, POS1.toString()),
+                                                                                BlockPosArgument.getOrLoadBlockPos(ctx, POS2.toString()), null))
                                                                         .then(Commands.argument(CommandConstants.OWNER.toString(), EntityArgument.player())
                                                                                 .executes(ctx -> createCuboidRegion(ctx, getRegionNameArgument(ctx), getDimCacheArgument(ctx),
-                                                                                        BlockPosArgument.getOrLoadBlockPos(ctx, "pos1"),
-                                                                                        BlockPosArgument.getOrLoadBlockPos(ctx, "pos2"), getOwnerArgument(ctx))))))
+                                                                                        BlockPosArgument.getOrLoadBlockPos(ctx, POS1.toString()),
+                                                                                        BlockPosArgument.getOrLoadBlockPos(ctx, POS2.toString()), getOwnerArgument(ctx))))))
                                                 )
                                         )
                                 )
