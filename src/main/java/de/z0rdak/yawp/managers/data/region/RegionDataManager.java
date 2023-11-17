@@ -271,6 +271,11 @@ public class RegionDataManager extends WorldSavedData {
         return globalRegion;
     }
 
+    public void resetGlobalRegion() {
+        globalRegion = new GlobalRegion();
+        save();
+    }
+
     public Collection<IMarkableRegion> getRegionsFor(RegistryKey<World> dim) {
         return cacheFor(dim).getRegions();
     }
