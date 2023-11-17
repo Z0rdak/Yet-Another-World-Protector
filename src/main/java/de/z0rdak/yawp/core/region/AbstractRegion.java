@@ -1,10 +1,10 @@
 package de.z0rdak.yawp.core.region;
 
 import de.z0rdak.yawp.commands.RegionCommands;
-import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
+import de.z0rdak.yawp.core.group.PlayerContainer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -92,7 +92,12 @@ public abstract class AbstractRegion implements IProtectedRegion {
     }
 
     @Override
-    public void addFlag(IFlag flag){
+    public RegionType getRegionType() {
+        return this.regionType;
+    }
+
+    @Override
+    public void addFlag(IFlag flag) {
         this.flags.put(flag);
     }
 

@@ -1,9 +1,9 @@
 package de.z0rdak.yawp.core.region;
 
-import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
+import de.z0rdak.yawp.core.group.PlayerContainer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.RegistryKey;
@@ -34,6 +34,8 @@ public interface IProtectedRegion extends INBTSerializable<CompoundNBT> {
     String getName();
 
     RegistryKey<World> getDim();
+
+    RegionType getRegionType();
 
     void addFlag(IFlag flag);
 
