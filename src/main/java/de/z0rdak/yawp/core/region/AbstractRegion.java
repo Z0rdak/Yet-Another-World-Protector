@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.core.region;
 
-import de.z0rdak.yawp.commands.RegionCommands;
+import de.z0rdak.yawp.commands.CommandUtil;
 import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
@@ -221,10 +221,11 @@ public abstract class AbstractRegion implements IProtectedRegion {
      *
      * @param player to be checked
      * @return true if player is in region list or is an operator, false otherwise
+     * TODO: Add argument for group to check
      */
     @Override
     public boolean permits(Player player) {
-        return isInGroup(player, RegionCommands.OWNER) || isInGroup(player, RegionCommands.MEMBER);
+        return isInGroup(player, CommandUtil.OWNER) || isInGroup(player, CommandUtil.MEMBER);
     }
 
     public boolean isInGroup(Player player, String group) {
