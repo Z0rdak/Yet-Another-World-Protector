@@ -14,6 +14,9 @@ public enum CommandConstants {
     ALLOW("allow"),
 
     AREA("area"),
+    POS1("pos1"),
+    POS2("pos2"),
+
     BLOCKS("blocks"),
     CHILD("child"),
     CHILDREN("children"),
@@ -83,8 +86,8 @@ public enum CommandConstants {
     TYPE("type"),
     UPDATE("update"),
     VERT("vert"),
-    Y1("Y1"),
-    Y2("Y2");
+    Y_MIN("y-min"),
+    Y_MAX("y-max");
 
     private final String cmdString;
 
