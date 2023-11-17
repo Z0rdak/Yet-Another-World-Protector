@@ -10,7 +10,6 @@ import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.region.AbstractMarkableRegion;
 import de.z0rdak.yawp.core.region.CuboidRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
-import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -31,7 +30,6 @@ import java.util.Random;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.DimensionCommands.regionNameSuggestions;
-import static de.z0rdak.yawp.core.region.RegionType.LOCAL;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.MessageUtil.buildRegionInfoLink;
 import static de.z0rdak.yawp.util.MessageUtil.sendCmdFeedback;
@@ -72,7 +70,7 @@ public final class MarkerCommands {
                 return res;
             }
             if (res == 1) {
-                sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.name.exists", buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION), buildRegionInfoLink(dimCache.getRegion(regionName), LOCAL)));
+                sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.name.exists", buildRegionInfoLink(dimCache.getDimensionalRegion()), buildRegionInfoLink(dimCache.getRegion(regionName))));
                 return res;
             }
 
@@ -92,20 +90,20 @@ public final class MarkerCommands {
                         boolean hasConfigPermission = CommandPermissionConfig.hasPlayerPermission(player);
                         if (parentRegion != null) {
                             // should only be a region which has player as owner at this point due to the OwnerRegionArgumentType suggestions
-                            if (parentRegion.hasPlayer(player.getUUID(), RegionCommands.OWNER) || hasConfigPermission) {
+                            if (parentRegion.hasPlayer(player.getUUID(), CommandUtil.OWNER) || hasConfigPermission) {
                                 if (AbstractMarkableRegion.fullyContains(parentRegion.getArea(), region.getArea())) {
                                     dimCache.addRegion(region);
                                     parentRegion.addChild(region);
                                     LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.getDefaultPriority());
                                     RegionDataManager.save();
-                                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region, LOCAL)));
+                                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
                                     return 0;
                                 } else {
-                                    sendCmdFeedback(src, new TranslatableComponent( "cli.msg.dim.info.region.create.stick.area.invalid.parent", buildRegionInfoLink(parentRegion, LOCAL)));
+                                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.stick.area.invalid.parent", buildRegionInfoLink(parentRegion)));
                                     return -1;
                                 }
                             } else {
-                                sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.local.deny", buildRegionInfoLink(parentRegion, LOCAL)));
+                                sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.local.deny", buildRegionInfoLink(parentRegion)));
                                 return 1;
                             }
                         } else {
@@ -113,10 +111,10 @@ public final class MarkerCommands {
                                 dimCache.addRegion(region);
                                 LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.getDefaultPriority());
                                 RegionDataManager.save();
-                                sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region, LOCAL)));
+                                sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
                                 return 0;
                             } else {
-                                sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.dim.deny", buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION)));
+                                sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.dim.deny", buildRegionInfoLink(dimCache.getDimensionalRegion())));
                                 return 2;
                             }
                         }
