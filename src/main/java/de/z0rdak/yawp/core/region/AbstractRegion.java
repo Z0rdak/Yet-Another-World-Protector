@@ -56,17 +56,6 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.deserializeNBT(nbt);
     }
 
-    protected AbstractRegion(String name, RegionType type) {
-        this.name = name;
-        this.regionType = type;
-        this.flags = new FlagContainer();
-        this.groups = new HashMap<>();
-        this.groups.put(MEMBERS, new PlayerContainer());
-        this.groups.put(OWNERS, new PlayerContainer());
-        this.isActive = true;
-        this.children = new HashMap<>();
-    }
-
     @Nullable
     @Override
     public String getParentName() {
@@ -83,18 +72,6 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.groups.put(OWNERS, new PlayerContainer());
         this.children = new HashMap<>();
         this.isActive = true;
-    }
-
-    /**
-     * Minimal constructor to create an abstract region by supplying a name, type and an owner.
-     * @param name name of the region
-     * @param owner region owner
-     */
-    protected AbstractRegion(String name, RegionType regionType, PlayerEntity owner) {
-        this(name, regionType);
-        if (owner != null) {
-            this.groups.get(OWNERS).addPlayer(owner.getUUID(), owner.getScoreboardName());
-        }
     }
 
     protected AbstractRegion(String name, RegistryKey<World> dimension, RegionType regionType, PlayerEntity owner) {

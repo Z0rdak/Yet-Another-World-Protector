@@ -1,6 +1,5 @@
 package de.z0rdak.yawp.core.region;
 
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
@@ -25,10 +24,6 @@ public class GlobalRegion extends AbstractRegion {
 
     protected GlobalRegion(String name, RegionType type) {
         super(name, GLOBAL_DIMENSION, type);
-    }
-
-    protected GlobalRegion(String name, RegionType regionType, PlayerEntity owner) {
-        super(name, GLOBAL_DIMENSION, regionType, owner);
     }
 
     @Override

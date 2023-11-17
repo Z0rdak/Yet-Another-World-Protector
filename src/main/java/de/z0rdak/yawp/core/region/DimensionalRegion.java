@@ -5,9 +5,6 @@ import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
-import org.lwjgl.system.CallbackI;
-
-import javax.annotation.Nonnull;
 
 /**
  * The DimensionalRegion represents the only direct implementation of an Abstract region.
@@ -16,12 +13,12 @@ import javax.annotation.Nonnull;
 public final class DimensionalRegion extends AbstractRegion {
 
     public DimensionalRegion(RegistryKey<World> dimensionKey) {
-        super(dimensionKey.location().toString(), RegionType.DIMENSION);
+        super(dimensionKey.location().toString(), dimensionKey, RegionType.DIMENSION);
         this.dimension = dimensionKey;
     }
 
     public DimensionalRegion(RegistryKey<World> dimensionKey, IProtectedRegion parent) {
-        super(dimensionKey.location().toString(), RegionType.DIMENSION);
+        super(dimensionKey.location().toString(), dimensionKey, RegionType.DIMENSION);
         this.dimension = dimensionKey;
         if (! (parent instanceof GlobalRegion)) {
             throw new IllegalArgumentException("Illegal parent region for dimensional region");
