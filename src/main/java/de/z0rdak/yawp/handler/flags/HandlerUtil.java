@@ -133,8 +133,15 @@ public final class HandlerUtil {
         return new TextComponent(defaultFlagMsg);
     }
 
-    private static String replaceMatches(String flag, PlayerFlagEvent flagCheckEvent) {
-        String flagMsg = flag;
+    private static String getDefaultFlagMsgTemplate(IFlag flag) {
+        // decide whether to pick a flag specific msg or the default one
+        String flagMsgLangKey = flag.getFlagMsg().isDefault() ? "flag.msg.deny.default" : "flag.msg.deny." + flag.getName();
+        TranslationTextComponent flagMsgTemplateComp = new TranslationTextComponent(flagMsgLangKey);
+        return flagMsgTemplateComp.getString();
+    }
+
+    private static String replaceMatches(String flagMsgTemplate, PlayerFlagEvent flagCheckEvent) {
+        String flagMsg = flagMsgTemplate;
         for (Map.Entry<String, String> entry : flagCheckEvent.getMsgSubstitutes().entrySet()) {
             flagMsg = flagMsg.replace(entry.getKey(), entry.getValue());
         }
