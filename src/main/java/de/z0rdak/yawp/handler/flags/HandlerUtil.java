@@ -81,6 +81,12 @@ public final class HandlerUtil {
         return flagCheck.isDenied();
     }
 
+    public static final String FLAG_TEMPLATE = "{flag}";
+    public static final String POS_TEMPLATE = "{pos}";
+    public static final String REGION_TEMPLATE = "{region}";
+    public static final String DIM_TEMPLATE = "{dim}";
+    public static final String PLAYER_TEMPLATE = "{player}";
+
     public static void sendFlagMsg(FlagCheckEvent flagCheck) {
         boolean isPlayerEvent = flagCheck instanceof PlayerFlagEvent;
         boolean hasLocalRegion = flagCheck.getLocalRegion() != null;
