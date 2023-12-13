@@ -111,14 +111,15 @@ public final class HandlerUtil {
         }
     }
 
+    // TODO: create custom map impl
     public static Map<String, String> defaultSubstituteMap(RegionFlag flag, IProtectedRegion region, BlockPos pos, @Nullable PlayerEntity player) {
         Map<String, String> substituteMap = new HashMap<>();
-        substituteMap.put("{flag}", flag.name);
-        substituteMap.put("{pos}", MessageUtil.shortBlockPos(pos));
-        substituteMap.put("{region}", region.getName());
-        substituteMap.put("{dimension}", region.getDim().location().toString());
-        if (player != null) {
-            substituteMap.put("{player}", player.getScoreboardName());
+        substituteMap.put(FLAG_TEMPLATE, flag.name);
+        substituteMap.put(POS_TEMPLATE, MessageUtil.shortBlockPos(pos));
+        substituteMap.put(REGION_TEMPLATE, region.getName());
+        substituteMap.put(DIM_TEMPLATE, region.getDim().location().toString());
+        if (player != null && flag.categories.contains(FlagCategory.PLAYER)) {
+            substituteMap.put(PLAYER_TEMPLATE, player.getScoreboardName());
         }
         return substituteMap;
     }
