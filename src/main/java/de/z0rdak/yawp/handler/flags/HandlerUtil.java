@@ -125,32 +125,12 @@ public final class HandlerUtil {
         return substituteMap;
     }
 
-    public static MutableComponent buildFlagMsg(PlayerFlagEvent flagCheckEvent, IFlag flag, String defaultMsg) {
-        if (flag.getFlagMsg().isDefault()) {
-            String defaultFlagMsg = replaceMatches(defaultMsg, flagCheckEvent);
-            return new TextComponent(defaultFlagMsg);
-        } else {
-            // replace all placeholders with values
-            String flagMsg = replaceMatches(flag.getFlagMsg().getMsg(), flagCheckEvent);
-
-            // apply color and text formatting
-            Pattern compile = Pattern.compile("\\{(?<id>[cfrCFR]):(?<format>[a-zA-Z_]*)}");
-            Matcher matcher = compile.matcher(flagMsg);
-            while (matcher.find()) {
-                String id = matcher.group("id");
-                String format = matcher.group("format");
-                if (id.toLowerCase(Locale.ROOT).equals("c") || id.toLowerCase(Locale.ROOT).equals("f")) {
-                    ChatFormatting formatting = ChatFormatting.getByName(format);
-                    if (formatting != null) {
-                        // TODO: replace occourance of string with this
-                    }
-                }
-                if (id.toLowerCase(Locale.ROOT).equals("r")) {
-                    ChatFormatting resetFormat = ChatFormatting.RESET;
-                }
-            }
-            return new TextComponent(flagMsg);
-        }
+    public static MutableComponent buildFlagMsg(PlayerFlagEvent flagCheckEvent, IFlag flag) {
+        String flagMsgTemplate = flag.getFlagMsg().isDefault()
+                ? getDefaultFlagMsgTemplate(flag)
+                : flag.getFlagMsg().getMsg();
+        String defaultFlagMsg = replaceMatches(flagMsgTemplate, flagCheckEvent);
+        return new TextComponent(defaultFlagMsg);
     }
 
     private static String replaceMatches(String flag, PlayerFlagEvent flagCheckEvent) {
