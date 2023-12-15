@@ -18,11 +18,13 @@ import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.MessageUtil;
+import de.z0rdak.yawp.util.constants.RegionNBT;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.Collection;
 import java.util.List;
@@ -166,15 +168,25 @@ public class RegionArgumentType implements ArgumentType<String> {
         if (context.getSource() instanceof CommandSourceStack) {
             CommandSourceStack src = (CommandSourceStack) context.getSource();
             DimensionRegionCache dimCache = ArgumentUtil.getDimCacheArgument((CommandContext<CommandSourceStack>) context);
-            Collection<String> regionNames = dimCache.getRegionNames();
-            if (regionNames.isEmpty()) {
-                MessageUtil.sendCmdFeedback(src, new TextComponent("No regions defined in dim '" + dimCache.dimensionKey().location() + "'"));
-                return Suggestions.empty();
-            }
-            return SharedSuggestionProvider.suggest(regionNames, builder);
+            return suggestRegionsForOwner(builder, src, dimCache);
         } else {
             return Suggestions.empty();
         }
+    }
+
+    private CompletableFuture<Suggestions> suggestRegionsForOwner(SuggestionsBuilder builder, CommandSourceStack src, DimensionRegionCache dimCache) {
+        Collection<IMarkableRegion> regions = dimCache.getRegions();
+        if (src.getEntity() instanceof Player) {
+            regions = regions.stream()
+                    .filter(region -> region.isInGroup((Player) src.getEntity(), RegionNBT.OWNERS))
+                    .collect(Collectors.toList());
+        }
+        Collection<String> regionNames = regions.stream().map(IProtectedRegion::getName).collect(Collectors.toSet());
+        if (regionNames.isEmpty()) {
+            MessageUtil.sendCmdFeedback(src, new TextComponent("No regions defined in dim '" + dimCache.dimensionKey().location() + "'"));
+            return Suggestions.empty();
+        }
+        return SharedSuggestionProvider.suggest(regionNames, builder);
     }
 
     @SuppressWarnings("unchecked")
@@ -183,12 +195,7 @@ public class RegionArgumentType implements ArgumentType<String> {
             CommandSourceStack src = (CommandSourceStack) context.getSource();
             try {
                 DimensionRegionCache dimCache = ArgumentUtil.getTargetDimRegionArgument((CommandContext<CommandSourceStack>) context);
-                Collection<String> regionNames = dimCache.getRegionNames();
-                if (regionNames.isEmpty()) {
-                    MessageUtil.sendCmdFeedback(src, new TextComponent("No regions defined in dim '" + dimCache.dimensionKey().location() + "'"));
-                    return Suggestions.empty();
-                }
-                return SharedSuggestionProvider.suggest(regionNames, builder);
+                return suggestRegionsForOwner(builder, src, dimCache);
             } catch (CommandSyntaxException e) {
                 return Suggestions.empty();
             }
