@@ -436,34 +436,49 @@ public class CommandUtil {
         }
     }
 
-    public static int copyRegionFlags(CommandContext<CommandSource> ctx, IProtectedRegion srcRegion, IProtectedRegion region) {
-        srcRegion.getFlags().forEach(region::addFlag);
+    public static int copyRegionFlags(CommandContext<CommandSource> ctx, IProtectedRegion srcRegion, IProtectedRegion targetRegion) {
+        if (srcRegion.getFlags().isEmpty()) {
+            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.flag.empty", buildRegionInfoLink(srcRegion)));
+            return 1;
+        }
+        // get the flags which are in the srcRegion but not in the targetRegion
+        Set<IFlag> flagsToCopy = srcRegion.getFlags().stream()
+                .filter(flag -> !targetRegion.containsFlag(flag.getName()))
+                .collect(Collectors.toSet());
+        // flagsToCopy.forEach(region::addFlag);
+        srcRegion.getFlags().forEach(targetRegion::addFlag);
         RegionDataManager.save();
-        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("Copied flags from region %s to %s", buildRegionInfoLink(srcRegion), buildRegionInfoLink(region)));
+        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.copy.region.flags", flagsToCopy.size(), buildRegionInfoLink(srcRegion), buildRegionInfoLink(targetRegion)));
         return 0;
     }
 
-    public static int copyRegionState(CommandContext<CommandSource> ctx, IProtectedRegion region, IProtectedRegion srcRegion) {
-        region.setIsActive(srcRegion.isActive());
-        region.setIsMuted(srcRegion.isMuted());
-        if (region instanceof IMarkableRegion && srcRegion instanceof IMarkableRegion) {
-            IMarkableRegion regionTarget = (IMarkableRegion) region;
+    public static int copyRegionState(CommandContext<CommandSource> ctx, IProtectedRegion srcRegion, IProtectedRegion targetRegion) {
+        targetRegion.setIsActive(srcRegion.isActive());
+        targetRegion.setIsMuted(srcRegion.isMuted());
+        if (srcRegion instanceof IMarkableRegion && targetRegion instanceof IMarkableRegion) {
             IMarkableRegion regionSource = (IMarkableRegion) srcRegion;
+            IMarkableRegion regionTarget = (IMarkableRegion) targetRegion;
             regionTarget.setPriority(regionSource.getPriority());
         }
         RegionDataManager.save();
-        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("Copied state from region %s to %s", buildRegionInfoLink(srcRegion), buildRegionInfoLink(region)));
+        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.copy.region.state", buildRegionInfoLink(srcRegion), buildRegionInfoLink(targetRegion)));
         return 0;
     }
 
-    public static int copyRegionPlayers(CommandContext<CommandSource> ctx, IProtectedRegion region, IProtectedRegion srcRegion, String group) {
+    public static int copyRegionPlayers(CommandContext<CommandSource> ctx, IProtectedRegion srcRegion, IProtectedRegion targetRegion, String group) {
         if (!srcRegion.getGroup(group).getPlayers().isEmpty()) {
-            srcRegion.getGroup(group).getPlayers().forEach((uuid, name) -> region.getGroup(group).addPlayer(uuid, name));
+            // get the players which are in the srcRegion but not in the targetRegion
+            Set<Map.Entry<UUID, String>> playerEntriesToCopy = srcRegion.getGroup(group).getPlayers().entrySet().stream()
+                    .filter(entry -> !targetRegion.getGroup(group).getPlayers().containsKey(entry.getKey()))
+                    .collect(Collectors.toSet());
+            //playerEntriesToCopy.forEach(entry -> region.getGroup(group).addPlayer(entry.getKey(), entry.getValue()));
+
+            srcRegion.getGroup(group).getPlayers().forEach((uuid, name) -> targetRegion.getGroup(group).addPlayer(uuid, name));
             RegionDataManager.save();
-            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("Copied players of group '%s' from %s to %s", group, buildRegionInfoLink(srcRegion), buildRegionInfoLink(region)));
+            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.copy.region.players", playerEntriesToCopy.size(), group, buildRegionInfoLink(srcRegion), buildRegionInfoLink(targetRegion)));
             return 0;
         }
-        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("No players of group '%s' in %s", group, buildRegionInfoLink(srcRegion)));
+        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.group.player.empty", group, buildRegionInfoLink(srcRegion)));
         return 1;
     }
 
