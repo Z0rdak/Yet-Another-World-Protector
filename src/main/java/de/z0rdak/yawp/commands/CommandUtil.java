@@ -245,7 +245,7 @@ public class CommandUtil {
                 cmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), GROUP.toString(), group, groupType.name);
                 break;
             case DIMENSION:
-                cmd = buildCommandStr(DIM.toString(), dim, LIST.toString(), GROUP.toString(), group, groupType.name);
+                cmd = buildCommandStr(CommandConstants.DIM.toString(), dim, LIST.toString(), GROUP.toString(), group, groupType.name);
                 break;
             case LOCAL:
                 cmd = buildCommandStr(REGION.toString(), dim, region.getName(), LIST.toString(), GROUP.toString(), group, groupType.name);
