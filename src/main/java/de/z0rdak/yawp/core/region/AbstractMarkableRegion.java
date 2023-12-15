@@ -134,6 +134,11 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     }
 
     @Override
+    public void rename(String newName) {
+        this.name = newName;
+    }
+
+    @Override
     public int getPriority() {
         return priority;
     }

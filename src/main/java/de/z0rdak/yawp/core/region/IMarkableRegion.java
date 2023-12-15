@@ -28,4 +28,6 @@ public interface IMarkableRegion extends IProtectedRegion {
 
    void setPriority(int priority);
 
+   void rename(String newName);
+
 }
