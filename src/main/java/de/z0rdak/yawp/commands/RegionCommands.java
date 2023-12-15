@@ -7,125 +7,92 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
 import de.z0rdak.yawp.commands.arguments.flag.RegionFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.AddRegionChildArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RemoveRegionChildArgumentType;
-import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
-import de.z0rdak.yawp.core.affiliation.AffiliationType;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
-import de.z0rdak.yawp.core.flag.BooleanFlag;
-import de.z0rdak.yawp.core.flag.IFlag;
-import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.core.region.*;
-import de.z0rdak.yawp.core.stick.AbstractStick;
-import de.z0rdak.yawp.core.stick.MarkerStick;
-import de.z0rdak.yawp.handler.flags.HandlerUtil;
+import de.z0rdak.yawp.core.region.CuboidRegion;
+import de.z0rdak.yawp.core.region.DimensionalRegion;
+import de.z0rdak.yawp.core.region.IMarkableRegion;
+import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
-import de.z0rdak.yawp.util.StickException;
-import de.z0rdak.yawp.util.StickType;
-import de.z0rdak.yawp.util.StickUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.BlockPosArgument;
 import net.minecraft.command.arguments.DimensionArgument;
 import net.minecraft.command.arguments.EntityArgument;
-import net.minecraft.command.arguments.TeamArgument;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.ExperienceOrbEntity;
-import net.minecraft.entity.merchant.villager.WanderingTraderEntity;
-import net.minecraft.entity.monster.SlimeEntity;
-import net.minecraft.entity.passive.GolemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.scoreboard.Team;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.MinecraftForge;
 
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.DimensionCommands.checkValidRegionName;
-import static de.z0rdak.yawp.core.region.RegionType.LOCAL;
-import static de.z0rdak.yawp.util.CommandUtil.*;
+import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.MessageUtil.*;
 
 
 public class RegionCommands {
 
+    private final static int MIN_BUILD_LIMIT = 0;
+    private final static int MAX_BUILD_LIMIT = 255;
+
     private RegionCommands() {
     }
 
-    public final static String MEMBER = "member";
-    public final static String OWNER = "owner";
-
     public static LiteralArgumentBuilder<CommandSource> build() {
-        List<String> affiliationList = Arrays.asList(MEMBER, OWNER);
         return literal(REGION)
                 .then(Commands.argument(DIM.toString(), DimensionArgument.dimension())
                         .then(Commands.argument(REGION.toString(), StringArgumentType.word())
                                 .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestions(ctx, builder))
-                                .executes(ctx -> promptRegionInfo(ctx.getSource(), getRegionArgument(ctx)))
+                                .executes(ctx -> CommandUtil.promptRegionInfo(ctx, getRegionArgument(ctx)))
                                 .then(literal(INFO)
-                                        .executes(ctx -> promptRegionInfo(ctx.getSource(), getRegionArgument(ctx))))
-                                .then(literal(COPY)
-                                        .then(Commands.argument(SRC_DIM.toString(), DimensionArgument.dimension())
-                                                .then(Commands.argument(SRC_REGION.toString(), StringArgumentType.word())
-                                                                .suggests((ctx, builder) -> RegionArgumentType.region().listSrcRegions(ctx, builder))
-                                                                .then(literal(FLAGS)
-                                                                        .executes(ctx -> DimensionCommands.copyRegionFlags(ctx, getRegionArgument(ctx), getSourceRegionArgument(ctx))))
-                                                                .then(literal(STATE)
-                                                                        .executes(ctx -> DimensionCommands.copyRegionState(ctx, getRegionArgument(ctx), getSourceRegionArgument(ctx))))
-                                                                .then(literal(PLAYERS)
-                                                                        .executes(ctx -> DimensionCommands.copyRegionPlayers(ctx, getRegionArgument(ctx), getSourceRegionArgument(ctx)))
-                                                                        .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                                                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(affiliationList, builder))
-                                                                                .executes(ctx -> DimensionCommands.copyRegionPlayers(ctx, getRegionArgument(ctx), getSourceRegionArgument(ctx), getAffiliationArgument(ctx))))
-                                                                )
-                                                        // .then(literal(TEAMS)
-                                                        //         .executes(ctx -> DimensionCommands.copyRegionTeams(ctx, getRegionArgument(ctx), getSourceRegionArgument(ctx)))
-                                                        //         .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                                        //                 .suggests((ctx, builder) -> ISuggestionProvider.suggest(affiliationList, builder))
-                                                        //                 .executes(ctx -> DimensionCommands.copyRegionTeams(ctx, getRegionArgument(ctx), getSourceRegionArgument(ctx), getAffiliationArgument(ctx))))
-                                                        // )
-                                                        // .then(literal(AFFILIATION)
-                                                        //         .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                                        //                 .suggests((ctx, builder) -> ISuggestionProvider.suggest(affiliationList, builder))
-                                                        //                 .executes(ctx -> DimensionCommands.copyRegionAffiliation(ctx, getRegionArgument(ctx), getSourceRegionArgument(ctx), getAffiliationArgument(ctx))))
-                                                        // )
-                                                )
-                                        )
-                                )
-                                .then(literal(SPATIAL)
-                                        .executes(ctx -> promptRegionSpatialProperties(ctx.getSource(), getRegionArgument(ctx))))
+                                        .executes(ctx -> CommandUtil.promptRegionInfo(ctx, getRegionArgument(ctx))))
+                                .then(CommandUtil.buildClearSubCommand(ArgumentUtil::getRegionArgument))
+                                .then(CommandUtil.buildAddSubCommand(ArgumentUtil::getRegionArgument))
+                                .then(CommandUtil.buildListSubCommand(ArgumentUtil::getRegionArgument))
+                                .then(CommandUtil.buildRemoveSubCommand(ArgumentUtil::getRegionArgument))
+                                .then(CommandUtil.buildCopySubCommand(ArgumentUtil::getRegionArgument))
+                                .then(literal(ADD)
+                                        .then(literal(CHILD)
+                                                .then(Commands.argument(CHILD.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> AddRegionChildArgumentType.potentialChildRegions().listSuggestions(ctx, builder))
+                                                        .executes(ctx -> addChildren(ctx, getRegionArgument(ctx), getChildRegionArgument(ctx))))))
+                                .then(literal(REMOVE)
+                                        .then(literal(CHILD)
+                                                .then(Commands.argument(CHILD.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> RemoveRegionChildArgumentType.childRegions().listSuggestions(ctx, builder))
+                                                        .executes(ctx -> removeChildren(ctx, getDimCacheArgument(ctx), getRegionArgument(ctx), getChildRegionArgument(ctx))))))
+                                .then(literal(LIST)
+                                        .then(literal(CHILDREN)
+                                                .executes(ctx -> promptRegionChildren(ctx, getRegionArgument(ctx), 0))
+                                                .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
+                                                        .executes(ctx -> promptRegionChildren(ctx, getRegionArgument(ctx), getPageNoArgument(ctx))))))
                                 .then(literal(STATE)
-                                        .executes(ctx -> promptRegionState(ctx.getSource(), getRegionArgument(ctx)))
+                                        .executes(ctx -> promptLocalRegionState(ctx, getRegionArgument(ctx)))
                                         .then(literal(ALERT)
-                                                .executes(ctx -> CommandUtil.setAlertState(ctx, getRegionArgument(ctx), RegionType.LOCAL, !getRegionArgument(ctx).isMuted()))
+                                                .executes(ctx -> CommandUtil.setAlertState(ctx, getRegionArgument(ctx), !getRegionArgument(ctx).isMuted()))
                                                 .then(Commands.argument(ALERT.toString(), BoolArgumentType.bool())
-                                                        .executes(ctx -> CommandUtil.setAlertState(ctx, getRegionArgument(ctx), RegionType.LOCAL, getAlertArgument(ctx)))))
+                                                        .executes(ctx -> CommandUtil.setAlertState(ctx, getRegionArgument(ctx), getAlertArgument(ctx)))))
                                         .then(literal(ENABLE)
-                                                .executes(ctx -> CommandUtil.setActiveState(ctx, getRegionArgument(ctx), RegionType.LOCAL, !getRegionArgument(ctx).isActive()))
+                                                .executes(ctx -> CommandUtil.setActiveState(ctx, getRegionArgument(ctx), !getRegionArgument(ctx).isActive()))
                                                 .then(Commands.argument(ENABLE.toString(), BoolArgumentType.bool())
-                                                        .executes(ctx -> CommandUtil.setActiveState(ctx, getRegionArgument(ctx), RegionType.LOCAL, getEnableArgument(ctx)))))
+                                                        .executes(ctx -> CommandUtil.setActiveState(ctx, getRegionArgument(ctx), getEnableArgument(ctx)))))
                                         .then(literal(PRIORITY)
                                                 .then(Commands.argument(PRIORITY.toString(), IntegerArgumentType.integer())
                                                         .executes(ctx -> setPriority(ctx, getRegionArgument(ctx), getPriorityArgument(ctx))))
@@ -134,132 +101,32 @@ public class RegionCommands {
                                                                 .executes(ctx -> setPriority(ctx, getRegionArgument(ctx), getPriorityArgument(ctx), 1))))
                                                 .then(literal(DEC)
                                                         .then(Commands.argument(PRIORITY.toString(), IntegerArgumentType.integer())
-                                                                .executes(ctx -> setPriority(ctx, getRegionArgument(ctx), getPriorityArgument(ctx), -1)))))
-                                )
-                                .then(literal(LIST)
-                                        .then(literal(FLAG)
-                                                .executes(ctx -> promptRegionFlags(ctx.getSource(), getRegionArgument(ctx), 0))
-                                                .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
-                                                        .executes(ctx -> promptRegionFlags(ctx.getSource(), getRegionArgument(ctx), getPageNoArgument(ctx)))))
-                                        .then(literal(CommandConstants.OWNER)
-                                                .executes(ctx -> promptRegionAffiliates(ctx.getSource(), getRegionArgument(ctx), OWNER))
-                                                .then(literal(TEAM)
-                                                        .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), OWNER, AffiliationType.TEAM, 0))
-                                                        .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
-                                                                .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), OWNER, AffiliationType.TEAM, getPageNoArgument(ctx)))))
-                                                .then(literal(PLAYER)
-                                                        .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), OWNER, AffiliationType.PLAYER, 0))
-                                                        .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
-                                                                .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), OWNER, AffiliationType.PLAYER, getPageNoArgument(ctx))))
-                                                ))
-                                        .then(literal(CommandConstants.MEMBER)
-                                                .executes(ctx -> promptRegionAffiliates(ctx.getSource(), getRegionArgument(ctx), MEMBER))
-                                                .then(literal(TEAM)
-                                                        .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), MEMBER, AffiliationType.TEAM, 0))
-                                                        .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
-                                                                .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), MEMBER, AffiliationType.TEAM, getPageNoArgument(ctx)))))
-                                                .then(literal(PLAYER)
-                                                        .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), MEMBER, AffiliationType.PLAYER, 0))
-                                                        .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
-                                                                .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), MEMBER, AffiliationType.PLAYER, getPageNoArgument(ctx))))
-                                                ))
-                                        .then(literal(CHILDREN)
-                                                .executes(ctx -> promptRegionChildren(ctx.getSource(), getRegionArgument(ctx), 0))
-                                                .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
-                                                        .executes(ctx -> promptRegionChildren(ctx.getSource(), getRegionArgument(ctx), getPageNoArgument(ctx))))
-                                        )
-                                )
+                                                                .executes(ctx -> setPriority(ctx, getRegionArgument(ctx), getPriorityArgument(ctx), -1))))))
                                 .then(literal(AREA)
+                                        .executes(ctx -> promptRegionAreaInfo(ctx.getSource(), getRegionArgument(ctx)))
                                         .then(literal(SET)
                                                 .then(Commands.literal(AreaType.CUBOID.areaType)
-                                                        .then(Commands.argument("pos1", BlockPosArgument.blockPos())
-                                                                .then(Commands.argument("pos2", BlockPosArgument.blockPos())
-                                                                        .executes(ctx -> updateArea(ctx, getRegionArgument(ctx), AreaType.CUBOID, BlockPosArgument.getOrLoadBlockPos(ctx, "pos1"), BlockPosArgument.getOrLoadBlockPos(ctx, "pos2"))))))
-                                        )
+                                                        .then(Commands.argument(POS1.toString(), BlockPosArgument.blockPos())
+                                                                .then(Commands.argument(POS2.toString(), BlockPosArgument.blockPos())
+                                                                        .executes(ctx -> updateArea(ctx, getRegionArgument(ctx), AreaType.CUBOID, BlockPosArgument.getOrLoadBlockPos(ctx, POS1.toString()), BlockPosArgument.getOrLoadBlockPos(ctx, POS2.toString())))))))
                                         .then(literal(EXPAND)
-                                                .executes(ctx -> expandArea(ctx, getRegionArgument(ctx), -64, 320))
-                                                .then(Commands.argument("yMin", IntegerArgumentType.integer(-64, 320))
-                                                        .then(Commands.argument("yMax", IntegerArgumentType.integer(-64, 320))
-                                                                .executes(ctx -> expandArea(ctx, getRegionArgument(ctx), IntegerArgumentType.getInteger(ctx, "yMin"), IntegerArgumentType.getInteger(ctx, "yMax"))))
-                                                )
-                                        )
-                                )
-                                // .then(literal(NAME)
-                                //         .then(Commands.argument(REGION.toString(), StringArgumentType.word())
-                                //                 .executes(ctx -> renameRegion(ctx, getRegionArgument(ctx), getRegionNameArgument(ctx), getDimCacheArgument(ctx)))
-                                //         )
-                                // )
-                                .then(literal(ADD)
-                                        .then(literal(CommandConstants.PLAYER)
-                                                .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> ISuggestionProvider.suggest(affiliationList, builder))
-                                                        .then(Commands.argument(CommandConstants.PLAYER.toString(), EntityArgument.player())
-                                                                .executes(ctx -> addPlayer(ctx, getPlayerArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx)))))
-                                                .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> ISuggestionProvider.suggest(affiliationList, builder))
-                                                        .then(Commands.argument(CommandConstants.PLAYER.toString(), EntityArgument.player())
-                                                                .executes(ctx -> addPlayer(ctx, getPlayerArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx))))))
-                                        .then(literal(CommandConstants.TEAM)
-                                                .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> ISuggestionProvider.suggest(affiliationList, builder))
-                                                        .then(Commands.argument(CommandConstants.TEAM.toString(), TeamArgument.team())
-                                                                .executes(ctx -> addTeam(ctx, getTeamArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx)))))
-                                                .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> ISuggestionProvider.suggest(affiliationList, builder))
-                                                        .then(Commands.argument(CommandConstants.TEAM.toString(), TeamArgument.team())
-                                                                .executes(ctx -> addTeam(ctx, getTeamArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx))))))
-                                        .then(literal(FLAG)
-                                                .then(Commands.argument(FLAG.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> RegionFlagArgumentType.flag().listSuggestions(ctx, builder))
-                                                        .executes(ctx -> addFlag(ctx, getRegionArgument(ctx), getFlagArgument(ctx)))))
-                                        .then(literal(CHILD)
-                                                .then(Commands.argument(CHILD.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> AddRegionChildArgumentType.potentialChildRegions().listSuggestions(ctx, builder))
-                                                        .executes(ctx -> addChildren(ctx, getRegionArgument(ctx), getChildRegionArgument(ctx))))))
-                                .then(literal(REMOVE)
-                                        .then(literal(CommandConstants.PLAYER)
-                                                .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> ISuggestionProvider.suggest(affiliationList, builder))
-                                                        .then(Commands.argument(CommandConstants.PLAYER.toString(), EntityArgument.player())
-                                                                .executes(ctx -> removePlayer(ctx, getPlayerArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx)))))
-                                                .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> ISuggestionProvider.suggest(affiliationList, builder))
-                                                        .then(Commands.argument(CommandConstants.PLAYER.toString(), EntityArgument.player())
-                                                                .executes(ctx -> removePlayer(ctx, getPlayerArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx))))))
-                                        .then(literal(CommandConstants.TEAM)
-                                                .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> ISuggestionProvider.suggest(affiliationList, builder))
-                                                        .then(Commands.argument(CommandConstants.TEAM.toString(), TeamArgument.team())
-                                                                .executes(ctx -> removeTeam(ctx, getTeamArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx)))))
-                                                .then(Commands.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> ISuggestionProvider.suggest(affiliationList, builder))
-                                                        .then(Commands.argument(CommandConstants.TEAM.toString(), TeamArgument.team())
-                                                                .executes(ctx -> removeTeam(ctx, getTeamArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx))))))
-                                        .then(literal(FLAG)
-                                                .then(Commands.argument(FLAG.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> RegionFlagArgumentType.flag().listSuggestions(ctx, builder))
-                                                        .executes(ctx -> removeFlag(ctx, getRegionArgument(ctx), getFlagArgument(ctx)))))
-                                        .then(literal(CHILD)
-                                                .then(Commands.argument(CHILD.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> RemoveRegionChildArgumentType.childRegions().listSuggestions(ctx, builder))
-                                                        .executes(ctx -> removeChildren(ctx, getDimCacheArgument(ctx), getRegionArgument(ctx), getChildRegionArgument(ctx))))))
-                                /* TODO: Facade for reverse child setting ?
-                                .then(literal(PARENT)
-                                        .then(literal(SET)
-                                                .then(Commands.argument(PARENT_REGION.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> SetRegionParentArgumentType.parentRegion().listSuggestions(ctx, builder))
-                                                        .executes(ctx -> setRegionParent(ctx.getSource(), RegionArgumentType.getRegion(ctx, REGION.toString()), RegionArgumentType.getRegion(ctx, PARENT_REGION.toString())))))
-                                        .then(literal(CLEAR)
-                                                .executes(ctx -> clearRegionParent(ctx.getSource(), RegionArgumentType.getRegion(ctx, REGION.toString())))))
-                                 */
+                                                .executes(ctx -> expandArea(ctx, getRegionArgument(ctx), MIN_BUILD_LIMIT, MAX_BUILD_LIMIT))
+                                                .then(Commands.argument(Y_MIN.toString(), IntegerArgumentType.integer(MIN_BUILD_LIMIT, MAX_BUILD_LIMIT))
+                                                        .then(Commands.argument(Y_MAX.toString(), IntegerArgumentType.integer(MIN_BUILD_LIMIT, MAX_BUILD_LIMIT))
+                                                                .executes(ctx -> expandArea(ctx, getRegionArgument(ctx), IntegerArgumentType.getInteger(ctx, Y_MIN.toString()), IntegerArgumentType.getInteger(ctx, Y_MAX.toString()))))))
+                                        .then(literal(TELEPORT)
+                                                .then(Commands.literal(SET.toString())
+                                                        .then(Commands.argument(TARGET.toString(), BlockPosArgument.blockPos())
+                                                                .executes(ctx -> setTeleportPos(ctx, getRegionArgument(ctx), BlockPosArgument.getOrLoadBlockPos(ctx, TARGET.toString())))))))
                                 .then(literal(TELEPORT)
                                         .executes(ctx -> teleport(ctx.getSource(), getRegionArgument(ctx)))
                                         .then(Commands.argument(PLAYER.toString(), EntityArgument.player())
-                                                .executes(ctx -> teleport(ctx.getSource(), getRegionArgument(ctx), getPlayerArgument(ctx))))
-                                        .then(Commands.literal(SET.toString())
-                                                .then(Commands.argument(TARGET.toString(), BlockPosArgument.blockPos())
-                                                        .executes(ctx -> setTeleportPos(ctx, getRegionArgument(ctx), BlockPosArgument.getOrLoadBlockPos(ctx, TARGET.toString()))))))))
-                ;
+                                                .executes(ctx -> teleport(ctx.getSource(), getRegionArgument(ctx), getPlayerArgument(ctx)))))
+                                .then(literal(RENAME)
+                                        .then(Commands.argument(REGION.toString(), StringArgumentType.word())
+                                                .executes(ctx -> renameRegion(ctx, getRegionArgument(ctx), getRegionNameArgument(ctx), getDimCacheArgument(ctx)))))
+                        )
+                );
     }
 
     // TODO: Needs rework after other shapes are implemented
