@@ -14,7 +14,9 @@ import net.minecraft.entity.passive.SnowGolemEntity;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.passive.WanderingTraderEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.particle.ParticleEffect;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.World.ExplosionSourceType;
@@ -91,7 +93,7 @@ public class ServerWorldMixin {
     }
 
     @Inject(method = "createExplosion", at = @At("HEAD"), cancellable = true, allow = 1)
-    public void onIgniteExplosive(@Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionBehavior behavior, double x, double y, double z, float power, boolean createFire, World.ExplosionSourceType explosionSourceType, CallbackInfoReturnable<Explosion> cir) {
+    public void onIgniteExplosive(@Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionBehavior behavior, double x, double y, double z, float power, boolean createFire, World.ExplosionSourceType explosionSourceType, ParticleEffect particle, ParticleEffect emitterParticle, SoundEvent soundEvent, CallbackInfoReturnable<Explosion> cir) {
         ServerWorld world = (ServerWorld) (Object) this;
         DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.getRegistryKey());
         // Extra check for player initiated explosion here. Should normally be prevented by not allowing 
@@ -100,14 +102,14 @@ public class ServerWorldMixin {
             FlagCheckEvent flagCheck = checkPlayerEvent(player, new BlockPos((int) x, (int) y, (int) z), IGNITE_EXPLOSIVES, dimCache.getDimensionalRegion());
             if (flagCheck.isDenied()) {
                 sendFlagDeniedMsg(flagCheck, player);
-                Explosion explosion = world.createExplosion(entity, damageSource, behavior, x, y, z, power, createFire, ExplosionSourceType.NONE, false);
+                Explosion explosion = world.createExplosion(entity, damageSource, behavior, x, y, z, power, createFire, ExplosionSourceType.NONE, particle, emitterParticle, soundEvent);
                 cir.setReturnValue(explosion);
             }
         }
         if (explosionSourceType == ExplosionSourceType.MOB) {
             FlagCheckEvent flagCheck = checkTargetEvent(new BlockPos((int) x, (int) y, (int) z), MOB_GRIEFING, dimCache.getDimensionalRegion());
             if (flagCheck.isDenied()) {
-                Explosion explosion = world.createExplosion(entity, damageSource, behavior, x, y, z, power, createFire, ExplosionSourceType.NONE, false);
+                Explosion explosion = world.createExplosion(entity, damageSource, behavior, x, y, z, power, createFire, ExplosionSourceType.NONE, particle, emitterParticle, soundEvent);
                 cir.setReturnValue(explosion);
             }
         }

@@ -98,7 +98,7 @@ public abstract class ExplosionMixin {
     }
 
     @Shadow
-    public abstract DamageSource getDamageSource();
+    private DamageSource damageSource;
 
     @Inject(method = "collectBlocksAndDamageEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getOtherEntities(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/Box;)Ljava/util/List;"), cancellable = true, allow = 1)
     public void onExplosion(CallbackInfo ci) {
@@ -122,7 +122,7 @@ public abstract class ExplosionMixin {
 
             for (int v = 0; v < affectedEntities.size(); ++v) {
                 Entity entity = affectedEntities.get(v);
-                if (!entity.isImmuneToExplosion()) {
+                if (!entity.isImmuneToExplosion(explosion)) {
                     double w = Math.sqrt(entity.squaredDistanceTo(vec3d)) / (double) q;
                     if (w <= 1.0) {
                         double x = entity.getX() - this.x;
@@ -135,7 +135,7 @@ public abstract class ExplosionMixin {
                             z /= aa;
                             double ab = getExposure(vec3d, entity);
                             double ac = (1.0 - w) * ab;
-                            entity.damage(this.getDamageSource(), (float) ((int) ((ac * ac + ac) / 2.0 * 7.0 * (double) q + 1.0)));
+                            entity.damage(this.damageSource, (float) ((int) ((ac * ac + ac) / 2.0 * 7.0 * (double) q + 1.0)));
                             double ad = ac;
                             if (entity instanceof LivingEntity) {
                                 ad = ProtectionEnchantment.transformExplosionKnockback((LivingEntity) entity, ac);

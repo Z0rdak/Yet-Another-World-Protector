@@ -140,7 +140,7 @@ public class MessageUtil {
 
     public static MutableText buildPlayerHoverComponent(PlayerEntity player) {
         HoverEvent.EntityContent entityTooltipInfo = new HoverEvent.EntityContent(EntityType.PLAYER, player.getUuid(), player.getName());
-        MutableText playerName = Text.literal(player.getEntityName());
+        MutableText playerName = player.getName().copy();
         playerName.setStyle(playerName.getStyle()
                 .withColor(LINK_COLOR)
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, entityTooltipInfo))
@@ -800,7 +800,7 @@ public class MessageUtil {
                         : buildPlayerHoverComponent(player);
             }
             case TEAM -> {
-                Team team = RegionDataManager.serverInstance.getScoreboard().getPlayerTeam(affiliateName);
+                Team team = RegionDataManager.serverInstance.getScoreboard().getScoreHolderTeam(affiliateName);
                 yield team == null ? Text.literal((affiliateName)) : buildTeamHoverComponent(team);
             }
         };

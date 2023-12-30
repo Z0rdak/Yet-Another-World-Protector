@@ -770,7 +770,7 @@ public class RegionCommands {
     private static int teleport(ServerCommandSource src, IMarkableRegion region) {
         try {
             ServerPlayerEntity player = src.getPlayerOrThrow();
-            src.getServer().getCommandManager().getDispatcher().execute(buildRegionTpCmd(region, player.getEntityName()), src);
+            src.getServer().getCommandManager().getDispatcher().execute(buildRegionTpCmd(region, player.getName().toString()), src);
             return 0;
         } catch (CommandSyntaxException e) {
             YetAnotherWorldProtector.LOGGER.warn("Unable to teleport command source to region.");
@@ -780,7 +780,7 @@ public class RegionCommands {
 
     private static int teleport(ServerCommandSource src, IMarkableRegion region, PlayerEntity player) {
         try {
-            src.getServer().getCommandManager().getDispatcher().execute(buildRegionTpCmd(region, player.getEntityName()), src);
+            src.getServer().getCommandManager().getDispatcher().execute(buildRegionTpCmd(region, player.getName().toString()), src);
             return 0;
         } catch (CommandSyntaxException e) {
             YetAnotherWorldProtector.LOGGER.warn("Error executing teleport command.");
