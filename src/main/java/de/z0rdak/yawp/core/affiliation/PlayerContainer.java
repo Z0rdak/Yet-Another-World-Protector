@@ -62,7 +62,7 @@ public class PlayerContainer implements IMemberContainer, INbtSerializable<NbtCo
 
     @Override
     public void addPlayer(PlayerEntity player) {
-        this.players.put(player.getUuid(), player.getEntityName());
+        this.players.put(player.getUuid(), player.getName().toString());
     }
 
     @Override
