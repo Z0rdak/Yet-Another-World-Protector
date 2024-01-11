@@ -4,7 +4,9 @@ import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.commands.CommandSourceType;
 import de.z0rdak.yawp.commands.CommandUtil;
+import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -43,62 +45,88 @@ public class CommandInterceptor {
     public static void handleModCommandPermission(CommandEvent event) {
         CommandContextBuilder<CommandSourceStack> cmdContext = event.getParseResults().getContext();
         List<String> nodeNames = cmdContext.getNodes().stream().map(node -> node.getNode().getName()).collect(Collectors.toList());
-        if (nodeNames.size() > 0 && nodeNames.get(0) != null && !nodeNames.get(0).equals(BASE_CMD)) {
-            return;
-        }
-        if (nodeNames.size() > 2) {
-            YetAnotherWorldProtector.LOGGER.debug("Executed command: '" + event.getParseResults().getReader().getString() + "' by '" + cmdContext.getSource().getTextName() + "'.");
-            String subCmd = nodeNames.get(1);
-            int cancelExecutionResultCode = 0;
-            switch (subCmd) {
-                case "region":
-                    cancelExecutionResultCode = handleRegionCmdExecution(cmdContext, nodeNames);
-                    break;
-                case "dim":
-                    cancelExecutionResultCode = handleDimCommandExecution(cmdContext, nodeNames);
-                    break;
-                case "global":
-                    cancelExecutionResultCode = verifyGlobalCommandPermission(cmdContext, nodeNames);
-                    break;
-                case "flag":
-                    cancelExecutionResultCode = verifyFlagCommandPermission(cmdContext, nodeNames);
-                    break;
-                case "marker":
-                    cancelExecutionResultCode = verifyMarkerCommandPermission(cmdContext, nodeNames);
-                    break;
+        CommandSource src = cmdContext.getSource();
+        try {
+            CommandSourceType cmdSrcType = CommandSourceType.of(src);
+            if (!hasModBaseCmd(nodeNames)) {
+                return;
             }
-            event.setCanceled(cancelExecutionResultCode != 0);
-        }
+            if (nodeNames.size() > 2) {
+                YetAnotherWorldProtector.LOGGER.debug("Executed command: '" + event.getParseResults().getReader().getString() + "' by '" + cmdContext.getSource().getTextName() + "'.");
+                String subCmd = nodeNames.get(1);
+                int cancelExecutionResultCode = 0;
+                switch (subCmd) {
+                    case "region":
+                        if (!cmdContext.getArguments().containsKey(REGION.toString())) {
+                            cancelExecutionResultCode = 9;
+                            break;
+                        }
+                        cancelExecutionResultCode = handleRegionCmdExecution(cmdContext, nodeNames, cmdSrcType);
+                        break;
+                    case "dim":
+                        if (!cmdContext.getArguments().containsKey(DIM.toString())) {
+                            cancelExecutionResultCode = 9;
+                            break;
+                        }
+                        cancelExecutionResultCode = handleDimCommandExecution(cmdContext, nodeNames, cmdSrcType);
+                        break;
+                    case "global":
+                        if (!cmdContext.getArguments().containsKey(GLOBAL.toString())) {
+                            cancelExecutionResultCode = 9;
+                            break;
+                        }
+                        cancelExecutionResultCode = verifyGlobalCommandPermission(cmdContext, nodeNames, cmdSrcType);
+                        break;
+                    case "flag":
+                        if (!cmdContext.getArguments().containsKey(FLAG.toString())) {
+                            cancelExecutionResultCode = 9;
+                            break;
+                        }
+                        cancelExecutionResultCode = verifyFlagCommandPermission(cmdContext, nodeNames, cmdSrcType);
+                        break;
+                    case "marker":
+                        if (!cmdContext.getArguments().containsKey(MARKER.toString())) {
+                            cancelExecutionResultCode = 9;
+                            break;
+                        }
+                        cancelExecutionResultCode = verifyMarkerCommandPermission(cmdContext, nodeNames, cmdSrcType);
+                        break;
+                }
+                event.setCanceled(cancelExecutionResultCode != 0);
+            }
 
+        } catch (IllegalArgumentException e) {
+            YetAnotherWorldProtector.LOGGER.error(e);
+        }
+    }
+
+    private static boolean hasModBaseCmd(List<String> nodeNames) {
+        return nodeNames.size() > 0 && nodeNames.get(0) != null && !nodeNames.get(0).equals(BASE_CMD);
     }
 
     /**
      * TODO: Implement
      *  /wp marker reset|give|create
      */
-    private static int verifyMarkerCommandPermission(CommandContextBuilder<CommandSourceStack> cmdContext, List<String> nodeNames) {
+    private static int verifyMarkerCommandPermission(CommandContextBuilder<CommandSourceStack> cmdContext, List<String> nodeNames, CommandSourceType cmdSrcType) {
         CommandSourceStack src = cmdContext.getSource();
         return 0;
     }
 
     // TODO: Implement
-    private static int verifyFlagCommandPermission(CommandContextBuilder<CommandSourceStack> cmdContext, List<String> nodeNames) {
+    private static int verifyFlagCommandPermission(CommandContextBuilder<CommandSourceStack> cmdContext, List<String> nodeNames, CommandSourceType cmdSrcType) {
         CommandSourceStack src = cmdContext.getSource();
         return 0;
     }
 
     // TODO: Implement
-    private static int verifyGlobalCommandPermission(CommandContextBuilder<CommandSourceStack> cmdContext, List<String> nodeNames) {
+    private static int verifyGlobalCommandPermission(CommandContextBuilder<CommandSourceStack> cmdContext, List<String> nodeNames, CommandSourceType cmdSrcType) {
         CommandSourceStack src = cmdContext.getSource();
         return 0;
     }
 
-    public static int handleRegionCmdExecution(CommandContextBuilder<CommandSourceStack> cmdContext, List<String> nodeNames) {
+    public static int handleRegionCmdExecution(CommandContextBuilder<CommandSourceStack> cmdContext, List<String> nodeNames, CommandSourceType cmdSrcType) {
         CommandSourceStack src = cmdContext.getSource();
-        // /wp region <dim> <region> -> Missing region param
-        if (!cmdContext.getArguments().containsKey(REGION.toString())) {
-            return 0;
-        }
         ParsedArgument<CommandSourceStack, ?> regionArg = cmdContext.getArguments().get(REGION.toString());
         if (regionArg != null && regionArg.getResult() instanceof String regionName) {
             ParsedArgument<CommandSourceStack, ?> dimParsedArgument = cmdContext.getArguments().get(DIM.toString());
@@ -110,6 +138,10 @@ public class CommandInterceptor {
                     return 1;
                 }
                 IMarkableRegion region = dimCache.getRegion(regionName);
+                if (region == null) {
+                    MessageUtil.sendCmdFeedback(cmdContext.getSource(), new TextComponent("No region with name '" + regionName + "' defined in dim '" + dimCache.dimensionKey().location() + "'"));
+                    return 1;
+                }
                 try {
                     if (src.getEntity() instanceof Player && region != null) {
                         ServerPlayer player = src.getPlayerOrException();
@@ -156,12 +188,9 @@ public class CommandInterceptor {
         return 0;
     }
 
-    public static int handleDimCommandExecution(CommandContextBuilder<CommandSourceStack> cmdContext, List<String> nodeNames) {
+
+    public static int handleDimCommandExecution(CommandContextBuilder<CommandSourceStack> cmdContext, List<String> nodeNames, CommandSourceType cmdSrcType) {
         CommandSourceStack src = cmdContext.getSource();
-        // /wp region <dim> <region> -> Missing dim argument
-        if (!cmdContext.getArguments().containsKey(DIM.toString())) {
-            return 0;
-        }
         ParsedArgument<CommandSourceStack, ?> dimParsedArgument = cmdContext.getArguments().get(DIM.toString());
         if (dimParsedArgument != null && dimParsedArgument.getResult() instanceof ResourceLocation dimResLoc) {
             ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, dimResLoc);
