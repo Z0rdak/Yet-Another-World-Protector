@@ -25,6 +25,7 @@ import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -111,6 +112,13 @@ public class CommandInterceptor {
     private static int verifyMarkerCommandPermission(CommandContextBuilder<CommandSourceStack> cmdContext, List<String> nodeNames, CommandSourceType cmdSrcType) {
         CommandSourceStack src = cmdContext.getSource();
         return 0;
+
+    }
+
+    private static boolean checkSubCmdAtIndex(List<String> nodeNames, int index, String subCmd, String... subCmds) {
+        List<String> subCmdList = Arrays.asList(subCmds);
+        subCmdList.add(subCmd);
+        return nodeNames.size() >= index + 1 && nodeNames.get(index) != null && nodeNames.stream().anyMatch(subCmdList::contains);
     }
 
     // TODO: Implement
