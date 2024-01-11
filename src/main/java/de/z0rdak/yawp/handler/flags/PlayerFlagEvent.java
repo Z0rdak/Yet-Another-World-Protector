@@ -32,6 +32,16 @@ public class PlayerFlagEvent extends FlagCheckEvent {
         return player;
     }
 
+    public void setMsgSubstitutes(Map<String, String> msgSubstitutes) {
+        if (msgSubstitutes != null) {
+            if (this.msgSubstitutes != null) {
+                this.msgSubstitutes.putAll(msgSubstitutes);
+            } else {
+                this.msgSubstitutes = msgSubstitutes;
+            }
+        }
+    }
+
     public Map<String, String> getMsgSubstitutes() {
         return msgSubstitutes;
     }
