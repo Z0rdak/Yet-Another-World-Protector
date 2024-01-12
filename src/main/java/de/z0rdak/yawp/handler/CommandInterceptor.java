@@ -8,6 +8,7 @@ import de.z0rdak.yawp.commands.CommandSourceType;
 import de.z0rdak.yawp.commands.CommandUtil;
 import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
+import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.MessageUtil;
@@ -24,6 +25,7 @@ import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -112,6 +114,48 @@ public class CommandInterceptor {
         CommandSource src = cmdContext.getSource();
         return 0;
 
+    }
+
+
+    @Nullable
+    private static DimensionRegionCache checkValidDimRegion(CommandContextBuilder<CommandSource> cmdContext) {
+        ParsedArgument<CommandSource, ?> dimParsedArgument = cmdContext.getArguments().get(DIM.toString());
+        if (dimParsedArgument != null && dimParsedArgument.getResult() instanceof ResourceLocation) {
+            ResourceLocation dimResLoc = (ResourceLocation) dimParsedArgument.getResult();
+            RegistryKey<World> dim = RegistryKey.create(Registry.DIMENSION_REGISTRY, dimResLoc);
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
+            if (dimCache == null) {
+                MessageUtil.sendCmdFeedback(cmdContext.getSource(), new StringTextComponent("Dimension not found in region data").withStyle(RED));
+                return null;
+            }
+            return dimCache;
+        }
+        return null;
+    }
+
+    @Nullable
+    private static IProtectedRegion checkValidLocalRegion(CommandContextBuilder<CommandSource> cmdContext) {
+        ParsedArgument<CommandSource, ?> regionArg = cmdContext.getArguments().get(REGION.toString());
+        if (regionArg != null && regionArg.getResult() instanceof String) {
+            String regionName = (String) regionArg.getResult();
+            ParsedArgument<CommandSource, ?> dimParsedArgument = cmdContext.getArguments().get(DIM.toString());
+            if (dimParsedArgument != null && dimParsedArgument.getResult() instanceof ResourceLocation) {
+                ResourceLocation dimResLoc = (ResourceLocation) dimParsedArgument.getResult();
+                RegistryKey<World> dim = RegistryKey.create(Registry.DIMENSION_REGISTRY, dimResLoc);
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
+                if (!dimCache.contains(regionName)) {
+                    MessageUtil.sendCmdFeedback(cmdContext.getSource(), new StringTextComponent("No region with name '" + regionName + "' defined in dim '" + dimCache.dimensionKey().location() + "'"));
+                    return null;
+                }
+                IMarkableRegion region = dimCache.getRegion(regionName);
+                if (region == null) {
+                    MessageUtil.sendCmdFeedback(cmdContext.getSource(), new StringTextComponent("No region with name '" + regionName + "' defined in dim '" + dimCache.dimensionKey().location() + "'"));
+                    return null;
+                }
+                return region;
+            }
+        }
+        return null;
     }
 
     private static boolean checkSubCmdAtIndex(List<String> nodeNames, int index, String subCmd, String... subCmds) {
