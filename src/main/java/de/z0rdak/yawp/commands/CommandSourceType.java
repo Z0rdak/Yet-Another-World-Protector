@@ -7,8 +7,8 @@ import net.minecraft.entity.player.PlayerEntity;
 public enum CommandSourceType {
     PLAYER("player"),
     SERVER("server"),
-    COMMAND_BLOCK("command_block"),
-    NON_PLAYER("non_player"),
+    COMMAND_BLOCK("command-block"),
+    NON_PLAYER("non-player"),
     UNKNOWN("unknown");
 
     public final String source;
@@ -28,9 +28,11 @@ public enum CommandSourceType {
         if (cmdSrcEntity instanceof PlayerEntity) {
             return PLAYER;
         }
+        // TODO: Verify
         if (cmdSrc.getTextName().equals("Server")) {
             return SERVER;
         }
+        // TODO: Verify
         return COMMAND_BLOCK;
     }
 
