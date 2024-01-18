@@ -76,14 +76,14 @@ public class CommandInterceptor {
                             cancelExecutionResultCode = 9;
                             break;
                         }
-                        cancelExecutionResultCode = handleDimCommandExecution(cmdContext, nodeNames, cmdSrcType);
+                        cancelExecutionResultCode = handleDimCommandExecution(cmdContext, cmdSrcType);
                         break;
                     case "global":
                         if (!cmdContext.getArguments().containsKey(GLOBAL.toString())) {
                             cancelExecutionResultCode = 9;
                             break;
                         }
-                        cancelExecutionResultCode = verifyGlobalCommandPermission(cmdContext, nodeNames, cmdSrcType);
+                        cancelExecutionResultCode = verifyGlobalCommandPermission(cmdContext, cmdSrcType);
                         break;
                     case "flag":
                         if (!cmdContext.getArguments().containsKey(FLAG.toString())) {
@@ -202,7 +202,7 @@ Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
      * Verifies the permission for the given flag command. <br>
      * Syntax: /wp global info|clear|add|remove|list|state.
      */
-    private static int verifyGlobalCommandPermission(CommandContextBuilder<CommandSourceStack> cmdContext, List<String> nodeNames, CommandSourceType cmdSrcType) {
+    private static int verifyGlobalCommandPermission(CommandContextBuilder<CommandSourceStack> cmdContext, CommandSourceType cmdSrcType) {
         CommandSourceStack src = cmdContext.getSource();
         GlobalRegion region = RegionDataManager.get().getGlobalRegion();
         try {
@@ -258,7 +258,7 @@ Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
         }
     }
 
-    public static int handleDimCommandExecution(CommandContextBuilder<CommandSourceStack> cmdContext, List<String> nodeNames, CommandSourceType cmdSrcType) {
+    public static int handleDimCommandExecution(CommandContextBuilder<CommandSourceStack> cmdContext, CommandSourceType cmdSrcType) {
         CommandSourceStack src = cmdContext.getSource();
         DimensionRegionCache dimCache = checkValidDimRegion(cmdContext);
         if (dimCache == null) {
@@ -349,6 +349,7 @@ Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
         }
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static boolean hasCmdPermission(CommandSourceStack src, CommandSourceType cmdSrcType, String permissionGroup, IProtectedRegion region) throws CommandSyntaxException {
         switch (cmdSrcType) {
             case PLAYER: {
@@ -366,6 +367,7 @@ Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
         }
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static boolean hasCmdPermission(CommandContextBuilder<CommandSourceStack> ctx, CommandSourceType cmdSrcType, String permissionGroup, IProtectedRegion region, Function<List<String>, Boolean> subCmdPermission) throws CommandSyntaxException {
         switch (cmdSrcType) {
             case PLAYER: {
@@ -387,7 +389,6 @@ Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
     private static boolean hasCmdPermission(CommandContextBuilder<CommandSourceStack> ctx, CommandSourceType cmdSrcType) throws CommandSyntaxException {
         switch (cmdSrcType) {
             case PLAYER: {
-                List<String> nodeNames = ctx.getNodes().stream().map(node -> node.getNode().getName()).collect(Collectors.toList());
                 ServerPlayer player = ctx.getSource().getPlayerOrException();
                 return hasPlayerPermission(player);
             }
