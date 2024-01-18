@@ -11,7 +11,6 @@ import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.core.flag.FlagMessage;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandSource;
@@ -117,18 +116,6 @@ public final class FlagCommands {
         sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.info.flag.state.msg.mute", buildFlagMuteToggleLink(region, flag)));
         sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.info.flag.state.msg.text", buildFlagMessageEditLink(region, flag)));
         return 0;
-    }
-
-    private static int promptFlagInfo(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionType regionType, IFlag regionFlag) {
-        if (region.containsFlag(regionFlag.getName())) {
-            IFlag flag = region.getFlag(regionFlag.getName());
-            promptFlagInfo(ctx, region, flag);
-            return 0;
-        } else {
-            MessageUtil.sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.flag.not-present",
-                    buildRegionInfoLink(region), regionFlag));
-            return 1;
-        }
     }
 
     private static int setFlagMuteState(CommandContext<CommandSource> ctx, IProtectedRegion region, IFlag regionFlag) {
