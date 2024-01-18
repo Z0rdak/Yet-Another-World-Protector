@@ -74,14 +74,14 @@ public class CommandInterceptor {
                             cancelExecutionResultCode = 9;
                             break;
                         }
-                        cancelExecutionResultCode = handleDimCommandExecution(cmdContext, nodeNames, cmdSrcType);
+                        cancelExecutionResultCode = handleDimCommandExecution(cmdContext, cmdSrcType);
                         break;
                     case "global":
                         if (!cmdContext.getArguments().containsKey(GLOBAL.toString())) {
                             cancelExecutionResultCode = 9;
                             break;
                         }
-                        cancelExecutionResultCode = verifyGlobalCommandPermission(cmdContext, nodeNames, cmdSrcType);
+                        cancelExecutionResultCode = verifyGlobalCommandPermission(cmdContext, cmdSrcType);
                         break;
                     case "flag":
                         if (!cmdContext.getArguments().containsKey(FLAG.toString())) {
@@ -206,7 +206,7 @@ public class CommandInterceptor {
      * Verifies the permission for the given flag command. <br>
      * Syntax: /wp global info|clear|add|remove|list|state.
      */
-    private static int verifyGlobalCommandPermission(CommandContextBuilder<CommandSource> cmdContext, List<String> nodeNames, CommandSourceType cmdSrcType) {
+    private static int verifyGlobalCommandPermission(CommandContextBuilder<CommandSource> cmdContext, CommandSourceType cmdSrcType) {
         CommandSource src = cmdContext.getSource();
         GlobalRegion region = RegionDataManager.get().getGlobalRegion();
         try {
@@ -262,7 +262,7 @@ public class CommandInterceptor {
         }
     }
 
-    public static int handleDimCommandExecution(CommandContextBuilder<CommandSource> cmdContext, List<String> nodeNames, CommandSourceType cmdSrcType) {
+    public static int handleDimCommandExecution(CommandContextBuilder<CommandSource> cmdContext, CommandSourceType cmdSrcType) {
         CommandSource src = cmdContext.getSource();
         DimensionRegionCache dimCache = checkValidDimRegion(cmdContext);
         if (dimCache == null) {
@@ -353,6 +353,7 @@ public class CommandInterceptor {
         }
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static boolean hasCmdPermission(CommandSource src, CommandSourceType cmdSrcType, String permissionGroup, IProtectedRegion region) throws CommandSyntaxException {
         switch (cmdSrcType) {
             case PLAYER: {
@@ -370,6 +371,7 @@ public class CommandInterceptor {
         }
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static boolean hasCmdPermission(CommandContextBuilder<CommandSource> ctx, CommandSourceType cmdSrcType, String permissionGroup, IProtectedRegion region, Function<List<String>, Boolean> subCmdPermission) throws CommandSyntaxException {
         switch (cmdSrcType) {
             case PLAYER: {
@@ -391,7 +393,6 @@ public class CommandInterceptor {
     private static boolean hasCmdPermission(CommandContextBuilder<CommandSource> ctx, CommandSourceType cmdSrcType) throws CommandSyntaxException {
         switch (cmdSrcType) {
             case PLAYER: {
-                List<String> nodeNames = ctx.getNodes().stream().map(node -> node.getNode().getName()).collect(Collectors.toList());
                 ServerPlayerEntity player = ctx.getSource().getPlayerOrException();
                 return hasPlayerPermission(player);
             }
