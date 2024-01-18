@@ -56,9 +56,9 @@ public class RegionCommands {
     }
 
     public static LiteralArgumentBuilder<CommandSource> build() {
-        return literal(REGION)
+        return literal(LOCAL)
                 .then(Commands.argument(DIM.toString(), DimensionArgument.dimension())
-                        .then(Commands.argument(REGION.toString(), StringArgumentType.word())
+                        .then(Commands.argument(LOCAL.toString(), StringArgumentType.word())
                                 .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestions(ctx, builder))
                                 .executes(ctx -> CommandUtil.promptRegionInfo(ctx, getRegionArgument(ctx)))
                                 .then(literal(INFO)
@@ -123,7 +123,7 @@ public class RegionCommands {
                                         .then(Commands.argument(PLAYER.toString(), EntityArgument.player())
                                                 .executes(ctx -> teleport(ctx.getSource(), getRegionArgument(ctx), getPlayerArgument(ctx)))))
                                 .then(literal(RENAME)
-                                        .then(Commands.argument(REGION.toString(), StringArgumentType.word())
+                                        .then(Commands.argument(LOCAL.toString(), StringArgumentType.word())
                                                 .executes(ctx -> renameRegion(ctx, getRegionArgument(ctx), getRegionNameArgument(ctx), getDimCacheArgument(ctx)))))
                         )
                 );
@@ -201,7 +201,6 @@ public class RegionCommands {
     }
 
     private static int renameRegion(CommandContext<CommandSource> src, IMarkableRegion region, String regionName, DimensionRegionCache dimCache) {
-        // TODO:
         int res = checkValidRegionName(regionName, dimCache);
         if (res == -1) {
             sendCmdFeedback(src.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.name.invalid", regionName));
@@ -319,7 +318,7 @@ public class RegionCommands {
         }
         List<IFormattableTextComponent> regionPagination = buildPaginationComponents(
                 buildRegionChildrenHeader(region),
-                buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), CHILDREN.toString()),
+                buildCommandStr(LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), CHILDREN.toString()),
                 buildRemoveRegionEntries(region, children),
                 pageNo,
                 new StringTextComponent(" - ").append(buildRegionAddChildrenLink(region)));
