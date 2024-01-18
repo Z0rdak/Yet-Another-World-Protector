@@ -54,6 +54,7 @@ public class CommandInterceptor {
         List<String> nodeNames = cmdContext.getNodes().stream().map(node -> node.getNode().getName()).collect(Collectors.toList());
         CommandSourceStack src = cmdContext.getSource();
         try {
+
             CommandSourceType cmdSrcType = CommandSourceType.of(src);
             if (!hasModBaseCmd(nodeNames)) {
                 return;
@@ -64,7 +65,7 @@ public class CommandInterceptor {
                 int cancelExecutionResultCode = 0;
                 switch (subCmd) {
                     case "region":
-                        if (!cmdContext.getArguments().containsKey(REGION.toString())) {
+                        if (!cmdContext.getArguments().containsKey(CommandConstants.LOCAL.toString())) {
                             cancelExecutionResultCode = 9;
                             break;
                         }
@@ -108,46 +109,23 @@ public class CommandInterceptor {
     }
 
     /**
-     * TODO: Implementation <br>
      * Verifies the permission for the given marker command. <br>
      * Syntax: /wp marker reset|give|create [...] <br>
      */
     private static int verifyMarkerCommandPermission(CommandContextBuilder<CommandSourceStack> cmdContext, List<String> nodeNames, CommandSourceType cmdSrcType) {
-        CommandSourceStack src = cmdContext.getSource();
         try {
             boolean isMarkerSubCmd = checkSubCmdAtIndex(nodeNames, 2, RESET, GIVE, CREATE);
             if (!isMarkerSubCmd) {
                 return ALLOW_CMD;
             }
-            String subCmd = nodeNames.get(2);
-            switch (cmdSrcType) {
-                case PLAYER: {
-                    Player player = src.getPlayerOrException();
-                    boolean hasConfigPermission = hasPlayerPermission(player);
-                    switch (subCmd) {
-                        case "reset":
-                            break;
-                        case "give":
-                            break;
-                        case "create":
-                            break;
-                    }
-                    return CANCEL_CMD;
-                }
-                case SERVER:
-                case COMMAND_BLOCK:
-                case NON_PLAYER:
-                case UNKNOWN:
-                    YetAnotherWorldProtector.LOGGER.info("This command needs a player to be executed!");
-                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.stick.no-player").withStyle(RED));
-                    return CANCEL_CMD;
-            }
+            boolean hasPermission = hasCmdPermission(cmdContext, cmdSrcType);
+            handlePermission(cmdContext.getSource(), hasPermission);
+            return hasPermission ? ALLOW_CMD : CANCEL_CMD;
 
         } catch (CommandSyntaxException e) {
             YetAnotherWorldProtector.LOGGER.error(e);
+            return CANCEL_CMD;
         }
-        return ALLOW_CMD;
-
     }
 
 
@@ -300,7 +278,7 @@ public class CommandInterceptor {
 
     @Nullable
     private static IProtectedRegion checkValidLocalRegion(CommandContextBuilder<CommandSourceStack> cmdContext) {
-        ParsedArgument<CommandSourceStack, ?> regionArg = cmdContext.getArguments().get(REGION.toString());
+        ParsedArgument<CommandSourceStack, ?> regionArg = cmdContext.getArguments().get(CommandConstants.LOCAL.toString());
         if (regionArg != null && regionArg.getResult() instanceof String) {
             String regionName = (String) regionArg.getResult();
             ParsedArgument<CommandSourceStack, ?> dimParsedArgument = cmdContext.getArguments().get(DIM.toString());
@@ -336,6 +314,13 @@ public class CommandInterceptor {
         }
     }
 
+    private static void handlePermission(CommandSourceStack src, boolean hasPermission) {
+        if (!hasPermission) {
+            YetAnotherWorldProtector.LOGGER.info("'" + src.getTextName() + "' is not allowed to execute this command");
+            sendCmdFeedback(src, new TranslatableComponent("cli.msg.info.cmd.deny"));
+        }
+    }
+
     private static boolean hasCmdPermission(CommandSourceStack src, CommandSourceType cmdSrcType, String permissionGroup, IProtectedRegion region) throws CommandSyntaxException {
         switch (cmdSrcType) {
             case PLAYER: {
@@ -361,6 +346,22 @@ public class CommandInterceptor {
                 boolean hasConfigPermission = hasPlayerPermission(player);
                 boolean isOwner = region.isInGroup(player, permissionGroup);
                 return (isOwner || hasConfigPermission) || subCmdPermission.apply(nodeNames);
+            }
+            case SERVER:
+                return true;
+            case COMMAND_BLOCK:
+                return isCommandBlockExecutionAllowed();
+            default:
+                return false;
+        }
+    }
+
+    private static boolean hasCmdPermission(CommandContextBuilder<CommandSourceStack> ctx, CommandSourceType cmdSrcType) throws CommandSyntaxException {
+        switch (cmdSrcType) {
+            case PLAYER: {
+                List<String> nodeNames = ctx.getNodes().stream().map(node -> node.getNode().getName()).collect(Collectors.toList());
+                ServerPlayer player = ctx.getSource().getPlayerOrException();
+                return hasPlayerPermission(player);
             }
             case SERVER:
                 return true;
