@@ -47,6 +47,8 @@ public class DimensionCommands {
     public static final List<String> regionNameSuggestions = Arrays.asList("newRegion", "spawn", "home", "town", "arena");
 
     // FIXME: typing in invalid dimension is adding this dimension to set of dims
+
+    // TODO: Disable all regions
     public static LiteralArgumentBuilder<CommandSource> build() {
         return literal(DIM)
                 /* /wp dimension <dim> list region */
@@ -61,13 +63,13 @@ public class DimensionCommands {
                         .then(buildRemoveSubCommand((ctx) -> getDimCacheArgument(ctx).getDimensionalRegion()))
                         .then(buildCopySubCommand((ctx) -> getDimCacheArgument(ctx).getDimensionalRegion()))
                         .then(literal(LIST)
-                                .then(literal(REGION)
+                                .then(literal(CommandConstants.LOCAL)
                                         .executes(ctx -> promptDimensionRegionList(ctx, getDimCacheArgument(ctx), 0))
                                         .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
                                                 .executes(ctx -> promptDimensionRegionList(ctx, getDimCacheArgument(ctx), getPageNoArgument(ctx)))))
                         )
                         .then(literal(DELETE)
-                                .then(Commands.argument(REGION.toString(), StringArgumentType.word())
+                                .then(Commands.argument(CommandConstants.LOCAL.toString(), StringArgumentType.word())
                                         .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestions(ctx, builder))
                                         .executes(ctx -> attemptDeleteRegion(ctx, getDimCacheArgument(ctx), getRegionArgument(ctx)))
                                         .then(Commands.literal("-y")
@@ -93,8 +95,8 @@ public class DimensionCommands {
                                 )
                         )
                         .then(literal(CREATE)
-                                .then(literal(REGION)
-                                        .then(Commands.argument(REGION.toString(), StringArgumentType.word())
+                                .then(literal(CommandConstants.LOCAL)
+                                        .then(Commands.argument(CommandConstants.LOCAL.toString(), StringArgumentType.word())
                                                 .suggests((ctx, builder) -> ISuggestionProvider.suggest(Collections.singletonList(regionNameSuggestions.get(new Random().nextInt(regionNameSuggestions.size()))), builder))
                                                 //.then(Commands.argument(AREA.toString(), StringArgumentType.word())
                                                 //        .suggests((ctx, builder) -> AreaArgumentType.areaType().listSuggestions(ctx, builder))
@@ -124,14 +126,20 @@ public class DimensionCommands {
 
 
     private static int resetLocalRegions(CommandContext<CommandSource> ctx, DimensionRegionCache dimCache) {
+        // TODO: What should happen? Clear players? Clear flags? Clear.... ?
         return 0;
     }
 
     private static int deleteRegions(CommandContext<CommandSource> ctx, DimensionRegionCache dimCache) {
+        // TODO:
         return 0;
     }
 
     private static int resetDimRegion(CommandContext<CommandSource> ctx, DimensionRegionCache dimCache) {
+        // TODO: Remove flags
+        // TODO: Remove players
+        // TODO: Remove teams
+        // TODO: apply default region state
         return 0;
     }
 
@@ -193,7 +201,6 @@ public class DimensionCommands {
         return 1;
     }
 
-    // FIXME: Are child / parent relation properly removed when deleting a region?
     private static int deleteRegion(CommandContext<CommandSource> ctx, DimensionRegionCache dim, IMarkableRegion region) {
         if (dim.contains(region.getName())) {
             if (!region.getChildren().isEmpty()) {
@@ -228,7 +235,7 @@ public class DimensionCommands {
             }
             List<IFormattableTextComponent> regionPagination = buildPaginationComponents(
                     buildRegionListHeader(dimRegion),
-                    buildCommandStr(DIM.toString(), dimRegion.getName(), LIST.toString(), REGION.toString()),
+                    buildCommandStr(DIM.toString(), dimRegion.getName(), LIST.toString(), CommandConstants.LOCAL.toString()),
                     buildRemoveRegionEntries(dimRegion, regionsForDim),
                     pageNo,
                     new StringTextComponent(" - ").append(buildDimCreateRegionLink(dimRegion)));

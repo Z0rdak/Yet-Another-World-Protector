@@ -53,7 +53,6 @@ import java.util.stream.Collectors;
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.MessageUtil.*;
-import static de.z0rdak.yawp.util.constants.RegionNBT.DIM;
 
 public class CommandUtil {
 
@@ -221,7 +220,7 @@ public class CommandUtil {
                 cmd = buildCommandStr(DIM.toString(), region.getName(), LIST.toString(), FLAG.toString());
                 break;
             case LOCAL:
-                cmd = buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), FLAG.toString());
+                cmd = buildCommandStr(LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), FLAG.toString());
                 break;
         }
         List<IFlag> flags = LocalRegions.getSortedFlags(region);
@@ -245,10 +244,10 @@ public class CommandUtil {
                 cmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), GROUP.toString(), group, groupType.name);
                 break;
             case DIMENSION:
-                cmd = buildCommandStr(CommandConstants.DIM.toString(), dim, LIST.toString(), GROUP.toString(), group, groupType.name);
+                cmd = buildCommandStr(DIM.toString(), dim, LIST.toString(), GROUP.toString(), group, groupType.name);
                 break;
             case LOCAL:
-                cmd = buildCommandStr(REGION.toString(), dim, region.getName(), LIST.toString(), GROUP.toString(), group, groupType.name);
+                cmd = buildCommandStr(LOCAL.toString(), dim, region.getName(), LIST.toString(), GROUP.toString(), group, groupType.name);
                 break;
         }
         if (!GROUP_LIST.contains(group)) {
@@ -314,13 +313,20 @@ public class CommandUtil {
         return 1;
     }
 
+    // TODO: Fixme
     public static int removePlayer(CommandContext<CommandSource> ctx, Collection<ServerPlayerEntity> players, IProtectedRegion region, String group) {
         players.forEach(player -> CommandUtil.removePlayer(ctx, player, region, group));
         return 0;
     }
 
+    // TODO: Fixme
     public static int removePlayer(CommandContext<CommandSource> ctx, String playerName, IProtectedRegion region, String group) {
         return CommandUtil.removePlayer(ctx, playerName, region, group);
+    }
+
+    public static int removePlayer(CommandContext<CommandSource> ctx, UUID playerUuid, IProtectedRegion region, String group) {
+        // TODO: Fixme
+        return -1;
     }
 
     public static int removePlayer(CommandContext<CommandSource> src, PlayerEntity player, IProtectedRegion region, String group) {
@@ -342,11 +348,6 @@ public class CommandUtil {
                 buildRegionInfoLink(region));
         sendCmdFeedback(src.getSource(), msg);
         return 1;
-    }
-
-    public static int removePlayer(CommandContext<CommandSource> ctx, UUID playerUuid, IProtectedRegion region, String group) {
-        // TODO
-        return -1;
     }
 
     public static int addPlayer(CommandContext<CommandSource> ctx, Collection<ServerPlayerEntity> players, IProtectedRegion region, String group) {
