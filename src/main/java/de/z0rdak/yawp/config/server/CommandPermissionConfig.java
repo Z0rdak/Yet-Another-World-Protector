@@ -1,8 +1,6 @@
 package de.z0rdak.yawp.config.server;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.management.OpEntry;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -75,7 +73,7 @@ public class CommandPermissionConfig {
         return tokens.stream().anyMatch(t -> t.length() != size);
     }
 
-    public static boolean AllowInfoCmds() {
+    public static boolean isReadOnlyAllowed() {
         return ALLOW_READ_ONLY_CMDS.get();
     }
 
@@ -87,6 +85,7 @@ public class CommandPermissionConfig {
         return WP_CMDS[WP_COMMAND_ALTERNATIVE.get()];
     }
 
+    // FIXME: not used
     public static boolean allowRegionTp() {
         return ENABLE_REGION_TP.get();
     }
@@ -99,18 +98,8 @@ public class CommandPermissionConfig {
                 .collect(Collectors.toSet());
     }
 
-    // FIXME: What about CommandBlockMinecarts?
-    public static boolean hasPermission(CommandSource source) {
-        try {
-            return hasPlayerPermission(source.getPlayerOrException());
-        } catch (CommandSyntaxException e) {
-            boolean isServerConsole = source.getTextName().equals("Server");
-            if (isServerConsole) {
-                return true;
-            } else {
-                return COMMAND_BLOCK_EXECUTION.get();
-            }
-        }
+    public static boolean isCommandBlockExecutionAllowed() {
+        return COMMAND_BLOCK_EXECUTION.get();
     }
 
     public static boolean hasPlayerPermission(PlayerEntity player) {
