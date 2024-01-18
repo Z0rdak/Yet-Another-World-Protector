@@ -10,7 +10,6 @@ import de.z0rdak.yawp.commands.arguments.flag.IFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.core.flag.FlagMessage;
 import de.z0rdak.yawp.core.flag.IFlag;
-import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -67,14 +66,14 @@ public final class FlagCommands {
                         .executes(ctx -> promptFlagInfo(ctx, regionSupplier.apply(ctx), getIFlagArgument(ctx)))
                 )
                 .then(literal(ENABLE)
-                        .executes(ctx -> setEnableState(ctx, regionSupplier.apply(ctx), getFlagArgument(ctx)))
+                        .executes(ctx -> setEnableState(ctx, regionSupplier.apply(ctx), getIFlagArgument(ctx)))
                         .then(Commands.argument(ENABLE.toString(), BoolArgumentType.bool())
-                                .executes(ctx -> setEnableState(ctx, regionSupplier.apply(ctx), getFlagArgument(ctx), getEnableArgument(ctx))))
+                                .executes(ctx -> setEnableState(ctx, regionSupplier.apply(ctx), getIFlagArgument(ctx), getEnableArgument(ctx))))
                 )
                 .then(literal(OVERRIDE)
-                        .executes(ctx -> setInvertState(ctx, regionSupplier.apply(ctx), getFlagArgument(ctx)))
+                        .executes(ctx -> setInvertState(ctx, regionSupplier.apply(ctx), getIFlagArgument(ctx)))
                         .then(Commands.argument(OVERRIDE.toString(), BoolArgumentType.bool())
-                                .executes(ctx -> setInvertState(ctx, regionSupplier.apply(ctx), getFlagArgument(ctx), getNegationArgument(ctx))))
+                                .executes(ctx -> setInvertState(ctx, regionSupplier.apply(ctx), getIFlagArgument(ctx), getNegationArgument(ctx))))
                 )
                 .then(literal(MSG)
                         .then(literal(MUTE)
@@ -119,9 +118,9 @@ public final class FlagCommands {
         return 0;
     }
 
-    private static int promptFlagInfo(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, RegionType regionType, RegionFlag regionFlag) {
-        if (region.containsFlag(regionFlag)) {
-            IFlag flag = region.getFlag(regionFlag.name);
+    private static int promptFlagInfo(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, RegionType regionType, IFlag regionFlag) {
+        if (region.containsFlag(regionFlag.getName())) {
+            IFlag flag = region.getFlag(regionFlag.getName());
             promptFlagInfo(ctx, region, flag);
             return 0;
         } else {
@@ -169,24 +168,13 @@ public final class FlagCommands {
         return 0;
     }
 
-    private static int setEnableState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, RegionFlag regionFlag) {
-        if (region.containsFlag(regionFlag.name)) {
-            IFlag flag = region.getFlag(regionFlag.name);
+    private static int setEnableState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag regionFlag) {
+        if (region.containsFlag(regionFlag.getName())) {
+            IFlag flag = region.getFlag(regionFlag.getName());
             return setEnableState(ctx, region, regionFlag, !flag.isActive());
         } else {
             MessageUtil.sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.not-present",
-                    buildRegionInfoLink(region), regionFlag.name));
-            return 1;
-        }
-    }
-
-    private static int setEnableState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, RegionFlag regionFlag, boolean enable) {
-        if (region.containsFlag(regionFlag.name)) {
-            IFlag flag = region.getFlag(regionFlag.name);
-            return setEnableState(ctx, region, flag, enable);
-        } else {
-            MessageUtil.sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.not-present",
-                    buildRegionInfoLink(region), regionFlag.name));
+                    buildRegionInfoLink(region), regionFlag.getName()));
             return 1;
         }
     }
@@ -205,24 +193,13 @@ public final class FlagCommands {
 
     }
 
-    public static int setInvertState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, RegionFlag regionFlag) {
-        if (region.containsFlag(regionFlag.name)) {
-            IFlag flag = region.getFlag(regionFlag.name);
+    public static int setInvertState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag regionFlag) {
+        if (region.containsFlag(regionFlag.getName())) {
+            IFlag flag = region.getFlag(regionFlag.getName());
             return setInvertState(ctx, region, flag, !flag.doesOverride());
         } else {
             MessageUtil.sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.not-present",
-                    buildRegionInfoLink(region), regionFlag.name));
-            return 1;
-        }
-    }
-
-    public static int setInvertState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, RegionFlag regionFlag, boolean invert) {
-        if (region.containsFlag(regionFlag.name)) {
-            IFlag flag = region.getFlag(regionFlag.name);
-            return setInvertState(ctx, region, flag, invert);
-        } else {
-            MessageUtil.sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.not-present",
-                    buildRegionInfoLink(region), regionFlag.name));
+                    buildRegionInfoLink(region), regionFlag.getName()));
             return 1;
         }
     }
