@@ -349,6 +349,30 @@ public class MessageUtil {
         }
     }
 
+    public static IFormattableTextComponent buildAllLocalEnableComponent(DimensionRegionCache dimCache) {
+        String enableLinkTextKey = "cli.msg.info.region.state.alert.all.true.link.text";
+        String enableHoverTextKey = "cli.msg.info.region.state.alert.all.true.link.hover";
+        String disableLinkTextKey = "cli.msg.info.region.state.alert.all.false.link.text";
+        String disableHoverTextKey = "cli.msg.info.region.state.alert.all.false.link.hover";
+        String enableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), STATE.toString(), ENABLE_LOCAL.toString(), Boolean.TRUE.toString());
+        String disableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), STATE.toString(), ENABLE_LOCAL.toString(), Boolean.FALSE.toString());
+        IFormattableTextComponent activeAlertLink = buildExecuteCmdComponent(enableLinkTextKey, enableHoverTextKey, enableCmd, RUN_COMMAND, ADD_CMD_COLOR);
+        IFormattableTextComponent disableAlertLink = buildExecuteCmdComponent(disableLinkTextKey, disableHoverTextKey, disableCmd, RUN_COMMAND, REMOVE_CMD_COLOR);
+        return activeAlertLink.append(" ").append(disableAlertLink);
+    }
+
+    public static IFormattableTextComponent buildAllLocalAlertToggleLink(DimensionRegionCache dimCache) {
+        String enableLinkTextKey = "cli.msg.info.region.state.enable.all.true.link.text";
+        String enableHoverTextKey = "cli.msg.info.region.state.enable.all.true.link.hover";
+        String disableLinkTextKey = "cli.msg.info.region.state.enable.all.false.link.text";
+        String disableHoverTextKey = "cli.msg.info.region.state.enable.all.false.link.hover";
+        String enableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), STATE.toString(), ALERT_LOCAL.toString(), Boolean.TRUE.toString());
+        String disableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), STATE.toString(), ALERT_LOCAL.toString(), Boolean.FALSE.toString());
+        IFormattableTextComponent activeAlertLink = buildExecuteCmdComponent(enableLinkTextKey, enableHoverTextKey, enableCmd, RUN_COMMAND, ADD_CMD_COLOR);
+        IFormattableTextComponent disableAlertLink = buildExecuteCmdComponent(disableLinkTextKey, disableHoverTextKey, disableCmd, RUN_COMMAND, REMOVE_CMD_COLOR);
+        return activeAlertLink.append(" ").append(disableAlertLink);
+    }
+
     public static IFormattableTextComponent buildRegionPriorityComponent(IMarkableRegion region) {
         int defaultPriorityInc = RegionConfig.getDefaultPriorityInc();
         String incPriorityCmd = ArgumentUtil.buildCommandStr(REGION.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), INC.toString(), String.valueOf(defaultPriorityInc));
