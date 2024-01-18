@@ -50,7 +50,15 @@ public class DimensionCommands {
     private DimensionCommands() {
     }
 
-    public static final List<String> regionNameSuggestions = Arrays.asList("newRegion", "spawn", "home", "town", "arena");
+    private static List<String> getRegionNameSuggestions() {
+        String examples = new TranslatableComponent("cli.info.region.name.examples").getString();
+        return Arrays.asList(examples.split(","));
+    }
+
+    private static String getRandomExample() {
+        List<String> regionNameSuggestions = getRegionNameSuggestions();
+        return regionNameSuggestions.get(new Random().nextInt(regionNameSuggestions.size()));
+    }
 
     // FIXME: typing in invalid dimension is adding this dimension to set of dims
     public static LiteralArgumentBuilder<CommandSourceStack> build() {
@@ -109,7 +117,7 @@ public class DimensionCommands {
                         .then(literal(CREATE)
                                 .then(literal(CommandConstants.LOCAL)
                                         .then(Commands.argument(CommandConstants.LOCAL.toString(), StringArgumentType.word())
-                                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Collections.singletonList(regionNameSuggestions.get(new Random().nextInt(regionNameSuggestions.size()))), builder))
+                                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Collections.singletonList(getRandomExample()), builder))
                                                 //.then(Commands.argument(AREA.toString(), StringArgumentType.word())
                                                 //        .suggests((ctx, builder) -> AreaArgumentType.areaType().listSuggestions(ctx, builder))
                                                 //        .executes(ctx -> createRegion(ctx.getSource(), getRegionNameArgument(ctx), getDimCacheArgument(ctx), getAreaTypeArgument(ctx))))
