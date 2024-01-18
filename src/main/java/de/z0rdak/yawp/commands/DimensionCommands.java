@@ -241,7 +241,9 @@ public class DimensionCommands {
 
     private static int attemptDeleteRegion(CommandContext<CommandSourceStack> ctx, DimensionRegionCache dim, IMarkableRegion region) {
         if (dim.contains(region.getName())) {
-            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.dim.region.remove.attempt", buildRegionInfoLink(region), buildRegionInfoLink(dim.getDimensionalRegion())));
+            MutableComponent removeRegionLink = buildRemoveRegionLink(region);
+            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.dim.region.remove.attempt",
+                    buildRegionInfoLink(region), buildRegionInfoLink(dim.getDimensionalRegion(), removeRegionLink)));
             return 0;
         }
         return 1;
