@@ -1,7 +1,9 @@
 package de.z0rdak.yawp.commands;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.minecart.CommandBlockMinecartEntity;
 import net.minecraft.entity.player.PlayerEntity;
 
 public enum CommandSourceType {
@@ -21,19 +23,24 @@ public enum CommandSourceType {
         if (cmdSrc == null) {
             throw new IllegalArgumentException("Command source can't be null!");
         }
-        Entity cmdSrcEntity = cmdSrc.getEntity();
-        if (cmdSrcEntity != null && !(cmdSrcEntity instanceof PlayerEntity)) {
-            return NON_PLAYER;
+        try {
+            Entity cmdSrcEntity = cmdSrc.getEntityOrException();
+            if (!(cmdSrcEntity instanceof PlayerEntity)) {
+                if (cmdSrcEntity instanceof CommandBlockMinecartEntity) {
+                    return COMMAND_BLOCK;
+                }
+                return NON_PLAYER;
+            } else {
+                return PLAYER;
+            }
+        } catch (CommandSyntaxException e) {
+            // for server and command blocks this is
+            // just an exclusion procedure because it is not possible to access the direct source
+            if (cmdSrc.getTextName().equals("Server")) {
+                return SERVER;
+            }
+            return COMMAND_BLOCK;
         }
-        if (cmdSrcEntity instanceof PlayerEntity) {
-            return PLAYER;
-        }
-        // TODO: Verify
-        if (cmdSrc.getTextName().equals("Server")) {
-            return SERVER;
-        }
-        // TODO: Verify
-        return COMMAND_BLOCK;
     }
 
     @Override
