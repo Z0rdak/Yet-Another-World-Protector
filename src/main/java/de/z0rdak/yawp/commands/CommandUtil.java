@@ -184,14 +184,19 @@ public class CommandUtil {
     /**
      * Prompt the common region state to the command issuer.
      * == [state] for [<name>] ==
-     * Enabled: [true|false]
-     * Alert: [on|off]
+     * Enabled: [true|false] | [all-off] [all-on]
+     * Alert: [on|off] | [all-off] [all-on]
      */
     public static int promptRegionState(CommandContext<CommandSource> ctx, IProtectedRegion region) {
         sendCmdFeedback(ctx.getSource(), buildHeader(new TranslationTextComponent("cli.msg.info.header.for", buildRegionStateLink(region), buildRegionInfoLink(region))));
-        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.enable", buildRegionEnableComponent(region)));
-        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.alert", buildRegionAlertToggleLink(region)));
-        // TODO: Link to enable/disable all local regions
+        IFormattableTextComponent regionEnableComponent = buildRegionEnableComponent(region);
+        IFormattableTextComponent regionAlertComponent = buildRegionAlertToggleLink(region);
+        if (region.getRegionType() == RegionType.DIMENSION) {
+            regionEnableComponent.append(" | ").append(buildAllLocalEnableComponent(getDimCacheArgument(ctx)));
+            regionAlertComponent.append(" | ").append(buildAllLocalAlertToggleLink(getDimCacheArgument(ctx)));
+        }
+        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.enable", regionEnableComponent));
+        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.alert", regionAlertComponent));
         return 0;
     }
 
@@ -589,7 +594,6 @@ public class CommandUtil {
     private static Predicate<? super Entity> getEntityFilterForFlag(RegionFlag flag) {
         switch (flag) {
             case SPAWNING_ALL:
-                // FIXME: does not remove ExperienceOrbEntity
                 return e -> !(e instanceof PlayerEntity);
             case SPAWNING_MONSTER:
                 return HandlerUtil::isMonster;
