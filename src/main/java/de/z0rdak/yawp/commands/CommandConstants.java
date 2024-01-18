@@ -61,7 +61,6 @@ public enum CommandConstants {
     PLAYER("player"),
     PLAYERS("players"),
     PRIORITY("priority"),
-    REGION("region"),
     PAGE("page"),
     REGIONS("regions"),
     REMOVE("remove"),
