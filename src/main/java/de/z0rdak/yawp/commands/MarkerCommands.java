@@ -29,10 +29,9 @@ import net.minecraftforge.common.MinecraftForge;
 
 import java.util.Collections;
 import java.util.Objects;
-import java.util.Random;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
-import static de.z0rdak.yawp.commands.DimensionCommands.regionNameSuggestions;
+import static de.z0rdak.yawp.commands.DimensionCommands.getRandomExample;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.MessageUtil.buildRegionInfoLink;
 import static de.z0rdak.yawp.util.MessageUtil.sendCmdFeedback;
@@ -53,7 +52,7 @@ public final class MarkerCommands {
                         .executes(ctx -> resetStick(ctx.getSource())))
                 .then(literal(CREATE)
                         .then(Commands.argument(CommandConstants.LOCAL.toString(), StringArgumentType.word())
-                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(Collections.singletonList(regionNameSuggestions.get(new Random().nextInt(regionNameSuggestions.size()))), builder))
+                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(Collections.singletonList(getRandomExample()), builder))
                                 .executes(ctx -> createRegion(ctx.getSource(), getRegionNameArgument(ctx), null))
                                 .then(Commands.argument(PARENT.toString(), StringArgumentType.word())
                                         .suggests((ctx, builder) -> OwnedRegionArgumentType.region().listSuggestions(ctx, builder))
