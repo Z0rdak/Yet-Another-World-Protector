@@ -95,9 +95,13 @@ public class DimensionCommands {
                                                 .executes(ctx -> CommandUtil.setAlertState(ctx, getDimCacheArgument(ctx).getDimensionalRegion(), getAlertArgument(ctx))))
                                 )
                                 .then(literal(ENABLE)
-                                        .executes(ctx -> CommandUtil.setAlertState(ctx, getDimCacheArgument(ctx).getDimensionalRegion(), !getDimCacheArgument(ctx).getDimensionalRegion().isActive()))
+                                        .executes(ctx -> CommandUtil.setActiveState(ctx, getDimCacheArgument(ctx).getDimensionalRegion(), !getDimCacheArgument(ctx).getDimensionalRegion().isActive()))
                                         .then(Commands.argument(ENABLE.toString(), BoolArgumentType.bool())
-                                                .executes(ctx -> CommandUtil.setAlertState(ctx, getDimCacheArgument(ctx).getDimensionalRegion(), getEnableArgument(ctx))))
+                                                .executes(ctx -> CommandUtil.setActiveState(ctx, getDimCacheArgument(ctx).getDimensionalRegion(), getEnableArgument(ctx))))
+                                )
+                                .then(literal(ENABLE_LOCAL)
+                                        .then(Commands.argument(ENABLE.toString(), BoolArgumentType.bool())
+                                                .executes(ctx -> setActiveStateForAllLocal(ctx, getDimCacheArgument(ctx), getEnableArgument(ctx))))
                                 )
                         )
                         .then(literal(CREATE)
@@ -130,6 +134,21 @@ public class DimensionCommands {
                 );
     }
 
+
+    private static int setActiveStateForAllLocal(CommandContext<CommandSource> ctx, DimensionRegionCache dimCache, boolean enable) {
+        if (dimCache != null) {
+            dimCache.getRegionsInDimension().values().forEach(region -> {
+                region.setIsActive(enable);
+            });
+            String state = enable ? "Enabled" : "Disabled";
+            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.state.enable.set.value.local",
+                    state, buildRegionInfoLink(dimCache.getDimensionalRegion())));
+            RegionDataManager.save();
+            return 0;
+        } else {
+            return 1;
+        }
+    }
 
     private static int resetLocalRegions(CommandContext<CommandSource> ctx, DimensionRegionCache dimCache) {
         // TODO: What should happen? Clear players? Clear flags? Clear.... ?
