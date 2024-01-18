@@ -57,8 +57,6 @@ public final class MarkerCommands {
                 ;
     }
 
-
-    // TODO: Argument for getting the Marker? Argument could check for player holding valid marker
     private static int createRegion(CommandSourceStack src, String regionName, IMarkableRegion parentRegion) {
         try {
             Player player = src.getPlayerOrException();
@@ -72,6 +70,7 @@ public final class MarkerCommands {
                 sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.name.exists", buildRegionInfoLink(dimCache.getDimensionalRegion()), buildRegionInfoLink(dimCache.getRegion(regionName))));
                 return res;
             }
+
 
             ItemStack maybeStick = player.getMainHandItem();
             if (StickUtil.isVanillaStick(maybeStick)) {
@@ -147,7 +146,7 @@ public final class MarkerCommands {
                 StickType stickType = getStickType(mainHandItem);
                 if (Objects.requireNonNull(stickType) == StickType.MARKER) {
                     mainHandItem = StickUtil.initMarkerNbt(mainHandItem, StickType.MARKER, player.getCommandSenderWorld().dimension());
-                    // FIXME: When different area types are available: Get stick, reset it, and save it back.
+                    // Note: When different area types are available: Get stick, reset it, and save it back.
                     sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.stick.reset"));
                     return 0;
                 } else {
