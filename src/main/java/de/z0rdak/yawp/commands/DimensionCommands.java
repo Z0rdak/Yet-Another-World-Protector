@@ -53,8 +53,6 @@ public class DimensionCommands {
     public static final List<String> regionNameSuggestions = Arrays.asList("newRegion", "spawn", "home", "town", "arena");
 
     // FIXME: typing in invalid dimension is adding this dimension to set of dims
-
-    // TODO: Disable all regions
     public static LiteralArgumentBuilder<CommandSourceStack> build() {
         return literal(DIM)
                 /* /wp dimension <dim> list region */
@@ -244,7 +242,6 @@ public class DimensionCommands {
     private static int deleteRegion(CommandContext<CommandSourceStack> ctx, DimensionRegionCache dim, IMarkableRegion region) {
         if (dim.contains(region.getName())) {
             if (!region.getChildren().isEmpty()) {
-                // TODO: config option which allows deleting region with children? children then default to dim parent
                 sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.dim.region.remove.fail.hasChildren", buildRegionInfoLink(region)));
                 return -1;
             }
