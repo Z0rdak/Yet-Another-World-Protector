@@ -94,6 +94,10 @@ public class DimensionCommands {
                                         .then(Commands.argument(ALERT.toString(), BoolArgumentType.bool())
                                                 .executes(ctx -> CommandUtil.setAlertState(ctx, getDimCacheArgument(ctx).getDimensionalRegion(), getAlertArgument(ctx))))
                                 )
+                                .then(literal(ALERT_LOCAL)
+                                        .then(Commands.argument(ALERT.toString(), BoolArgumentType.bool())
+                                                .executes(ctx -> setAlertStateForAllLocal(ctx, getDimCacheArgument(ctx), getAlertArgument(ctx))))
+                                )
                                 .then(literal(ENABLE)
                                         .executes(ctx -> CommandUtil.setActiveState(ctx, getDimCacheArgument(ctx).getDimensionalRegion(), !getDimCacheArgument(ctx).getDimensionalRegion().isActive()))
                                         .then(Commands.argument(ENABLE.toString(), BoolArgumentType.bool())
@@ -137,11 +141,22 @@ public class DimensionCommands {
 
     private static int setActiveStateForAllLocal(CommandContext<CommandSource> ctx, DimensionRegionCache dimCache, boolean enable) {
         if (dimCache != null) {
-            dimCache.getRegionsInDimension().values().forEach(region -> {
-                region.setIsActive(enable);
-            });
+            dimCache.getRegionsInDimension().values().forEach(region -> region.setIsActive(enable));
             String state = enable ? "Enabled" : "Disabled";
             sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.state.enable.set.value.local",
+                    state, buildRegionInfoLink(dimCache.getDimensionalRegion())));
+            RegionDataManager.save();
+            return 0;
+        } else {
+            return 1;
+        }
+    }
+
+    private static int setAlertStateForAllLocal(CommandContext<CommandSource> ctx, DimensionRegionCache dimCache, boolean mute) {
+        if (dimCache != null) {
+            dimCache.getRegionsInDimension().values().forEach(region -> region.setIsMuted(mute));
+            String state = mute ? "Enabled" : "Disabled";
+            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.state.alert.set.value.local",
                     state, buildRegionInfoLink(dimCache.getDimensionalRegion())));
             RegionDataManager.save();
             return 0;
