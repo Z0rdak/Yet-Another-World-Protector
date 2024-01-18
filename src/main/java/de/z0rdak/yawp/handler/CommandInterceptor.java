@@ -128,11 +128,11 @@ public class CommandInterceptor {
 
 
     /**
-     * TODO: Implementation  <br>
      * Verifies the permission for the given flag command. <br>
      * Syntax for Local Regions:        /wp flag local &lt;dim&gt; &lt;region&gt; &lt;flag&gt; enable|msg ... <br>
      * Syntax for Dimensional Regions:  /wp flag dim &lt;dim&gt; &lt;flag&gt; enable|msg ... <br>
      * Syntax for Global Regions:       /wp flag global &lt;flag&gt; enable|msg ... <br>
+     * Note: Implementation can still be improved through generalization or fusing the flag command with the sub-flag command. <br>
      */
     private static int verifyFlagCommandPermission(CommandContextBuilder<CommandSource> cmdContext, List<String> nodeNames, CommandSourceType cmdSrcType) {
         CommandSource src = cmdContext.getSource();
@@ -141,7 +141,6 @@ public class CommandInterceptor {
             if (!isRegionTypeCmd) {
                 return ALLOW_CMD;
             }
-
             String regionTypeCmd = nodeNames.get(2);
             switch (regionTypeCmd) {
                 case "local": {
@@ -149,21 +148,51 @@ public class CommandInterceptor {
                     if (region == null) {
                         return ALLOW_CMD;
                     }
-
+                    Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
+                        //  0   1    2       3      4    5      6
+                        // /wp flag local <dim> <region> <flag> enable|msg ...
+                        int subCmdIdx = 6;
+                        boolean isReadOnlyCmd = checkSubCmdAtIndex(nodes, subCmdIdx, INFO);
+                        boolean isFlagShortCmd = nodes.size() == subCmdIdx;
+                        return (isFlagShortCmd || isReadOnlyCmd) && isReadOnlyAllowed();
+                    };
+                    boolean hasPermission = hasCmdPermission(cmdContext, cmdSrcType, CommandUtil.OWNER, region, subCmdPermission);
+                    handlePermission(src, region, hasPermission);
+                    return hasPermission ? ALLOW_CMD : CANCEL_CMD;
                 }
-                break;
+
                 case "dim": {
                     DimensionRegionCache dimCache = checkValidDimRegion(cmdContext);
                     if (dimCache == null) {
                         return ALLOW_CMD;
                     }
                     IProtectedRegion region = dimCache.getDimensionalRegion();
+                    Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
+                        //  0   1    2     3    4    5          6
+                        // /wp flag dim <dim> <flag> enable|msg ...
+                        int subCmdIdx = 5;
+                        boolean isReadOnlyCmd = checkSubCmdAtIndex(nodes, subCmdIdx, INFO);
+                        boolean isFlagShortCmd = nodes.size() == subCmdIdx;
+                        return (isFlagShortCmd || isReadOnlyCmd) && isReadOnlyAllowed();
+                    };
+                    boolean hasPermission = hasCmdPermission(cmdContext, cmdSrcType, CommandUtil.OWNER, region, subCmdPermission);
+                    handlePermission(src, region, hasPermission);
+                    return hasPermission ? ALLOW_CMD : CANCEL_CMD;
                 }
-                break;
                 case "global": {
                     GlobalRegion region = RegionDataManager.get().getGlobalRegion();
+                    Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
+                        //  0   1    2       3      4         5
+                        // /wp flag global <flag> enable|msg ...
+                        int subCmdIdx = 4;
+                        boolean isReadOnlyCmd = checkSubCmdAtIndex(nodes, subCmdIdx, INFO);
+                        boolean isFlagShortCmd = nodes.size() == subCmdIdx;
+                        return (isFlagShortCmd || isReadOnlyCmd) && isReadOnlyAllowed();
+                    };
+                    boolean hasPermission = hasCmdPermission(cmdContext, cmdSrcType, CommandUtil.OWNER, region, subCmdPermission);
+                    handlePermission(src, region, hasPermission);
+                    return hasPermission ? ALLOW_CMD : CANCEL_CMD;
                 }
-                break;
                 default:
                     break;
             }
