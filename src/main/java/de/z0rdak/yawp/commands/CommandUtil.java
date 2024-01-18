@@ -191,11 +191,12 @@ public class CommandUtil {
         sendCmdFeedback(ctx.getSource(), buildHeader(new TranslationTextComponent("cli.msg.info.header.for", buildRegionStateLink(region), buildRegionInfoLink(region))));
         sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.enable", buildRegionEnableComponent(region)));
         sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.alert", buildRegionAlertToggleLink(region)));
+        // TODO: Link to enable/disable all local regions
         return 0;
     }
 
     /**
-     * == Affiliation '%s' for '%s'==
+     * == Group '%s' for '%s'==
      * Players: [n player(s)][+]
      * Teams: [m team(s)][+]
      */
@@ -546,7 +547,6 @@ public class CommandUtil {
                 default:
                     throw new IllegalArgumentException("Unexpected value = " + flag.getClass().getName());
             }
-            // TODO: More general: Trigger for adding flags?
             if (flag.name.contains("spawning") && FlagConfig.removeEntitiesEnabled()) {
                 removeInvolvedEntities(ctx, region, flag);
             }
