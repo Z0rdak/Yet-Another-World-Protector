@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.commands.arguments.flag.IFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.core.flag.FlagMessage;
@@ -22,8 +23,9 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
@@ -31,148 +33,74 @@ import static de.z0rdak.yawp.util.MessageUtil.*;
 
 public final class FlagCommands {
 
-    private static final List<String> flagMsgExamples = Arrays.asList(
-            "<Your flag message here>",
-            "You can't place blocks here in the region {region}, {player}!",
-            "Sorry, you are not allowed to break blocks here, {player}!",
-            "Team '{team}' is not allowed to place blocks here!",
-            "You are not allowed to use this block ('{block}' @ '{pos}')!",
-            "Only players and teams which are '{affiliation}' are allowed to participate in PVP here!",
-            "PVP is disabled in this region {region}!",
-            "This action is denied here because of the '{flag}' flag!",
-            "Entity {entity} at {pos} can't be tamed because of the active flag '{flag}' in the region '{region}'!",
-            "You shall not pass!!!"
-    );
-
     private FlagCommands() {
     }
 
     public static LiteralArgumentBuilder<CommandSource> build() {
+
         return literal(FLAG)
-                //.then(literal(GLOBAL)
-                //        .then(flagGlobalSubCommands()))
-                //.then(literal(DIM)
-                //        .then(flagDimSubCommands()))
+                .then(literal(GLOBAL)
+                        .then(flagSubCmd((ctx) -> getGlobalRegion())))
+                .then(literal(DIM)
+                        .then(flagDimSubCommands()))
                 .then(literal(LOCAL)
                         .then(flagLocalSubCommands()));
     }
 
-    // flag <flag> entry add <string>
-    // flag <flag> entry remove <string>
-    // flag <flag> entry clear
-    public static LiteralArgumentBuilder<CommandSource> flagGlobalSubCommands() {
-        return literal(GLOBAL)
-                .then(Commands.argument(FLAG.toString(), StringArgumentType.word())
-                        // FIXME: suggestions not working for global region
-                        .suggests((ctx, builder) -> IFlagArgumentType.flag().listSuggestions(ctx, builder))
-                        .executes(ctx -> promptGlobalFlagInfo(ctx, getFlagArgument(ctx)))
-                        .then(literal(INFO)
-                                .executes(ctx -> promptGlobalFlagInfo(ctx, getFlagArgument(ctx)))
-                        )
-                        .then(literal(ENABLE)
-                                .executes(ctx -> setGlobalEnableState(ctx, getFlagArgument(ctx)))
-                                .then(Commands.argument(ENABLE.toString(), BoolArgumentType.bool())
-                                        .executes(ctx -> setGlobalEnableState(ctx, getFlagArgument(ctx), getEnableArgument(ctx))))
-                        )
-                        .then(literal(OVERRIDE)
-                                .executes(ctx -> setGlobalInvertState(ctx, getFlagArgument(ctx)))
-                                .then(Commands.argument(OVERRIDE.toString(), BoolArgumentType.bool())
-                                        .executes(ctx -> setGlobalInvertState(ctx, getFlagArgument(ctx), getNegationArgument(ctx))))
-                        )
-                        .then(literal(MSG)
-                                .then(literal(MUTE)
-                                        .executes(ctx -> setGlobalFlagMuteState(ctx, getFlagArgument(ctx)))
-                                        .then(Commands.argument(MUTE.toString(), BoolArgumentType.bool())
-                                                .executes(ctx -> setGlobalFlagMuteState(ctx, getFlagArgument(ctx), getMuteArgument(ctx))))
-                                )
-                                .then(literal(SET)
-                                        .then(Commands.argument(MSG.toString(), StringArgumentType.string())
-                                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(flagMsgExamples, builder))
-                                                .executes(ctx -> setGlobalRegionFlagMsg(ctx, getFlagArgument(ctx), getFlagMsgArgument(ctx))))
-                                )
-                                .then(literal(CLEAR)
-                                        .executes(ctx -> setGlobalRegionFlagMsg(ctx, getFlagArgument(ctx), FlagMessage.CONFIG_MSG))
-                                )
-                        )
-                );
-    }
-
-    private static int promptGlobalFlagInfo(CommandContext<CommandSource> ctx, RegionFlag flagArgument) {
-        return 0;
-    }
-
-    private static int setGlobalEnableState(CommandContext<CommandSource> ctx, RegionFlag flagArgument, boolean enableArgument) {
-        return 0;
-    }
-
-    private static int setGlobalEnableState(CommandContext<CommandSource> ctx, RegionFlag flagArgument) {
-        return 0;
-    }
-
-    private static int setGlobalInvertState(CommandContext<CommandSource> ctx, RegionFlag flagArgument, boolean negationArgument) {
-        return 1;
-    }
-
-    private static int setGlobalInvertState(CommandContext<CommandSource> ctx, RegionFlag flagArgument) {
-        return 1;
-    }
-
-    private static int setGlobalFlagMuteState(CommandContext<CommandSource> ctx, RegionFlag flagArgument, boolean muteArgument) {
-        return 0;
-    }
-
-    private static int setGlobalFlagMuteState(CommandContext<CommandSource> ctx, RegionFlag flagArgument) {
-        return 0;
-    }
-
-    private static int setGlobalRegionFlagMsg(CommandContext<CommandSource> ctx, RegionFlag flagArgument, String configMsg) {
-        return 0;
-    }
-
-    private static int setGlobalRegionFlagMsg(CommandContext<CommandSource> ctx, RegionFlag flagArgument) {
-        return 0;
+    public static RequiredArgumentBuilder<CommandSource, ResourceLocation> flagDimSubCommands() {
+        return Commands.argument(DIM.toString(), DimensionArgument.dimension())
+                .then(flagSubCmd((ctx) -> getDimCacheArgument(ctx).getDimensionalRegion()));
     }
 
     public static RequiredArgumentBuilder<CommandSource, ResourceLocation> flagLocalSubCommands() {
         return Commands.argument(DIM.toString(), DimensionArgument.dimension())
-                .then(Commands.argument(REGION.toString(), StringArgumentType.word())
+                .then(Commands.argument(CommandConstants.LOCAL.toString(), StringArgumentType.word())
                         .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestions(ctx, builder))
-                        .then(flagSubCmd(RegionType.LOCAL))
+                        .then(flagSubCmd(ArgumentUtil::getRegionArgument))
                 );
     }
 
-    private static RequiredArgumentBuilder<CommandSource, String> flagSubCmd(RegionType regionType) {
+    private static RequiredArgumentBuilder<CommandSource, String> flagSubCmd(Function<CommandContext<CommandSource>, IProtectedRegion> regionSupplier) {
         return Commands.argument(FLAG.toString(), StringArgumentType.word())
                 .suggests((ctx, builder) -> IFlagArgumentType.flag().listSuggestions(ctx, builder))
-                .executes(ctx -> promptFlagInfo(ctx, getRegion(ctx, regionType), regionType, getFlagArgument(ctx)))
+                .executes(ctx -> promptFlagInfo(ctx, regionSupplier.apply(ctx), getIFlagArgument(ctx)))
                 .then(literal(INFO)
-                        .executes(ctx -> promptFlagInfo(ctx, getRegion(ctx, regionType), regionType, getFlagArgument(ctx)))
+                        .executes(ctx -> promptFlagInfo(ctx, regionSupplier.apply(ctx), getIFlagArgument(ctx)))
                 )
                 .then(literal(ENABLE)
-                        .executes(ctx -> setEnableState(ctx, getRegion(ctx, regionType), regionType, getFlagArgument(ctx)))
+                        .executes(ctx -> setEnableState(ctx, regionSupplier.apply(ctx), getFlagArgument(ctx)))
                         .then(Commands.argument(ENABLE.toString(), BoolArgumentType.bool())
-                                .executes(ctx -> setEnableState(ctx, getRegion(ctx, regionType), regionType, getFlagArgument(ctx), getEnableArgument(ctx))))
+                                .executes(ctx -> setEnableState(ctx, regionSupplier.apply(ctx), getFlagArgument(ctx), getEnableArgument(ctx))))
                 )
                 .then(literal(OVERRIDE)
-                        .executes(ctx -> setInvertState(ctx, getRegion(ctx, regionType), regionType, getFlagArgument(ctx)))
+                        .executes(ctx -> setInvertState(ctx, regionSupplier.apply(ctx), getFlagArgument(ctx)))
                         .then(Commands.argument(OVERRIDE.toString(), BoolArgumentType.bool())
-                                .executes(ctx -> setInvertState(ctx, getRegion(ctx, regionType), regionType, getFlagArgument(ctx), getNegationArgument(ctx))))
+                                .executes(ctx -> setInvertState(ctx, regionSupplier.apply(ctx), getFlagArgument(ctx), getNegationArgument(ctx))))
                 )
                 .then(literal(MSG)
                         .then(literal(MUTE)
-                                .executes(ctx -> setFlagMuteState(ctx, getRegion(ctx, regionType), regionType, getFlagArgument(ctx)))
+                                .executes(ctx -> setFlagMuteState(ctx, regionSupplier.apply(ctx), getIFlagArgument(ctx)))
                                 .then(Commands.argument(MUTE.toString(), BoolArgumentType.bool())
-                                        .executes(ctx -> setFlagMuteState(ctx, getRegion(ctx, regionType), regionType, getFlagArgument(ctx), getMuteArgument(ctx))))
+                                        .executes(ctx -> setFlagMuteState(ctx, regionSupplier.apply(ctx), getIFlagArgument(ctx), getMuteArgument(ctx))))
                         )
                         .then(literal(SET)
                                 .then(Commands.argument(MSG.toString(), StringArgumentType.string())
-                                        .suggests((ctx, builder) -> ISuggestionProvider.suggest(flagMsgExamples, builder))
-                                        .executes(ctx -> setRegionFlagMsg(ctx, getRegion(ctx, regionType), regionType, getFlagArgument(ctx), getFlagMsgArgument(ctx))))
+                                        .suggests((ctx, builder) -> ISuggestionProvider.suggest(flagMsgExamples(), builder))
+                                        .executes(ctx -> setRegionFlagMsg(ctx, regionSupplier.apply(ctx), getIFlagArgument(ctx), getFlagMsgArgument(ctx))))
                         )
                         .then(literal(CLEAR)
-                                .executes(ctx -> setRegionFlagMsg(ctx, getRegion(ctx, regionType), regionType, getFlagArgument(ctx), FlagMessage.CONFIG_MSG))
+                                .executes(ctx -> setRegionFlagMsg(ctx, regionSupplier.apply(ctx), getIFlagArgument(ctx), FlagMessage.CONFIG_MSG))
                         )
                 );
+    }
+
+    private static List<String> flagMsgExamples() {
+        final int amountOfExamples = 10;
+        List<String> examples = new ArrayList<>(amountOfExamples);
+        for (int i = 0; i < amountOfExamples; i++) {
+            examples.add(new TranslationTextComponent("cli.info.flag.state.msg.text.example." + i).getString());
+        }
+        return examples;
     }
 
     /**
@@ -183,7 +111,7 @@ public final class FlagCommands {
      * Muted: [no] <br></br>
      * Msg [set] [x]: 'msg' <br></br>
      */
-    private static int promptFlagInfo(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionType regionType, IFlag flag) {
+    private static int promptFlagInfo(CommandContext<CommandSource> ctx, IProtectedRegion region, IFlag flag) {
         sendCmdFeedback(ctx.getSource(), buildFlagInfoHeader(region, flag));
         sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.info.flag.state.enable", buildFlagActiveToggleLink(region, flag)));
         sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.info.flag.state.override", buildFlagInvertToggleLink(region, flag)));
@@ -195,7 +123,7 @@ public final class FlagCommands {
     private static int promptFlagInfo(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionType regionType, RegionFlag regionFlag) {
         if (region.containsFlag(regionFlag)) {
             IFlag flag = region.getFlag(regionFlag.name);
-            promptFlagInfo(ctx, region, regionType, flag);
+            promptFlagInfo(ctx, region, flag);
             return 0;
         } else {
             MessageUtil.sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.flag.not-present",
@@ -204,29 +132,18 @@ public final class FlagCommands {
         }
     }
 
-    private static int setFlagMuteState(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionType regionType, RegionFlag regionFlag) {
-        if (region.containsFlag(regionFlag)) {
-            IFlag flag = region.getFlag(regionFlag.name);
-            return setFlagMuteState(ctx, region, regionType, flag, !flag.getFlagMsg().isMuted());
+    private static int setFlagMuteState(CommandContext<CommandSource> ctx, IProtectedRegion region, IFlag regionFlag) {
+        if (region.containsFlag(regionFlag.getName())) {
+            IFlag flag = region.getFlag(regionFlag.getName());
+            return setFlagMuteState(ctx, region, flag, !flag.getFlagMsg().isMuted());
         } else {
             MessageUtil.sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.flag.not-present",
-                    buildRegionInfoLink(region), regionFlag.name));
+                    buildRegionInfoLink(region), regionFlag.getName()));
             return 1;
         }
     }
 
-    private static int setFlagMuteState(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionType regionType, RegionFlag regionFlag, boolean setMuted) {
-        if (region.containsFlag(regionFlag)) {
-            IFlag flag = region.getFlag(regionFlag.name);
-            return setFlagMuteState(ctx, region, regionType, flag, setMuted);
-        } else {
-            MessageUtil.sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.flag.not-present",
-                    buildRegionInfoLink(region), regionFlag.name));
-            return 1;
-        }
-    }
-
-    private static int setFlagMuteState(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionType regionType, IFlag flag, boolean setMuted) {
+    private static int setFlagMuteState(CommandContext<CommandSource> ctx, IProtectedRegion region, IFlag flag, boolean setMuted) {
         flag.getFlagMsg().mute(setMuted);
         IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!setMuted), String.valueOf(setMuted));
         IFormattableTextComponent msg = new TranslationTextComponent("cli.flag.msg.mute.success.text",
@@ -239,18 +156,7 @@ public final class FlagCommands {
 
     }
 
-    private static int setRegionFlagMsg(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionType regionType, RegionFlag regionFlag, String flagMsgStr) {
-        if (region.containsFlag(regionFlag.name)) {
-            IFlag flag = region.getFlag(regionFlag.name);
-            return setRegionFlagMsg(ctx, region, regionType, flag, flagMsgStr);
-        } else {
-            MessageUtil.sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.flag.not-present",
-                    buildRegionInfoLink(region), regionFlag.name));
-            return 1;
-        }
-    }
-
-    private static int setRegionFlagMsg(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionType regionType, IFlag flag, String flagMsgStr) {
+    private static int setRegionFlagMsg(CommandContext<CommandSource> ctx, IProtectedRegion region, IFlag flag, String flagMsgStr) {
         String oldFlagMsg = flag.getFlagMsg().getMsg();
         FlagMessage flagMsg = new FlagMessage(flagMsgStr, flag.getFlagMsg().isMuted());
         flag.setFlagMsg(flagMsg);
@@ -264,10 +170,10 @@ public final class FlagCommands {
         return 0;
     }
 
-    private static int setEnableState(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionType regionType, RegionFlag regionFlag) {
+    private static int setEnableState(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionFlag regionFlag) {
         if (region.containsFlag(regionFlag.name)) {
             IFlag flag = region.getFlag(regionFlag.name);
-            return setEnableState(ctx, region, regionType, regionFlag, !flag.isActive());
+            return setEnableState(ctx, region, regionFlag, !flag.isActive());
         } else {
             MessageUtil.sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.flag.not-present",
                     buildRegionInfoLink(region), regionFlag.name));
@@ -275,7 +181,7 @@ public final class FlagCommands {
         }
     }
 
-    private static int setEnableState(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionType regionType, RegionFlag regionFlag, boolean enable) {
+    private static int setEnableState(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionFlag regionFlag, boolean enable) {
         if (region.containsFlag(regionFlag.name)) {
             IFlag flag = region.getFlag(regionFlag.name);
             return setEnableState(ctx, region, flag, enable);
@@ -300,10 +206,10 @@ public final class FlagCommands {
 
     }
 
-    public static int setInvertState(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionType regionType, RegionFlag regionFlag) {
+    public static int setInvertState(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionFlag regionFlag) {
         if (region.containsFlag(regionFlag.name)) {
             IFlag flag = region.getFlag(regionFlag.name);
-            return setInvertState(ctx, region, regionType, flag, !flag.doesOverride());
+            return setInvertState(ctx, region, flag, !flag.doesOverride());
         } else {
             MessageUtil.sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.flag.not-present",
                     buildRegionInfoLink(region), regionFlag.name));
@@ -311,10 +217,10 @@ public final class FlagCommands {
         }
     }
 
-    public static int setInvertState(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionType regionType, RegionFlag regionFlag, boolean invert) {
+    public static int setInvertState(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionFlag regionFlag, boolean invert) {
         if (region.containsFlag(regionFlag.name)) {
             IFlag flag = region.getFlag(regionFlag.name);
-            return setInvertState(ctx, region, regionType, flag, invert);
+            return setInvertState(ctx, region, flag, invert);
         } else {
             MessageUtil.sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.flag.not-present",
                     buildRegionInfoLink(region), regionFlag.name));
@@ -322,7 +228,7 @@ public final class FlagCommands {
         }
     }
 
-    public static int setInvertState(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionType regionType, IFlag flag, boolean invert) {
+    public static int setInvertState(CommandContext<CommandSource> ctx, IProtectedRegion region, IFlag flag, boolean invert) {
         flag.setOverride(invert);
         IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!invert), String.valueOf(invert));
         IFormattableTextComponent msg = new TranslationTextComponent("cli.flag.invert.success.text",
