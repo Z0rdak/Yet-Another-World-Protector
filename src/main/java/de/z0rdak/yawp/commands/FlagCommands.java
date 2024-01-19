@@ -106,14 +106,14 @@ public final class FlagCommands {
      * Enabled: [yes] <br></br>
      * Inverted: [no] <br></br>
      * Muted: [no] <br></br>
-     * Msg [set] [x]: 'msg' <br></br>
+     * Message: [set] [x]: 'msg' <br></br>
      */
     private static int promptFlagInfo(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag flag) {
         sendCmdFeedback(ctx.getSource(), buildFlagInfoHeader(region, flag));
         sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.info.flag.state.enable", buildFlagActiveToggleLink(region, flag)));
         sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.info.flag.state.override", buildFlagInvertToggleLink(region, flag)));
         sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.info.flag.state.msg.mute", buildFlagMuteToggleLink(region, flag)));
-        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.info.flag.state.msg.text", buildFlagMessageEditLink(region, flag)));
+        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.info.flag.state.msg.text", buildFlagMessageComponent(region, flag)));
         return 0;
     }
 
