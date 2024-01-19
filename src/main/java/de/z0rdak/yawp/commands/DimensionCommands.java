@@ -49,7 +49,7 @@ public class DimensionCommands {
         return Arrays.asList(examples.split(","));
     }
 
-    private static String getRandomExample() {
+    public static String getRandomExample() {
         List<String> regionNameSuggestions = getRegionNameSuggestions();
         return regionNameSuggestions.get(new Random().nextInt(regionNameSuggestions.size()));
     }
@@ -82,7 +82,7 @@ public class DimensionCommands {
                                                 .executes(ctx -> deleteRegion(ctx, getDimCacheArgument(ctx), getRegionArgument(ctx))))))
                         .then(literal(DELETE_ALL)
                                 .then(literal(REGIONS)
-                                        .executes(ctx -> deleteRegions(ctx, getDimCacheArgument(ctx)))
+                                        .executes(ctx -> attemptDeleteRegions(ctx, getDimCacheArgument(ctx)))
                                         .then(literal(FOREVER)
                                                 .then(literal(SERIOUSLY)
                                                         .executes(ctx -> deleteRegions(ctx, getDimCacheArgument(ctx)))))))
@@ -143,7 +143,7 @@ public class DimensionCommands {
         if (dimCache != null) {
             dimCache.getRegionsInDimension().values().forEach(region -> region.setIsActive(enable));
             String state = enable ? "Enabled" : "Disabled";
-            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.state.enable.set.value.local",
+            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.state.enable.all.set.value",
                     state, buildRegionInfoLink(dimCache.getDimensionalRegion())));
             RegionDataManager.save();
             return 0;
@@ -156,7 +156,7 @@ public class DimensionCommands {
         if (dimCache != null) {
             dimCache.getRegionsInDimension().values().forEach(region -> region.setIsMuted(mute));
             String state = mute ? "Enabled" : "Disabled";
-            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.state.alert.set.value.local",
+            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.state.alert.all.set.value",
                     state, buildRegionInfoLink(dimCache.getDimensionalRegion())));
             RegionDataManager.save();
             return 0;
@@ -165,21 +165,32 @@ public class DimensionCommands {
         }
     }
 
+    /**
+     * Reset groups (players and teams) and state for all local regions in the dimension.<br></br>
+     * This keeps region hierarchy and flags intact. <br></br>
+     * Scenario: You want to keep the local region layout and hierarchy but want to reset players and teams.<br></br>
+     */
     private static int resetLocalRegions(CommandContext<CommandSource> ctx, DimensionRegionCache dimCache) {
-        // TODO: What should happen? Clear players? Clear flags? Clear.... ?
+        dimCache.getRegionsInDimension().values().forEach(region -> {
+            region.resetGroups();
+            region.setIsActive(true);
+            region.setIsMuted(false);
+        });
+        RegionDataManager.save();
+        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.dim.reset.all.confirm", buildRegionInfoLink(dimCache.getDimensionalRegion())));
         return 0;
     }
 
-    private static int deleteRegions(CommandContext<CommandSource> ctx, DimensionRegionCache dimCache) {
-        // TODO:
-        return 0;
-    }
-
+    /**
+     * Reset groups (players and teams) and state for the dimensional region.<br></br>
+     * This keeps region hierarchy and flags intact.<br></br>
+     */
     private static int resetDimRegion(CommandContext<CommandSource> ctx, DimensionRegionCache dimCache) {
-        // TODO: Remove flags
-        // TODO: Remove players
-        // TODO: Remove teams
-        // TODO: apply default region state
+        dimCache.getDimensionalRegion().resetGroups();
+        dimCache.getDimensionalRegion().setIsActive(true);
+        dimCache.getDimensionalRegion().setIsMuted(false);
+        RegionDataManager.save();
+        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.dim.reset.confirm", buildRegionInfoLink(dimCache.getDimensionalRegion())));
         return 0;
     }
 
