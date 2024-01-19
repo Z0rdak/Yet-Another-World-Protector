@@ -695,40 +695,6 @@ public class MessageUtil {
         }
     }
 
-    /**
-     * Builds the flag info component for the given flag and region. <br></br>
-     * == Flag info for [flagname] of [region] == <br></br>
-     * Enabled: [yes] <br></br>
-     * Inverted: [no] <br></br>
-     * Muted: [no] <br></br>
-     * Msg [set] [x]: 'msg' <br></br>
-     *
-     * @param region
-     * @param flag
-     * @return == Flag info for [flagname] of [region] ==
-     */
-    // TODO:
-    public static IFormattableTextComponent buildFlagInfoComponent(IProtectedRegion region, IFlag flag) {
-        IFormattableTextComponent header = buildFlagInfoHeader(region, flag);
-        switch (region.getRegionType()) {
-            case GLOBAL: {
-                buildInfoComponent("cli.info.flag.state.enable", buildFlagActiveToggleLink(region, flag));
-                buildInfoComponent("cli.info.flag.state.override", buildFlagInvertToggleLink(region, flag));
-                buildInfoComponent("cli.info.flag.state.msg.mute", buildFlagMuteToggleLink(region, flag));
-                buildInfoComponent("cli.info.flag.state.msg.text", buildFlagMessageEditLink(region, flag));
-                return header;
-            }
-            case DIMENSION: {
-                return header;
-            }
-            case LOCAL: {
-                return header;
-            }
-            default:
-                throw new IllegalStateException("Unexpected value: " + region.getRegionType());
-        }
-    }
-
     public static IFormattableTextComponent buildFlagActiveToggleLink(IProtectedRegion region, IFlag flag) {
         switch (region.getRegionType()) {
             case GLOBAL: {
@@ -771,6 +737,49 @@ public class MessageUtil {
         }
     }
 
+    public static IFormattableTextComponent buildFlagMessageEditLink(IProtectedRegion region, IFlag flag) {
+        IFormattableTextComponent hover = new TranslationTextComponent("cli.info.flag.state.msg.text.link.hover", region.getName());
+        IFormattableTextComponent text = new TranslationTextComponent("cli.info.flag.state.msg.text.set.edit");
+        switch (region.getRegionType()) {
+            case GLOBAL: {
+                String cmd = buildCommandStr(FLAG.toString(), GLOBAL.toString(), flag.getName(), MSG.toString(), SET.toString());
+                return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, REMOVE_CMD_COLOR);
+            }
+            case DIMENSION: {
+                String cmd = buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().location().toString(), flag.getName(), MSG.toString(), SET.toString());
+                return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, REMOVE_CMD_COLOR);
+            }
+            case LOCAL: {
+                String cmd = buildCommandStr(FLAG.toString(), LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag.getName(), MSG.toString(), SET.toString());
+                return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, REMOVE_CMD_COLOR);
+            }
+            default:
+                throw new IllegalStateException("Unexpected value: " + region.getRegionType());
+        }
+    }
+
+    private static IFormattableTextComponent buildFlagMessageClearLink(IProtectedRegion region, IFlag flag) {
+        IFormattableTextComponent hover = new TranslationTextComponent("cli.msg.info.dim.region.remove.all.link.hover", region.getName());
+        IFormattableTextComponent text = new TranslationTextComponent("cli.link.remove");
+        switch (region.getRegionType()) {
+            case GLOBAL: {
+                String cmd = buildCommandStr(FLAG.toString(), GLOBAL.toString(), flag.getName(), MSG.toString(), CLEAR.toString());
+                return buildExecuteCmdComponent(text, hover, cmd, RUN_COMMAND, REMOVE_CMD_COLOR);
+            }
+            case DIMENSION: {
+                String cmd = buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().location().toString(), flag.getName(), MSG.toString(), CLEAR.toString());
+                return buildExecuteCmdComponent(text, hover, cmd, RUN_COMMAND, REMOVE_CMD_COLOR);
+            }
+            case LOCAL: {
+                String cmd = buildCommandStr(FLAG.toString(), LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag.getName(), MSG.toString(), CLEAR.toString());
+                return buildExecuteCmdComponent(text, hover, cmd, RUN_COMMAND, REMOVE_CMD_COLOR);
+            }
+            default:
+                throw new IllegalStateException("Unexpected value: " + region.getRegionType());
+        }
+    }
+
+
     public static IFormattableTextComponent buildFlagMuteToggleLink(IProtectedRegion region, IFlag flag) {
         switch (region.getRegionType()) {
             case GLOBAL: {
@@ -792,39 +801,41 @@ public class MessageUtil {
         }
     }
 
-    public static IFormattableTextComponent buildFlagMessageEditLink(IProtectedRegion region, IFlag flag) {
-        // TODO: consider player flag specific messages
-        // TODO: build clear link when not default and use it
-        // TODO: use different text than quick action text
-        boolean hasDefaultMsg = flag.getFlagMsg().isDefault();
-        IFormattableTextComponent flagMsgText = new TranslationTextComponent("cli.info.flag.state.msg.text.link.text", flag.getFlagMsg().getMsg());
-        IFormattableTextComponent hoverText = new TranslationTextComponent("cli.info.flag.state.msg.text.link.hover",
-                buildFlagInfoLink(region, flag), buildRegionInfoLink(region));
-        switch (region.getRegionType()) {
-            case GLOBAL: {
-                String cmd = buildCommandStr(FLAG.toString(), GLOBAL.toString(), flag.getName(), flag.getFlagMsg().getMsg());
-                if (hasDefaultMsg) {
-                    flagMsgText = new StringTextComponent(FlagConfig.getRawGlobalFlagMsg());
-                }
-                return buildExecuteCmdComponent(flagMsgText, hoverText, cmd, SUGGEST_COMMAND, LINK_COLOR);
-            }
-            case DIMENSION: {
-                String cmd = buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().location().toString(), flag.getName(), flag.getFlagMsg().getMsg());
-                if (hasDefaultMsg) {
-                    flagMsgText = new StringTextComponent(FlagConfig.getRawDimFlagMsg());
-                }
-                return buildExecuteCmdComponent(flagMsgText, hoverText, cmd, SUGGEST_COMMAND, LINK_COLOR);
-            }
-            case LOCAL: {
-                String cmd = buildCommandStr(FLAG.toString(), LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag.getName(), flag.getFlagMsg().getMsg());
-                if (hasDefaultMsg) {
-                    flagMsgText = new StringTextComponent(FlagConfig.getRawLocalFlagMsg());
-                }
-                return buildExecuteCmdComponent(flagMsgText, hoverText, cmd, SUGGEST_COMMAND, LINK_COLOR);
-            }
-            default:
-                throw new IllegalStateException("Unexpected value: " + region.getRegionType());
+    public static IFormattableTextComponent buildFlagMessageHoverText(IProtectedRegion region, IFlag flag) {
+        String flagMsg = flag.getFlagMsg().getMsg();
+        if (flag.getFlagMsg().getMsg().length() > 30) {
+            flagMsg = flagMsg.substring(0, 30) + "...";
         }
+        IFormattableTextComponent flagMsgText = new TranslationTextComponent("cli.info.flag.state.msg.text.link.text", flagMsg);
+        IFormattableTextComponent hoverText = new StringTextComponent(flag.getFlagMsg().getMsg());
+        // if flag has default msg, use default msg
+        if (flag.getFlagMsg().isDefault()) {
+            switch (region.getRegionType()) {
+                case GLOBAL: {
+                    hoverText = new TranslationTextComponent("flag.player.msg.push.deny.global.default");
+                    break;
+                }
+                case DIMENSION: {
+                    hoverText = new TranslationTextComponent("flag.player.msg.push.deny.dim.default");
+                    break;
+                }
+                case LOCAL: {
+                    hoverText = new TranslationTextComponent("flag.player.msg.push.deny.local.default");
+                    break;
+                }
+            }
+        }
+        return buildTextWithHoverMsg(flagMsgText, hoverText, WHITE);
+    }
+
+    /**
+     * Message: [set] [x]: 'msg' <br></br>
+     */
+    public static IFormattableTextComponent buildFlagMessageComponent(IProtectedRegion region, IFlag flag) {
+        IFormattableTextComponent editLink = buildFlagMessageEditLink(region, flag);
+        IFormattableTextComponent clearLink = buildFlagMessageClearLink(region, flag);
+        IFormattableTextComponent flagMsgTextWithHover = buildFlagMessageHoverText(region, flag);
+        return editLink.append(" ").append(clearLink).append(" '").append(flagMsgTextWithHover).append("'");
     }
 
     private static IFormattableTextComponent buildFlagToggleLink(String cmd, String langKey, boolean toggleActiveState, String... subCmds) {
