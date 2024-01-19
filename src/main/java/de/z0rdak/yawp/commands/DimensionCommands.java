@@ -291,6 +291,22 @@ public class DimensionCommands {
         return 1;
     }
 
+    private static int attemptDeleteRegions(CommandContext<CommandSource> ctx, DimensionRegionCache dimCache) {
+        int amount = dimCache.getRegionsInDimension().size();
+        IFormattableTextComponent removeAllRegionsLink = buildRemoveAllRegionsLink(dimCache);
+        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.dim.region.remove.all.attempt",
+                amount, buildRegionInfoLink(dimCache.getDimensionalRegion(), removeAllRegionsLink)));
+        return 0;
+    }
+
+    private static int deleteRegions(CommandContext<CommandSource> ctx, DimensionRegionCache dimCache) {
+        int amount = dimCache.getRegionsInDimension().size();
+        dimCache.clearRegions();
+        RegionDataManager.save();
+        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.dim.region.remove.all.confirm", amount, buildRegionInfoLink(dimCache.getDimensionalRegion())));
+        return 0;
+    }
+
     private static int promptDimensionRegionList(CommandContext<CommandSource> ctx, DimensionRegionCache dimCache, int pageNo) {
         if (dimCache != null) {
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();

@@ -10,7 +10,6 @@ import net.minecraft.util.RegistryKey;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.INBTSerializable;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -81,10 +80,9 @@ public interface IProtectedRegion extends INBTSerializable<CompoundNBT> {
 
     void setIsMuted(boolean isMuted);
 
-    @Nullable
+    // TODO: GlobalRegion has self-reference as parent
     IProtectedRegion getParent();
 
-    @Nullable
     String getParentName();
 
     boolean setParent(IProtectedRegion parent);
@@ -96,6 +94,10 @@ public interface IProtectedRegion extends INBTSerializable<CompoundNBT> {
     void addChild(IProtectedRegion child);
 
     void removeChild(IProtectedRegion child);
+
+    void clearChildren();
+
+    void resetGroups();
 
     boolean hasChild(IProtectedRegion child);
 }
