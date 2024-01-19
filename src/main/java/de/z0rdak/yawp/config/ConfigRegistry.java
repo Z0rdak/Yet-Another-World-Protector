@@ -5,16 +5,12 @@ import de.z0rdak.yawp.commands.CommandRegistry;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
-import de.z0rdak.yawp.core.flag.FlagCategory;
-import de.z0rdak.yawp.core.flag.RegionFlag;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-
-import java.util.Comparator;
 
 import static de.z0rdak.yawp.YetAnotherWorldProtector.MODID;
 
@@ -77,18 +73,6 @@ public final class ConfigRegistry {
                             ? ": " + String.join(", ", FlagConfig.getBreakFlagEntityTags())
                             : "");
                     YetAnotherWorldProtector.LOGGER.info(numBreakEntityTagEntries + " Block Entity tag entries read from config" + loadedBreakEntityTags);
-
-                    String defaultLocalFlagMsg = FlagConfig.getRawLocalFlagMsg();
-                    YetAnotherWorldProtector.LOGGER.info("Default flag message for Local Regions: " + defaultLocalFlagMsg);
-
-                    String defaultDimFlagMsg = FlagConfig.getRawDimFlagMsg();
-                    YetAnotherWorldProtector.LOGGER.info("Default flag message for Dimensional Regions: " + defaultDimFlagMsg);
-
-                    YetAnotherWorldProtector.LOGGER.info("Loading default flag messages...");
-                    RegionFlag.getFlagsMatchingCategory(FlagCategory.PLAYER)
-                            .stream()
-                            .sorted(Comparator.comparing(f -> f.name))
-                            .forEach(f -> YetAnotherWorldProtector.LOGGER.debug("Loaded default flag message for flag '" + f.name + "': " + FlagConfig.getDefaultFlagMessage(f)));
                 }
                 break;
             }
