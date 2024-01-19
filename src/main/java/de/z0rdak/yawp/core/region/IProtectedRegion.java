@@ -80,7 +80,6 @@ public interface IProtectedRegion extends INBTSerializable<CompoundTag> {
 
     void setIsMuted(boolean isMuted);
 
-    // TODO: GlobalRegion has self-reference as parent
     IProtectedRegion getParent();
 
     String getParentName();
