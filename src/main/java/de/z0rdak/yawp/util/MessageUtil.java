@@ -847,6 +847,33 @@ public class MessageUtil {
         return regions.stream().map(region -> buildRemoveRegionEntry(parent, region)).collect(Collectors.toList());
     }
 
+
+    /**
+     * Builds a TextComponent for the given flag and region. <br></br>
+     * Currently not used in the CLI for obvious reasons. <br></br>
+     */
+    public static IFormattableTextComponent buildRemoveAllRegionsAttemptLink(DimensionRegionCache dimCache) {
+        String cmd = buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), DELETE_ALL.toString(), REGIONS.toString());
+        IFormattableTextComponent hover = new TranslationTextComponent("cli.msg.info.dim.region.remove.all.link.hover", dimCache.getDimensionalRegion().getName());
+        IFormattableTextComponent text = new TranslationTextComponent("cli.link.remove");
+        return buildExecuteCmdComponent(text, hover, cmd, RUN_COMMAND, REMOVE_CMD_COLOR);
+    }
+
+    public static IFormattableTextComponent buildRemoveAllRegionsLink(DimensionRegionCache dimCache) {
+        String cmd = buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), DELETE_ALL.toString(), REGIONS.toString(), FOREVER.toString(), SERIOUSLY.toString());
+        IFormattableTextComponent hover = new TranslationTextComponent("cli.msg.info.dim.region.remove.all.link.hover", dimCache.getDimensionalRegion().getName());
+        IFormattableTextComponent text = new TranslationTextComponent("cli.link.remove");
+        return buildExecuteCmdComponent(text, hover, cmd, RUN_COMMAND, REMOVE_CMD_COLOR);
+    }
+
+
+    public static IFormattableTextComponent buildRemoveRegionLink(IProtectedRegion region) {
+        String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), DELETE.toString(), region.getName(), "-y");
+        IFormattableTextComponent hover = new TranslationTextComponent("cli.msg.info.dim.region.remove.link.hover", region.getName());
+        IFormattableTextComponent text = new TranslationTextComponent("cli.link.remove");
+        return buildExecuteCmdComponent(text, hover, cmd, RUN_COMMAND, REMOVE_CMD_COLOR);
+    }
+
     public static IFormattableTextComponent buildRemoveRegionEntry(IProtectedRegion parent, IProtectedRegion region) {
         Style resetStyle = Style.EMPTY.withColor(WHITE).withHoverEvent(null).withClickEvent(null);
         IFormattableTextComponent separator = new StringTextComponent(" ").setStyle(resetStyle);
