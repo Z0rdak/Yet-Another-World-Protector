@@ -1,8 +1,6 @@
 package de.z0rdak.yawp.config.server;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import de.z0rdak.yawp.core.flag.FlagCategory;
-import de.z0rdak.yawp.core.flag.RegionFlag;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 import java.util.*;
@@ -16,11 +14,7 @@ public class FlagConfig {
     private static final ForgeConfigSpec.ConfigValue<Boolean> REMOVE_ENTITIES_FOR_SPAWNING_FLAGS;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> BREAK_FLAG_ENTITIES;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> BREAK_FLAG_ENTITY_TAGS;
-    private static final ForgeConfigSpec.ConfigValue<String> LOCAL_DEFAULT_FLAG_MSG;
-    private static final ForgeConfigSpec.ConfigValue<String> DIM_DEFAULT_FLAG_MSG;
-    private static final ForgeConfigSpec.ConfigValue<String> GLOBAL_DEFAULT_FLAG_MSG;
     private static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_FLAG_INHERITANCE;
-    private static final SortedMap<RegionFlag, ForgeConfigSpec.ConfigValue<String>> DEFAULT_FLAG_MESSAGES = new TreeMap<>();
 
     private static final String DEFAULT_FLAG_MSG_PATH = "YAWP-default-flag-message-configuration";
 
@@ -43,35 +37,9 @@ public class FlagConfig {
                 .comment("Toggle to remove entities when adding spawning-* flags.\n true -> remove entities related to this flag\n false -> don't remove entities")
                 .define(Collections.singletonList("remove_entities_for_spawning_flags"), true);
 
-        LOCAL_DEFAULT_FLAG_MSG = BUILDER
-                .comment("Default flag message for Local Regions. Displayed when a flag action is denied.")
-                .define(Collections.singletonList("local_flag_msg"), "[{region}]: The '{flag}' flag denies this action here!");
-
-        DIM_DEFAULT_FLAG_MSG = BUILDER
-                .comment("Default flag message for Dimensional Regions. Displayed when a flag action is denied.")
-                .define(Collections.singletonList("dim_flag_msg"), "[{region}]: The '{flag}' flag denies this action in this dimension!");
-
-        GLOBAL_DEFAULT_FLAG_MSG = BUILDER
-                .comment("Default flag message for the Global Region. Displayed when a flag action is denied.")
-                .define(Collections.singletonList("global_flag_msg"), "[This action is globally denied because of the '{flag}' flag!");
-
         ENABLE_FLAG_INHERITANCE = BUILDER.comment("Enable flag inheritance.")
                 .define("enable_flag_inheritance", false);
 
-        BUILDER.pop();
-
-        BUILDER.push(DEFAULT_FLAG_MSG_PATH).build();
-
-        RegionFlag.getFlagsMatchingCategory(FlagCategory.PLAYER)
-                .stream()
-                .sorted(Comparator.comparing(f -> f.name))
-                .forEach(flag -> {
-                    ForgeConfigSpec.ConfigValue<String> flagMsgConfig = BUILDER
-                            .comment("Default flag message for flag '" + flag.name + "'.")
-                            .define(Collections.singletonList(flag.name), DEFAULT_PLAYER_SPECIFIC_MSG);
-                            DEFAULT_FLAG_MESSAGES.put(flag, flagMsgConfig);
-                        }
-                );
         BUILDER.pop();
 
         CONFIG_SPEC = BUILDER.build();
@@ -79,14 +47,6 @@ public class FlagConfig {
 
     public static boolean isFlagInheritanceEnabled() {
         return ENABLE_FLAG_INHERITANCE.get();
-    }
-
-    public static String getDefaultFlagMessage(RegionFlag flag) {
-        return DEFAULT_FLAG_MESSAGES.get(flag).get();
-    }
-
-    public static boolean hasDefaultMsgConfig(RegionFlag flag) {
-        return DEFAULT_FLAG_MESSAGES.containsKey(flag);
     }
 
     private static List<String> defaultEntityBreakFlagEntries() {
@@ -107,30 +67,6 @@ public class FlagConfig {
 
     public static boolean removeEntitiesEnabled() {
         return REMOVE_ENTITIES_FOR_SPAWNING_FLAGS.get();
-    }
-
-    public static String getRawDimFlagMsg() {
-        return DIM_DEFAULT_FLAG_MSG.get();
-    }
-
-    public static String getRawGlobalFlagMsg() {
-        return GLOBAL_DEFAULT_FLAG_MSG.get();
-    }
-
-    public static String getRawLocalFlagMsg() {
-        return LOCAL_DEFAULT_FLAG_MSG.get();
-    }
-
-    public static boolean isDefinedInConfig(RegionFlag regionFlag) {
-        return DEFAULT_FLAG_MESSAGES.containsKey(regionFlag);
-    }
-
-    public static boolean hasDefaultFlagMsg(RegionFlag regionFlag) {
-        return isDefinedInConfig(regionFlag) && DEFAULT_FLAG_MESSAGES.get(regionFlag).get().equals(DEFAULT_PLAYER_SPECIFIC_MSG);
-    }
-
-    public static boolean hasCustomFlagMsg(RegionFlag regionFlag) {
-        return isDefinedInConfig(regionFlag) && !DEFAULT_FLAG_MESSAGES.get(regionFlag).get().equals(DEFAULT_PLAYER_SPECIFIC_MSG);
     }
 
     private static boolean isValidEntityEntry(Object entity) {
