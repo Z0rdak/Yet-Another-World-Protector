@@ -176,11 +176,6 @@ public class DimensionCommands {
         return 0;
     }
 
-    private static int deleteRegions(CommandContext<CommandSourceStack> ctx, DimensionRegionCache dimCache) {
-        // TODO:
-        return 0;
-    }
-
     private static int resetDimRegion(CommandContext<CommandSourceStack> ctx, DimensionRegionCache dimCache) {
         // TODO: Remove flags
         // TODO: Remove players
@@ -266,6 +261,22 @@ public class DimensionCommands {
             return 0;
         }
         return 1;
+    }
+
+    private static int attemptDeleteRegions(CommandContext<CommandSourceStack> ctx, DimensionRegionCache dimCache) {
+        int amount = dimCache.getRegionsInDimension().size();
+        MutableComponent removeAllRegionsLink = buildRemoveAllRegionsLink(dimCache);
+        sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.dim.region.remove.all.attempt",
+                amount, buildRegionInfoLink(dimCache.getDimensionalRegion(), removeAllRegionsLink)));
+        return 0;
+    }
+
+    private static int deleteRegions(CommandContext<CommandSourceStack> ctx, DimensionRegionCache dimCache) {
+        int amount = dimCache.getRegionsInDimension().size();
+        dimCache.clearRegions();
+        RegionDataManager.save();
+        sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.dim.region.remove.all.confirm", amount, buildRegionInfoLink(dimCache.getDimensionalRegion())));
+        return 0;
     }
 
     private static int promptDimensionRegionList(CommandContext<CommandSourceStack> ctx, DimensionRegionCache dimCache, int pageNo) {

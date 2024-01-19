@@ -87,6 +87,10 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
         }
     }
 
+    public void clearRegions() {
+        this.regionsInDimension.clear();
+        this.dimensionalRegion.clearChildren();
+    }
 
     public void renameRegion(IMarkableRegion region, String regionName) {
         IMarkableRegion currentRegion = this.regionsInDimension.get(region.getName());

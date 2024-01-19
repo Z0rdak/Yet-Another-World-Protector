@@ -185,6 +185,12 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.getGroup(group).removeTeam(teamName);
     }
 
+    public void resetGroups() {
+        this.groups.clear();
+        this.groups.put(MEMBERS, new PlayerContainer());
+        this.groups.put(OWNERS, new PlayerContainer());
+    }
+
     @Override
     public void removePlayer(UUID playerUuid, String group) {
         this.getGroup(group).removePlayer(playerUuid);
