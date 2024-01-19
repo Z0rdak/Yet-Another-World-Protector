@@ -255,6 +255,12 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.children.remove(child.getName());
     }
 
+    @Override
+    public void clearChildren() {
+        this.children.clear();
+        this.childrenNames.clear();
+    }
+
     /**
      * TODO: Global region stuff
      * Most error handling and consistency checks are done beforehand by the ArgumentTypes for add and removing children.
