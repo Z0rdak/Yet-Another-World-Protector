@@ -12,11 +12,9 @@ import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.CuboidArea;
-import de.z0rdak.yawp.core.area.SphereArea;
 import de.z0rdak.yawp.core.region.CuboidRegion;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
-import de.z0rdak.yawp.core.region.SphereRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
@@ -35,7 +33,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import org.apache.commons.lang3.NotImplementedException;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -60,7 +57,6 @@ public class DimensionCommands {
         return regionNameSuggestions.get(new Random().nextInt(regionNameSuggestions.size()));
     }
 
-    // FIXME: typing in invalid dimension is adding this dimension to set of dims
     public static LiteralArgumentBuilder<CommandSource> build() {
         return literal(DIM)
                 /* /wp dimension <dim> list region */
@@ -238,25 +234,6 @@ public class DimensionCommands {
         RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
         dimCache.addRegion(region);
         LocalRegions.ensureHigherRegionPriorityFor(region, RegionConfig.getDefaultPriority());
-        RegionDataManager.save();
-        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
-        return 0;
-    }
-
-    private static int createSphereRegion(CommandContext<CommandSource> ctx, @Nonnull String regionName, DimensionRegionCache dimCache, BlockPos center, BlockPos outerPos, ServerPlayerEntity owner) {
-        int res = checkValidRegionName(regionName, dimCache);
-        if (res == -1) {
-            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.name.invalid", regionName));
-            return res;
-        }
-        if (res == 1) {
-            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.name.exists", dimCache.getDimensionalRegion().getName(), buildRegionInfoLink(dimCache.getRegion(regionName))));
-            return res;
-        }
-        SphereArea area = new SphereArea(center, outerPos);
-        SphereRegion region = new SphereRegion(regionName, area, owner, dimCache.dimensionKey());
-        RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
-        dimCache.addRegion(region);
         RegionDataManager.save();
         sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
         return 0;
