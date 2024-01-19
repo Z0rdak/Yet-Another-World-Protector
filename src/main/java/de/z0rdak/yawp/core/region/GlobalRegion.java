@@ -6,9 +6,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 public class GlobalRegion extends AbstractRegion {
 
     public static final ResourceLocation GLOBAL = new ResourceLocation("yawp", "global");
@@ -24,18 +21,7 @@ public class GlobalRegion extends AbstractRegion {
 
     protected GlobalRegion(String name, RegionType type) {
         super(name, GLOBAL_DIMENSION, type);
-    }
-
-    @Override
-    public boolean setParent(@Nonnull IProtectedRegion parent) {
-        // throw new IllegalRegionStateException("Attempt to set parent for global region");
-        return false;
-    }
-
-    @Nullable
-    @Override
-    public IProtectedRegion getParent() {
-        return null;
+        this.parent = this;
     }
 
     @Override
