@@ -82,14 +82,4 @@ public class FlagConfig {
     private static boolean isValidTagEntry(Object tags) {
         return true;
     }
-
-    /**
-     * TODO: Implementation for validation flag msg
-     *
-     * @param flagMsg
-     * @return
-     */
-    private static boolean isValidFlagMsg(Object flagMsg) {
-        return true;
-    }
 }
