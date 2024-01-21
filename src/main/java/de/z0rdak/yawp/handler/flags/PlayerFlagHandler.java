@@ -37,7 +37,6 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
@@ -484,10 +483,10 @@ public final class PlayerFlagHandler {
                 boolean hasEmptyHands = hasEmptyHands(player);
 
                 BlockRayTraceResult pos = event.getHitVec();
-                if (pos != null && pos.getType() == RayTraceResult.Type.BLOCK) {
-                    BlockPos bPos = pos.getBlockPos();
+                boolean isBlock = pos != null && pos.getType() == RayTraceResult.Type.BLOCK;
+                if (isBlock) {
                     if (player.isShiftKeyDown() && hasEmptyHands || !player.isShiftKeyDown()) {
-                        FlagCheckEvent flagCheckEvent = checkEvent(bPos, USE_BLOCKS, dimCache.getDimensionalRegion(), player);
+                        FlagCheckEvent flagCheckEvent = checkEvent(pos.getBlockPos(), USE_BLOCKS, dimCache.getDimensionalRegion(), player);
                         handleAndSendMsg(event, flagCheckEvent);
                     }
                 }
@@ -495,7 +494,6 @@ public final class PlayerFlagHandler {
                     FlagCheckEvent useItemCheck = checkEvent(event.getPos(), USE_ITEMS, dimCache.getDimensionalRegion(), player);
                     handleAndSendMsg(event, useItemCheck);
                 }
-
                 // Note: following flags are already covered with use_blocks
                 // check for ender chest access
                 if (isEnderChest) {
@@ -511,6 +509,7 @@ public final class PlayerFlagHandler {
                         handleAndSendMsg(event, flagCheckEvent);
                     }
                 }
+                event.getWorld().updateNeighborsAt(pos.getBlockPos(), event.getWorld().getBlockState(pos.getBlockPos()).getBlock());
             }
         }
     }
