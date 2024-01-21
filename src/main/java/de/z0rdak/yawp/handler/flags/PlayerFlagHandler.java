@@ -231,7 +231,6 @@ public final class PlayerFlagHandler {
     }
 
     @SubscribeEvent
-    @TargetFocusedFlag(flag = NO_PVP)
     public static void onPvpAction(LivingHurtEvent event) {
         if (isServerSide(event)) {
             Entity dmgSourceEntity = event.getSource().getDirectEntity();
@@ -477,7 +476,8 @@ public final class PlayerFlagHandler {
                 boolean hasEmptyHands = hasEmptyHands(player);
 
                 BlockHitResult pos = event.getHitVec();
-                if (pos != null && pos.getType() == HitResult.Type.BLOCK) {
+                boolean isBlock = pos != null && pos.getType() == HitResult.Type.BLOCK;
+                if (isBlock) {
                     if (player.isShiftKeyDown() && hasEmptyHands || !player.isShiftKeyDown()) {
                         FlagCheckEvent flagCheckEvent = checkEvent(pos.getBlockPos(), USE_BLOCKS, dimCache.getDimensionalRegion(), player);
                         handleAndSendMsg(event, flagCheckEvent);
@@ -488,7 +488,6 @@ public final class PlayerFlagHandler {
                     FlagCheckEvent useItemCheck = checkEvent(event.getPos(), USE_ITEMS, dimCache.getDimensionalRegion(), player);
                     handleAndSendMsg(event, useItemCheck);
                 }
-
                 // Note: following flags are already covered with use_blocks
                 // check for ender chest access
                 if (isEnderChest) {
@@ -504,6 +503,7 @@ public final class PlayerFlagHandler {
                         handleAndSendMsg(event, flagCheckEvent);
                     }
                 }
+                event.getWorld().updateNeighborsAt(pos.getBlockPos(), event.getWorld().getBlockState(pos.getBlockPos()).getBlock());
             }
         }
     }
