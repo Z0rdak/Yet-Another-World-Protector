@@ -20,6 +20,7 @@ public class CommandPermissionConfig {
 
     private static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_REGION_TP;
     private static final ForgeConfigSpec.ConfigValue<Boolean> ALLOW_READ_ONLY_CMDS;
+    private static final ForgeConfigSpec.ConfigValue<Boolean> DISABLE_CMD_FOR_NON_OP;
     private static final ForgeConfigSpec.ConfigValue<Integer> REQUIRED_OP_LEVEL;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> PLAYERS_WITH_PERMISSION;
     private static final ForgeConfigSpec.ConfigValue<Boolean> COMMAND_BLOCK_EXECUTION;
@@ -44,6 +45,9 @@ public class CommandPermissionConfig {
 
         ALLOW_READ_ONLY_CMDS = BUILDER.comment("Defines whether info commands for regions can be used by every player.")
                 .define("allow_info_cmds", true);
+
+        DISABLE_CMD_FOR_NON_OP = BUILDER.comment("Defines whether mod commands are disabled for non-OP players.")
+                .define("disable_cmd_for_non_op", false);
 
         ENABLE_REGION_TP = BUILDER.comment("Defines whether teleport in and out of a region is allowed by everyone. Mostly useful when using something like Waystones inside of regions.")
                 .define("allow_region_tp", false);
@@ -79,6 +83,10 @@ public class CommandPermissionConfig {
 
     public static boolean isReadOnlyAllowed() {
         return ALLOW_READ_ONLY_CMDS.get();
+    }
+
+    public static boolean isCmdDisabledForNonOp() {
+        return DISABLE_CMD_FOR_NON_OP.get();
     }
 
     public static String getBaseCmdAlt() {
