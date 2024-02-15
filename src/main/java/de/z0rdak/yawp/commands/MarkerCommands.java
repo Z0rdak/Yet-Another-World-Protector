@@ -48,7 +48,7 @@ public final class MarkerCommands {
                 .then(literal(RESET)
                         .executes(ctx -> resetStick(ctx.getSource())))
                 .then(literal(CREATE)
-                        .then(Commands.argument(CommandConstants.LOCAL.toString(), StringArgumentType.word())
+                        .then(Commands.argument(CommandConstants.NAME.toString(), StringArgumentType.word())
                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Collections.singletonList(getRandomExample()), builder))
                                 .executes(ctx -> createRegion(ctx.getSource(), getRegionNameArgument(ctx), null))
                                 .then(Commands.argument(PARENT.toString(), StringArgumentType.word())

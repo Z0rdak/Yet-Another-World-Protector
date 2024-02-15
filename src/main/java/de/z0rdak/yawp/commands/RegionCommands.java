@@ -11,59 +11,38 @@ import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.commands.arguments.region.AddRegionChildArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RemoveRegionChildArgumentType;
+import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
-import de.z0rdak.yawp.core.flag.BooleanFlag;
-import de.z0rdak.yawp.core.flag.IFlag;
-import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.core.group.GroupType;
-import de.z0rdak.yawp.core.region.*;
-import de.z0rdak.yawp.core.stick.AbstractStick;
-import de.z0rdak.yawp.core.stick.MarkerStick;
-import de.z0rdak.yawp.handler.flags.HandlerUtil;
+import de.z0rdak.yawp.core.region.CuboidRegion;
+import de.z0rdak.yawp.core.region.DimensionalRegion;
+import de.z0rdak.yawp.core.region.IMarkableRegion;
+import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
-import de.z0rdak.yawp.util.StickException;
-import de.z0rdak.yawp.util.StickType;
-import de.z0rdak.yawp.util.StickUtil;
-import net.minecraft.ChatFormatting;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
-import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.DimensionArgument;
-import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.TeamArgument;
-import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.ExperienceOrb;
-import net.minecraft.world.entity.animal.AbstractGolem;
-import net.minecraft.world.entity.monster.Slime;
-import net.minecraft.world.entity.npc.WanderingTrader;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.entity.EntityTypeTest;
-import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.command.arguments.BlockPosArgument;
+import net.minecraft.command.arguments.DimensionArgument;
+import net.minecraft.command.arguments.EntityArgument;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.DimensionCommands.checkValidRegionName;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.MessageUtil.*;
-import static net.minecraft.ChatFormatting.RESET;
+
 
 public class RegionCommands {
 
@@ -73,7 +52,7 @@ public class RegionCommands {
     private RegionCommands() {
     }
 
-    public static LiteralArgumentBuilder<CommandSourceStack> build() {
+    public static LiteralArgumentBuilder<CommandSource> build() {
         return literal(LOCAL)
                 .then(Commands.argument(DIM.toString(), DimensionArgument.dimension())
                         .then(Commands.argument(LOCAL.toString(), StringArgumentType.word())
@@ -126,7 +105,7 @@ public class RegionCommands {
                                                 .then(Commands.literal(AreaType.CUBOID.areaType)
                                                         .then(Commands.argument(POS1.toString(), BlockPosArgument.blockPos())
                                                                 .then(Commands.argument(POS2.toString(), BlockPosArgument.blockPos())
-                                                                        .executes(ctx -> updateArea(ctx, getRegionArgument(ctx), AreaType.CUBOID, BlockPosArgument.getSpawnablePos(ctx, POS1.toString()), BlockPosArgument.getSpawnablePos(ctx, POS2.toString())))))))
+                                                                        .executes(ctx -> updateArea(ctx, getRegionArgument(ctx), AreaType.CUBOID, BlockPosArgument.getOrLoadBlockPos(ctx, POS1.toString()), BlockPosArgument.getOrLoadBlockPos(ctx, POS2.toString())))))))
                                         .then(literal(EXPAND)
                                                 .executes(ctx -> expandArea(ctx, getRegionArgument(ctx), MIN_BUILD_LIMIT, MAX_BUILD_LIMIT))
                                                 .then(Commands.argument(Y_MIN.toString(), IntegerArgumentType.integer(MIN_BUILD_LIMIT, MAX_BUILD_LIMIT))
@@ -135,19 +114,21 @@ public class RegionCommands {
                                         .then(literal(TELEPORT)
                                                 .then(Commands.literal(SET.toString())
                                                         .then(Commands.argument(TARGET.toString(), BlockPosArgument.blockPos())
-                                                                .executes(ctx -> setTeleportPos(ctx, getRegionArgument(ctx), BlockPosArgument.getSpawnablePos(ctx, TARGET.toString())))))))
-                                .then(literal(TELEPORT)
-                                        .executes(ctx -> teleport(ctx.getSource(), getRegionArgument(ctx)))
-                                        .then(Commands.argument(PLAYER.toString(), EntityArgument.player())
-                                                .executes(ctx -> teleport(ctx.getSource(), getRegionArgument(ctx), getPlayerArgument(ctx)))))
-                                .then(literal(RENAME)
-                                        .then(Commands.argument(LOCAL.toString(), StringArgumentType.word())
-                                                .executes(ctx -> renameRegion(ctx, getRegionArgument(ctx), getRegionNameArgument(ctx), getDimCacheArgument(ctx)))))
+                                                                .executes(ctx -> setTeleportPos(ctx, getRegionArgument(ctx), BlockPosArgument.getOrLoadBlockPos(ctx, TARGET.toString())))))))
+                                        .then(literal(TELEPORT)
+                                                .executes(ctx -> teleport(ctx.getSource(), getRegionArgument(ctx)))
+                                                .then(Commands.argument(PLAYER.toString(), EntityArgument.player())
+                                                        .executes(ctx -> teleport(ctx.getSource(), getRegionArgument(ctx), getPlayerArgument(ctx)))))
+                                        .then(literal(RENAME)
+                                                .then(Commands.argument(NAME.toString(), StringArgumentType.word())
+                                                        .executes(ctx -> renameRegion(ctx, getRegionArgument(ctx), getRegionNameArgument(ctx), getDimCacheArgument(ctx)))))
+                                // Idea: reset player, team, etc. with complete hierarchy
+                                // Scenario: Keep region and children with flags but reset it for new player base
                         )
                 );
     }
 
-    private static int expandArea(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, int yMin, int yMax) {
+    private static int expandArea(CommandContext<CommandSource> ctx, IMarkableRegion region, int yMin, int yMax) {
         int min = Math.min(yMin, yMax);
         int max = Math.max(yMin, yMax);
         IMarkableArea oldArea = region.getArea();
@@ -158,12 +139,12 @@ public class RegionCommands {
             throw new IllegalArgumentException("Unexpected value = " + oldArea.getClass().getName());
         }
         RegionDataManager.save();
-        MutableComponent updateAreaMsg = new TranslatableComponent("cli.msg.info.region.area.area.update", buildRegionAreaLink(region), buildRegionInfoLink(region));
+        IFormattableTextComponent updateAreaMsg = new TranslationTextComponent("cli.msg.info.region.area.area.update", buildRegionAreaLink(region), buildRegionInfoLink(region));
         sendCmdFeedback(ctx.getSource(), updateAreaMsg);
         return 0;
     }
 
-    private static int updateArea(CommandContext<CommandSourceStack> src, IMarkableRegion region, AreaType areaType, BlockPos pos1, BlockPos pos2) {
+    private static int updateArea(CommandContext<CommandSource> src, IMarkableRegion region, AreaType areaType, BlockPos pos1, BlockPos pos2) {
         try {
             IProtectedRegion parent = region.getParent();
             // TODO: Contains method for regions, with dimensional always returning true if dim is the same
@@ -176,20 +157,21 @@ public class RegionCommands {
                         int newPriority = LocalRegions.ensureHigherRegionPriorityFor(cuboidRegion, RegionConfig.getDefaultPriority());
                         YetAnotherWorldProtector.LOGGER.info("New priority {} for region {}", newPriority, region.getName());
                     }
-                    if (parent instanceof IMarkableRegion localParentRegion) {
+                    if (parent instanceof IMarkableRegion) {
+                        IMarkableRegion localParentRegion = (IMarkableRegion) parent;
                         CuboidArea parentArea = (CuboidArea) localParentRegion.getArea();
                         if (parentArea.contains(cuboidArea)) {
                             int newPriority = LocalRegions.ensureHigherRegionPriorityFor(cuboidRegion, localParentRegion.getPriority() + 1);
                             YetAnotherWorldProtector.LOGGER.info("New priority {} for region {}", newPriority, region.getName());
                         } else {
-                            MutableComponent updateAreaFailMsg = new TranslatableComponent("cli.msg.info.region.area.area.update.fail.boundaries", buildRegionInfoLink(parent), buildRegionInfoLink(region));
+                            IFormattableTextComponent updateAreaFailMsg = new TranslationTextComponent("cli.msg.info.region.area.area.update.fail.boundaries", buildRegionInfoLink(parent), buildRegionInfoLink(region));
                             sendCmdFeedback(src.getSource(), updateAreaFailMsg);
                             return 1;
                         }
                     }
                     cuboidRegion.setArea(cuboidArea);
                     RegionDataManager.save();
-                    MutableComponent updateAreaMsg = new TranslatableComponent("cli.msg.info.region.area.area.update", buildRegionAreaLink(region), buildRegionInfoLink(region));
+                    IFormattableTextComponent updateAreaMsg = new TranslationTextComponent("cli.msg.info.region.area.area.update", buildRegionAreaLink(region), buildRegionInfoLink(region));
                     sendCmdFeedback(src.getSource(), updateAreaMsg);
                     return 0;
                 case CYLINDER:
@@ -205,61 +187,69 @@ public class RegionCommands {
         }
     }
 
-    private static int renameRegion(CommandContext<CommandSourceStack> src, IMarkableRegion region, String regionName, DimensionRegionCache dimCache) {
+    private static int renameRegion(CommandContext<CommandSource> src, IMarkableRegion region, String regionName, DimensionRegionCache dimCache) {
         int res = checkValidRegionName(regionName, dimCache);
         if (res == -1) {
-            sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.dim.info.region.create.name.invalid", regionName));
+            sendCmdFeedback(src.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.name.invalid", regionName));
             return res;
         }
         if (res == 1) {
-            sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.dim.info.region.create.name.exists", dimCache.getDimensionalRegion().getName(), buildRegionInfoLink(dimCache.getRegion(regionName))));
+            sendCmdFeedback(src.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.name.exists", dimCache.getDimensionalRegion().getName(), buildRegionInfoLink(dimCache.getRegion(regionName))));
             return res;
         }
-        // FIXME:
-        dimCache.renameRegion(region, regionName);
-        RegionDataManager.save();
-        return 0;
+        try {
+            // TODO: Test this
+            dimCache.renameRegion(region, regionName);
+            RegionDataManager.save();
+            return 0;
+        } catch (IllegalArgumentException ex) {
+            sendCmdFeedback(src.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.name.exists", dimCache.getDimensionalRegion().getName(), buildRegionInfoLink(dimCache.getRegion(regionName))));
+            return 1;
+        }
     }
 
-    public static int removeChildren(CommandContext<CommandSourceStack> src, DimensionRegionCache dimCache, IProtectedRegion parent, IProtectedRegion child) {
+    public static int removeChildren(CommandContext<CommandSource> src, DimensionRegionCache dimCache, IProtectedRegion parent, IProtectedRegion child) {
         if (parent.hasChild(child)) {
             // FIXME: Removing child does not set priority correct with overlapping regions
             dimCache.getDimensionalRegion().addChild(child); // this also removes the child from the local parent
             child.setIsActive(false);
             LocalRegions.ensureLowerRegionPriorityFor((CuboidRegion) child, RegionConfig.getDefaultPriority());
             RegionDataManager.save();
-            MutableComponent parentLink = buildRegionInfoLink(parent);
-            MutableComponent notLongerChildLink = buildRegionInfoLink(child);
-            MutableComponent dimensionalLink = buildRegionInfoLink(dimCache.getDimensionalRegion());
-            sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.info.region.children.remove", notLongerChildLink, parentLink));
-            sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.info.region.parent.clear", notLongerChildLink, dimensionalLink));
+            IFormattableTextComponent parentLink = buildRegionInfoLink(parent);
+            IFormattableTextComponent notLongerChildLink = buildRegionInfoLink(child);
+            IFormattableTextComponent dimensionalLink = buildRegionInfoLink(dimCache.getDimensionalRegion());
+            IFormattableTextComponent undoLink = buildRegionActionUndoLink(src.getInput(), REMOVE, ADD);
+            sendCmdFeedback(src.getSource(), new TranslationTextComponent("cli.msg.info.region.children.remove", notLongerChildLink, parentLink).append(" ")
+                    .append(undoLink));
+            sendCmdFeedback(src.getSource(), new TranslationTextComponent("cli.msg.info.region.parent.clear", notLongerChildLink, dimensionalLink));
             return 0;
         }
         // should not happen, due to RemoveRegionChildArgumentType should only provide valid child regions
         return -1;
     }
 
-    public static int addChildren(CommandContext<CommandSourceStack> src, IMarkableRegion parent, IMarkableRegion child) {
+    public static int addChildren(CommandContext<CommandSource> src, IMarkableRegion parent, IMarkableRegion child) {
         if (!parent.hasChild(child) && child.getParent() != null && child.getParent() instanceof DimensionalRegion) {
             parent.addChild(child);
             LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) child, parent.getPriority() + 1);
             RegionDataManager.save();
-            MutableComponent parentLink = buildRegionInfoLink(parent);
-            MutableComponent childLink = buildRegionInfoLink(child);
-            MutableComponent undoLink = buildRegionActionUndoLink(src.getInput(), ADD, REMOVE);
-            sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.info.region.children.add", childLink, parentLink).append(" ").append(undoLink));
+            IFormattableTextComponent parentLink = buildRegionInfoLink(parent);
+            IFormattableTextComponent childLink = buildRegionInfoLink(child);
+            IFormattableTextComponent undoLink = buildRegionActionUndoLink(src.getInput(), ADD, REMOVE);
+            sendCmdFeedback(src.getSource(), new TranslationTextComponent("cli.msg.info.region.children.add", childLink, parentLink).append(" ")
+                    .append(undoLink));
             return 0;
         }
         // should not happen, due to AddRegionChildArgumentType should only provide valid child regions
         return -1;
     }
 
-    public static int setPriority(CommandContext<CommandSourceStack> src, IMarkableRegion region, int priority, int factor) {
+    public static int setPriority(CommandContext<CommandSource> src, IMarkableRegion region, int priority, int factor) {
         long newValue = (long) region.getPriority() + ((long) priority * factor);
         if (Integer.MAX_VALUE - newValue > 0) {
             return setPriority(src, region, (int) newValue);
         } else {
-            sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.warn.region.state.priority.set.invalid", buildRegionInfoLink(region), newValue));
+            sendCmdFeedback(src.getSource(), new TranslationTextComponent("cli.msg.warn.region.state.priority.set.invalid", buildRegionInfoLink(region), newValue));
             return -1;
         }
     }
@@ -273,7 +263,7 @@ public class RegionCommands {
      * @param priority
      * @return
      */
-    public static int setPriority(CommandContext<CommandSourceStack> src, IMarkableRegion region, int priority) {
+    public static int setPriority(CommandContext<CommandSource> src, IMarkableRegion region, int priority) {
         CuboidRegion cuboidRegion = (CuboidRegion) region;
         List<CuboidRegion> intersectingRegions = LocalRegions.getIntersectingRegionsFor(cuboidRegion);
         boolean existRegionWithSamePriority = intersectingRegions
@@ -283,13 +273,13 @@ public class RegionCommands {
         if (parent instanceof IMarkableRegion) {
             int parentPriority = ((IMarkableRegion) parent).getPriority();
             if (parentPriority >= priority) {
-                MutableComponent updatePriorityFailMsg = new TranslatableComponent("cli.msg.info.region.state.priority.set.fail.to-low", buildRegionInfoLink(region));
+                IFormattableTextComponent updatePriorityFailMsg = new TranslationTextComponent("cli.msg.info.region.state.priority.set.fail.to-low", buildRegionInfoLink(region));
                 sendCmdFeedback(src.getSource(), updatePriorityFailMsg);
                 return 1;
             }
         }
         if (existRegionWithSamePriority) {
-            MutableComponent updatePriorityFailMsg = new TranslatableComponent("cli.msg.info.region.state.priority.set.fail.same", buildRegionInfoLink(region), priority);
+            IFormattableTextComponent updatePriorityFailMsg = new TranslationTextComponent("cli.msg.info.region.state.priority.set.fail.same", buildRegionInfoLink(region), priority);
             sendCmdFeedback(src.getSource(), updatePriorityFailMsg);
             return 1;
         } else {
@@ -297,31 +287,33 @@ public class RegionCommands {
             if (oldPriority != priority) {
                 region.setPriority(priority);
                 RegionDataManager.save();
-                MutableComponent undoLink = buildRegionActionUndoLink(src.getInput(), String.valueOf(oldPriority), String.valueOf(priority));
-                sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.info.region.state.priority.set.success",
-                        buildRegionInfoLink(region), oldPriority, region.getPriority()).append(" ").append(undoLink));
+                IFormattableTextComponent undoLink = buildRegionActionUndoLink(src.getInput(), String.valueOf(oldPriority), String.valueOf(priority));
+                sendCmdFeedback(src.getSource(), new TranslationTextComponent("cli.msg.info.region.state.priority.set.success",
+                        buildRegionInfoLink(region), oldPriority, region.getPriority())
+                        .append(" ")
+                        .append(undoLink));
                 return 0;
             } else {
-                sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.info.region.state.priority.set.fail.no-change", buildRegionInfoLink(region)));
+                sendCmdFeedback(src.getSource(), new TranslationTextComponent("cli.msg.info.region.state.priority.set.fail.no-change", buildRegionInfoLink(region)));
                 return 1;
             }
         }
     }
 
-    private static int promptRegionChildren(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, int pageNo) {
+    private static int promptRegionChildren(CommandContext<CommandSource> ctx, IProtectedRegion region, int pageNo) {
         List<IMarkableRegion> children = region.getChildren().values().stream().map(r -> (IMarkableRegion) r).collect(Collectors.toList());
-        MutableComponent childRegionList = new TextComponent("");
+        IFormattableTextComponent childRegionList = new StringTextComponent("");
         if (children.isEmpty()) {
-            MutableComponent noChildrenText = new TranslatableComponent("cli.msg.info.region.children.empty", buildRegionInfoLink(region));
+            IFormattableTextComponent noChildrenText = new TranslationTextComponent("cli.msg.info.region.children.empty", buildRegionInfoLink(region));
             childRegionList.append(noChildrenText);
             sendCmdFeedback(ctx.getSource(), childRegionList);
         }
-        List<MutableComponent> regionPagination = buildPaginationComponents(
+        List<IFormattableTextComponent> regionPagination = buildPaginationComponents(
                 buildRegionChildrenHeader(region),
                 buildCommandStr(LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), CHILDREN.toString()),
                 buildRemoveRegionEntries(region, children),
                 pageNo,
-                new TextComponent(" - ").append(buildRegionAddChildrenLink(region)));
+                new StringTextComponent(" - ").append(buildRegionAddChildrenLink(region)));
         regionPagination.forEach(line -> sendCmdFeedback(ctx.getSource(), line));
         return 0;
     }
@@ -334,7 +326,7 @@ public class RegionCommands {
      * @param region
      * @return
      */
-    private static int promptLocalRegionState(CommandContext<CommandSourceStack> ctx, IMarkableRegion region) {
+    private static int promptLocalRegionState(CommandContext<CommandSource> ctx, IMarkableRegion region) {
         // TODO: State and priority prompted?
         CommandUtil.promptRegionState(ctx, region);
         sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.priority", buildRegionPriorityComponent(region)));
@@ -349,8 +341,8 @@ public class RegionCommands {
      * Marked Blocks: [X,Y,Z], ..., [X,Y,Z] [Set] [Show]
      * TP-Anchor: [X,Y,Z] [Set]
      */
-    private static int promptRegionAreaInfo(CommandSourceStack src, IMarkableRegion region) {
-        sendCmdFeedback(src, buildHeader(new TranslatableComponent("cli.msg.info.header.for", buildRegionAreaLink(region), buildRegionInfoLink(region))));
+    private static int promptRegionAreaInfo(CommandSource src, IMarkableRegion region) {
+        sendCmdFeedback(src, buildHeader(new TranslationTextComponent("cli.msg.info.header.for", buildRegionAreaLink(region), buildRegionInfoLink(region))));
         sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.area.location", buildDimensionTeleportLink(region)));
         sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.area.area", buildRegionAreaDetailComponent(region)));
         sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.area.marked", buildRegionAreaMarkingComponent(region)));
@@ -358,9 +350,9 @@ public class RegionCommands {
         return 0;
     }
 
-    private static int teleport(CommandSourceStack src, IMarkableRegion region) {
+    private static int teleport(CommandSource src, IMarkableRegion region) {
         try {
-            ServerPlayer player = src.getPlayerOrException();
+            ServerPlayerEntity player = src.getPlayerOrException();
             src.getServer().getCommands().getDispatcher().execute(buildRegionTpCmd(region, player.getScoreboardName()), src);
             return 0;
         } catch (CommandSyntaxException e) {
@@ -369,7 +361,7 @@ public class RegionCommands {
         }
     }
 
-    private static int teleport(CommandSourceStack src, IMarkableRegion region, Player player) {
+    private static int teleport(CommandSource src, IMarkableRegion region, PlayerEntity player) {
         try {
             src.getServer().getCommands().getDispatcher().execute(buildRegionTpCmd(region, player.getScoreboardName()), src);
             return 0;
@@ -382,15 +374,14 @@ public class RegionCommands {
 
     // Todo: Enable/Disable teleporting? - Only for owners?
     // TODO: If owner of parent region, allow for setting tp point outside of region, else restrict it to region area
-    private static int setTeleportPos(CommandContext<CommandSourceStack> src, IMarkableRegion region, BlockPos target) {
+    private static int setTeleportPos(CommandContext<CommandSource> src, IMarkableRegion region, BlockPos target) {
         if (!region.getTpTarget().equals(target)) {
             region.setTpTarget(target);
             RegionDataManager.save();
-            MutableComponent newTpTargetLink = buildDimensionalBlockTpLink(region.getDim(), target);
-            sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.info.region.area.location.teleport.set", buildRegionInfoLink(region), newTpTargetLink));
+            IFormattableTextComponent newTpTargetLink = buildDimensionalBlockTpLink(region.getDim(), target);
+            sendCmdFeedback(src.getSource(), new TranslationTextComponent("cli.msg.info.region.area.location.teleport.set", buildRegionInfoLink(region), newTpTargetLink));
             return 0;
         }
         return 1;
     }
-
 }

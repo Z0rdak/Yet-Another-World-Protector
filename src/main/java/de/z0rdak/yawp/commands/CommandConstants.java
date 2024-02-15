@@ -56,6 +56,7 @@ public enum CommandConstants {
     INT("int"),
     MEMBER("member"),
     RENAME("rename"),
+    NAME("name"),
     MARKER("marker"),
     GIVE("give"),
     OWNER("owner"),

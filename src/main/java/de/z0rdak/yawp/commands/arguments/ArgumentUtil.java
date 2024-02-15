@@ -59,12 +59,12 @@ public class ArgumentUtil {
     }
 
     public static String getRegionNameArgument(CommandContext<CommandSourceStack> ctx) {
-        return StringArgumentType.getString(ctx, REGION.toString());
+        return StringArgumentType.getString(ctx, CommandConstants.NAME.toString());
     }
 
     public static IMarkableRegion getRegionArgument(CommandContext<CommandSourceStack> ctx) {
         try {
-            return RegionArgumentType.getRegion(ctx, REGION.toString());
+            return RegionArgumentType.getRegion(ctx, LOCAL.toString());
         } catch (CommandSyntaxException e) {
             YetAnotherWorldProtector.LOGGER.error(e.getMessage());
             throw new RuntimeException(e);
