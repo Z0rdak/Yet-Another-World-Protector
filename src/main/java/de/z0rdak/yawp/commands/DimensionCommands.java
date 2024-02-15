@@ -112,7 +112,7 @@ public class DimensionCommands {
                         )
                         .then(literal(CREATE)
                                 .then(literal(CommandConstants.LOCAL)
-                                        .then(Commands.argument(CommandConstants.LOCAL.toString(), StringArgumentType.word())
+                                        .then(Commands.argument(CommandConstants.NAME.toString(), StringArgumentType.word())
                                                 .suggests((ctx, builder) -> ISuggestionProvider.suggest(Collections.singletonList(getRandomExample()), builder))
                                                 //.then(Commands.argument(AREA.toString(), StringArgumentType.word())
                                                 //        .suggests((ctx, builder) -> AreaArgumentType.areaType().listSuggestions(ctx, builder))

@@ -13,6 +13,7 @@ import de.z0rdak.yawp.commands.arguments.flag.RegionFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.AddRegionChildArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RemoveRegionChildArgumentType;
+import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.CuboidArea;
@@ -118,13 +119,15 @@ public class RegionCommands {
                                                 .then(Commands.literal(SET.toString())
                                                         .then(Commands.argument(TARGET.toString(), BlockPosArgument.blockPos())
                                                                 .executes(ctx -> setTeleportPos(ctx, getRegionArgument(ctx), BlockPosArgument.getOrLoadBlockPos(ctx, TARGET.toString())))))))
-                                .then(literal(TELEPORT)
-                                        .executes(ctx -> teleport(ctx.getSource(), getRegionArgument(ctx)))
-                                        .then(Commands.argument(PLAYER.toString(), EntityArgument.player())
-                                                .executes(ctx -> teleport(ctx.getSource(), getRegionArgument(ctx), getPlayerArgument(ctx)))))
-                                .then(literal(RENAME)
-                                        .then(Commands.argument(LOCAL.toString(), StringArgumentType.word())
-                                                .executes(ctx -> renameRegion(ctx, getRegionArgument(ctx), getRegionNameArgument(ctx), getDimCacheArgument(ctx)))))
+                                        .then(literal(TELEPORT)
+                                                .executes(ctx -> teleport(ctx.getSource(), getRegionArgument(ctx)))
+                                                .then(Commands.argument(PLAYER.toString(), EntityArgument.player())
+                                                        .executes(ctx -> teleport(ctx.getSource(), getRegionArgument(ctx), getPlayerArgument(ctx)))))
+                                        .then(literal(RENAME)
+                                                .then(Commands.argument(NAME.toString(), StringArgumentType.word())
+                                                        .executes(ctx -> renameRegion(ctx, getRegionArgument(ctx), getRegionNameArgument(ctx), getDimCacheArgument(ctx)))))
+                                // Idea: reset player, team, etc. with complete hierarchy
+                                // Scenario: Keep region and children with flags but reset it for new player base
                         )
                 );
     }
@@ -210,10 +213,15 @@ public class RegionCommands {
             sendCmdFeedback(src.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.name.exists", dimCache.getDimensionalRegion().getName(), buildRegionInfoLink(dimCache.getRegion(regionName))));
             return res;
         }
-        // FIXME:
-        dimCache.renameRegion(region, regionName);
-        RegionDataManager.save();
-        return 0;
+        try {
+            // TODO: Test this
+            dimCache.renameRegion(region, regionName);
+            RegionDataManager.save();
+            return 0;
+        } catch (IllegalArgumentException ex) {
+            sendCmdFeedback(src.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.name.exists", dimCache.getDimensionalRegion().getName(), buildRegionInfoLink(dimCache.getRegion(regionName))));
+            return 1;
+        }
     }
 
     public static int removeChildren(CommandContext<CommandSource> src, DimensionRegionCache dimCache, IProtectedRegion parent, IProtectedRegion child) {
