@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.core.flag;
 
 import net.minecraft.nbt.CompoundTag;
+import org.apache.commons.lang3.NotImplementedException;
 
 import static de.z0rdak.yawp.core.flag.FlagType.INT_FLAG;
 
@@ -41,14 +42,13 @@ public class IntFlag extends AbstractFlag {
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag nbt = super.serializeNBT();
-        // TODO
-        return nbt;
+        throw new NotImplementedException("Missing serializeNBT implementation in IntFlag");
     }
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-        // TODO
+        throw new NotImplementedException("Missing deserializeNBT implementation in IntFlag");
     }
 
     @Override
