@@ -16,10 +16,6 @@ public class FlagConfig {
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> BREAK_FLAG_ENTITY_TAGS;
     private static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_FLAG_INHERITANCE;
 
-    private static final String DEFAULT_FLAG_MSG_PATH = "YAWP-default-flag-message-configuration";
-
-    private static final String DEFAULT_PLAYER_SPECIFIC_MSG = "The '{flag}' flag denies this action here!";
-
     static {
         final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
