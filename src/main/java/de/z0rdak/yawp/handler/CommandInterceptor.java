@@ -7,6 +7,7 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.CommandConstants;
 import de.z0rdak.yawp.commands.CommandSourceType;
 import de.z0rdak.yawp.commands.CommandUtil;
+import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
@@ -391,9 +392,13 @@ public class CommandInterceptor {
     }
 
     private static boolean hasCmdPermission(CommandContextBuilder<CommandSource> ctx, CommandSourceType cmdSrcType) throws CommandSyntaxException {
+        return hasCmdPermission(ctx.getSource(), cmdSrcType);
+    }
+
+    private static boolean hasCmdPermission(CommandSource src, CommandSourceType cmdSrcType) throws CommandSyntaxException {
         switch (cmdSrcType) {
             case PLAYER: {
-                ServerPlayerEntity player = ctx.getSource().getPlayerOrException();
+                ServerPlayerEntity player = src.getPlayerOrException();
                 return hasPlayerPermission(player);
             }
             case SERVER:
@@ -402,6 +407,27 @@ public class CommandInterceptor {
                 return isCommandBlockExecutionAllowed();
             default:
                 return false;
+        }
+    }
+
+    public static boolean hasCmdPermission(CommandSource src) {
+        CommandSourceType cmdSrcType = CommandSourceType.of(src);
+        try {
+            return hasCmdPermission(src, cmdSrcType);
+        } catch (CommandSyntaxException e) {
+            return false;
+        }
+    }
+
+    public static boolean isAllowedForNonOp(CommandSource src) {
+        CommandSourceType cmdSrcType = CommandSourceType.of(src);
+        try {
+            if (CommandPermissionConfig.isCmdDisabledForNonOp()) {
+                return hasCmdPermission(src, cmdSrcType);
+            }
+            return false;
+        } catch (CommandSyntaxException e) {
+            return false;
         }
     }
 }
