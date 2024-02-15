@@ -59,7 +59,7 @@ public class ArgumentUtil {
     }
 
     public static String getRegionNameArgument(CommandContext<CommandSource> ctx) {
-        return StringArgumentType.getString(ctx, REGION.toString());
+        return StringArgumentType.getString(ctx, CommandConstants.NAME.toString());
     }
 
     public static IMarkableRegion getRegionArgument(CommandContext<CommandSource> ctx) {
