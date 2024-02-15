@@ -27,6 +27,7 @@ import net.minecraft.command.arguments.DimensionArgument;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.command.arguments.TeamArgument;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.item.ExperienceOrbEntity;
 import net.minecraft.entity.merchant.villager.WanderingTraderEntity;
 import net.minecraft.entity.monster.SlimeEntity;
@@ -578,17 +579,37 @@ public class CommandUtil {
         if (regionWorld != null) {
             Predicate<? super Entity> entityFilter = getEntityFilterForFlag(flag);
             switch (region.getRegionType()) {
-                case GLOBAL:
-                    server.getAllLevels().forEach(world -> getEntitiesToRemove(world, entityFilter, flag).forEach(world::despawn));
-                    break;
-                case DIMENSION:
-                    getEntitiesToRemove(regionWorld, entityFilter, flag).forEach(regionWorld::despawn);
-                    break;
-                case LOCAL:
-                    getEntitiesToRemove(regionWorld, (IMarkableRegion) region, entityFilter).forEach(regionWorld::despawn);
-                    break;
+                case GLOBAL: {
+                    server.getAllLevels().forEach(world -> {
+                        List<Entity> entitiesToRemove = getEntitiesToRemove(world, entityFilter, flag);
+                        entitiesToRemove.stream().filter(e -> !isPersistent(e)).forEach(world::despawn);
+                    });
+                }
+                break;
+                case DIMENSION: {
+                    List<Entity> entitiesToRemove = getEntitiesToRemove(regionWorld, entityFilter, flag);
+                    entitiesToRemove.stream().filter(e -> !isPersistent(e)).forEach(regionWorld::despawn);
+                }
+                break;
+                case LOCAL: {
+                    List<Entity> entitiesToRemove = getEntitiesToRemove(regionWorld, (IMarkableRegion) region, entityFilter);
+                    entitiesToRemove.stream().filter(e -> !isPersistent(e)).forEach(regionWorld::despawn);
+                }
+                break;
             }
         }
+    }
+
+    private static boolean hasEnabledPersistenceFlag(Entity e) {
+        if (e instanceof MobEntity) {
+            MobEntity mob = (MobEntity) e;
+            return mob.isPersistenceRequired();
+        }
+        return false;
+    }
+
+    private static boolean isPersistent(Entity e) {
+        return hasEnabledPersistenceFlag(e) || e.hasCustomName();
     }
 
     private static Predicate<? super Entity> getEntityFilterForFlag(RegionFlag flag) {
