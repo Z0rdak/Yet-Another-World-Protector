@@ -7,6 +7,7 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.CommandConstants;
 import de.z0rdak.yawp.commands.CommandSourceType;
 import de.z0rdak.yawp.commands.CommandUtil;
+import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
@@ -387,9 +388,13 @@ Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
     }
 
     private static boolean hasCmdPermission(CommandContextBuilder<CommandSourceStack> ctx, CommandSourceType cmdSrcType) throws CommandSyntaxException {
+        return hasCmdPermission(ctx.getSource(), cmdSrcType);
+    }
+
+    private static boolean hasCmdPermission(CommandSourceStack src, CommandSourceType cmdSrcType) throws CommandSyntaxException {
         switch (cmdSrcType) {
             case PLAYER: {
-                ServerPlayer player = ctx.getSource().getPlayerOrException();
+                ServerPlayer player = src.getPlayerOrException();
                 return hasPlayerPermission(player);
             }
             case SERVER:
@@ -398,6 +403,27 @@ Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
                 return isCommandBlockExecutionAllowed();
             default:
                 return false;
+        }
+    }
+
+    public static boolean hasCmdPermission(CommandSourceStack src) {
+        CommandSourceType cmdSrcType = CommandSourceType.of(src);
+        try {
+            return hasCmdPermission(src, cmdSrcType);
+        } catch (CommandSyntaxException e) {
+            return false;
+        }
+    }
+
+    public static boolean isAllowedForNonOp(CommandSourceStack src) {
+        CommandSourceType cmdSrcType = CommandSourceType.of(src);
+        try {
+            if (CommandPermissionConfig.isCmdDisabledForNonOp()) {
+                return hasCmdPermission(src, cmdSrcType);
+            }
+            return false;
+        } catch (CommandSyntaxException e) {
+            return false;
         }
     }
 }

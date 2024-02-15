@@ -3,8 +3,9 @@ package de.z0rdak.yawp.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
+import de.z0rdak.yawp.config.server.CommandPermissionConfig;
+import de.z0rdak.yawp.handler.CommandInterceptor;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.ClickEvent;
@@ -44,6 +45,7 @@ public final class CommandRegistry {
 
     private static LiteralArgumentBuilder<CommandSourceStack> buildCommands(String baseCmd) {
         return Commands.literal(baseCmd)
+                .requires(CommandInterceptor::isAllowedForNonOp)
                 .executes(ctx -> promptHelp(ctx.getSource()))
                 .then(ArgumentUtil.literal(CommandConstants.HELP)
                         .executes(ctx -> promptHelp(ctx.getSource())))
