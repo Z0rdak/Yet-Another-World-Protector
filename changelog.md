@@ -47,9 +47,11 @@
   * `{region}` - name of involved region
   * `{dimension}` - name of dimension
   * `{pos}` - position of flag activation source \[X=x, Y=y, Z=z\]
-* Flag messages also can be formatted by using special placeholders:
-  * `{f:bold}` - TBD
-  * ...
+* Flag messages also can be formatted by using hte minecraft default string formatting.
+  * For example `&c{player}&r tried to break a block in &9{region}&r!` will result in a red player name and a blue
+    region name.
+  * Take a look at [this tool](https://codepen.io/0biwan/pen/ggVemP) for reference as well as
+    the [minecraft wiki](https://minecraft.wiki/w/Formatting_codes).
 
 * Add commands for enhanced flag management:
   * `/wp flag local <dim> <region> <flag> enable [true|false]` - enable/disable flag for checks
@@ -74,6 +76,9 @@
 * `yawp-common.toml` - Add new permission config:
   * `allow_region_tp`. Decides whether teleporting inside/outside a region is allowed for everyone. Useful when using
     Waystones in regions for example.
+  * `disable_cmd_for_non_op`. Defines whether mod commands are disabled for non-OP players. This is useful when you want
+    to use the mod only for OPs or players which have their UUID entry in the config. Enable this if you don't want the
+    YAWP command to be seen by non-permitted users.
 * `yawp-flags.toml` - Add new flag configs:
   * `enable_flag_inheritance`: Toggles the inheritance of flags of parent regions.
   * `remove_entities_for_spawning_flags`: Toggles the despawning of entities when using the `spawning-*` flags.
@@ -100,8 +105,8 @@
   * The optional parameters can be used to set a specific height.
   * Omitting the parameters will set the region area to `expand 0 255` for 1.16.5 and `expand -64 320` for newer
     versions.
+* Add new command to rename a Local Region: `/wp region <dim> <region> rename <newName>`.
 * Dimensional Regions now can be muted (as well as their flags, all or individually).
-* Add new language keys
 
 ## Changed
 
