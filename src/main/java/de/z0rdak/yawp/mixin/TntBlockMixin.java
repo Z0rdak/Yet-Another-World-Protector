@@ -3,6 +3,7 @@ package de.z0rdak.yawp.mixin;
 import de.z0rdak.yawp.handler.flags.FlagCheckEvent;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
+import de.z0rdak.yawp.util.FlagMessageUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.TNTBlock;
 import net.minecraft.entity.player.PlayerEntity;
@@ -19,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.IGNITE_EXPLOSIVES;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
+import static de.z0rdak.yawp.handler.flags.HandlerUtil.checkEvent;
 
 @Mixin(TNTBlock.class)
 public class TntBlockMixin {
@@ -32,7 +33,7 @@ public class TntBlockMixin {
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.dimension());
                 FlagCheckEvent flagCheck = checkEvent(pos, IGNITE_EXPLOSIVES, dimCache.getDimensionalRegion(), player2);
                 if (flagCheck.isDenied()) {
-                    sendFlagMsg(flagCheck);
+                    FlagMessageUtil.sendFlagMsg(flagCheck);
                     cir.setReturnValue(ActionResultType.CONSUME);
                 }
             }
