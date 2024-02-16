@@ -93,7 +93,6 @@ public class CommandPermissionConfig {
         return WP_CMDS[WP_COMMAND_ALTERNATIVE.get()];
     }
 
-    // FIXME: not used
     public static boolean allowRegionTp() {
         return ENABLE_REGION_TP.get();
     }

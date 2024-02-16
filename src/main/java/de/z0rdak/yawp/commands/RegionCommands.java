@@ -13,7 +13,6 @@ import de.z0rdak.yawp.commands.arguments.flag.RegionFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.AddRegionChildArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RemoveRegionChildArgumentType;
-import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.CuboidArea;
@@ -119,13 +118,13 @@ public class RegionCommands {
                                                 .then(Commands.literal(SET.toString())
                                                         .then(Commands.argument(TARGET.toString(), BlockPosArgument.blockPos())
                                                                 .executes(ctx -> setTeleportPos(ctx, getRegionArgument(ctx), BlockPosArgument.getOrLoadBlockPos(ctx, TARGET.toString())))))))
-                                        .then(literal(TELEPORT)
-                                                .executes(ctx -> teleport(ctx.getSource(), getRegionArgument(ctx)))
-                                                .then(Commands.argument(PLAYER.toString(), EntityArgument.player())
-                                                        .executes(ctx -> teleport(ctx.getSource(), getRegionArgument(ctx), getPlayerArgument(ctx)))))
-                                        .then(literal(RENAME)
-                                                .then(Commands.argument(NAME.toString(), StringArgumentType.word())
-                                                        .executes(ctx -> renameRegion(ctx, getRegionArgument(ctx), getRegionNameArgument(ctx), getDimCacheArgument(ctx)))))
+                                .then(literal(TELEPORT)
+                                        .executes(ctx -> teleport(ctx, getRegionArgument(ctx)))
+                                        .then(Commands.argument(PLAYER.toString(), EntityArgument.player())
+                                                .executes(ctx -> teleport(ctx, getRegionArgument(ctx), getPlayerArgument(ctx))))))
+                        .then(literal(RENAME)
+                                        .then(Commands.argument(NAME.toString(), StringArgumentType.word())
+                                                .executes(ctx -> renameRegion(ctx, getRegionArgument(ctx), getRegionNameArgument(ctx), getDimCacheArgument(ctx))))
                                 // Idea: reset player, team, etc. with complete hierarchy
                                 // Scenario: Keep region and children with flags but reset it for new player base
                         )
@@ -366,30 +365,28 @@ public class RegionCommands {
         return 0;
     }
 
-    private static int teleport(CommandSource src, IMarkableRegion region) {
+    private static int teleport(CommandContext<CommandSource> ctx, IMarkableRegion region) {
         try {
-            ServerPlayerEntity player = src.getPlayerOrException();
-            src.getServer().getCommands().getDispatcher().execute(buildRegionTpCmd(region, player.getScoreboardName()), src);
-            return 0;
+            ServerPlayerEntity player = ctx.getSource().getPlayerOrException();
+            return teleport(ctx, region, player);
         } catch (CommandSyntaxException e) {
-            YetAnotherWorldProtector.LOGGER.warn("Unable to teleport command source to region.");
+            YetAnotherWorldProtector.LOGGER.warn("Unable to teleport command source to region. Most likely not a player");
             return -1;
         }
     }
 
-    private static int teleport(CommandSource src, IMarkableRegion region, PlayerEntity player) {
+    private static int teleport(CommandContext<CommandSource> ctx, IMarkableRegion region, PlayerEntity player) {
         try {
-            src.getServer().getCommands().getDispatcher().execute(buildRegionTpCmd(region, player.getScoreboardName()), src);
+            String teleportCmd = buildRegionTpCmd(region, player.getScoreboardName());
+            ctx.getSource().getServer().getCommands().getDispatcher().execute(teleportCmd, ctx.getSource());
+            YetAnotherWorldProtector.LOGGER.warn("Trying to execute TP: '{}'", teleportCmd);
             return 0;
         } catch (CommandSyntaxException e) {
             YetAnotherWorldProtector.LOGGER.warn("Error executing teleport command.");
-            // TODO: error executing tp command
             return -1;
         }
     }
 
-    // Todo: Enable/Disable teleporting? - Only for owners?
-    // TODO: If owner of parent region, allow for setting tp point outside of region, else restrict it to region area
     private static int setTeleportPos(CommandContext<CommandSource> src, IMarkableRegion region, BlockPos target) {
         if (!region.getTpTarget().equals(target)) {
             region.setTpTarget(target);
