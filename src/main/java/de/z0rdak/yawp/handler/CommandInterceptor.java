@@ -239,7 +239,18 @@ Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
                 boolean isReadOnlyCmd = checkSubCmdAtIndex(nodes, subCmdIdx, INFO, LIST);
                 boolean isExtendedInfoCmd = checkSubCmdAtIndex(nodes, subCmdIdx, STATE, AREA) && nodes.size() == subCmdIdx + 1;
                 boolean isRegionShortCmd = nodes.size() == subCmdIdx;
-                return (isRegionShortCmd || isReadOnlyCmd || isExtendedInfoCmd) && isReadOnlyAllowed();
+                //  0   1    2       3      4    5    6
+                // /wp local <dim> <region> area tp <player>
+                boolean isAreaModifyCmd = checkSubCmdAtIndex(nodeNames, subCmdIdx, AREA) && nodeNames.size() > subCmdIdx + 1;
+                boolean isRegionTpCmd = isAreaModifyCmd && checkSubCmdAtIndex(nodeNames, subCmdIdx + 1, TELEPORT) && nodeNames.size() >= subCmdIdx + 2;
+                boolean isRegionTpAndAllowed = isRegionTpCmd && CommandPermissionConfig.allowRegionTp();
+                /* TODO: Check if tp is outside region and inside parent region for permission to tp ?
+                   IMarkableRegion localRegion = (IMarkableRegion) region;
+                   boolean tpIsOutSideRegionButInsideParent = localRegion.getTpTarget()
+                */
+                // TODO: If owner of parent region, allow for setting tp point outside of region
+                boolean isReadOnlyAndAllowed = (isRegionShortCmd || isReadOnlyCmd || isExtendedInfoCmd) && isReadOnlyAllowed();
+                return isReadOnlyAndAllowed || isRegionTpAndAllowed;
             };
             boolean hasPermission = hasCmdPermission(cmdContext, cmdSrcType, CommandUtil.OWNER, region, subCmdPermission);
             //  0    1      2      3       4     5     6
