@@ -64,7 +64,7 @@ public class ArgumentUtil {
 
     public static IMarkableRegion getRegionArgument(CommandContext<CommandSource> ctx) {
         try {
-            return RegionArgumentType.getRegion(ctx, REGION.toString());
+            return RegionArgumentType.getRegion(ctx, CommandConstants.LOCAL.toString());
         } catch (CommandSyntaxException e) {
             YetAnotherWorldProtector.LOGGER.error(e.getMessage());
             throw new RuntimeException(e);

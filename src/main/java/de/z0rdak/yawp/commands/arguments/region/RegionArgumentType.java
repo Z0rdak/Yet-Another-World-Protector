@@ -91,7 +91,7 @@ public class RegionArgumentType implements ArgumentType<String> {
             }
             case LOCAL: {
                 DimensionRegionCache dimCache = ArgumentUtil.getDimCacheArgument(context);
-                String regionName = context.getArgument(CommandConstants.REGION.toString(), String.class);
+                String regionName = context.getArgument(CommandConstants.LOCAL.toString(), String.class);
                 if (!dimCache.contains(regionName)) {
                     MessageUtil.sendCmdFeedback(context.getSource(), new StringTextComponent("No region with name '" + regionName + "' defined in dim '" + dimCache.dimensionKey().location() + "'"));
                     throw ERROR_INVALID_VALUE.create(regionName);
