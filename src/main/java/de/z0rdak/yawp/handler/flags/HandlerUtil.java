@@ -5,6 +5,7 @@ import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
+import de.z0rdak.yawp.util.FlagMessageUtil;
 import de.z0rdak.yawp.util.LocalRegions;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.FlyingEntity;

@@ -1,10 +1,11 @@
-package de.z0rdak.yawp.handler.flags;
+package de.z0rdak.yawp.util;
 
 import de.z0rdak.yawp.core.flag.FlagCategory;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.util.MessageUtil;
+import de.z0rdak.yawp.handler.flags.FlagCheckEvent;
+import de.z0rdak.yawp.handler.flags.PlayerFlagEvent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.IFormattableTextComponent;

@@ -5,6 +5,7 @@ import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
+import de.z0rdak.yawp.util.FlagMessageUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
@@ -17,7 +18,6 @@ import net.minecraft.entity.passive.horse.SkeletonHorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.world.BlockEvent;
@@ -105,7 +105,7 @@ public class WorldFlagHandler {
             event.setCanceled(flagCheckEvent.isDenied());
             if (event.isCanceled()) {
                 if (entity instanceof PlayerEntity) {
-                    sendFlagMsg(new PlayerFlagEvent(flagCheckEvent, (PlayerEntity) entity));
+                    FlagMessageUtil.sendFlagMsg(new PlayerFlagEvent(flagCheckEvent, (PlayerEntity) entity));
                 }
                 return;
             }
