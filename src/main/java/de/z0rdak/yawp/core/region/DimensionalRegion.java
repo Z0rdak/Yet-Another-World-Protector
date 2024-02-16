@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.core.region;
 
+import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
@@ -28,7 +29,7 @@ public final class DimensionalRegion extends AbstractRegion {
 
     public DimensionalRegion(CompoundNBT nbt) {
         super(nbt);
-        // TODO: Set global region parent
+        this.parent = RegionDataManager.get().getGlobalRegion();
         this.deserializeNBT(nbt);
     }
 
