@@ -5,6 +5,7 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
+import de.z0rdak.yawp.util.FlagMessageUtil;
 import net.minecraft.block.AbstractPressurePlateBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -77,7 +78,7 @@ public final class PlayerFlagHandler {
                 if (event.player.isFallFlying()) {
                     FlagCheckEvent flagCheckEvent = checkEvent(event.player.blockPosition(), NO_FLIGHT, dimCache.getDimensionalRegion(), event.player);
                     if (flagCheckEvent.isDenied()) {
-                        sendFlagMsg(flagCheckEvent);
+                        FlagMessageUtil.sendFlagMsg(flagCheckEvent);
                         event.player.stopFallFlying();
                     }
                 }
@@ -243,7 +244,7 @@ public final class PlayerFlagHandler {
                     PlayerEntity playerSource = (PlayerEntity) dmgSourceEntity;
                     FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(playerTarget.blockPosition(), NO_PVP, dimCache.getDimensionalRegion());
                     if (flagCheckEvent.isDenied()) {
-                        sendFlagMsg(new PlayerFlagEvent(flagCheckEvent, playerSource));
+                        FlagMessageUtil.sendFlagMsg(new PlayerFlagEvent(flagCheckEvent, playerSource));
                         event.setAmount(0f);
                         event.setCanceled(true);
                     }
@@ -705,7 +706,7 @@ public final class PlayerFlagHandler {
                     FlagCheckEvent flagCheckEvent = checkEvent(pos, SLEEP, dimCache.getDimensionalRegion(), player);
                     // FIXME: Msg is default from sleep deny
                     if (flagCheckEvent.isDenied()) {
-                        sendFlagMsg(flagCheckEvent);
+                        FlagMessageUtil.sendFlagMsg(flagCheckEvent);
                         event.setResult(Event.Result.DENY);
                     }
                 });

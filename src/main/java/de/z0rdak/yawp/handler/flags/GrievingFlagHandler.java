@@ -5,6 +5,7 @@ import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
+import de.z0rdak.yawp.util.FlagMessageUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.boss.WitherEntity;
@@ -14,7 +15,6 @@ import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.entity.monster.ZombieEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.living.LivingDestroyBlockEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
@@ -47,7 +47,7 @@ public class GrievingFlagHandler {
                 event.setCanceled(flagCheckEvent.isDenied());
                 if (event.isCanceled()) {
                     if (trampler instanceof PlayerEntity) {
-                        sendFlagMsg(new PlayerFlagEvent(flagCheckEvent, (PlayerEntity) trampler));
+                        FlagMessageUtil.sendFlagMsg(new PlayerFlagEvent(flagCheckEvent, (PlayerEntity) trampler));
                     }
                     return;
                 }
