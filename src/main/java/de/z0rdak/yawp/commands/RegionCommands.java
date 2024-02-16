@@ -146,7 +146,7 @@ public class RegionCommands {
     private static int updateArea(CommandContext<CommandSource> src, IMarkableRegion region, AreaType areaType, BlockPos pos1, BlockPos pos2) {
         try {
             IProtectedRegion parent = region.getParent();
-            // TODO: Contains method for regions, with dimensional always returning true if dim is the same
+            // TODO: Implement a contains method for regions, with dimensional always returning true if dim is the same
             // IMarkableRegions would use the area contains method
             switch (areaType) {
                 case CUBOID:
@@ -256,11 +256,6 @@ public class RegionCommands {
     /**
      * Attempt to set new priority for the given region. <br>
      * Fails if region priority is used by an overlapping region at same hierarchy level.
-     *
-     * @param src
-     * @param region
-     * @param priority
-     * @return
      */
     public static int setPriority(CommandContext<CommandSource> src, IMarkableRegion region, int priority) {
         CuboidRegion cuboidRegion = (CuboidRegion) region;
@@ -320,13 +315,8 @@ public class RegionCommands {
     /**
      * Prompt the common region state and the local region priority info
      * Priority: n [#][+5][-5]
-     *
-     * @param ctx
-     * @param region
-     * @return
      */
     private static int promptLocalRegionState(CommandContext<CommandSource> ctx, IMarkableRegion region) {
-        // TODO: State and priority prompted?
         CommandUtil.promptRegionState(ctx, region);
         sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.priority", buildRegionPriorityComponent(region)));
         return 0;
