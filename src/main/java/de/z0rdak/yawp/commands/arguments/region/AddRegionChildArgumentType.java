@@ -49,8 +49,6 @@ public class AddRegionChildArgumentType implements ArgumentType<String> {
     @Override
     public String parse(StringReader reader) throws CommandSyntaxException {
         int i = reader.getCursor();
-
-        // FIXME: Pattern only matches chars, not the valid name
         while (reader.canRead() && String.valueOf(reader.peek()).matches(Pattern.compile("^[A-Za-z\\d\\-]$").pattern())) {
             reader.skip();
         }

@@ -50,7 +50,6 @@ public class AreaArgumentType implements ArgumentType<AreaType> {
             } else {
               throw new IllegalArgumentException("Invalid area type supplied");
             }
-            // TODO: Make own AreaTypeException? would be overkill... but..
         } catch (IllegalArgumentException argumentException) {
             reader.setCursor(i);
             YetAnotherWorldProtector.LOGGER.error("Error parsing area type");
