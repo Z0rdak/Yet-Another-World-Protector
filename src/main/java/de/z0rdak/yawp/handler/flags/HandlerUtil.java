@@ -1,6 +1,5 @@
 package de.z0rdak.yawp.handler.flags;
 
-import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
@@ -29,11 +28,7 @@ import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.Event;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public final class HandlerUtil {
 
@@ -76,92 +71,13 @@ public final class HandlerUtil {
                 || entity instanceof Shulker;
     }
 
-    public static boolean handleAndSendMsg(Event event, FlagCheckEvent flagCheck) {
-        sendFlagMsg(flagCheck);
-        event.setCanceled(flagCheck.isDenied());
-        return flagCheck.isDenied();
-    }
-
-    public static final String FLAG_TEMPLATE = "{flag}";
-    public static final String POS_TEMPLATE = "{pos}";
-    public static final String REGION_TEMPLATE = "{region}";
-    public static final String DIM_TEMPLATE = "{dim}";
-    public static final String PLAYER_TEMPLATE = "{player}";
-
-    public static void sendFlagMsg(FlagCheckEvent flagCheck) {
-        boolean isPlayerEvent = flagCheck instanceof PlayerFlagEvent;
-        boolean hasLocalRegion = flagCheck.getLocalRegion() != null;
-        if (!hasLocalRegion && flagCheck.isDeniedInDim()) {
-            if (!flagCheck.getDimRegion().isMuted()) {
-                IFlag flag = flagCheck.getDimRegion().getFlag(flagCheck.getRegionFlag().name);
-                sendFlagMsg(flagCheck, isPlayerEvent, flag, flagCheck.getDimRegion(), FlagConfig.getRawDimFlagMsg());
-            }
-        }
-        if (hasLocalRegion && flagCheck.isDeniedLocal()) {
-            if (!flagCheck.getLocalRegion().isMuted()) {
-                IFlag flag = flagCheck.getLocalRegion().getFlag(flagCheck.getRegionFlag().name);
-                sendFlagMsg(flagCheck, isPlayerEvent, flag, flagCheck.getLocalRegion(), FlagConfig.getRawLocalFlagMsg());
-            }
-        }
-    }
-
-    private static void sendFlagMsg(FlagCheckEvent flagCheck, boolean isPlayerEvent, IFlag flag, IProtectedRegion region, String defaultFlagConfigMsg) {
-        boolean isFlagMuted = flag.getFlagMsg().isMuted();
-        if (!isFlagMuted && isPlayerEvent) {
-            PlayerFlagEvent playerFlagEvent = (PlayerFlagEvent) flagCheck;
-            playerFlagEvent.getMsgSubstitutes().put("{region}", region.getName());
-            String flagConfigMsg = FlagConfig.hasDefaultMsgConfig(flagCheck.getRegionFlag())
-                    ? FlagConfig.getDefaultFlagMessage(flagCheck.getRegionFlag())
-                    : defaultFlagConfigMsg;
-            MutableComponent flagMsg = buildFlagMsg(playerFlagEvent, flag, flagConfigMsg);
-            MessageUtil.sendNotification(playerFlagEvent.getPlayer(), flagMsg);
-        }
-    }
-
-    // TODO: create custom map impl
-    public static Map<String, String> defaultSubstituteMap(RegionFlag flag, IProtectedRegion region, BlockPos pos, @Nullable Player player) {
-        Map<String, String> substituteMap = new HashMap<>();
-        substituteMap.put(FLAG_TEMPLATE, flag.name);
-        substituteMap.put(POS_TEMPLATE, MessageUtil.shortBlockPos(pos));
-        substituteMap.put(REGION_TEMPLATE, region.getName());
-        substituteMap.put(DIM_TEMPLATE, region.getDim().location().toString());
-        if (player != null && flag.categories.contains(FlagCategory.PLAYER)) {
-            substituteMap.put(PLAYER_TEMPLATE, player.getScoreboardName());
-        }
-        return substituteMap;
-    }
-
-    public static MutableComponent buildFlagMsg(PlayerFlagEvent flagCheckEvent, IFlag flag) {
-        String flagMsgTemplate = flag.getFlagMsg().isDefault()
-                ? getDefaultFlagMsgTemplate(flag)
-                : flag.getFlagMsg().getMsg();
-        String defaultFlagMsg = replaceMatches(flagMsgTemplate, flagCheckEvent);
-        return new TextComponent(defaultFlagMsg);
-    }
-
-    private static String getDefaultFlagMsgTemplate(IFlag flag) {
-        // decide whether to pick a flag specific msg or the default one
-        String flagMsgLangKey = flag.getFlagMsg().isDefault() ? "flag.msg.deny.default" : "flag.msg.deny." + flag.getName();
-        TranslationTextComponent flagMsgTemplateComp = new TranslationTextComponent(flagMsgLangKey);
-        return flagMsgTemplateComp.getString();
-    }
-
-    private static String replaceMatches(String flagMsgTemplate, PlayerFlagEvent flagCheckEvent) {
-        String flagMsg = flagMsgTemplate;
-        for (Map.Entry<String, String> entry : flagCheckEvent.getMsgSubstitutes().entrySet()) {
-            flagMsg = flagMsg.replace(entry.getKey(), entry.getValue());
-        }
-        return flagMsg;
-    }
-
-
     public static FlagCheckEvent checkEvent(BlockPos target, RegionFlag regionFlag, DimensionalRegion dimRegion, @Nullable Player player) {
         IMarkableRegion involvedRegion = LocalRegions.getInvolvedRegionFor(target, dimRegion.getDim());
         FlagCheckEvent flagCheck = new FlagCheckEvent(dimRegion, involvedRegion, regionFlag);
         if (player != null) {
             // TODO: Make this lazy and/or only execute it when msg is to be displayed
             // FIXME: currently the dim name is set here as {region}, and is corrected later
-            Map<String, String> subsMap = defaultSubstituteMap(regionFlag, dimRegion, target, player);
+            Map<String, String> subsMap = FlagMessageUtil.defaultSubstitutes(regionFlag, dimRegion, target, player);
             flagCheck = new PlayerFlagEvent(flagCheck, player, subsMap);
         }
         if (involvedRegion == null) {
@@ -204,5 +120,18 @@ public final class HandlerUtil {
             flagCheck.setDenied(isDenied);
         }
         return flagCheck;
+    }
+
+    /**
+     * Handles the given flag check event and sends the flag message if the flag is not muted <br>
+     *
+     * @param event     the flag check event to handle and send the message for
+     * @param flagCheck the flag check event to handle and send the message for
+     * @return true if the flag is denied, else false
+     */
+    public static boolean handleAndSendMsg(Event event, FlagCheckEvent flagCheck) {
+        FlagMessageUtil.sendFlagMsg(flagCheck);
+        event.setCanceled(flagCheck.isDenied());
+        return flagCheck.isDenied();
     }
 }
