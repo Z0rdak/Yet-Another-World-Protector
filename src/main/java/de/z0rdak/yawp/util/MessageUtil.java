@@ -160,12 +160,12 @@ public class MessageUtil {
     }
 
     public static IFormattableTextComponent buildTeamHoverComponent(Team team) {
-        IFormattableTextComponent playerName = new StringTextComponent(team.getName());
-        playerName.setStyle(playerName.getStyle()
+        IFormattableTextComponent teamName = new StringTextComponent(team.getName());
+        teamName.setStyle(teamName.getStyle()
                 .withColor(LINK_COLOR)
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslationTextComponent("cli.msg.info.region.group.link.hover")))
                 .withClickEvent(new ClickEvent(RUN_COMMAND, "/team list " + team.getName())));
-        return playerName;
+        return teamName;
     }
 
     /***
