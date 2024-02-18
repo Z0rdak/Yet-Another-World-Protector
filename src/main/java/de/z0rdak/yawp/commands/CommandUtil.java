@@ -1,10 +1,11 @@
 package de.z0rdak.yawp.commands;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import de.z0rdak.yawp.commands.arguments.flag.RegionFlagArgumentType;
+import de.z0rdak.yawp.commands.arguments.flag.IFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.core.area.CuboidArea;
@@ -20,12 +21,14 @@ import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
 import de.z0rdak.yawp.util.MessageUtil;
+import de.z0rdak.yawp.util.MojangApiHelper;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.DimensionArgument;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.command.arguments.TeamArgument;
+import net.minecraft.command.arguments.UUIDArgument;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.item.ExperienceOrbEntity;
@@ -36,6 +39,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.IFormattableTextComponent;
@@ -44,9 +48,12 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -99,7 +106,7 @@ public class CommandUtil {
                                         .executes(ctx -> removeTeam(ctx, getTeamArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx))))))
                 .then(literal(FLAG)
                         .then(Commands.argument(FLAG.toString(), StringArgumentType.greedyString())
-                                .suggests((ctx, builder) -> RegionFlagArgumentType.flag().listSuggestions(ctx, builder))
+                                .suggests((ctx, builder) -> IFlagArgumentType.flag().listSuggestions(ctx, builder))
                                 .executes(ctx -> removeFlag(ctx, regionSupplier.apply(ctx), getFlagArguments(ctx)))));
     }
 
@@ -109,7 +116,13 @@ public class CommandUtil {
                         .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
                                 .suggests((ctx, builder) -> ISuggestionProvider.suggest(GROUP_LIST, builder))
                                 .then(Commands.argument(PLAYER.toString(), EntityArgument.players())
-                                        .executes(ctx -> addPlayer(ctx, getPlayersArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx))))))
+                                        .executes(ctx -> addPlayers(ctx, getPlayersArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx))))
+                                .then(Commands.argument(PLAYER_UUID.toString(), UUIDArgument.uuid())
+                                        .executes(ctx -> addPlayerByUuid(ctx, getPlayerUUIDArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx))))
+                                .then(Commands.argument(PLAYER_NAMES.toString(), StringArgumentType.string())
+                                        .executes(ctx -> addPlayersByName(ctx, getPlayerNamesArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx))))
+                        )
+                )
                 .then(literal(TEAM)
                         .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
                                 .suggests((ctx, builder) -> ISuggestionProvider.suggest(GROUP_LIST, builder))
@@ -117,7 +130,7 @@ public class CommandUtil {
                                         .executes(ctx -> addTeam(ctx, getTeamArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx))))))
                 .then(literal(FLAG)
                         .then(Commands.argument(FLAG.toString(), StringArgumentType.greedyString())
-                                .suggests((ctx, builder) -> RegionFlagArgumentType.flag().listSuggestions(ctx, builder))
+                                .suggests((ctx, builder) -> IFlagArgumentType.flag().listSuggestions(ctx, builder))
                                 .executes(ctx -> addFlag(ctx, regionSupplier.apply(ctx), getFlagArguments(ctx)))));
     }
 
@@ -357,7 +370,70 @@ public class CommandUtil {
         return 1;
     }
 
-    public static int addPlayer(CommandContext<CommandSource> ctx, Collection<ServerPlayerEntity> players, IProtectedRegion region, String group) {
+    private static int addPlayerByUuid(CommandContext<CommandSource> ctx, UUID playerUuid, IProtectedRegion region, String group) {
+        if (!GROUP_LIST.contains(group)) {
+            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.region.info.group.invalid", group).withStyle(TextFormatting.RED));
+            return -1;
+        }
+        GameProfile cachedProfile = MojangApiHelper.lookupGameProfileInCache(ctx, playerUuid);
+        if (cachedProfile != null && cachedProfile.isComplete()) {
+            return addPlayer(ctx, cachedProfile.getId(), cachedProfile.getName(), region, group);
+        }
+        IFormattableTextComponent regionInfoLink = buildRegionInfoLink(region);
+        TranslationTextComponent lookupPending = new TranslationTextComponent("cli.msg.info.player.lookup.pending",
+                playerUuid.toString(), group, regionInfoLink);
+        sendCmdFeedback(ctx.getSource(), lookupPending);
+        DistExecutor.unsafeCallWhenOn(Dist.DEDICATED_SERVER, () -> () -> CompletableFuture.runAsync(
+                () -> MojangApiHelper.getGameProfileInfo(playerUuid, (gameProfile) -> {
+                    if (gameProfile != null) {
+                        TranslationTextComponent lookupSuccess = new TranslationTextComponent("cli.msg.info.player.lookup.success",
+                                playerUuid.toString(), group, regionInfoLink);
+                        sendCmdFeedback(ctx.getSource(), lookupSuccess);
+                        addPlayer(ctx, gameProfile.getId(), gameProfile.getName(), region, group);
+                    } else {
+                        TranslationTextComponent lookupFailed = new TranslationTextComponent("cli.msg.info.player.lookup.failed",
+                                playerUuid.toString(), group, regionInfoLink);
+                        sendCmdFeedback(ctx.getSource(), lookupFailed);
+                    }
+                })));
+        return 0;
+    }
+
+    public static int addPlayersByName(CommandContext<CommandSource> ctx, List<String> playerNames, IProtectedRegion region, String group) {
+        if (!GROUP_LIST.contains(group)) {
+            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.region.info.group.invalid", group).withStyle(TextFormatting.RED));
+            return -1;
+        }
+        playerNames.forEach(name -> CommandUtil.addPlayerByName(ctx, name, region, group));
+        return 0;
+    }
+
+    private static int addPlayerByName(CommandContext<CommandSource> ctx, String playerName, IProtectedRegion region, String group) {
+        GameProfile cachedProfile = MojangApiHelper.lookupGameProfileInCache(ctx, playerName);
+        if (cachedProfile != null && cachedProfile.isComplete()) {
+            return addPlayer(ctx, cachedProfile.getId(), cachedProfile.getName(), region, group);
+        }
+        IFormattableTextComponent regionInfoLink = buildRegionInfoLink(region);
+        TranslationTextComponent lookupPending = new TranslationTextComponent("cli.msg.info.player.lookup.pending",
+                playerName, group, regionInfoLink);
+        sendCmdFeedback(ctx.getSource(), lookupPending);
+        DistExecutor.unsafeCallWhenOn(Dist.DEDICATED_SERVER, () -> () -> CompletableFuture.runAsync(
+                () -> MojangApiHelper.getGameProfileInfo(playerName, (gameProfile) -> {
+                    if (gameProfile != null) {
+                        TranslationTextComponent lookupSuccess = new TranslationTextComponent("cli.msg.info.player.lookup.success",
+                                playerName, group, regionInfoLink);
+                        sendCmdFeedback(ctx.getSource(), lookupSuccess);
+                        addPlayer(ctx, gameProfile.getId(), gameProfile.getName(), region, group);
+                    } else {
+                        TranslationTextComponent lookupFailed = new TranslationTextComponent("cli.msg.info.player.lookup.failed",
+                                playerName, group, regionInfoLink);
+                        sendCmdFeedback(ctx.getSource(), lookupFailed);
+                    }
+                })));
+        return 0;
+    }
+
+    public static int addPlayers(CommandContext<CommandSource> ctx, Collection<ServerPlayerEntity> players, IProtectedRegion region, String group) {
         players.forEach(player -> CommandUtil.addPlayer(ctx, player, region, group));
         return 0;
     }
@@ -367,18 +443,20 @@ public class CommandUtil {
             sendCmdFeedback(src.getSource(), new TranslationTextComponent("cli.msg.region.info.group.invalid", group).withStyle(TextFormatting.RED));
             return -1;
         }
+        return addPlayer(src, player.getUUID(), player.getScoreboardName(), region, group);
+    }
+
+    private static int addPlayer(CommandContext<CommandSource> src, UUID uuid, String name, IProtectedRegion region, String group) {
         IFormattableTextComponent regionInfoLink = buildRegionInfoLink(region);
         IFormattableTextComponent undoLink = buildRegionActionUndoLink(src.getInput(), ADD, REMOVE);
-        if (!region.hasPlayer(player.getUUID(), group)) {
-            region.addPlayer(player, group);
+        if (!region.hasPlayer(uuid, group)) {
+            region.addPlayer(uuid, name, group);
             RegionDataManager.save();
-            TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.player.added",
-                    player.getScoreboardName(), group, regionInfoLink);
+            TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.player.added", name, group, regionInfoLink);
             sendCmdFeedback(src.getSource(), msg.append(" ").append(undoLink));
             return 0;
         }
-        TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.player.present",
-                player.getScoreboardName(), group, regionInfoLink);
+        TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.player.present", name, group, regionInfoLink);
         sendCmdFeedback(src.getSource(), msg);
         return 1;
     }
@@ -409,7 +487,6 @@ public class CommandUtil {
         flags.forEach(flag -> CommandUtil.removeRegionFlag(ctx, region, flag));
         return 0;
     }
-
 
     public static int removeRegionFlag(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionFlag flag) {
         if (region.containsFlag(flag)) {
