@@ -478,7 +478,7 @@ public class CommandUtil {
             return 0;
         }
         TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.team.present",
-                teamHoverInfo, team.getName(), regionInfoLink, group);
+                teamHoverInfo, group, regionInfoLink);
         sendCmdFeedback(ctx.getSource(), msg);
         return 1;
     }
