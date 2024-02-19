@@ -23,10 +23,13 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.TeamArgument;
+import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.scores.PlayerTeam;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
@@ -100,6 +103,14 @@ public class ArgumentUtil {
         return EntityArgument.getPlayers(ctx, CommandConstants.PLAYER.toString());
     }
 
+    public static java.util.UUID getPlayerUUIDArgument(CommandContext<CommandSourceStack> ctx) {
+        return UuidArgument.getUuid(ctx, CommandConstants.PLAYER_UUID.toString());
+    }
+
+    public static List<String> getPlayerNamesArgument(CommandContext<CommandSourceStack> ctx) {
+        String[] names = StringArgumentType.getString(ctx, PLAYER_NAMES.toString()).split(" ");
+        return Arrays.asList(names);
+    }
 
     public static String getFlagNameArgument(CommandContext<CommandSourceStack> ctx) {
         return StringArgumentType.getString(ctx, CommandConstants.FLAG.toString());
