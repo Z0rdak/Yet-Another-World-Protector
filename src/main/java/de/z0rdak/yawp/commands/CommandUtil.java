@@ -282,12 +282,12 @@ public class CommandUtil {
                     group, buildRegionInfoLink(region)));
             return 1;
         }
-        List<IFormattableTextComponent> affiliatePagination = buildPaginationComponents(
+        List<IFormattableTextComponent> groupMemberPagination = buildPaginationComponents(
                 buildGroupHeader(region, group, groupType),
-                cmd, buildRemoveGroupEntries(region, groupNames, groupType, group),
+                cmd, buildRemoveGroupMemberEntries(region, groupNames, groupType, group),
                 pageNo,
                 new StringTextComponent(" - ").append(buildAddToGroupLink(region, group, groupType)));
-        affiliatePagination.forEach(line -> sendCmdFeedback(ctx.getSource(), line));
+        groupMemberPagination.forEach(line -> sendCmdFeedback(ctx.getSource(), line));
         return 0;
     }
 
