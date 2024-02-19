@@ -141,7 +141,7 @@ public class CommandUtil {
                         .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
                                 .executes(ctx -> promptFlagList(ctx, regionSupplier.apply(ctx), getPageNoArgument(ctx)))))
                 .then(literal(GROUP)
-                        .then(Commands.argument(GROUP.toString(), StringArgumentType.string())
+                        .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
                                 .suggests((ctx, builder) -> ISuggestionProvider.suggest(CommandUtil.GROUP_LIST, builder))
                                 .executes(ctx -> CommandUtil.promptGroupLinks(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx)))
                                 .then(literal(TEAM)
