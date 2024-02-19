@@ -66,8 +66,8 @@ public class CommandPermissionConfig {
         return ALLOW_READ_ONLY_CMDS.get();
     }
 
-    public static boolean isCmdDisabledForNonOp() {
-        return DISABLE_CMD_FOR_NON_OP.get();
+    public static boolean isCmdEnabledForNonOp() {
+        return !DISABLE_CMD_FOR_NON_OP.get();
     }
 
     public static String getBaseCmdAlt() {
@@ -94,7 +94,7 @@ public class CommandPermissionConfig {
         return COMMAND_BLOCK_EXECUTION.get();
     }
 
-    public static boolean hasPlayerPermission(Player player) {
+    public static boolean hasConfigPermission(Player player) {
         return hasUUIDConfigEntry(player) || hasNeededOpLevel(player) ||
                 player.hasPermissions(REQUIRED_OP_LEVEL.get());
     }
