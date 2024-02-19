@@ -117,7 +117,7 @@ public class CommandInterceptor {
             if (!isMarkerSubCmd) {
                 return ALLOW_CMD;
             }
-            boolean hasPermission = hasCmdPermission(cmdContext, cmdSrcType);
+            boolean hasPermission = hasConfigPermission(cmdContext, cmdSrcType);
             handlePermission(cmdContext.getSource(), hasPermission);
             return hasPermission ? ALLOW_CMD : CANCEL_CMD;
 
@@ -370,7 +370,7 @@ public class CommandInterceptor {
         switch (cmdSrcType) {
             case PLAYER: {
                 ServerPlayerEntity player = src.getPlayerOrException();
-                boolean hasConfigPermission = hasPlayerPermission(player);
+                boolean hasConfigPermission = CommandPermissionConfig.hasConfigPermission(player);
                 boolean isOwner = region.isInGroup(player, permissionGroup);
                 return isOwner || hasConfigPermission;
             }
@@ -389,7 +389,7 @@ public class CommandInterceptor {
             case PLAYER: {
                 List<String> nodeNames = ctx.getNodes().stream().map(node -> node.getNode().getName()).collect(Collectors.toList());
                 ServerPlayerEntity player = ctx.getSource().getPlayerOrException();
-                boolean hasConfigPermission = hasPlayerPermission(player);
+                boolean hasConfigPermission = CommandPermissionConfig.hasConfigPermission(player);
                 boolean isOwner = region.isInGroup(player, permissionGroup);
                 return (isOwner || hasConfigPermission) || subCmdPermission.apply(nodeNames);
             }
@@ -402,15 +402,15 @@ public class CommandInterceptor {
         }
     }
 
-    private static boolean hasCmdPermission(CommandContextBuilder<CommandSource> ctx, CommandSourceType cmdSrcType) throws CommandSyntaxException {
-        return hasCmdPermission(ctx.getSource(), cmdSrcType);
+    private static boolean hasConfigPermission(CommandContextBuilder<CommandSource> ctx, CommandSourceType cmdSrcType) throws CommandSyntaxException {
+        return hasConfigPermission(ctx.getSource(), cmdSrcType);
     }
 
-    private static boolean hasCmdPermission(CommandSource src, CommandSourceType cmdSrcType) throws CommandSyntaxException {
+    private static boolean hasConfigPermission(CommandSource src, CommandSourceType cmdSrcType) throws CommandSyntaxException {
         switch (cmdSrcType) {
             case PLAYER: {
                 ServerPlayerEntity player = src.getPlayerOrException();
-                return hasPlayerPermission(player);
+                return CommandPermissionConfig.hasConfigPermission(player);
             }
             case SERVER:
                 return true;
@@ -424,7 +424,7 @@ public class CommandInterceptor {
     public static boolean hasCmdPermission(CommandSource src) {
         CommandSourceType cmdSrcType = CommandSourceType.of(src);
         try {
-            return hasCmdPermission(src, cmdSrcType);
+            return hasConfigPermission(src, cmdSrcType);
         } catch (CommandSyntaxException e) {
             return false;
         }
@@ -433,10 +433,7 @@ public class CommandInterceptor {
     public static boolean isAllowedForNonOp(CommandSource src) {
         CommandSourceType cmdSrcType = CommandSourceType.of(src);
         try {
-            if (CommandPermissionConfig.isCmdDisabledForNonOp()) {
-                return hasCmdPermission(src, cmdSrcType);
-            }
-            return false;
+            return hasConfigPermission(src, cmdSrcType) || CommandPermissionConfig.isCmdEnabledForNonOp();
         } catch (CommandSyntaxException e) {
             return false;
         }
