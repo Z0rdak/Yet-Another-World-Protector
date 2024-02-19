@@ -377,25 +377,23 @@ public class CommandUtil {
         }
         GameProfile cachedProfile = MojangApiHelper.lookupGameProfileInCache(ctx, playerUuid);
         if (cachedProfile != null && cachedProfile.isComplete()) {
+            TranslationTextComponent cacheSuccess = new TranslationTextComponent("cli.msg.info.player.lookup.cache.success", playerUuid.toString());
+            sendCmdFeedback(ctx.getSource(), cacheSuccess);
             return addPlayer(ctx, cachedProfile.getId(), cachedProfile.getName(), region, group);
         }
-        IFormattableTextComponent regionInfoLink = buildRegionInfoLink(region);
-        TranslationTextComponent lookupPending = new TranslationTextComponent("cli.msg.info.player.lookup.pending",
-                playerUuid.toString(), group, regionInfoLink);
-        sendCmdFeedback(ctx.getSource(), lookupPending);
-        DistExecutor.unsafeCallWhenOn(Dist.DEDICATED_SERVER, () -> () -> CompletableFuture.runAsync(
-                () -> MojangApiHelper.getGameProfileInfo(playerUuid, (gameProfile) -> {
-                    if (gameProfile != null) {
-                        TranslationTextComponent lookupSuccess = new TranslationTextComponent("cli.msg.info.player.lookup.success",
-                                playerUuid.toString(), group, regionInfoLink);
-                        sendCmdFeedback(ctx.getSource(), lookupSuccess);
-                        addPlayer(ctx, gameProfile.getId(), gameProfile.getName(), region, group);
-                    } else {
-                        TranslationTextComponent lookupFailed = new TranslationTextComponent("cli.msg.info.player.lookup.failed",
-                                playerUuid.toString(), group, regionInfoLink);
-                        sendCmdFeedback(ctx.getSource(), lookupFailed);
-                    }
-                })));
+        TranslationTextComponent cacheMiss = new TranslationTextComponent("cli.msg.info.player.lookup.pending",
+                playerUuid.toString(), "uuid");
+        sendCmdFeedback(ctx.getSource(), cacheMiss);
+        CompletableFuture.runAsync(() -> MojangApiHelper.getGameProfileInfo(playerUuid, (gameProfile) -> {
+            if (gameProfile != null) {
+                TranslationTextComponent lookupSuccess = new TranslationTextComponent("cli.msg.info.player.lookup.api.success", playerUuid.toString());
+                sendCmdFeedback(ctx.getSource(), lookupSuccess);
+                addPlayer(ctx, gameProfile.getId(), gameProfile.getName(), region, group);
+            } else {
+                TranslationTextComponent lookupFailed = new TranslationTextComponent("cli.msg.info.player.lookup.api.failed", playerUuid.toString());
+                sendCmdFeedback(ctx.getSource(), lookupFailed);
+            }
+        }));
         return 0;
     }
 
@@ -411,25 +409,23 @@ public class CommandUtil {
     private static int addPlayerByName(CommandContext<CommandSource> ctx, String playerName, IProtectedRegion region, String group) {
         GameProfile cachedProfile = MojangApiHelper.lookupGameProfileInCache(ctx, playerName);
         if (cachedProfile != null && cachedProfile.isComplete()) {
+            TranslationTextComponent cacheSuccess = new TranslationTextComponent("cli.msg.info.player.lookup.cache.success", playerName);
+            sendCmdFeedback(ctx.getSource(), cacheSuccess);
             return addPlayer(ctx, cachedProfile.getId(), cachedProfile.getName(), region, group);
         }
-        IFormattableTextComponent regionInfoLink = buildRegionInfoLink(region);
-        TranslationTextComponent lookupPending = new TranslationTextComponent("cli.msg.info.player.lookup.pending",
-                playerName, group, regionInfoLink);
-        sendCmdFeedback(ctx.getSource(), lookupPending);
-        DistExecutor.unsafeCallWhenOn(Dist.DEDICATED_SERVER, () -> () -> CompletableFuture.runAsync(
-                () -> MojangApiHelper.getGameProfileInfo(playerName, (gameProfile) -> {
-                    if (gameProfile != null) {
-                        TranslationTextComponent lookupSuccess = new TranslationTextComponent("cli.msg.info.player.lookup.success",
-                                playerName, group, regionInfoLink);
-                        sendCmdFeedback(ctx.getSource(), lookupSuccess);
-                        addPlayer(ctx, gameProfile.getId(), gameProfile.getName(), region, group);
-                    } else {
-                        TranslationTextComponent lookupFailed = new TranslationTextComponent("cli.msg.info.player.lookup.failed",
-                                playerName, group, regionInfoLink);
-                        sendCmdFeedback(ctx.getSource(), lookupFailed);
-                    }
-                })));
+        TranslationTextComponent cacheMiss = new TranslationTextComponent("cli.msg.info.player.lookup.pending",
+                playerName, "name");
+        sendCmdFeedback(ctx.getSource(), cacheMiss);
+        CompletableFuture.runAsync(() -> MojangApiHelper.getGameProfileInfo(playerName, (gameProfile) -> {
+            if (gameProfile != null) {
+                TranslationTextComponent lookupSuccess = new TranslationTextComponent("cli.msg.info.player.lookup.success", playerName);
+                sendCmdFeedback(ctx.getSource(), lookupSuccess);
+                addPlayer(ctx, gameProfile.getId(), gameProfile.getName(), region, group);
+            } else {
+                TranslationTextComponent lookupFailed = new TranslationTextComponent("cli.msg.info.player.lookup.failed", playerName);
+                sendCmdFeedback(ctx.getSource(), lookupFailed);
+            }
+        }));
         return 0;
     }
 
