@@ -49,26 +49,7 @@ public class CommandPermissionConfig {
                 .define("allow_region_tp", false);
 
         PLAYERS_WITH_PERMISSION = BUILDER.comment("Player UUIDs with permission to use mod commands.\n Make sure to put the UUIDs in parentheses, just like a normal string.\n Example: players_with_permission = [\"614c9eac-11c9-3ca6-b697-938355fa8235\", \"b9f5e998-520a-3fa2-8208-0c20f22aa20f\"]")
-                .defineListAllowEmpty(Collections.singletonList("players_with_permission"), ArrayList::new, (uuid) -> {
-                    if (uuid instanceof String) {
-                        try {
-                            String uuidStr = (String) uuid;
-                            if (uuidStr.length() != 36) {
-                                throw new IllegalArgumentException("Invalid UUID - wrong length");
-                            }
-                            List<String> uuidTokens = Arrays.asList(uuidStr.split("-"));
-                            List<String> shortTokens = uuidTokens.subList(1,3);
-                            if (uuidTokens.get(0).length() != 8 || containsBadLength(shortTokens, 4) || uuidTokens.get(4).length() != 12) {
-                                throw new IllegalArgumentException("Invalid UUID - wrong token sizes");
-                            }
-                            return true;
-                        } catch (IllegalArgumentException e) {
-                            YetAnotherWorldProtector.LOGGER.warn("Invalid UUID '" + uuid + "' in config");
-                            return false;
-                        }
-                    }
-                    return false;
-                });
+                .defineListAllowEmpty(Collections.singletonList("players_with_permission"), ArrayList::new, CommandPermissionConfig::validateUuid);
         BUILDER.pop();
         CONFIG_SPEC = BUILDER.build();
     }
@@ -126,6 +107,27 @@ public class CommandPermissionConfig {
                 .get(player.getGameProfile());
         if (opPlayerEntry != null) {
             return opPlayerEntry.getLevel() >= REQUIRED_OP_LEVEL.get();
+        }
+        return false;
+    }
+
+    public static boolean validateUuid(Object uuid) {
+        if (uuid instanceof String) {
+            try {
+                String uuidStr = (String) uuid;
+                if (uuidStr.length() != 36) {
+                    throw new IllegalArgumentException("Invalid UUID - wrong length");
+                }
+                List<String> uuidTokens = Arrays.asList(uuidStr.split("-"));
+                List<String> shortTokens = uuidTokens.subList(1, 3);
+                if (uuidTokens.get(0).length() != 8 || containsBadLength(shortTokens, 4) || uuidTokens.get(4).length() != 12) {
+                    throw new IllegalArgumentException("Invalid UUID - wrong token sizes");
+                }
+                return true;
+            } catch (IllegalArgumentException e) {
+                YetAnotherWorldProtector.LOGGER.warn("Invalid UUID '" + uuid + "' in config");
+                return false;
+            }
         }
         return false;
     }
