@@ -1204,28 +1204,34 @@ public class MessageUtil {
                 : buildExecuteCmdComponent(linkText, hoverLink, command, RUN_COMMAND, LINK_COLOR);
     }
 
-    public static List<IFormattableTextComponent> buildRemoveGroupEntries(IProtectedRegion region, List<String> groupNames, GroupType groupType, String affiliation) {
-        return groupNames.stream().map(group -> buildRemoveGroupEntry(region, group, groupType, affiliation)).collect(Collectors.toList());
+    /**
+     * @param region    the region to build the link for
+     * @param names     the names of the players or teams of the group
+     * @param groupType the type of the group (player or team)
+     * @param group     the name of the group
+     * @return a list of links to remove the group from the region
+     */
+    public static List<IFormattableTextComponent> buildRemoveGroupMemberEntries(IProtectedRegion region, List<String> names, GroupType groupType, String group) {
+        return names.stream().sorted().map(name -> buildRemoveGroupEntry(region, name, groupType, group)).collect(Collectors.toList());
     }
 
-    // TODO: Check arguments and usage (group and groupName
-    public static IFormattableTextComponent buildRemoveGroupEntry(IProtectedRegion region, String groupName, GroupType groupType, String group) {
+    public static IFormattableTextComponent buildRemoveGroupEntry(IProtectedRegion region, String name, GroupType groupType, String group) {
         IFormattableTextComponent linkText = new TranslationTextComponent("cli.link.remove");
-        IFormattableTextComponent hoverText = new TranslationTextComponent("cli.msg.info.region.group." + groupType.name + ".remove.link.hover", groupName, region.getName());
+        IFormattableTextComponent hoverText = new TranslationTextComponent("cli.msg.info.region.group." + groupType.name + ".remove.link.hover", name, region.getName());
         IFormattableTextComponent regionRemoveLink;
         switch (region.getRegionType()) {
             case GLOBAL: {
-                String command = buildCommandStr(GLOBAL.toString(), REMOVE.toString(), groupType.name, group, groupName);
+                String command = buildCommandStr(GLOBAL.toString(), REMOVE.toString(), groupType.name, group, name);
                 regionRemoveLink = buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, REMOVE_CMD_COLOR);
                 break;
             }
             case DIMENSION: {
-                String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), REMOVE.toString(), groupType.name, group, groupName);
+                String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), REMOVE.toString(), groupType.name, group, name);
                 regionRemoveLink = buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, REMOVE_CMD_COLOR);
                 break;
             }
             case LOCAL: {
-                String command = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), REMOVE.toString(), groupType.name, group, groupName);
+                String command = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), REMOVE.toString(), groupType.name, group, name);
                 regionRemoveLink = buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, REMOVE_CMD_COLOR);
                 break;
             }
@@ -1234,7 +1240,7 @@ public class MessageUtil {
         }
         return new StringTextComponent(" - ")
                 .append(regionRemoveLink).append(" ")
-                .append(buildGroupInfo(region, groupName, groupType));
+                .append(buildGroupInfo(region, name, groupType));
     }
 
     public static IFormattableTextComponent buildGroupInfo(IProtectedRegion region, String groupName, GroupType groupType) {
