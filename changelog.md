@@ -1,7 +1,6 @@
 # [0.0.3.0-beta1] - 2023-12-15
 
 ## Added
-
 * Add command to copy region properties
 * Add enhanced flag management
 * Add flag inheritance
@@ -9,7 +8,6 @@
 * Add the Global Region. It's the parent region of all Dimensional Regions. One region to rule them all.
 
 ### Copy region properties
-
 * Add new command to copy properties from one Local Region to another Local Region:
   * `/wp dim <dim> <region> copy flags to-local <target-dim> <target-region>`: copy all flags from `region`
     to `target-region`
@@ -35,7 +33,6 @@
     a specific group (members, owners) add it as optional parameter
 
 ### Enhanced Flags
-
 * Flags now have their own dedicated flag message which is shown when the flag is triggered.
 * It's now possible to mute flag messages for each individual flag (it is still possible to mute all flags for the
   region).
@@ -72,7 +69,6 @@
 * Add interactive CLI support for enhanced flag management.
 
 ### Config
-
 * `yawp-common.toml` - Add new permission config:
   * `allow_region_tp`. Decides whether teleporting inside/outside a region is allowed for everyone. Useful when using
     Waystones in regions for example.
@@ -92,21 +88,32 @@
 
 ### Global Region
 
-* The Global Region has the same properties as the Dimensional Regions but is not limited to one dimension.
+* The Global Region has the same properties as the Dimensional Regions but is not limited to one dimension. It is the
+  parent region of all Dimensional Regions and active everywhere.
 * Add new commands for management of the Global Region:
-  * `/wp global ...`.
-  * ...
+  * `/wp global info`.
+  * `/wp global clear flags|players|teams|group`.
+  * `/wp global add player|team|flag`.
+  * `/wp global remove player|team|flag`.
+  * `/wp global list flag|group|dim`.
+  * `/wp global state alert|enable`.
 * Add interactive CLI support for the Global Region
 
 ### Misc
 
 * Add new command to expand the area of a Local Region:
-  * `/wp region <dim> <region> area expand [yMin] [yMax]`.
+  * `/wp local <dim> <region> area expand [yMin] [yMax]`.
   * The optional parameters can be used to set a specific height.
-  * Omitting the parameters will set the region area to `expand 0 255` for 1.16.5 and `expand -64 320` for newer
-    versions.
+  * Omitting the parameters will set the region area to the Minecraft version specific build limits
 * Add new command to rename a Local Region: `/wp region <dim> <region> rename <newName>`.
-* Dimensional Regions now can be muted (as well as their flags, all or individually).
+* Add new commands to add and remove offline players from/to regions.
+  * `/wp local <dim> <region> add player <group> by-name <player names separated by space>`.
+  * `/wp local <dim> <region> remove player <group> by-name <player names separated by space>`.
+  * `/wp local <dim> <region> add player <group> by-uuid <player uuid>`.
+  * `/wp local <dim> <region> remove player <group> by-uuid <player uuid>`.
+  * Note that you can define multiple names for adding and removing but only one UUID at a time.
+  * Same goes for the Global and Dimensional Regions as well
+* Dimensional Regions now can be muted (as well as their flags, all or individually)
 
 ## Changed
 
@@ -127,7 +134,16 @@
 * Rename affiliation to groups. This change also involves some commands and language keys.
 * Change commands to manage groups (former known as affiliations):
   * New: `/wp region <dim> <region> add|list|remove group player|team <member|owner> ...`
-  * Old: `/wp region <dim> <region> add|list|remove player|team <member|owner> ...`
+  * Old: `/wp region <dim> <region> add|list|remove affiliate player|team <member|owner> ...`
+* Change commands to manage Local Regions:
+  * New: `/wp local <dim> <region> ...`
+  * Old: `/wp region <dim> <region> ...`
+* The spawning flags no longer remove entities with the PersistanceRequired tag or a custom name.
+* Renaming a Stick to create a RegionMarker is now disabled to prevent permission issues. This will come back in a
+  future update with a overhaul of the RegionMarker.
+* Moved the region name examples (used when creating a new region) to the language file to enable I18n support for the
+  examples.
+* Moved the flag message examples to the language file to enable I18n support for the examples.
 
 ## Fixed
 
