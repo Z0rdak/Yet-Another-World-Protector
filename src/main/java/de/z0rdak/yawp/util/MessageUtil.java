@@ -1243,23 +1243,23 @@ public class MessageUtil {
                 .append(buildGroupInfo(region, name, groupType));
     }
 
-    public static IFormattableTextComponent buildGroupInfo(IProtectedRegion region, String groupName, GroupType groupType) {
+    public static IFormattableTextComponent buildGroupInfo(IProtectedRegion region, String groupMemberName, GroupType groupType) {
         IFormattableTextComponent res;
         switch (groupType) {
             case PLAYER: {
-                PlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByName(groupName);
+                PlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByName(groupMemberName);
                 res = player == null
-                        ? new StringTextComponent(groupName).withStyle(GRAY).append(" ").append(new TranslationTextComponent("cli.msg.info.player.list.entry.offline"))
+                        ? new StringTextComponent(groupMemberName).withStyle(GRAY).append(" ").append(new TranslationTextComponent("cli.msg.info.player.list.entry.offline"))
                         : buildPlayerHoverComponent(player);
                 break;
             }
             case TEAM: {
                 ServerWorld level = ServerLifecycleHooks.getCurrentServer().getLevel(region.getDim());
                 if (level != null) {
-                    Team team = level.getScoreboard().getPlayerTeam(groupName);
-                    res = team == null ? new StringTextComponent(groupName) : buildTeamHoverComponent(team);
+                    Team team = level.getScoreboard().getPlayerTeam(groupMemberName);
+                    res = team == null ? new StringTextComponent(groupMemberName) : buildTeamHoverComponent(team);
                 } else {
-                    res = new StringTextComponent(groupName);
+                    res = new StringTextComponent(groupMemberName);
                 }
                 break;
             }

@@ -86,7 +86,7 @@ public final class MarkerCommands {
                         }
                         AbstractMarkableRegion region = LocalRegions.regionFrom(player, marker, regionName);
                         RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
-                        boolean hasConfigPermission = CommandPermissionConfig.hasPlayerPermission(player);
+                        boolean hasConfigPermission = CommandPermissionConfig.hasConfigPermission(player);
                         if (parentRegion != null) {
                             // should only be a region which has player as owner at this point due to the OwnerRegionArgumentType suggestions
                             if (parentRegion.hasPlayer(player.getUUID(), CommandUtil.OWNER) || hasConfigPermission) {
