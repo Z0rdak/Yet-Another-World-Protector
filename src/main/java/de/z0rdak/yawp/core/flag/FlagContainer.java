@@ -65,11 +65,27 @@ public class FlagContainer extends HashMap<String, IFlag> implements INBTSeriali
         this.put(flag.getName(), flag);
     }
 
-    public boolean contains(RegionFlag flag){
+    public boolean contains(RegionFlag flag) {
         return this.containsKey(flag.name);
     }
 
-    public boolean contains(String flag){
+    public boolean contains(String flag) {
         return this.containsKey(flag);
+    }
+
+    public void updateFlag(IFlag flag) {
+        this.put(flag);
+    }
+
+    public void toggleFlag(String flag, boolean enable) {
+        if (this.contains(flag)) {
+            this.get(flag).setIsActive(enable);
+        }
+    }
+
+    public void invertFlag(String flag) {
+        if (this.contains(flag)) {
+            this.get(flag).setOverride(this.get(flag).doesOverride());
+        }
     }
 }

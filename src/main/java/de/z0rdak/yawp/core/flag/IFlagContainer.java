@@ -7,4 +7,10 @@ public interface IFlagContainer {
    boolean contains(RegionFlag flag);
 
    boolean contains(String flag);
+
+   void updateFlag(IFlag flag);
+
+   void toggleFlag(String flag, boolean enable);
+
+   void invertFlag(String flag);
 }

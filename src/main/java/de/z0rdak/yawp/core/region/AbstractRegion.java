@@ -38,6 +38,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
     protected Map<String, PlayerContainer> groups;
     protected boolean isActive;
     protected boolean isMuted;
+    protected boolean inheritFlags;
     @Nullable
     protected IProtectedRegion parent;
     protected String parentName;
@@ -56,7 +57,6 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.deserializeNBT(nbt);
     }
 
-    @Nullable
     @Override
     public String getParentName() {
         return parentName;
@@ -125,29 +125,21 @@ public abstract class AbstractRegion implements IProtectedRegion {
         return flags;
     }
 
+    public boolean inheritsFlags() {
+        return this.inheritFlags;
+    }
+
+    public void setInheritFlags(boolean inheritFlags) {
+        this.inheritFlags = inheritFlags;
+    }
+
     @Nullable
     @Override
-    public IFlag getFlag(String flagName){
+    public IFlag getFlag(String flagName) {
         if (this.flags.contains(flagName)) {
             return this.flags.get(flagName);
         } else {
             return null;
-        }
-    }
-
-    public void updateFlag(IFlag flag) {
-        this.flags.put(flag);
-    }
-
-    public void toggleFlag(String flag, boolean enable){
-        if (this.containsFlag(flag)) {
-            this.flags.get(flag).setIsActive(enable);
-        }
-    }
-
-    public void invertFlag(String flag){
-        if (this.containsFlag(flag)) {
-            this.flags.get(flag).setOverride(this.flags.get(flag).doesOverride());
         }
     }
 
@@ -252,12 +244,6 @@ public abstract class AbstractRegion implements IProtectedRegion {
                 || (player.getTeam() != null && this.groups.get(group).hasTeam(player.getTeam().getName()));
     }
 
-
-    @Override
-    public boolean disallows(PlayerEntity player) {
-        return !permits(player);
-    }
-
     /**
      * Will always be called by IMarkableRegion to remove child of type IMarkableRegion
      * @param child
@@ -274,7 +260,6 @@ public abstract class AbstractRegion implements IProtectedRegion {
     }
 
     /**
-     * TODO: Global region stuff
      * Most error handling and consistency checks are done beforehand by the ArgumentTypes for add and removing children.
      * Try to add a child region to this region. <br>
      * 1. The child already has a parent which is a local region  or <br>
@@ -282,26 +267,25 @@ public abstract class AbstractRegion implements IProtectedRegion {
      * 3. The child is the parent of this region <br>
      * 4. The child area is not completely contained by the parent area. (done beforehand)
      * Also removes child from dimension region
-     * FIXME: since this method does manage more than adding children, it should be renamed
+     * FIXME: since this method does manage more than adding children, it should be renamed; add Global region stuff <br>
+     *
      * @param child child to add to this region.
      */
     @Override
     public void addChild(@Nonnull IProtectedRegion child) {
-        IProtectedRegion childParent = child.getParent();
-        if (childParent != null) {
-            boolean hasDimRegionParent = childParent instanceof DimensionalRegion;
-            boolean hasLocalRegionParent = childParent instanceof IMarkableRegion;
-            if (hasLocalRegionParent) {
-                if (!childParent.equals(this) && this instanceof IMarkableRegion) {
+        IProtectedRegion parent = child.getParent();
+        if (parent != null) {
+            if (parent instanceof IMarkableRegion) {
+                if (!parent.equals(this) && this instanceof IMarkableRegion) {
                     // TODO: Why not allow this, as long as the owner of both regions are the same?
                     throw new IllegalRegionStateException("Not allowed to \"steal\" child from other parent than a dimensional region");
                 }
                 if (this instanceof DimensionalRegion) {
-                    childParent.removeChild(child);
+                    parent.removeChild(child);
                 }
             }
-            if (hasDimRegionParent) {
-                childParent.removeChild(child);
+            if (parent instanceof DimensionalRegion) {
+                parent.removeChild(child);
             }
         }
         child.setParent(this);
@@ -327,10 +311,15 @@ public abstract class AbstractRegion implements IProtectedRegion {
      * FIXME: setParent should not be used directly. Use addChild instead
      * Contains common consistency checks for setting a parent region.
      * More specific checks and assignments need to be implemented in subclasses.
+     *
      * @param parent the parent to set for this region.
      * @throws IllegalRegionStateException when consistency checks are failing.
      */
-    public boolean setParent(IProtectedRegion parent){
+    public boolean setParent(IProtectedRegion parent) {
+        if (parent instanceof GlobalRegion && this instanceof GlobalRegion) {
+            this.parent = this;
+            return true;
+        }
         if (parent instanceof DimensionalRegion) {
             this.parent = parent;
             return true;
