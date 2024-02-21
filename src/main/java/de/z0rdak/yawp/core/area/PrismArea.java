@@ -27,20 +27,17 @@ public class PrismArea extends AbstractArea {
         this.blockNodes = blockNodes;
     }
 
-    // TODO: implementation
     @Override
     public boolean contains(BlockPos pos) {
         throw new NotImplementedException("Missing contains implementation in PrismArea");
     }
 
-    // TODO: implementation
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag nbt = super.serializeNBT();
         throw new NotImplementedException("Missing serializeNBT implementation in PrismArea");
     }
 
-    // TODO: implementation
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);

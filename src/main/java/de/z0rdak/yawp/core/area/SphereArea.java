@@ -35,7 +35,6 @@ public class SphereArea extends CenteredArea {
         return this.radius;
     }
 
-    // TODO: MAX sphere radius
     public SphereArea(BlockPos middlePos, int radius) {
         this(middlePos, new BlockPos(middlePos)
                 .offset(0, radius, 0));
