@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-// TODO: Create abstraction for prism and polygon area with a list of blocks (maybe cuboid fits here too?)
 public class PrismArea extends AbstractArea {
 
     public List<BlockPos> blockNodes;
@@ -28,20 +27,17 @@ public class PrismArea extends AbstractArea {
         this.blockNodes = blockNodes;
     }
 
-    // TODO: implementation
     @Override
     public boolean contains(BlockPos pos) {
         throw new NotImplementedException("Missing contains implementation in PrismArea");
     }
 
-    // TODO: implementation
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = super.serializeNBT();
         throw new NotImplementedException("Missing serializeNBT implementation in PrismArea");
     }
 
-    // TODO: implementation
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
         super.deserializeNBT(nbt);

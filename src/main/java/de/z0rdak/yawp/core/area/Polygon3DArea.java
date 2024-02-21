@@ -36,7 +36,6 @@ public class Polygon3DArea extends AbstractArea {
         return Collections.unmodifiableList(positions);
     }
 
-    // TODO: validate
     @Override
     public boolean contains(BlockPos q) {
         return calcAngleSum(q, this.positions, this.positions.size()) == 2 * Math.PI;
