@@ -73,4 +73,20 @@ public class FlagContainer extends HashMap<String, IFlag> implements INBTSeriali
     public boolean contains(String flag) {
         return this.containsKey(flag);
     }
+
+    public void updateFlag(IFlag flag) {
+        this.put(flag);
+    }
+
+    public void toggleFlag(String flag, boolean enable) {
+        if (this.contains(flag)) {
+            this.get(flag).setIsActive(enable);
+        }
+    }
+
+    public void invertFlag(String flag) {
+        if (this.contains(flag)) {
+            this.get(flag).setOverride(this.get(flag).doesOverride());
+        }
+    }
 }
