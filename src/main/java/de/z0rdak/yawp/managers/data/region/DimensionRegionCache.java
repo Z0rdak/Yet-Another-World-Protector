@@ -93,11 +93,14 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
     }
 
     public void renameRegion(IMarkableRegion region, String regionName) {
+        if (this.regionsInDimension.containsKey(regionName)) {
+            throw new IllegalArgumentException("Region with name '" + regionName + "' already exists in dimension '" + this.dimensionalRegion.getName() + "'!");
+        }
         IMarkableRegion currentRegion = this.regionsInDimension.get(region.getName());
-        // TODO: Rename me -> remove region, clone region, change name, add region, restore hierarchy
-        // TODO: update children name in parent
         IProtectedRegion parent = currentRegion.getParent();
-        this.regionsInDimension.put(regionName, currentRegion);
+        this.removeRegion(currentRegion);
+        currentRegion.rename(regionName);
+        this.addRegion(currentRegion, parent);
     }
 
     public boolean contains(String regionName) {
@@ -125,7 +128,6 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
         if (nbt.contains(DIM_REGION, Tag.TAG_COMPOUND)) {
             this.dimensionalRegion = new DimensionalRegion(nbt.getCompound(DIM_REGION));
         } else {
-            // TODO: Add dimKey as property to nbt compound to init new default dimensional region
             throw new IllegalArgumentException("Unable to load dimensional region data from NBT");
         }
         this.regionsInDimension = new HashMap<>();
