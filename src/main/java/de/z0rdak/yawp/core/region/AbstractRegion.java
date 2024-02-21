@@ -53,6 +53,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.groups = new HashMap<>();
         this.groups.put(MEMBERS, new PlayerContainer());
         this.groups.put(OWNERS, new PlayerContainer());
+        this.inheritFlags = true;
         this.deserializeNBT(nbt);
     }
 
@@ -71,6 +72,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.groups.put(OWNERS, new PlayerContainer());
         this.children = new HashMap<>();
         this.isActive = true;
+        this.inheritFlags = true;
     }
 
     protected AbstractRegion(String name, ResourceKey<Level> dimension, RegionType regionType, Player owner) {
@@ -351,6 +353,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
         nbt.putString(REGION_TYPE, this.regionType.type);
         nbt.putBoolean(ACTIVE, this.isActive);
         nbt.putBoolean(MUTED, this.isMuted);
+        nbt.putBoolean(INHERIT_FLAGS, this.inheritFlags);
         nbt.put(FLAGS, this.flags.serializeNBT());
         nbt.put(OWNERS, this.groups.get(OWNERS).serializeNBT());
         nbt.put(MEMBERS, this.groups.get(MEMBERS).serializeNBT());
@@ -379,6 +382,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.isActive = nbt.getBoolean(ACTIVE);
         this.isMuted = nbt.getBoolean(MUTED);
         this.regionType = RegionType.of(nbt.getString(REGION_TYPE));
+        this.inheritFlags = nbt.getBoolean(INHERIT_FLAGS);
         this.flags = new FlagContainer(nbt.getCompound(FLAGS));
         this.groups = new HashMap<>();
         this.groups.put(OWNERS, new PlayerContainer(nbt.getCompound(OWNERS)));
