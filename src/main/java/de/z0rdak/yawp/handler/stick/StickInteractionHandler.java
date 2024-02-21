@@ -10,7 +10,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.player.AnvilRepairEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -30,8 +29,6 @@ public class StickInteractionHandler {
     @SubscribeEvent
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (!event.getWorld().isClientSide) {
-            Player player = event.getPlayer();
-            // TODO: Maybe check if player is allowed to mark block
             ItemStack involvedItemStack = event.getItemStack();
             if (!involvedItemStack.equals(ItemStack.EMPTY) && isVanillaStick(involvedItemStack)) {
                 StickType stickType = getStickType(involvedItemStack);
@@ -63,7 +60,7 @@ public class StickInteractionHandler {
                 if (event.getPlayer().isShiftKeyDown() && targetIsAir) {
                     StickType stickType = getStickType(involvedItemStack);
                     if (Objects.requireNonNull(stickType) == StickType.MARKER) {
-                        // FIXME: cycling mode is disabled for now because there is only one working area type
+                        // Note: cycling mode is disabled for now because there is only one working area type
                         //MarkerStickHandler.onCycleRegionMarker(involvedItemStack);
                     }
                 }
@@ -75,7 +72,6 @@ public class StickInteractionHandler {
      * Handles action when renaming mod sticks in an anvil.
      * This is used to create a mod stick or to define a region by renaming a valid RegionMarker stick.
      */
-    @SubscribeEvent
     public static void onStickRename(AnvilRepairEvent event) {
         Player player = event.getPlayer();
         if (!player.getCommandSenderWorld().isClientSide) {
