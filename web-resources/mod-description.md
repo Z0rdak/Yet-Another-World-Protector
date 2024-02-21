@@ -158,10 +158,10 @@ The configuration is split in different files, covering different topics.
 Since YAWP is a server-side mod, the config for it is found in the directory `/serverconfig` in your minecraft world
 directory.
 
-![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/yawp-feature-11.png)
+[<img src="https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/yawp-feature-11.png">](https://github.com/Z0rdak/Yet-Another-World-Protector/wiki)
 
-The documentation of the mod is small but growing. I am trying to keep up with the content. You cant find the
-documentation/wiki [here](https://github.com/Z0rdak/Yet-Another-World-Protector/wiki).
+The documentation of the mod is small but growing. I am trying to keep up with the content. You can find the
+documentation [<< here >>](https://github.com/Z0rdak/Yet-Another-World-Protector/wiki).
 
 The documentation covers
 
