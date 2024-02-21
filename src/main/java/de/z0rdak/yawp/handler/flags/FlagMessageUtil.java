@@ -55,6 +55,9 @@ public final class FlagMessageUtil {
      */
     public static void sendFlagMsg(FlagCheckEvent flagCheck) {
         IProtectedRegion responsibleRegion = flagCheck.getResponsibleRegion();
+        if (responsibleRegion == null) {
+            return;
+        }
         IFlag flag = responsibleRegion.getFlag(flagCheck.getRegionFlag().name);
         boolean isFlagMuted = flag.getFlagMsg().isMuted();
         // If not muted and the event is a player event, send the message
