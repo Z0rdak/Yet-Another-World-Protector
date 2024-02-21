@@ -22,7 +22,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 
 import static de.z0rdak.yawp.commands.CommandConstants.CREATE;
 import static de.z0rdak.yawp.commands.CommandConstants.MARKER;
-import static de.z0rdak.yawp.util.CommandUtil.buildCommandStr;
+import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.buildCommandStr;
 import static de.z0rdak.yawp.util.MessageUtil.*;
 import static de.z0rdak.yawp.util.StickUtil.*;
 
@@ -43,9 +43,9 @@ public class MarkerStickHandler {
             return;
         }
         // add block to NBT list
+        int index = marker.getMarkedBlocks().size() % (marker.getAreaType().neededBlocks + 1);
         marker.addMarkedBlock(event.getPos());
-        int blockNo = marker.getMarkedBlocks().size() % marker.getAreaType().neededBlocks;
-        sendMessage(event.getPlayer(), new TranslationTextComponent("cli.marker.create.mark.block", blockNo, shortBlockPos(event.getPos())));
+        sendMessage(event.getPlayer(), new TranslationTextComponent("cli.marker.create.mark.block", index, shortBlockPos(event.getPos())));
         // check whether marked blocks form a valid marked area
         boolean hasValidArea = marker.checkValidArea();
         involvedItem.getTag().put(STICK, marker.serializeNBT());
@@ -62,7 +62,6 @@ public class MarkerStickHandler {
 
     /**
      * Create a region from the NBT data of the renamed region marker.
-     * TODO: Make parent selectable for creating region, this is needed to check if a player is allowed to create a region with the stick
      */
     public static void onCreateRegion(AnvilRepairEvent event) {
         ItemStack outputItem = event.getItemResult();
@@ -82,7 +81,6 @@ public class MarkerStickHandler {
                         marker.reset();
                         outputItem.getTag().put(STICK, marker.serializeNBT());
                         setStickName(outputItem, type);
-                        // TODO: Reset marker on dimChange?
                         RegionDataManager.save();
                     } else {
                         sendMessage(player, new TranslationTextComponent("Player dimension not matching marker data"));

@@ -10,7 +10,6 @@ import net.minecraft.item.Items;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.player.AnvilRepairEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -30,8 +29,6 @@ public class StickInteractionHandler {
     @SubscribeEvent
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (!event.getWorld().isClientSide) {
-            PlayerEntity player = event.getPlayer();
-            // TODO: Maybe check if player is allowed to mark block
             ItemStack involvedItemStack = event.getItemStack();
             if (!involvedItemStack.equals(ItemStack.EMPTY) && isVanillaStick(involvedItemStack)) {
                 StickType stickType = getStickType(involvedItemStack);
@@ -62,7 +59,7 @@ public class StickInteractionHandler {
                 if (event.getPlayer().isShiftKeyDown() && targetIsAir) {
                     StickType stickType = getStickType(involvedItemStack);
                     if (Objects.requireNonNull(stickType) == StickType.MARKER) {
-                        // FIXME: cycling mode is disabled for now because there is only one working area type
+                        // Note: cycling mode is disabled for now because there is only one working area type
                         //MarkerStickHandler.onCycleRegionMarker(involvedItemStack);
                     }
                 }
@@ -74,7 +71,6 @@ public class StickInteractionHandler {
      * Handles action when renaming mod sticks in an anvil.
      * This is used to create a mod stick or to define a region by renaming a valid RegionMarker stick.
      */
-    @SubscribeEvent
     public static void onStickRename(AnvilRepairEvent event) {
         PlayerEntity player = event.getPlayer();
         if (!player.getCommandSenderWorld().isClientSide) {
@@ -105,7 +101,6 @@ public class StickInteractionHandler {
             event.setBreakChance(0.0f);
             player.giveExperienceLevels(1);
             initMarkerNbt(outputItem, type, event.getPlayer().getCommandSenderWorld().dimension());
-            // FIXME: does not work like in 1.18.2 +
             player.inventory.setChanged();
         }
     }
