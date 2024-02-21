@@ -54,6 +54,8 @@ public interface IProtectedRegion extends INBTSerializable<CompoundNBT> {
 
     void addPlayer(PlayerEntity player, String group);
 
+    void addPlayer(UUID uuid, String playerName, String group);
+
     void addTeam(String teamName, String group);
 
     void removeTeam(String teamName, String group);

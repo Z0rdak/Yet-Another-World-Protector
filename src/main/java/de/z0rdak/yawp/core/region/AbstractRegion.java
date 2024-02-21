@@ -177,6 +177,12 @@ public abstract class AbstractRegion implements IProtectedRegion {
     }
 
     @Override
+    public void addPlayer(UUID uuid, String playerName, String group) {
+        this.getGroup(group).addPlayer(uuid, playerName);
+    }
+
+
+    @Override
     public void addTeam(String teamName, String group) {
         this.getGroup(group).addTeam(teamName);
     }
@@ -194,6 +200,12 @@ public abstract class AbstractRegion implements IProtectedRegion {
 
     @Override
     public void removePlayer(UUID playerUuid, String group) {
+        if (group.equals("*")) {
+            for (String g : this.groups.keySet()) {
+                this.getGroup(g).removePlayer(playerUuid);
+            }
+            return;
+        }
         this.getGroup(group).removePlayer(playerUuid);
     }
 
