@@ -288,7 +288,7 @@ public final class PlayerFlagHandler {
                         // another check for PVP - this does not prevent knock-back? but prevents dmg
                         FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(dmgTarget.blockPosition(), MELEE_PLAYERS, dimCache.getDimensionalRegion());
                         if (flagCheckEvent.isDenied()) {
-                            sendFlagMsg(new PlayerFlagEvent(flagCheckEvent, dmgSource));
+                            FlagMessageUtil.sendFlagMsg(new PlayerFlagEvent(flagCheckEvent, dmgSource));
                             event.setAmount(0f);
                             event.setCanceled(true);
                         }
