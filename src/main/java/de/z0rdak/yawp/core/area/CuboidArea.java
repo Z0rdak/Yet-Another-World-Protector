@@ -37,13 +37,20 @@ public class CuboidArea extends AbstractArea {
         this.p2 = AreaUtil.getHigherPos(p1, p2);
     }
 
-    public CuboidArea(List<BlockPos> blocks){
+    public CuboidArea(List<BlockPos> blocks) {
         this(blocks.get(0), blocks.get(1));
     }
 
     public CuboidArea(CompoundNBT nbt) {
         super(nbt);
         this.deserializeNBT(nbt);
+    }
+
+    public static CuboidArea expand(CuboidArea area, int min, int max) {
+        BlockPos p1 = area.getAreaP1();
+        BlockPos p2 = area.getAreaP2();
+        return new CuboidArea(new BlockPos(p1.getX(), min, p1.getZ()),
+                new BlockPos(p2.getX(), max, p2.getZ()));
     }
 
     @Override
@@ -53,13 +60,6 @@ public class CuboidArea extends AbstractArea {
         return pos.getX() >= area.minX && pos.getX() <= area.maxX
                 && pos.getY() >= this.area.minY && pos.getY() <= this.area.maxY
                 && pos.getZ() >= this.area.minZ && pos.getZ() <= this.area.maxZ;
-    }
-
-    public static CuboidArea expand(CuboidArea area, int min, int max) {
-        BlockPos p1 = area.getAreaP1();
-        BlockPos p2 = area.getAreaP2();
-        return new CuboidArea(new BlockPos(p1.getX(), min, p1.getZ()),
-                new BlockPos(p2.getX(), max, p2.getZ()));
     }
 
     public boolean contains(CuboidArea inner) {
@@ -76,15 +76,15 @@ public class CuboidArea extends AbstractArea {
         return area;
     }
 
-    public int getXsize(){
+    public int getXsize() {
         return (int) Math.max(this.area.getXsize(), 1);
     }
 
-    public int getZsize(){
+    public int getZsize() {
         return (int) Math.max(this.area.getZsize(), 1);
     }
 
-    public int getYsize(){
+    public int getYsize() {
         return (int) Math.max(this.area.getYsize(), 1);
     }
 
@@ -166,3 +166,4 @@ public class CuboidArea extends AbstractArea {
 
 
     }
+}
