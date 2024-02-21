@@ -54,6 +54,8 @@ public interface IProtectedRegion extends INBTSerializable<CompoundTag> {
 
     void addPlayer(Player player, String group);
 
+    void addPlayer(UUID uuid, String playerName, String group);
+
     void addTeam(String teamName, String group);
 
     void removeTeam(String teamName, String group);
