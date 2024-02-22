@@ -113,6 +113,13 @@ public final class LocalRegions {
         }
     }
 
+    /**
+     * Gets all active regions which contain the provided position in the given dimension. <br>
+     *
+     * @param position the position to check for involved regions
+     * @param dim      the dimension to check for involved regions
+     * @return all active regions which contain the given location and dimension
+     */
     public static List<IMarkableRegion> getInvolvedRegionsFor(BlockPos position, RegistryKey<World> dim) {
         return RegionDataManager.get().getRegionsFor(dim).stream()
                 .filter(IMarkableRegion::isActive)
@@ -120,6 +127,15 @@ public final class LocalRegions {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Gets the region with the highest priority among all involved regions at the given location and dimension. <br>
+     * This considers the active state of the region as well. <br>
+     *
+     * @param position the position to check for involved regions
+     * @param dim      the dimension to check for involved regions
+     * @return the region with the highest priority among all involved regions which contain the given location
+     */
+    @Nullable
     public static IMarkableRegion getInvolvedRegionFor(BlockPos position, RegistryKey<World> dim) {
         List<IMarkableRegion> regionsForPos = getInvolvedRegionsFor(position, dim);
         if (regionsForPos.isEmpty()) {
@@ -129,17 +145,21 @@ public final class LocalRegions {
         }
     }
 
-    public static IMarkableRegion getInvolvedRegion(BlockPos pos, RegistryKey<World> dim) {
+    /**
+     * Gets the responsible region for the given position and dimension. <br>
+     * The responsible region is the region with the highest priority among all involved regions at the given location and dimension. <br>
+     * If no involved region is found, the dimensional region is returned. <br>
+     *
+     * @param pos the position to get the responsible region for
+     * @param dim the dimension to get the responsible region for
+     * @return the responsible region for the given position and dimension
+     */
+    public static IProtectedRegion getResponsible(BlockPos pos, RegistryKey<World> dim) {
         IMarkableRegion region = getInvolvedRegionFor(pos, dim);
-        List<FlagCorrelation> flags = getFlagsRecursive(region, new ArrayList<>());
-        return null;
-    }
-
-    public static IMarkableRegion getInvolvedRegionWithParentFlags(BlockPos pos, RegistryKey<World> dim) {
-        IMarkableRegion region = getInvolvedRegionFor(pos, dim);
-        List<IFlag> flags = getFlags(region, new ArrayList<>());
-
-        return null;
+        if (region == null) {
+            return RegionDataManager.get().cacheFor(dim).getDimensionalRegion();
+        }
+        return region;
     }
 
     /**
