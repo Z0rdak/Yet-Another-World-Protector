@@ -18,7 +18,6 @@ import net.minecraft.world.scores.Team;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.UUID;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -108,7 +107,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
     }
 
     public boolean containsFlag(RegionFlag flag) {
-        return this.flags.contains(flag);
+        return this.flags.contains(flag.name);
     }
 
     @Override
@@ -253,6 +252,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
     @Override
     public void removeChild(IProtectedRegion child) {
         this.children.remove(child.getName());
+        this.childrenNames.remove(child.getName());
     }
 
     @Override
@@ -292,6 +292,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
         }
         child.setParent(this);
         this.children.put(child.getName(), child);
+        this.childrenNames.add(child.getName());
     }
 
     @Override
