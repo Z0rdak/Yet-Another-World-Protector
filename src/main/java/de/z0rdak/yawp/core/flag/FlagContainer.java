@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.core.flag;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.handler.flags.FlagState;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
 
@@ -66,8 +67,11 @@ public class FlagContainer extends HashMap<String, IFlag> implements INBTSeriali
         this.put(flag.getName(), flag);
     }
 
-    public boolean contains(RegionFlag flag) {
-        return this.containsKey(flag.name);
+    public FlagState flagState(RegionFlag flag) {
+        if (this.contains(flag.name)) {
+            return this.get(flag.name).isActive() ? FlagState.DENIED : FlagState.ALLOWED;
+        }
+        return FlagState.UNDEFINED;
     }
 
     public boolean contains(String flag) {
@@ -81,12 +85,6 @@ public class FlagContainer extends HashMap<String, IFlag> implements INBTSeriali
     public void toggleFlag(String flag, boolean enable) {
         if (this.contains(flag)) {
             this.get(flag).setIsActive(enable);
-        }
-    }
-
-    public void invertFlag(String flag) {
-        if (this.contains(flag)) {
-            this.get(flag).setOverride(this.get(flag).doesOverride());
         }
     }
 }
