@@ -238,6 +238,12 @@ public class DimensionCommands {
                 return -1;
             }
             if (region.getParent() != null) {
+                // TODO: Check, does not seem to work according to bug report
+                /* Reproduce: Parent P, Child C
+                1. delete C
+                2. Save
+                3. Check if Parent P still has child C
+                */
                 region.getParent().removeChild(region);
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(region.getDim());
                 dimCache.getDimensionalRegion().addChild(region);
