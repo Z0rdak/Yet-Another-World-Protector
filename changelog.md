@@ -148,6 +148,7 @@
 ## Fixed
 
 * Fix some cli typos
+* Fix parent - child hierarchy inconsistency when deleting children
 
 # [0.0.2.9-beta3] - 2023-08-12
 
