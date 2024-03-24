@@ -232,7 +232,7 @@ public class DimensionCommands {
         }
 
         RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
-        dimCache.addRegion(region);
+        dimCache.addRegion(dimCache.getDimensionalRegion(), region);
         LocalRegions.ensureHigherRegionPriorityFor(region, RegionConfig.getDefaultPriority());
         RegionDataManager.save();
         sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));

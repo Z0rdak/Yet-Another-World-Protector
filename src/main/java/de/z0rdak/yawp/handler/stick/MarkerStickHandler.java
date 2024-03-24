@@ -76,7 +76,7 @@ public class MarkerStickHandler {
                 if (region != null) {
                     DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.getCommandSenderWorld().dimension());
                     if (dimCache != null){
-                        dimCache.addRegion(region);
+                        dimCache.addRegion(dimCache.getDimensionalRegion(), region);
                         LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.getDefaultPriority());
                         marker.reset();
                         outputItem.getTag().put(STICK, marker.serializeNBT());

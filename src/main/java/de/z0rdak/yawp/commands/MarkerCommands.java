@@ -98,9 +98,9 @@ public final class MarkerCommands {
                             // should only be a region which has player as owner at this point due to the OwnerRegionArgumentType suggestions
                             if (parentRegion.hasPlayer(player.getUUID(), CommandUtil.OWNER) || hasConfigPermission) {
                                 if (AbstractMarkableRegion.fullyContains(parentRegion.getArea(), region.getArea())) {
-                                    dimCache.addRegion(region);
+                                    dimCache.addRegion(dimCache.getDimensionalRegion(), region);
                                     parentRegion.addChild(region);
-                                    LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.DEFAULT_REGION_PRIORITY.get());
+                                    LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.getDefaultPriority());
                                     RegionDataManager.save();
                                     sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
                                     return 0;
@@ -114,8 +114,8 @@ public final class MarkerCommands {
                             }
                         } else {
                             if (dimCache.hasOwner(player) || hasConfigPermission) {
-                                dimCache.addRegion(region);
-                                LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.DEFAULT_REGION_PRIORITY.get());
+                                dimCache.addRegion(dimCache.getDimensionalRegion(), region);
+                                LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.getDefaultPriority());
                                 RegionDataManager.save();
                                 sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
                                 return 0;
@@ -176,7 +176,7 @@ public final class MarkerCommands {
             PlayerEntity targetPlayer = src.getPlayerOrException();
             ItemStack markerStick = StickUtil.initMarkerNbt(Items.STICK.getDefaultInstance(), StickType.MARKER, targetPlayer.level.dimension());
             targetPlayer.addItem(markerStick);
-            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.stick.reset"));
+            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.stick.success"));
         } catch (CommandSyntaxException e) {
             sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.stick.no-player").withStyle(RED));
             return 1;
