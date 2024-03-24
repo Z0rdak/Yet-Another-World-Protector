@@ -35,6 +35,10 @@ import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
+/**
+ * Class which manages the region data for the mod. It is responsible for loading and saving the region data to disk and
+ * provides methods to access the region data.
+ */
 @EventBusSubscriber(modid = YetAnotherWorldProtector.MODID)
 public class RegionDataManager extends WorldSavedData {
 
