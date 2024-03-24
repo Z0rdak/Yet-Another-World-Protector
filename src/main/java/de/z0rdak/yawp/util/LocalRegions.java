@@ -243,6 +243,29 @@ public final class LocalRegions {
         return cuboidRegion.getPriority();
     }
 
+    /**
+     * Recursively gets all flags defined in the region hierarchy of the provided region, including all it's parents. <br></br>
+     *
+     * @param region the region (and its parents) to get active flags
+     * @param carry  a flag container, holding information about region flags
+     * @return a flag container of all active flags of the given region including its parents.
+     */
+    public static FlagContainer getFlagsRecursive(IProtectedRegion region, FlagContainer carry) {
+        if (region == region.getParent()) { // global region has itself as parent
+            return carry;
+        }
+        Map<String, IFlag> activeParentFlags = region.getParent().getFlagContainer().getActiveFlags();
+        activeParentFlags.forEach((flagName, flag) -> {
+            boolean parentFlagOverrides = flag.doesOverride();
+            boolean existingFlag = carry.contains(flagName);
+            if (parentFlagOverrides && existingFlag) {
+                carry.remove(flagName);
+                carry.put(flagName, flag);
+            }
+        });
+        return getFlagsRecursive(region.getParent(), carry);
+    }
+
 
     // TODO: recursive check for ensuring region priorities
     public static void rectifyRegionPriorities(CuboidRegion parent, int defaultPriority) {
