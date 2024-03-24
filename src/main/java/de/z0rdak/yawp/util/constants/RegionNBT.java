@@ -12,6 +12,7 @@ public final class RegionNBT {
     public static final String ACTIVE = "active";
     public static final String PLAYERS = "players";
     public static final String FLAGS = "flags";
+    public static final String INHERIT_FLAGS = "inherits_flags";
     public static final String MUTED = "muted";
     public static final String DEFAULT = "default";
     public static final String AREA = "area";
