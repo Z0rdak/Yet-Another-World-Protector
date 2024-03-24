@@ -9,7 +9,7 @@ public abstract class AbstractFlag implements IFlag {
     protected String name;
     protected FlagType type;
     protected boolean isActive;
-    protected boolean override;
+    protected boolean doesOverride;
     protected FlagMessage msg;
 
     public AbstractFlag(String name, FlagType type, boolean override) {
@@ -20,7 +20,7 @@ public abstract class AbstractFlag implements IFlag {
         this.name = name;
         this.type = type;
         this.isActive = isActive;
-        this.override = override;
+        this.doesOverride = override;
         this.msg = FlagMessage.DEFAULT_FLAG_MSG;
     }
 
@@ -57,14 +57,15 @@ public abstract class AbstractFlag implements IFlag {
         this.isActive = active;
     }
 
+
     @Override
     public boolean doesOverride() {
-        return this.override;
+        return this.doesOverride;
     }
 
     @Override
     public void setOverride(boolean override) {
-        this.override = override;
+        this.doesOverride = override;
     }
 
     @Override
@@ -82,7 +83,7 @@ public abstract class AbstractFlag implements IFlag {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putString(FLAG_NAME, this.name);
         nbt.putBoolean(FLAG_ACTIVE, this.isActive);
-        nbt.putBoolean(OVERRIDE, this.override);
+        nbt.putBoolean(OVERRIDE, this.doesOverride);
         nbt.putString(FLAG_TYPE, this.type.flagType);
         nbt.put(FLAG_MSG, this.msg.serializeNBT());
         return nbt;
@@ -92,7 +93,7 @@ public abstract class AbstractFlag implements IFlag {
     public void deserializeNBT(CompoundNBT nbt) {
         this.name = nbt.getString(FLAG_NAME);
         this.isActive = nbt.getBoolean(FLAG_ACTIVE);
-        this.override = nbt.getBoolean(OVERRIDE);
+        this.doesOverride = nbt.getBoolean(OVERRIDE);
         this.type = FlagType.of(nbt.getString(FLAG_TYPE));
         this.msg = new FlagMessage(nbt.getCompound(FLAG_MSG));
     }
