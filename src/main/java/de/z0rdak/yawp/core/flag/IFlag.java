@@ -50,20 +50,18 @@ public interface IFlag extends INBTSerializable<CompoundTag>, Comparable<IFlag> 
     FlagType getType();
 
     /**
-     * Returns whether the flag is inverted for flag checks. <br>
-     * If true the flag is treated as a whitelist flag (flag action is allowed), <br>
-     * otherwise is treated like a blacklist (flag action is prohibited).
+     * Returns whether the flag does override the same flag defined in child regions. <br>
      *
-     * @return true if the flag acts as a whitelist flag, false otherwise.
+     * @return true if the flag overrides the same flag in child regions
      */
     boolean doesOverride();
 
     /**
-     * Set the inverted state of the flag.
-     *
-     * @param override true sets flag to act like a whitelist flag, false sets flag to be a blacklist flag.
+     * Set the override state of the flag. <br>
+     * When true, it overrides the same flag in child regions.
+     * @param doesOverride overrides the same flag in child regions if set to true
      */
-    void setOverride(boolean override);
+    void setOverride(boolean doesOverride);
 
     /**
      * Returns whether the flag is active in the region. <br>
