@@ -90,7 +90,7 @@ public final class MarkerCommands {
                             // should only be a region which has player as owner at this point due to the OwnerRegionArgumentType suggestions
                             if (parentRegion.hasPlayer(player.getUUID(), CommandUtil.OWNER) || hasConfigPermission) {
                                 if (AbstractMarkableRegion.fullyContains(parentRegion.getArea(), region.getArea())) {
-                                    dimCache.addRegion(region);
+                                    dimCache.addRegion(dimCache.getDimensionalRegion(), region);
                                     parentRegion.addChild(region);
                                     LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.getDefaultPriority());
                                     RegionDataManager.save();
@@ -106,7 +106,7 @@ public final class MarkerCommands {
                             }
                         } else {
                             if (dimCache.hasOwner(player) || hasConfigPermission) {
-                                dimCache.addRegion(region);
+                                dimCache.addRegion(dimCache.getDimensionalRegion(), region);
                                 LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.getDefaultPriority());
                                 RegionDataManager.save();
                                 sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));

@@ -63,9 +63,9 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
         return dimensionalRegion;
     }
 
-    public void addRegion(IMarkableRegion region) {
-        this.dimensionalRegion.addChild(region);
-        this.regionsInDimension.put(region.getName(), region);
+    public void addRegion(IProtectedRegion parent, IMarkableRegion child) {
+        parent.addChild(child);
+        this.regionsInDimension.put(child.getName(), child);
     }
 
     @Nullable
@@ -100,7 +100,7 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
         IProtectedRegion parent = currentRegion.getParent();
         this.removeRegion(currentRegion);
         currentRegion.rename(regionName);
-        this.addRegion(currentRegion, parent);
+        this.addRegion(parent, currentRegion);
     }
 
     public boolean contains(String regionName) {
@@ -138,7 +138,7 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
             if (areaType != null) {
                 YetAnotherWorldProtector.LOGGER.debug("Loading region data for region '" + regionName + "'");
                 IMarkableRegion newRegion = DimensionRegionCache.deserializeLocalRegion(areaType, regionNbt);
-                this.addRegion(newRegion);
+                this.addRegion(this.getDimensionalRegion(), newRegion);
             } else {
                 YetAnotherWorldProtector.LOGGER.error("Unable to read region type for region '" + regionName + "'!");
             }
