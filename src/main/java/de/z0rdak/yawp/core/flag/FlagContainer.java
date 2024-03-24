@@ -6,6 +6,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import static de.z0rdak.yawp.util.constants.RegionNBT.FLAG_TYPE;
@@ -71,6 +72,16 @@ public class FlagContainer extends HashMap<String, IFlag> implements INBTSeriali
             return this.get(flag.name).isActive() ? FlagState.DENIED : FlagState.ALLOWED;
         }
         return FlagState.UNDEFINED;
+    }
+
+    public Map<String, IFlag> getActiveFlags() {
+        Map<String, IFlag> activeFlags = new HashMap<>();
+        this.forEach((k, v) -> {
+            if (v.isActive()) {
+                activeFlags.put(k, v);
+            }
+        });
+        return activeFlags;
     }
 
     public boolean contains(String flag) {
