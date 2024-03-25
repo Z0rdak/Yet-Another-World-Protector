@@ -7,6 +7,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.api.events.region.RegionEvent;
 import de.z0rdak.yawp.commands.arguments.flag.RegionFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.AddRegionChildArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
@@ -49,6 +50,7 @@ import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.MinecraftForge;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -234,6 +236,18 @@ public class RegionCommands {
                 case CUBOID:
                     CuboidArea cuboidArea = new CuboidArea(pos1, pos2);
                     CuboidRegion cuboidRegion = (CuboidRegion) region;
+
+                    ServerPlayerEntity player;
+                    try {
+                        player = src.getSource().getPlayerOrException();
+                    } catch (CommandSyntaxException e) {
+                        player = null;
+                    }
+
+                    if(MinecraftForge.EVENT_BUS.post(new RegionEvent.UpdateRegionEvent(region, player))) {
+                        return 0;
+                    }
+
                     if (parent instanceof DimensionalRegion) {
                         int newPriority = LocalRegions.ensureHigherRegionPriorityFor(cuboidRegion, RegionConfig.DEFAULT_REGION_PRIORITY.get());
                         YetAnotherWorldProtector.LOGGER.info("New priority {} for region {}", newPriority, region.getName());

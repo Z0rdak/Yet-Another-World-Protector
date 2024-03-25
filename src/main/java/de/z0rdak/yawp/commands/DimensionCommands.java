@@ -5,6 +5,9 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+
+import de.z0rdak.yawp.api.events.region.RegionEvent;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.affiliation.AffiliationType;
@@ -34,6 +37,7 @@ import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -203,6 +207,18 @@ public class DimensionCommands {
             return res;
         }
         CuboidRegion region = new CuboidRegion(regionName, new CuboidArea(pos1, pos2), owner, dimCache.dimensionKey());
+
+        ServerPlayerEntity player;
+        try {
+            player = src.getPlayerOrException();
+        } catch (CommandSyntaxException e) {
+            player = null;
+        }
+
+        if(MinecraftForge.EVENT_BUS.post(new RegionEvent.CreateRegionEvent(region, player))) {
+            return 0;
+        }
+
         RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
         dimCache.addRegion(region);
         LocalRegions.ensureHigherRegionPriorityFor(region, RegionConfig.DEFAULT_REGION_PRIORITY.get());
@@ -239,6 +255,17 @@ public class DimensionCommands {
 
     // FIXME: Are child / parent relation properly removed when deleting a region?
     private static int deleteRegion(CommandSource src, DimensionRegionCache dim, IMarkableRegion region) {
+        ServerPlayerEntity player;
+        try {
+            player = src.getPlayerOrException();
+        } catch (CommandSyntaxException e) {
+            player = null;
+        }
+
+        if(MinecraftForge.EVENT_BUS.post(new RegionEvent.RemoveRegionEvent(region, player))) {
+            return 0;
+        }
+
         if (dim.contains(region.getName())) {
             if (!region.getChildren().isEmpty()) {
                 // TODO: config option which allows deleting region with children? children then default to dim parent
