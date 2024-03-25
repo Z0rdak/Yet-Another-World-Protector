@@ -37,7 +37,6 @@ public abstract class AbstractRegion implements IProtectedRegion {
     protected boolean isActive;
     protected boolean isMuted;
     protected boolean inheritFlags;
-    @Nullable
     protected IProtectedRegion parent;
     protected String parentName;
     protected Map<String, IProtectedRegion> children;
@@ -341,7 +340,6 @@ public abstract class AbstractRegion implements IProtectedRegion {
         return parent.hasChild(this);
     }
 
-    @Nullable
     public IProtectedRegion getParent() {
         return parent;
     }
