@@ -5,10 +5,7 @@ import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.core.region.DimensionalRegion;
-import de.z0rdak.yawp.core.region.GlobalRegion;
-import de.z0rdak.yawp.core.region.IMarkableRegion;
-import de.z0rdak.yawp.core.region.IProtectedRegion;
+import de.z0rdak.yawp.core.region.*;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -161,29 +158,38 @@ public class RegionDataManager extends SavedData {
         for (String dimKey : dimensionRegions.getAllKeys()) {
             ResourceKey<Level> dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(dimKey));
             DimensionRegionCache dimCache = rdm.dimCacheMap.get(dimension);
-            if (dimCache.getRegions().size() > 0) {
+            if (!dimCache.getRegions().isEmpty()) {
                 YetAnotherWorldProtector.LOGGER.info(new TranslatableComponent("data.nbt.dimensions.load.dim.restore", dimKey).getString());
-            }
-            DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-            dimCache.getRegionsInDimension().values().forEach(region -> {
-                // set child references
-                region.getChildrenNames().forEach(childName -> {
-                    IMarkableRegion childRegion = dimCache.getRegion(childName);
-                    region.addChild(childRegion);
-                });
-                // TODO: Replace this and put it into addChild?
-                // set parent reference
-                String parentName = region.getParentName();
-                boolean hasValidParent = parentName != null && !parentName.equals("");
-                if (hasValidParent) {
-                    boolean hasDimRegionAsParent = parentName.contains(":");
-                    if (hasDimRegionAsParent) { // colons are not allowed in normal region names so this should work fine
-                        region.setParent(dimRegion);
-                    } else {
-                        region.setParent(dimCache.getRegion(parentName));
+
+                DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
+                dimCache.getRegionsInDimension().values().forEach(region -> {
+                    // set child references
+                    region.getChildrenNames().forEach(childName -> {
+                        IMarkableRegion childRegion = dimCache.getRegion(childName);
+                        region.addChild(childRegion);
+                    });
+                    // TODO: Replace this and put it into addChild?
+                    // set parent reference
+                    String parentName = region.getParentName();
+                    boolean hasValidParent = parentName != null && !parentName.isEmpty(); // hasNonEmptyStringParent rather
+                    if (hasValidParent) {
+                        boolean isDimRegion = region.getRegionType() == RegionType.DIMENSION;
+                        boolean isGlobalRegion = region.getRegionType() == RegionType.GLOBAL;
+                        if (isDimRegion || isGlobalRegion) {
+                            region.setParent(globalRegion);
+                        }
+                        boolean hasDimRegionAsParent = parentName.contains(":");
+                        if (hasDimRegionAsParent) { // colons are not allowed in normal region names so this should work fine
+                            region.setParent(dimRegion);
+                        } else {
+                            if (!dimCache.contains(parentName)) {
+                                throw new IllegalRegionStateException("Corrupt save data. Parent region '" + parentName + "' not found in dimension '" + dimKey + "'!");
+                            }
+                            region.setParent(dimCache.getRegion(parentName));
+                        }
                     }
-                }
-            });
+                });
+            }
         }
         return rdm;
     }
