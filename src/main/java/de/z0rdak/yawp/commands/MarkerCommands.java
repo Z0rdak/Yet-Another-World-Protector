@@ -4,6 +4,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.api.events.region.RegionEvent;
 import de.z0rdak.yawp.commands.arguments.region.OwnedRegionArgumentType;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
@@ -24,6 +25,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraftforge.common.MinecraftForge;
 import java.util.Collections;
 import java.util.Objects;
 
@@ -83,7 +85,12 @@ public final class MarkerCommands {
                             sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.stick.area.invalid").withStyle(RED));
                             return 1;
                         }
+
                         AbstractMarkableRegion region = LocalRegions.regionFrom(player, marker, regionName);
+                        if(MinecraftForge.EVENT_BUS.post(new RegionEvent.CreateRegionEvent(region, player))) {
+                            return 0;
+                        }
+
                         RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
                         boolean hasConfigPermission = CommandPermissionConfig.hasPlayerPermission(player);
                         if (parentRegion != null) {
