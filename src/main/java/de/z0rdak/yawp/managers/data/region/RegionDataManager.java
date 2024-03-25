@@ -269,8 +269,9 @@ public class RegionDataManager extends SavedData {
     }
 
     public int getTotalRegionAmount() {
-        return (int) dimCacheMap.values().stream()
-                .mapToLong(regionCache -> regionCache.getRegionNames().size()).sum();
+        return dimCacheMap.values().stream()
+                .mapToInt(regionCache -> regionCache.getRegionNames().size())
+                .sum();
     }
 
     public int getRegionAmount(ResourceKey<Level> dim) {
@@ -337,7 +338,7 @@ public class RegionDataManager extends SavedData {
         DimensionRegionCache cache = new DimensionRegionCache(dim);
         addFlags(RegionConfig.getDefaultDimFlags(), cache.getDimensionalRegion());
         cache.getDimensionalRegion().setIsActive(RegionConfig.shouldActivateNewDimRegion());
-        cache.getDimensionalRegion().setParent(globalRegion);
+        globalRegion.addChild(cache.getDimensionalRegion());
         dimCacheMap.put(dim, cache);
         dimensionDataNames.add(cache.getDimensionalRegion().getName());
         return cache;
