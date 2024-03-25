@@ -691,18 +691,18 @@ public class CommandUtil {
                 case GLOBAL: {
                     server.getAllLevels().forEach(world -> {
                         List<Entity> entitiesToRemove = getEntitiesToRemove(world, entityFilter, flag);
-                        entitiesToRemove.stream().filter(e -> !isPersistent(e)).forEach(world::despawn);
+                        entitiesToRemove.forEach(world::despawn);
                     });
                 }
                 break;
                 case DIMENSION: {
                     List<Entity> entitiesToRemove = getEntitiesToRemove(regionWorld, entityFilter, flag);
-                    entitiesToRemove.stream().filter(e -> !isPersistent(e)).forEach(regionWorld::despawn);
+                    entitiesToRemove.forEach(regionWorld::despawn);
                 }
                 break;
                 case LOCAL: {
                     List<Entity> entitiesToRemove = getEntitiesToRemove(regionWorld, (IMarkableRegion) region, entityFilter);
-                    entitiesToRemove.stream().filter(e -> !isPersistent(e)).forEach(regionWorld::despawn);
+                    entitiesToRemove.forEach(regionWorld::despawn);
                 }
                 break;
             }
@@ -717,8 +717,8 @@ public class CommandUtil {
         return false;
     }
 
-    private static boolean isPersistent(Entity e) {
-        return hasEnabledPersistenceFlag(e) || e.hasCustomName();
+    private static boolean isNotPersistent(Entity e) {
+        return !hasEnabledPersistenceFlag(e) && !e.hasCustomName();
     }
 
     private static Predicate<? super Entity> getEntityFilterForFlag(RegionFlag flag) {
@@ -750,7 +750,10 @@ public class CommandUtil {
      * ...area.intersects(entity.getBoundingBox()) ...
      */
     private static List<Entity> getEntitiesToRemove(ServerWorld level, IMarkableRegion region, Predicate<? super Entity> entityFilter) {
-        return level.getEntities((Entity) null, ((CuboidArea) region.getArea()).getArea(), entityFilter);
+        return level.getEntities((Entity) null, ((CuboidArea) region.getArea()).getArea(), entityFilter)
+                .stream()
+                .filter(CommandUtil::isNotPersistent)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -761,6 +764,7 @@ public class CommandUtil {
         return entities.stream()
                 // don't consider entities, which are currently in a Local Region which doesn't have the flag
                 .filter(e -> isInRegionWithoutFlag(level, flag, e))
+                .filter(CommandUtil::isNotPersistent)
                 .collect(Collectors.toList());
     }
 
