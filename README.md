@@ -18,6 +18,7 @@ new [issue](https://github.com/Z0rdak/Yet-Another-World-Protector/issues) on our
 - Special thanks to IVEN#2107 for the mod logo!
 - Special thanks to Reincarnaciya for the russian translation!
 - Special thanks to petersv5 aka. ptefar, for help porting flags to fabric!
+- Special thanks for DerHammer#8038 for the first API implementation.
 
 # License
 
