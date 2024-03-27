@@ -20,7 +20,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.DimensionSavedDataManager;
 import net.minecraft.world.storage.WorldSavedData;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -39,11 +38,11 @@ import java.util.stream.Collectors;
 import static de.z0rdak.yawp.util.constants.RegionNBT.DIMENSIONS;
 import static de.z0rdak.yawp.util.constants.RegionNBT.REGIONS;
 
-@EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER)
+@EventBusSubscriber(modid = YetAnotherWorldProtector.MODID)
 public class RegionDataManager extends WorldSavedData {
 
     /**
-     * Name which is used for the file to store the NBT data: yawp-dimensions.dat
+     * Name which is used for the file to store the NBT data: yawp-dimensions.dat.old
      */
     private static final String DATA_NAME = YetAnotherWorldProtector.MODID + "-dimensions";
     /**

@@ -27,13 +27,15 @@ public class TntBlockMixin {
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true, allow = 1)
     public void onUseFlintAndSteel(BlockState state, World world, BlockPos pos, PlayerEntity player2, Hand hand, BlockRayTraceResult hit, CallbackInfoReturnable<ActionResultType> cir) {
-        ItemStack itemStack = player2.getItemInHand(hand);
-        if (itemStack.sameItemStackIgnoreDurability(Items.FLINT_AND_STEEL.getDefaultInstance()) || itemStack.sameItem(Items.FIRE_CHARGE.getDefaultInstance())) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.dimension());
-            FlagCheckEvent flagCheck = checkPlayerEvent(player2, pos, IGNITE_EXPLOSIVES, dimCache.getDimensionalRegion());
-            if (flagCheck.isDenied()) {
-                sendFlagDeniedMsg(flagCheck, player2);
-                cir.setReturnValue(ActionResultType.CONSUME);
+        if (!world.isClientSide) {
+            ItemStack itemStack = player2.getItemInHand(hand);
+            if (itemStack.sameItemStackIgnoreDurability(Items.FLINT_AND_STEEL.getDefaultInstance()) || itemStack.sameItem(Items.FIRE_CHARGE.getDefaultInstance())) {
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.dimension());
+                FlagCheckEvent flagCheck = checkPlayerEvent(player2, pos, IGNITE_EXPLOSIVES, dimCache.getDimensionalRegion());
+                if (flagCheck.isDenied()) {
+                    sendFlagDeniedMsg(flagCheck, player2);
+                    cir.setReturnValue(ActionResultType.CONSUME);
+                }
             }
         }
     }

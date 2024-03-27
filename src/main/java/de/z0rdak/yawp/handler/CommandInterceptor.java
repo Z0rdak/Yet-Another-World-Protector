@@ -18,7 +18,6 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -35,7 +34,7 @@ import static de.z0rdak.yawp.util.MessageUtil.sendCmdFeedback;
 import static net.minecraft.util.text.TextFormatting.RED;
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 
-@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER, bus = FORGE)
+@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, bus = FORGE)
 public class CommandInterceptor {
 
     /**
@@ -45,19 +44,21 @@ public class CommandInterceptor {
     public static void handleModCommandPermission(CommandEvent event) {
         CommandContextBuilder<CommandSource> cmdContext = event.getParseResults().getContext();
         CommandSource src = cmdContext.getSource();
-        List<ParsedCommandNode<CommandSource>> cmdNodes = cmdContext.getNodes();
-        if (cmdNodes.size() > 2) {
-            String baseCmd = cmdNodes.get(0).getNode().getName();
-            if (baseCmd.equals(BASE_CMD)) {
-                YetAnotherWorldProtector.LOGGER.debug("Executed command: '" + event.getParseResults().getReader().getString() + "' by '" + src.getTextName() + "'.");
-                String subCmd = cmdNodes.get(1).getNode().getName();
-                switch (subCmd) {
-                    case "region":
-                        handleRegionCmdExecution(event);
-                        break;
-                    case "dim":
-                        handleDimCommandExecution(event);
-                        break;
+        if (!src.getLevel().isClientSide) {
+            List<ParsedCommandNode<CommandSource>> cmdNodes = cmdContext.getNodes();
+            if (cmdNodes.size() > 2) {
+                String baseCmd = cmdNodes.get(0).getNode().getName();
+                if (baseCmd.equals(BASE_CMD)) {
+                    YetAnotherWorldProtector.LOGGER.debug("Executed command: '" + event.getParseResults().getReader().getString() + "' by '" + src.getTextName() + "'.");
+                    String subCmd = cmdNodes.get(1).getNode().getName();
+                    switch (subCmd) {
+                        case "region":
+                            handleRegionCmdExecution(event);
+                            break;
+                        case "dim":
+                            handleDimCommandExecution(event);
+                            break;
+                    }
                 }
             }
         }
