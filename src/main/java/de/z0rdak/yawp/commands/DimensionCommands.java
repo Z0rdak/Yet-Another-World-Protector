@@ -6,7 +6,6 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-
 import de.z0rdak.yawp.api.events.region.RegionEvent;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.config.server.RegionConfig;
@@ -29,9 +28,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
-import org.apache.commons.lang3.NotImplementedException;
 
 import javax.annotation.Nullable;
 import java.util.*;
