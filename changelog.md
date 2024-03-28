@@ -1,4 +1,4 @@
-# [0.0.3.0-beta1] - 2023-12-15
+# [0.0.4.0-beta1] - 2024-04-30
 
 ## Added
 * Add command to copy region properties
@@ -58,7 +58,8 @@
     description of possible placeholders for messages.
   * `/wp flag local <dim> <region> <flag> msg clear` ...
   * `/wp flag local <dim> <region> <flag> msg mute` ...
-  * `/wp flag dim ...` to manage flag properties for Dimensional Regions
+  * `/wp flag dim ...` to manage flag properties for a Dimensional Region
+  * `/wp flag global ...` to manage flag properties for the Global Region
 
 ### Flag inheritance for regions
 
@@ -150,10 +151,23 @@
 * Fix some cli typos
 * Fix parent - child hierarchy inconsistency when deleting children
 
+# [0.0.3.0-beta1] - 2024-03-27
+
+## Add first basic draft for an API to manage regions [Pull Request #105](https://github.com/Z0rdak/Yet-Another-World-Protector/pull/105). Thank you very much!
+
+* Implement CreateRegion event which is fired whenever a region is created. This event can be canceled to prevent the
+  creation.
+* Implement UpdateRegion event which is fired whenever a region is update (the area changed). This event can be
+  canceled.
+* Implement DeleteRegion event which is fired whenever a region is deleted. This event can be canceled to prevent the
+  deletion.
+
+## Changed
+
+* Bump forge version to latest (36.2.42)
+
 # [0.0.2.9-beta3] - 2023-08-12
-
 ## Fixed
-
 * [Forge] Fix place-blocks and no-walker-freeze flags not working together properly
 * [Fabric] Fix spawning-all flag destroying thrown out items
 * [Fabric] Fix inventory desync when placing a block with the `place-blocks` flag active
