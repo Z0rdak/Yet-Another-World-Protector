@@ -294,11 +294,6 @@ public class RegionCommands {
      * Fails if region priority is used by an overlapping region at same hierarchy level.
      */
     public static int setPriority(CommandContext<CommandSourceStack> src, IMarkableRegion region, int priority) {
-        CuboidRegion cuboidRegion = (CuboidRegion) region;
-        List<CuboidRegion> intersectingRegions = LocalRegions.getIntersectingRegionsFor(cuboidRegion);
-        boolean existRegionWithSamePriority = intersectingRegions
-                .stream()
-                .anyMatch(r -> r.getPriority() == priority);
         IProtectedRegion parent = region.getParent();
         if (parent instanceof IMarkableRegion) {
             int parentPriority = ((IMarkableRegion) parent).getPriority();
@@ -308,6 +303,8 @@ public class RegionCommands {
                 return 1;
             }
         }
+        CuboidRegion cuboidRegion = (CuboidRegion) region;
+        boolean existRegionWithSamePriority = LocalRegions.hasAnyRegionWithSamePriority(cuboidRegion, priority);
         if (existRegionWithSamePriority) {
             MutableComponent updatePriorityFailMsg = new TranslatableComponent("cli.msg.info.region.state.priority.set.fail.same", buildRegionInfoLink(region), priority);
             sendCmdFeedback(src.getSource(), updatePriorityFailMsg);
