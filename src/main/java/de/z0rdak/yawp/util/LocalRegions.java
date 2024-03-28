@@ -243,6 +243,15 @@ public final class LocalRegions {
                 .collect(Collectors.toList());
     }
 
+    public static boolean hasAnyRegionWithSamePriority(List<IMarkableRegion> region, int priority) {
+        return region.stream().anyMatch(r -> ((CuboidRegion) r).getPriority() == priority);
+    }
+
+    public static boolean hasAnyRegionWithSamePriority(IMarkableRegion region, int priority) {
+        return hasAnyRegionWithSamePriority(getIntersectingRegionsFor(region), priority);
+    }
+
+
     public static List<CuboidRegion> getIntersectingWithSamePriority(CuboidRegion cuboidRegion) {
         return cuboidRegion.getParent().getChildren().values()
                 .stream()
