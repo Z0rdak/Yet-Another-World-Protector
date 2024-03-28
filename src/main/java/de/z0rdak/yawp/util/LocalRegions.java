@@ -1,10 +1,12 @@
 package de.z0rdak.yawp.util;
 
 import de.z0rdak.yawp.core.area.CuboidArea;
+import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.core.stick.MarkerStick;
+import de.z0rdak.yawp.handler.flags.FlagState;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.RegistryKey;
@@ -12,10 +14,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public final class LocalRegions {
@@ -161,6 +160,21 @@ public final class LocalRegions {
         }
         return region;
     }
+
+    public static FlagState getFlagState(BlockPos pos, RegistryKey<World> dim, RegionFlag flag, @Nullable PlayerEntity player) {
+        IProtectedRegion region = getResponsible(pos, dim);
+        if (player == null) {
+            return region.getFlagContainer().flagState(flag);
+        } else {
+            boolean isPermitted = region.permits(player);
+            if (isPermitted) {
+                return FlagState.ALLOWED;
+            } else {
+                return region.getFlagContainer().flagState(flag);
+            }
+        }
+    }
+
 
     /**
      * Gets all active flags of the given region including all it's parents.
