@@ -206,6 +206,14 @@ public final class LocalRegions {
                 .collect(Collectors.toList());
     }
 
+    public static List<IMarkableRegion> getIntersectingRegions(IMarkableRegion region) {
+        return RegionDataManager.get().getRegionsFor(region.getDim()).stream()
+                .filter(r -> !r.equals(region)) // filter input region from the result
+                .map(r -> (CuboidRegion) r)
+                .filter(r -> ((CuboidArea) region.getArea()).intersects((CuboidArea) (r).getArea()))
+                .collect(Collectors.toList());
+    }
+
     /**
      * Gets intersecting region at the same region hierarchy.
      *
