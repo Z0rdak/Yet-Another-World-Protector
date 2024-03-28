@@ -7,9 +7,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
-import de.z0rdak.yawp.commands.arguments.flag.RegionFlagArgumentType;
+import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.commands.arguments.region.AddRegionChildArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RemoveRegionChildArgumentType;
@@ -35,7 +34,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.List;
@@ -274,11 +272,6 @@ public class RegionCommands {
      * Fails if region priority is used by an overlapping region at same hierarchy level.
      */
     public static int setPriority(CommandContext<CommandSource> src, IMarkableRegion region, int priority) {
-        CuboidRegion cuboidRegion = (CuboidRegion) region;
-        List<CuboidRegion> intersectingRegions = LocalRegions.getIntersectingRegionsFor(cuboidRegion);
-        boolean existRegionWithSamePriority = intersectingRegions
-                .stream()
-                .anyMatch(r -> r.getPriority() == priority);
         IProtectedRegion parent = region.getParent();
         if (parent instanceof IMarkableRegion) {
             int parentPriority = ((IMarkableRegion) parent).getPriority();
@@ -288,6 +281,8 @@ public class RegionCommands {
                 return 1;
             }
         }
+        CuboidRegion cuboidRegion = (CuboidRegion) region;
+        boolean existRegionWithSamePriority = LocalRegions.hasAnyRegionWithSamePriority(cuboidRegion, priority);
         if (existRegionWithSamePriority) {
             IFormattableTextComponent updatePriorityFailMsg = new TranslationTextComponent("cli.msg.info.region.state.priority.set.fail.same", buildRegionInfoLink(region), priority);
             sendCmdFeedback(src.getSource(), updatePriorityFailMsg);
