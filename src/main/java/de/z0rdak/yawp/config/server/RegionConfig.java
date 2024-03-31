@@ -24,7 +24,7 @@ public class RegionConfig {
     static {
         final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
-        BUILDER.push("YetAnotherWorldProtector region configuration").build();
+        BUILDER.push("YetAnotherWorldProtector region configuration");
 
         DEFAULT_REGION_PRIORITY = BUILDER.comment("Default region priority for newly created regions.")
                 .defineInRange("default_region_priority", 10, 0, Integer.MAX_VALUE);
