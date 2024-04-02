@@ -1,25 +1,25 @@
 package de.z0rdak.yawp.handler.flags;
 
 
-public class FlagState {
-    public static final FlagState ALLOWED = new FlagState(true);
-    public static final FlagState DENIED = new FlagState(false);
-    public static final FlagState UNDEFINED = new FlagState();
+public enum FlagState {
+    ALLOWED(true),
+    DENIED(false),
+    UNDEFINED();
 
     private final boolean value;
     private final boolean isDefined;
 
-    private FlagState() {
+    FlagState() {
         this.value = false;
         this.isDefined = false;
     }
 
-    public FlagState(boolean value) {
+    FlagState(boolean value) {
         this.value = value;
         this.isDefined = true;
     }
 
-    public static FlagState fromBoolean(boolean value) {
+    public static FlagState from(boolean value) {
         return value ? ALLOWED : DENIED;
     }
 
