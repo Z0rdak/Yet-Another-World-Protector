@@ -147,7 +147,7 @@ public final class LocalRegions {
     /**
      * Gets the responsible region for the given position and dimension. <br>
      * The responsible region is the region with the highest priority among all involved regions at the given location and dimension. <br>
-     * If no involved region is found, the dimensional region is returned. <br>
+     * If no Local Region is defined at the given position, the dimensional region is responsible and returned. <br>
      *
      * @param pos the position to get the responsible region for
      * @param dim the dimension to get the responsible region for
