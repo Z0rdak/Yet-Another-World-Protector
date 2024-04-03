@@ -1,15 +1,29 @@
 package de.z0rdak.yawp.core.flag;
 
+import de.z0rdak.yawp.api.events.region.FlagCheckResult;
+import de.z0rdak.yawp.core.region.IProtectedRegion;
+import de.z0rdak.yawp.util.MessageUtil;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.util.INBTSerializable;
 
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
+import javax.annotation.Nullable;
+import java.util.*;
 
+import static de.z0rdak.yawp.core.flag.FlagCategory.PLAYER;
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
 public class FlagMessage implements INBTSerializable<CompoundTag> {
+
+    public static final String FLAG_TEMPLATE = "{flag}";
+    public static final String POS_TEMPLATE = "{pos}";
+    public static final String REGION_TEMPLATE = "{region}";
+    public static final String DIM_TEMPLATE = "{dim}";
+    public static final String PLAYER_TEMPLATE = "{player}";
 
     public static final String CONFIG_MSG = "config";
     public static final Set<String> MSG_TOKEN;
@@ -23,7 +37,7 @@ public class FlagMessage implements INBTSerializable<CompoundTag> {
         MSG_TOKEN.add("{pos}");
         MSG_TOKEN.add("{player}");
         MSG_TOKEN.add("{team}");
-        MSG_TOKEN.add("{affiliation}");
+        MSG_TOKEN.add("{group}");
         MSG_TOKEN.add("{entity}");
         MSG_TOKEN.add("{block}");
     }
@@ -90,5 +104,92 @@ public class FlagMessage implements INBTSerializable<CompoundTag> {
         this.msg = nbt.getString(MSG);
         this.muted = nbt.getBoolean(MUTED);
         this.isDefault = nbt.getBoolean(DEFAULT);
+    }
+
+    /**
+     * Returns a map with default substitutes for the given flag and region. <br>
+     *
+     * @param flag   the flag to get the substitutes for
+     * @param region the region to get the substitutes for
+     * @param pos    the position to get the substitutes for
+     * @param player the player to get the substitutes for
+     * @return a map with default substitutes for the given flag and region
+     */
+    public static Map<String, String> defaultSubstitutes(RegionFlag flag, IProtectedRegion region, BlockPos pos, @Nullable Player player) {
+        Map<String, String> substituteMap = new HashMap<>();
+        substituteMap.put(FLAG_TEMPLATE, flag.name);
+        substituteMap.put(POS_TEMPLATE, MessageUtil.shortBlockPos(pos));
+        substituteMap.put(REGION_TEMPLATE, region.getName());
+        substituteMap.put(DIM_TEMPLATE, region.getDim().location().toString());
+        if (player != null && flag.categories.contains(PLAYER)) {
+            substituteMap.put(PLAYER_TEMPLATE, player.getScoreboardName());
+        }
+        return substituteMap;
+    }
+
+    /**
+     * Returns a map with default substitutes for the given flag check result. <br>
+     * The substitutes are built from the flag, responsible region, position and player in the result. <br>
+     * The substitutes are then returned as a map. <br>
+     *
+     * @param result the flag check result to get the default substitutes for
+     * @return a map with default substitutes for the given flag check result
+     */
+    public static Map<String, String> defaultSubstitutesFor(FlagCheckResult result) {
+        Map<String, String> substituteMap = new HashMap<>();
+        substituteMap.put(FLAG_TEMPLATE, result.getFlag().getName());
+        substituteMap.put(POS_TEMPLATE, MessageUtil.shortBlockPos(result.getPos()));
+        substituteMap.put(REGION_TEMPLATE, result.getResponsible().getName());
+        substituteMap.put(DIM_TEMPLATE, result.getResponsible().getDim().location().toString());
+        if (result.getPlayer() != null && result.getRegionFlag().categories.contains(PLAYER)) {
+            substituteMap.put(PLAYER_TEMPLATE, result.getPlayer().getScoreboardName());
+        }
+        return substituteMap;
+    }
+
+    /**
+     * Builds a flag message from the given flag check result and substitutes. <br>
+     * The flag message is built from the flag message template of the flag in the result. <br>
+     * The matches in the flag message template are replaced with the substitutes. <br>
+     * The flag message is then returned as a {@link MutableComponent}. <br>
+     *
+     * @param result      the flag check result to build the message for
+     * @param substitutes the substitutes to replace the matches in the flag message template with
+     * @return the flag message for the given flag check result and substitutes
+     */
+    public static MutableComponent buildFrom(FlagCheckResult result, Map<String, String> substitutes) {
+        String flagMsgTemplate = result.getFlag().getFlagMsg().isDefault() ? getI18nFlagMsgTemplate(result.getFlag()) : result.getFlag().getFlagMsg().getMsg();
+        String flagMsg = replaceMatches(flagMsgTemplate, substitutes);
+        return new TextComponent(flagMsg);
+    }
+
+    /**
+     * Returns the flag message template for the given flag from the I18n keys. <br>
+     * If the flag has a custom message defined, that message is returned instead. <br>
+     *
+     * @param flag the flag to get the default message template for
+     * @return the default flag message template for the given flag
+     */
+    private static String getI18nFlagMsgTemplate(IFlag flag) {
+        RegionFlag regionFlag = RegionFlag.fromId(flag.getName());
+        String flagMsgLangKey = regionFlag.categories.contains(FlagCategory.PLAYER) ? "flag.msg.deny." + flag.getName() : "flag.msg.deny.default";
+        return new TranslatableComponent(flagMsgLangKey).getString();
+    }
+
+    /**
+     * Replaces the matches in the given flag message template with the substitutes. <br>
+     * The matches are replaced with the substitutes in the given map. <br>
+     * The flag message with the matches replaced is then returned. <br>
+     *
+     * @param flagMsgTemplate the flag message template to replace the matches in
+     * @param substitutes     the substitutes to replace the matches with
+     * @return the flag message with the matches replaced
+     */
+    private static String replaceMatches(String flagMsgTemplate, Map<String, String> substitutes) {
+        String flagMsg = flagMsgTemplate;
+        for (Map.Entry<String, String> entry : substitutes.entrySet()) {
+            flagMsg = flagMsg.replace(entry.getKey(), entry.getValue());
+        }
+        return flagMsg;
     }
 }
