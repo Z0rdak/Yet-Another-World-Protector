@@ -1,12 +1,10 @@
 package de.z0rdak.yawp.util;
 
 import de.z0rdak.yawp.core.area.CuboidArea;
-import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.core.stick.MarkerStick;
-import de.z0rdak.yawp.handler.flags.FlagState;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.RegistryKey;
@@ -14,7 +12,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public final class LocalRegions {
@@ -24,9 +25,6 @@ public final class LocalRegions {
 
     /**
      * Gets flags of region sorted by active state and name
-     *
-     * @param region
-     * @return
      */
     public static List<IFlag> getSortedFlags(IProtectedRegion region) {
         List<IFlag> activeFlags = region.getFlags().stream()
@@ -86,6 +84,7 @@ public final class LocalRegions {
      * @param dim      the dimension to check regions for
      * @return a list of regions which match the criteria, can be empty.
      */
+    @Deprecated
     public static List<IMarkableRegion> getInvolvedRegionsFor(RegionFlag flag, BlockPos position, RegistryKey<World> dim) {
         return RegionDataManager.get().getRegionsFor(dim).stream()
                 .filter(IMarkableRegion::isActive)
@@ -94,17 +93,13 @@ public final class LocalRegions {
                 .collect(Collectors.toList());
     }
 
-    public static List<IMarkableRegion> getRegionsWithoutFlag(RegionFlag flag, BlockPos position, RegistryKey<World> dim) {
-        return RegionDataManager.get().getRegionsFor(dim).stream()
+    @Nullable
+    public static IMarkableRegion getRegionWithoutFlag(RegionFlag flag, BlockPos position, RegistryKey<World> dim) {
+        List<IMarkableRegion> regionsForPos = RegionDataManager.get().getRegionsFor(dim).stream()
                 .filter(IMarkableRegion::isActive)
                 .filter(region -> !region.containsFlag(flag))
                 .filter(region -> region.contains(position))
                 .collect(Collectors.toList());
-    }
-
-    @Nullable
-    public static IMarkableRegion getRegionWithoutFlag(RegionFlag flag, BlockPos position, RegistryKey<World> dim) {
-        List<IMarkableRegion> regionsForPos = getRegionsWithoutFlag(flag, position, dim);
         if (regionsForPos.isEmpty()) {
             return null;
         } else {
@@ -112,113 +107,29 @@ public final class LocalRegions {
         }
     }
 
-    /**
-     * Gets all active regions which contain the provided position in the given dimension. <br>
-     *
-     * @param position the position to check for involved regions
-     * @param dim      the dimension to check for involved regions
-     * @return all active regions which contain the given location and dimension
-     */
-    public static List<IMarkableRegion> getInvolvedRegionsFor(BlockPos position, RegistryKey<World> dim) {
-        return RegionDataManager.get().getRegionsFor(dim).stream()
-                .filter(IMarkableRegion::isActive)
-                .filter(region -> region.contains(position))
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Gets the region with the highest priority among all involved regions at the given location and dimension. <br>
-     * This considers the active state of the region as well. <br>
-     *
-     * @param position the position to check for involved regions
-     * @param dim      the dimension to check for involved regions
-     * @return the region with the highest priority among all involved regions which contain the given location
-     */
-    @Nullable
-    public static IMarkableRegion getInvolvedRegionFor(BlockPos position, RegistryKey<World> dim) {
-        List<IMarkableRegion> regionsForPos = getInvolvedRegionsFor(position, dim);
-        if (regionsForPos.isEmpty()) {
-            return null;
-        } else {
-            return Collections.max(regionsForPos, Comparator.comparing(IMarkableRegion::getPriority));
-        }
-    }
-
-    /**
-     * Gets the responsible region for the given position and dimension. <br>
-     * The responsible region is the region with the highest priority among all involved regions at the given location and dimension. <br>
-     * If no Local Region is defined at the given position, the dimensional region is responsible and returned. <br>
-     *
-     * @param pos the position to get the responsible region for
-     * @param dim the dimension to get the responsible region for
-     * @return the responsible region for the given position and dimension
-     */
-    public static IProtectedRegion getResponsible(BlockPos pos, RegistryKey<World> dim) {
-        IMarkableRegion region = getInvolvedRegionFor(pos, dim);
-        if (region == null) {
-            return RegionDataManager.get().cacheFor(dim).getDimensionalRegion();
-        }
-        return region;
-    }
-
-    public static FlagState getFlagState(BlockPos pos, RegistryKey<World> dim, RegionFlag flag, @Nullable PlayerEntity player) {
-        IProtectedRegion region = getResponsible(pos, dim);
-        if (player == null) {
-            return region.getFlagContainer().flagState(flag);
-        } else {
-            boolean isPermitted = region.permits(player);
-            if (isPermitted) {
-                return FlagState.ALLOWED;
-            } else {
-                return region.getFlagContainer().flagState(flag);
-            }
-        }
-    }
-
-
-    /**
-     * Gets all active flags of the given region including all it's parents.
-     * @param region the region to get active flags
-     * @param carry list holding information about region flags
-     * @return a list of all active flags of the given region including its parents.
-     */
-    public static List<FlagCorrelation> getFlagsRecursive(IProtectedRegion region, List<FlagCorrelation> carry) {
-        if (region == null) {
+    /*
+    public static FlagCorrelation evaluateFlag(IProtectedRegion region, RegionFlag regionFlag, @Nullable FlagCorrelation carry) {
+        // break case
+        if (region.getParent().equals(region)) {
             return carry;
         }
-        List<FlagCorrelation> parentFlags = region.getFlags().stream()
-                .filter(IFlag::isActive)
-                .map(f -> new FlagCorrelation(region, getRegionType(region), f))
-                .collect(Collectors.toList());
-        carry.addAll(parentFlags);
-        return getFlagsRecursive(region.getParent(), carry);
-    }
-
-    public static List<IFlag> getFlags(IProtectedRegion region, List<IFlag> carry) {
-        if (region == null) {
-            return carry;
+        if (region.getFlagContainer().flagState(regionFlag.name) != FlagState.UNDEFINED) {
+            IFlag flag = region.getFlag(regionFlag.name);
+            //if (flag.doesOverride() && region.getChildren().size() > 0) {
+            //    return new FlagCorrelation(region, flag);
+            //}
+            if (region.equals(region.getParent()))
+                return new FlagCorrelation(region, flag);
+            return evaluateFlag(region.getParent(), regionFlag, new FlagCorrelation(region, flag));
         }
-        List<IFlag> parentFlags = region.getFlags().stream()
-                .filter(IFlag::isActive)
-                .collect(Collectors.toList());
-        carry.addAll(parentFlags);
-        return getFlags(region.getParent(), carry);
-    }
+        // recursive case, as long as the region is not the global region
+        FlagCorrelation parentEval = evaluateFlag(region.getParent(), regionFlag, carry);
 
-    public static RegionType getRegionType(IProtectedRegion region) {
-        return region instanceof DimensionalRegion ? RegionType.DIMENSION : region instanceof IMarkableRegion ? RegionType.LOCAL : RegionType.GLOBAL;
+        IFlag flag = region.getFlag(regionFlag.name);
+        FlagCorrelation flagCorrelation = new FlagCorrelation(region, flag);
+        return evaluateFlag(region.getParent(), regionFlag, flagCorrelation);
     }
-
-    // TODO: Start from dimRegion with only the parents, so possible regions to check are far less
-    public static List<IMarkableRegion> getInvolvedRegionsFor(RegionFlag flag, BlockPos position, PlayerEntity player, RegistryKey<World> dim) {
-        return RegionDataManager.get().getRegionsFor(dim).stream()
-                .filter(IMarkableRegion::isActive)
-                .filter(region -> region.containsFlag(flag) && region.getFlag(flag.name).isActive())
-                //.filter(region -> !region.permits(player))
-                // position check should always be the last check to do, because it is the most computation expensive
-                .filter(region -> region.contains(position))
-                .collect(Collectors.toList());
-    }
+    */
 
     public static List<IMarkableRegion> getIntersectingRegions(IMarkableRegion region) {
         return RegionDataManager.get().getRegionsFor(region.getDim()).stream()
@@ -228,13 +139,60 @@ public final class LocalRegions {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Gets intersecting region at the same region hierarchy.
-     *
-     * @param cuboidRegion
-     * @return
-     */
-    public static List<CuboidRegion> getIntersectingRegionsFor(CuboidRegion cuboidRegion) {
+    public static boolean hasAnyRegionWithSamePriority(IMarkableRegion region, int priority) {
+        return hasAnyRegionWithSamePriority(getIntersectingRegionsFor(region), priority);
+    }
+
+    public static int ensureHigherRegionPriorityFor(IMarkableRegion cuboidRegion, int defaultPriority) {
+        List<IMarkableRegion> intersectingRegions = getIntersectingRegionsFor(cuboidRegion);
+        boolean hasRegionWithSamePriority = hasAnyRegionWithSamePriority(intersectingRegions, defaultPriority);
+        if (hasRegionWithSamePriority) {
+            int maxPriority = intersectingRegions.stream()
+                    .map(r -> (CuboidRegion) r)
+                    .mapToInt(AbstractMarkableRegion::getPriority)
+                    .max().getAsInt();
+            cuboidRegion.setPriority(maxPriority + 1);
+        } else {
+            cuboidRegion.setPriority(defaultPriority);
+        }
+        return cuboidRegion.getPriority();
+    }
+
+    // TODO: FIXME
+    // TODO: recursive check for ensuring region priorities
+    @Deprecated
+    public static void rectifyRegionPriorities(IMarkableRegion parent, int defaultPriority) {
+        List<IMarkableRegion> children = getIntersectingRegionsFor(parent);
+        if (children.size() == 0) {
+            return;
+        }
+        for (IMarkableRegion child : children) {
+
+            rectifyRegionPriorities(child, parent.getPriority());
+        }
+        List<IMarkableRegion> intersectingRegions = getIntersectingRegionsFor(parent);
+        boolean hasRegionWithSamePriority = intersectingRegions.stream().anyMatch(r -> r.getPriority() == parent.getPriority());
+        if (hasRegionWithSamePriority) {
+            int minPriority = intersectingRegions.stream().mapToInt(IMarkableRegion::getPriority).min().getAsInt();
+            parent.setPriority(minPriority - 1);
+        } else {
+            parent.setPriority(defaultPriority);
+        }
+    }
+
+    public static int ensureLowerRegionPriorityFor(IMarkableRegion cuboidRegion, int defaultPriority) {
+        List<IMarkableRegion> intersectingRegions = getIntersectingRegionsFor(cuboidRegion);
+        boolean hasRegionWithSamePriority = intersectingRegions.stream().anyMatch(r -> r.getPriority() == cuboidRegion.getPriority());
+        if (hasRegionWithSamePriority) {
+            int minPriority = intersectingRegions.stream().mapToInt(IMarkableRegion::getPriority).min().getAsInt();
+            cuboidRegion.setPriority(minPriority - 1);
+        } else {
+            cuboidRegion.setPriority(defaultPriority);
+        }
+        return cuboidRegion.getPriority();
+    }
+
+    private static List<IMarkableRegion> getIntersectingRegionsFor(IMarkableRegion cuboidRegion) {
         return cuboidRegion.getParent().getChildren().values()
                 .stream()
                 .filter(r -> !r.equals(cuboidRegion)) // filter input region from the result
@@ -243,16 +201,11 @@ public final class LocalRegions {
                 .collect(Collectors.toList());
     }
 
-    public static boolean hasAnyRegionWithSamePriority(List<IMarkableRegion> region, int priority) {
+    private static boolean hasAnyRegionWithSamePriority(List<IMarkableRegion> region, int priority) {
         return region.stream().anyMatch(r -> ((CuboidRegion) r).getPriority() == priority);
     }
 
-    public static boolean hasAnyRegionWithSamePriority(IMarkableRegion region, int priority) {
-        return hasAnyRegionWithSamePriority(getIntersectingRegionsFor(region), priority);
-    }
-
-
-    public static List<CuboidRegion> getIntersectingWithSamePriority(CuboidRegion cuboidRegion) {
+    private static List<CuboidRegion> getIntersectingWithSamePriority(CuboidRegion cuboidRegion) {
         return cuboidRegion.getParent().getChildren().values()
                 .stream()
                 .filter(r -> !r.equals(cuboidRegion)) // filter input region from the result
@@ -262,73 +215,4 @@ public final class LocalRegions {
                 .collect(Collectors.toList());
     }
 
-    public static int ensureHigherRegionPriorityFor(CuboidRegion cuboidRegion, int defaultPriority) {
-        List<CuboidRegion> intersectingRegions = getIntersectingRegionsFor(cuboidRegion);
-        boolean hasRegionWithSamePriority = intersectingRegions.stream().anyMatch(r -> r.getPriority() == cuboidRegion.getPriority());
-        if (hasRegionWithSamePriority) {
-            int maxPriority = intersectingRegions.stream().mapToInt(AbstractMarkableRegion::getPriority).max().getAsInt();
-            cuboidRegion.setPriority(maxPriority + 1);
-        } else {
-            cuboidRegion.setPriority(defaultPriority);
-        }
-        return cuboidRegion.getPriority();
-    }
-
-    /**
-     * Recursively gets all flags defined in the region hierarchy of the provided region, including all it's parents. <br></br>
-     *
-     * @param region the region (and its parents) to get active flags
-     * @param carry  a flag container, holding information about region flags
-     * @return a flag container of all active flags of the given region including its parents.
-     */
-    public static FlagContainer getFlagsRecursive(IProtectedRegion region, FlagContainer carry) {
-        if (region == region.getParent()) { // global region has itself as parent
-            return carry;
-        }
-        Map<String, IFlag> activeParentFlags = region.getParent().getFlagContainer().getActiveFlags();
-        activeParentFlags.forEach((flagName, flag) -> {
-            boolean parentFlagOverrides = flag.doesOverride();
-            boolean existingFlag = carry.contains(flagName);
-            if (parentFlagOverrides && existingFlag) {
-                carry.remove(flagName);
-                carry.put(flagName, flag);
-            }
-        });
-        return getFlagsRecursive(region.getParent(), carry);
-    }
-
-
-    // TODO: recursive check for ensuring region priorities
-    public static void rectifyRegionPriorities(CuboidRegion parent, int defaultPriority) {
-        List<CuboidRegion> children = getIntersectingRegionsFor(parent);
-        if (children.size() == 0) {
-            return;
-        }
-        for (CuboidRegion child : children) {
-
-            rectifyRegionPriorities(child, parent.getPriority());
-        }
-
-
-        List<CuboidRegion> intersectingRegions = getIntersectingRegionsFor(parent);
-        boolean hasRegionWithSamePriority = intersectingRegions.stream().anyMatch(r -> r.getPriority() == parent.getPriority());
-        if (hasRegionWithSamePriority) {
-            int minPriority = intersectingRegions.stream().mapToInt(AbstractMarkableRegion::getPriority).min().getAsInt();
-            parent.setPriority(minPriority - 1);
-        } else {
-            parent.setPriority(defaultPriority);
-        }
-    }
-
-    public static int ensureLowerRegionPriorityFor(CuboidRegion cuboidRegion, int defaultPriority) {
-        List<CuboidRegion> intersectingRegions = getIntersectingRegionsFor(cuboidRegion);
-        boolean hasRegionWithSamePriority = intersectingRegions.stream().anyMatch(r -> r.getPriority() == cuboidRegion.getPriority());
-        if (hasRegionWithSamePriority) {
-            int minPriority = intersectingRegions.stream().mapToInt(AbstractMarkableRegion::getPriority).min().getAsInt();
-            cuboidRegion.setPriority(minPriority - 1);
-        } else {
-            cuboidRegion.setPriority(defaultPriority);
-        }
-        return cuboidRegion.getPriority();
-    }
 }
