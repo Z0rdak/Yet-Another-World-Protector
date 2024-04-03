@@ -7,6 +7,7 @@ import java.util.Set;
 
 import static de.z0rdak.yawp.core.flag.FlagType.LIST_FLAG;
 
+@Deprecated
 public class ListFlag extends AbstractFlag {
 
     public Set<String> resourceKey;
@@ -39,11 +40,6 @@ public class ListFlag extends AbstractFlag {
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
         super.deserializeNBT(nbt);
-        throw new UnsupportedOperationException("Not implemented yet");
-    }
-
-    @Override
-    public boolean isAllowed(Object... args) {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 }

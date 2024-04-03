@@ -8,6 +8,7 @@ import static de.z0rdak.yawp.core.flag.FlagType.INT_FLAG;
 /**
  * Will be used for applying effects with a specific value and interval
  */
+@Deprecated
 public class IntFlag extends AbstractFlag {
 
     private int value;
@@ -50,10 +51,5 @@ public class IntFlag extends AbstractFlag {
     public void deserializeNBT(CompoundNBT nbt) {
         super.deserializeNBT(nbt);
         throw new NotImplementedException("Missing deserializeNBT implementation in IntFlag");
-    }
-
-    @Override
-    public boolean isAllowed(Object... args) {
-        return false;
     }
 }

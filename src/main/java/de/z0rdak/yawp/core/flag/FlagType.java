@@ -7,7 +7,9 @@ import java.util.stream.Collectors;
 public enum FlagType {
 
     BOOLEAN_FLAG("BooleanFlag"),
+    @Deprecated
     LIST_FLAG("ListFlag"),
+    @Deprecated
     INT_FLAG("IntFlag");
 
     public final String flagType;

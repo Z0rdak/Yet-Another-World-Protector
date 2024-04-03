@@ -1,7 +1,6 @@
 package de.z0rdak.yawp.core.flag;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import de.z0rdak.yawp.handler.flags.FlagState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.common.util.INBTSerializable;
 
@@ -94,7 +93,7 @@ public class FlagContainer extends HashMap<String, IFlag> implements INBTSeriali
 
     public void toggleFlag(String flag, boolean enable) {
         if (this.contains(flag)) {
-            this.get(flag).setIsActive(enable);
+            this.get(flag).setState(enable ? FlagState.ALLOWED : FlagState.DENIED);
         }
     }
 }
