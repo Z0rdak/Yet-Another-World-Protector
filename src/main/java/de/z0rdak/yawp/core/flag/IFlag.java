@@ -34,7 +34,7 @@ public interface IFlag extends INBTSerializable<CompoundTag>, Comparable<IFlag> 
     /**
      * Get the unique identifier for the flag. <br>
      * The valid flags are currently stored as an enum. <br>
-     * Mod:Name -> ResourceLocation in future.
+     * Mod:Name -> ResourceLocation in the future.
      *
      * @return unique name for flag.
      * @see RegionFlag
@@ -42,8 +42,7 @@ public interface IFlag extends INBTSerializable<CompoundTag>, Comparable<IFlag> 
     String getName();
 
     /**
-     * Returns the flag type of the flag.
-     *
+     * Returns the flag type of the flag.     *
      * @return the flag type enum value of the flag.
      * @see FlagType
      */
@@ -71,24 +70,11 @@ public interface IFlag extends INBTSerializable<CompoundTag>, Comparable<IFlag> 
      */
     boolean isActive();
 
-    /**
-     * Set the active state of the flag.
-     *
-     * @param active true activates the flag, false disables the flag for checks.
-     */
-    void setIsActive(boolean active);
+    FlagState getState();
+
+    void setState(FlagState state);
 
     FlagMessage getFlagMsg();
 
     void setFlagMsg(FlagMessage msg);
-
-    /**
-     * FIXME: should work, but hacky workaround
-     * Returns whether the flag allows the flag action considering the optional arguments
-     *
-     * @param args optional arguments to be used in flag check
-     * @return whether the flag allows the flag action
-     */
-    boolean isAllowed(Object... args);
-
 }

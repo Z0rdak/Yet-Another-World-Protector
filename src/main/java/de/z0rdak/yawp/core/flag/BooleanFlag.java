@@ -19,7 +19,7 @@ public class BooleanFlag extends AbstractFlag {
     }
 
     public BooleanFlag(RegionFlag flag) {
-        super(flag.name, flag.type, false, true);
+        super(flag.name, flag.type, false, FlagState.DENIED);
     }
 
     @Override
@@ -31,10 +31,5 @@ public class BooleanFlag extends AbstractFlag {
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-    }
-
-    @Override
-    public boolean isAllowed(Object... args) {
-        return isActive() && (this.doesOverride());
     }
 }

@@ -8,28 +8,28 @@ public abstract class AbstractFlag implements IFlag {
 
     protected String name;
     protected FlagType type;
-    protected boolean isActive;
+    protected FlagState state;
     protected boolean doesOverride;
     protected FlagMessage msg;
 
     public AbstractFlag(String name, FlagType type, boolean override) {
-        this(name, type, override, true);
+        this(name, type, override, FlagState.DENIED);
     }
 
-    public AbstractFlag(String name, FlagType type, boolean override, boolean isActive) {
+    public AbstractFlag(String name, FlagType type, boolean override, FlagState state) {
         this.name = name;
         this.type = type;
-        this.isActive = isActive;
+        this.state = state;
         this.doesOverride = override;
         this.msg = FlagMessage.DEFAULT_FLAG_MSG;
     }
 
     public AbstractFlag(String name, FlagType type) {
-        this(name, type, false, true);
+        this(name, type, false, FlagState.DENIED);
     }
 
-    public AbstractFlag(String name, FlagType type, boolean override, boolean isActive, String msg) {
-        this(name, type, override, isActive);
+    public AbstractFlag(String name, FlagType type, boolean override, FlagState state, String msg) {
+        this(name, type, override, state);
         this.msg = new FlagMessage(msg);
     }
 
@@ -49,14 +49,18 @@ public abstract class AbstractFlag implements IFlag {
 
     @Override
     public boolean isActive() {
-        return this.isActive;
+        return this.state == FlagState.ALLOWED || this.state == FlagState.DENIED;
     }
 
     @Override
-    public void setIsActive(boolean active) {
-        this.isActive = active;
+    public FlagState getState() {
+        return this.state;
     }
 
+    @Override
+    public void setState(FlagState state) {
+        this.state = state;
+    }
 
     @Override
     public boolean doesOverride() {
@@ -82,7 +86,7 @@ public abstract class AbstractFlag implements IFlag {
     public CompoundTag serializeNBT() {
         CompoundTag nbt = new CompoundTag();
         nbt.putString(FLAG_NAME, this.name);
-        nbt.putBoolean(FLAG_ACTIVE, this.isActive);
+        nbt.putInt(FLAG_STATE, this.state.ordinal());
         nbt.putBoolean(OVERRIDE, this.doesOverride);
         nbt.putString(FLAG_TYPE, this.type.flagType);
         nbt.put(FLAG_MSG, this.msg.serializeNBT());
@@ -92,7 +96,7 @@ public abstract class AbstractFlag implements IFlag {
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         this.name = nbt.getString(FLAG_NAME);
-        this.isActive = nbt.getBoolean(FLAG_ACTIVE);
+        this.state = FlagState.values()[nbt.getInt(FLAG_STATE)];
         this.doesOverride = nbt.getBoolean(OVERRIDE);
         this.type = FlagType.of(nbt.getString(FLAG_TYPE));
         this.msg = new FlagMessage(nbt.getCompound(FLAG_MSG));
@@ -100,8 +104,8 @@ public abstract class AbstractFlag implements IFlag {
 
     @Override
     public int compareTo(IFlag o) {
-        int nameComparsionRes = this.name.compareTo(o.getName());
-        int activeComparsionRes = this.isActive && !o.isActive() ? 1 : !this.isActive && o.isActive() ? -1 : 0;
-        return nameComparsionRes + activeComparsionRes;
+        int nameComparisonRes = this.name.compareTo(o.getName());
+        int stateResult = this.state.compareTo(o.getState());
+        return nameComparisonRes + stateResult;
     }
 }
