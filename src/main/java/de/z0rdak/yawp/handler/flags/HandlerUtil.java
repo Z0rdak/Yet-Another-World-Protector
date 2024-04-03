@@ -151,7 +151,7 @@ public final class HandlerUtil {
      * @param dim the dimension to get the responsible region for
      * @return the responsible region for the given position and dimension
      */
-    public static IProtectedRegion getResponsible(BlockPos pos, RegistryKey<World> dim) {
+    private static IProtectedRegion getResponsible(BlockPos pos, RegistryKey<World> dim) {
         IMarkableRegion region = getInvolvedRegionFor(pos, dim);
         if (region == null) {
             return RegionDataManager.get().cacheFor(dim).getDimensionalRegion();
@@ -166,7 +166,7 @@ public final class HandlerUtil {
      * @param dim      the dimension to check for involved regions
      * @return all active regions which contain the given location and dimension
      */
-    public static List<IMarkableRegion> getInvolvedRegionsFor(BlockPos position, RegistryKey<World> dim) {
+    private static List<IMarkableRegion> getInvolvedRegionsFor(BlockPos position, RegistryKey<World> dim) {
         return RegionDataManager.get().getRegionsFor(dim).stream()
                 .filter(IMarkableRegion::isActive)
                 .filter(region -> region.contains(position))
@@ -182,7 +182,7 @@ public final class HandlerUtil {
      * @return the region with the highest priority among all involved regions which contain the given location
      */
     @Nullable
-    public static IMarkableRegion getInvolvedRegionFor(BlockPos position, RegistryKey<World> dim) {
+    private static IMarkableRegion getInvolvedRegionFor(BlockPos position, RegistryKey<World> dim) {
         List<IMarkableRegion> regionsForPos = getInvolvedRegionsFor(position, dim);
         if (regionsForPos.isEmpty()) {
             return null;
@@ -207,7 +207,7 @@ public final class HandlerUtil {
      * @param player the player to check the flag state against
      * @return the flag state for the given region and flag
      */
-    public static FlagState getFlagState(IProtectedRegion region, RegionFlag flag, @Nullable PlayerEntity player) {
+    private static FlagState getFlagState(IProtectedRegion region, RegionFlag flag, @Nullable PlayerEntity player) {
         if (player == null) {
             return region.getFlagContainer().flagState(flag.name);
         } else {
@@ -229,7 +229,7 @@ public final class HandlerUtil {
      * @param carry  a flag container, holding information about region flags
      * @return a flag container of all active flags of the given region including its parents.
      */
-    public static FlagContainer getFlagsRecursive(IProtectedRegion region, FlagContainer carry) {
+    private static FlagContainer getFlagsRecursive(IProtectedRegion region, FlagContainer carry) {
         if (region.equals(region.getParent())) { // global region has itself as parent
             return carry;
         }
@@ -258,7 +258,7 @@ public final class HandlerUtil {
      * @param carry      the flag correlation to carry (initially null)
      * @return the flag correlation for the given region and flag
      */
-    public static FlagCorrelation getFlagCorrelation(IProtectedRegion region, RegionFlag regionFlag, @Nullable FlagCorrelation carry) {
+    private static FlagCorrelation getFlagCorrelation(IProtectedRegion region, RegionFlag regionFlag, @Nullable FlagCorrelation carry) {
         if (region.equals(region.getParent())) {
             if (region.getFlagContainer().flagState(regionFlag.name) != FlagState.UNDEFINED) {
                 IFlag flag = region.getFlag(regionFlag.name);
