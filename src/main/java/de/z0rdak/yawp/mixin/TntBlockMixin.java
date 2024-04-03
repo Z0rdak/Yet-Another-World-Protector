@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.mixin;
 
 import de.z0rdak.yawp.handler.flags.FlagCheckEvent;
+import de.z0rdak.yawp.handler.flags.HandlerUtil;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.core.BlockPos;
@@ -13,13 +14,15 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.TntBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraftforge.common.MinecraftForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.IGNITE_EXPLOSIVES;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
+import static de.z0rdak.yawp.handler.flags.HandlerUtil.handleAndSendMsg;
+import static de.z0rdak.yawp.handler.flags.HandlerUtil.sendFlagMsg;
 
 @Mixin(TntBlock.class)
 public class TntBlockMixin {
@@ -28,13 +31,17 @@ public class TntBlockMixin {
     public void onUseFlintAndSteel(BlockState state, Level world, BlockPos pos, Player player2, InteractionHand hand, BlockHitResult hit, CallbackInfoReturnable<InteractionResult> cir) {
         if (!world.isClientSide) {
             ItemStack itemStack = player2.getItemInHand(hand);
-            if (itemStack.sameItemStackIgnoreDurability(Items.FLINT_AND_STEEL.getDefaultInstance()) || itemStack.is(Items.FIRE_CHARGE)) {
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.dimension());
-                FlagCheckEvent flagCheck = checkEvent(pos, IGNITE_EXPLOSIVES, dimCache.getDimensionalRegion(), player2);
-                if (flagCheck.isDenied()) {
-                    sendFlagMsg(flagCheck);
-                    cir.setReturnValue(InteractionResult.CONSUME);
+            if (itemStack.sameItemStackIgnoreDurability(Items.FLINT_AND_STEEL.getDefaultInstance()) || itemStack.sameItem(Items.FIRE_CHARGE.getDefaultInstance())) {
+                FlagCheckEvent checkEvent = new FlagCheckEvent(pos, IGNITE_EXPLOSIVES, world.dimension(), player2);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
                 }
+                FlagCheckResult result = HandlerUtil.evaluate(checkEvent);
+                MinecraftForge.EVENT_BUS.post(result);
+                handleAndSendMsg(result, null, denyResult -> {
+                    cir.setReturnValue(InteractionResult.CONSUME);
+                    sendFlagMsg(denyResult);
+                });
             }
         }
     }
