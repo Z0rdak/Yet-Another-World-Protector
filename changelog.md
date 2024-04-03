@@ -1,12 +1,26 @@
 # [0.0.4.0-beta1] - 2024-04-30
 
+**Warning/Disclaimer:** This update introduces **breaking changes**. Please make sure to back up your world before
+updating to this version.
+These changes are necessary to enable the new features and to make the mod scalable for future updates and keep it
+maintainable. Note that I'll try to keep these changes to a minimum in the future. But this will happen from time to
+time to enable new features and to improve the mod.
+
+**Breaking changes relate to:**
+
+- **the way region data is stored** and thus the way it is read/written.
+
+- **how the flags are handled** - in particular, the way flags are inherited and overridden by parent regions
+
+- **the structure and naming of some commands** - which have changed to be more consistent
+
 ## Added
 * Add command to copy region properties
 * Add enhanced flag management
 * Add flag inheritance and overriding for regions
 * Add new config options
-* Add the Global Region. It's the parent region of all Dimensional Regions. One region to rule them all.
-* [API] New events for flag checks. You can now listen to flag checks and cancel them if needed and listen for the
+* Add the Global Region. It's the parent region of all Dimensional Regions. **One region to rule them all!**
+* API: New events for flag checks. You can now listen to flag checks and cancel them if needed and listen for the
   result of a check and manipulate the outcome.
 
 ### Copy region properties
