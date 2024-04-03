@@ -3,9 +3,11 @@
 ## Added
 * Add command to copy region properties
 * Add enhanced flag management
-* Add flag inheritance
+* Add flag inheritance and overriding for regions
 * Add new config options
 * Add the Global Region. It's the parent region of all Dimensional Regions. One region to rule them all.
+* [API] New events for flag checks. You can now listen to flag checks and cancel them if needed and listen for the
+  result of a check and manipulate the outcome.
 
 ### Copy region properties
 * Add new command to copy properties from one Local Region to another Local Region:
@@ -61,7 +63,7 @@
   * `/wp flag dim ...` to manage flag properties for a Dimensional Region
   * `/wp flag global ...` to manage flag properties for the Global Region
 
-### Flag inheritance for regions
+### Flag inheritance & overriding for regions
 
 * Child regions now inherit the flags of their parent regions. This means that every region will also inherit the flags
   of the corresponding Dimensional region. Flags now need explicitly set to override the flags of the parent
@@ -99,6 +101,13 @@
   * `/wp global list flag|group|dim`.
   * `/wp global state alert|enable`.
 * Add interactive CLI support for the Global Region
+
+### API
+
+* Add FlagCheckEvent. This event is fired before a flag is checked. It can be canceled and in the progress can be used
+  to cancel the flag check entirely.
+* Add FlagCheckResult as an event. This event is fired after a flag check. It can be used to manipulate the
+  outcome of the flag check. This event cannot be canceled.
 
 ### Misc
 
