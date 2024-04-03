@@ -34,6 +34,7 @@ public final class RegionNBT {
     public static final String MSG = "msg";
     public static final String FLAG_MSG = "flag_msg";
     public static final String FLAG_ACTIVE = "is_active";
+    public static final String FLAG_STATE = "state";
     public static final String OVERRIDE = "override";
     public static final String FLAG_VALUE = "value";
     public static final String IS_DENIED = "isDenied";
