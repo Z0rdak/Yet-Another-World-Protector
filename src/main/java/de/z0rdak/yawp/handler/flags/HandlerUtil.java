@@ -33,6 +33,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -315,9 +316,24 @@ public final class HandlerUtil {
         return result.getFlagState();
     }
 
-    public static FlagState handleAndSendMsg(FlagCheckResult result) {
-        if (result.getFlagState() == FlagState.DENIED) {
-            sendFlagMsg(result);
+    public static FlagState cancelOnDeny(Event event, FlagCheckResult result, @Nullable BiConsumer<Event, FlagCheckResult> onAllow, @Nullable BiConsumer<Event, FlagCheckResult> onDeny) {
+        if (result.getFlagState() == FlagState.ALLOWED) {
+            if (onAllow != null) {
+                onAllow.accept(event, result);
+            }
+        } else { // DENIED
+            if (onDeny != null) {
+                event.setCanceled(true);
+                onDeny.accept(event, result);
+            }
+        }
+        return result.getFlagState();
+    }
+
+    public static FlagState cancelOnDeny(Event event, FlagCheckResult result) {
+        if (result.getFlagState() == FlagState.ALLOWED) {
+        } else { // DENIED
+            event.setCanceled(true);
         }
         return result.getFlagState();
     }
