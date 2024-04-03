@@ -2,10 +2,7 @@ package de.z0rdak.yawp.handler.flags;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
-import de.z0rdak.yawp.core.flag.FlagContainer;
-import de.z0rdak.yawp.core.flag.FlagMessage;
-import de.z0rdak.yawp.core.flag.IFlag;
-import de.z0rdak.yawp.core.flag.RegionFlag;
+import de.z0rdak.yawp.core.flag.*;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -39,6 +36,17 @@ import java.util.stream.Collectors;
 import static de.z0rdak.yawp.core.flag.FlagMessage.REGION_TEMPLATE;
 
 public final class HandlerUtil {
+
+    static class FlagCorrelation {
+
+        public IProtectedRegion region;
+        public IFlag flag;
+
+        public FlagCorrelation(IProtectedRegion region, IFlag flag) {
+            this.region = region;
+            this.flag = flag;
+        }
+    }
 
     private HandlerUtil(){}
 
