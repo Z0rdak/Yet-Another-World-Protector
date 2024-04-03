@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
 public class FlagCheckEvent extends Event {
 
     /**
-     * The target position of the flag check. Depending on the flag this can be the block position or the entity position.
+     * The target position of the flag check. Depending on the flag this can be a block position or an entity position.
      */
     private final BlockPos target;
     /**
