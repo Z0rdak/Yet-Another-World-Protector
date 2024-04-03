@@ -8,7 +8,7 @@ public interface IFlagContainer {
 
    boolean contains(String flag);
 
-   FlagState flagState(RegionFlag flag);
+   FlagState flagState(String flagName);
 
    void updateFlag(IFlag flag);
 

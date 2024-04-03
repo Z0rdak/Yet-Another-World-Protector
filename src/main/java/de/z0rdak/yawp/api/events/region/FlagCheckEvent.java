@@ -1,4 +1,4 @@
-package de.z0rdak.yawp.handler.flags;
+package de.z0rdak.yawp.api.events.region;
 
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import net.minecraft.entity.player.PlayerEntity;
