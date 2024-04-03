@@ -1,84 +1,62 @@
 package de.z0rdak.yawp.handler.flags;
 
-import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.core.region.DimensionalRegion;
-import de.z0rdak.yawp.core.region.IMarkableRegion;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 
 import javax.annotation.Nullable;
 
-// TODO: FlagCheck for 'nested' flags (when boolean flag works with true and false) like secondary tool or use portal
-// TODO: Split in Event which holds the input data and is cancelable and in a result type which is used for processing flagMSg, etc
+/**
+ * Event that is fired before a flag is checked.
+ * Can be used to cancel the flag check.
+ */
 @Cancelable
 public class FlagCheckEvent extends Event {
 
-    private final DimensionalRegion dimRegion;
+    /**
+     * The target position of the flag check. Depending on the flag this can be the block position or the entity position.
+     */
+    private final BlockPos target;
+    /**
+     * The dimension in which the flag check is performed, can be used to get the corresponding Dimensional Region.
+     */
+    private final RegistryKey<World> dimension;
+    /**
+     * The player that triggered the flag check, may be null when no player was involved. This depends on the checked flag.
+     */
     @Nullable
-    private final IMarkableRegion localRegion;
-    private boolean isDenied;
-    private boolean isDeniedInDim;
-    private boolean isDeniedLocal;
+    private final PlayerEntity player;
+
+    /**
+     * The flag that is checked.
+     */
     private final RegionFlag regionFlag;
-    private IFlag flag;
 
-    public FlagCheckEvent(DimensionalRegion dimRegion, IMarkableRegion localRegion, RegionFlag regionFlag) {
-        this(dimRegion, localRegion, regionFlag, true, true, true);
-    }
-
-
-    public FlagCheckEvent(DimensionalRegion dimRegion, IMarkableRegion localRegion, RegionFlag regionFlag, boolean isDenied, boolean isDeniedLocal, boolean isDeniedInDim) {
-        this.dimRegion = dimRegion;
-        this.localRegion = localRegion;
+    public FlagCheckEvent(BlockPos target, RegionFlag regionFlag, RegistryKey<World> dimension, @Nullable PlayerEntity player) {
+        this.player = player;
+        this.target = target;
+        this.dimension = dimension;
         this.regionFlag = regionFlag;
-        this.isDenied = isDenied;
-        this.isDeniedLocal = isDeniedLocal;
-        this.isDeniedInDim = isDeniedInDim;
     }
 
-    public IFlag getFlag() {
-        return flag;
-    }
-
-    public void setFlag(IFlag flag) {
-        this.flag = flag;
+    public BlockPos getTarget() {
+        return this.target;
     }
 
     public RegionFlag getRegionFlag() {
         return regionFlag;
     }
 
-    public boolean isDenied() {
-        return isDenied;
+    public RegistryKey<World> getDimension() {
+        return dimension;
     }
 
-    public void setDenied(boolean denied) {
-        isDenied = denied;
-    }
-
-    public boolean isDeniedInDim() {
-        return isDeniedInDim;
-    }
-
-    public void setDeniedInDim(boolean deniedInDim) {
-        isDeniedInDim = deniedInDim;
-    }
-
-    public boolean isDeniedLocal() {
-        return isDeniedLocal;
-    }
-
-    public void setDeniedLocal(boolean deniedLocal) {
-        isDeniedLocal = deniedLocal;
-    }
-
-    public DimensionalRegion getDimRegion() {
-        return dimRegion;
-    }
-
-    public IMarkableRegion getLocalRegion() {
-        return localRegion;
+    @Nullable
+    public PlayerEntity getPlayer() {
+        return player;
     }
 }
