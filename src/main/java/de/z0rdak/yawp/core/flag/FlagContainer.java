@@ -68,9 +68,9 @@ public class FlagContainer extends HashMap<String, IFlag> implements INBTSeriali
         this.put(flag.getName(), flag);
     }
 
-    public FlagState flagState(RegionFlag flag) {
-        if (this.contains(flag.name)) {
-            return this.get(flag.name).isActive() ? FlagState.DENIED : FlagState.ALLOWED;
+    public FlagState flagState(String flagName) {
+        if (this.contains(flagName)) {
+            return this.get(flagName).isActive() ? FlagState.DENIED : FlagState.ALLOWED;
         }
         return FlagState.UNDEFINED;
     }
