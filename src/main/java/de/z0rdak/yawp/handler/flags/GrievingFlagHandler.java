@@ -1,6 +1,9 @@
 package de.z0rdak.yawp.handler.flags;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.region.FlagCheckResult;
+import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
@@ -15,6 +18,7 @@ import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.living.LivingDestroyBlockEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
@@ -64,28 +68,34 @@ public class GrievingFlagHandler {
         }
     }
 
-    // TODO: Test
     @SubscribeEvent
     public static void onEntityDestroyBlock(LivingDestroyBlockEvent event) {
         if (isServerSide(event)) {
             LivingEntity destroyer = event.getEntityLiving();
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(destroyer));
-            if (dimCache != null) {
-                DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                if (destroyer instanceof EnderDragon) {
-                    FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(event.getPos(), RegionFlag.DRAGON_BLOCK_PROT, dimRegion);
-                    event.setCanceled(flagCheckEvent.isDenied());
+            BlockPos target = event.getPos();
+            FlagCheckEvent checkEvent = null;
+            if (destroyer instanceof EnderDragon) {
+                checkEvent = new FlagCheckEvent(target, RegionFlag.DRAGON_BLOCK_PROT, getEntityDim(destroyer), null);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                     return;
                 }
-                if (destroyer instanceof WitherBoss) {
-                    FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(event.getPos(), RegionFlag.WITHER_BLOCK_PROT, dimRegion);
-                    event.setCanceled(flagCheckEvent.isDenied());
+            }
+            if (destroyer instanceof WitherBoss) {
+                checkEvent = new FlagCheckEvent(target, RegionFlag.WITHER_BLOCK_PROT, getEntityDim(destroyer), null);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                     return;
                 }
-                if (destroyer instanceof Zombie) {
-                    FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(event.getPos(), RegionFlag.ZOMBIE_DOOR_PROT, dimRegion);
-                    event.setCanceled(flagCheckEvent.isDenied());
+            }
+            if (destroyer instanceof Zombie) {
+                checkEvent = new FlagCheckEvent(target, RegionFlag.ZOMBIE_DOOR_PROT, getEntityDim(destroyer), null);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
                 }
+            }
+            if (checkEvent != null) {
+                processCheck(checkEvent, null, denyResult -> {
+                    event.setCanceled(true);
+                });
             }
         }
     }
@@ -97,17 +107,26 @@ public class GrievingFlagHandler {
     public static void onEntityDropLoot(LivingDropsEvent event) {
         if (isServerSide(event)) {
             LivingEntity lootEntity = event.getEntityLiving();
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(lootEntity));
-            if (dimCache != null) {
-                FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(lootEntity.blockPosition(), RegionFlag.DROP_LOOT_ALL, dimCache.getDimensionalRegion());
-                event.setCanceled(flagCheckEvent.isDenied());
-                if (event.isCanceled()) {
+            Player player = isPlayer(lootEntity) ? (Player) lootEntity : null;
+            FlagCheckEvent checkEvent = new FlagCheckEvent(lootEntity.blockPosition(), RegionFlag.DROP_LOOT_ALL, event.getEntity().level.dimension(), player);
+            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                return;
+            }
+            FlagState flagState = processCheck(checkEvent, null, denyResult -> {
+                event.setCanceled(true);
+                sendFlagMsg(denyResult);
+            });
+            if (flagState == FlagState.DENIED)
+                return;
+            if (player != null) {
+                FlagCheckEvent playerCheckEvent = new FlagCheckEvent(lootEntity.blockPosition(), RegionFlag.DROP_LOOT_PLAYER, player.level.dimension(), player);
+                if (MinecraftForge.EVENT_BUS.post(playerCheckEvent)) {
                     return;
                 }
-                if (isPlayer(event.getSource().getEntity())) {
-                    FlagCheckEvent playerFlagCheckEvent = checkEvent(lootEntity.blockPosition(), RegionFlag.DROP_LOOT_PLAYER, dimCache.getDimensionalRegion(), (PlayerEntity) event.getSource().getEntity());
-                    handleAndSendMsg(event, playerFlagCheckEvent);
-                }
+                processCheck(playerCheckEvent, null, denyResult -> {
+                    event.setCanceled(true);
+                    sendFlagMsg(denyResult);
+                });
             }
         }
     }
@@ -150,21 +169,25 @@ public class GrievingFlagHandler {
 
     @SubscribeEvent
     public static void onMobGriefing(EntityMobGriefingEvent event) {
-        if (event.getEntity() != null && event.getEntity().getCommandSenderWorld() != null) {
-            if (isServerSide(event)) {
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
-                if (dimCache != null) {
-                    FlagCheckEvent mobGriefingFlagCheck = HandlerUtil.checkEvent(event.getEntity().blockPosition(), RegionFlag.MOB_GRIEFING, dimCache.getDimensionalRegion());
-                    if (mobGriefingFlagCheck.isDenied()) {
+        if (!event.getEntity().level.isClientSide) {
+            if (isServerSide(event.getEntity())) {
+                FlagCheckEvent checkEvent = new FlagCheckEvent(event.getEntity().blockPosition(), RegionFlag.MOB_GRIEFING, getEntityDim(event.getEntity()), null);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
+                }
+                FlagState flagState = processCheck(checkEvent, null, denyResult -> {
+                    event.setResult(Event.Result.DENY);
+                });
+                if (flagState == FlagState.DENIED)
+                    return;
+                if (event.getEntity() instanceof EnderMan) {
+                    checkEvent = new FlagCheckEvent(event.getEntity().blockPosition(), RegionFlag.ENDERMAN_GRIEFING, getEntityDim(event.getEntity()), null);
+                    if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                        return;
+                    }
+                    processCheck(checkEvent, null, denyResult -> {
                         event.setResult(Event.Result.DENY);
-                    }
-
-                    if (event.getEntity() instanceof EnderMan) {
-                        FlagCheckEvent endermanGriefingFlagCheck = HandlerUtil.checkEvent(event.getEntity().blockPosition(), RegionFlag.ENDERMAN_GRIEFING, dimCache.getDimensionalRegion());
-                        if (endermanGriefingFlagCheck.isDenied()) {
-                            event.setResult(Event.Result.DENY);
-                        }
-                    }
+                    });
                 }
             }
         }
