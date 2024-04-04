@@ -1,28 +1,27 @@
 package de.z0rdak.yawp.handler.flags;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
-import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import de.z0rdak.yawp.util.FlagMessageUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
 import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
-import net.minecraft.entity.merchant.villager.VillagerEntity;
-import net.minecraft.entity.monster.CreeperEntity;
-import net.minecraft.entity.passive.MooshroomEntity;
-import net.minecraft.entity.passive.PigEntity;
-import net.minecraft.entity.passive.horse.SkeletonHorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+
+import javax.annotation.Nullable;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
@@ -39,8 +38,8 @@ public class WorldFlagHandler {
     }
 
     /**
-     * Prevents all lightning strikes to hurt entities
-     * and removes the lightning entity itself (needs testing)
+     * TODO: How to prevent lightning strikes which are not hitting entities?
+     * Prevents all lightning strikes to hurt entities and removes the lightning entity itself
      *
      * @param event information about the lightning striking an entity
      */
@@ -48,27 +47,14 @@ public class WorldFlagHandler {
     public static void onLightningStrikeOccur(EntityStruckByLightningEvent event) {
         if (isServerSide(event)) {
             Entity poorEntity = event.getEntity();
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(poorEntity));
-            FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(poorEntity.blockPosition(), LIGHTNING_PROT, dimCache.getDimensionalRegion());
-            event.setCanceled(flagCheckEvent.isDenied());
-            if (flagCheckEvent.isDenied()) {
-                event.getLightning().remove();
+            FlagCheckEvent checkEvent = new FlagCheckEvent(poorEntity.blockPosition(), LIGHTNING_PROT, event.getEntity().level.dimension(), null);
+            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                 return;
             }
-
-            // TODO: Implement, flags not yet defined
-            if (poorEntity instanceof PlayerEntity) {
-            }
-            if (poorEntity instanceof PigEntity) {
-            }
-            if (poorEntity instanceof CreeperEntity) {
-            }
-            if (poorEntity instanceof MooshroomEntity) { // Also check for entity data Type == red
-            }
-            if (poorEntity instanceof VillagerEntity) {
-            }
-            if (poorEntity instanceof SkeletonHorseEntity) {
-            }
+            HandlerUtil.processCheck(checkEvent, null, denyResult -> {
+                event.setCanceled(true);
+                event.getLightning().remove();
+            });
         }
     }
 
@@ -83,9 +69,11 @@ public class WorldFlagHandler {
     public static void onNetherPortalSpawn(BlockEvent.PortalSpawnEvent event) {
         World world = (World) event.getWorld();
         if (isServerSide(event)) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.dimension());
-            FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(event.getPos(), SPAWN_PORTAL, dimCache.getDimensionalRegion());
-            event.setCanceled(flagCheckEvent.isDenied());
+            FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPos(), SPAWN_PORTAL, world.dimension(), null);
+            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                return;
+            }
+            HandlerUtil.processCheck(checkEvent, null, deny -> event.setCanceled(true));
         }
     }
 
@@ -100,48 +88,61 @@ public class WorldFlagHandler {
     public static void onUsePortal(EntityTravelToDimensionEvent event) {
         if (isServerSide(event.getEntity())) {
             Entity entity = event.getEntity();
-            DimensionalRegion dimRegion = RegionDataManager.get().cacheFor(getEntityDim(entity)).getDimensionalRegion();
-            FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(entity.blockPosition(), USE_PORTAL, dimRegion);
-            event.setCanceled(flagCheckEvent.isDenied());
-            if (event.isCanceled()) {
-                if (entity instanceof PlayerEntity) {
-                    FlagMessageUtil.sendFlagMsg(new PlayerFlagEvent(flagCheckEvent, (PlayerEntity) entity));
-                }
+            RegistryKey<World> dimension = event.getEntity().level.dimension();
+            BlockPos target = entity.blockPosition();
+            PlayerEntity player = entity instanceof PlayerEntity ? (PlayerEntity) entity : null;
+            FlagCheckEvent checkGeneralEvent = new FlagCheckEvent(target, USE_PORTAL, dimension, player);
+            if (MinecraftForge.EVENT_BUS.post(checkGeneralEvent)) {
                 return;
             }
-            if (entity instanceof PlayerEntity) {
-                FlagCheckEvent playerFlagCheckEvent = checkEvent(entity.blockPosition(), USE_PORTAL_PLAYERS, dimRegion, (PlayerEntity) entity);
-                handleAndSendMsg(event, playerFlagCheckEvent);
-            } else {
+            HandlerUtil.processCheck(checkGeneralEvent, null, denyResult -> {
+                event.setCanceled(true);
+            });
 
-                if (entity instanceof ItemEntity) {
-                    flagCheckEvent = HandlerUtil.checkEvent(entity.blockPosition(), USE_PORTAL_ITEMS, dimRegion);
-                    event.setCanceled(flagCheckEvent.isDenied());
+            if (entity instanceof PlayerEntity) {
+                FlagCheckEvent checkPlayerEvent = new FlagCheckEvent(target, USE_PORTAL_PLAYERS, dimension, player);
+                if (MinecraftForge.EVENT_BUS.post(checkPlayerEvent)) {
                     return;
                 }
-                if (isAnimal(entity)) {
-                    flagCheckEvent = HandlerUtil.checkEvent(entity.blockPosition(), USE_PORTAL_ANIMALS, dimRegion);
-                    event.setCanceled(flagCheckEvent.isDenied());
-                    return;
-                }
-                if (isMonster(entity)) {
-                    flagCheckEvent = HandlerUtil.checkEvent(entity.blockPosition(), USE_PORTAL_MONSTERS, dimRegion);
-                    event.setCanceled(flagCheckEvent.isDenied());
-                    return;
-                }
-                if (entity instanceof AbstractVillagerEntity) {
-                    flagCheckEvent = HandlerUtil.checkEvent(entity.blockPosition(), USE_PORTAL_VILLAGERS, dimRegion);
-                    event.setCanceled(flagCheckEvent.isDenied());
-                    return;
-                }
-                if (entity instanceof AbstractMinecartEntity) {
-                    flagCheckEvent = HandlerUtil.checkEvent(entity.blockPosition(), USE_PORTAL_MINECARTS, dimRegion);
-                    event.setCanceled(flagCheckEvent.isDenied());
+                HandlerUtil.processCheck(checkPlayerEvent, null, denyResult -> {
+                    event.setCanceled(true);
+                });
+            } else {
+                FlagCheckEvent nonPlayerCheckEvent = getNonPlayerCheckEventFor(entity, target, dimension);
+                if (nonPlayerCheckEvent != null) {
+                    if (MinecraftForge.EVENT_BUS.post(nonPlayerCheckEvent)) {
+                        return;
+                    }
+                    HandlerUtil.processCheck(nonPlayerCheckEvent, null, denyResult -> {
+                        event.setCanceled(true);
+                    });
                 }
             }
         }
     }
 
+    @Nullable
+    @Deprecated
+    // this will be replaced with resource key matching in the next updates, so all these flags will disappear, too.
+    private static FlagCheckEvent getNonPlayerCheckEventFor(Entity entity, BlockPos target, RegistryKey<World> dimension) {
+        FlagCheckEvent nonPlayerCheckEvent = null;
+        if (entity instanceof ItemEntity) {
+            nonPlayerCheckEvent = new FlagCheckEvent(target, USE_PORTAL_ITEMS, dimension, null);
+        }
+        if (isAnimal(entity)) {
+            nonPlayerCheckEvent = new FlagCheckEvent(target, USE_PORTAL_ANIMALS, dimension, null);
+        }
+        if (isMonster(entity)) {
+            nonPlayerCheckEvent = new FlagCheckEvent(target, USE_PORTAL_MONSTERS, dimension, null);
+        }
+        if (entity instanceof AbstractVillagerEntity) {
+            nonPlayerCheckEvent = new FlagCheckEvent(target, USE_PORTAL_VILLAGERS, dimension, null);
+        }
+        if (entity instanceof AbstractMinecartEntity) {
+            nonPlayerCheckEvent = new FlagCheckEvent(target, USE_PORTAL_MINECARTS, dimension, null);
+        }
+        return nonPlayerCheckEvent;
+    }
 
     @SubscribeEvent
     public static void onTravelToDim(EntityTravelToDimensionEvent event) {
