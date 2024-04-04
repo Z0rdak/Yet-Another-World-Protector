@@ -1,7 +1,6 @@
 package de.z0rdak.yawp.mixin;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
-import de.z0rdak.yawp.api.events.region.FlagCheckResult;
 import de.z0rdak.yawp.handler.flags.HandlerUtil;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -14,7 +13,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.USE_ELYTRA;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.handleAndSendMsg;
 
 @Mixin({Player.class})
 public abstract class PlayerEntityMixin extends LivingEntity {
@@ -31,9 +29,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                 return;
             }
-            FlagCheckResult result = HandlerUtil.evaluate(checkEvent);
-            MinecraftForge.EVENT_BUS.post(result);
-            handleAndSendMsg(result, null, denyResult -> {
+            HandlerUtil.processCheck(checkEvent, null, denyResult -> {
                 cir.setReturnValue(false);
             });
         }

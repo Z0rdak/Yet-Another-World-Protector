@@ -1,7 +1,6 @@
 package de.z0rdak.yawp.mixin;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
-import de.z0rdak.yawp.api.events.region.FlagCheckResult;
 import de.z0rdak.yawp.handler.flags.HandlerUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
@@ -14,7 +13,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.NO_WALKER_FREEZE;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.handleAndSendMsg;
 
 @Mixin(FrostWalkerEnchantment.class)
 public class FrostWalkerEnchantmentMixin {
@@ -26,9 +24,7 @@ public class FrostWalkerEnchantmentMixin {
             if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                 return;
             }
-            FlagCheckResult result = HandlerUtil.evaluate(checkEvent);
-            MinecraftForge.EVENT_BUS.post(result);
-            handleAndSendMsg(result, null, denyResult -> {
+            HandlerUtil.processCheck(checkEvent, null, denyResult -> {
                 info.cancel();
             });
         }
