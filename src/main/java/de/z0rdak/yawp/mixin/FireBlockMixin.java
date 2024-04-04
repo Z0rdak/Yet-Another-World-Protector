@@ -1,7 +1,6 @@
 package de.z0rdak.yawp.mixin;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
-import de.z0rdak.yawp.api.events.region.FlagCheckResult;
 import de.z0rdak.yawp.handler.flags.HandlerUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.FireBlock;
@@ -16,7 +15,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.Random;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.FIRE_TICK;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.handleAndSendMsg;
 
 
 @Mixin(FireBlock.class)
@@ -29,9 +27,7 @@ public abstract class FireBlockMixin {
             if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                 return;
             }
-            FlagCheckResult result = HandlerUtil.evaluate(checkEvent);
-            MinecraftForge.EVENT_BUS.post(result);
-            handleAndSendMsg(result, null, denyResult -> {
+            HandlerUtil.processCheck(checkEvent, null, denyResult -> {
                 info.cancel();
             });
         }
