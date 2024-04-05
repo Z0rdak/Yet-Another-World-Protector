@@ -2,7 +2,6 @@ package de.z0rdak.yawp.handler.flags;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
-import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.core.BlockPos;
@@ -154,30 +153,25 @@ public class WorldFlagHandler {
     public static void onTravelToDim(EntityTravelToDimensionEvent event) {
         if (isServerSide(event.getEntity())) {
             if (event.getEntity() instanceof Player player) {
-                DimensionalRegion dimRegion = RegionDataManager.get().cacheFor(event.getDimension()).getDimensionalRegion();
-                ServerLevel targetServerLevel = player.getServer().getLevel(event.getDimension());
+                ResourceKey<Level> dim = event.getDimension();
+                DimensionalRegion dimRegion = RegionDataManager.get().cacheFor(dim).getDimensionalRegion();
+                ServerLevel targetServerLevel = player.getServer().getLevel(dim);
                 if (targetServerLevel != null) {
-                    /*
-                    FIXME: Get target position correctly - until then flag only works for dimension
+                  /*
+                    TODO: Get target position correctly - until then flag only works for dimension
                     WorldBorder worldborder = targetServerLevel.getWorldBorder();
                     double tpPosScale = DimensionType.getTeleportationScale(player.level.dimensionType(), targetServerLevel.dimensionType());
                     BlockPos targetPos = worldborder.clampToBounds(player.getX() * tpPosScale, player.getY(), player.getZ() * tpPosScale);
                      */
-                    PlayerFlagEvent playerFlagCheckEvent = new PlayerFlagEvent(player, dimRegion, null, ENTER_DIM);
-                    playerFlagCheckEvent.setDeniedLocal(false);
-                    if (dimRegion.isActive()) {
-                        if (dimRegion.containsFlag(ENTER_DIM) && !dimRegion.permits(player)) {
-                            IFlag flag = dimRegion.getFlag(ENTER_DIM.name);
-                            // TODO: Check state with allowed
-                            playerFlagCheckEvent.setDeniedInDim(flag.isActive());
-                        } else {
-                            playerFlagCheckEvent.setDeniedInDim(false);
-                        }
-                    } else {
-                        playerFlagCheckEvent.setDeniedInDim(false);
+                    // FIXME: Workaround is to not let users add this flag to Local Regions for now until the block position is correctly determined
+                    FlagCheckEvent checkGeneralEvent = new FlagCheckEvent(player.blockPosition(), ENTER_DIM, dim, player);
+                    if (MinecraftForge.EVENT_BUS.post(checkGeneralEvent)) {
+                        return;
                     }
-                    playerFlagCheckEvent.setDenied(playerFlagCheckEvent.isDeniedInDim());
-                    handleAndSendMsg(event, playerFlagCheckEvent);
+                    HandlerUtil.processCheck(checkGeneralEvent, null, denyResult -> {
+                        event.setCanceled(true);
+                        sendFlagMsg(denyResult);
+                    });
                 }
             }
         }
