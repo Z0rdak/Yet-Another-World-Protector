@@ -31,7 +31,7 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
     private DimensionalRegion dimensionalRegion;
 
     public DimensionRegionCache(ResourceKey<Level> dim) {
-        this(new DimensionalRegion(dim));
+        this(new DimensionalRegion(dim, RegionDataManager.get().getGlobalRegion()));
     }
 
     public DimensionRegionCache(CompoundTag nbt) {
