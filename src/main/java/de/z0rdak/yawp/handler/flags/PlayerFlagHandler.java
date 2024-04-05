@@ -55,7 +55,9 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
@@ -499,28 +501,44 @@ public final class PlayerFlagHandler {
     public static void onPlayerUseToolSecondary(BlockEvent.BlockToolModificationEvent event) {
         if (!event.getWorld().isClientSide()) {
             Player player = event.getPlayer();
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
-            FlagCheckEvent flagCheckEvent = checkEvent(event.getPos(), TOOL_SECONDARY_USE, dimCache.getDimensionalRegion(), player);
-            if (handleEvent(event, flagCheckEvent)) {
-                // FIXME: [next update]: how about all TOOL_SECONDARY_USE is denied but one of the following is allowed?
-                // this kind of check is not uncommon. See onPlayerRightClickBlock e.g.
+            BlockPos target = event.getPos();
+            ResourceKey<Level> dim = getEntityDim(player);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(target, TOOL_SECONDARY_USE, dim, player);
+            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                 return;
             }
-                // TODO: Events for ToolActions
+            FlagState flagState = processCheck(checkEvent, null, onDeny -> {
+                event.setCanceled(true);
+                sendFlagMsg(onDeny);
+            });
+            if (flagState == FlagState.DENIED)
+                return;
+
             if (event.getToolAction().equals(ToolActions.AXE_STRIP)) {
-                flagCheckEvent = checkEvent(event.getPos(), AXE_STRIP, dimCache.getDimensionalRegion(), player);
-                handleEvent(event, flagCheckEvent);
+                checkEvent = new FlagCheckEvent(target, AXE_STRIP, dim, player);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
+                }
             }
             if (event.getToolAction().equals(ToolActions.HOE_TILL)) {
-                flagCheckEvent = checkEvent(event.getPos(), HOE_TILL, dimCache.getDimensionalRegion(), player);
-                handleEvent(event, flagCheckEvent);
+                checkEvent = new FlagCheckEvent(target, HOE_TILL, dim, player);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
+                }
             }
             if (event.getToolAction().equals(ToolActions.SHOVEL_FLATTEN)) {
-                flagCheckEvent = checkEvent(event.getPos(), SHOVEL_PATH, dimCache.getDimensionalRegion(), player);
-                handleEvent(event, flagCheckEvent);
+                checkEvent = new FlagCheckEvent(target, SHOVEL_PATH, dim, player);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
+                }
+            }
+            if (checkEvent != null) {
+                processCheck(checkEvent, null, onDeny -> {
+                    event.setCanceled(true);
+                    sendFlagMsg(onDeny);
+                });
             }
         }
-
     }
 
     @SubscribeEvent
@@ -528,47 +546,63 @@ public final class PlayerFlagHandler {
         if (isServerSide(event)) {
             Player player = event.getPlayer();
             BlockEntity targetEntity = event.getWorld().getBlockEntity(event.getPos());
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
+            ResourceKey<Level> dim = getEntityDim(player);
             boolean isLockableTileEntity = targetEntity instanceof BaseContainerBlockEntity;
             boolean isEnderChest = targetEntity instanceof EnderChestBlockEntity;
             boolean isContainer = targetEntity instanceof LecternBlockEntity || isLockableTileEntity;
 
             // used to allow player to place blocks when shift clicking container or usable bock
             boolean hasEmptyHands = hasEmptyHands(player);
-
             BlockHitResult pos = event.getHitVec();
             boolean isBlock = pos != null && pos.getType() == HitResult.Type.BLOCK;
-            if (isBlock) {
-                if (player.isShiftKeyDown() && hasEmptyHands || !player.isShiftKeyDown()) {
-                    FlagCheckEvent flagCheckEvent = checkEvent(pos.getBlockPos(), USE_BLOCKS, dimCache.getDimensionalRegion(), player);
-                    handleEvent(event, flagCheckEvent);
-                    }
-                }
 
+            if (player.isShiftKeyDown() && hasEmptyHands || !player.isShiftKeyDown()) {
+                if (isBlock) {
+                    FlagCheckEvent checkEvent = new FlagCheckEvent(pos.getBlockPos(), USE_BLOCKS, dim, player);
+                    if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                        return;
+                    }
+                    processCheck(checkEvent, null, onDeny -> {
+                        event.setCanceled(true);
+                        sendFlagMsg(onDeny);
+                        event.getWorld().updateNeighborsAt(pos.getBlockPos(), event.getWorld().getBlockState(pos.getBlockPos()).getBlock());
+                    });
+                }
+                // Note: following flags are already covered with use_blocks
+                // check for ender chest access
+                if (isEnderChest) {
+                    FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPos(), ENDER_CHEST_ACCESS, dim, player);
+                    if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                        return;
+                    }
+                    processCheck(checkEvent, null, onDeny -> {
+                        event.setCanceled(true);
+                        sendFlagMsg(onDeny);
+                    });
+                }
+                // check for container access
+                if (isContainer) {
+                    FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPos(), CONTAINER_ACCESS, dim, player);
+                    if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                        return;
+                    }
+                    processCheck(checkEvent, null, onDeny -> {
+                        event.setCanceled(true);
+                        sendFlagMsg(onDeny);
+                    });
+                }
+            }
             if (!hasEmptyHands) {
-                FlagCheckEvent useItemCheck = checkEvent(event.getPos(), USE_ITEMS, dimCache.getDimensionalRegion(), player);
-                handleEvent(event, useItemCheck);
-            }
-            // Note: following flags are already covered with use_blocks
-            // check for ender chest access
-            if (isEnderChest) {
-                if (player.isShiftKeyDown() && hasEmptyHands || !player.isShiftKeyDown()) {
-                    FlagCheckEvent flagCheckEvent = checkEvent(targetEntity.getBlockPos(), ENDER_CHEST_ACCESS, dimCache.getDimensionalRegion(), player);
-                    handleEvent(event, flagCheckEvent);
+                FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPos(), USE_ITEMS, dim, player);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
                 }
-            }
-            // check for container access
-            if (isContainer) {
-                if (player.isShiftKeyDown() && hasEmptyHands || !player.isShiftKeyDown()) {
-                    FlagCheckEvent flagCheckEvent = checkEvent(targetEntity.getBlockPos(), CONTAINER_ACCESS, dimCache.getDimensionalRegion(), player);
-                    handleEvent(event, flagCheckEvent);
-                }
-            }
-            if (isBlock) {
-                event.getWorld().updateNeighborsAt(pos.getBlockPos(), event.getWorld().getBlockState(pos.getBlockPos()).getBlock());
+                processCheck(checkEvent, null, onDeny -> {
+                    event.setCanceled(true);
+                    sendFlagMsg(onDeny);
+                });
             }
         }
-
     }
 
 
@@ -675,42 +709,45 @@ public final class PlayerFlagHandler {
         }
     }
 
+    /**
+     * Prevents players from using activator blocks like pressure plates
+     * TODO: This is very jank implementation. Needs to be tested with multiple players.
+     * TODO: Move check to activator block itself
+     */
     @SubscribeEvent
     public static void onSteppedOnActivator(BlockEvent.NeighborNotifyEvent event) {
         if (isServerSide(event)) {
-            Level world = (Level) event.getWorld();
             Block block = event.getWorld().getBlockState(event.getPos()).getBlock();
             BlockPos pos = event.getPos();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
             if (block instanceof BasePressurePlateBlock) {
                 AABB areaAbovePressurePlate = new AABB(pos.getX() - 1, pos.getY(), pos.getZ() - 1, pos.getX() + 1, pos.getY() + 2, pos.getZ() + 1);
                 List<Player> players = event.getWorld().getEntities(EntityType.PLAYER, areaAbovePressurePlate, (player) -> true);
-                boolean isCanceledForOne = false;
+                final FlagState[] cumulativeState = {FlagState.UNDEFINED};
+                Map<Player, FlagCheckEvent> playerCheckEventMap = new HashMap<>();
                 for (Player player : players) {
-
-
                     FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), USE_BLOCKS, getEntityDim(player), player);
                     if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                         return;
                     }
-                    HandlerUtil.processCheck(checkEvent, null, onDeny -> {
-                        event.setCanceled(true);
-                        sendFlagMsg(onDeny);
-                    });
-
-
-                    FlagCheckEvent flagCheckEvent = checkEvent(event.getPos(), USE_BLOCKS, dimCache.getDimensionalRegion(), player);
-                    isCanceledForOne = isCanceledForOne || handleEvent(event, flagCheckEvent);
-                    event.setCanceled(isCanceledForOne);
+                    playerCheckEventMap.put(player, checkEvent);
                 }
-
+                for (Map.Entry<Player, FlagCheckEvent> entry : playerCheckEventMap.entrySet()) {
+                    FlagState state = HandlerUtil.processCheck(entry.getValue(), null, HandlerUtil::sendFlagMsg);
+                    if (state == FlagState.DENIED) {
+                        cumulativeState[0] = state;
+                    }
+                }
+                if (cumulativeState[0] == FlagState.DENIED) {
+                    event.setCanceled(true);
+                }
             }
         }
-
     }
 
     /**
      * Note: Does not prevent from fluids generate additional blocks (cobble generator). Use BlockEvent.FluidPlaceBlockEvent for this
+     * TODO: Check event.getFilledBucket again to maybe simplify this check
      */
     @SubscribeEvent
     public static void onBucketFill(FillBucketEvent event) {
@@ -725,8 +762,14 @@ public final class PlayerFlagHandler {
                 int bucketItemMaxStackCount = event.getEmptyBucket().getMaxStackSize();
                 // placing fluid
                 if (bucketItemMaxStackCount == 1) {
-                    FlagCheckEvent flagCheckEvent = checkEvent(targetPos, PLACE_FLUIDS, dimCache.getDimensionalRegion(), player);
-                    handleEvent(event, flagCheckEvent);
+                    FlagCheckEvent checkEvent = new FlagCheckEvent(targetPos, PLACE_FLUIDS, getEntityDim(player), player);
+                    if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                        return;
+                    }
+                    HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                        event.setCanceled(true);
+                        sendFlagMsg(onDeny);
+                    });
                 }
                 // scooping fluid (breaking fluid)
                 if (bucketItemMaxStackCount > 1) {
@@ -743,8 +786,14 @@ public final class PlayerFlagHandler {
                             isFluid = ForgeRegistries.FLUIDS.tags().getTagNames().anyMatch(tag -> blockState.getFluidState().is(tag));
                         }
                         if (isWaterlogged || isFluid) {
-                            FlagCheckEvent flagCheckEvent = checkEvent(targetPos, SCOOP_FLUIDS, dimCache.getDimensionalRegion(), player);
-                            handleEvent(event, flagCheckEvent);
+                            FlagCheckEvent checkEvent = new FlagCheckEvent(targetPos, SCOOP_FLUIDS, getEntityDim(player), player);
+                            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                                return;
+                            }
+                            HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                                event.setCanceled(true);
+                                sendFlagMsg(onDeny);
+                            });
                         }
                     }
                 }
