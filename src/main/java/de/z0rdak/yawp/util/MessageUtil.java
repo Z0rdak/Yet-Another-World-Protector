@@ -844,8 +844,29 @@ public class MessageUtil {
         return buildExecuteCmdComponent(linkText, hoverText, cmdStr, RUN_COMMAND, color);
     }
 
-    public static List<IFormattableTextComponent> buildRemoveFlagEntries(IProtectedRegion region, List<IFlag> flags) {
-        return flags.stream().map(flag -> buildRemoveFlagEntry(region, flag)).collect(Collectors.toList());
+    public static List<IFormattableTextComponent> buildRemoveFlagEntries(IProtectedRegion region, FlagContainer flags) {
+        List<IFormattableTextComponent> flagEntries = buildFlagEntries(region, flags);
+        List<IProtectedRegion> regionHierarchy = HandlerUtil.getRegionHierarchy(region.getParent(), new ArrayList<>());
+        List<IFormattableTextComponent> derivedFlagEntries = regionHierarchy.stream()
+                .flatMap(r -> buildFlagEntries(region, region.getFlagContainer()).stream()
+                        .map(fe -> fe.withStyle(ITALIC)))
+                .collect(Collectors.toList());
+        flagEntries.addAll(derivedFlagEntries);
+        return flagEntries;
+    }
+
+    private static List<IFormattableTextComponent> buildFlagEntries(IProtectedRegion region, FlagContainer derivedFlags) {
+        Map<FlagState, List<IFlag>> sortedFlags = LocalRegions.sortFlagsByState(derivedFlags);
+        List<IFormattableTextComponent> derivedFlagEntries = new ArrayList<>(sortedFlags.size());
+        sortedFlags.get(FlagState.ALLOWED)
+                .forEach(flag -> derivedFlagEntries.add(buildRemoveFlagEntry(region, flag, WHITE)));
+        sortedFlags.get(FlagState.DENIED)
+                .forEach(flag -> derivedFlagEntries.add(buildRemoveFlagEntry(region, flag, RED)));
+        sortedFlags.get(FlagState.DISABLED)
+                .forEach(flag -> derivedFlagEntries.add(buildRemoveFlagEntry(region, flag, GRAY)));
+        sortedFlags.get(FlagState.UNDEFINED)
+                .forEach(flag -> derivedFlagEntries.add(buildRemoveFlagEntry(region, flag, GRAY)));
+        return derivedFlagEntries;
     }
 
     public static List<IFormattableTextComponent> buildResetDimensionalRegionEntries(IProtectedRegion parent, List<DimensionRegionCache> regions) {
