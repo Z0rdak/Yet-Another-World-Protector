@@ -52,24 +52,31 @@ time to enable new features and to improve the mod.
 * Flags now have their own dedicated flag message which is shown when the flag is triggered.
 * It's now possible to mute flag messages for each individual flag (it is still possible to mute all flags for the
   region).
-* Flags can be disabled to keep the flags in the region but disable the flag check. This is useful when you need to
-  disable a flag but don't want to lose the flag settings.
 * Flag messages can contain placeholders for:
   * `{player}` - name of player
   * `{flag}` - name of triggered flag
   * `{region}` - name of involved region
   * `{dimension}` - name of dimension
   * `{pos}` - position of flag activation source \[X=x, Y=y, Z=z\]
-* Flag messages also can be formatted by using hte minecraft default string formatting.
+* Flag messages also can be formatted by using the minecraft default string formatting.
   * For example `&c{player}&r tried to break a block in &9{region}&r!` will result in a red player name and a blue
     region name.
   * Take a look at [this tool](https://codepen.io/0biwan/pen/ggVemP) for reference as well as
     the [minecraft wiki](https://minecraft.wiki/w/Formatting_codes).
 
+* Flags now have a *FlagState* instead of just being present/absent. When you add a flag, it will have the denied state
+  to keep the same behavior as before. The different flag states are described as follows:
+  * *Allowed* - The flag is allowed for the region and will be checked.
+  * *Denied* - The flag is denied for the region and will be checked.
+  * *Disabled* - The flag is disabled for the region and will not be checked.
+  * *Undefined* - The flag is not defined for the region.
+* Flags can be disabled to keep the flags in the region but disable the flag check. This is useful when you need to
+  disable a flag but don't want to lose the flag settings.
+
 * Add commands for enhanced flag management:
-  * `/wp flag local <dim> <region> <flag> enable [true|false]` - enable/disable flag for checks
-  * `/wp flag local <dim> <region> <flag> override [true|false]` - sets the flag to override the same flag in parent region; enable it to override parent
-    region flags
+  * `/wp flag local <dim> <region> <flag> state [ALLOWED|DENIED|DISABLED|UNDEFINED]` - set the state for a flag
+  * `/wp flag local <dim> <region> <flag> override [true|false]` - sets the flag to override the same flag in child
+    regions
   * `/wp flag local <dim> <region> <flag> msg set "msg"` - set a new message for the flag. Check the wiki for a
     description of possible placeholders for messages.
   * `/wp flag local <dim> <region> <flag> msg clear` ...
@@ -80,28 +87,29 @@ time to enable new features and to improve the mod.
 ### Flag inheritance & overriding for regions
 
 * Child regions now inherit the flags of their parent regions. This means that every region will also inherit the flags
-  of the corresponding Dimensional region. Flags now need explicitly set to override the flags of the parent
-  region.
-* Change region flag pagination to include parent flags (in different color)
-* Add interactive CLI support for enhanced flag management.
+  of the corresponding Dimensional region and the Global Region.
+* Parent regions can now override flags of child regions to enforce flags onto them.
+* Flag pagination now includes parent flags (in italic)
+* Flag pagination now also sorts flags by region and flag state
+  * WHITE - allowed flags
+  * RED - denied flags
+  * GRAY - disabled flags
+  * DARK GRAY - undefined flags
+* Flag pagination shows overriding flags in a bolt/underline font
+* Add interactive CLI support for enhanced flag management
+  * TODO: FlagState CLI update
 
 ### Config
 * `yawp-common.toml` - Add new permission config:
-  * `allow_region_tp`. Decides whether teleporting inside/outside a region is allowed for everyone. Useful when using
+  * `allow_region_tp` - Decides whether teleporting inside/outside a region is allowed for everyone. Useful when using
     Waystones in regions for example.
   * `disable_cmd_for_non_op`. Defines whether mod commands are disabled for non-OP players. This is useful when you want
     to use the mod only for OPs or players which have their UUID entry in the config. Enable this if you don't want the
     YAWP command to be seen by non-permitted users.
 * `yawp-flags.toml` - Add new flag configs:
   * `enable_flag_inheritance`: Toggles the inheritance of flags of parent regions.
-  * `remove_entities_for_spawning_flags`: Toggles the despawning of entities when using the `spawning-*` flags.
-  * `dim_flag_msg`: default flag msg config for Dimensional Regions
-  * `local_flag_msg`: default flag msg config for Local Regions
-
-* `yawp-flags.toml` - Add config section `[YAWP-default-flag-message-configuration]`:
-  * Contains default flag messages for all player related flags.
-  * They will override the more general default flag message.
-  * Setting a non-default flag message with the corresponding command will override the config values.
+  * `remove_entities_for_spawning_flags`: Toggles the de-spawning of entities when using the `spawning-*` flags.
+  * TODO: `break_flag_entities` and `break_flag_entity_tags` are now also used for the `place-blocks` flag.
 
 ### Global Region
 
@@ -164,7 +172,7 @@ time to enable new features and to improve the mod.
   * Old: `/wp region <dim> <region> ...`
 * The spawning flags no longer remove entities with the PersistanceRequired tag or a custom name.
 * Renaming a Stick to create a RegionMarker is now disabled to prevent permission issues. This will come back in a
-  future update with a overhaul of the RegionMarker.
+  future update with an overhaul of the RegionMarker.
 * Moved the region name examples (used when creating a new region) to the language file to enable I18n support for the
   examples.
 * Moved the flag message examples to the language file to enable I18n support for the examples.
