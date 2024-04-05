@@ -55,10 +55,13 @@ public final class HandlerUtil {
     public static FlagState processCheck(FlagCheckEvent checkEvent, @Nullable Consumer<FlagCheckResult> onAllow, @Nullable Consumer<FlagCheckResult> onDeny) {
         FlagCheckResult result = evaluate(checkEvent);
         MinecraftForge.EVENT_BUS.post(result);
-        if (result.getFlagState() == FlagState.ALLOWED) {
+        if (result.getFlagState() == FlagState.ALLOWED
+                || result.getFlagState() == FlagState.UNDEFINED
+                || result.getFlagState() == FlagState.DISABLED) {
             if (onAllow != null)
                 onAllow.accept(result);
-        } else {
+        }
+        if (result.getFlagState() == FlagState.DENIED) {
             if (onDeny != null)
                 onDeny.accept(result);
         }
@@ -326,10 +329,13 @@ public final class HandlerUtil {
     public static FlagState processCheck(Event event, FlagCheckEvent checkEvent, @Nullable BiConsumer<Event, FlagCheckResult> onAllow, @Nullable BiConsumer<Event, FlagCheckResult> onDeny) {
         FlagCheckResult result = evaluate(checkEvent);
         MinecraftForge.EVENT_BUS.post(result);
-        if (result.getFlagState() == FlagState.ALLOWED) {
+        if (result.getFlagState() == FlagState.ALLOWED
+                || result.getFlagState() == FlagState.UNDEFINED
+                || result.getFlagState() == FlagState.DISABLED) {
             if (onAllow != null)
                 onAllow.accept(event, result);
-        } else {
+        }
+        if (result.getFlagState() == FlagState.DENIED) {
             if (onDeny != null)
                 onDeny.accept(event, result);
         }
