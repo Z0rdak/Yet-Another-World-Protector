@@ -124,6 +124,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
             if (fullyContains(((IMarkableRegion) parent).getArea(), this.area)) {
                 this.isMuted = markableParentRegion.isMuted();
                 this.parent = markableParentRegion;
+                this.parentName = markableParentRegion.getParentName();
                 YetAnotherWorldProtector.LOGGER.debug("Setting parent '" + parent.getName() + "' for region '" + this.getName() + "'");
                 return true;
             } else {

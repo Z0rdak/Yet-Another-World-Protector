@@ -72,6 +72,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.children = new HashMap<>();
         this.isActive = true;
         this.inheritFlags = true;
+        this.childrenNames = new HashSet<>();
     }
 
     protected AbstractRegion(String name, RegistryKey<World> dimension, RegionType regionType, PlayerEntity owner) {
@@ -320,10 +321,17 @@ public abstract class AbstractRegion implements IProtectedRegion {
     public boolean setParent(IProtectedRegion parent) {
         if (parent instanceof GlobalRegion && this instanceof GlobalRegion) {
             this.parent = this;
+            this.parentName = GlobalRegion.GLOBAL.toString();
+            return true;
+        }
+        if (parent instanceof GlobalRegion && this instanceof DimensionalRegion) {
+            this.parent = parent;
+            this.parentName = GlobalRegion.GLOBAL.toString();
             return true;
         }
         if (parent instanceof DimensionalRegion) {
             this.parent = parent;
+            this.parentName = parent.getParentName();
             return true;
         }
         if (!parent.getDim().location().equals(GlobalRegion.GLOBAL) || !(parent instanceof GlobalRegion)) {

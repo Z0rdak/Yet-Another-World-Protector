@@ -35,6 +35,7 @@ public final class DimensionalRegion extends AbstractRegion {
 
     public DimensionalRegion(String dimensionKey) {
         this(RegistryKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(dimensionKey)));
+        this.parent = RegionDataManager.get().getGlobalRegion();
     }
 
     /**

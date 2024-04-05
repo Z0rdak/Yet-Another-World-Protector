@@ -22,18 +22,17 @@ public class GlobalRegion extends AbstractRegion {
     protected GlobalRegion(String name, RegionType type) {
         super(name, GLOBAL_DIMENSION, type);
         this.parent = this;
+        this.parentName = GLOBAL.toString();
     }
 
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = super.serializeNBT();
-        nbt.putBoolean("global", true);
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
         super.deserializeNBT(nbt);
-        boolean isGlobal = nbt.getBoolean("global");
     }
 }
