@@ -98,7 +98,7 @@ public final class HandlerUtil {
         IFlag flag = responsibleRegion.getFlag(result.getFlag().getName());
         boolean isFlagMuted = flag.getFlagMsg().isMuted();
         // If not muted and the event is a player event, send the message
-        if (!isFlagMuted && result.getPlayer() != null) {
+        if (!isFlagMuted && result.getPlayer() != null && result.getPlayer() instanceof PlayerEntity) {
             Map<String, String> msgSubstitutes = FlagMessage.defaultSubstitutesFor(result);
             msgSubstitutes.put(REGION_TEMPLATE, responsibleRegion.getName());
             IFormattableTextComponent flagMsg = FlagMessage.buildFrom(result, msgSubstitutes);
