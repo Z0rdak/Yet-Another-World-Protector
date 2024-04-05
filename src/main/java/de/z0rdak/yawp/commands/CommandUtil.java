@@ -650,6 +650,11 @@ public class CommandUtil {
     }
 
     public static int addRegionFlag(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionFlag flag) {
+        if (region.getRegionType() == RegionType.LOCAL && flag == RegionFlag.ENTER_DIM) {
+            IFormattableTextComponent msg = new StringTextComponent("Flag 'enter-dim' is currently not supported for local regions.");
+            sendCmdFeedback(ctx.getSource(), msg);
+            return 1;
+        }
         if (!region.containsFlag(flag)) {
             IFlag iFlag;
             switch (flag.type) {
