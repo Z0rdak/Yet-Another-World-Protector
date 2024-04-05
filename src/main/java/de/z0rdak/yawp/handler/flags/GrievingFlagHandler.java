@@ -2,12 +2,8 @@ package de.z0rdak.yawp.handler.flags;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
-import de.z0rdak.yawp.api.events.region.FlagCheckResult;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.core.region.DimensionalRegion;
-import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
-import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.boss.WitherEntity;
@@ -16,7 +12,9 @@ import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.entity.monster.ZombieEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.living.LivingDestroyBlockEvent;
@@ -29,6 +27,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
@@ -44,27 +43,38 @@ public class GrievingFlagHandler {
     public static void onFarmLandTrampled(BlockEvent.FarmlandTrampleEvent event) {
         if (isServerSide(event.getEntity())) {
             Entity trampler = event.getEntity();
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(trampler));
-            if (dimCache != null) {
-                FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(event.getPos(), RegionFlag.TRAMPLE_FARMLAND, dimCache.getDimensionalRegion());
-                event.setCanceled(flagCheckEvent.isDenied());
-                if (event.isCanceled()) {
-                    if (trampler instanceof PlayerEntity) {
-                        FlagMessageUtil.sendFlagMsg(new PlayerFlagEvent(flagCheckEvent, (PlayerEntity) trampler));
-                    }
+            RegistryKey<World> dim = getEntityDim(trampler);
+            PlayerEntity player = trampler instanceof PlayerEntity ? (PlayerEntity) trampler : null;
+            FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPos(), RegionFlag.TRAMPLE_FARMLAND, dim, player);
+            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                return;
+            }
+            FlagState flagState = processCheck(checkEvent, null, denyResult -> {
+                event.setCanceled(true);
+                sendFlagMsg(denyResult);
+            });
+            if (flagState == FlagState.DENIED)
+                return;
+            // cancel only player trampling
+            if (trampler instanceof PlayerEntity) {
+                FlagCheckEvent playerTrampleFlagCheck = new FlagCheckEvent(event.getPos(), RegionFlag.TRAMPLE_FARMLAND_PLAYER, dim, player);
+                if (MinecraftForge.EVENT_BUS.post(playerTrampleFlagCheck)) {
                     return;
                 }
-                // cancel only player trampling
-                if (trampler instanceof PlayerEntity) {
-                    PlayerEntity player = (PlayerEntity) trampler;
-                    FlagCheckEvent playerFlagCheckEvent = checkEvent(event.getPos(), RegionFlag.TRAMPLE_FARMLAND_PLAYER, dimCache.getDimensionalRegion(), player);
-                    handleAndSendMsg(event, playerFlagCheckEvent);
-                } else {
-                    // cancel for other entities
-                    flagCheckEvent = HandlerUtil.checkEvent(event.getPos(), RegionFlag.TRAMPLE_FARMLAND_OTHER, dimCache.getDimensionalRegion());
-                    event.setCanceled(flagCheckEvent.isDenied());
+                processCheck(playerTrampleFlagCheck, null, denyResult -> {
+                    event.setCanceled(true);
+                    sendFlagMsg(denyResult);
+                });
+            } else {
+                FlagCheckEvent entityTrampleFlagCheck = new FlagCheckEvent(event.getPos(), RegionFlag.TRAMPLE_FARMLAND_OTHER, dim, null);
+                if (MinecraftForge.EVENT_BUS.post(entityTrampleFlagCheck)) {
+                    return;
                 }
+                processCheck(entityTrampleFlagCheck, null, denyResult -> {
+                    event.setCanceled(true);
+                });
             }
+
         }
     }
 
@@ -136,32 +146,53 @@ public class GrievingFlagHandler {
         if (isServerSide(event)) {
             PlayerEntity player = event.getAttackingPlayer();
             Entity xpDroppingEntity = event.getEntityLiving();
+            RegistryKey<World> dim = getEntityDim(xpDroppingEntity);
+            BlockPos pos = xpDroppingEntity.blockPosition();
             if (player != null) {
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
-                if (dimCache != null) {
-                    DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                    // prevent all xp drop
-                    FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(xpDroppingEntity.blockPosition(), RegionFlag.XP_DROP_ALL, dimRegion);
-                    event.setCanceled(flagCheckEvent.isDenied());
-                    if (event.isCanceled()) {
+                // prevent all xp drop
+                FlagCheckEvent checkEvent = new FlagCheckEvent(pos, RegionFlag.XP_DROP_ALL, dim, null);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
+                }
+                FlagState flagState = processCheck(checkEvent, null, denyResult -> {
+                    event.setCanceled(true);
+                });
+                if (flagState == FlagState.DENIED)
+                    return;
+
+                // prevent non-member/owner players from dropping xp by killing mobs
+                checkEvent = new FlagCheckEvent(pos, RegionFlag.XP_DROP_PLAYER, dim, player);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
+                }
+                flagState = processCheck(checkEvent, null, denyResult -> {
+                    event.setCanceled(true);
+                    sendFlagMsg(denyResult);
+                });
+                if (flagState == FlagState.DENIED)
+                    return;
+
+                // prevent monster xp drop
+                if (isMonster(xpDroppingEntity)) {
+                    checkEvent = new FlagCheckEvent(pos, RegionFlag.XP_DROP_MONSTER, dim, null);
+                    if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                         return;
                     }
-                    if (event.getAttackingPlayer() != null) {
-                        // prevent non-member/owner players from dropping xp by killing mobs
-                        FlagCheckEvent playerFlagCheckEvent = checkEvent(xpDroppingEntity.blockPosition(), RegionFlag.XP_DROP_PLAYER, dimCache.getDimensionalRegion(), player);
-                        if (handleAndSendMsg(event, playerFlagCheckEvent)) {
-                            return;
-                        }
+                    flagState = processCheck(checkEvent, null, denyResult -> {
+                        event.setCanceled(true);
+                        sendFlagMsg(denyResult);
+                    });
+                    if (flagState == FlagState.DENIED) {
                     }
-                    // prevent monster xp drop
-                    if (isMonster(xpDroppingEntity)) {
-                        flagCheckEvent = HandlerUtil.checkEvent(xpDroppingEntity.blockPosition(), RegionFlag.XP_DROP_MONSTER, dimRegion);
-                        event.setCanceled(flagCheckEvent.isDenied());
-                    } else {
-                        // prevent other entity xp drop (villagers, animals, ..)
-                        flagCheckEvent = HandlerUtil.checkEvent(xpDroppingEntity.blockPosition(), RegionFlag.XP_DROP_OTHER, dimRegion);
-                        event.setCanceled(flagCheckEvent.isDenied());
+                } else {
+                    checkEvent = new FlagCheckEvent(pos, RegionFlag.XP_DROP_OTHER, dim, null);
+                    if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                        return;
                     }
+                    processCheck(checkEvent, null, denyResult -> {
+                        event.setCanceled(true);
+                        sendFlagMsg(denyResult);
+                    });
                 }
             }
         }
@@ -211,47 +242,80 @@ public class GrievingFlagHandler {
     */
 
     /**
-     * TODO: Inverted flags would need to re-add allowed blocks/entites
-     * Removes affected entities and/or blocks from the event list to protect them
+     * TODO: Inverted flags would need to re-add allowed blocks/entities to the event list
      */
     @SubscribeEvent
     public static void onExplosion(ExplosionEvent.Detonate event) {
         if (!event.getWorld().isClientSide) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(event.getWorld().dimension());
-            if (dimCache != null && dimCache.getDimensionalRegion().isActive()) {
-                DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
+            RegistryKey<World> dim = event.getWorld().dimension();
 
-                Set<BlockPos> protectedBlocks = event.getAffectedBlocks().stream()
-                        .filter(blockPos -> HandlerUtil.checkEvent(blockPos, RegionFlag.EXPLOSION_BLOCK, dimRegion).isDenied())
-                        .collect(Collectors.toSet());
-                Set<Entity> protectedEntities = event.getAffectedEntities().stream()
-                        .filter(entity -> HandlerUtil.checkEvent(entity.blockPosition(), RegionFlag.EXPLOSION_ENTITY, dimRegion).isDenied())
-                        .collect(Collectors.toSet());
+            Set<BlockPos> protectedBlocks = event.getAffectedBlocks().stream()
+                    .filter(explosionBlockPosFilterPredicate(dim, RegionFlag.EXPLOSION_BLOCK))
+                    .collect(Collectors.toSet());
+            Set<Entity> protectedEntities = event.getAffectedEntities().stream()
+                    .filter(explosionEntityPosFilterPredicate(dim, RegionFlag.EXPLOSION_BLOCK))
+                    .collect(Collectors.toSet());
+            preventDestructionFor(event, protectedBlocks, protectedEntities);
 
-                event.getAffectedBlocks().removeAll(protectedBlocks);
-                event.getAffectedEntities().removeAll(protectedEntities);
-
-                if (event.getExplosion().getSourceMob() != null) {
-                    boolean explosionTriggeredByCreeper = (event.getExplosion().getSourceMob() instanceof CreeperEntity);
-                    if (explosionTriggeredByCreeper) {
-                        protectedBlocks = event.getAffectedBlocks().stream()
-                                .filter(blockPos -> HandlerUtil.checkEvent(blockPos, RegionFlag.EXPLOSION_CREEPER_BLOCK, dimRegion).isDenied())
-                                .collect(Collectors.toSet());
-                        protectedEntities = event.getAffectedEntities().stream()
-                                .filter(entity -> HandlerUtil.checkEvent(entity.blockPosition(), RegionFlag.EXPLOSION_CREEPER_ENTITY, dimRegion).isDenied())
-                                .collect(Collectors.toSet());
-                    } else {
-                        protectedBlocks = event.getAffectedBlocks().stream()
-                                .filter(blockPos -> HandlerUtil.checkEvent(blockPos, RegionFlag.EXPLOSION_OTHER_BLOCKS, dimRegion).isDenied())
-                                .collect(Collectors.toSet());
-                        protectedEntities = event.getAffectedEntities().stream()
-                                .filter(entity -> HandlerUtil.checkEvent(entity.blockPosition(), RegionFlag.EXPLOSION_OTHER_ENTITY, dimRegion).isDenied())
-                                .collect(Collectors.toSet());
-                    }
-                    event.getAffectedBlocks().removeAll(protectedBlocks);
-                    event.getAffectedEntities().removeAll(protectedEntities);
+            if (event.getExplosion().getSourceMob() != null) {
+                boolean explosionTriggeredByCreeper = (event.getExplosion().getSourceMob() instanceof CreeperEntity);
+                if (explosionTriggeredByCreeper) {
+                    protectedBlocks = event.getAffectedBlocks().stream()
+                            .filter(explosionBlockPosFilterPredicate(dim, RegionFlag.EXPLOSION_CREEPER_BLOCK))
+                            .collect(Collectors.toSet());
+                    protectedEntities = event.getAffectedEntities().stream()
+                            .filter(explosionEntityPosFilterPredicate(dim, RegionFlag.EXPLOSION_CREEPER_ENTITY))
+                            .collect(Collectors.toSet());
+                } else {
+                    protectedBlocks = event.getAffectedBlocks().stream()
+                            .filter(explosionBlockPosFilterPredicate(dim, RegionFlag.EXPLOSION_OTHER_BLOCKS))
+                            .collect(Collectors.toSet());
+                    protectedEntities = event.getAffectedEntities().stream()
+                            .filter(explosionEntityPosFilterPredicate(dim, RegionFlag.EXPLOSION_OTHER_ENTITY))
+                            .collect(Collectors.toSet());
                 }
+                preventDestructionFor(event, protectedBlocks, protectedEntities);
             }
         }
+    }
+
+    /**
+     * Removes affected entities and/or blocks from the event list to protect them
+     *
+     * @param event             the explosion event
+     * @param protectedBlocks   the blocks to protect
+     * @param protectedEntities the entities to protect
+     */
+    private static void preventDestructionFor(ExplosionEvent.Detonate event, Set<BlockPos> protectedBlocks, Set<Entity> protectedEntities) {
+        event.getAffectedBlocks().removeAll(protectedBlocks);
+        event.getAffectedEntities().removeAll(protectedEntities);
+    }
+
+    private static Predicate<Entity> explosionEntityPosFilterPredicate(RegistryKey<World> dim, RegionFlag flag) {
+        return entity -> {
+            // TODO: Introduce a subtype for FlagCheckEvent which holds multiple blocks? This way only one event is fired
+            // TODO: Make the event cancellable and have a mutable blockpos list
+            FlagCheckEvent checkEvent = new FlagCheckEvent(entity.blockPosition(), flag, dim, null);
+            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                return true;
+            }
+            // TODO: Same for check result, here we only need one result for all blocks
+            FlagState flagState = processCheck(checkEvent, null, null);
+            return flagState == FlagState.DENIED;
+        };
+    }
+
+    private static Predicate<BlockPos> explosionBlockPosFilterPredicate(RegistryKey<World> dim, RegionFlag flag) {
+        return pos -> {
+            // TODO: Introduce a subtype for FlagCheckEvent which holds multiple blocks? This way only one event is fired
+            // TODO: Make the event cancellable and have a mutable blockpos list
+            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, flag, dim, null);
+            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                return true;
+            }
+            // TODO: Same for check result, here we only need one result for all blocks
+            FlagState flagState = processCheck(checkEvent, null, null);
+            return flagState == FlagState.DENIED;
+        };
     }
 }
