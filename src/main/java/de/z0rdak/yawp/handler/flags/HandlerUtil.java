@@ -247,9 +247,9 @@ public final class HandlerUtil {
      * @param carry  a flag container, holding information about region flags
      * @return a flag container of all active flags of the given region including its parents.
      */
-    private static FlagContainer getFlagsRecursive(IProtectedRegion region, FlagContainer carry) {
+    public static FlagContainer getFlagsRecursive(IProtectedRegion region, FlagContainer carry) {
         if (region.equals(region.getParent())) { // global region has itself as parent
-            return carry;
+            return carry == null ? region.getFlagContainer() : carry;
         }
         Map<String, IFlag> activeParentFlags = region.getParent().getFlagContainer().getActiveFlags();
         activeParentFlags.forEach((flagName, flag) -> {
@@ -261,6 +261,22 @@ public final class HandlerUtil {
             }
         });
         return getFlagsRecursive(region.getParent(), carry);
+    }
+
+    /**
+     * Recursively gets the region hierarchy for the given region. <br>
+     * The region hierarchy is a list of regions starting with the given region and ending with the global region. <br>
+     *
+     * @param region the region to get the hierarchy for
+     * @param carry  the list to carry the hierarchy (initially empty)
+     * @return the region hierarchy for the given region
+     */
+    public static List<IProtectedRegion> getRegionHierarchy(IProtectedRegion region, List<IProtectedRegion> carry) {
+        if (region.equals(region.getParent())) { // global region has itself as parent
+            return carry.isEmpty() ? Collections.singletonList(region) : carry;
+        }
+        carry.add(region);
+        return getRegionHierarchy(region.getParent(), carry);
     }
 
     /**
