@@ -38,4 +38,15 @@ public enum FlagState {
                 throw new IllegalArgumentException("Unknown flag state: " + value);
         }
     }
+
+    public static FlagState invert(FlagState state) {
+        switch (state) {
+            case ALLOWED:
+                return DENIED;
+            case DENIED:
+                return ALLOWED;
+            default:
+                return state;
+        }
+    }
 }
