@@ -39,15 +39,27 @@ import static de.z0rdak.yawp.core.flag.FlagMessage.REGION_TEMPLATE;
 
 public final class HandlerUtil {
 
-    static class FlagCorrelation {
-
-        public IProtectedRegion region;
-        public IFlag flag;
-
-        public FlagCorrelation(IProtectedRegion region, IFlag flag) {
-            this.region = region;
-            this.flag = flag;
+    /**
+     * Processes the given flag check event and executes the given consumers if the flag is allowed or denied. <br>
+     * The flag check event is evaluated and posted to the event bus. <br>
+     * If the flag is allowed, the onAllow consumer is executed, otherwise onDeny. <br>
+     *
+     * @param checkEvent the flag check event to process
+     * @param onAllow    the consumer to execute if the flag is allowed
+     * @param onDeny     the consumer to execute if the flag is denied
+     * @return the flag state of the result
+     */
+    public static FlagState processCheck(FlagCheckEvent checkEvent, @Nullable Consumer<FlagCheckResult> onAllow, @Nullable Consumer<FlagCheckResult> onDeny) {
+        FlagCheckResult result = evaluate(checkEvent);
+        MinecraftForge.EVENT_BUS.post(result);
+        if (result.getFlagState() == FlagState.ALLOWED) {
+            if (onAllow != null)
+                onAllow.accept(result);
+        } else {
+            if (onDeny != null)
+                onDeny.accept(result);
         }
+        return result.getFlagState();
     }
 
     private HandlerUtil(){}
@@ -281,43 +293,41 @@ public final class HandlerUtil {
     }
 
     /**
-     * Handles the given flag check event and sends the flag message if the flag is not muted <br>
+     * Processes the given flag check event and executes the given consumers if the flag is allowed or denied. <br>
+     * The flag check event is evaluated and posted to the event bus. <br>
+     * If the flag is allowed, the onAllow consumer is executed, otherwise onDeny. <br>
      *
-     * @param result  the flag check result to handle and send the message for
-     * @param onAllow the consumer to execute if the flag is allowed
-     * @param onDeny  the consumer to execute if the flag is denied
+     * @param event      the original related event
+     * @param checkEvent the flag check event to process
+     * @param onAllow    the consumer to execute if the flag is allowed
+     * @param onDeny     the consumer to execute if the flag is denied
      * @return the flag state of the result
      */
-    public static FlagState handleAndSendMsg(FlagCheckResult result, @Nullable Consumer<FlagCheckResult> onAllow, @Nullable Consumer<FlagCheckResult> onDeny) {
+    public static FlagState processCheck(Event event, FlagCheckEvent checkEvent, @Nullable BiConsumer<Event, FlagCheckResult> onAllow, @Nullable BiConsumer<Event, FlagCheckResult> onDeny) {
+        FlagCheckResult result = evaluate(checkEvent);
+        MinecraftForge.EVENT_BUS.post(result);
         if (result.getFlagState() == FlagState.ALLOWED) {
             if (onAllow != null)
-                onAllow.accept(result);
+                onAllow.accept(event, result);
         } else {
             if (onDeny != null)
-                onDeny.accept(result);
-        }
-        return result.getFlagState();
-    }
-
-    public static FlagState cancelOnDeny(Event event, FlagCheckResult result, @Nullable BiConsumer<Event, FlagCheckResult> onAllow, @Nullable BiConsumer<Event, FlagCheckResult> onDeny) {
-        if (result.getFlagState() == FlagState.ALLOWED) {
-            if (onAllow != null) {
-                onAllow.accept(event, result);
-            }
-        } else { // DENIED
-            if (onDeny != null) {
-                event.setCanceled(true);
                 onDeny.accept(event, result);
-            }
         }
         return result.getFlagState();
     }
 
-    public static FlagState cancelOnDeny(Event event, FlagCheckResult result) {
-        if (result.getFlagState() == FlagState.ALLOWED) {
-        } else { // DENIED
-            event.setCanceled(true);
+    /**
+     * A correlation of a region and a flag. <br>
+     * This is used to determine the responsible region for a flag state.
+     */
+    static class FlagCorrelation {
+
+        public IProtectedRegion region;
+        public IFlag flag;
+
+        public FlagCorrelation(IProtectedRegion region, IFlag flag) {
+            this.region = region;
+            this.flag = flag;
         }
-        return result.getFlagState();
     }
 }
