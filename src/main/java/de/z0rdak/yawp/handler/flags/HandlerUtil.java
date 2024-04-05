@@ -24,6 +24,7 @@ import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.Event;
@@ -281,20 +282,6 @@ public final class HandlerUtil {
             carry = new FlagCorrelation(region, region.getFlag(regionFlag.name));
             return getFlagCorrelation(region.getParent(), regionFlag, carry);
         }
-    }
-
-
-    /**
-     * Handles the given flag check event and sends the flag message if the flag is not muted <br>
-     * Note: Forge specific implementation
-     * @param event     the flag check event to handle and send the message for
-     * @param result the flag check result to handle and send the message for
-     * @return true if the flag is denied, else false
-     */
-    public static boolean handleAndSendMsg(Event event, FlagCheckResult result) {
-        sendFlagMsg(result);
-        event.setCanceled(result.getFlagState() == FlagState.DENIED);
-        return event.isCanceled();
     }
 
     /**
