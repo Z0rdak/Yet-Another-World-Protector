@@ -13,6 +13,7 @@ import de.z0rdak.yawp.commands.arguments.flag.RegionFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.core.area.AreaType;
+import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.FlagType;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
@@ -159,6 +160,11 @@ public class ArgumentUtil {
 
     public static boolean getEnableArgument(CommandContext<CommandSource> ctx) {
         return BoolArgumentType.getBool(ctx, CommandConstants.ENABLE.toString());
+    }
+
+    public static FlagState getFlagStateArgument(CommandContext<CommandSource> ctx) {
+        String state = StringArgumentType.getString(ctx, STATE.toString());
+        return FlagState.from(state);
     }
 
     public static boolean getNegationArgument(CommandContext<CommandSource> ctx) {
