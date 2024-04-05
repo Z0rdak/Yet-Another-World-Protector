@@ -2,7 +2,9 @@ package de.z0rdak.yawp.handler.flags;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.config.server.FlagConfig;
+import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.core.BlockPos;
@@ -35,6 +37,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.ServerChatEvent;
@@ -71,16 +74,15 @@ public final class PlayerFlagHandler {
     @SubscribeEvent
     public static void onElytraFlying(TickEvent.PlayerTickEvent event) {
         if (isServerSide(event.player) && event.phase == TickEvent.Phase.END) {
-            ResourceKey<Level> entityDim = getEntityDim(event.player);
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(entityDim);
-            if (dimCache != null) {
-                if (event.player.isFallFlying()) {
-                    FlagCheckEvent flagCheckEvent = checkEvent(event.player.blockPosition(), NO_FLIGHT, dimCache.getDimensionalRegion(), event.player);
-                    if (flagCheckEvent.isDenied()) {
-                        sendFlagMsg(flagCheckEvent);
-                        event.player.stopFallFlying();
-                    }
+            ResourceKey<Level> dim = getEntityDim(event.player);
+            if (event.player.isFallFlying()) {
+                FlagCheckEvent checkEvent = new FlagCheckEvent(event.player.blockPosition(), NO_FLIGHT, dim, event.player);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
                 }
+                HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                    event.player.stopFallFlying();
+                });
             }
         }
     }
@@ -93,12 +95,15 @@ public final class PlayerFlagHandler {
         if (isServerSide(event)) {
             if (event.getTarget() instanceof Player target) {
                 Player attacker = event.getPlayer();
-                ResourceKey<Level> entityDim = getEntityDim(attacker);
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(entityDim);
-                if (dimCache != null) {
-                    FlagCheckEvent flagCheckEvent = checkEvent(target.blockPosition(), MELEE_PLAYERS, dimCache.getDimensionalRegion(), attacker);
-                    handleAndSendMsg(event, flagCheckEvent);
+                ResourceKey<Level> dim = getEntityDim(attacker);
+                FlagCheckEvent checkEvent = new FlagCheckEvent(target.blockPosition(), MELEE_PLAYERS, dim, attacker);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
                 }
+                HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                    event.setCanceled(true);
+                    sendFlagMsg(onDeny);
+                });
             }
         }
     }
@@ -112,41 +117,54 @@ public final class PlayerFlagHandler {
         if (isServerSide(event)) {
             Player player = event.getPlayer();
             Entity eventEntity = event.getTarget();
-            ResourceKey<Level> entityDim = getEntityDim(event.getPlayer());
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(entityDim);
-            if (dimCache != null) {
-                if (isAnimal(eventEntity)) {
-                    FlagCheckEvent flagCheckEvent = checkEvent(eventEntity.blockPosition(), MELEE_ANIMALS, dimCache.getDimensionalRegion(), player);
-                    handleAndSendMsg(event, flagCheckEvent);
+            ResourceKey<Level> dim = getEntityDim(event.getPlayer());
+            BlockPos entityPos = eventEntity.blockPosition();
+            FlagCheckEvent checkEvent = null;
+
+            if (isAnimal(eventEntity)) {
+                checkEvent = new FlagCheckEvent(entityPos, MELEE_ANIMALS, dim, player);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                     return;
                 }
-                if (isMonster(eventEntity)) {
-                    FlagCheckEvent flagCheckEvent = checkEvent(eventEntity.blockPosition(), MELEE_MONSTERS, dimCache.getDimensionalRegion(), player);
-                    handleAndSendMsg(event, flagCheckEvent);
+            }
+            if (isMonster(eventEntity)) {
+                checkEvent = new FlagCheckEvent(entityPos, MELEE_MONSTERS, dim, player);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                     return;
                 }
-                if (event.getTarget() instanceof Villager) {
-                    FlagCheckEvent flagCheckEvent = checkEvent(eventEntity.blockPosition(), MELEE_VILLAGERS, dimCache.getDimensionalRegion(), player);
-                    handleAndSendMsg(event, flagCheckEvent);
+            }
+            if (event.getTarget() instanceof Villager) {
+                checkEvent = new FlagCheckEvent(entityPos, MELEE_VILLAGERS, dim, player);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                     return;
                 }
-                if (event.getTarget() instanceof WanderingTrader) {
-                    FlagCheckEvent flagCheckEvent = checkEvent(eventEntity.blockPosition(), MELEE_WANDERING_TRADER, dimCache.getDimensionalRegion(), player);
-                    handleAndSendMsg(event, flagCheckEvent);
+            }
+            if (event.getTarget() instanceof WanderingTrader) {
+                checkEvent = new FlagCheckEvent(entityPos, MELEE_WANDERING_TRADER, dim, player);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
                 }
+            }
+            if (checkEvent != null) {
+                HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                    event.setCanceled(true);
+                    sendFlagMsg(onDeny);
+                });
             }
         }
     }
 
-    // unrelated: mobs pickup logic => MobEntity#livingTick
     @SubscribeEvent
     public static void onPickupItem(EntityItemPickupEvent event) {
         if (isServerSide(event)) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
-            if (dimCache != null) {
-                FlagCheckEvent flagCheckEvent = checkEvent(event.getEntity().blockPosition(), ITEM_PICKUP, dimCache.getDimensionalRegion(), event.getPlayer());
-                handleAndSendMsg(event, flagCheckEvent);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(event.getEntity().blockPosition(), ITEM_PICKUP, getEntityDim(event.getPlayer()), event.getPlayer());
+            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                return;
             }
+            HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                event.setCanceled(true);
+                sendFlagMsg(onDeny);
+            });
         }
     }
 
@@ -155,34 +173,31 @@ public final class PlayerFlagHandler {
         Player player = event.getCausedByPlayer();
         if (player != null) {
             if (!player.getCommandSenderWorld().isClientSide) {
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
-                if (dimCache != null) {
-                    if (event.getParentA() instanceof Villager) {
-                        // TODO: Test on Villagers and add extra flag
-                    }
-                    FlagCheckEvent flagCheckEvent = checkEvent(event.getParentB().blockPosition(), ANIMAL_BREEDING, dimCache.getDimensionalRegion(), event.getCausedByPlayer());
-                    handleAndSendMsg(event, flagCheckEvent);
+                FlagCheckEvent checkEvent = new FlagCheckEvent(event.getParentB().blockPosition(), ANIMAL_BREEDING, getEntityDim(player), event.getCausedByPlayer());
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
                 }
+                HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                    event.setCanceled(true);
+                    sendFlagMsg(onDeny);
+                });
             }
-        } else {
-            // TODO: test if this is fired when animals are bred without player interaction (with mods?)
         }
     }
 
-    /**
-     * Note: maybe add flag for different tamable animals / non vanilla / etc
-     */
     @SubscribeEvent
     public static void onAnimalTameAttempt(AnimalTameEvent event) {
         Player player = event.getTamer();
         if (player != null) {
             if (!player.getCommandSenderWorld().isClientSide) {
-                Animal animal = event.getAnimal();
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
-                if (dimCache != null) {
-                    FlagCheckEvent flagCheckEvent = checkEvent(event.getAnimal().blockPosition(), ANIMAL_TAMING, dimCache.getDimensionalRegion(), player);
-                    handleAndSendMsg(event, flagCheckEvent);
+                FlagCheckEvent checkEvent = new FlagCheckEvent(event.getAnimal().blockPosition(), ANIMAL_TAMING, getEntityDim(player), player);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
                 }
+                HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                    event.setCanceled(true);
+                    sendFlagMsg(onDeny);
+                });
             }
         }
     }
@@ -191,11 +206,14 @@ public final class PlayerFlagHandler {
     public static void onPlayerLevelChange(PlayerXpEvent.LevelChange event) {
         if (isServerSide(event)) {
             Player player = event.getPlayer();
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
-            if (dimCache != null) {
-                FlagCheckEvent flagCheckEvent = checkEvent(event.getPlayer().blockPosition(), LEVEL_FREEZE, dimCache.getDimensionalRegion(), player);
-                handleAndSendMsg(event, flagCheckEvent);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPlayer().blockPosition(), LEVEL_FREEZE, getEntityDim(player), player);
+            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                return;
             }
+            HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                event.setCanceled(true);
+                sendFlagMsg(onDeny);
+            });
         }
     }
 
@@ -203,15 +221,15 @@ public final class PlayerFlagHandler {
     public static void onPlayerXPChange(PlayerXpEvent.XpChange event) {
         if (!event.getPlayer().getCommandSenderWorld().isClientSide) {
             Player player = event.getPlayer();
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
-            if (dimCache != null) {
-                FlagCheckEvent flagCheckEvent = checkEvent(event.getPlayer().blockPosition(), XP_FREEZE, dimCache.getDimensionalRegion(), player);
-                handleAndSendMsg(event, flagCheckEvent);
-                if (flagCheckEvent.isDenied()) {
-                    // TODO: Test whether this is needed?
-                    event.setAmount(0);
-                }
+            FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPlayer().blockPosition(), XP_FREEZE, getEntityDim(player), player);
+            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                return;
             }
+            HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                event.setCanceled(true);
+                event.setAmount(0);
+                sendFlagMsg(onDeny);
+            });
         }
     }
 
@@ -219,14 +237,15 @@ public final class PlayerFlagHandler {
     public static void onPlayerXpPickup(PlayerXpEvent.PickupXp event) {
         if (!event.getPlayer().getCommandSenderWorld().isClientSide) {
             Player player = event.getPlayer();
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
-            if (dimCache != null) {
-                FlagCheckEvent flagCheckEvent = checkEvent(event.getPlayer().blockPosition(), XP_PICKUP, dimCache.getDimensionalRegion(), player);
-                handleAndSendMsg(event, flagCheckEvent);
-                if (flagCheckEvent.isDenied()) {
-                    event.getOrb().remove(Entity.RemovalReason.DISCARDED);
-                }
+            FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPlayer().blockPosition(), XP_PICKUP, getEntityDim(player), player);
+            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                return;
             }
+            HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                event.setCanceled(true);
+                event.getOrb().remove(Entity.RemovalReason.DISCARDED);
+                sendFlagMsg(onDeny);
+            });
         }
     }
 
@@ -236,17 +255,17 @@ public final class PlayerFlagHandler {
             Entity dmgSourceEntity = event.getSource().getDirectEntity();
             Entity hurtEntity = event.getEntityLiving();
             if (hurtEntity instanceof Player && dmgSourceEntity instanceof Player) {
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(dmgSourceEntity));
-                if (dimCache != null) {
-                    Player playerTarget = (Player) hurtEntity;
-                    Player playerSource = (Player) dmgSourceEntity;
-                    FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(playerTarget.blockPosition(), NO_PVP, dimCache.getDimensionalRegion());
-                    if (flagCheckEvent.isDenied()) {
-                        sendFlagMsg(new PlayerFlagEvent(flagCheckEvent, playerSource));
-                        event.setAmount(0f);
-                        event.setCanceled(true);
-                    }
+                Player playerTarget = (Player) hurtEntity;
+                Player playerSource = (Player) dmgSourceEntity;
+                FlagCheckEvent checkEvent = new FlagCheckEvent(playerTarget.blockPosition(), NO_PVP, getEntityDim(playerSource), playerSource);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
                 }
+                HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                    event.setCanceled(true);
+                    event.setAmount(0f);
+                    sendFlagMsg(onDeny);
+                });
             }
         }
     }
@@ -256,15 +275,16 @@ public final class PlayerFlagHandler {
         if (isServerSide(event)) {
             Entity hurtEntity = event.getEntityLiving();
             if (hurtEntity instanceof Player) {
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(hurtEntity));
-                if (dimCache != null) {
-                    Player playerTarget = (Player) hurtEntity;
-                    FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(playerTarget.blockPosition(), INVINCIBLE, dimCache.getDimensionalRegion());
-                    if (flagCheckEvent.isDenied()) {
-                        event.setAmount(0f);
-                        event.setCanceled(true);
-                    }
+                Player playerTarget = (Player) hurtEntity;
+                FlagCheckEvent checkEvent = new FlagCheckEvent(playerTarget.blockPosition(), INVINCIBLE, getEntityDim(playerTarget), null);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
                 }
+                HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                    event.setCanceled(true);
+                    event.setAmount(0f);
+                    sendFlagMsg(onDeny);
+                });
             }
         }
     }
@@ -277,20 +297,19 @@ public final class PlayerFlagHandler {
     public static void onReceiveDmg(LivingDamageEvent event) {
         if (isServerSide(event)) {
             Entity dmgSourceEntity = event.getSource().getDirectEntity();
-            if (dmgSourceEntity instanceof Player) {
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(dmgSourceEntity));
-                if (dimCache != null) {
-                    if (event.getEntityLiving() instanceof Player dmgTarget) {
-                        Player dmgSource = ((Player) dmgSourceEntity);
-                        // another check for PVP - this does not prevent knock-back? but prevents dmg
-                        FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(dmgTarget.blockPosition(), MELEE_PLAYERS, dimCache.getDimensionalRegion());
-                        if (flagCheckEvent.isDenied()) {
-                            FlagMessageUtil.sendFlagMsg(new PlayerFlagEvent(flagCheckEvent, dmgSource));
-                            event.setAmount(0f);
-                            event.setCanceled(true);
-                        }
-                    }
+            if (dmgSourceEntity instanceof Player && event.getEntityLiving() instanceof Player) {
+                Player dmgTarget = (Player) event.getEntityLiving();
+                Player dmgSource = ((Player) dmgSourceEntity);
+                FlagCheckEvent checkEvent = new FlagCheckEvent(dmgTarget.blockPosition(), MELEE_PLAYERS, getEntityDim(dmgSource), dmgSource);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
                 }
+                // another check for PVP - this does not prevent knock-back? but prevents dmg
+                HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                    event.setCanceled(true);
+                    event.setAmount(0f);
+                    sendFlagMsg(onDeny);
+                });
             }
         }
     }
@@ -299,20 +318,25 @@ public final class PlayerFlagHandler {
     public static void onPlayerKnockback(LivingKnockBackEvent event) {
         if (isServerSide(event)) {
             if (event.getEntityLiving() instanceof Player) {
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
-                if (dimCache != null) {
-                    Player dmgTarget = (Player) event.getEntityLiving();
-                    FlagCheckEvent flagCheckEvent = HandlerUtil.checkEvent(dmgTarget.blockPosition(), KNOCKBACK_PLAYERS, dimCache.getDimensionalRegion());
-                    if (flagCheckEvent.isDenied()) {
-                        event.setCanceled(true);
-                        event.setStrength(0);
-                    }
-                    flagCheckEvent = HandlerUtil.checkEvent(dmgTarget.blockPosition(), INVINCIBLE, dimCache.getDimensionalRegion());
-                    if (flagCheckEvent.isDenied()) {
-                        event.setCanceled(true);
-                        event.setStrength(0);
-                    }
+                Player dmgTarget = (Player) event.getEntityLiving();
+                FlagCheckEvent checkEvent = new FlagCheckEvent(dmgTarget.blockPosition(), KNOCKBACK_PLAYERS, getEntityDim(dmgTarget), null);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
                 }
+                HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                    event.setCanceled(true);
+                    event.setStrength(0);
+                    sendFlagMsg(onDeny);
+                });
+                checkEvent = new FlagCheckEvent(dmgTarget.blockPosition(), INVINCIBLE, getEntityDim(dmgTarget), null);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
+                }
+                HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                    event.setCanceled(true);
+                    event.setStrength(0);
+                    sendFlagMsg(onDeny);
+                });
             }
         }
     }
@@ -321,11 +345,15 @@ public final class PlayerFlagHandler {
     public static void onPlayerBreakBlock(BlockEvent.BreakEvent event) {
         if (isServerSide(event)) {
             Player player = event.getPlayer();
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
-            if (dimCache != null) {
-                FlagCheckEvent flagCheckEvent = checkEvent(event.getPos(), BREAK_BLOCKS, dimCache.getDimensionalRegion(), player);
-                handleAndSendMsg(event, flagCheckEvent);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPos(), BREAK_BLOCKS, getEntityDim(player), player);
+            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                return;
             }
+            HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                event.setCanceled(true);
+                updateBlockState((Level) event.getWorld(), event.getPos());
+                sendFlagMsg(onDeny);
+            });
         }
     }
 
@@ -333,11 +361,27 @@ public final class PlayerFlagHandler {
     public static void onPlayerPlaceBlock(BlockEvent.EntityPlaceEvent event) {
         if (isServerSide(event)) {
             if (event.getEntity() != null && event.getEntity() instanceof Player player) {
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
-                if (dimCache != null) {
-                    FlagCheckEvent flagCheckEvent = checkEvent(event.getPos(), PLACE_BLOCKS, dimCache.getDimensionalRegion(), player);
-                    handleAndSendMsg(event, flagCheckEvent);
+
+                // TODO: Needs to be checked at right click use?
+                Set<String> entities = FlagConfig.getBreakFlagEntities();
+                boolean isBlockCovered = entities.stream().anyMatch(entity -> {
+                    ResourceLocation entityResourceLocation = new ResourceLocation(entity);
+                    ResourceLocation blockName = event.getPlacedBlock().getBlock().getRegistryName();
+                    return blockName != null && blockName.equals(entityResourceLocation);
+                });
+                if (isBlockCovered) {
+                    // TODO:
                 }
+
+                FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPos(), PLACE_BLOCKS, getEntityDim(player), player);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
+                }
+                HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                    event.setCanceled(true);
+                    updateBlockState((Level) event.getWorld(), event.getPos());
+                    sendFlagMsg(onDeny);
+                });
             }
         }
     }
@@ -347,22 +391,28 @@ public final class PlayerFlagHandler {
         if (isServerSide(event)) {
             Entity target = event.getTarget();
             Player player = event.getPlayer();
-            ResourceKey<Level> entityDim = getEntityDim(event.getPlayer());
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(entityDim);
-            if (dimCache != null) {
-                // FIXME: Tags not considered yet
-                Set<String> entityTags = FlagConfig.getBreakFlagEntityTags();
-                Set<String> entities = FlagConfig.getBreakFlagEntities();
-                boolean isBlockEntityCovered = entities.stream().anyMatch(entity -> {
-                    ResourceLocation entityResourceLocation = new ResourceLocation(entity);
-                    return target.getType().getRegistryName() != null && target.getType().getRegistryName().equals(entityResourceLocation);
-                });
-                if (isBlockEntityCovered) {
-                    FlagCheckEvent flagCheckEvent = checkEvent(event.getTarget().blockPosition(), BREAK_BLOCKS, dimCache.getDimensionalRegion(), player);
-                    handleAndSendMsg(event, flagCheckEvent);
+            // FIXME: Tags not considered yet
+            Set<String> entityTags = FlagConfig.getBreakFlagEntityTags();
+            Set<String> entities = FlagConfig.getBreakFlagEntities();
+            boolean isBlockEntityCovered = entities.stream().anyMatch(entity -> {
+                ResourceLocation entityResourceLocation = new ResourceLocation(entity);
+                return target.getType().getRegistryName() != null && target.getType().getRegistryName().equals(entityResourceLocation);
+            });
+            if (isBlockEntityCovered) {
+                FlagCheckEvent checkEvent = new FlagCheckEvent(event.getTarget().blockPosition(), BREAK_BLOCKS, getEntityDim(player), player);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
                 }
+                processCheck(checkEvent, null, onDeny -> {
+                    event.setCanceled(true);
+                    sendFlagMsg(onDeny);
+                });
             }
         }
+    }
+
+    public static void updateBlockState(Level world, BlockPos pos) {
+        world.updateNeighborsAt(pos, world.getBlockState(pos).getBlock());
     }
 
     @SubscribeEvent
@@ -373,19 +423,24 @@ public final class PlayerFlagHandler {
             // the ignition to begin with.
             if (event.getExplosion().getExploder() instanceof PrimedTnt tntEntity) {
                 if (tntEntity.getOwner() instanceof Player player) {
-                    DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
-                    if (dimCache != null) {
-                        FlagCheckEvent flagCheckEvent = checkEvent(new BlockPos(explosion.getPosition()), IGNITE_EXPLOSIVES, dimCache.getDimensionalRegion(), player);
-                        handleAndSendMsg(event, flagCheckEvent);
+                    FlagCheckEvent checkEvent = new FlagCheckEvent(new BlockPos(explosion.getPosition()), IGNITE_EXPLOSIVES, getEntityDim(player), player);
+                    if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                        return;
                     }
+                    processCheck(checkEvent, null, onDeny -> {
+                        event.setCanceled(true);
+                        sendFlagMsg(onDeny);
+                    });
                 }
             }
             if (explosion.getSourceMob() instanceof Monster monster) {
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(monster));
-                FlagCheckEvent flagCheck = HandlerUtil.checkEvent(new BlockPos(explosion.getPosition()), MOB_GRIEFING, dimCache.getDimensionalRegion());
-                if (flagCheck.isDenied()) {
-                    event.setCanceled(flagCheck.isDenied());
+                FlagCheckEvent checkEvent = new FlagCheckEvent(new BlockPos(explosion.getPosition()), MOB_GRIEFING, getEntityDim(monster), null);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
                 }
+                processCheck(checkEvent, null, onDeny -> {
+                    event.setCanceled(true);
+                });
             }
         }
     }
@@ -394,40 +449,48 @@ public final class PlayerFlagHandler {
     public static void onBonemealUse(BonemealEvent event) {
         if (isServerSide(event)) {
             Player player = (Player) event.getEntity();
-            ResourceKey<Level> entityDim = getEntityDim(event.getPlayer());
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(entityDim);
-            if (dimCache != null) {
-
-                FlagCheckEvent flagCheckEvent = checkEvent(event.getPos(), USE_BONEMEAL, dimCache.getDimensionalRegion(), player);
-                handleAndSendMsg(event, flagCheckEvent);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPos(), USE_BONEMEAL, getEntityDim(player), player);
+            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                return;
             }
+            HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                event.setCanceled(true);
+                sendFlagMsg(onDeny);
+            });
         }
     }
 
     @SubscribeEvent
     public static void onPlayerUseEnderPearl(EntityTeleportEvent event) {
         if (isServerSide(event)) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
-            if (dimCache != null) {
-                // handle player teleportation using ender pearls
-                if (event instanceof EntityTeleportEvent.EnderPearl enderPearlEvent) {
-                    Player player = enderPearlEvent.getPlayer();
-
-                    FlagCheckEvent enderPearlToRegionFlagCheck = checkEvent(new BlockPos(event.getTarget()), USE_ENDERPEARL_TO_REGION, dimCache.getDimensionalRegion(), player);
-                    if (handleAndSendMsg(event, enderPearlToRegionFlagCheck)) {
-                        return;
-                    }
-
-                    FlagCheckEvent enderPearlFromRegionFlagCheck = checkEvent(player.blockPosition(), USE_ENDERPEARL_FROM_REGION, dimCache.getDimensionalRegion(), player);
-                    if (handleAndSendMsg(event, enderPearlFromRegionFlagCheck)) {
-                    }
-
-                    /* FIXME: refund pearl - duplication bug with e.g. origins mod
-                    int count = player.getHeldItem(player.getActiveHand()).getCount();
-                    player.getHeldItem(player.getActiveHand()).setCount(count + 1);
+            // handle player teleportation using ender pearls
+            if (event instanceof EntityTeleportEvent.EnderPearl enderPearlEvent) {
+                Player player = enderPearlEvent.getPlayer();
+                FlagCheckEvent checkEvent = new FlagCheckEvent(new BlockPos(event.getTarget()), USE_ENDERPEARL_TO_REGION, getEntityDim(player), player);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                     return;
-                    */
                 }
+                FlagState flagState = processCheck(checkEvent, null, onDeny -> {
+                    event.setCanceled(true);
+                    sendFlagMsg(onDeny);
+                });
+                if (flagState == FlagState.DENIED)
+                    return;
+
+                checkEvent = new FlagCheckEvent(new BlockPos(event.getTarget()), USE_ENDERPEARL_FROM_REGION, getEntityDim(player), player);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
+                }
+                processCheck(checkEvent, null, onDeny -> {
+                    event.setCanceled(true);
+                    sendFlagMsg(onDeny);
+                });
+                /* FIXME: refund pearl - duplication bug with e.g. origins mod
+                int count = player.getHeldItem(player.getActiveHand()).getCount();
+                player.getHeldItem(player.getActiveHand()).setCount(count + 1);
+                player.inventory.setChanged();
+                return;
+                */
             }
         }
     }
@@ -437,28 +500,27 @@ public final class PlayerFlagHandler {
         if (!event.getWorld().isClientSide()) {
             Player player = event.getPlayer();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
-            if (dimCache != null) {
-                FlagCheckEvent flagCheckEvent = checkEvent(event.getPos(), TOOL_SECONDARY_USE, dimCache.getDimensionalRegion(), player);
-                if (handleAndSendMsg(event, flagCheckEvent)) {
-                    // FIXME: [next update]: how about all TOOL_SECONDARY_USE is denied but one of the following is allowed?
-                    // this kind of check is not uncommon. See onPlayerRightClickBlock e.g.
-                    return;
-                }
+            FlagCheckEvent flagCheckEvent = checkEvent(event.getPos(), TOOL_SECONDARY_USE, dimCache.getDimensionalRegion(), player);
+            if (handleEvent(event, flagCheckEvent)) {
+                // FIXME: [next update]: how about all TOOL_SECONDARY_USE is denied but one of the following is allowed?
+                // this kind of check is not uncommon. See onPlayerRightClickBlock e.g.
+                return;
+            }
                 // TODO: Events for ToolActions
-                if (event.getToolAction().equals(ToolActions.AXE_STRIP)) {
-                    flagCheckEvent = checkEvent(event.getPos(), AXE_STRIP, dimCache.getDimensionalRegion(), player);
-                    handleAndSendMsg(event, flagCheckEvent);
-                }
-                if (event.getToolAction().equals(ToolActions.HOE_TILL)) {
-                    flagCheckEvent = checkEvent(event.getPos(), HOE_TILL, dimCache.getDimensionalRegion(), player);
-                    handleAndSendMsg(event, flagCheckEvent);
-                }
-                if (event.getToolAction().equals(ToolActions.SHOVEL_FLATTEN)) {
-                    flagCheckEvent = checkEvent(event.getPos(), SHOVEL_PATH, dimCache.getDimensionalRegion(), player);
-                    handleAndSendMsg(event, flagCheckEvent);
-                }
+            if (event.getToolAction().equals(ToolActions.AXE_STRIP)) {
+                flagCheckEvent = checkEvent(event.getPos(), AXE_STRIP, dimCache.getDimensionalRegion(), player);
+                handleEvent(event, flagCheckEvent);
+            }
+            if (event.getToolAction().equals(ToolActions.HOE_TILL)) {
+                flagCheckEvent = checkEvent(event.getPos(), HOE_TILL, dimCache.getDimensionalRegion(), player);
+                handleEvent(event, flagCheckEvent);
+            }
+            if (event.getToolAction().equals(ToolActions.SHOVEL_FLATTEN)) {
+                flagCheckEvent = checkEvent(event.getPos(), SHOVEL_PATH, dimCache.getDimensionalRegion(), player);
+                handleEvent(event, flagCheckEvent);
             }
         }
+
     }
 
     @SubscribeEvent
@@ -467,45 +529,46 @@ public final class PlayerFlagHandler {
             Player player = event.getPlayer();
             BlockEntity targetEntity = event.getWorld().getBlockEntity(event.getPos());
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
-            if (dimCache != null) {
-                boolean isLockableTileEntity = targetEntity instanceof BaseContainerBlockEntity;
-                boolean isEnderChest = targetEntity instanceof EnderChestBlockEntity;
-                boolean isContainer = targetEntity instanceof LecternBlockEntity || isLockableTileEntity;
+            boolean isLockableTileEntity = targetEntity instanceof BaseContainerBlockEntity;
+            boolean isEnderChest = targetEntity instanceof EnderChestBlockEntity;
+            boolean isContainer = targetEntity instanceof LecternBlockEntity || isLockableTileEntity;
 
-                // used to allow player to place blocks when shift clicking container or usable bock
-                boolean hasEmptyHands = hasEmptyHands(player);
+            // used to allow player to place blocks when shift clicking container or usable bock
+            boolean hasEmptyHands = hasEmptyHands(player);
 
-                BlockHitResult pos = event.getHitVec();
-                boolean isBlock = pos != null && pos.getType() == HitResult.Type.BLOCK;
-                if (isBlock) {
-                    if (player.isShiftKeyDown() && hasEmptyHands || !player.isShiftKeyDown()) {
-                        FlagCheckEvent flagCheckEvent = checkEvent(pos.getBlockPos(), USE_BLOCKS, dimCache.getDimensionalRegion(), player);
-                        handleAndSendMsg(event, flagCheckEvent);
+            BlockHitResult pos = event.getHitVec();
+            boolean isBlock = pos != null && pos.getType() == HitResult.Type.BLOCK;
+            if (isBlock) {
+                if (player.isShiftKeyDown() && hasEmptyHands || !player.isShiftKeyDown()) {
+                    FlagCheckEvent flagCheckEvent = checkEvent(pos.getBlockPos(), USE_BLOCKS, dimCache.getDimensionalRegion(), player);
+                    handleEvent(event, flagCheckEvent);
                     }
                 }
 
-                if (!hasEmptyHands) {
-                    FlagCheckEvent useItemCheck = checkEvent(event.getPos(), USE_ITEMS, dimCache.getDimensionalRegion(), player);
-                    handleAndSendMsg(event, useItemCheck);
+            if (!hasEmptyHands) {
+                FlagCheckEvent useItemCheck = checkEvent(event.getPos(), USE_ITEMS, dimCache.getDimensionalRegion(), player);
+                handleEvent(event, useItemCheck);
+            }
+            // Note: following flags are already covered with use_blocks
+            // check for ender chest access
+            if (isEnderChest) {
+                if (player.isShiftKeyDown() && hasEmptyHands || !player.isShiftKeyDown()) {
+                    FlagCheckEvent flagCheckEvent = checkEvent(targetEntity.getBlockPos(), ENDER_CHEST_ACCESS, dimCache.getDimensionalRegion(), player);
+                    handleEvent(event, flagCheckEvent);
                 }
-                // Note: following flags are already covered with use_blocks
-                // check for ender chest access
-                if (isEnderChest) {
-                    if (player.isShiftKeyDown() && hasEmptyHands || !player.isShiftKeyDown()) {
-                        FlagCheckEvent flagCheckEvent = checkEvent(targetEntity.getBlockPos(), ENDER_CHEST_ACCESS, dimCache.getDimensionalRegion(), player);
-                        handleAndSendMsg(event, flagCheckEvent);
-                    }
+            }
+            // check for container access
+            if (isContainer) {
+                if (player.isShiftKeyDown() && hasEmptyHands || !player.isShiftKeyDown()) {
+                    FlagCheckEvent flagCheckEvent = checkEvent(targetEntity.getBlockPos(), CONTAINER_ACCESS, dimCache.getDimensionalRegion(), player);
+                    handleEvent(event, flagCheckEvent);
                 }
-                // check for container access
-                if (isContainer) {
-                    if (player.isShiftKeyDown() && hasEmptyHands || !player.isShiftKeyDown()) {
-                        FlagCheckEvent flagCheckEvent = checkEvent(targetEntity.getBlockPos(), CONTAINER_ACCESS, dimCache.getDimensionalRegion(), player);
-                        handleAndSendMsg(event, flagCheckEvent);
-                    }
-                }
+            }
+            if (isBlock) {
                 event.getWorld().updateNeighborsAt(pos.getBlockPos(), event.getWorld().getBlockState(pos.getBlockPos()).getBlock());
             }
         }
+
     }
 
 
@@ -513,13 +576,16 @@ public final class PlayerFlagHandler {
     public static void onAccessMinecartChest(PlayerInteractEvent.EntityInteract event) {
         if (isServerSide(event)) {
             Player player = event.getPlayer();
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
-            if (dimCache != null) {
-                boolean isMinecartContainer = event.getTarget() instanceof AbstractMinecartContainer;
-                if (isMinecartContainer) {
-                    FlagCheckEvent flagCheckEvent = checkEvent(event.getTarget().blockPosition(), CONTAINER_ACCESS, dimCache.getDimensionalRegion(), player);
-                    handleAndSendMsg(event, flagCheckEvent);
+            boolean isMinecartContainer = event.getTarget() instanceof AbstractMinecartContainer;
+            if (isMinecartContainer) {
+                FlagCheckEvent checkEvent = new FlagCheckEvent(event.getTarget().blockPosition(), CONTAINER_ACCESS, getEntityDim(player), player);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
                 }
+                HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                    event.setCanceled(true);
+                    sendFlagMsg(onDeny);
+                });
             }
         }
     }
@@ -528,15 +594,24 @@ public final class PlayerFlagHandler {
     public static void onEntityInteraction(PlayerInteractEvent.EntityInteractSpecific event) {
         if (isServerSide(event)) {
             Player player = event.getPlayer();
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
-            if (dimCache != null) {
-                FlagCheckEvent flagCheckEvent = checkEvent(event.getTarget().blockPosition(), USE_ENTITIES, dimCache.getDimensionalRegion(), player);
-                handleAndSendMsg(event, flagCheckEvent);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(event.getTarget().blockPosition(), USE_ENTITIES, getEntityDim(player), player);
+            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                return;
+            }
+            HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                event.setCanceled(true);
+                sendFlagMsg(onDeny);
+            });
+            if (!hasEmptyHands(player)) {
 
-                if (!hasEmptyHands(player)) {
-                    FlagCheckEvent useItemCheck = checkEvent(event.getPos(), USE_ITEMS, dimCache.getDimensionalRegion(), player);
-                    handleAndSendMsg(event, useItemCheck);
+                checkEvent = new FlagCheckEvent(event.getPos(), USE_ITEMS, getEntityDim(player), player);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
                 }
+                HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                    event.setCanceled(true);
+                    sendFlagMsg(onDeny);
+                });
             }
         }
     }
@@ -550,15 +625,23 @@ public final class PlayerFlagHandler {
     public static void onEntityInteraction(PlayerInteractEvent.EntityInteract event) {
         if (isServerSide(event)) {
             Player player = event.getPlayer();
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
-            if (dimCache != null) {
-                FlagCheckEvent flagCheckEvent = checkEvent(event.getTarget().blockPosition(), USE_ENTITIES, dimCache.getDimensionalRegion(), player);
-                handleAndSendMsg(event, flagCheckEvent);
-
-                if (!hasEmptyHands(player)) {
-                    FlagCheckEvent useItemCheck = checkEvent(event.getPos(), USE_ENTITIES, dimCache.getDimensionalRegion(), player);
-                    handleAndSendMsg(event, useItemCheck);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(event.getTarget().blockPosition(), USE_ENTITIES, getEntityDim(player), player);
+            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                return;
+            }
+            HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                event.setCanceled(true);
+                sendFlagMsg(onDeny);
+            });
+            if (!hasEmptyHands(player)) {
+                checkEvent = new FlagCheckEvent(event.getPos(), USE_ENTITIES, getEntityDim(player), player);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
                 }
+                HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                    event.setCanceled(true);
+                    sendFlagMsg(onDeny);
+                });
             }
         }
     }
@@ -567,47 +650,63 @@ public final class PlayerFlagHandler {
     public static void onEntityInteraction(PlayerInteractEvent.RightClickItem event) {
         if (isServerSide(event)) {
             Player player = event.getPlayer();
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntity()));
-            if (dimCache != null) {
+            FlagCheckEvent checkEvent;
 
                 if (!hasEmptyHands(player)) {
-                    FlagCheckEvent flagCheckEvent = checkEvent(event.getPos(), USE_ENTITIES, dimCache.getDimensionalRegion(), player);
-                    handleAndSendMsg(event, flagCheckEvent);
+                    checkEvent = new FlagCheckEvent(event.getPos(), USE_ENTITIES, getEntityDim(player), player);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
                 }
-
-                FlagCheckEvent flagCheckEvent = checkEvent(event.getPos(), USE_ITEMS, dimCache.getDimensionalRegion(), player);
-                handleAndSendMsg(event, flagCheckEvent);
+                HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                    event.setCanceled(true);
+                    sendFlagMsg(onDeny);
+                });
             }
+            checkEvent = new FlagCheckEvent(event.getPos(), USE_ITEMS, getEntityDim(player), player);
+            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                return;
+            }
+            HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                event.setCanceled(true);
+                sendFlagMsg(onDeny);
+            });
+
+
         }
     }
 
-
-    /**
-     * TODO: This is difficult to test. Do it.
-     *
-     * @param event
-     */
     @SubscribeEvent
     public static void onSteppedOnActivator(BlockEvent.NeighborNotifyEvent event) {
         if (isServerSide(event)) {
             Level world = (Level) event.getWorld();
             Block block = event.getWorld().getBlockState(event.getPos()).getBlock();
             BlockPos pos = event.getPos();
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.dimension());
-            if (dimCache != null) {
-                if (block instanceof BasePressurePlateBlock) {
-                    AABB areaAbovePressurePlate = new AABB(pos.getX() - 1, pos.getY(), pos.getZ() - 1, pos.getX() + 1, pos.getY() + 2, pos.getZ() + 1);
-                    List<Player> players = event.getWorld().getEntities(EntityType.PLAYER, areaAbovePressurePlate, (player) -> true);
-                    boolean isCanceledForOne = false;
-                    for (Player player : players) {
-                        FlagCheckEvent flagCheckEvent = checkEvent(event.getPos(), USE_BLOCKS, dimCache.getDimensionalRegion(), player);
-                        isCanceledForOne = isCanceledForOne || handleAndSendMsg(event, flagCheckEvent);
-                        event.setCanceled(isCanceledForOne);
-                    }
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
+            if (block instanceof BasePressurePlateBlock) {
+                AABB areaAbovePressurePlate = new AABB(pos.getX() - 1, pos.getY(), pos.getZ() - 1, pos.getX() + 1, pos.getY() + 2, pos.getZ() + 1);
+                List<Player> players = event.getWorld().getEntities(EntityType.PLAYER, areaAbovePressurePlate, (player) -> true);
+                boolean isCanceledForOne = false;
+                for (Player player : players) {
 
+
+                    FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), USE_BLOCKS, getEntityDim(player), player);
+                    if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                        return;
+                    }
+                    HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                        event.setCanceled(true);
+                        sendFlagMsg(onDeny);
+                    });
+
+
+                    FlagCheckEvent flagCheckEvent = checkEvent(event.getPos(), USE_BLOCKS, dimCache.getDimensionalRegion(), player);
+                    isCanceledForOne = isCanceledForOne || handleEvent(event, flagCheckEvent);
+                    event.setCanceled(isCanceledForOne);
                 }
+
             }
         }
+
     }
 
     /**
@@ -619,7 +718,7 @@ public final class PlayerFlagHandler {
         if (isServerSide(event)) {
             Player player = event.getPlayer();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
-            if (dimCache != null && event.getTarget() != null) {
+            if (event.getTarget() != null) {
                 HitResult pos = event.getTarget();
                 BlockPos targetPos = new BlockPos(event.getTarget().getLocation());
                 // MaxStackSize: 1 -> full bucket so only placeable; >1 -> empty bucket, only fillable
@@ -627,7 +726,7 @@ public final class PlayerFlagHandler {
                 // placing fluid
                 if (bucketItemMaxStackCount == 1) {
                     FlagCheckEvent flagCheckEvent = checkEvent(targetPos, PLACE_FLUIDS, dimCache.getDimensionalRegion(), player);
-                    handleAndSendMsg(event, flagCheckEvent);
+                    handleEvent(event, flagCheckEvent);
                 }
                 // scooping fluid (breaking fluid)
                 if (bucketItemMaxStackCount > 1) {
@@ -639,12 +738,13 @@ public final class PlayerFlagHandler {
                         if (blockState.getBlock() instanceof SimpleWaterloggedBlock) {
                             isWaterlogged = blockState.getValue(BlockStateProperties.WATERLOGGED);
                         }
+                        // check if entityPos has a fluid tag
                         if (ForgeRegistries.FLUIDS.tags() != null) {
                             isFluid = ForgeRegistries.FLUIDS.tags().getTagNames().anyMatch(tag -> blockState.getFluidState().is(tag));
                         }
                         if (isWaterlogged || isFluid) {
                             FlagCheckEvent flagCheckEvent = checkEvent(targetPos, SCOOP_FLUIDS, dimCache.getDimensionalRegion(), player);
-                            handleAndSendMsg(event, flagCheckEvent);
+                            handleEvent(event, flagCheckEvent);
                         }
                     }
                 }
@@ -660,81 +760,85 @@ public final class PlayerFlagHandler {
     public static void onSendChat(ServerChatEvent event) {
         if (event.getPlayer() != null) {
             ServerPlayer player = event.getPlayer();
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
-            if (dimCache != null) {
-                FlagCheckEvent flagCheckEvent = checkEvent(player.blockPosition(), SEND_MESSAGE, dimCache.getDimensionalRegion(), player);
-                handleAndSendMsg(event, flagCheckEvent);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), SEND_MESSAGE, getEntityDim(player), player);
+            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                return;
             }
+            HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                event.setCanceled(true);
+                sendFlagMsg(onDeny);
+            });
         }
     }
 
-    /**
-     * TODO: add command list to block only specific commands, regardless of mod and permission of command
-     */
     @SubscribeEvent
     public static void onCommandSend(CommandEvent event) {
         try {
             Player player = event.getParseResults().getContext().getSource().getPlayerOrException();
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
-            if (dimCache != null) {
-                FlagCheckEvent flagCheckEvent = checkEvent(player.blockPosition(), EXECUTE_COMMAND, dimCache.getDimensionalRegion(), player);
-                handleAndSendMsg(event, flagCheckEvent);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), EXECUTE_COMMAND, getEntityDim(player), player);
+            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                return;
             }
+            HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                event.setCanceled(true);
+                sendFlagMsg(onDeny);
+            });
         } catch (CommandSyntaxException e) {
             // Most likely thrown because command was not send by a player.
             // This is fine because we don't want this flag to be triggered from non-players entities
         }
     }
 
-    // TODO: Flag to allow sleeping at daytime, by using event.setResult(Event.Result.ALLOW);
     @SubscribeEvent
     public static void onPlayerAttemptSleep(SleepingTimeCheckEvent event) {
         if (isServerSide(event)) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
-            if (dimCache != null) {
-                Player player = event.getPlayer();
-                event.getSleepingLocation().ifPresent((pos) -> {
-                    FlagCheckEvent flagCheckEvent = checkEvent(pos, SLEEP, dimCache.getDimensionalRegion(), player);
-                    // FIXME: Msg is default from sleep deny
-                    if (flagCheckEvent.isDenied()) {
-                        sendFlagMsg(flagCheckEvent);
-                        event.setResult(Event.Result.DENY);
-                    }
+            Player player = event.getPlayer();
+            event.getSleepingLocation().ifPresent((pos) -> {
+                FlagCheckEvent checkEvent = new FlagCheckEvent(pos, SLEEP, getEntityDim(player), player);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
+                }
+                HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                    event.setResult(Event.Result.DENY);
+                    sendFlagMsg(onDeny);
                 });
-            }
+            });
         }
     }
 
     @SubscribeEvent
     public static void onSetSpawn(PlayerSetSpawnEvent event) {
         if (isServerSide(event)) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
-            if (dimCache != null) {
-                BlockPos newSpawn = event.getNewSpawn();
-                Player player = event.getPlayer();
-                if (newSpawn != null) {
-                    FlagCheckEvent flagCheckEvent = checkEvent(newSpawn, SET_SPAWN, dimCache.getDimensionalRegion(), player);
-                    handleAndSendMsg(event, flagCheckEvent);
+            BlockPos newSpawn = event.getNewSpawn();
+            Player player = event.getPlayer();
+            if (newSpawn != null) {
+                FlagCheckEvent checkEvent = new FlagCheckEvent(newSpawn, SET_SPAWN, getEntityDim(player), player);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
                 }
+                HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                    event.setCanceled(true);
+                    sendFlagMsg(onDeny);
+                });
             }
         }
+
     }
 
-    /**
-     * TODO: Check for duplication
-     */
     @SubscribeEvent
     public static void onPlayerDropItem(ItemTossEvent event) {
         if (!event.getPlayer().getCommandSenderWorld().isClientSide) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
-            if (dimCache != null) {
-                Player player = event.getPlayer();
-                FlagCheckEvent flagCheckEvent = checkEvent(event.getEntityItem().blockPosition(), ITEM_DROP, dimCache.getDimensionalRegion(), player);
-                if (handleAndSendMsg(event, flagCheckEvent)) {
-                    // FIXME: Does not proper refund items?
-                    player.addItem(event.getEntityItem().getItem());
-                }
+            Player player = event.getPlayer();
+            FlagCheckEvent checkEvent = new FlagCheckEvent(event.getEntityItem().blockPosition(), ITEM_DROP, getEntityDim(player), player);
+            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                return;
             }
+            HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                event.setCanceled(true);
+                player.addItem(event.getEntityItem().getItem());
+                player.getInventory().setChanged();
+                sendFlagMsg(onDeny);
+            });
         }
     }
 
@@ -745,18 +849,27 @@ public final class PlayerFlagHandler {
     public static void onEntityMountAttempt(EntityMountEvent event) {
         if (isServerSide(event)) {
             Entity entityBeingMounted = event.getEntityBeingMounted();
-            // TODO: could be mob that dismounts because entity being mounted dies?
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getEntityMounting()));
-            if (dimCache != null) {
-                if (event.getEntityMounting() instanceof Player player) {
-                    if (event.isMounting()) {
-                        FlagCheckEvent flagCheckEvent = checkEvent(entityBeingMounted.blockPosition(), ANIMAL_MOUNTING, dimCache.getDimensionalRegion(), player);
-                        handleAndSendMsg(event, flagCheckEvent);
+            if (event.getEntityMounting() instanceof Player) {
+                Player player = (Player) event.getEntityMounting();
+                FlagCheckEvent checkEvent = new FlagCheckEvent(entityBeingMounted.blockPosition(), ANIMAL_MOUNTING, getEntityDim(player), player);
+                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    return;
+                }
+                HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                    event.setCanceled(true);
+                    sendFlagMsg(onDeny);
+                });
+                if (event.isDismounting()) {
+                    /* FIXME: Disabled in 1.16.5. Canceling event breaks unmounting. Wait for 1.17 fix: https://bugs.mojang.com/browse/MC-202202
+                    checkEvent = new FlagCheckEvent(entityBeingMounted.blockPosition(), ANIMAL_UNMOUNTING, getEntityDim(player), player);
+                    if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                        return;
                     }
-                    if (event.isDismounting()) {
-                        FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, entityBeingMounted.blockPosition(), ANIMAL_UNMOUNTING, dimCache.getDimensionalRegion());
-                        handleAndSendMsg(event, flagCheckEvent);
-                    }
+                    HandlerUtil.processCheck(checkEvent, null, onDeny -> {
+                        event.setCanceled(true);
+                        sendFlagMsg(onDeny);
+                    });
+                    */
                 }
             }
         }
