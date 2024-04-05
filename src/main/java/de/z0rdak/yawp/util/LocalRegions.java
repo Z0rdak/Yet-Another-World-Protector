@@ -1,6 +1,8 @@
 package de.z0rdak.yawp.util;
 
 import de.z0rdak.yawp.core.area.CuboidArea;
+import de.z0rdak.yawp.core.flag.FlagContainer;
+import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.*;
@@ -12,10 +14,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public final class LocalRegions {
@@ -39,6 +38,33 @@ public final class LocalRegions {
         flags.addAll(inActiveFlags);
         return flags;
     }
+
+    public static Map<FlagState, List<IFlag>> sortFlagsByState(FlagContainer flagContainer) {
+        List<IFlag> denied = flagContainer.values().stream()
+                .filter(f -> f.getState() == FlagState.DENIED)
+                .sorted()
+                .collect(Collectors.toList());
+        List<IFlag> allowed = flagContainer.values().stream()
+                .filter(f -> f.getState() == FlagState.ALLOWED)
+                .sorted()
+                .collect(Collectors.toList());
+        List<IFlag> disabled = flagContainer.values().stream()
+                .filter(f -> f.getState() == FlagState.ALLOWED)
+                .sorted()
+                .collect(Collectors.toList());
+        List<IFlag> undefined = flagContainer.values().stream()
+                .filter(f -> f.getState() == FlagState.ALLOWED)
+                .sorted()
+                .collect(Collectors.toList());
+
+        HashMap<FlagState, List<IFlag>> flagStateListMap = new HashMap<>();
+        flagStateListMap.put(FlagState.DENIED, denied);
+        flagStateListMap.put(FlagState.ALLOWED, allowed);
+        flagStateListMap.put(FlagState.DISABLED, disabled);
+        flagStateListMap.put(FlagState.UNDEFINED, undefined);
+        return flagStateListMap;
+    }
+
 
     public static AbstractMarkableRegion regionFrom(PlayerEntity player, MarkerStick marker, String regionName) {
         return regionFrom(player, marker, regionName, marker.getDimension());
@@ -202,7 +228,7 @@ public final class LocalRegions {
     }
 
     private static boolean hasAnyRegionWithSamePriority(List<IMarkableRegion> region, int priority) {
-        return region.stream().anyMatch(r -> ((CuboidRegion) r).getPriority() == priority);
+        return region.stream().anyMatch(r -> r.getPriority() == priority);
     }
 
     private static List<CuboidRegion> getIntersectingWithSamePriority(CuboidRegion cuboidRegion) {
