@@ -135,6 +135,7 @@ public class RegionDataManager extends WorldSavedData {
             globalRegion = new GlobalRegion(globalNbt);
             YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("Loaded global region data").getString());
         }
+        globalRegion.setParent(globalRegion);
         dimCacheMap.clear();
         CompoundNBT dimensionRegions = nbt.getCompound(DIMENSIONS);
         YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("Loading region(s) for " + dimensionRegions.getAllKeys().size() + " dimension(s)").getString());
@@ -183,7 +184,7 @@ public class RegionDataManager extends WorldSavedData {
                             region.setParent(globalRegion);
                         }
                         boolean hasDimRegionAsParent = parentName.contains(":");
-                        if (hasDimRegionAsParent) { // colons are not allowed in normal region names so this should work fine
+                        if (region.getRegionType() == RegionType.LOCAL && hasDimRegionAsParent) { // colons are not allowed in normal region names so this should work fine
                             region.setParent(dimRegion);
                         } else {
                             if (!dimCache.contains(parentName)) {

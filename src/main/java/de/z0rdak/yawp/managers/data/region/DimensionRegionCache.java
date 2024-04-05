@@ -27,7 +27,7 @@ public class DimensionRegionCache implements INBTSerializable<CompoundNBT> {
     private DimensionalRegion dimensionalRegion;
 
     public DimensionRegionCache(RegistryKey<World> dim) {
-        this(new DimensionalRegion(dim));
+        this(new DimensionalRegion(dim, RegionDataManager.get().getGlobalRegion()));
     }
 
     public DimensionRegionCache(CompoundNBT nbt) {
