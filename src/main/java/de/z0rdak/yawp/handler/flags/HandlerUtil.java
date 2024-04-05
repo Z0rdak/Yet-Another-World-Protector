@@ -110,7 +110,10 @@ public final class HandlerUtil {
      */
     public static void sendFlagMsg(FlagCheckResult result) {
         IProtectedRegion responsibleRegion = result.getResponsible();
-        IFlag flag = responsibleRegion.getFlag(result.getFlag().getName());
+        IFlag flag = responsibleRegion.getFlag(result.getRegionFlag().name);
+        if (flag == null || result.getFlagState() == FlagState.UNDEFINED || result.getFlagState() == FlagState.DISABLED) {
+            return;
+        }
         boolean isFlagMuted = flag.getFlagMsg().isMuted();
         // If not muted and the event is a player event, send the message
         if (!isFlagMuted && result.getPlayer() != null && result.getPlayer() instanceof PlayerEntity) {
