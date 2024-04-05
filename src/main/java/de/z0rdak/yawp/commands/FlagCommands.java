@@ -9,6 +9,7 @@ import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.commands.arguments.flag.IFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.core.flag.FlagMessage;
+import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -22,8 +23,10 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
@@ -66,8 +69,9 @@ public final class FlagCommands {
                 )
                 .then(literal(ENABLE)
                         .executes(ctx -> setEnableState(ctx, regionSupplier.apply(ctx), getIFlagArgument(ctx)))
-                        .then(Commands.argument(ENABLE.toString(), BoolArgumentType.bool())
-                                .executes(ctx -> setEnableState(ctx, regionSupplier.apply(ctx), getIFlagArgument(ctx), getEnableArgument(ctx))))
+                        .then(Commands.argument(STATE.toString(), StringArgumentType.word())
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Arrays.stream(FlagState.values()).map(Enum::name).collect(Collectors.toList()), builder))
+                                .executes(ctx -> setEnableState(ctx, regionSupplier.apply(ctx), getIFlagArgument(ctx), getFlagStateArgument(ctx))))
                 )
                 .then(literal(OVERRIDE)
                         .executes(ctx -> setInvertState(ctx, regionSupplier.apply(ctx), getIFlagArgument(ctx)))
@@ -158,7 +162,13 @@ public final class FlagCommands {
     private static int setEnableState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag regionFlag) {
         if (region.containsFlag(regionFlag.getName())) {
             IFlag flag = region.getFlag(regionFlag.getName());
-            return setEnableState(ctx, region, regionFlag, !flag.isActive());
+            if (flag.getState() == FlagState.ALLOWED || flag.getState() == FlagState.DENIED) {
+                return setEnableState(ctx, region, regionFlag, FlagState.invert(flag.getState()));
+            }
+            if (flag.getState() == FlagState.DISABLED) {
+                return setEnableState(ctx, region, regionFlag, FlagState.DENIED);
+            }
+            return setEnableState(ctx, region, regionFlag, flag.getState());
         } else {
             MessageUtil.sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.not-present",
                     buildRegionInfoLink(region), regionFlag.getName()));
@@ -166,10 +176,10 @@ public final class FlagCommands {
         }
     }
 
-    private static int setEnableState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag flag, boolean enable) {
-
-        flag.setIsActive(enable);
-        MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!enable), String.valueOf(enable));
+    private static int setEnableState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag flag, FlagState flagState) {
+        FlagState oldState = flag.getState();
+        flag.setState(flagState);
+        MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), oldState.name(), flagState.name());
         MutableComponent msg = new TranslatableComponent("cli.flag.enable.success.text",
                 buildFlagInfoLink(region, flag), flag.isActive())
                 .append(" ")
