@@ -21,6 +21,7 @@ public class FlagCheckResult extends Event {
      * The region that is responsible for the flag check.
      */
     private final IProtectedRegion responsibleRegion;
+    @Nullable
     private final IFlag flag;
     private final RegionFlag regionFlag;
     /**
@@ -61,6 +62,7 @@ public class FlagCheckResult extends Event {
         return regionFlag;
     }
 
+    @Nullable
     public IFlag getFlag() {
         return this.flag;
     }
