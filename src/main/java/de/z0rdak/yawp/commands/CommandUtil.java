@@ -250,14 +250,14 @@ public class CommandUtil {
                 cmd = buildCommandStr(LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), FLAG.toString());
                 break;
         }
-        List<IFlag> flags = LocalRegions.getSortedFlags(region);
-        if (flags.isEmpty()) {
+
+        List<IFormattableTextComponent> flagEntries = buildRemoveFlagEntries(region, region.getFlagContainer());
+        if (flagEntries.isEmpty()) {
             sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.flag.empty", buildRegionInfoLink(region)));
             return 1;
         }
         List<IFormattableTextComponent> flagPagination = buildPaginationComponents(
-                buildRegionFlagInfoHeader(region),
-                cmd, buildRemoveFlagEntries(region, flags), pageNo,
+                buildRegionFlagInfoHeader(region), cmd, flagEntries, pageNo,
                 new StringTextComponent(" - ").append(buildAddFlagLink(region)));
         flagPagination.forEach(line -> sendCmdFeedback(ctx.getSource(), line));
         return 0;
