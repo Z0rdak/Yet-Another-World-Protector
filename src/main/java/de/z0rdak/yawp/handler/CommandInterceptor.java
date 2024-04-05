@@ -66,35 +66,35 @@ public class CommandInterceptor {
                 int cancelExecutionResultCode = 0;
                 switch (subCmd) {
                     case "region":
-                        if (!cmdContext.getArguments().containsKey(CommandConstants.LOCAL.toString())) {
+                        if (!nodeNames.contains(CommandConstants.LOCAL.toString())) {
                             cancelExecutionResultCode = 9;
                             break;
                         }
                         cancelExecutionResultCode = handleRegionCmdExecution(cmdContext, nodeNames, cmdSrcType);
                         break;
                     case "dim":
-                        if (!cmdContext.getArguments().containsKey(DIM.toString())) {
+                        if (!nodeNames.contains(DIM.toString())) {
                             cancelExecutionResultCode = 9;
                             break;
                         }
                         cancelExecutionResultCode = handleDimCommandExecution(cmdContext, cmdSrcType);
                         break;
                     case "global":
-                        if (!cmdContext.getArguments().containsKey(GLOBAL.toString())) {
+                        if (!nodeNames.contains(GLOBAL.toString())) {
                             cancelExecutionResultCode = 9;
                             break;
                         }
                         cancelExecutionResultCode = verifyGlobalCommandPermission(cmdContext, cmdSrcType);
                         break;
                     case "flag":
-                        if (!cmdContext.getArguments().containsKey(FLAG.toString())) {
+                        if (!nodeNames.contains(FLAG.toString())) {
                             cancelExecutionResultCode = 9;
                             break;
                         }
                         cancelExecutionResultCode = verifyFlagCommandPermission(cmdContext, nodeNames, cmdSrcType);
                         break;
                     case "marker":
-                        if (!cmdContext.getArguments().containsKey(MARKER.toString())) {
+                        if (!nodeNames.contains(MARKER.toString())) {
                             cancelExecutionResultCode = 9;
                             break;
                         }
@@ -297,7 +297,7 @@ Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
     }
 
     private static boolean hasModBaseCmd(List<String> nodeNames) {
-        return nodeNames.size() > 0 && nodeNames.get(0) != null && !nodeNames.get(0).equals(BASE_CMD);
+        return !nodeNames.isEmpty() && nodeNames.get(0) != null && nodeNames.get(0).equals(BASE_CMD);
     }
 
     @Nullable
