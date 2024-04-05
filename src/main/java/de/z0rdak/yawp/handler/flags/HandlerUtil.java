@@ -145,7 +145,7 @@ public final class HandlerUtil {
         PlayerEntity player = checkEvent.getPlayer();
         RegionFlag regionFlag = checkEvent.getRegionFlag();
         IProtectedRegion responsibleRegion = getResponsible(target, checkEvent.getDimension());
-        FlagContainer flags = getFlagsRecursive(responsibleRegion, new FlagContainer());
+        FlagContainer flags = getFlagsRecursive(responsibleRegion, null);
         FlagState flagState = flags.flagState(regionFlag.name);
         if (flagState == FlagState.UNDEFINED) {
             return new FlagCheckResult(regionFlag, FlagState.UNDEFINED, target, responsibleRegion, player);
@@ -250,15 +250,20 @@ public final class HandlerUtil {
         if (region.equals(region.getParent())) { // global region has itself as parent
             return carry == null ? region.getFlagContainer() : carry;
         }
+        if (carry == null) {
+            carry = region.getFlagContainer();
+        }
         Map<String, IFlag> activeParentFlags = region.getParent().getFlagContainer().getActiveFlags();
-        activeParentFlags.forEach((flagName, flag) -> {
+        for (Map.Entry<String, IFlag> entry : activeParentFlags.entrySet()) {
+            String flagName = entry.getKey();
+            IFlag flag = entry.getValue();
             boolean parentFlagOverrides = flag.doesOverride();
             boolean existingFlag = carry.contains(flagName);
             if (parentFlagOverrides && existingFlag) {
                 carry.remove(flagName);
                 carry.put(flagName, flag);
             }
-        });
+        }
         return getFlagsRecursive(region.getParent(), carry);
     }
 
