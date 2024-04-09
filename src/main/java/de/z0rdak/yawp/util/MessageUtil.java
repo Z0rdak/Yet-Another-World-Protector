@@ -622,24 +622,27 @@ public class MessageUtil {
 
     /**
      * Creates a TextComponent with a Link for displaying the flag info. <br></br>
-     * Text: [flagname] [+] [~] [!] <br></br>
+     * Text: [flagname] [+]|[#] [!] [$] <br></br>
      * Where <br></br>
-     * - [+] is a quick link to toggle the flag active state, <br></br>
-     * - [!] is a quick link to toggle the flag invert state, <br></br>
-     * - [~] is a quick link to toggle the flag mute state, <br></br>
+     * - [!] is a quick link to toggle the flag active state, <br></br>
+     * - [s] is a suggest link to change the flag state, <br></br>
+     * - [m] is a quick link to toggle the flag override state, <br></br>
+     * - [o] is a quick link to toggle the flag mute state, <br></br>
      *
      * @param region
      * @param flag
-     * @return text component for quick flag actions [flagname] [+] [~] [!]
+     * @return text component for quick flag actions [flagname] [!|s] [m] [o]
      */
     private static MutableComponent buildFlagQuickActionComponent(IProtectedRegion region, IFlag flag, ChatFormatting flagLinkColor) {
         return buildFlagInfoLink(region, flag, flagLinkColor)
                 .append(" ")
-                .append(buildFlagActiveToggleLink(region, flag))
+                .append(buildFlagStateToggleLink(region, flag)) // [!]
+                .append("|")
+                .append(buildFlagStateSuggestionLink(region, flag)) // [s]
                 .append(" ")
-                .append(buildFlagMuteToggleLink(region, flag))
+                .append(buildFlagMuteToggleLink(region, flag)) // [m]
                 .append(" ")
-                .append(buildFlagInvertToggleLink(region, flag));
+                .append(buildFlagOverrideToggleLink(region, flag)); // [o]
     }
 
     /**
@@ -679,8 +682,11 @@ public class MessageUtil {
         return buildFlagInfoLink(region, flag, LINK_COLOR);
     }
 
-    // TODO: maybe additional link to suggest state command
-    public static MutableComponent buildFlagActiveToggleLink(IProtectedRegion region, IFlag flag) {
+
+    /**
+     * Creates a TextComponent for toggling the flag state between allow and deny <br></br>
+     */
+    public static MutableComponent buildFlagStateToggleLink(IProtectedRegion region, IFlag flag) {
         switch (region.getRegionType()) {
             case GLOBAL: {
                 String cmd = buildCommandStr(FLAG.toString(), GLOBAL.toString(), flag.getName());
@@ -701,7 +707,30 @@ public class MessageUtil {
         }
     }
 
-    public static MutableComponent buildFlagInvertToggleLink(IProtectedRegion region, IFlag flag) {
+    public static MutableComponent buildFlagStateSuggestionLink(IProtectedRegion region, IFlag flag) {
+        MutableComponent hover = new TranslatableComponent("cli.info.flag.state.set.link.hover", flag.getName(), region.getName());
+        MutableComponent text = new TranslatableComponent("cli.info.flag.state.set.link.text");
+        switch (region.getRegionType()) {
+            case GLOBAL: {
+                String cmd = buildCommandStr(FLAG.toString(), GLOBAL.toString(), flag.getName(), STATE.toString(), "");
+                return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, SUGGEST_COLOR);
+            }
+            case DIMENSION: {
+                String cmd = buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().location().toString(), flag.getName(), STATE.toString(), "");
+                return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, SUGGEST_COLOR);
+            }
+            case LOCAL: {
+                String cmd = buildCommandStr(FLAG.toString(), CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag.getName(), STATE.toString(), "");
+                return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, SUGGEST_COLOR);
+            }
+            case TEMPLATE:
+                throw new NotImplementedException("No supported yet");
+            default:
+                throw new IllegalStateException("Unexpected value: " + region.getRegionType());
+        }
+    }
+
+    public static MutableComponent buildFlagOverrideToggleLink(IProtectedRegion region, IFlag flag) {
         switch (region.getRegionType()) {
             case GLOBAL: {
                 String cmd = buildCommandStr(FLAG.toString(), GLOBAL.toString(), flag.getName());
