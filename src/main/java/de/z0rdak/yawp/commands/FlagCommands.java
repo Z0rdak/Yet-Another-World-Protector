@@ -97,7 +97,7 @@ public final class FlagCommands {
         final int amountOfExamples = 10;
         List<String> examples = new ArrayList<>(amountOfExamples);
         for (int i = 0; i < amountOfExamples; i++) {
-            examples.add(new TranslatableComponent("cli.info.flag.state.msg.text.example." + i).getString());
+            examples.add(new TranslatableComponent("cli.flag.msg.text.example." + i).getString());
         }
         return examples;
     }
@@ -105,17 +105,17 @@ public final class FlagCommands {
     /**
      * Builds the flag info component for the given flag and region. <br></br>
      * == Flag info for [flagname] of [region] == <br></br>
-     * Enabled: [yes] <br></br>
-     * Inverted: [no] <br></br>
+     * State: state [set state] <br></br>
      * Muted: [no] <br></br>
+     * Override: [false] <br></br>
      * Message: [set] [x]: 'msg' <br></br>
      */
     private static int promptFlagInfo(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag flag) {
         sendCmdFeedback(ctx.getSource(), buildFlagInfoHeader(region, flag));
-        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.info.flag.state.enable", buildFlagActiveToggleLink(region, flag)));
-        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.info.flag.state.override", buildFlagInvertToggleLink(region, flag)));
-        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.info.flag.state.msg.mute", buildFlagMuteToggleLink(region, flag)));
-        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.info.flag.state.msg.text", buildFlagMessageComponent(region, flag)));
+        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.flag.state", buildFlagStateComponent(region, flag)));
+        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.flag.msg.mute", buildFlagMuteToggleLink(region, flag)));
+        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.flag.override", buildFlagOverrideToggleLink(region, flag)));
+        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.flag.msg.text", buildFlagMessageComponent(region, flag)));
         return 0;
     }
 
