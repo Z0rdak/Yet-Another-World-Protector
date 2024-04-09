@@ -167,7 +167,7 @@ public class ArgumentUtil {
         return FlagState.from(state);
     }
 
-    public static boolean getNegationArgument(CommandContext<CommandSourceStack> ctx) {
+    public static boolean getOverrideArgument(CommandContext<CommandSourceStack> ctx) {
         return BoolArgumentType.getBool(ctx, CommandConstants.OVERRIDE.toString());
     }
 
