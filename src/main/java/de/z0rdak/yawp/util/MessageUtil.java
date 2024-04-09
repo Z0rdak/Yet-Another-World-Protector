@@ -728,9 +728,34 @@ public class MessageUtil {
         }
     }
 
+    public static IFormattableTextComponent buildFlagStateComponent(IProtectedRegion region, IFlag flag) {
+        FlagState state = flag.getState();
+        IFormattableTextComponent text = new StringTextComponent(state.name());
+        IFormattableTextComponent hover = StringTextComponent.EMPTY.plainCopy();
+        TextFormatting color = WHITE;
+        switch (state) {
+            case ALLOWED:
+                color = GREEN;
+                hover = new TranslationTextComponent("cli.flag.state.allowed.info.hover");
+                break;
+            case DENIED:
+                color = RED;
+                hover = new TranslationTextComponent("cli.flag.state.denied.info.hover");
+                break;
+            case DISABLED:
+                color = GRAY;
+                hover = new TranslationTextComponent("cli.flag.state.disabled.info.hover");
+                break;
+        }
+        IFormattableTextComponent stateInfo = buildTextWithHoverMsg(text, hover, color);
+        return stateInfo
+                .append(" ")
+                .append(buildFlagStateSuggestionLink(region, flag));
+    }
+
     public static IFormattableTextComponent buildFlagStateSuggestionLink(IProtectedRegion region, IFlag flag) {
-        IFormattableTextComponent hover = new TranslationTextComponent("cli.info.flag.state.set.link.hover", flag.getName(), region.getName());
-        IFormattableTextComponent text = new TranslationTextComponent("cli.info.flag.state.set.link.text");
+        IFormattableTextComponent hover = new TranslationTextComponent("cli.flag.state.set.link.hover", flag.getName(), region.getName());
+        IFormattableTextComponent text = new TranslationTextComponent("cli.flag.state.set.link.text");
         switch (region.getRegionType()) {
             case GLOBAL: {
                 String cmd = buildCommandStr(FLAG.toString(), GLOBAL.toString(), flag.getName(), STATE.toString(), "");
