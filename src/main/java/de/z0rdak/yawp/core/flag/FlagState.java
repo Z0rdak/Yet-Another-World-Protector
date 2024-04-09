@@ -1,5 +1,9 @@
 package de.z0rdak.yawp.core.flag;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public enum FlagState {
     DISABLED,
     /**
@@ -37,6 +41,17 @@ public enum FlagState {
             default:
                 throw new IllegalArgumentException("Unknown flag state: " + value);
         }
+    }
+
+    /**
+     * List of valid flag states for CLI to set the flag state.
+     * Undefined is excluded because it should not be accessible for users.
+     *
+     * @return list of valid flag states
+     */
+    public static List<String> ValidFlagStates() {
+        // exclude UNDEFINED
+        return Arrays.stream(FlagState.values()).filter(state -> state != UNDEFINED).map(Enum::name).collect(Collectors.toList());
     }
 
     public static FlagState invert(FlagState state) {
