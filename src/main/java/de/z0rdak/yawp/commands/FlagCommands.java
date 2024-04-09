@@ -23,10 +23,8 @@ import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
@@ -68,16 +66,16 @@ public final class FlagCommands {
                 .then(literal(INFO)
                         .executes(ctx -> promptFlagInfo(ctx, regionSupplier.apply(ctx), getIFlagArgument(ctx)))
                 )
-                .then(literal(ENABLE)
-                        .executes(ctx -> setEnableState(ctx, regionSupplier.apply(ctx), getIFlagArgument(ctx)))
+                .then(literal(STATE)
+                        .executes(ctx -> setFlagState(ctx, regionSupplier.apply(ctx), getIFlagArgument(ctx)))
                         .then(Commands.argument(STATE.toString(), StringArgumentType.word())
-                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(Arrays.stream(FlagState.values()).map(Enum::name).collect(Collectors.toList()), builder))
-                                .executes(ctx -> setEnableState(ctx, regionSupplier.apply(ctx), getIFlagArgument(ctx), getFlagStateArgument(ctx))))
+                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(FlagState.ValidFlagStates(), builder))
+                                .executes(ctx -> setFlagState(ctx, regionSupplier.apply(ctx), getIFlagArgument(ctx), getFlagStateArgument(ctx))))
                 )
                 .then(literal(OVERRIDE)
-                        .executes(ctx -> setInvertState(ctx, regionSupplier.apply(ctx), getIFlagArgument(ctx)))
+                        .executes(ctx -> setOverride(ctx, regionSupplier.apply(ctx), getIFlagArgument(ctx)))
                         .then(Commands.argument(OVERRIDE.toString(), BoolArgumentType.bool())
-                                .executes(ctx -> setInvertState(ctx, regionSupplier.apply(ctx), getIFlagArgument(ctx), getNegationArgument(ctx))))
+                                .executes(ctx -> setOverride(ctx, regionSupplier.apply(ctx), getIFlagArgument(ctx), getOverrideArgument(ctx))))
                 )
                 .then(literal(MSG)
                         .then(literal(MUTE)
@@ -160,16 +158,16 @@ public final class FlagCommands {
         return 0;
     }
 
-    private static int setEnableState(CommandContext<CommandSource> ctx, IProtectedRegion region, IFlag regionFlag) {
+    private static int setFlagState(CommandContext<CommandSource> ctx, IProtectedRegion region, IFlag regionFlag) {
         if (region.containsFlag(regionFlag.getName())) {
             IFlag flag = region.getFlag(regionFlag.getName());
             if (flag.getState() == FlagState.ALLOWED || flag.getState() == FlagState.DENIED) {
-                return setEnableState(ctx, region, regionFlag, FlagState.invert(flag.getState()));
+                return setFlagState(ctx, region, regionFlag, FlagState.invert(flag.getState()));
             }
             if (flag.getState() == FlagState.DISABLED) {
-                return setEnableState(ctx, region, regionFlag, FlagState.DENIED);
+                return setFlagState(ctx, region, regionFlag, FlagState.DENIED);
             }
-            return setEnableState(ctx, region, regionFlag, flag.getState());
+            return setFlagState(ctx, region, regionFlag, flag.getState());
         } else {
             MessageUtil.sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.flag.not-present",
                     buildRegionInfoLink(region), regionFlag.getName()));
@@ -177,7 +175,7 @@ public final class FlagCommands {
         }
     }
 
-    private static int setEnableState(CommandContext<CommandSource> ctx, IProtectedRegion region, IFlag flag, FlagState flagState) {
+    private static int setFlagState(CommandContext<CommandSource> ctx, IProtectedRegion region, IFlag flag, FlagState flagState) {
         FlagState oldState = flag.getState();
         flag.setState(flagState);
         IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), oldState.name(), flagState.name());
@@ -191,10 +189,10 @@ public final class FlagCommands {
 
     }
 
-    public static int setInvertState(CommandContext<CommandSource> ctx, IProtectedRegion region, IFlag regionFlag) {
+    public static int setOverride(CommandContext<CommandSource> ctx, IProtectedRegion region, IFlag regionFlag) {
         if (region.containsFlag(regionFlag.getName())) {
             IFlag flag = region.getFlag(regionFlag.getName());
-            return setInvertState(ctx, region, flag, !flag.doesOverride());
+            return setOverride(ctx, region, flag, !flag.doesOverride());
         } else {
             MessageUtil.sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.flag.not-present",
                     buildRegionInfoLink(region), regionFlag.getName()));
@@ -202,7 +200,7 @@ public final class FlagCommands {
         }
     }
 
-    public static int setInvertState(CommandContext<CommandSource> ctx, IProtectedRegion region, IFlag flag, boolean invert) {
+    public static int setOverride(CommandContext<CommandSource> ctx, IProtectedRegion region, IFlag flag, boolean invert) {
         flag.setOverride(invert);
         IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!invert), String.valueOf(invert));
         IFormattableTextComponent msg = new TranslationTextComponent("cli.flag.invert.success.text",
