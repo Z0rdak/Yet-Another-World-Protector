@@ -72,15 +72,14 @@ time to enable new features and to improve the mod.
   * *Undefined* - The flag is not defined for the region.
 * Flags can be disabled to keep the flags in the region but disable the flag check. This is useful when you need to
   disable a flag but don't want to lose the flag settings.
-
 * Add commands for enhanced flag management:
-  * `/wp flag local <dim> <region> <flag> state [ALLOWED|DENIED|DISABLED|UNDEFINED]` - set the state for a flag
-  * `/wp flag local <dim> <region> <flag> override [true|false]` - sets the flag to override the same flag in child
+  * `/wp flag local <dim> <local> <flag> state <ALLOWED|DENIED|DISABLED>` - set the state for a flag
+  * `/wp flag local <dim> <local> <flag> override <true|false>` - sets the flag to override the same flag in child
     regions
-  * `/wp flag local <dim> <region> <flag> msg set "msg"` - set a new message for the flag. Check the wiki for a
+  * `/wp flag local <dim> <local> <flag> msg set <msg>` - set a new message for the flag. Check the wiki for a
     description of possible placeholders for messages.
-  * `/wp flag local <dim> <region> <flag> msg clear` ...
-  * `/wp flag local <dim> <region> <flag> msg mute` ...
+  * `/wp flag local <dim> <local> <flag> msg clear` ...
+  * `/wp flag local <dim> <local> <flag> msg mute` ...
   * `/wp flag dim ...` to manage flag properties for a Dimensional Region
   * `/wp flag global ...` to manage flag properties for the Global Region
 
@@ -134,15 +133,15 @@ time to enable new features and to improve the mod.
 ### Misc
 
 * Add new command to expand the area of a Local Region:
-  * `/wp local <dim> <region> area expand [yMin] [yMax]`.
+  * `/wp local <dim> <local> area expand [yMin] [yMax]`.
   * The optional parameters can be used to set a specific height.
   * Omitting the parameters will set the region area to the Minecraft version specific build limits
-* Add new command to rename a Local Region: `/wp region <dim> <region> rename <newName>`.
+* Add new command to rename a Local Region: `/wp local <dim> <local> rename <newName>`.
 * Add new commands to add and remove offline players from/to regions.
-  * `/wp local <dim> <region> add player <group> by-name <player names separated by space>`.
-  * `/wp local <dim> <region> remove player <group> by-name <player names separated by space>`.
-  * `/wp local <dim> <region> add player <group> by-uuid <player uuid>`.
-  * `/wp local <dim> <region> remove player <group> by-uuid <player uuid>`.
+  * `/wp local <dim> <local> add player <group> by-name <player names separated by space>`.
+  * `/wp local <dim> <local> remove player <group> by-name <player names separated by space>`.
+  * `/wp local <dim> <local> add player <group> by-uuid <player uuid>`.
+  * `/wp local <dim> <local> remove player <group> by-uuid <player uuid>`.
   * Note that you can define multiple names for adding and removing but only one UUID at a time.
   * Same goes for the Global and Dimensional Regions as well
 * Dimensional Regions now can be muted (as well as their flags, all or individually)
@@ -158,18 +157,18 @@ time to enable new features and to improve the mod.
 * Rename spatial properties to area properties. This change also involves some commands and language keys.
 * Change command to update Local Region area:
   * Old: `/wp region <dim> <region> area Cuboid <pos1> <pos2>`
-  * New: `/wp region <dim> <region> area set Cuboid <pos1> <pos2>`
+  * New: `/wp local <dim> <local> area set Cuboid <pos1> <pos2>`
 * Improved RegionMarker indicators for marked blocks. It's item name now shows colored indicators for
   * the amount of blocks which needs to be marked for a valid area
   * a selected teleport position
 * The RegionMarker now also prompts feedback for marked blocks and a valid area to the player.
 * Rename affiliation to groups. This change also involves some commands and language keys.
-* Change commands to manage groups (former known as affiliations):
-  * New: `/wp region <dim> <region> add|list|remove group player|team <member|owner> ...`
-  * Old: `/wp region <dim> <region> add|list|remove affiliate player|team <member|owner> ...`
 * Change commands to manage Local Regions:
-  * New: `/wp local <dim> <region> ...`
   * Old: `/wp region <dim> <region> ...`
+  * New: `/wp local <dim> <local> ...`
+* Change commands to manage groups (former known as affiliations):
+  * Old: `/wp region <dim> <region> add|list|remove affiliate player|team <member|owner> ...`
+  * New: `/wp local <dim> <local> add|list|remove group player|team <member|owner> ...`
 * The spawning flags no longer remove entities with the PersistanceRequired tag or a custom name.
 * Renaming a Stick to create a RegionMarker is now disabled to prevent permission issues. This will come back in a
   future update with an overhaul of the RegionMarker.
@@ -184,8 +183,10 @@ time to enable new features and to improve the mod.
 
 # [0.0.3.0-beta1] - 2024-03-27
 
-## Add first basic draft for an API to manage regions [Pull Request #105](https://github.com/Z0rdak/Yet-Another-World-Protector/pull/105). Thank you very much!
+## Added
 
+* Add first basic draft for an API to manage
+  regions [Pull Request #105](https://github.com/Z0rdak/Yet-Another-World-Protector/pull/105). Thank you very much!
 * Implement CreateRegion event which is fired whenever a region is created. This event can be canceled to prevent the
   creation.
 * Implement UpdateRegion event which is fired whenever a region is update (the area changed). This event can be
@@ -194,7 +195,6 @@ time to enable new features and to improve the mod.
   deletion.
 
 ## Changed
-
 * Bump forge version to latest (36.2.42)
 
 # [0.0.2.9-beta3] - 2023-08-12
