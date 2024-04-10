@@ -67,12 +67,12 @@ public class GlobalCommands {
         return 0;
     }
 
-    private static int promptDimensionalRegions(CommandContext<CommandSourceStack> ctx, GlobalRegion region, int pageNo) {
+    private static int promptDimensionalRegions(CommandContext<CommandSourceStack> ctx, GlobalRegion globalRegion, int pageNo) {
         List<DimensionRegionCache> dimCaches = RegionDataManager.getDimensionCaches();
         List<MutableComponent> regionPagination = buildPaginationComponents(
-                buildRegionListHeader(region),
+                buildRegionListHeader(globalRegion),
                 buildCommandStr(GLOBAL.toString(), LIST.toString(), DIM.toString()),
-                buildResetDimensionalRegionEntries(region, dimCaches),
+                buildResetDimensionalRegionEntries(globalRegion, dimCaches),
                 pageNo,
                 // empty string, since there is now manual creation of dimensional regions
                 new TextComponent(""));
