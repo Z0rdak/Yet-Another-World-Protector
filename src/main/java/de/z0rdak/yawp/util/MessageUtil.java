@@ -810,7 +810,7 @@ public class MessageUtil {
                 return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, REMOVE_CMD_COLOR);
             }
             case LOCAL: {
-                String cmd = buildCommandStr(FLAG.toString(), LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag.getName(), MSG.toString(), SET.toString());
+                String cmd = buildCommandStr(FLAG.toString(), CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag.getName(), MSG.toString(), SET.toString());
                 return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, REMOVE_CMD_COLOR);
             }
             default:
@@ -831,7 +831,7 @@ public class MessageUtil {
                 return buildExecuteCmdComponent(text, hover, cmd, RUN_COMMAND, REMOVE_CMD_COLOR);
             }
             case LOCAL: {
-                String cmd = buildCommandStr(FLAG.toString(), LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag.getName(), MSG.toString(), CLEAR.toString());
+                String cmd = buildCommandStr(FLAG.toString(), CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag.getName(), MSG.toString(), CLEAR.toString());
                 return buildExecuteCmdComponent(text, hover, cmd, RUN_COMMAND, REMOVE_CMD_COLOR);
             }
             default:
@@ -931,12 +931,16 @@ public class MessageUtil {
         return derivedFlagEntries;
     }
 
-    public static List<IFormattableTextComponent> buildResetDimensionalRegionEntries(IProtectedRegion parent, List<DimensionRegionCache> regions) {
-        return regions.stream().map(region -> buildRemoveRegionEntry(parent, region.getDimensionalRegion())).collect(Collectors.toList());
+    public static List<IFormattableTextComponent> buildResetDimensionalRegionEntries(IProtectedRegion parent, List<DimensionRegionCache> dimCaches) {
+        return dimCaches.stream()
+                .map(region -> buildRemoveRegionEntry(parent, region.getDimensionalRegion()))
+                .collect(Collectors.toList());
     }
 
     public static List<IFormattableTextComponent> buildRemoveRegionEntries(IProtectedRegion parent, List<IMarkableRegion> regions) {
-        return regions.stream().map(region -> buildRemoveRegionEntry(parent, region)).collect(Collectors.toList());
+        return regions.stream()
+                .map(region -> buildRemoveRegionEntry(parent, region))
+                .collect(Collectors.toList());
     }
 
 
@@ -972,8 +976,10 @@ public class MessageUtil {
         IFormattableTextComponent regionRemoveLink;
         switch (parent.getRegionType()) {
             case GLOBAL: {
-                YetAnotherWorldProtector.LOGGER.info("reseting global region - just kidding its not implemented yet");
-                return new StringTextComponent("");
+                regionRemoveLink = buildDimResetComponent((DimensionalRegion) region)
+                        .append(separator)
+                        .append(buildRegionInfoLink(region));
+                break;
             }
             case DIMENSION: {
                 IFormattableTextComponent removeLink = buildDimSuggestRegionRemovalLink((IMarkableRegion) region);
@@ -994,6 +1000,13 @@ public class MessageUtil {
                 throw new IllegalArgumentException();
         }
         return new StringTextComponent(" - ").append(regionRemoveLink);
+    }
+
+    private static IFormattableTextComponent buildDimResetComponent(DimensionalRegion region) {
+        String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), CommandConstants.RESET.toString(), DIM.toString());
+        IFormattableTextComponent hover = new TranslationTextComponent("cli.dim.reset.dim.link.hover", region.getName());
+        IFormattableTextComponent text = new TranslationTextComponent("cli.link.action.undo.text");
+        return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, REMOVE_CMD_COLOR);
     }
 
     private static String buildPageCommand(String cmd, int page) {
@@ -1101,10 +1114,10 @@ public class MessageUtil {
                 buildRegionChildrenLink(region), buildRegionInfoLink(region)));
     }
 
-    // [n regions][+]
+    // [n dimCaches][+]
     public static IFormattableTextComponent buildDimRegionsLink(DimensionRegionCache dimCache) {
         DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-        String command = buildCommandStr(DIM.toString(), dimRegion.getDim().location().toString(), LIST.toString(), LOCAL.toString());
+        String command = buildCommandStr(DIM.toString(), dimRegion.getDim().location().toString(), LIST.toString(), CommandConstants.LOCAL.toString());
         IFormattableTextComponent listDimRegionsLinkText = new TranslationTextComponent("cli.msg.dim.info.region.list.link.text", dimCache.getRegions().size());
         IFormattableTextComponent listDimRegionsHoverText = new TranslationTextComponent("cli.msg.dim.info.region.list.link.hover", dimRegion.getName());
         IFormattableTextComponent listDimRegionsListLink = buildExecuteCmdComponent(listDimRegionsLinkText, listDimRegionsHoverText, command, RUN_COMMAND, LINK_COLOR);
@@ -1125,7 +1138,7 @@ public class MessageUtil {
             case DIMENSION: {
                 // TODO: children not regions
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(region.getDim());
-                String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), LOCAL.toString());
+                String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), CommandConstants.LOCAL.toString());
                 IFormattableTextComponent listDimRegionsLinkText = new TranslationTextComponent("cli.msg.dim.info.region.list.link.text", dimCache.getRegions().size());
                 IFormattableTextComponent listDimRegionsHoverText = new TranslationTextComponent("cli.msg.dim.info.region.list.link.hover", region.getName());
                 IFormattableTextComponent listDimRegionsListLink = buildExecuteCmdComponent(listDimRegionsLinkText, listDimRegionsHoverText, command, RUN_COMMAND, LINK_COLOR);
