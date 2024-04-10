@@ -114,7 +114,7 @@ public final class HandlerUtil {
         if (flag == null || result.getFlagState() == FlagState.UNDEFINED || result.getFlagState() == FlagState.DISABLED) {
             return;
         }
-        boolean isFlagMuted = flag.getFlagMsg().isMuted();
+        boolean isFlagMuted = flag.getFlagMsg().isMuted() || responsibleRegion.isMuted();
         // If not muted and the event is a player event, send the message
         if (!isFlagMuted && result.getPlayer() != null && result.getPlayer() instanceof PlayerEntity) {
             Map<String, String> msgSubstitutes = FlagMessage.defaultSubstitutesFor(result);
