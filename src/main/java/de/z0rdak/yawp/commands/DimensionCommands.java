@@ -68,7 +68,7 @@ public class DimensionCommands {
                         .then(buildRemoveSubCommand((ctx) -> getDimCacheArgument(ctx).getDimensionalRegion()))
                         .then(buildCopySubCommand((ctx) -> getDimCacheArgument(ctx).getDimensionalRegion()))
                         .then(literal(LIST)
-                                .then(literal(CommandConstants.LOCAL)
+                                .then(literal(LOCAL)
                                         .executes(ctx -> promptDimensionRegionList(ctx, getDimCacheArgument(ctx), 0))
                                         .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
                                                 .executes(ctx -> promptDimensionRegionList(ctx, getDimCacheArgument(ctx), getPageNoArgument(ctx)))))
@@ -188,6 +188,7 @@ public class DimensionCommands {
         dimCache.getDimensionalRegion().resetGroups();
         dimCache.getDimensionalRegion().setIsActive(true);
         dimCache.getDimensionalRegion().setIsMuted(false);
+        dimCache.getDimensionalRegion().getFlagContainer().clear();
         RegionDataManager.save();
         sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.dim.reset.confirm", buildRegionInfoLink(dimCache.getDimensionalRegion())));
         return 0;
