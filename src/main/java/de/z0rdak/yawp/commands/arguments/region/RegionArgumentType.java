@@ -15,6 +15,7 @@ import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
+import de.z0rdak.yawp.handler.CommandInterceptor;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.MessageUtil;
@@ -175,17 +176,29 @@ public class RegionArgumentType implements ArgumentType<String> {
 
     private CompletableFuture<Suggestions> suggestRegionsForOwner(SuggestionsBuilder builder, CommandSource src, DimensionRegionCache dimCache) {
         Collection<IMarkableRegion> regions = dimCache.getRegions();
-        if (src.getEntity() instanceof PlayerEntity) {
-            regions = regions.stream()
-                    .filter(region -> region.isInGroup((PlayerEntity) src.getEntity(), RegionNBT.OWNERS))
-                    .collect(Collectors.toList());
+        boolean hasPermission = CommandInterceptor.hasCmdPermission(src);
+        if (hasPermission) {
+            Collection<String> regionNames = dimCache.getRegions().stream().map(IProtectedRegion::getName).collect(Collectors.toSet());
+            if (regionNames.isEmpty()) {
+                MessageUtil.sendCmdFeedback(src, new StringTextComponent("No regions defined in dim '" + dimCache.dimensionKey().location() + "'"));
+                return Suggestions.empty();
+            } else {
+                return ISuggestionProvider.suggest(regionNames, builder);
+            }
+        } else {
+            if (src.getEntity() instanceof PlayerEntity) {
+                regions = regions.stream()
+                        .filter(region -> region.isInGroup((PlayerEntity) src.getEntity(), RegionNBT.OWNERS))
+                        .collect(Collectors.toList());
+                Collection<String> regionNames = regions.stream().map(IProtectedRegion::getName).collect(Collectors.toSet());
+                if (regionNames.isEmpty()) {
+                    MessageUtil.sendCmdFeedback(src, new StringTextComponent("No regions defined in dim '" + dimCache.dimensionKey().location() + "'"));
+                    return Suggestions.empty();
+                }
+                return ISuggestionProvider.suggest(regionNames, builder);
+            }
         }
-        Collection<String> regionNames = regions.stream().map(IProtectedRegion::getName).collect(Collectors.toSet());
-        if (regionNames.isEmpty()) {
-            MessageUtil.sendCmdFeedback(src, new StringTextComponent("No regions defined in dim '" + dimCache.dimensionKey().location() + "'"));
-            return Suggestions.empty();
-        }
-        return ISuggestionProvider.suggest(regionNames, builder);
+        return Suggestions.empty();
     }
 
     @SuppressWarnings("unchecked")
