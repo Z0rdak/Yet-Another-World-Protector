@@ -22,15 +22,13 @@ public class LeavesBlockMixin {
     @Inject(method = "randomTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/LeavesBlock;dropResources(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"), cancellable = true)
     private void spread(BlockState state, ServerWorld world, BlockPos pos, Random rnd, CallbackInfo info) {
         if (!world.isClientSide) {
-            if (!world.isClientSide) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(pos, LEAF_DECAY, world.dimension(), null);
-                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
-                    return;
-                }
-                HandlerUtil.processCheck(checkEvent, null, denyResult -> {
-                    info.cancel();
-                });
+            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, LEAF_DECAY, world.dimension(), null);
+            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                return;
             }
+            HandlerUtil.processCheck(checkEvent, null, denyResult -> {
+                info.cancel();
+            });
         }
     }
 }
