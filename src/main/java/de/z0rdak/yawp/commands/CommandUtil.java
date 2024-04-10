@@ -789,7 +789,7 @@ public class CommandUtil {
             // Area: [Area]
             sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.area", buildRegionAreaLink(markableRegion)));
         }
-        // Groups: [owners], [members], [<listAffiliations>]
+        // Groups: [owners], [members], [<listGroups>]
         sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.group", buildGroupLinks(region)));
 
         promptRegionChildrenInfo(ctx, region);
@@ -808,11 +808,8 @@ public class CommandUtil {
             case DIMENSION: {
                 // Regions: [global], [n children], [n regions][+],
                 MessageUtil.buildRegionChildrenLink(region);
-
-                MutableComponent globalRegionLink = buildRegionInfoLink(region, new TranslatableComponent("cli.msg.info.region.global.link.hover"));
-
+                MutableComponent globalRegionLink = buildRegionInfoLink(region.getParent(), new TranslatableComponent("cli.msg.info.region.global.link.hover"));
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(region.getDim());
-
                 MutableComponent regionsAndChildren = new TranslatableComponent("cli.msg.dim.info.region")
                         .append(": ")
                         .append(globalRegionLink)
