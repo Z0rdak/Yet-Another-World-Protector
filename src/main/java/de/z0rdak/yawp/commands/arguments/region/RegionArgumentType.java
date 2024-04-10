@@ -15,6 +15,7 @@ import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
+import de.z0rdak.yawp.handler.CommandInterceptor;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.MessageUtil;
@@ -92,7 +93,7 @@ public class RegionArgumentType implements ArgumentType<String> {
             }
             case LOCAL: {
                 DimensionRegionCache dimCache = ArgumentUtil.getDimCacheArgument(context);
-                String regionName = context.getArgument(CommandConstants.REGION.toString(), String.class);
+                String regionName = context.getArgument(CommandConstants.LOCAL.toString(), String.class);
                 if (!dimCache.contains(regionName)) {
                     MessageUtil.sendCmdFeedback(context.getSource(), new TextComponent("No region with name '" + regionName + "' defined in dim '" + dimCache.dimensionKey().location() + "'"));
                     throw ERROR_INVALID_VALUE.create(regionName);
@@ -176,17 +177,29 @@ public class RegionArgumentType implements ArgumentType<String> {
 
     private CompletableFuture<Suggestions> suggestRegionsForOwner(SuggestionsBuilder builder, CommandSourceStack src, DimensionRegionCache dimCache) {
         Collection<IMarkableRegion> regions = dimCache.getRegions();
-        if (src.getEntity() instanceof Player) {
-            regions = regions.stream()
-                    .filter(region -> region.isInGroup((Player) src.getEntity(), RegionNBT.OWNERS))
-                    .collect(Collectors.toList());
+        boolean hasPermission = CommandInterceptor.hasCmdPermission(src);
+        if (hasPermission) {
+            Collection<String> regionNames = dimCache.getRegions().stream().map(IProtectedRegion::getName).collect(Collectors.toSet());
+            if (regionNames.isEmpty()) {
+                MessageUtil.sendCmdFeedback(src, new TextComponent("No regions defined in dim '" + dimCache.dimensionKey().location() + "'"));
+                return Suggestions.empty();
+            } else {
+                return SharedSuggestionProvider.suggest(regionNames, builder);
+            }
+        } else {
+            if (src.getEntity() instanceof Player) {
+                regions = regions.stream()
+                        .filter(region -> region.isInGroup((Player) src.getEntity(), RegionNBT.OWNERS))
+                        .collect(Collectors.toList());
+                Collection<String> regionNames = regions.stream().map(IProtectedRegion::getName).collect(Collectors.toSet());
+                if (regionNames.isEmpty()) {
+                    MessageUtil.sendCmdFeedback(src, new TextComponent("No regions defined in dim '" + dimCache.dimensionKey().location() + "'"));
+                    return Suggestions.empty();
+                }
+                return SharedSuggestionProvider.suggest(regionNames, builder);
+            }
         }
-        Collection<String> regionNames = regions.stream().map(IProtectedRegion::getName).collect(Collectors.toSet());
-        if (regionNames.isEmpty()) {
-            MessageUtil.sendCmdFeedback(src, new TextComponent("No regions defined in dim '" + dimCache.dimensionKey().location() + "'"));
-            return Suggestions.empty();
-        }
-        return SharedSuggestionProvider.suggest(regionNames, builder);
+        return Suggestions.empty();
     }
 
     @SuppressWarnings("unchecked")
