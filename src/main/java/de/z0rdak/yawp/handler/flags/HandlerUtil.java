@@ -27,10 +27,7 @@ import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.Event;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -278,10 +275,10 @@ public final class HandlerUtil {
      */
     public static FlagContainer getFlagsRecursive(IProtectedRegion region, FlagContainer carry) {
         if (region.equals(region.getParent())) { // global region has itself as parent
-            return carry == null ? region.getFlagContainer() : carry;
+            return carry == null ? region.getFlagContainer().deepCopy() : carry;
         }
-        if (carry == null) {
-            carry = region.getFlagContainer();
+        if (carry == null) { // effectively make a deep copy of the flag container
+            carry = region.getFlagContainer().deepCopy();
         }
         Map<String, IFlag> activeParentFlags = region.getParent().getFlagContainer().getActiveFlags();
         for (Map.Entry<String, IFlag> entry : activeParentFlags.entrySet()) {
@@ -291,6 +288,9 @@ public final class HandlerUtil {
             boolean existingFlag = carry.contains(flagName);
             if (parentFlagOverrides && existingFlag) {
                 carry.remove(flagName);
+                carry.put(flagName, flag);
+            }
+            if (!existingFlag) {
                 carry.put(flagName, flag);
             }
         }
