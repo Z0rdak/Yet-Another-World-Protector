@@ -839,7 +839,6 @@ public class MessageUtil {
         }
     }
 
-
     public static MutableComponent buildFlagMuteToggleLink(IProtectedRegion region, IFlag flag) {
         switch (region.getRegionType()) {
             case GLOBAL: {
@@ -1179,13 +1178,15 @@ public class MessageUtil {
     }
 
     public static MutableComponent buildFlagListLink(IProtectedRegion region) {
-        MutableComponent flagListLinkText = new TranslatableComponent("cli.msg.info.region.flag.link.text", region.getFlags().size());
+        FlagContainer flagsInHierarchy = HandlerUtil.getFlagsRecursive(region, null);
+        MutableComponent flagListLinkText = new TranslatableComponent("cli.msg.info.region.flag.link.text",
+                region.getFlags().size(), flagsInHierarchy.size() - region.getFlags().size());
         MutableComponent flagListHoverText = new TranslatableComponent("cli.msg.info.region.flag.link.hover", region.getName());
         return switch (region.getRegionType()) {
             case GLOBAL -> {
                 String flagListCmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), FLAG.toString());
                 MutableComponent flagListLink = buildExecuteCmdComponent(flagListLinkText, flagListHoverText, flagListCmd, RUN_COMMAND, LINK_COLOR);
-                if (region.getFlags().isEmpty()) {
+                if (flagsInHierarchy.isEmpty()) {
                     flagListLink = flagListLinkText;
                 }
                 yield flagListLink.append(" ").append(buildAddFlagLink(region));
@@ -1193,7 +1194,7 @@ public class MessageUtil {
             case DIMENSION -> {
                 String flagListCmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), FLAG.toString());
                 MutableComponent flagListLink = buildExecuteCmdComponent(flagListLinkText, flagListHoverText, flagListCmd, RUN_COMMAND, LINK_COLOR);
-                if (region.getFlags().isEmpty()) {
+                if (flagsInHierarchy.isEmpty()) {
                     flagListLink = flagListLinkText;
                 }
                 yield flagListLink.append(" ").append(buildAddFlagLink(region));
@@ -1201,7 +1202,7 @@ public class MessageUtil {
             case LOCAL -> {
                 String listCmd = buildCommandStr(LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), FLAG.toString());
                 MutableComponent flagListLink = buildExecuteCmdComponent(flagListLinkText, flagListHoverText, listCmd, RUN_COMMAND, LINK_COLOR);
-                if (region.getFlags().isEmpty()) {
+                if (flagsInHierarchy.isEmpty()) {
                     flagListLink = flagListLinkText;
                 }
                 yield flagListLink.append(" ").append(buildAddFlagLink(region));
