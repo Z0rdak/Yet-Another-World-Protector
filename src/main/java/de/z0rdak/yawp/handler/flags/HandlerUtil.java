@@ -349,15 +349,25 @@ public final class HandlerUtil {
     /**
      * A correlation of a region and a flag. <br>
      * This is used to determine the responsible region for a flag state.
+     * This region is not necessarily the region responsible for the flag check event.
+     * It could be a parent region which overrides the flag state of the child region.
      */
-    static class FlagCorrelation {
+    public static class FlagCorrelation {
 
-        public IProtectedRegion region;
-        public IFlag flag;
+        public final IProtectedRegion region;
+        public final IFlag flag;
 
         public FlagCorrelation(IProtectedRegion region, IFlag flag) {
             this.region = region;
             this.flag = flag;
+        }
+
+        public IProtectedRegion getRegion() {
+            return region;
+        }
+
+        public IFlag getFlag() {
+            return flag;
         }
     }
 }
