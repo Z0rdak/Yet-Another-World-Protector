@@ -251,7 +251,7 @@ public class CommandUtil {
                 break;
         }
 
-        List<IFormattableTextComponent> flagEntries = buildRemoveFlagEntries(region, region.getFlagContainer());
+        List<IFormattableTextComponent> flagEntries = buildRemoveFlagEntries(region);
         if (flagEntries.isEmpty()) {
             sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.flag.empty", buildRegionInfoLink(region)));
             return 1;
