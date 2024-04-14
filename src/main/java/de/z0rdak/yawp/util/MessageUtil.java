@@ -35,15 +35,12 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import org.apache.commons.lang3.NotImplementedException;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
-import static de.z0rdak.yawp.core.region.RegionType.LOCAL;
+import static de.z0rdak.yawp.handler.flags.HandlerUtil.getFlagMapRecursive;
 import static net.minecraft.util.text.TextFormatting.RESET;
 import static net.minecraft.util.text.TextFormatting.*;
 import static net.minecraft.util.text.event.ClickEvent.Action.RUN_COMMAND;
@@ -422,8 +419,7 @@ public class MessageUtil {
         return buildRegionInfoLink(region, new TranslationTextComponent("cli.msg.info.region.link.hover", region.getName()));
     }
 
-    public static IFormattableTextComponent buildRegionInfoLink(IProtectedRegion region, IFormattableTextComponent hoverText) {
-        IFormattableTextComponent linkText = new StringTextComponent(region.getName());
+    public static IFormattableTextComponent buildRegionInfoLink(IProtectedRegion region, IFormattableTextComponent linkText, IFormattableTextComponent hoverText) {
         switch (region.getRegionType()) {
             case GLOBAL: {
                 String command = buildCommandStr(GLOBAL.toString(), INFO.toString());
@@ -440,6 +436,11 @@ public class MessageUtil {
             default:
                 throw new IllegalStateException("Unexpected value: " + region.getRegionType());
         }
+    }
+
+    public static IFormattableTextComponent buildRegionInfoLink(IProtectedRegion region, IFormattableTextComponent hoverText) {
+        IFormattableTextComponent linkText = new StringTextComponent(region.getName());
+        return buildRegionInfoLink(region, linkText, hoverText);
     }
 
     public static IFormattableTextComponent buildRegionAreaLink(IMarkableRegion region) {
