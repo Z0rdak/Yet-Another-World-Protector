@@ -1,12 +1,12 @@
 package de.z0rdak.yawp.util;
 
 import de.z0rdak.yawp.core.area.CuboidArea;
-import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.core.stick.MarkerStick;
+import de.z0rdak.yawp.handler.flags.HandlerUtil;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.RegistryKey;
@@ -39,25 +39,12 @@ public final class LocalRegions {
         return flags;
     }
 
-    public static Map<FlagState, List<IFlag>> sortFlagsByState(FlagContainer flagContainer) {
-        List<IFlag> denied = flagContainer.values().stream()
-                .filter(f -> f.getState() == FlagState.DENIED)
-                .sorted()
-                .collect(Collectors.toList());
-        List<IFlag> allowed = flagContainer.values().stream()
-                .filter(f -> f.getState() == FlagState.ALLOWED)
-                .sorted()
-                .collect(Collectors.toList());
-        List<IFlag> disabled = flagContainer.values().stream()
-                .filter(f -> f.getState() == FlagState.ALLOWED)
-                .sorted()
-                .collect(Collectors.toList());
-        List<IFlag> undefined = flagContainer.values().stream()
-                .filter(f -> f.getState() == FlagState.ALLOWED)
-                .sorted()
-                .collect(Collectors.toList());
-
-        HashMap<FlagState, List<IFlag>> flagStateListMap = new HashMap<>();
+    public static Map<FlagState, List<HandlerUtil.FlagCorrelation>> sortFlagsByState(Map<String, HandlerUtil.FlagCorrelation> flagMap) {
+        List<HandlerUtil.FlagCorrelation> denied = getCorrelationByState(flagMap, FlagState.DENIED);
+        List<HandlerUtil.FlagCorrelation> allowed = getCorrelationByState(flagMap, FlagState.ALLOWED);
+        List<HandlerUtil.FlagCorrelation> disabled = getCorrelationByState(flagMap, FlagState.DISABLED);
+        List<HandlerUtil.FlagCorrelation> undefined = getCorrelationByState(flagMap, FlagState.UNDEFINED);
+        HashMap<FlagState, List<HandlerUtil.FlagCorrelation>> flagStateListMap = new HashMap<>();
         flagStateListMap.put(FlagState.DENIED, denied);
         flagStateListMap.put(FlagState.ALLOWED, allowed);
         flagStateListMap.put(FlagState.DISABLED, disabled);
@@ -65,6 +52,11 @@ public final class LocalRegions {
         return flagStateListMap;
     }
 
+    private static List<HandlerUtil.FlagCorrelation> getCorrelationByState(Map<String, HandlerUtil.FlagCorrelation> flagMap, FlagState state) {
+        return flagMap.values().stream()
+                .filter(correlation -> correlation.getFlag().getState() == state)
+                .collect(Collectors.toList());
+    }
 
     public static AbstractMarkableRegion regionFrom(PlayerEntity player, MarkerStick marker, String regionName) {
         return regionFrom(player, marker, regionName, marker.getDimension());
