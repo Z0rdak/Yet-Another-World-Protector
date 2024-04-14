@@ -11,6 +11,7 @@ import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.core.flag.FlagMessage;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
+import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.MessageUtil;
@@ -114,9 +115,14 @@ public final class FlagCommands {
     private static int promptFlagInfo(CommandContext<CommandSource> ctx, IProtectedRegion region, IFlag flag) {
         sendCmdFeedback(ctx.getSource(), buildFlagInfoHeader(region, flag));
         sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.flag.state", buildFlagStateComponent(region, flag)));
-        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.flag.msg.mute", buildFlagMuteToggleLink(region, flag)));
-        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.flag.override", buildFlagOverrideToggleLink(region, flag)));
-        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.flag.msg.text", buildFlagMessageComponent(region, flag)));
+        IFormattableTextComponent overrideComponent = buildFlagOverrideInfoComponent(flag)
+                .append(" ")
+                .append(buildFlagOverrideToggleLink(region, flag));
+        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.flag.override", overrideComponent));
+        if (RegionFlag.hasPlayerCategory(flag)) {
+            sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.flag.msg.mute", buildFlagMuteToggleLink(region, flag)));
+            sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.flag.msg.text", buildFlagMessageComponent(region, flag)));
+        }
         return 0;
     }
 
@@ -200,10 +206,10 @@ public final class FlagCommands {
         }
     }
 
-    public static int setOverride(CommandContext<CommandSource> ctx, IProtectedRegion region, IFlag flag, boolean invert) {
-        flag.setOverride(invert);
-        IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!invert), String.valueOf(invert));
-        IFormattableTextComponent msg = new TranslationTextComponent("cli.flag.invert.success.text",
+    public static int setOverride(CommandContext<CommandSource> ctx, IProtectedRegion region, IFlag flag, boolean override) {
+        flag.setOverride(override);
+        IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!override), String.valueOf(override));
+        IFormattableTextComponent msg = new TranslationTextComponent("cli.flag.override.success.text",
                 buildFlagInfoLink(region, flag), flag.doesOverride())
                 .append(" ")
                 .append(undoLink);
