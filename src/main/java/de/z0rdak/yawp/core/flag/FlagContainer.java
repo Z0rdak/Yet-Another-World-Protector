@@ -63,6 +63,10 @@ public class FlagContainer extends HashMap<String, IFlag> implements INBTSeriali
         });
     }
 
+    public FlagContainer deepCopy() {
+        return new FlagContainer(this.serializeNBT());
+    }
+
     public void put(IFlag flag) {
         this.put(flag.getName(), flag);
     }
