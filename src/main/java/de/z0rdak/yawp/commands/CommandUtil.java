@@ -822,10 +822,14 @@ public class CommandUtil {
             break;
             case LOCAL: {
                 // Hierarchy: [parent][x], [n children][+]
+                MutableComponent parentClearLink = buildParentClearLink((IMarkableRegion) region);
+                if (region.getParent().getRegionType() != RegionType.LOCAL) {
+                    parentClearLink = new TextComponent("");
+                }
                 MutableComponent regionHierarchy = new TranslatableComponent("cli.msg.info.region.hierarchy")
                         .append(": ")
-                        .append(buildRegionInfoLink(region))
-                        .append(buildParentClearLink((IMarkableRegion) region))
+                        .append(buildRegionInfoLink(region.getParent()))
+                        .append(parentClearLink)
                         .append(new TextComponent(", ").withStyle(ChatFormatting.RESET))
                         .append(buildRegionChildrenLink(region));
                 sendCmdFeedback(ctx.getSource(), regionHierarchy);
