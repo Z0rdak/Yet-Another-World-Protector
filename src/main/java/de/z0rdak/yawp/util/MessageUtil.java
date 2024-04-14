@@ -861,7 +861,6 @@ public class MessageUtil {
         }
     }
 
-
     public static IFormattableTextComponent buildFlagMuteToggleLink(IProtectedRegion region, IFlag flag) {
         switch (region.getRegionType()) {
             case GLOBAL: {
@@ -1217,13 +1216,15 @@ public class MessageUtil {
     }
 
     public static IFormattableTextComponent buildFlagListLink(IProtectedRegion region) {
-        IFormattableTextComponent flagListLinkText = new TranslationTextComponent("cli.msg.info.region.flag.link.text", region.getFlags().size());
+        FlagContainer flagsInHierarchy = HandlerUtil.getFlagsRecursive(region, null);
+        IFormattableTextComponent flagListLinkText = new TranslationTextComponent("cli.msg.info.region.flag.link.text",
+                region.getFlags().size(), flagsInHierarchy.size() - region.getFlags().size());
         IFormattableTextComponent flagListHoverText = new TranslationTextComponent("cli.msg.info.region.flag.link.hover", region.getName());
         switch (region.getRegionType()) {
             case GLOBAL: {
                 String flagListCmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), FLAG.toString());
                 IFormattableTextComponent flagListLink = buildExecuteCmdComponent(flagListLinkText, flagListHoverText, flagListCmd, RUN_COMMAND, LINK_COLOR);
-                if (region.getFlags().isEmpty()) {
+                if (flagsInHierarchy.isEmpty()) {
                     flagListLink = flagListLinkText;
                 }
                 return flagListLink.append(" ").append(buildAddFlagLink(region));
@@ -1231,7 +1232,7 @@ public class MessageUtil {
             case DIMENSION: {
                 String flagListCmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), FLAG.toString());
                 IFormattableTextComponent flagListLink = buildExecuteCmdComponent(flagListLinkText, flagListHoverText, flagListCmd, RUN_COMMAND, LINK_COLOR);
-                if (region.getFlags().isEmpty()) {
+                if (flagsInHierarchy.isEmpty()) {
                     flagListLink = flagListLinkText;
                 }
                 return flagListLink.append(" ").append(buildAddFlagLink(region));
@@ -1239,7 +1240,7 @@ public class MessageUtil {
             case LOCAL: {
                 String listCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), FLAG.toString());
                 IFormattableTextComponent flagListLink = buildExecuteCmdComponent(flagListLinkText, flagListHoverText, listCmd, RUN_COMMAND, LINK_COLOR);
-                if (region.getFlags().isEmpty()) {
+                if (flagsInHierarchy.isEmpty()) {
                     flagListLink = flagListLinkText;
                 }
                 return flagListLink.append(" ").append(buildAddFlagLink(region));
