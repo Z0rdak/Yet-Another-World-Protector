@@ -820,10 +820,14 @@ public class CommandUtil {
             break;
             case LOCAL: {
                 // Hierarchy: [parent][x], [n children][+]
+                IFormattableTextComponent parentClearLink = buildParentClearLink((IMarkableRegion) region);
+                if (region.getParent().getRegionType() != RegionType.LOCAL) {
+                    parentClearLink = new StringTextComponent("");
+                }
                 IFormattableTextComponent regionHierarchy = new TranslationTextComponent("cli.msg.info.region.hierarchy")
                         .append(": ")
-                        .append(buildRegionInfoLink(region))
-                        .append(buildParentClearLink((IMarkableRegion) region))
+                        .append(buildRegionInfoLink(region.getParent()))
+                        .append(parentClearLink)
                         .append(new StringTextComponent(", ").withStyle(TextFormatting.RESET))
                         .append(buildRegionChildrenLink(region));
                 sendCmdFeedback(ctx.getSource(), regionHierarchy);
