@@ -240,6 +240,33 @@ public final class HandlerUtil {
         }
     }
 
+    public static Map<String, FlagCorrelation> getFlagMapRecursive(IProtectedRegion region, Map<String, FlagCorrelation> carry) {
+        if (carry == null) {
+            carry = region.getFlags().stream()
+                    .collect(Collectors.toMap(IFlag::getName, flag -> new FlagCorrelation(region, flag), (a, b) -> b, HashMap::new));
+        }
+        if (region.equals(region.getParent())) { // global region has itself as parent
+            return carry;
+        }
+        Set<Map.Entry<String, IFlag>> parentFlags = region.getParent().getFlagContainer().entrySet();
+        for (Map.Entry<String, IFlag> entry : parentFlags) {
+            String flagName = entry.getKey();
+            IFlag flag = entry.getValue();
+            boolean parentFlagOverrides = flag.doesOverride();
+            boolean existingFlag = carry.containsKey(flagName);
+            if (parentFlagOverrides && existingFlag) {
+                carry.remove(flagName);
+                carry.put(flagName, new FlagCorrelation(region.getParent(), flag));
+            }
+            if (!existingFlag) {
+                carry.put(flagName, new FlagCorrelation(region, flag));
+            }
+        }
+        return getFlagMapRecursive(region.getParent(), carry);
+    }
+
+
+
     /**
      * Recursively gets all flags defined in the region hierarchy of the provided region, including all it's parents. <br></br>
      * This is used, when we have determined the responsible region for an Event or a BlockPos. <br></br>
