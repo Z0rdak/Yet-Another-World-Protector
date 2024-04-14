@@ -653,7 +653,7 @@ public class MessageUtil {
      * - [s] is a suggest link to change the flag state, <br></br>
      * - [m] is a quick link to toggle the flag override state, <br></br>
      * - [o] is a quick link to toggle the flag mute state, <br></br>
-     *
+     * FIXME: Regiontype indicator is still D even though the flags are from G
      * @param region
      * @param flag
      * @return text component for quick flag actions [flagname] [regionTypeIdentifier] [s] [m] [o]
@@ -929,29 +929,50 @@ public class MessageUtil {
         return buildExecuteCmdComponent(linkText, hoverText, cmdStr, RUN_COMMAND, color);
     }
 
-    public static List<IFormattableTextComponent> buildRemoveFlagEntries(IProtectedRegion region, FlagContainer flags) {
-        List<IFormattableTextComponent> flagEntries = buildFlagEntries(region, flags);
-        List<IProtectedRegion> regionHierarchy = HandlerUtil.getRegionHierarchy(region.getParent(), new ArrayList<>());
-        List<IFormattableTextComponent> derivedFlagEntries = regionHierarchy.stream()
-                .flatMap(r -> buildFlagEntries(region, region.getFlagContainer()).stream()
-                        .map(fe -> fe.withStyle(ITALIC)))
-                .collect(Collectors.toList());
-        flagEntries.addAll(derivedFlagEntries);
+    /**
+     * Show flags for region, with a color of their state
+     * But also show parent flags in italic
+     * How do we want to handle flags defined in the region but also in the parent?
+     * If the child flag is dominant, we display the child flag, and add a hint to the parent
+     * If the flag is overriden, we format them with strikethrough and add a link to the parent which overrides it
+     */
+    public static List<IFormattableTextComponent> buildRemoveFlagEntries(IProtectedRegion region) {
+        List<IFormattableTextComponent> flagEntries = new ArrayList<>();
+
+        Map<String, HandlerUtil.FlagCorrelation> flagMapRecursive = getFlagMapRecursive(region, null);
+        Map<FlagState, List<HandlerUtil.FlagCorrelation>> flagStateListMap = LocalRegions.sortFlagsByState(flagMapRecursive);
+
+        List<IFormattableTextComponent> allowedFlagEntries = buildFlagEntries(flagStateListMap, FlagState.ALLOWED);
+        List<IFormattableTextComponent> deniedFlagEntries = buildFlagEntries(flagStateListMap, FlagState.DENIED);
+        List<IFormattableTextComponent> disabledFlagEntries = buildFlagEntries(flagStateListMap, FlagState.DISABLED);
+
+        flagEntries.addAll(allowedFlagEntries);
+        flagEntries.addAll(deniedFlagEntries);
+        flagEntries.addAll(disabledFlagEntries);
         return flagEntries;
     }
 
-    private static List<IFormattableTextComponent> buildFlagEntries(IProtectedRegion region, FlagContainer derivedFlags) {
-        Map<FlagState, List<IFlag>> sortedFlags = LocalRegions.sortFlagsByState(derivedFlags);
-        List<IFormattableTextComponent> derivedFlagEntries = new ArrayList<>(sortedFlags.size());
-        sortedFlags.get(FlagState.ALLOWED)
-                .forEach(flag -> derivedFlagEntries.add(buildRemoveFlagEntry(region, flag, WHITE)));
-        sortedFlags.get(FlagState.DENIED)
-                .forEach(flag -> derivedFlagEntries.add(buildRemoveFlagEntry(region, flag, RED)));
-        sortedFlags.get(FlagState.DISABLED)
-                .forEach(flag -> derivedFlagEntries.add(buildRemoveFlagEntry(region, flag, GRAY)));
-        sortedFlags.get(FlagState.UNDEFINED)
-                .forEach(flag -> derivedFlagEntries.add(buildRemoveFlagEntry(region, flag, GRAY)));
-        return derivedFlagEntries;
+    private static List<IFormattableTextComponent> buildFlagEntries(Map<FlagState, List<HandlerUtil.FlagCorrelation>> flagStateListMap, FlagState state) {
+        List<HandlerUtil.FlagCorrelation> allowedFlags = flagStateListMap.get(state);
+        allowedFlags.sort(Comparator.comparing(flagCorrelation -> flagCorrelation.getFlag().getName()));
+        return allowedFlags.stream()
+                .map(flagCorrelation -> buildRemoveFlagEntry(flagCorrelation.getRegion(), flagCorrelation.getFlag(), colorForState(state)))
+                .collect(Collectors.toList());
+    }
+
+    private static TextFormatting colorForState(FlagState state) {
+        switch (state) {
+            case ALLOWED:
+                return WHITE;
+            case DENIED:
+                return RED;
+            case DISABLED:
+                return GRAY;
+            case UNDEFINED:
+                return UNDERLINE;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     public static List<IFormattableTextComponent> buildResetDimensionalRegionEntries(IProtectedRegion parent, List<DimensionRegionCache> dimCaches) {
