@@ -36,15 +36,11 @@ import net.minecraft.world.scores.Team;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import org.apache.commons.lang3.NotImplementedException;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
-import static de.z0rdak.yawp.core.region.RegionType.LOCAL;
 import static net.minecraft.ChatFormatting.RESET;
 import static net.minecraft.ChatFormatting.*;
 import static net.minecraft.network.chat.ClickEvent.Action.RUN_COMMAND;
@@ -399,12 +395,11 @@ public class MessageUtil {
         return buildRegionInfoLink(region, new TranslatableComponent("cli.msg.info.region.link.hover", region.getName()));
     }
 
-    public static MutableComponent buildRegionInfoLink(IProtectedRegion region, MutableComponent hoverText) {
-        MutableComponent linkText = new TextComponent(region.getName());
+    public static MutableComponent buildRegionInfoLink(IProtectedRegion region, MutableComponent linkText, MutableComponent hoverText) {
         return switch (region.getRegionType()) {
             case GLOBAL -> {
                 String command = buildCommandStr(GLOBAL.toString(), INFO.toString());
-                yield  buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, LINK_COLOR);
+                yield buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, LINK_COLOR);
             }
             case DIMENSION -> {
                 String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), INFO.toString());
@@ -417,6 +412,11 @@ public class MessageUtil {
             default ->
                 throw new IllegalStateException("Unexpected value: " + region.getRegionType());
         };
+    }
+
+    public static MutableComponent buildRegionInfoLink(IProtectedRegion region, MutableComponent hoverText) {
+        MutableComponent linkText = new TextComponent(region.getName());
+        return buildRegionInfoLink(region, linkText, hoverText);
     }
 
     public static MutableComponent buildRegionAreaLink(IMarkableRegion region) {
