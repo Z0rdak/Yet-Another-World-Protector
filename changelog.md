@@ -15,8 +15,9 @@ time to enable new features and to improve the mod.
 - **the structure and naming of some commands** - which have changed to be more consistent
 
 ## Added
-* Add command to copy region properties
-* Add enhanced flag management
+
+* Add commands to copy region properties
+* Add enhanced flag management and messages
 * Add flag inheritance and overriding for regions
 * Add new config options
 * Add the Global Region. It's the parent region of all Dimensional Regions. **One region to rule them all!**
@@ -175,6 +176,7 @@ time to enable new features and to improve the mod.
 * Moved the region name examples (used when creating a new region) to the language file to enable I18n support for the
   examples.
 * Moved the flag message examples to the language file to enable I18n support for the examples.
+* Flag list links for regions now also show number of inherited flags in parentheses
 
 ## Fixed
 
