@@ -157,6 +157,12 @@ public enum RegionFlag {
                 .collect(Collectors.toSet());
     }
 
+    public static boolean hasPlayerCategory(IFlag flag) {
+        Set<RegionFlag> flagsMatchingCategory = getFlagsMatchingCategory(FlagCategory.PLAYER);
+        RegionFlag regionFlag = RegionFlag.fromId(flag.getName());
+        return flagsMatchingCategory.contains(regionFlag);
+    }
+
     public static RegionFlag fromId(String flagIdentifier) throws IllegalArgumentException {
         List<RegionFlag> singleFlag = Arrays.stream(values())
                 .filter(flag -> flag.name.equals(flagIdentifier))
