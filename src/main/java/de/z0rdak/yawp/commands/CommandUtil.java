@@ -253,7 +253,7 @@ public class CommandUtil {
                 break;
         }
 
-        List<MutableComponent> flagEntries = buildRemoveFlagEntries(region, region.getFlagContainer());
+        List<MutableComponent> flagEntries = buildRemoveFlagEntries(region);
         if (flagEntries.isEmpty()) {
             sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.empty", buildRegionInfoLink(region)));
             return 1;
