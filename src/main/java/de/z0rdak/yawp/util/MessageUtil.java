@@ -589,9 +589,6 @@ public class MessageUtil {
 
     /**
      * Creates a TextComponent for flag removal, followed by the flag infos
-     *
-     * @param region
-     * @param flag
      * @return - [x] [flagname] [<region-indicator] [] []
      */
     private static MutableComponent buildRemoveFlagEntry(IProtectedRegion region, IFlag flag, ChatFormatting flagLinkColor, ChatFormatting... formattings) {
@@ -643,7 +640,6 @@ public class MessageUtil {
         if (flag.doesOverride()) {
             flagInfoLink.withStyle(UNDERLINE);
         }
-
         return flagInfoLink
                 .append(new TextComponent(" "))
                 .append(buildFlagInfoLink(region, flag, regionTypeIndicator, hoverText, DARK_PURPLE))
@@ -652,9 +648,9 @@ public class MessageUtil {
                 //.append("|")
                 .append(buildFlagStateSuggestionLink(region, flag)) // [s]
                 .append(" ")
-                .append(buildFlagMuteToggleLink(region, flag)) // [m]
+                .append(buildFlagMuteToggleLink(region, flag, true)) // [m]
                 .append(" ")
-                .append(buildFlagOverrideToggleLink(region, flag)); // [o]
+                .append(buildFlagOverrideToggleLink(region, flag, true)); // [o]
     }
 
     /**
@@ -776,19 +772,25 @@ public class MessageUtil {
     }
 
 
-    public static MutableComponent buildFlagOverrideToggleLink(IProtectedRegion region, IFlag flag) {
+    public static MutableComponent buildFlagOverrideToggleLink(IProtectedRegion region, IFlag flag, boolean shortLink) {
+        MutableComponent linkText = new TranslatableComponent("cli.flag.override.link.text." + flag.doesOverride());
+        MutableComponent hoverText = new TranslatableComponent("cli.flag.override.link.hover." + flag.doesOverride(), flag.getName(), region.getName());
+        if (shortLink) {
+            linkText = new TranslatableComponent("cli.flag.override.link.text.toggle");
+        }
+        ChatFormatting color = flag.doesOverride() ? ChatFormatting.GREEN : ChatFormatting.GRAY;
         switch (region.getRegionType()) {
             case GLOBAL: {
-                String cmd = buildCommandStr(FLAG.toString(), GLOBAL.toString(), flag.getName());
-                return buildFlagToggleLink(cmd, "override", flag.doesOverride(), OVERRIDE.toString());
+                String cmd = buildCommandStr(FLAG.toString(), GLOBAL.toString(), flag.getName(), OVERRIDE.toString());
+                return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, color);
             }
             case DIMENSION: {
-                String cmd = buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().location().toString(), flag.getName());
-                return buildFlagToggleLink(cmd, "override", flag.doesOverride(), OVERRIDE.toString());
+                String cmd = buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().location().toString(), flag.getName(), OVERRIDE.toString());
+                return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, color);
             }
             case LOCAL: {
-                String cmd = buildCommandStr(FLAG.toString(), CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag.getName());
-                return buildFlagToggleLink(cmd, "override", flag.doesOverride(), OVERRIDE.toString());
+                String cmd = buildCommandStr(FLAG.toString(), CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag.getName(), OVERRIDE.toString());
+                return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, color);
             }
             case TEMPLATE:
                 throw new NotImplementedException("No supported yet");
@@ -839,20 +841,25 @@ public class MessageUtil {
         }
     }
 
-    public static MutableComponent buildFlagMuteToggleLink(IProtectedRegion region, IFlag flag) {
+    public static MutableComponent buildFlagMuteToggleLink(IProtectedRegion region, IFlag flag, boolean shortLink) {
+        IFormattableTextComponent hover = new TranslationTextComponent("cli.flag.msg.mute.set.link.hover", flag.getName(), region.getName());
+        IFormattableTextComponent text = new TranslationTextComponent("cli.flag.msg.mute.set.link.text." + flag.getFlagMsg().isMuted());
+        if (shortLink) {
+            text = new TranslationTextComponent("cli.flag.msg.mute.set.link.text.toggle");
+        }
+        TextFormatting textFormatting = flag.getFlagMsg().isMuted() ? GREEN : GRAY;
         switch (region.getRegionType()) {
             case GLOBAL: {
-                String cmd = buildCommandStr(FLAG.toString(), GLOBAL.toString(), flag.getName());
-                // TODO: replace and build own component
-                return buildFlagToggleLink(cmd, "msg.mute.set", !flag.getFlagMsg().isMuted(), MSG.toString(), MUTE.toString());
+                String cmd = buildCommandStr(FLAG.toString(), GLOBAL.toString(), flag.getName(), MSG.toString(), MUTE.toString());
+                return buildExecuteCmdComponent(text, hover, cmd, RUN_COMMAND, textFormatting);
             }
             case DIMENSION: {
-                String cmd = buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().location().toString(), flag.getName());
-                return buildFlagToggleLink(cmd, "msg.mute.set", !flag.getFlagMsg().isMuted(), MSG.toString(), MUTE.toString());
+                String cmd = buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().location().toString(), flag.getName(), MSG.toString(), MUTE.toString());
+                return buildExecuteCmdComponent(text, hover, cmd, RUN_COMMAND, textFormatting);
             }
             case LOCAL: {
-                String cmd = buildCommandStr(FLAG.toString(), CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag.getName());
-                return buildFlagToggleLink(cmd, "msg.mute.set", !flag.getFlagMsg().isMuted(), MSG.toString(), MUTE.toString());
+                String cmd = buildCommandStr(FLAG.toString(), CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag.getName(), MSG.toString(), MUTE.toString());
+                return buildExecuteCmdComponent(text, hover, cmd, RUN_COMMAND, textFormatting);
             }
             case TEMPLATE:
                 throw new NotImplementedException("No supported yet");
@@ -1119,7 +1126,7 @@ public class MessageUtil {
     }
 
 
-    // [n dimCaches][+]
+    // [n regions][+]
     public static MutableComponent buildDimRegionsLink(DimensionRegionCache dimCache) {
         DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
         String command = buildCommandStr(DIM.toString(), dimRegion.getDim().location().toString(), LIST.toString(), CommandConstants.LOCAL.toString());
@@ -1137,7 +1144,7 @@ public class MessageUtil {
                 Collection<String> dimensionList = RegionDataManager.get().getDimensionList();
                 String command = buildCommandStr(GLOBAL.toString(), LIST.toString(), DIM.toString());
                 MutableComponent listDimRegionsLinkText = new TranslatableComponent("cli.msg.global.info.region.list.link.text", dimensionList.size());
-                MutableComponent listDimRegionsHoverText = new TranslatableComponent("cli.msg.global.info.region.list.link.hover", region.getName());
+                MutableComponent listDimRegionsHoverText = new TranslatableComponent("cli.msg.global.info.region.list.link.hover");
                 yield buildExecuteCmdComponent(listDimRegionsLinkText, listDimRegionsHoverText, command, RUN_COMMAND, LINK_COLOR);
             }
             case DIMENSION -> {
