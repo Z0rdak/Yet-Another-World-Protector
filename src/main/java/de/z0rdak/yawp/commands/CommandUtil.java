@@ -789,7 +789,7 @@ public class CommandUtil {
         }
         // Groups: [owners], [members], [<listGroups>]
         sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.group", buildGroupLinks(region)));
-
+        // Regions: [global], [n children], [n regions][+], ||   [n dimensions(s)]  || Hierarchy: [parent][x], [n children][+]
         promptRegionChildrenInfo(ctx, region);
         // State: [State]
         sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state", buildRegionStateLink(region)));
@@ -808,7 +808,7 @@ public class CommandUtil {
                 MessageUtil.buildRegionChildrenLink(region);
                 IFormattableTextComponent globalRegionLink = buildRegionInfoLink(region.getParent(), new TranslationTextComponent("cli.msg.info.region.global.link.hover"));
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(region.getDim());
-                IFormattableTextComponent regionsAndChildren = new TranslationTextComponent("cli.msg.dim.info.region")
+                IFormattableTextComponent regionsAndChildren = new TranslationTextComponent("cli.msg.info.region.hierarchy")
                         .append(": ")
                         .append(globalRegionLink)
                         .append(new StringTextComponent(", ").withStyle(TextFormatting.RESET))
