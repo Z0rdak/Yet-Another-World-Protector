@@ -63,7 +63,7 @@ public final class MarkerCommands {
         try {
             Player player = src.getPlayerOrException();
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.level.dimension());
-            int res = DimensionCommands.checkValidRegionName(regionName, dimCache);
+            int res = RegionDataManager.get().isValidRegionName(dimCache.getDimensionalRegion().getDim(), regionName);
             if (res == -1) {
                 sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.name.invalid", regionName));
                 return res;
@@ -99,7 +99,7 @@ public final class MarkerCommands {
                                 if (AbstractMarkableRegion.fullyContains(parentRegion.getArea(), region.getArea())) {
                                     dimCache.addRegion(dimCache.getDimensionalRegion(), region);
                                     parentRegion.addChild(region);
-                                    LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.getDefaultPriority());
+                                    LocalRegions.ensureHigherRegionPriorityFor(region, RegionConfig.getDefaultPriority());
                                     RegionDataManager.save();
                                     sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
                                     return 0;
@@ -114,7 +114,7 @@ public final class MarkerCommands {
                         } else {
                             if (dimCache.hasOwner(player) || hasConfigPermission) {
                                 dimCache.addRegion(dimCache.getDimensionalRegion(), region);
-                                LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.getDefaultPriority());
+                                LocalRegions.ensureHigherRegionPriorityFor(region, RegionConfig.getDefaultPriority());
                                 RegionDataManager.save();
                                 sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
                                 return 0;

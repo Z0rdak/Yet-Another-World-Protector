@@ -1,6 +1,8 @@
 package de.z0rdak.yawp.managers.data.region;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.commands.CommandConstants;
+import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.IFlag;
@@ -33,6 +35,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static de.z0rdak.yawp.commands.CommandConstants.values;
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
 /**
@@ -319,6 +322,18 @@ public class RegionDataManager extends SavedData {
             save();
         }
         return dimCacheMap.get(dim);
+    }
+
+    public int isValidRegionName(ResourceKey<Level> dim, String regionName) {
+        List<String> commandStrings = Arrays.stream(values()).map(CommandConstants::toString).collect(Collectors.toList());
+        if (!regionName.matches(RegionArgumentType.VALID_NAME_PATTERN.pattern())
+                || commandStrings.contains(regionName.toLowerCase())) {
+            return -1;
+        }
+        if (cacheFor(dim).contains(regionName)) {
+            return 1;
+        }
+        return 0;
     }
 
     public boolean containsCacheFor(ResourceKey<Level> dim) {

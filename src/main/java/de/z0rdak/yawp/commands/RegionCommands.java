@@ -62,7 +62,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
-import static de.z0rdak.yawp.commands.DimensionCommands.checkValidRegionName;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.MessageUtil.*;
 
@@ -223,7 +222,7 @@ public class RegionCommands {
     }
 
     private static int renameRegion(CommandContext<CommandSourceStack> src, IMarkableRegion region, String regionName, DimensionRegionCache dimCache) {
-        int res = checkValidRegionName(regionName, dimCache);
+        int res = RegionDataManager.get().isValidRegionName(dimCache.getDimensionalRegion().getDim(), regionName);
         if (res == -1) {
             sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.dim.info.region.create.name.invalid", regionName));
             return res;
