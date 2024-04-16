@@ -3,6 +3,7 @@ package de.z0rdak.yawp.api.events.region;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.RegistryKey;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 
@@ -14,7 +15,7 @@ public abstract class RegionEvent extends Event {
     @Nullable
     private final PlayerEntity player;
 
-    private RegionEvent(IMarkableRegion region, PlayerEntity player) {
+    private RegionEvent(IMarkableRegion region, @Nullable PlayerEntity player) {
         this.region = region;
         this.player = player;
     }
@@ -23,6 +24,7 @@ public abstract class RegionEvent extends Event {
         return region;
     }
 
+    @Nullable
     public PlayerEntity getPlayer() {
         return player;
     }
@@ -65,6 +67,13 @@ public abstract class RegionEvent extends Event {
             return newName;
         }
 
+        /**
+         * The name set here is not validated again. Be sure you validate the name before setting it. <br></br>
+         * Otherwise, you may cause inconsistencies and break your whole region definition.
+         *
+         * @param newName The new name of the region - be sure to validate it before
+         * @see de.z0rdak.yawp.managers.data.region.RegionDataManager#isValidRegionName(RegistryKey, String)
+         */
         public void setNewName(String newName) {
             this.newName = newName;
         }
@@ -88,6 +97,11 @@ public abstract class RegionEvent extends Event {
             return markedArea;
         }
 
+        /**
+         * The area set here is not validated again. Be sure you validate the area before setting it. <br></br>
+         * Otherwise, you may cause inconsistencies and break your whole region definition.
+         * @param markedArea The new area of the region - be sure to validate it before
+         */
         public void setMarkedArea(IMarkableArea markedArea) {
             this.markedArea = markedArea;
         }
