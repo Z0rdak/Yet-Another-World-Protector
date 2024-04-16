@@ -325,16 +325,19 @@ public final class HandlerUtil {
 
     public static FlagCorrelation getResponsibleFlag(IProtectedRegion region, RegionFlag regionFlag, @Nullable FlagCorrelation carry) {
         if (carry == null) {
-            if (region.getFlagContainer().get(regionFlag.name).isActive()) {
+            FlagState flagState = region.getFlagContainer().flagState(regionFlag.name);
+            if (flagState == FlagState.ALLOWED || flagState == FlagState.DENIED) {
                 IFlag flag = region.getFlag(regionFlag.name);
                 carry = new FlagCorrelation(region, flag);
             } else
                 carry = new FlagCorrelation(region, null);
         }
         if (region.equals(region.getParent())) {
-            IFlag flag = region.getFlag(regionFlag.name);
-            if (flag.doesOverride()) {
-                carry = new FlagCorrelation(region, flag);
+            if (region.getFlagContainer().flagState(regionFlag.name) != FlagState.UNDEFINED) {
+                IFlag flag = region.getFlag(regionFlag.name);
+                if (flag.doesOverride()) {
+                    carry = new FlagCorrelation(region, flag);
+                }
             }
             return carry;
         }
