@@ -163,6 +163,11 @@ public enum RegionFlag {
         return flagsMatchingCategory.contains(regionFlag);
     }
 
+    public static boolean hasPlayerCategory(RegionFlag regionFlag) {
+        return regionFlag.categories.contains(FlagCategory.PLAYER);
+    }
+
+
     public static RegionFlag fromId(String flagIdentifier) throws IllegalArgumentException {
         List<RegionFlag> singleFlag = Arrays.stream(values())
                 .filter(flag -> flag.name.equals(flagIdentifier))
