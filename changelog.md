@@ -130,6 +130,11 @@ time to enable new features and to improve the mod.
   to cancel the flag check entirely.
 * Add FlagCheckResult as an event. This event is fired after a flag check. It can be used to manipulate the
   outcome of the flag check. This event cannot be canceled.
+* Add UpdateArea event as subtype of RegionEvent. This event is fired whenever the area of a region is updated. It can
+  be
+  canceled to prevent the update.
+* Add RenameRegion event as subtype of RegionEvent. This event is fired whenever a region is renamed. It can be
+  canceled to prevent the renaming.
 
 ### Misc
 
@@ -177,6 +182,10 @@ time to enable new features and to improve the mod.
   examples.
 * Moved the flag message examples to the language file to enable I18n support for the examples.
 * Flag list links for regions now also show number of inherited flags in parentheses
+
+## Removed
+
+* Remove UpdateRegionEvent, this is replaced by the UpdateArea and RenameRegion events.
 
 ## Fixed
 
