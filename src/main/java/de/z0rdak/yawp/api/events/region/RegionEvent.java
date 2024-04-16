@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.api.events.region;
 
+import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.eventbus.api.Cancelable;
@@ -41,6 +42,59 @@ public abstract class RegionEvent extends Event {
     }
 
     /**
+     * This event is fired whenever a new region is renamed. This event is cancelable.
+     * When this is event is canceled, the region will not be renamed.
+     */
+    @Cancelable
+    public static class RenameRegion extends RegionEvent {
+
+        private final String oldName;
+        private String newName;
+
+        public RenameRegion(IMarkableRegion region, String oldName, String newName, PlayerEntity player) {
+            super(region, player);
+            this.newName = newName;
+            this.oldName = oldName;
+        }
+
+        public String getOldName() {
+            return oldName;
+        }
+
+        public String getNewName() {
+            return newName;
+        }
+
+        public void setNewName(String newName) {
+            this.newName = newName;
+        }
+    }
+
+    /**
+     * This event is fired whenever a new area is created. This event is cancelable.
+     * Canceling this event will prevent the area from being updated.
+     */
+    @Cancelable
+    public static class UpdateArea extends RegionEvent {
+
+        private IMarkableArea markedArea;
+
+        public UpdateArea(IMarkableRegion region, IMarkableArea area, PlayerEntity player) {
+            super(region, player);
+            this.markedArea = area;
+        }
+
+        public IMarkableArea getMarkedArea() {
+            return markedArea;
+        }
+
+        public void setMarkedArea(IMarkableArea markedArea) {
+            this.markedArea = markedArea;
+        }
+    }
+
+
+    /**
      * This event is fired whenever a region is about to be removed. This event is cancelable.
      * When this is event is canceled, the region will not be deleted.
      */
@@ -48,18 +102,6 @@ public abstract class RegionEvent extends Event {
     public static class RemoveRegionEvent extends RegionEvent {
 
         public RemoveRegionEvent(IMarkableRegion region, PlayerEntity player) {
-            super(region, player);
-        }
-    }
-
-    /**
-     * This event is fired whenever a region is updated. This event is cancelable.
-     * When this is event is canceled, the region properties will not be changed.
-     */
-    @Cancelable
-    public static class UpdateRegionEvent extends RegionEvent {
-
-        public UpdateRegionEvent(IMarkableRegion region, PlayerEntity player) {
             super(region, player);
         }
     }

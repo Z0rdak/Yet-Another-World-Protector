@@ -134,9 +134,20 @@ public class RegionCommands {
         IMarkableArea oldArea = region.getArea();
         if (oldArea instanceof CuboidArea) {
             CuboidArea cuboidArea = CuboidArea.expand((CuboidArea) oldArea, min, max);
+
+            ServerPlayerEntity player;
+            try {
+                player = ctx.getSource().getPlayerOrException();
+            } catch (CommandSyntaxException e) {
+                player = null;
+            }
+            if (MinecraftForge.EVENT_BUS.post(new RegionEvent.UpdateArea(region, cuboidArea, player))) {
+                return 0;
+            }
             region.setArea(cuboidArea);
         } else {
-            throw new IllegalArgumentException("Unexpected value = " + oldArea.getClass().getName());
+            YetAnotherWorldProtector.LOGGER.error("AreaType {} is not yet supported", oldArea.getClass().getName());
+            return 1;
         }
         RegionDataManager.save();
         IFormattableTextComponent updateAreaMsg = new TranslationTextComponent("cli.msg.info.region.area.area.update", buildRegionAreaLink(region), buildRegionInfoLink(region));
@@ -160,8 +171,7 @@ public class RegionCommands {
                     } catch (CommandSyntaxException e) {
                         player = null;
                     }
-
-                    if(MinecraftForge.EVENT_BUS.post(new RegionEvent.UpdateRegionEvent(region, player))) {
+                    if (MinecraftForge.EVENT_BUS.post(new RegionEvent.UpdateArea(region, cuboidArea, player))) {
                         return 0;
                     }
 
@@ -210,6 +220,15 @@ public class RegionCommands {
             return res;
         }
         try {
+            ServerPlayerEntity player;
+            try {
+                player = src.getSource().getPlayerOrException();
+            } catch (CommandSyntaxException e) {
+                player = null;
+            }
+            if (MinecraftForge.EVENT_BUS.post(new RegionEvent.RenameRegion(region, region.getName(), regionName, player))) {
+                return 0;
+            }
             // TODO: Test this
             dimCache.renameRegion(region, regionName);
             RegionDataManager.save();
@@ -243,7 +262,7 @@ public class RegionCommands {
     public static int addChildren(CommandContext<CommandSource> src, IMarkableRegion parent, IMarkableRegion child) {
         if (!parent.hasChild(child) && child.getParent() != null && child.getParent() instanceof DimensionalRegion) {
             parent.addChild(child);
-            LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) child, parent.getPriority() + 1);
+            LocalRegions.ensureHigherRegionPriorityFor(child, parent.getPriority() + 1);
             RegionDataManager.save();
             IFormattableTextComponent parentLink = buildRegionInfoLink(parent);
             IFormattableTextComponent childLink = buildRegionInfoLink(child);
