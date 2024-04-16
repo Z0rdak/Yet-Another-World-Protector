@@ -18,6 +18,7 @@ import de.z0rdak.yawp.core.group.GroupType;
 import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.handler.flags.HandlerUtil;
+import de.z0rdak.yawp.handler.flags.FlagCorrelation;
 import de.z0rdak.yawp.handler.flags.HandlerUtil;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -842,12 +843,12 @@ public class MessageUtil {
     }
 
     public static MutableComponent buildFlagMuteToggleLink(IProtectedRegion region, IFlag flag, boolean shortLink) {
-        IFormattableTextComponent hover = new TranslationTextComponent("cli.flag.msg.mute.set.link.hover", flag.getName(), region.getName());
-        IFormattableTextComponent text = new TranslationTextComponent("cli.flag.msg.mute.set.link.text." + flag.getFlagMsg().isMuted());
+        MutableComponent hover = new TranslatableComponent("cli.flag.msg.mute.set.link.hover", flag.getName(), region.getName());
+        MutableComponent text = new TranslatableComponent("cli.flag.msg.mute.set.link.text." + flag.getFlagMsg().isMuted());
         if (shortLink) {
-            text = new TranslationTextComponent("cli.flag.msg.mute.set.link.text.toggle");
+            text = new TranslatableComponent("cli.flag.msg.mute.set.link.text.toggle");
         }
-        TextFormatting textFormatting = flag.getFlagMsg().isMuted() ? GREEN : GRAY;
+        ChatFormatting textFormatting = flag.getFlagMsg().isMuted() ? GREEN : GRAY;
         switch (region.getRegionType()) {
             case GLOBAL: {
                 String cmd = buildCommandStr(FLAG.toString(), GLOBAL.toString(), flag.getName(), MSG.toString(), MUTE.toString());
@@ -922,22 +923,16 @@ public class MessageUtil {
      */
     public static List<MutableComponent> buildRemoveFlagEntries(IProtectedRegion region) {
         List<MutableComponent> flagEntries = new ArrayList<>();
-
-        Map<String, HandlerUtil.FlagCorrelation> flagMapRecursive = getFlagMapRecursive(region, null);
-        Map<FlagState, List<HandlerUtil.FlagCorrelation>> flagStateListMap = LocalRegions.sortFlagsByState(flagMapRecursive);
-
-        List<MutableComponent> allowedFlagEntries = buildFlagEntries(flagStateListMap, FlagState.ALLOWED);
-        List<MutableComponent> deniedFlagEntries = buildFlagEntries(flagStateListMap, FlagState.DENIED);
-        List<MutableComponent> disabledFlagEntries = buildFlagEntries(flagStateListMap, FlagState.DISABLED);
-
-        flagEntries.addAll(allowedFlagEntries);
-        flagEntries.addAll(deniedFlagEntries);
-        flagEntries.addAll(disabledFlagEntries);
+        Map<String, FlagCorrelation> flagMapRecursive = getFlagMapRecursive(region, null);
+        Map<FlagState, List<FlagCorrelation>> flagStateListMap = LocalRegions.sortFlagsByState(flagMapRecursive);
+        flagEntries.addAll(buildFlagEntries(flagStateListMap, FlagState.ALLOWED));
+        flagEntries.addAll(buildFlagEntries(flagStateListMap, FlagState.DENIED));
+        flagEntries.addAll(buildFlagEntries(flagStateListMap, FlagState.DISABLED));
         return flagEntries;
     }
 
-    private static List<MutableComponent> buildFlagEntries(Map<FlagState, List<HandlerUtil.FlagCorrelation>> flagStateListMap, FlagState state) {
-        List<HandlerUtil.FlagCorrelation> allowedFlags = flagStateListMap.get(state);
+    private static List<MutableComponent> buildFlagEntries(Map<FlagState, List<FlagCorrelation>> flagStateListMap, FlagState state) {
+        List<FlagCorrelation> allowedFlags = flagStateListMap.get(state);
         allowedFlags.sort(Comparator.comparing(flagCorrelation -> flagCorrelation.getFlag().getName()));
         return allowedFlags.stream()
                 .map(flagCorrelation -> buildRemoveFlagEntry(flagCorrelation.getRegion(), flagCorrelation.getFlag(), colorForState(state)))
