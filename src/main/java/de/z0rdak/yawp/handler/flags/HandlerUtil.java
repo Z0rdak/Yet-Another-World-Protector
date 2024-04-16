@@ -109,17 +109,18 @@ public final class HandlerUtil {
      */
     public static void sendFlagMsg(FlagCheckResult result) {
         IProtectedRegion responsibleRegion = result.getResponsible();
-        IFlag flag = responsibleRegion.getFlag(result.getRegionFlag().name);
+        IFlag flag = responsibleRegion.getFlag(result.getFlagCheck().getRegionFlag().name);
         if (flag == null || result.getFlagState() == FlagState.UNDEFINED || result.getFlagState() == FlagState.DISABLED) {
             return;
         }
         boolean isFlagMuted = flag.getFlagMsg().isMuted() || responsibleRegion.isMuted();
+        Player player = result.getFlagCheck().getPlayer();
         // If not muted and the event is a player event, send the message
-        if (!isFlagMuted && result.getPlayer() != null && result.getPlayer() instanceof Player) {
+        if (!isFlagMuted && player instanceof Player) {
             Map<String, String> msgSubstitutes = FlagMessage.defaultSubstitutesFor(result);
             msgSubstitutes.put(REGION_TEMPLATE, responsibleRegion.getName());
             MutableComponent flagMsg = FlagMessage.buildFrom(result, msgSubstitutes);
-            MessageUtil.sendNotification(result.getPlayer(), flagMsg);
+            MessageUtil.sendNotification(player, flagMsg);
         }
     }
 
