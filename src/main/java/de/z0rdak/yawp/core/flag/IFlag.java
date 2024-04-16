@@ -63,7 +63,8 @@ public interface IFlag extends INBTSerializable<CompoundTag>, Comparable<IFlag> 
     void setOverride(boolean doesOverride);
 
     /**
-     * Returns whether the flag is active in the region. <br>
+     * Returns whether the flag is active in the region. <br></br>
+     * This means the flag state is either ALLOWED or DENIED. <br></br>
      * Disabled flags are not considered for flag checks.
      *
      * @return true if flag is active, false otherwise.
