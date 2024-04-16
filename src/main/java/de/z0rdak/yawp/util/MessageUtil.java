@@ -660,9 +660,6 @@ public class MessageUtil {
         IFormattableTextComponent regionTypeIndicator = new StringTextComponent(region.getRegionType().type.substring(0, 1).toUpperCase());
         IFormattableTextComponent hoverText = new TranslationTextComponent("cli.flag.info.hover", flag.getName(), region.getName());
         IFormattableTextComponent flagInfoLink = buildFlagInfoLink(region, flag, flagLinkColor);
-        if (flag.doesOverride()) {
-            flagInfoLink.withStyle(UNDERLINE);
-        }
         return flagInfoLink
                 .append(new StringTextComponent(" "))
                 .append(buildFlagInfoLink(region, flag, regionTypeIndicator, hoverText, DARK_PURPLE))
@@ -964,13 +961,11 @@ public class MessageUtil {
     private static TextFormatting colorForState(FlagState state) {
         switch (state) {
             case ALLOWED:
-                return WHITE;
+                return GREEN;
             case DENIED:
                 return RED;
             case DISABLED:
                 return GRAY;
-            case UNDEFINED:
-                return UNDERLINE;
             default:
                 throw new IllegalArgumentException();
         }
