@@ -121,19 +121,6 @@ public final class HandlerUtil {
         }
     }
 
-    /*
-     a method that checks an event with the specified flag rule set
-     child region takes priority over parent region, if flag of child region is set and denied
-     if flag of child region is set and allowed, the event is allowed and the flag of the child child is checked
-     if flag of child region is not set, the flag of the parent region is checked
-     if flag of parent region is set and denied, the event is denied
-     if flag of parent region is set and allowed, the event is allowed
-     if flag of parent region is not set, the event is allowed and the flag of the parent parent is checked until global region is reached
-     only the local region can be null, if so, the check for the dim region and its parent is performed
-     write a recursive method that checks the flag of the region and its parents
-     */
-
-
     /**
      * Evaluates the given flag check event and returns the result. <br>
      *
@@ -337,64 +324,28 @@ public final class HandlerUtil {
             return carry;
         }
         FlagState flagState = region.getFlagContainer().flagState(regionFlag.name);
-        if (flagState == FlagState.UNDEFINED) {
-            return getFlagCorrelation(region.getParent(), regionFlag, carry);
-        } else {
+        if (flagState != FlagState.UNDEFINED) {
             // allowed or denied
             carry = new FlagCorrelation(region, region.getFlag(regionFlag.name));
-            return getFlagCorrelation(region.getParent(), regionFlag, carry);
         }
+        return getFlagCorrelation(region.getParent(), regionFlag, carry);
     }
 
-    /**
-     * Processes the given flag check event and executes the given consumers if the flag is allowed or denied. <br>
-     * The flag check event is evaluated and posted to the event bus. <br>
-     * If the flag is allowed, the onAllow consumer is executed, otherwise onDeny. <br>
-     *
-     * @param event      the original related event
-     * @param checkEvent the flag check event to process
-     * @param onAllow    the consumer to execute if the flag is allowed
-     * @param onDeny     the consumer to execute if the flag is denied
-     * @return the flag state of the result
-     */
-    public static FlagState processCheck(Event event, FlagCheckEvent checkEvent, @Nullable BiConsumer<Event, FlagCheckResult> onAllow, @Nullable BiConsumer<Event, FlagCheckResult> onDeny) {
-        FlagCheckResult result = evaluate(checkEvent);
-        MinecraftForge.EVENT_BUS.post(result);
-        if (result.getFlagState() == FlagState.ALLOWED
-                || result.getFlagState() == FlagState.UNDEFINED
-                || result.getFlagState() == FlagState.DISABLED) {
-            if (onAllow != null)
-                onAllow.accept(event, result);
+    public static FlagCorrelation getResponsibleFlag(IProtectedRegion region, RegionFlag regionFlag, @Nullable FlagCorrelation carry) {
+        if (carry == null) {
+            if (region.getFlagContainer().get(regionFlag.name).isActive()) {
+                IFlag flag = region.getFlag(regionFlag.name);
+                carry = new FlagCorrelation(region, flag);
+            } else
+                carry = new FlagCorrelation(region, null);
         }
-        if (result.getFlagState() == FlagState.DENIED) {
-            if (onDeny != null)
-                onDeny.accept(event, result);
+        if (region.equals(region.getParent())) {
+            IFlag flag = region.getFlag(regionFlag.name);
+            if (flag.doesOverride()) {
+                carry = new FlagCorrelation(region, flag);
+            }
+            return carry;
         }
-        return result.getFlagState();
-    }
-
-    /**
-     * A correlation of a region and a flag. <br>
-     * This is used to determine the responsible region for a flag state.
-     * This region is not necessarily the region responsible for the flag check event.
-     * It could be a parent region which overrides the flag state of the child region.
-     */
-    public static class FlagCorrelation {
-
-        public final IProtectedRegion region;
-        public final IFlag flag;
-
-        public FlagCorrelation(IProtectedRegion region, IFlag flag) {
-            this.region = region;
-            this.flag = flag;
-        }
-
-        public IProtectedRegion getRegion() {
-            return region;
-        }
-
-        public IFlag getFlag() {
-            return flag;
-        }
+        return getResponsibleFlag(region.getParent(), regionFlag, carry);
     }
 }
