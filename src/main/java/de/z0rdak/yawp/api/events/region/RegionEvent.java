@@ -14,7 +14,7 @@ public abstract class RegionEvent extends Event {
     @Nullable
     private final Player player;
 
-    private RegionEvent(IMarkableRegion region, Player player) {
+    private RegionEvent(IMarkableRegion region, @Nullable Player player) {
         this.region = region;
         this.player = player;
     }
@@ -23,6 +23,7 @@ public abstract class RegionEvent extends Event {
         return region;
     }
 
+    @Nullable
     public Player getPlayer() {
         return player;
     }
@@ -51,7 +52,7 @@ public abstract class RegionEvent extends Event {
         private final String oldName;
         private String newName;
 
-        public RenameRegion(IMarkableRegion region, String oldName, String newName, PlayerEntity player) {
+        public RenameRegion(IMarkableRegion region, String oldName, String newName, Player player) {
             super(region, player);
             this.newName = newName;
             this.oldName = oldName;
@@ -65,6 +66,13 @@ public abstract class RegionEvent extends Event {
             return newName;
         }
 
+        /**
+         * The name set here is not validated again. Be sure you validate the name before setting it. <br></br>
+         * Otherwise, you may cause inconsistencies and break your whole region definition.
+         *
+         * @param newName The new name of the region - be sure to validate it before
+         * @see de.z0rdak.yawp.managers.data.region.RegionDataManager#isValidRegionName(ResourceKey, String)
+         */
         public void setNewName(String newName) {
             this.newName = newName;
         }
@@ -79,7 +87,7 @@ public abstract class RegionEvent extends Event {
 
         private IMarkableArea markedArea;
 
-        public UpdateArea(IMarkableRegion region, IMarkableArea area, PlayerEntity player) {
+        public UpdateArea(IMarkableRegion region, IMarkableArea area, Player player) {
             super(region, player);
             this.markedArea = area;
         }
@@ -88,6 +96,11 @@ public abstract class RegionEvent extends Event {
             return markedArea;
         }
 
+        /**
+         * The area set here is not validated again. Be sure you validate the area before setting it. <br></br>
+         * Otherwise, you may cause inconsistencies and break your whole region definition.
+         * @param markedArea The new area of the region - be sure to validate it before
+         */
         public void setMarkedArea(IMarkableArea markedArea) {
             this.markedArea = markedArea;
         }
