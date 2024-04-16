@@ -2,7 +2,6 @@ package de.z0rdak.yawp.api.events.region;
 
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
-import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
@@ -17,37 +16,29 @@ import javax.annotation.Nullable;
  * Contains the responsible region, the flag, the position, the player and the result.
  */
 public class FlagCheckResult extends Event {
-    /**
-     * The region that is responsible for the flag check.
-     */
+
+    private final FlagCheckEvent flagCheck;
+
     private final IProtectedRegion responsibleRegion;
+
     @Nullable
     private final IFlag flag;
-    private final RegionFlag regionFlag;
-    /**
-     * The target position of the flag check result. Depending on the flag this can refer to a block position or a entity position.
-     */
-    private final BlockPos pos;
-    /**
-     * The player that triggered the flag check, may be null when no player was involved. This depends on the checked flag.
-     */
-    @Nullable
-    private final Player player;
-    private final ResourceKey<Level> dim;
+
     private FlagState result;
 
-    public FlagCheckResult(RegionFlag flag, FlagState state, BlockPos pos, IProtectedRegion responsibleRegion, @Nullable Player player) {
+    public FlagCheckResult(FlagCheckEvent flagCheck, FlagState state, IProtectedRegion responsibleRegion, @Nullable IFlag flag) {
+        this.flagCheck = flagCheck;
         this.responsibleRegion = responsibleRegion;
-        this.dim = responsibleRegion.getDim();
-        this.pos = pos;
-        this.player = player;
         this.result = state;
-        this.regionFlag = flag;
-        this.flag = responsibleRegion.getFlagContainer().get(flag.name);
+        this.flag = flag;
     }
 
     public IProtectedRegion getResponsible() {
         return this.responsibleRegion;
+    }
+
+    public FlagCheckEvent getFlagCheck() {
+        return flagCheck;
     }
 
     public FlagState getFlagState() {
@@ -58,25 +49,10 @@ public class FlagCheckResult extends Event {
         this.result = result;
     }
 
-    public RegionFlag getRegionFlag() {
-        return regionFlag;
-    }
-
     @Nullable
     public IFlag getFlag() {
         return this.flag;
     }
 
-    public BlockPos getPos() {
-        return this.pos;
-    }
 
-    @Nullable
-    public Player getPlayer() {
-        return this.player;
-    }
-
-    public ResourceKey<Level> getDim() {
-        return this.dim;
-    }
 }
