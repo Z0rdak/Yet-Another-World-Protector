@@ -41,6 +41,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
+import static de.z0rdak.yawp.commands.CommandUtil.GROUP_LIST;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static net.minecraft.ChatFormatting.RESET;
 import static net.minecraft.ChatFormatting.*;
@@ -526,7 +527,7 @@ public class MessageUtil {
     }
 
     public static List<String> getGroupsForRegion(IProtectedRegion region) {
-        return RegionCommands.GROUP_LIST;
+        return GROUP_LIST;
     }
 
     private static int getGroupSize(IProtectedRegion region, String groupName) {
@@ -638,9 +639,6 @@ public class MessageUtil {
         MutableComponent regionTypeIndicator = new TextComponent(region.getRegionType().type.substring(0, 1).toUpperCase());
         MutableComponent hoverText = new TranslatableComponent("cli.flag.info.hover", flag.getName(), region.getName());
         MutableComponent flagInfoLink = buildFlagInfoLink(region, flag, flagLinkColor);
-        if (flag.doesOverride()) {
-            flagInfoLink.withStyle(UNDERLINE);
-        }
         return flagInfoLink
                 .append(new TextComponent(" "))
                 .append(buildFlagInfoLink(region, flag, regionTypeIndicator, hoverText, DARK_PURPLE))
@@ -942,13 +940,11 @@ public class MessageUtil {
     private static ChatFormatting colorForState(FlagState state) {
         switch (state) {
             case ALLOWED:
-                return WHITE;
+                return GREEN;
             case DENIED:
                 return RED;
             case DISABLED:
                 return GRAY;
-            case UNDEFINED:
-                return UNDERLINE;
             default:
                 throw new IllegalArgumentException();
         }
