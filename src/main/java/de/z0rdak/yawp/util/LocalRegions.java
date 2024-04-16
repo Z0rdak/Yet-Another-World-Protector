@@ -6,7 +6,7 @@ import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.core.stick.MarkerStick;
-import de.z0rdak.yawp.handler.flags.HandlerUtil;
+import de.z0rdak.yawp.handler.flags.FlagCorrelation;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.RegistryKey;
@@ -39,20 +39,18 @@ public final class LocalRegions {
         return flags;
     }
 
-    public static Map<FlagState, List<HandlerUtil.FlagCorrelation>> sortFlagsByState(Map<String, HandlerUtil.FlagCorrelation> flagMap) {
-        List<HandlerUtil.FlagCorrelation> denied = getCorrelationByState(flagMap, FlagState.DENIED);
-        List<HandlerUtil.FlagCorrelation> allowed = getCorrelationByState(flagMap, FlagState.ALLOWED);
-        List<HandlerUtil.FlagCorrelation> disabled = getCorrelationByState(flagMap, FlagState.DISABLED);
-        List<HandlerUtil.FlagCorrelation> undefined = getCorrelationByState(flagMap, FlagState.UNDEFINED);
-        HashMap<FlagState, List<HandlerUtil.FlagCorrelation>> flagStateListMap = new HashMap<>();
+    public static Map<FlagState, List<FlagCorrelation>> sortFlagsByState(Map<String, FlagCorrelation> flagMap) {
+        List<FlagCorrelation> denied = getCorrelationByState(flagMap, FlagState.DENIED);
+        List<FlagCorrelation> allowed = getCorrelationByState(flagMap, FlagState.ALLOWED);
+        List<FlagCorrelation> disabled = getCorrelationByState(flagMap, FlagState.DISABLED);
+        HashMap<FlagState, List<FlagCorrelation>> flagStateListMap = new HashMap<>();
         flagStateListMap.put(FlagState.DENIED, denied);
         flagStateListMap.put(FlagState.ALLOWED, allowed);
         flagStateListMap.put(FlagState.DISABLED, disabled);
-        flagStateListMap.put(FlagState.UNDEFINED, undefined);
         return flagStateListMap;
     }
 
-    private static List<HandlerUtil.FlagCorrelation> getCorrelationByState(Map<String, HandlerUtil.FlagCorrelation> flagMap, FlagState state) {
+    private static List<FlagCorrelation> getCorrelationByState(Map<String, FlagCorrelation> flagMap, FlagState state) {
         return flagMap.values().stream()
                 .filter(correlation -> correlation.getFlag().getState() == state)
                 .collect(Collectors.toList());

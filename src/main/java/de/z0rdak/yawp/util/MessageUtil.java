@@ -17,6 +17,7 @@ import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
+import de.z0rdak.yawp.handler.flags.FlagCorrelation;
 import de.z0rdak.yawp.handler.flags.HandlerUtil;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -944,22 +945,16 @@ public class MessageUtil {
      */
     public static List<IFormattableTextComponent> buildRemoveFlagEntries(IProtectedRegion region) {
         List<IFormattableTextComponent> flagEntries = new ArrayList<>();
-
-        Map<String, HandlerUtil.FlagCorrelation> flagMapRecursive = getFlagMapRecursive(region, null);
-        Map<FlagState, List<HandlerUtil.FlagCorrelation>> flagStateListMap = LocalRegions.sortFlagsByState(flagMapRecursive);
-
-        List<IFormattableTextComponent> allowedFlagEntries = buildFlagEntries(flagStateListMap, FlagState.ALLOWED);
-        List<IFormattableTextComponent> deniedFlagEntries = buildFlagEntries(flagStateListMap, FlagState.DENIED);
-        List<IFormattableTextComponent> disabledFlagEntries = buildFlagEntries(flagStateListMap, FlagState.DISABLED);
-
-        flagEntries.addAll(allowedFlagEntries);
-        flagEntries.addAll(deniedFlagEntries);
-        flagEntries.addAll(disabledFlagEntries);
+        Map<String, FlagCorrelation> flagMapRecursive = getFlagMapRecursive(region, null);
+        Map<FlagState, List<FlagCorrelation>> flagStateListMap = LocalRegions.sortFlagsByState(flagMapRecursive);
+        flagEntries.addAll(buildFlagEntries(flagStateListMap, FlagState.ALLOWED));
+        flagEntries.addAll(buildFlagEntries(flagStateListMap, FlagState.DENIED));
+        flagEntries.addAll(buildFlagEntries(flagStateListMap, FlagState.DISABLED));
         return flagEntries;
     }
 
-    private static List<IFormattableTextComponent> buildFlagEntries(Map<FlagState, List<HandlerUtil.FlagCorrelation>> flagStateListMap, FlagState state) {
-        List<HandlerUtil.FlagCorrelation> allowedFlags = flagStateListMap.get(state);
+    private static List<IFormattableTextComponent> buildFlagEntries(Map<FlagState, List<FlagCorrelation>> flagStateListMap, FlagState state) {
+        List<FlagCorrelation> allowedFlags = flagStateListMap.get(state);
         allowedFlags.sort(Comparator.comparing(flagCorrelation -> flagCorrelation.getFlag().getName()));
         return allowedFlags.stream()
                 .map(flagCorrelation -> buildRemoveFlagEntry(flagCorrelation.getRegion(), flagCorrelation.getFlag(), colorForState(state)))
