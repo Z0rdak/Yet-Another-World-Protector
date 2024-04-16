@@ -137,12 +137,12 @@ public class FlagMessage implements INBTSerializable<CompoundNBT> {
      */
     public static Map<String, String> defaultSubstitutesFor(FlagCheckResult result) {
         Map<String, String> substituteMap = new HashMap<>();
-        substituteMap.put(FLAG_TEMPLATE, result.getFlag().getName());
-        substituteMap.put(POS_TEMPLATE, MessageUtil.shortBlockPos(result.getPos()));
+        substituteMap.put(FLAG_TEMPLATE, result.getFlagCheck().getRegionFlag().name);
+        substituteMap.put(POS_TEMPLATE, MessageUtil.shortBlockPos(result.getFlagCheck().getTarget()));
         substituteMap.put(REGION_TEMPLATE, result.getResponsible().getName());
         substituteMap.put(DIM_TEMPLATE, result.getResponsible().getDim().location().toString());
-        if (result.getPlayer() != null && result.getRegionFlag().categories.contains(PLAYER)) {
-            substituteMap.put(PLAYER_TEMPLATE, result.getPlayer().getScoreboardName());
+        if (result.getFlagCheck().getPlayer() != null && RegionFlag.hasPlayerCategory(result.getFlagCheck().getRegionFlag())) {
+            substituteMap.put(PLAYER_TEMPLATE, result.getFlagCheck().getPlayer().getScoreboardName());
         }
         return substituteMap;
     }
