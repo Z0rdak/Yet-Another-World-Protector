@@ -57,9 +57,13 @@ public class RegionArgumentType implements ArgumentType<String> {
                 String regionTypeLiteral = nodes.get(1).getNode().getName();
                 RegionType regionType = RegionType.of(regionTypeLiteral);
                 boolean isFlagSubCmd = regionTypeLiteral.equals(FLAG.toString()) && nodes.size() >= 3;
-                if (regionType == null && isFlagSubCmd) {
+
+                if (isFlagSubCmd && regionType == null) {
                     String flagRegionTypeLiteral = nodes.get(2).getNode().getName();
                     return RegionType.of(flagRegionTypeLiteral);
+                }
+                if (!isFlagSubCmd && regionType != null) {
+                    return regionType;
                 }
             }
         }
