@@ -141,7 +141,7 @@
   "cli.msg.info.cmd.deny": "You don't have permission to execute this command!",
   "cli.msg.info.dim.region": "Region(s)",
   "cli.msg.info.dim.region.child.hover": "Direction child region of Dimensional Region",
-  "cli.msg.info.dim.region.remove.all.attempt": "Attempt to remove all regions %s from dimension %s. Confirm removal by clicking here %s",
+  "cli.msg.info.dim.region.remove.all.attempt": "Attempt to remove all (%s) regions from dimension %s. Confirm removal by clicking here %s",
   "cli.msg.info.dim.region.remove.all.confirm": "Removed %s regions from dimension %s",
   "cli.msg.info.dim.region.remove.all.fail": "Some regions from %s couldn't be removed.",
   "cli.msg.info.dim.region.remove.all.link.hover": "Remove all regions from %s",

@@ -45,7 +45,7 @@ public class DimensionCommands {
     }
 
     private static List<String> getRegionNameSuggestions() {
-        String examples = new TranslationTextComponent("cli.info.region.name.examples").getString();
+        String examples = new TranslationTextComponent("cli.region.name.examples").getString();
         return Arrays.asList(examples.split(","));
     }
 
@@ -194,20 +194,8 @@ public class DimensionCommands {
         return 0;
     }
 
-    public static int checkValidRegionName(String regionName, DimensionRegionCache dimCache) {
-        List<String> commandStrings = Arrays.stream(values()).map(CommandConstants::toString).collect(Collectors.toList());
-        if (!regionName.matches(RegionArgumentType.VALID_NAME_PATTERN.pattern())
-                || commandStrings.contains(regionName.toLowerCase())) {
-            return -1;
-        }
-        if (dimCache.contains(regionName)) {
-            return 1;
-        }
-        return 0;
-    }
-
     private static int createCuboidRegion(CommandContext<CommandSource> ctx, String regionName, DimensionRegionCache dimCache, BlockPos pos1, BlockPos pos2, @Nullable ServerPlayerEntity owner) {
-        int res = checkValidRegionName(regionName, dimCache);
+        int res = RegionDataManager.get().isValidRegionName(dimCache.getDimensionalRegion().getDim(), regionName);
         if (res == -1) {
             sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.name.invalid", regionName));
             return res;
@@ -287,7 +275,7 @@ public class DimensionCommands {
         int amount = dimCache.getRegionsInDimension().size();
         IFormattableTextComponent removeAllRegionsLink = buildRemoveAllRegionsLink(dimCache);
         sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.dim.region.remove.all.attempt",
-                amount, buildRegionInfoLink(dimCache.getDimensionalRegion(), removeAllRegionsLink)));
+                amount, buildRegionInfoLink(dimCache.getDimensionalRegion()), removeAllRegionsLink));
         return 0;
     }
 
