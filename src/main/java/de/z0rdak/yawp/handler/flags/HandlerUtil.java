@@ -27,11 +27,9 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.world.BlockEvent;
-import net.minecraftforge.eventbus.api.Event;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -117,7 +115,7 @@ public final class HandlerUtil {
         }
         boolean isFlagMuted = flag.getFlagMsg().isMuted() || responsibleRegion.isMuted();
         // If not muted and the event is a player event, send the message
-        if (!isFlagMuted && result.getPlayer() != null && result.getPlayer() instanceof PlayerEntity) {
+        if (!isFlagMuted && result.getPlayer() != null && result.getPlayer() instanceof Player) {
             Map<String, String> msgSubstitutes = FlagMessage.defaultSubstitutesFor(result);
             msgSubstitutes.put(REGION_TEMPLATE, responsibleRegion.getName());
             MutableComponent flagMsg = FlagMessage.buildFrom(result, msgSubstitutes);
@@ -127,27 +125,16 @@ public final class HandlerUtil {
 
     /**
      * Evaluates the given flag check event and returns the result. <br>
-     *
+     * The responsible region is determined and the flag state is checked against the player's permissions. <br>
      * @param checkEvent the flag check event to evaluate
      * @return the result of the flag check event
      */
     public static FlagCheckResult evaluate(FlagCheckEvent checkEvent) {
-        BlockPos target = checkEvent.getTarget();
-        Player player = checkEvent.getPlayer();
         RegionFlag regionFlag = checkEvent.getRegionFlag();
-        IProtectedRegion responsibleRegion = getResponsible(target, checkEvent.getDimension());
-        FlagContainer flags = getFlagsRecursive(responsibleRegion, null);
-        FlagState flagState = flags.flagState(regionFlag.name);
-        if (flagState == FlagState.UNDEFINED) {
-            return new FlagCheckResult(regionFlag, FlagState.UNDEFINED, target, responsibleRegion, player);
-        } else {
-            // now we know that there is a flag active (either allowed or disallowed,
-            // but we need to check the correct region which is responsible,
-            // because a parent could override the child
-            FlagCorrelation flagCorrelation = getFlagCorrelation(responsibleRegion, regionFlag, new FlagCorrelation(responsibleRegion, null));
-            FlagState state = getFlagState(flagCorrelation.region, regionFlag, player);
-            return new FlagCheckResult(regionFlag, state, target, flagCorrelation.region, player);
-        }
+        IProtectedRegion targetRegion = getResponsible(checkEvent.getTarget(), checkEvent.getDimension());
+        FlagCorrelation responsibleFlag = getResponsibleFlag(targetRegion, regionFlag, null);
+        FlagState playerRelatedState = getFlagState(responsibleFlag.getRegion(), regionFlag, checkEvent.getPlayer());
+        return new FlagCheckResult(checkEvent, playerRelatedState, responsibleFlag.getRegion(), responsibleFlag.getFlag());
     }
 
     /**
