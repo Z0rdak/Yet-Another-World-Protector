@@ -1237,11 +1237,11 @@ public class MessageUtil {
         switch (region.getRegionType()) {
             case GLOBAL: {
                 String command = buildCommandStr(GLOBAL.toString(), STATE.toString());
-                return buildExecuteCmdComponent(linkText, hoverText, command, SUGGEST_COMMAND, ADD_CMD_COLOR);
+                return buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, LINK_COLOR);
             }
             case DIMENSION: {
                 String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), STATE.toString());
-                return buildExecuteCmdComponent(linkText, hoverText, command, SUGGEST_COMMAND, ADD_CMD_COLOR);
+                return buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, LINK_COLOR);
             }
             case LOCAL: {
                 String showStateCmd = buildCommandStr(LOCAL.toString(), region.getDim().location().toString(), region.getName(), STATE.toString());
