@@ -18,6 +18,12 @@ public final class AreaUtil {
                 + Math.pow(b.getZ() - a.getZ(), 2));
     }
 
+    public static int distanceManhattan(BlockPos a, BlockPos b) {
+        return Math.abs(b.getX() - a.getX())
+                + Math.abs(b.getY() - a.getY())
+                + Math.abs(b.getZ() - a.getZ());
+    }
+
     public static double length(BlockPos a) {
         return Math.sqrt(Math.pow(a.getX(), 2)
                 + Math.pow(a.getY(), 2)
