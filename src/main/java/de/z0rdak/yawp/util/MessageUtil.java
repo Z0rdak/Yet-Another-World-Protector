@@ -773,7 +773,7 @@ public class MessageUtil {
 
     public static MutableComponent buildFlagOverrideToggleLink(IProtectedRegion region, IFlag flag, boolean shortLink) {
         MutableComponent linkText = new TranslatableComponent("cli.flag.override.link.text." + flag.doesOverride());
-        MutableComponent hoverText = new TranslatableComponent("cli.flag.override.link.hover." + flag.doesOverride(), flag.getName(), region.getName());
+        MutableComponent hoverText = new TranslatableComponent("cli.flag.override.link.hover." + !flag.doesOverride(), flag.getName(), region.getName());
         if (shortLink) {
             linkText = new TranslatableComponent("cli.flag.override.link.text.toggle");
         }
