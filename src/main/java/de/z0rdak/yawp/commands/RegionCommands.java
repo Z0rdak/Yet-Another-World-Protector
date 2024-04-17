@@ -68,8 +68,8 @@ import static de.z0rdak.yawp.util.MessageUtil.*;
 
 public class RegionCommands {
 
-    private final static int MIN_BUILD_LIMIT = 0;
-    private final static int MAX_BUILD_LIMIT = 255;
+    public final static int MIN_BUILD_LIMIT = 0;
+    public final static int MAX_BUILD_LIMIT = 255;
 
     private RegionCommands() {
     }
