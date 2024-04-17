@@ -385,7 +385,7 @@ public class RegionCommands {
         sendCmdFeedback(src, buildHeader(new TranslatableComponent("cli.msg.info.header.for", buildRegionAreaLink(region), buildRegionInfoLink(region))));
         sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.area.location", buildDimensionTeleportLink(region)));
         sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.area.area", buildRegionAreaDetailComponent(region)));
-        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.area.marked", buildRegionAreaMarkingComponent(region)));
+        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.area.marked", buildMarkedBlocksAreaComponent(region)));
         sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.area.tp", buildRegionAreaTpComponent(region)));
         return 0;
     }

@@ -1,8 +1,10 @@
 package de.z0rdak.yawp.util;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.math.Vector3d;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.CommandConstants;
+import de.z0rdak.yawp.commands.RegionCommands;
 import de.z0rdak.yawp.commands.RegionCommands;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
@@ -10,6 +12,7 @@ import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
+import de.z0rdak.yawp.core.area.SphereArea;
 import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.FlagState;
@@ -110,6 +113,10 @@ public class MessageUtil {
         return "[X=" + target.getX() + ", Y=" + target.getY() + ", Z=" + target.getZ() + "]";
     }
 
+    public static String shortBlockPos(Vector3d target) {
+        return "[X=" + target.x + ", Y=" + target.y + ", Z=" + target.z + "]";
+    }
+
     public static String buildBlockPosLinkText(BlockPos target) {
         return target.getX() + ", " + target.getY() + ", " + target.getZ();
     }
@@ -203,15 +210,17 @@ public class MessageUtil {
         switch (area.getAreaType()) {
             case CUBOID: {
                 CuboidArea cuboidArea = (CuboidArea) area;
-                MutableComponent sizeInfo = buildAreaAxisInfoComponent(cuboidArea, Direction.Axis.X).append(", ")
-                        .append(buildAreaAxisInfoComponent(cuboidArea, Direction.Axis.Y)).append(", ")
-                        .append(buildAreaAxisInfoComponent(cuboidArea, Direction.Axis.Z)).append(", ");
-                return areaInfo.append(" ").append(sizeInfo).append(buildRegionAreaExpandLink(region));
+                return areaInfo.append(" ")
+                        .append(buildCuboidAreaInfo(cuboidArea))
+                        .append(buildRegionAreaExpandLink(region));
             }
             case CYLINDER:
                 throw new NotImplementedException("cylinder");
             case SPHERE:
-                throw new NotImplementedException("sphere");
+                SphereArea sphereArea = (SphereArea) area;
+                return areaInfo.append(" ")
+                        .append(buildSphereAreaInfo(sphereArea)).append(" ")
+                        .append(buildRegionAreaExpandLink(region));
             case POLYGON_3D:
                 throw new NotImplementedException("polygon");
             case PRISM:
@@ -222,7 +231,28 @@ public class MessageUtil {
     }
 
     /**
-     * Axis=N
+     * [X=n], [Y=m], [Z=o]
+     *
+     * @param cuboidArea
+     * @return
+     */
+    private static MutableComponent buildCuboidAreaInfo(CuboidArea cuboidArea) {
+        return buildAreaAxisInfoComponent(cuboidArea, Direction.Axis.X).append(", ")
+                .append(buildAreaAxisInfoComponent(cuboidArea, Direction.Axis.Y)).append(", ")
+                .append(buildAreaAxisInfoComponent(cuboidArea, Direction.Axis.Z)).append(", ");
+
+    }
+
+    private static MutableComponent buildSphereAreaInfo(SphereArea sphereArea) {
+        MutableComponent text = new TextComponent("Center=" + shortBlockPos(sphereArea.getCenter()))
+                .append(" ")
+                .append(new TextComponent("Radius: " + sphereArea.getRadius()));
+        return buildTextWithHoverMsg(text, text, WHITE);
+    }
+
+    /**
+     * Builds component showing size of the area for the given axis with a hover text displaying the block range of the axis.
+     * Axis=N, e.g. X=5
      */
     private static MutableComponent buildAreaAxisInfoComponent(CuboidArea cuboidArea, Direction.Axis axis) {
         int min = (int) Math.floor(cuboidArea.getArea().min(axis));
@@ -237,11 +267,9 @@ public class MessageUtil {
      * [<=expand=>] [<=max=>]
      */
     public static MutableComponent buildRegionAreaExpandLink(IMarkableRegion region) {
-        int minBlockHeight = 0;
-        int maxBlockHeight = 255;
         MutableComponent linkText = new TranslatableComponent("cli.msg.info.region.area.area.expand.link.text");
         MutableComponent linkHover = new TranslatableComponent("cli.msg.info.region.area.area.expand.link.hover");
-        String expandCmd = buildCommandStr(LOCAL.toString(), region.getDim().location().toString(), region.getName(), AREA.toString(), EXPAND.toString());
+        String expandCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), AREA.toString(), EXPAND.toString());
         switch (region.getArea().getAreaType()) {
             case CUBOID: {
                 CuboidArea cuboidArea = (CuboidArea) region.getArea();
@@ -253,14 +281,14 @@ public class MessageUtil {
                 // [<=max=>]
                 MutableComponent maxExpandLinkText = new TranslatableComponent("cli.msg.info.region.area.area.expand-max.link.text");
                 MutableComponent maxExpandLinkHover = new TranslatableComponent("cli.msg.info.region.area.area.expand-max.link.hover");
-                String maxExpandCmd = appendSubCommand(expandCmd, String.valueOf(minBlockHeight), String.valueOf(maxBlockHeight));
+                String maxExpandCmd = appendSubCommand(expandCmd, String.valueOf(RegionCommands.MIN_BUILD_LIMIT), String.valueOf(RegionCommands.MAX_BUILD_LIMIT));
                 MutableComponent maxExpandLink = buildExecuteCmdComponent(maxExpandLinkText, maxExpandLinkHover, maxExpandCmd, RUN_COMMAND, LINK_COLOR);
                 return expandLink.append(" ").append(maxExpandLink);
             }
             case CYLINDER:
                 throw new NotImplementedException("cylinder");
             case SPHERE:
-                throw new NotImplementedException("sphere");
+                return new TextComponent("No sphere expand yet");
             case POLYGON_3D:
                 throw new NotImplementedException("polygon");
             case PRISM:
@@ -270,39 +298,26 @@ public class MessageUtil {
         }
     }
 
-    /**
-     * Marked Blocks: [X,Y,Z], ..., [X,Y,Z] [Set] [Show]
-     */
-    public static MutableComponent buildRegionAreaMarkingComponent(IMarkableRegion region) {
-        switch (region.getArea().getAreaType()) {
-            case CUBOID: {
-                CuboidArea cuboidArea = (CuboidArea) region.getArea();
-                String areaCmd = buildCommandStr(LOCAL.toString(), region.getDim().location().toString(), region.getName(), AREA.toString());
-                MutableComponent setAreaLinkText = new TranslatableComponent("cli.msg.info.region.area.area.set.link");
-                MutableComponent setAreaLinkHover = new TranslatableComponent("cli.msg.info.region.area.area.set.hover", region.getName());
-                String blocks = String.join(" ", cuboidArea.getMarkedBlocks().stream()
-                        .map(MessageUtil::buildBlockCoordinateStr)
-                        .collect(Collectors.toSet()));
-                String setArea = appendSubCommand(areaCmd, SET.toString(), region.getArea().getAreaType().areaType, blocks);
-                MutableComponent setAreaLink = buildExecuteCmdComponent(setAreaLinkText, setAreaLinkHover, setArea, SUGGEST_COMMAND, LINK_COLOR);
+    private static MutableComponent buildShowAreaToggleLink(IMarkableRegion region) {
+        MutableComponent showAreaLinkText = new TranslatableComponent("cli.msg.info.region.area.area.show.link");
+        MutableComponent showAreaLinkHover = new TranslatableComponent("cli.msg.info.region.area.area.show.hover", region.getName());
+        String showAreaCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), AREA.toString(), "show");
+        return buildExecuteCmdComponent(showAreaLinkText, showAreaLinkHover, showAreaCmd, RUN_COMMAND, LINK_COLOR);
+    }
 
-                MutableComponent showAreaLinkText = new TranslatableComponent("cli.msg.info.region.area.area.show.link");
-                MutableComponent showAreaLinkHover = new TranslatableComponent("cli.msg.info.region.area.area.show.hover", region.getName());
-                String showArea = appendSubCommand(areaCmd, "show");
-                MutableComponent showAreaLink = buildExecuteCmdComponent(showAreaLinkText, showAreaLinkHover, showArea, RUN_COMMAND, LINK_COLOR);
-                return buildBlockPosTpLinks(region).append(" ").append(setAreaLink).append(" ");//.append(showAreaLink);
-            }
-            case CYLINDER:
-                throw new NotImplementedException("cylinder");
-            case SPHERE:
-                throw new NotImplementedException("sphere");
-            case POLYGON_3D:
-                throw new NotImplementedException("polygon");
-            case PRISM:
-                throw new NotImplementedException("prism");
-            default:
-                throw new IllegalArgumentException("Invalid area type");
-        }
+    /**
+     * Marked Blocks: [X,Y,Z], ..., [X,Y,Z] [Set]
+     */
+    public static MutableComponent buildMarkedBlocksAreaComponent(IMarkableRegion region) {
+        String areaCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), AREA.toString(), SET.toString(), region.getArea().getAreaType().areaType, " ");
+        MutableComponent setAreaLinkText = new TranslatableComponent("cli.msg.info.region.area.area.set.link");
+        MutableComponent setAreaLinkHover = new TranslatableComponent("cli.msg.info.region.area.area.set.hover", region.getName());
+        String blocks = String.join(" ", region.getArea().getMarkedBlocks().stream()
+                .map(MessageUtil::buildBlockCoordinateStr)
+                .collect(Collectors.toSet()));
+        String setAreaCmd = appendSubCommand(areaCmd, SET.toString(), region.getArea().getAreaType().areaType, blocks);
+        MutableComponent setAreaLink = buildExecuteCmdComponent(setAreaLinkText, setAreaLinkHover, setAreaCmd, SUGGEST_COMMAND, LINK_COLOR);
+        return buildBlockPosTpLinks(region).append(" ").append(setAreaLink).append(" ");
     }
 
     /**
