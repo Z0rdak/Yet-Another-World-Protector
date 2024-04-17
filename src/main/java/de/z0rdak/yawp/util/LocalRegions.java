@@ -130,55 +130,22 @@ public final class LocalRegions {
         }
     }
 
-    /*
-    public static FlagCorrelation evaluateFlag(IProtectedRegion region, RegionFlag regionFlag, @Nullable FlagCorrelation carry) {
-        // break case
-        if (region.getParent().equals(region)) {
-            return carry;
-        }
-        if (region.getFlagContainer().flagState(regionFlag.name) != FlagState.UNDEFINED) {
-            IFlag flag = region.getFlag(regionFlag.name);
-            //if (flag.doesOverride() && region.getChildren().size() > 0) {
-            //    return new FlagCorrelation(region, flag);
-            //}
-            if (region.equals(region.getParent()))
-                return new FlagCorrelation(region, flag);
-            return evaluateFlag(region.getParent(), regionFlag, new FlagCorrelation(region, flag));
-        }
-        // recursive case, as long as the region is not the global region
-        FlagCorrelation parentEval = evaluateFlag(region.getParent(), regionFlag, carry);
-
-        IFlag flag = region.getFlag(regionFlag.name);
-        FlagCorrelation flagCorrelation = new FlagCorrelation(region, flag);
-        return evaluateFlag(region.getParent(), regionFlag, flagCorrelation);
-    }
-    */
-
-    public static List<IMarkableRegion> getIntersectingRegions(IMarkableRegion region) {
-        return RegionDataManager.get().getRegionsFor(region.getDim()).stream()
-                .filter(r -> !r.equals(region)) // filter input region from the result
-                .map(r -> (CuboidRegion) r)
-                .filter(r -> (region.getArea()).intersects((r).getArea()))
-                .collect(Collectors.toList());
-    }
-
     public static boolean hasAnyRegionWithSamePriority(IMarkableRegion region, int priority) {
         return hasAnyRegionWithSamePriority(getIntersectingRegionsFor(region), priority);
     }
 
-    public static int ensureHigherRegionPriorityFor(IMarkableRegion cuboidRegion, int defaultPriority) {
-        List<IMarkableRegion> intersectingRegions = getIntersectingRegionsFor(cuboidRegion);
+    public static int ensureHigherRegionPriorityFor(IMarkableRegion markableRegion, int defaultPriority) {
+        List<IMarkableRegion> intersectingRegions = getIntersectingRegionsFor(markableRegion);
         boolean hasRegionWithSamePriority = hasAnyRegionWithSamePriority(intersectingRegions, defaultPriority);
         if (hasRegionWithSamePriority) {
             int maxPriority = intersectingRegions.stream()
-                    .map(r -> (CuboidRegion) r)
-                    .mapToInt(AbstractMarkableRegion::getPriority)
+                    .mapToInt(IMarkableRegion::getPriority)
                     .max().getAsInt();
-            cuboidRegion.setPriority(maxPriority + 1);
+            markableRegion.setPriority(maxPriority + 1);
         } else {
-            cuboidRegion.setPriority(defaultPriority);
+            markableRegion.setPriority(defaultPriority);
         }
-        return cuboidRegion.getPriority();
+        return markableRegion.getPriority();
     }
 
     // TODO: FIXME
@@ -203,24 +170,31 @@ public final class LocalRegions {
         }
     }
 
-    public static int ensureLowerRegionPriorityFor(IMarkableRegion cuboidRegion, int defaultPriority) {
-        List<IMarkableRegion> intersectingRegions = getIntersectingRegionsFor(cuboidRegion);
-        boolean hasRegionWithSamePriority = intersectingRegions.stream().anyMatch(r -> r.getPriority() == cuboidRegion.getPriority());
+    public static int ensureLowerRegionPriorityFor(IMarkableRegion markableRegion, int defaultPriority) {
+        List<IMarkableRegion> intersectingRegions = getIntersectingRegionsFor(markableRegion);
+        boolean hasRegionWithSamePriority = intersectingRegions.stream().anyMatch(r -> r.getPriority() == markableRegion.getPriority());
         if (hasRegionWithSamePriority) {
             int minPriority = intersectingRegions.stream().mapToInt(IMarkableRegion::getPriority).min().getAsInt();
-            cuboidRegion.setPriority(minPriority - 1);
+            markableRegion.setPriority(minPriority - 1);
         } else {
-            cuboidRegion.setPriority(defaultPriority);
+            markableRegion.setPriority(defaultPriority);
         }
-        return cuboidRegion.getPriority();
+        return markableRegion.getPriority();
     }
 
-    private static List<IMarkableRegion> getIntersectingRegionsFor(IMarkableRegion cuboidRegion) {
-        return cuboidRegion.getParent().getChildren().values()
+    public static List<IMarkableRegion> getIntersectingRegions(IMarkableRegion region) {
+        return RegionDataManager.get().getRegionsFor(region.getDim()).stream()
+                .filter(r -> !r.equals(region)) // filter input region from the result
+                .filter(r -> (region.getArea()).intersects((r).getArea()))
+                .collect(Collectors.toList());
+    }
+
+    public static List<IMarkableRegion> getIntersectingRegionsFor(IMarkableRegion markableRegion) {
+        return markableRegion.getParent().getChildren().values()
                 .stream()
-                .filter(r -> !r.equals(cuboidRegion)) // filter input region from the result
-                .map(r -> (CuboidRegion) r)
-                .filter(r -> (cuboidRegion.getArea()).intersects((r).getArea()))
+                .map(r -> (IMarkableRegion) r)
+                .filter(r -> !r.equals(markableRegion)) // filter input region from the result
+                .filter(r -> (markableRegion.getArea()).intersects((r).getArea()))
                 .collect(Collectors.toList());
     }
 
@@ -228,13 +202,13 @@ public final class LocalRegions {
         return region.stream().anyMatch(r -> r.getPriority() == priority);
     }
 
-    private static List<CuboidRegion> getIntersectingWithSamePriority(CuboidRegion cuboidRegion) {
-        return cuboidRegion.getParent().getChildren().values()
+    private static List<IMarkableRegion> getIntersectingWithSamePriority(IMarkableRegion markableRegion) {
+        return markableRegion.getParent().getChildren().values()
                 .stream()
-                .filter(r -> !r.equals(cuboidRegion)) // filter input region from the result
-                .map(r -> (CuboidRegion) r)
-                .filter(region -> (cuboidRegion.getArea()).intersects((region).getArea()))
-                .filter(r -> r.getPriority() == cuboidRegion.getPriority())
+                .filter(r -> !r.equals(markableRegion)) // filter input region from the result
+                .map(r -> (IMarkableRegion) r)
+                .filter(region -> (markableRegion.getArea()).intersects((region).getArea()))
+                .filter(r -> r.getPriority() == markableRegion.getPriority())
                 .collect(Collectors.toList());
     }
 
