@@ -11,6 +11,9 @@ import org.apache.commons.lang3.NotImplementedException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static de.z0rdak.yawp.util.AreaUtil.distance;
+import static de.z0rdak.yawp.util.AreaUtil.distanceManhattan;
+
 public class SphereArea extends CenteredArea {
 
     private int radius;
@@ -22,7 +25,7 @@ public class SphereArea extends CenteredArea {
 
     public SphereArea(BlockPos centerPos, BlockPos scopePos) {
         super(centerPos, AreaType.SPHERE);
-        this.radius = (distanceManhattan(centerPos, scopePos));
+        this.radius = (int) (distance(centerPos, scopePos) + 0.5);
     }
 
     public SphereArea(BlockPos middlePos, int radius) {
@@ -35,7 +38,7 @@ public class SphereArea extends CenteredArea {
 
     @Override
     public boolean contains(BlockPos pos) {
-        return distanceManhattan(this.center, pos) <= this.radius;
+        return distance(this.center, pos) < this.radius + 0.5;
     }
 
     @Override
