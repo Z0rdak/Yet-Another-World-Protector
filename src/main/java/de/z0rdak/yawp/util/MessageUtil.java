@@ -794,7 +794,7 @@ public class MessageUtil {
 
     public static IFormattableTextComponent buildFlagOverrideToggleLink(IProtectedRegion region, IFlag flag, boolean shortLink) {
         IFormattableTextComponent linkText = new TranslationTextComponent("cli.flag.override.link.text." + flag.doesOverride());
-        IFormattableTextComponent hoverText = new TranslationTextComponent("cli.flag.override.link.hover." + flag.doesOverride(), flag.getName(), region.getName());
+        IFormattableTextComponent hoverText = new TranslationTextComponent("cli.flag.override.link.hover." + !flag.doesOverride(), flag.getName(), region.getName());
         if (shortLink) {
             linkText = new TranslationTextComponent("cli.flag.override.link.text.toggle");
         }
