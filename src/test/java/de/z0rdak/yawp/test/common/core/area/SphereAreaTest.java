@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SphereAreaTest {
 
@@ -56,6 +56,85 @@ public class SphereAreaTest {
                     }
                 }
             }
+        }
+    }
+
+    public static List<BlockPos> getBlocksJustOutOfSphere(BlockPos center, int radius) {
+        List<BlockPos> blocksOnSphereSurface = new ArrayList<>();
+
+        int centerX = center.getX();
+        int centerY = center.getY();
+        int centerZ = center.getZ();
+
+        for (int x = centerX - radius; x <= centerX + radius; x++) {
+            for (int y = centerY - radius; y <= centerY + radius; y++) {
+                for (int z = centerZ - radius; z <= centerZ + radius; z++) {
+                    double distanceSquared = Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2) + Math.pow(z - centerZ, 2);
+                    if (Math.abs(distanceSquared - radius * radius) < 1e-6) {
+                        blocksOnSphereSurface.add(new BlockPos(x, y, z));
+                    }
+                }
+            }
+        }
+
+        return blocksOnSphereSurface;
+    }
+
+    public static List<BlockPos> getBlocksInSphereHalf(BlockPos center, int radius) {
+        List<BlockPos> blocksInSphereHalf = new ArrayList<>();
+
+        int centerX = center.getX();
+        int centerY = center.getY();
+        int centerZ = center.getZ();
+
+        for (int x = centerX - radius; x <= centerX + radius; x++) {
+            for (int y = centerY - radius; y <= centerY + radius; y++) {
+                for (int z = centerZ; z <= centerZ + radius; z++) {
+                    double distanceSquared = Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2) + Math.pow(z - centerZ, 2);
+                    if (distanceSquared <= radius * radius) {
+                        blocksInSphereHalf.add(new BlockPos(x, y, z));
+                    }
+                }
+            }
+        }
+
+        return blocksInSphereHalf;
+    }
+
+    @Test
+    public void testContainsBlocks() {
+        int radius = 5;
+        BlockPos radiusPos = new BlockPos(0, radius, 0);
+        SphereArea sphere = new SphereArea(new BlockPos(0, 0, 0), radiusPos);
+        // SphereArea sphere1 = new SphereArea(new BlockPos(0, 0, 0), radius);
+        System.out.println("Testing sphere with radius " + radius);
+        System.out.println("Center: " + sphere.getCenterPos().toShortString());
+        System.out.println("Radius: " + sphere.getRadius());
+        System.out.println("Test containment: ");
+        List<BlockPos> blocksInSphereHalf = getBlocksInSphereHalf(sphere.getCenterPos(), radius);
+        for (BlockPos pos : blocksInSphereHalf) {
+            System.out.println("\tChecking " + pos.toShortString() + " in sphere");
+            assertTrue(sphere.contains(pos), "Sphere does not contain " + pos);
+        }
+
+        System.out.println("Test no containment: ");
+        getBlocksJustOutOfSphere(sphere.getCenterPos(), radius + 1).forEach(pos -> {
+            System.out.println("\tChecking " + pos.toShortString() + " out of sphere hull");
+            assertFalse(sphere.contains(pos), "Sphere does contain " + pos);
+        });
+    }
+
+    @Test
+    public void testCreation() {
+        for (int i = 0; i < 10; i++) {
+            int radius = i;
+            System.out.println("Testing sphere with radius " + radius);
+            BlockPos radiusPos = new BlockPos(0, radius, 0);
+            SphereArea sa1 = new SphereArea(new BlockPos(0, 0, 0), radiusPos);
+            SphereArea sa2 = new SphereArea(new BlockPos(0, 0, 0), radius);
+            assertEquals(sa1.getCenter(), sa2.getCenter());
+            assertEquals(sa1.getRadius(), sa2.getRadius());
+            assertArrayEquals(sa1.getMarkedBlocks().toArray(), sa2.getMarkedBlocks().toArray());
         }
     }
 
