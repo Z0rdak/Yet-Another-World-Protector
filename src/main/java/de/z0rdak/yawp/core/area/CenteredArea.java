@@ -31,6 +31,10 @@ public abstract class CenteredArea extends AbstractArea {
         return new Vector3d(this.center.getX(), this.center.getY(), this.center.getZ());
     }
 
+    public BlockPos getCenterPos() {
+        return this.center;
+    }
+
     @Override
     public boolean contains(BlockPos pos) {
         return false;
