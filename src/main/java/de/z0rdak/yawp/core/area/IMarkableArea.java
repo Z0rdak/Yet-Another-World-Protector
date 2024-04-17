@@ -21,4 +21,8 @@ public interface IMarkableArea extends INBTSerializable<CompoundNBT> {
     List<BlockPos> getMarkedBlocks();
 
     Set<BlockPos> getHull();
+
+    boolean containsOther(IMarkableArea other);
+
+    boolean intersects(IMarkableArea other);
 }
