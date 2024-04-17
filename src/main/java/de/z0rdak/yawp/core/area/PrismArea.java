@@ -53,4 +53,15 @@ public class PrismArea extends AbstractArea {
     public Set<BlockPos> getHull() {
         throw new NotImplementedException("ChunkArea.getHull() not implemented yet");
     }
+
+
+    @Override
+    public boolean containsOther(IMarkableArea other) {
+        throw new NotImplementedException("Not yet implemented");
+    }
+
+    @Override
+    public boolean intersects(IMarkableArea other) {
+        throw new NotImplementedException("Not yet implemented");
+    }
 }

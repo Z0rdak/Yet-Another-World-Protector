@@ -72,4 +72,14 @@ public class MultiSectionArea extends AbstractArea {
         throw new NotImplementedException("ChunkArea.getHull() not implemented yet");
     }
 
+    @Override
+    public boolean containsOther(IMarkableArea other) {
+        throw new NotImplementedException("Not yet implemented");
+    }
+
+    @Override
+    public boolean intersects(IMarkableArea other) {
+        throw new NotImplementedException("Not yet implemented");
+    }
+
 }
