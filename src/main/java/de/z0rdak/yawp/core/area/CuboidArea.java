@@ -41,10 +41,6 @@ public class CuboidArea extends AbstractArea {
         this.p2 = AreaUtil.getHigherPos(p1, p2);
     }
 
-    public CuboidArea(List<BlockPos> blocks){
-        this(blocks.get(0), blocks.get(1));
-    }
-
     public CuboidArea(CompoundTag nbt) {
         super(nbt);
         this.deserializeNBT(nbt);
