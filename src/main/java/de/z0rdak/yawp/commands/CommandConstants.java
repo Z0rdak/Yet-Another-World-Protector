@@ -17,6 +17,9 @@ public enum CommandConstants {
     AREA("area"),
     POS1("pos1"),
     POS2("pos2"),
+    RADIUS_POS("radius-pos"),
+    RADIUS("radius"),
+    CENTER_POS("center-pos"),
 
     BLOCKS("blocks"),
     CHILD("child"),
