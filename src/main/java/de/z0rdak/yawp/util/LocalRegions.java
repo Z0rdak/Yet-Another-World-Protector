@@ -128,7 +128,7 @@ public final class LocalRegions {
         return RegionDataManager.get().getRegionsFor(region.getDim()).stream()
                 .filter(r -> !r.equals(region)) // filter input region from the result
                 .map(r -> (CuboidRegion) r)
-                .filter(r -> ((CuboidArea) region.getArea()).intersects((CuboidArea) (r).getArea()))
+                .filter(r -> (region.getArea()).intersects((r).getArea()))
                 .collect(Collectors.toList());
     }
 
@@ -190,7 +190,7 @@ public final class LocalRegions {
                 .stream()
                 .filter(r -> !r.equals(cuboidRegion)) // filter input region from the result
                 .map(r -> (CuboidRegion) r)
-                .filter(r -> ((CuboidArea) cuboidRegion.getArea()).intersects((CuboidArea) (r).getArea()))
+                .filter(r -> (cuboidRegion.getArea()).intersects((r).getArea()))
                 .collect(Collectors.toList());
     }
 
@@ -203,7 +203,7 @@ public final class LocalRegions {
                 .stream()
                 .filter(r -> !r.equals(cuboidRegion)) // filter input region from the result
                 .map(r -> (CuboidRegion) r)
-                .filter(region -> ((CuboidArea) cuboidRegion.getArea()).intersects((CuboidArea) (region).getArea()))
+                .filter(region -> (cuboidRegion.getArea()).intersects((region).getArea()))
                 .filter(r -> r.getPriority() == cuboidRegion.getPriority())
                 .collect(Collectors.toList());
     }
