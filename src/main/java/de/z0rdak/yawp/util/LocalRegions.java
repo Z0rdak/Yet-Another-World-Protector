@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.util;
 
 import de.z0rdak.yawp.core.area.CuboidArea;
+import de.z0rdak.yawp.core.area.SphereArea;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
@@ -12,6 +13,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.apache.commons.lang3.NotImplementedException;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -67,12 +69,17 @@ public final class LocalRegions {
             case SPHERE:
                 return sphericalRegionFrom(marker, regionName, player, dim);
             default:
-                return null;
+                throw new NotImplementedException("Area type not implemented yet");
         }
     }
 
     private static SphereRegion sphericalRegionFrom(MarkerStick marker, String regionName, PlayerEntity player, RegistryKey<World> dim) {
-        return null;
+        List<BlockPos> blocks = marker.getMarkedBlocks();
+        SphereArea sphereArea = new SphereArea(blocks.get(0), blocks.get(1));
+        if (marker.getTeleportPos() != null) {
+            return new SphereRegion(regionName, sphereArea, marker.getTeleportPos(), player, dim);
+        }
+        return new SphereRegion(regionName, sphereArea, player, dim);
     }
 
     private static CuboidRegion cuboidRegionFrom(MarkerStick marker, String regionName, PlayerEntity player) {
@@ -81,7 +88,7 @@ public final class LocalRegions {
 
     private static CuboidRegion cuboidRegionFrom(MarkerStick marker, String regionName, PlayerEntity player, RegistryKey<World> dim) {
         List<BlockPos> blocks = marker.getMarkedBlocks();
-        CuboidArea cuboidArea = new CuboidArea(blocks);
+        CuboidArea cuboidArea = new CuboidArea(blocks.get(0), blocks.get(1));
         if (marker.getTeleportPos() != null) {
             return new CuboidRegion(regionName, cuboidArea, marker.getTeleportPos(), player, dim);
         }
