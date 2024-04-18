@@ -100,20 +100,8 @@ public class MessageUtil {
         return target.getX() + " " + target.getY() + " " + target.getZ();
     }
 
-    public static String buildTeleportLinkText(RegistryKey<World> dim, BlockPos target) {
-        return buildTeleportLinkText(dim.location().toString(), target);
-    }
-
-    public static String buildTeleportLinkText(String regionName, BlockPos target) {
-        return regionName + " @ [" + buildBlockPosLinkText(target) + "]";
-    }
-
     public static String shortBlockPos(BlockPos target) {
         return "[X=" + target.getX() + ", Y=" + target.getY() + ", Z=" + target.getZ() + "]";
-    }
-
-    public static String shortBlockPos(Vector3d target) {
-        return "[X=" + target.x + ", Y=" + target.y() + ", Z=" + target.z() + "]";
     }
 
     public static String buildBlockPosLinkText(BlockPos target) {
@@ -191,35 +179,45 @@ public class MessageUtil {
     }
 
     /**
-     * Location: [dimInfo] @ [tpCoordinates]
+     * [X,Y,Z]
      */
-    public static IFormattableTextComponent buildDimensionTeleportLink(IMarkableRegion region) {
+    public static IFormattableTextComponent buildDimensionalBlockTpLink(RegistryKey<World> dim, BlockPos target) {
+        String teleportCmd = buildDimTeleportCmd(dim, "@s", target);
+        TranslationTextComponent text = new TranslationTextComponent("cli.msg.info.region.area.tp.block.link.text", buildBlockPosLinkText(target));
+        TranslationTextComponent hover = new TranslationTextComponent("cli.msg.info.region.area.tp.block.link.hover");
+        return buildExecuteCmdComponent(text, hover, teleportCmd, RUN_COMMAND, TP_COLOR);
+    }
+
+    public static IFormattableTextComponent buildTeleportLink(IMarkableRegion region) {
         String executeCmdStr = buildDimTeleportCmd(region.getDim(), "@s", region.getTpTarget());
-        IFormattableTextComponent cmdLinkText = new TranslationTextComponent("cli.msg.info.region.area.tp.link.text", buildTeleportLinkText(region.getDim(), region.getTpTarget()));
-        IFormattableTextComponent teleportCmdHoverText = new TranslationTextComponent("cli.msg.info.region.area.tp.link.hover", region.getName(), region.getDim().location().toString());
-        return buildExecuteCmdComponent(cmdLinkText, teleportCmdHoverText, executeCmdStr, RUN_COMMAND, TP_COLOR);
+        TranslationTextComponent text = new TranslationTextComponent("cli.msg.info.region.area.tp.link.text", buildBlockPosLinkText(region.getTpTarget()));
+        IFormattableTextComponent hover = new TranslationTextComponent("cli.msg.info.region.area.tp.link.hover", region.getName(), region.getDim().location().toString());
+        return buildExecuteCmdComponent(text, hover, executeCmdStr, RUN_COMMAND, TP_COLOR);
     }
 
     /**
-     * Area: Cuboid, Size: X=69, Y=10, Z=42 [<=expand=>] [<=max=>]
+     * [region] @ [X,Y,Z]
      */
+    public static IFormattableTextComponent buildDimensionTeleportLink(IMarkableRegion region) {
+        String executeCmdStr = buildDimTeleportCmd(region.getDim(), "@s", region.getTpTarget());
+        TranslationTextComponent text = new TranslationTextComponent("cli.msg.info.region.area.tp.link.text", buildBlockPosLinkText(region.getTpTarget()));
+        IFormattableTextComponent hover = new TranslationTextComponent("cli.msg.info.region.area.tp.link.hover", region.getName(), region.getDim().location().toString());
+        return buildRegionInfoLink(region).append(" @ ")
+                .append(buildExecuteCmdComponent(text, hover, executeCmdStr, RUN_COMMAND, TP_COLOR));
+    }
+
     public static IFormattableTextComponent buildRegionAreaDetailComponent(IMarkableRegion region) {
         IMarkableArea area = region.getArea();
-        IFormattableTextComponent areaInfo = new StringTextComponent("(" + area.getAreaType().areaType + ")");
+        IFormattableTextComponent areaInfo = new StringTextComponent(area.getAreaType().areaType);
         switch (area.getAreaType()) {
-            case CUBOID: {
+            case CUBOID:
                 CuboidArea cuboidArea = (CuboidArea) area;
-                return areaInfo.append(" ")
-                        .append(buildCuboidAreaInfo(cuboidArea))
-                        .append(buildRegionAreaExpandLink(region));
-            }
+                return areaInfo.append(", ").append(buildCuboidAreaInfo(cuboidArea));
             case CYLINDER:
                 throw new NotImplementedException("cylinder");
             case SPHERE:
                 SphereArea sphereArea = (SphereArea) area;
-                return areaInfo.append(" ")
-                        .append(buildSphereAreaInfo(sphereArea)).append(" ")
-                        .append(buildRegionAreaExpandLink(region));
+                return areaInfo.append(", ").append(buildSphereAreaInfo(sphereArea));
             case POLYGON_3D:
                 throw new NotImplementedException("polygon");
             case PRISM:
@@ -230,24 +228,24 @@ public class MessageUtil {
     }
 
     /**
-     * [X=n], [Y=m], [Z=o]
-     *
-     * @param cuboidArea
-     * @return
+     *  Size: X=69, Y=10, Z=42
      */
     private static IFormattableTextComponent buildCuboidAreaInfo(CuboidArea cuboidArea) {
-        return buildAreaAxisInfoComponent(cuboidArea, Direction.Axis.X).append(", ")
-                .append(buildAreaAxisInfoComponent(cuboidArea, Direction.Axis.Y)).append(", ")
-                .append(buildAreaAxisInfoComponent(cuboidArea, Direction.Axis.Z)).append(", ");
+        return new TranslationTextComponent("cli.msg.info.region.area.area.size.text.cuboid",
+                buildAreaAxisInfoComponent(cuboidArea, Direction.Axis.X),
+                buildAreaAxisInfoComponent(cuboidArea, Direction.Axis.Y),
+                buildAreaAxisInfoComponent(cuboidArea, Direction.Axis.Z));
 
     }
 
+    /**
+     * Center: [X,Y,Z], Radius: 5, Diameter: 11
+     */
     private static IFormattableTextComponent buildSphereAreaInfo(SphereArea sphereArea) {
-        IFormattableTextComponent centerPos = new StringTextComponent(shortBlockPos(sphereArea.getCenter()));
-        return new StringTextComponent("Center: ")
-                .append(buildTextWithHoverMsg(centerPos, centerPos, WHITE))
-                .append(", ")
-                .append(new StringTextComponent("Radius: " + sphereArea.getRadius()));
+        int diameter = (sphereArea.getRadius() * 2) + 1;
+        IFormattableTextComponent centerPos = new StringTextComponent(buildBlockPosLinkText(sphereArea.getCenterPos()));
+        return new TranslationTextComponent("cli.msg.info.region.area.area.size.text.sphere",
+                buildTextWithHoverMsg(centerPos, centerPos, WHITE), sphereArea.getRadius(), diameter);
     }
 
     /**
@@ -268,8 +266,8 @@ public class MessageUtil {
      */
     public static IFormattableTextComponent buildRegionAreaExpandLink(IMarkableRegion region) {
         IFormattableTextComponent linkText = new TranslationTextComponent("cli.msg.info.region.area.area.expand.link.text");
-        IFormattableTextComponent linkHover = new TranslationTextComponent("cli.msg.info.region.area.area.expand.link.hover");
-        String expandCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), AREA.toString(), EXPAND.toString());
+        IFormattableTextComponent linkHover = new TranslationTextComponent("cli.msg.info.region.area.area.expand.link.hover", region.getName());
+        String expandCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), AREA.toString(), EXPAND.toString(), region.getArea().getAreaType().areaType);
         switch (region.getArea().getAreaType()) {
             case CUBOID: {
                 CuboidArea cuboidArea = (CuboidArea) region.getArea();
@@ -288,7 +286,9 @@ public class MessageUtil {
             case CYLINDER:
                 throw new NotImplementedException("cylinder");
             case SPHERE:
-                return new StringTextComponent("No sphere expand yet");
+                // [<=expand=>]
+                String expandCmdSuggestion = appendSubCommand(expandCmd, String.valueOf(1));
+                return buildExecuteCmdComponent(linkText, linkHover, expandCmdSuggestion, SUGGEST_COMMAND, LINK_COLOR);
             case POLYGON_3D:
                 throw new NotImplementedException("polygon");
             case PRISM:
@@ -306,26 +306,26 @@ public class MessageUtil {
     }
 
     /**
-     * Marked Blocks: [X,Y,Z], ..., [X,Y,Z] [Set]
+     * [set area]
      */
-    public static IFormattableTextComponent buildMarkedBlocksAreaComponent(IMarkableRegion region) {
+    public static IFormattableTextComponent buildAreaUpdateLink(IMarkableRegion region) {
         TranslationTextComponent setAreaLinkText = new TranslationTextComponent("cli.msg.info.region.area.area.set.link");
         TranslationTextComponent setAreaLinkHover = new TranslationTextComponent("cli.msg.info.region.area.area.set.hover", region.getName());
         String blocks = String.join(" ", region.getArea().getMarkedBlocks().stream()
                 .map(MessageUtil::buildBlockCoordinateStr)
                 .collect(Collectors.toSet()));
         String setAreaCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), AREA.toString(), SET.toString(), region.getArea().getAreaType().areaType, blocks);
-        IFormattableTextComponent setAreaLink = buildExecuteCmdComponent(setAreaLinkText, setAreaLinkHover, setAreaCmd, SUGGEST_COMMAND, LINK_COLOR);
-        return buildBlockPosTpLinks(region).append(" ").append(setAreaLink).append(" ");
+        return buildExecuteCmdComponent(setAreaLinkText, setAreaLinkHover, setAreaCmd, SUGGEST_COMMAND, LINK_COLOR);
     }
 
     /**
-     * TP-Anchor: [X,Y,Z] [Set]
+     * [set area] [set TP] [show area] [<=expand=>] [<=max=>]
      */
-    public static IFormattableTextComponent buildRegionAreaTpComponent(IMarkableRegion region) {
-        IFormattableTextComponent regionTpLink = buildDimensionalBlockTpLink(region.getDim(), region.getTpTarget());
-        IFormattableTextComponent setTpLink = buildRegionSetTpLink(region);
-        return regionTpLink.append(" ").append(setTpLink);
+    public static IFormattableTextComponent buildRegionAreaActionLinks(IMarkableRegion region) {
+        return buildAreaUpdateLink(region).append("  ")
+                .append(buildRegionSetTpLink(region)).append("  ")
+                .append(buildRegionAreaExpandLink(region));
+        // .append("  ").append(buildShowAreaToggleLink(region));
     }
 
     public static IFormattableTextComponent buildTextWithHoverMsg(IFormattableTextComponent text, IFormattableTextComponent hoverText, TextFormatting color) {
@@ -337,7 +337,7 @@ public class MessageUtil {
     public static IFormattableTextComponent buildHelpSuggestionLink(String translationKey, CommandConstants baseCmd, CommandConstants cmd) {
         String command = "/" + CommandPermissionConfig.BASE_CMD + " " + baseCmd + " " + cmd + " ";
         return new StringTextComponent(" ")
-                .append(buildExecuteCmdComponent("=>", "chat.link.hover.command.copy", command, SUGGEST_COMMAND, SUGGEST_COLOR))
+                .append(buildExecuteCmdComponent("=>", "chat.link.hover.command.copy", command, SUGGEST_COMMAND, LINK_COLOR))
                 .append(new StringTextComponent(" "))
                 .append(new TranslationTextComponent(translationKey));
     }
@@ -400,11 +400,10 @@ public class MessageUtil {
         IFormattableTextComponent decreaseLink = buildExecuteCmdComponent(decLinkText, decHoverText, decPriorityCmd, RUN_COMMAND, REMOVE_CMD_COLOR);
         IFormattableTextComponent priorityValue = new StringTextComponent(String.valueOf(region.getPriority()));
         String setPriorityCmd = ArgumentUtil.buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), "");
-        IFormattableTextComponent setPriorityLinkText = new TranslationTextComponent("cli.msg.info.region.state.priority.set.link.text");
+        IFormattableTextComponent setPriorityLinkText = new TranslationTextComponent("cli.msg.info.region.state.priority.set.link.text", region.getPriority());
         IFormattableTextComponent setPriorityHoverText = new TranslationTextComponent("cli.msg.info.region.state.priority.set.link.hover");
-        IFormattableTextComponent setPriorityLink = buildExecuteCmdComponent(setPriorityLinkText, setPriorityHoverText, setPriorityCmd, SUGGEST_COMMAND, SUGGEST_COLOR);
-        return priorityValue.append(" ")
-                .append(setPriorityLink).append(" ")
+        IFormattableTextComponent setPriorityLink = buildExecuteCmdComponent(setPriorityLinkText, setPriorityHoverText, setPriorityCmd, SUGGEST_COMMAND, LINK_COLOR);
+        return setPriorityLink.append(" ")
                 .append(increaseLink).append(" ")
                 .append(decreaseLink);
     }
@@ -415,20 +414,27 @@ public class MessageUtil {
         TextFormatting color = region.isMuted() ? REMOVE_CMD_COLOR : ADD_CMD_COLOR;
         switch (region.getRegionType()) {
             case GLOBAL: {
-                String cmd = ArgumentUtil.buildCommandStr(GLOBAL.toString(), MSG.toString(), MUTE.toString());
+                String cmd = buildCommandStr(GLOBAL.toString(), STATE.toString(), ALERT.toString(), Boolean.toString(!region.isMuted()));
                 return buildExecuteCmdComponent(linkTextKey, hoverTextKey, cmd, RUN_COMMAND, color);
             }
             case DIMENSION: {
-                String cmd = ArgumentUtil.buildCommandStr(DIM.toString(), region.getDim().location().toString(), STATE.toString(), MSG.toString(), MUTE.toString());
+                String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), STATE.toString(), ALERT.toString(), Boolean.toString(!region.isMuted()));
                 return buildExecuteCmdComponent(linkTextKey, hoverTextKey, cmd, RUN_COMMAND, color);
             }
             case LOCAL: {
-                String cmd = ArgumentUtil.buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), MSG.toString(), MUTE.toString());
+                String cmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), ALERT.toString(), Boolean.toString(!region.isMuted()));
                 return buildExecuteCmdComponent(linkTextKey, hoverTextKey, cmd, RUN_COMMAND, color);
             }
             default:
                 throw new IllegalStateException("Unexpected value: " + region.getRegionType());
         }
+    }
+
+    public static IFormattableTextComponent buildRegionRenameLink(IProtectedRegion region) {
+        String cmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), RENAME.toString(), "");
+        IFormattableTextComponent text = new TranslationTextComponent("cli.msg.info.region.state.rename.link.text");
+        IFormattableTextComponent hover = new TranslationTextComponent("cli.msg.info.region.state.rename.link.hover", region.getName());
+        return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, LINK_COLOR);
     }
 
     public static IFormattableTextComponent buildRegionInfoLink(IProtectedRegion region) {
@@ -782,15 +788,15 @@ public class MessageUtil {
         switch (region.getRegionType()) {
             case GLOBAL: {
                 String cmd = buildCommandStr(FLAG.toString(), GLOBAL.toString(), flag.getName(), STATE.toString(), "");
-                return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, SUGGEST_COLOR);
+                return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, LINK_COLOR);
             }
             case DIMENSION: {
                 String cmd = buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().location().toString(), flag.getName(), STATE.toString(), "");
-                return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, SUGGEST_COLOR);
+                return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, LINK_COLOR);
             }
             case LOCAL: {
                 String cmd = buildCommandStr(FLAG.toString(), CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag.getName(), STATE.toString(), "");
-                return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, SUGGEST_COLOR);
+                return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, LINK_COLOR);
             }
             case TEMPLATE:
                 throw new NotImplementedException("No supported yet");
@@ -840,15 +846,15 @@ public class MessageUtil {
         switch (region.getRegionType()) {
             case GLOBAL: {
                 String cmd = buildCommandStr(FLAG.toString(), GLOBAL.toString(), flag.getName(), MSG.toString(), SET.toString());
-                return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, SUGGEST_COLOR);
+                return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, LINK_COLOR);
             }
             case DIMENSION: {
                 String cmd = buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().location().toString(), flag.getName(), MSG.toString(), SET.toString());
-                return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, SUGGEST_COLOR);
+                return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, LINK_COLOR);
             }
             case LOCAL: {
                 String cmd = buildCommandStr(FLAG.toString(), CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag.getName(), MSG.toString(), SET.toString());
-                return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, SUGGEST_COLOR);
+                return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, LINK_COLOR);
             }
             default:
                 throw new IllegalStateException("Unexpected value: " + region.getRegionType());
