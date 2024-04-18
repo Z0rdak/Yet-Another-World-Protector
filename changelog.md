@@ -176,6 +176,7 @@ time to enable new features and to improve the mod.
 * Flags now have an internal category. This info will also be added to the wiki. The categories are a change to allow
   some other features to be added in the future. The categories are not final and may still change.
 * Rename spatial properties to area properties. This change also involves some commands and language keys.
+* Rearranged the area properties CLI page, trying to give a more concise overview.
 * Change command to update Local Region area:
   * Old: `/wp region <dim> <region> area Cuboid <pos1> <pos2>`
   * New: `/wp local <dim> <local> area set Cuboid <pos1> <pos2>`
@@ -197,6 +198,7 @@ time to enable new features and to improve the mod.
   examples.
 * Moved the flag message examples to the language file to enable I18n support for the examples.
 * Flag list links for regions now also show number of inherited flags in parentheses
+* Rearranged the state CLI page for local regions, trying to give a more concise overview.
 
 ## Removed
 
