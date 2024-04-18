@@ -244,10 +244,11 @@ public class MessageUtil {
     }
 
     private static MutableComponent buildSphereAreaInfo(SphereArea sphereArea) {
-        MutableComponent text = new TextComponent("Center=" + shortBlockPos(sphereArea.getCenter()))
-                .append(" ")
+        MutableComponent centerPos = new TextComponent(shortBlockPos(sphereArea.getCenter()));
+        return new TextComponent("Center: ")
+                .append(buildTextWithHoverMsg(centerPos, centerPos, WHITE))
+                .append(", ")
                 .append(new TextComponent("Radius: " + sphereArea.getRadius()));
-        return buildTextWithHoverMsg(text, text, WHITE);
     }
 
     /**
