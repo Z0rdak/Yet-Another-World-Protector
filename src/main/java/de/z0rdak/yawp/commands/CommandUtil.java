@@ -215,11 +215,23 @@ public class CommandUtil {
         MutableComponent regionEnableComponent = buildRegionEnableComponent(region);
         MutableComponent regionAlertComponent = buildRegionAlertToggleLink(region);
         if (region.getRegionType() == RegionType.DIMENSION) {
-            regionEnableComponent.append(" | ").append(buildAllLocalEnableComponent(getDimCacheArgument(ctx)));
-            regionAlertComponent.append(" | ").append(buildAllLocalAlertToggleLink(getDimCacheArgument(ctx)));
+            regionEnableComponent
+                    .append(new StringTextComponent(" | ").setStyle(Style.EMPTY.applyFormat(TextFormatting.RESET)))
+                    .append(buildAllLocalEnableComponent(getDimCacheArgument(ctx)));
+            regionAlertComponent
+                    .append(new StringTextComponent(" | ").setStyle(Style.EMPTY.applyFormat(TextFormatting.RESET)))
+                    .append(buildAllLocalAlertToggleLink(getDimCacheArgument(ctx)));
+            sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.enable", regionEnableComponent));
+            sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.alert", regionAlertComponent));
+            return 0;
         }
-        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.enable", regionEnableComponent));
-        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.alert", regionAlertComponent));
+        if (region.getRegionType() == RegionType.LOCAL) {
+            sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.name", buildRegionRenameLink(region)));
+        }
+        IFormattableTextComponent enableComp = buildInfoComponent("cli.msg.info.region.state.enable", regionEnableComponent);
+        sendCmdFeedback(ctx.getSource(), enableComp
+                .append(new StringTextComponent(", ").withStyle(TextFormatting.RESET))
+                .append(buildInfoComponent("cli.msg.info.region.state.alert", regionAlertComponent)));
         return 0;
     }
 
@@ -791,7 +803,7 @@ public class CommandUtil {
         }
         // Groups: [owners], [members], [<listGroups>]
         sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.group", buildGroupLinks(region)));
-        // Regions: [global], [n children], [n regions][+], ||   [n dimensions(s)]  || Hierarchy: [parent][x], [n children][+]
+        // Regions: [global], [n children], [n regions][+], ||   [n dimensions(s)]  || Parent: [parent][x], [n children][+]
         promptRegionChildrenInfo(ctx, region);
         // State: [State]
         sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state", buildRegionStateLink(region)));
@@ -806,11 +818,11 @@ public class CommandUtil {
             }
             break;
             case DIMENSION: {
-                // Regions: [global], [n children], [n regions][+],
+                // Parent: [global], [n children], [n regions][+],
                 MessageUtil.buildRegionChildrenLink(region);
                 MutableComponent globalRegionLink = buildRegionInfoLink(region.getParent(), new TranslatableComponent("cli.msg.info.region.global.link.hover"));
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(region.getDim());
-                MutableComponent regionsAndChildren = new TranslatableComponent("cli.msg.info.region.hierarchy")
+                MutableComponent regionsAndChildren = new TranslatableComponent("cli.msg.info.region.parent")
                         .append(": ")
                         .append(globalRegionLink)
                         .append(new TextComponent(", ").withStyle(ChatFormatting.RESET))
@@ -821,12 +833,12 @@ public class CommandUtil {
             }
             break;
             case LOCAL: {
-                // Hierarchy: [parent][x], [n children][+]
+                // Parent: [parent][x], [n children][+]
                 MutableComponent parentClearLink = buildParentClearLink((IMarkableRegion) region);
                 if (region.getParent().getRegionType() != RegionType.LOCAL) {
                     parentClearLink = new TextComponent("");
                 }
-                MutableComponent regionHierarchy = new TranslatableComponent("cli.msg.info.region.hierarchy")
+                MutableComponent regionHierarchy = new TranslatableComponent("cli.msg.info.region.parent")
                         .append(": ")
                         .append(buildRegionInfoLink(region.getParent()))
                         .append(parentClearLink)
