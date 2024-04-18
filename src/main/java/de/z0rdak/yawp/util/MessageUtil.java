@@ -1310,18 +1310,15 @@ public class MessageUtil {
         return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, REMOVE_CMD_COLOR);
     }
 
-    /* TODO: extract method for n component(s) [+] */
-    public static MutableComponent buildDimFlagListLink(IProtectedRegion region) {
-        String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), FLAG.toString());
-        MutableComponent hoverLink = new TranslatableComponent("cli.msg.dim.flag.list.link.hover", region.getDim().location().toString());
-        MutableComponent linkText = new TranslatableComponent("cli.msg.flag.list.link.text", region.getFlags().size());
-        return region.getFlags().isEmpty()
-                ? new TranslatableComponent("cli.msg.info.region.flag.link.text", region.getFlags().size())
-                : buildExecuteCmdComponent(linkText, hoverLink, command, RUN_COMMAND, LINK_COLOR);
-    }
-
-    public static List<MutableComponent> buildRemoveGroupEntries(IProtectedRegion region, List<String> groupNames, GroupType groupType, String affiliation) {
-        return groupNames.stream().map(group -> buildRemoveGroupEntry(region, group, groupType, affiliation)).collect(Collectors.toList());
+    /**
+     * @param region    the region to build the link for
+     * @param names     the names of the players or teams of the group
+     * @param groupType the type of the group (player or team)
+     * @param group     the name of the group
+     * @return a list of links to remove the group from the region
+     */
+    public static List<MutableComponent> buildRemoveGroupMemberEntries(IProtectedRegion region, List<String> names, GroupType groupType, String group) {
+        return names.stream().sorted().map(name -> buildRemoveGroupEntry(region, name, groupType, group)).collect(Collectors.toList());
     }
 
     // TODO: Check arguments and usage (group and groupName
