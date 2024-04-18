@@ -31,6 +31,10 @@ public class SphereArea extends CenteredArea {
         this(middlePos, new BlockPos(middlePos).offset(0, radius, 0));
     }
 
+    public static SphereArea expand(SphereArea area, int expansion) {
+        return new SphereArea(area.center, area.radius + expansion);
+    }
+
     public int getRadius() {
         return this.radius;
     }
