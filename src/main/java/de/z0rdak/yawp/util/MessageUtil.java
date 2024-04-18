@@ -310,13 +310,12 @@ public class MessageUtil {
      * Marked Blocks: [X,Y,Z], ..., [X,Y,Z] [Set]
      */
     public static MutableComponent buildMarkedBlocksAreaComponent(IMarkableRegion region) {
-        String areaCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), AREA.toString(), SET.toString(), region.getArea().getAreaType().areaType, " ");
         MutableComponent setAreaLinkText = new TranslatableComponent("cli.msg.info.region.area.area.set.link");
         MutableComponent setAreaLinkHover = new TranslatableComponent("cli.msg.info.region.area.area.set.hover", region.getName());
         String blocks = String.join(" ", region.getArea().getMarkedBlocks().stream()
                 .map(MessageUtil::buildBlockCoordinateStr)
                 .collect(Collectors.toSet()));
-        String setAreaCmd = appendSubCommand(areaCmd, SET.toString(), region.getArea().getAreaType().areaType, blocks);
+        String setAreaCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), AREA.toString(), SET.toString(), region.getArea().getAreaType().areaType, blocks);
         MutableComponent setAreaLink = buildExecuteCmdComponent(setAreaLinkText, setAreaLinkHover, setAreaCmd, SUGGEST_COMMAND, LINK_COLOR);
         return buildBlockPosTpLinks(region).append(" ").append(setAreaLink).append(" ");
     }
@@ -325,7 +324,7 @@ public class MessageUtil {
      * TP-Anchor: [X,Y,Z] [Set]
      */
     public static MutableComponent buildRegionAreaTpComponent(IMarkableRegion region) {
-        MutableComponent regionTpLink = buildRegionTeleportLink(region);
+        MutableComponent regionTpLink = buildDimensionalBlockTpLink(region.getDim(), region.getTpTarget());
         MutableComponent setTpLink = buildRegionSetTpLink(region);
         return regionTpLink.append(" ").append(setTpLink);
     }
