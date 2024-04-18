@@ -195,8 +195,8 @@ public class MessageUtil {
      */
     public static IFormattableTextComponent buildDimensionTeleportLink(IMarkableRegion region) {
         String executeCmdStr = buildDimTeleportCmd(region.getDim(), "@s", region.getTpTarget());
-        IFormattableTextComponent cmdLinkText = new StringTextComponent(buildTeleportLinkText(region.getDim(), region.getTpTarget()));
-        IFormattableTextComponent teleportCmdHoverText = new TranslationTextComponent("cli.msg.info.region.area.location.teleport", region.getName(), region.getDim().location().toString());
+        IFormattableTextComponent cmdLinkText = new TranslationTextComponent("cli.msg.info.region.area.tp.link.text", buildTeleportLinkText(region.getDim(), region.getTpTarget()));
+        IFormattableTextComponent teleportCmdHoverText = new TranslationTextComponent("cli.msg.info.region.area.tp.link.hover", region.getName(), region.getDim().location().toString());
         return buildExecuteCmdComponent(cmdLinkText, teleportCmdHoverText, executeCmdStr, RUN_COMMAND, TP_COLOR);
     }
 
@@ -1323,21 +1323,22 @@ public class MessageUtil {
     public static IFormattableTextComponent buildRegionTeleportLink(IMarkableRegion region) {
         String teleportCmd = buildDimTeleportCmd(region.getDim(), "@s", region.getTpTarget());
         IFormattableTextComponent textInfo = new StringTextComponent(buildBlockPosLinkText(region.getTpTarget()));
-        IFormattableTextComponent hoverInfo = new TranslationTextComponent("cli.msg.info.region.area.area.tp.hover", region.getName());
+        IFormattableTextComponent hoverInfo = new TranslationTextComponent("cli.msg.info.region.area.tp.link.hover", region.getName(), region.getDim().toString());
         return buildExecuteCmdComponent(textInfo, hoverInfo, teleportCmd, RUN_COMMAND, TP_COLOR);
     }
 
     public static IFormattableTextComponent buildRegionSetTpLink(IMarkableRegion region) {
-        String teleportCmd = buildDimTeleportCmd(region.getDim(), "@s", region.getTpTarget());
-        TranslationTextComponent linkText = new TranslationTextComponent("cli.msg.info.region.area.area.tp.link");
-        TranslationTextComponent hoverText = new TranslationTextComponent("cli.msg.info.region.area.area.tp.hover", region.getName());
-        return buildExecuteCmdComponent(linkText, hoverText, teleportCmd, SUGGEST_COMMAND, LINK_COLOR);
+        String setTpPosCmd = buildCommandStr(LOCAL.toString(), region.getDim().location().toString(), region.getName(), AREA.toString(), TELEPORT.toString(), SET.toString(), "");
+        TranslationTextComponent linkText = new TranslationTextComponent("cli.msg.info.region.area.tp.set.link.text");
+        TranslationTextComponent hoverText = new TranslationTextComponent("cli.msg.info.region.area.tp.set.link.hover", region.getName());
+        return buildExecuteCmdComponent(linkText, hoverText, setTpPosCmd, SUGGEST_COMMAND, LINK_COLOR);
     }
 
     public static IFormattableTextComponent buildDimensionalBlockTpLink(RegistryKey<World> dim, BlockPos target) {
         String teleportCmd = buildDimTeleportCmd(dim, "@s", target);
-        return buildExecuteCmdComponent(buildBlockPosLinkText(target),
-                "cli.msg.info.region.area.location.teleport.link.hover", teleportCmd, RUN_COMMAND, TP_COLOR);
+        TranslationTextComponent text = new TranslationTextComponent("cli.msg.info.region.area.tp.block.link.text", buildBlockPosLinkText(target));
+        TranslationTextComponent hover = new TranslationTextComponent("cli.msg.info.region.area.tp.block.link.hover");
+        return buildExecuteCmdComponent(text, hover, teleportCmd, RUN_COMMAND, TP_COLOR);
     }
 
     public static IFormattableTextComponent buildDimSuggestRegionRemovalLink(IMarkableRegion region) {
