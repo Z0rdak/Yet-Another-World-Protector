@@ -377,5 +377,6 @@
   "help.tooltip.stick.marker.simple.2": "Keep the Region Marker in your hand while creating a region!",
   "help.tooltip.stick.marker.simple.3": "Mark a (Cuboid) region by right-clicking the diagonal opposite corner blocks.",
   "help.tooltip.stick.marker.simple.4": "Set a region teleport position by shift-right-clicking a block.",
-  "loading.client.info": "You are loading %s on a client. %s is a server-side only mod. The client only provides Internationalization."
+  "loading.client.info": "You are loading %s on a client. %s is a server-side only mod. The client only provides Internationalization.",
+  "cli.msg.info.region.area.update.type.change": "AreaType for %s changed from %s to %s"
 }
