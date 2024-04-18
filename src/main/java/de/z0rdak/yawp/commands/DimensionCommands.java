@@ -146,7 +146,7 @@ public class DimensionCommands {
                                                 )
                                                 .then(Commands.literal(AreaType.SPHERE.areaType)
                                                         .then(Commands.argument(CENTER_POS.toString(), BlockPosArgument.blockPos())
-                                                                .then(Commands.argument(RADIUS.toString(), IntegerArgumentType.integer())
+                                                                .then(Commands.argument(RADIUS.toString(), IntegerArgumentType.integer(0))
                                                                         .executes(ctx -> createSphereRegion(ctx, getRegionNameArgument(ctx), getDimCacheArgument(ctx),
                                                                                 BlockPosArgument.getSpawnablePos(ctx, CENTER_POS.toString()),
                                                                                 IntegerArgumentType.getInteger(ctx, RADIUS.toString()), null))
