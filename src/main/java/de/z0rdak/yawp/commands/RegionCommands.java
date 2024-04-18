@@ -16,10 +16,8 @@ import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
-import de.z0rdak.yawp.core.region.CuboidRegion;
-import de.z0rdak.yawp.core.region.DimensionalRegion;
-import de.z0rdak.yawp.core.region.IMarkableRegion;
-import de.z0rdak.yawp.core.region.IProtectedRegion;
+import de.z0rdak.yawp.core.area.SphereArea;
+import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
@@ -127,12 +125,29 @@ public class RegionCommands {
                                                 .then(Commands.literal(AreaType.CUBOID.areaType)
                                                         .then(Commands.argument(POS1.toString(), BlockPosArgument.blockPos())
                                                                 .then(Commands.argument(POS2.toString(), BlockPosArgument.blockPos())
-                                                                        .executes(ctx -> updateArea(ctx, getRegionArgument(ctx), AreaType.CUBOID, BlockPosArgument.getSpawnablePos(ctx, POS1.toString()), BlockPosArgument.getOrLoadBlockPos(ctx, POS2.toString())))))))
+                                                                        .executes(ctx -> setCuboidArea(ctx, getRegionArgument(ctx), BlockPosArgument.getSpawnablePos(ctx, POS1.toString()), BlockPosArgument.getSpawnablePos(ctx, POS2.toString()))))))
+                                                .then(Commands.literal(AreaType.SPHERE.areaType)
+                                                        .then(Commands.argument(CENTER_POS.toString(), BlockPosArgument.blockPos())
+                                                                .then(Commands.argument(RADIUS_POS.toString(), BlockPosArgument.blockPos())
+                                                                        .executes(ctx -> setSphereArea(ctx, getRegionArgument(ctx), BlockPosArgument.getSpawnablePos(ctx, CENTER_POS.toString()), BlockPosArgument.getSpawnablePos(ctx, RADIUS_POS.toString()))))))
+                                                .then(Commands.literal(AreaType.SPHERE.areaType)
+                                                        .then(Commands.argument(CENTER_POS.toString(), BlockPosArgument.blockPos())
+                                                                .then(Commands.argument(RADIUS.toString(), IntegerArgumentType.integer(0))
+                                                                        .executes(ctx -> setSphereArea(ctx, getRegionArgument(ctx), BlockPosArgument.getSpawnablePos(ctx, CENTER_POS.toString()), IntegerArgumentType.getInteger(ctx, RADIUS.toString()))))))
+                                        )
                                         .then(literal(EXPAND)
-                                                .executes(ctx -> expandArea(ctx, getRegionArgument(ctx), MIN_BUILD_LIMIT, MAX_BUILD_LIMIT))
-                                                .then(Commands.argument(Y_MIN.toString(), IntegerArgumentType.integer(MIN_BUILD_LIMIT, MAX_BUILD_LIMIT))
-                                                        .then(Commands.argument(Y_MAX.toString(), IntegerArgumentType.integer(MIN_BUILD_LIMIT, MAX_BUILD_LIMIT))
-                                                                .executes(ctx -> expandArea(ctx, getRegionArgument(ctx), IntegerArgumentType.getInteger(ctx, Y_MIN.toString()), IntegerArgumentType.getInteger(ctx, Y_MAX.toString()))))))
+                                                .then(Commands.literal(AreaType.CUBOID.areaType)
+                                                        .executes(ctx -> expandCuboid(ctx, getRegionArgument(ctx), MIN_BUILD_LIMIT, MAX_BUILD_LIMIT))
+                                                        .then(Commands.argument(Y_MIN.toString(), IntegerArgumentType.integer(MIN_BUILD_LIMIT, MAX_BUILD_LIMIT))
+                                                                .then(Commands.argument(Y_MAX.toString(), IntegerArgumentType.integer(MIN_BUILD_LIMIT, MAX_BUILD_LIMIT))
+                                                                        .executes(ctx -> expandCuboid(ctx, getRegionArgument(ctx), IntegerArgumentType.getInteger(ctx, Y_MIN.toString()), IntegerArgumentType.getInteger(ctx, Y_MAX.toString())))))
+                                                )
+                                                .then(Commands.literal(AreaType.SPHERE.areaType)
+                                                        .executes(ctx -> expandSphere(ctx, getRegionArgument(ctx), 1))
+                                                        .then(Commands.argument(EXPANSION.toString(), IntegerArgumentType.integer())
+                                                                .executes(ctx -> expandSphere(ctx, getRegionArgument(ctx), IntegerArgumentType.getInteger(ctx, EXPANSION.toString()))))
+                                                )
+                                        )
                                         .then(literal(TELEPORT)
                                                 .then(Commands.literal(SET.toString())
                                                         .then(Commands.argument(TARGET.toString(), BlockPosArgument.blockPos())
@@ -150,80 +165,88 @@ public class RegionCommands {
                 );
     }
 
-    private static int expandArea(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, int yMin, int yMax) {
-        int min = Math.min(yMin, yMax);
-        int max = Math.max(yMin, yMax);
-        IMarkableArea oldArea = region.getArea();
-        if (oldArea instanceof CuboidArea) {
-            CuboidArea cuboidArea = CuboidArea.expand((CuboidArea) oldArea, min, max);
-
-            ServerPlayerEntity player;
-            try {
-                player = ctx.getSource().getPlayerOrException();
-            } catch (CommandSyntaxException e) {
-                player = null;
-            }
-            if (MinecraftForge.EVENT_BUS.post(new RegionEvent.UpdateArea(region, cuboidArea, player))) {
-                return 0;
-            }
-            region.setArea(cuboidArea);
-        } else {
-            YetAnotherWorldProtector.LOGGER.error("AreaType {} is not yet supported", oldArea.getClass().getName());
-            return 1;
-        }
-        RegionDataManager.save();
-        MutableComponent updateAreaMsg = new TranslatableComponent("cli.msg.info.region.area.area.update", buildRegionAreaLink(region), buildRegionInfoLink(region));
-        sendCmdFeedback(ctx.getSource(), updateAreaMsg);
-        return 0;
+    private static int expandSphere(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, int expansion) {
+        SphereArea expand = SphereArea.expand((SphereArea) region.getArea(), expansion);
+        return updateArea(ctx, region, expand);
     }
 
-    private static int updateArea(CommandContext<CommandSourceStack> src, IMarkableRegion region, AreaType areaType, BlockPos pos1, BlockPos pos2) {
+    private static int setSphereArea(CommandContext<CommandSourceStack> src, IMarkableRegion region, BlockPos center, int radius) {
+        BlockPos newRadius = new BlockPos(radius, radius, radius).offset(0, radius, 0);
+        return setSphereArea(src, region, center, newRadius);
+    }
+
+    private static int setSphereArea(CommandContext<CommandSourceStack> src, IMarkableRegion region, BlockPos center, BlockPos radiusPos) {
+        return updateArea(src, region, new SphereArea(center, radiusPos));
+    }
+
+    private static int setCuboidArea(CommandContext<CommandSourceStack> src, IMarkableRegion region, BlockPos p1, BlockPos p2) {
+        return updateArea(src, region, new CuboidArea(p1, p2));
+    }
+
+    private static int expandCuboid(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, int yMin, int yMax) {
+        CuboidArea expand = CuboidArea.expand((CuboidArea) region.getArea(), yMin, yMax);
+        return updateArea(ctx, region, expand);
+    }
+
+    private static int updateArea(CommandContext<CommandSourceStack> src, IMarkableRegion region, IMarkableArea area) {
         try {
+            AreaType prevAreaType = region.getArea().getAreaType();
+            AreaType newAreaType = area.getAreaType();
             IProtectedRegion parent = region.getParent();
             // TODO: Implement a contains method for regions, with dimensional always returning true if dim is the same
             // IMarkableRegions would use the area contains method
-            switch (areaType) {
+
+            ServerPlayer player;
+            try {
+                player = src.getSource().getPlayerOrException();
+            } catch (CommandSyntaxException e) {
+                player = null;
+            }
+            if (MinecraftForge.EVENT_BUS.post(new RegionEvent.UpdateArea(region, area, player))) {
+                return 0;
+            }
+
+            // Note: this check can be remove once the area types are all implemented, it's just here to catch any errors
+            switch (newAreaType) {
                 case CUBOID:
-                    CuboidArea cuboidArea = new CuboidArea(pos1, pos2);
-                    CuboidRegion cuboidRegion = (CuboidRegion) region;
-
-                    ServerPlayer player;
-                    try {
-                        player = src.getSource().getPlayerOrException();
-                    } catch (CommandSyntaxException e) {
-                        player = null;
-                    }
-                    if (MinecraftForge.EVENT_BUS.post(new RegionEvent.UpdateArea(region, cuboidArea, player))) {
-                        return 0;
-                    }
-
-                    if (parent instanceof DimensionalRegion) {
-                        int newPriority = LocalRegions.ensureHigherRegionPriorityFor(cuboidRegion, RegionConfig.getDefaultPriority());
+                case SPHERE:
+                    if (parent.getRegionType() == RegionType.DIMENSION) {
+                        int newPriority = LocalRegions.ensureHigherRegionPriorityFor(region, RegionConfig.getDefaultPriority());
                         YetAnotherWorldProtector.LOGGER.info("New priority {} for region {}", newPriority, region.getName());
                     }
-                    if (parent instanceof IMarkableRegion) {
-                        IMarkableRegion localParentRegion = (IMarkableRegion) parent;
-                        CuboidArea parentArea = (CuboidArea) localParentRegion.getArea();
-                        if (parentArea.contains(cuboidArea)) {
-                            int newPriority = LocalRegions.ensureHigherRegionPriorityFor(cuboidRegion, localParentRegion.getPriority() + 1);
-                            YetAnotherWorldProtector.LOGGER.info("New priority {} for region {}", newPriority, region.getName());
-                        } else {
-                            MutableComponent updateAreaFailMsg = new TranslatableComponent("cli.msg.info.region.area.area.update.fail.boundaries", buildRegionInfoLink(parent), buildRegionInfoLink(region));
-                            sendCmdFeedback(src.getSource(), updateAreaFailMsg);
-                            return 1;
+                    if (parent.getRegionType() == RegionType.LOCAL) {
+                        IMarkableRegion localParent = (IMarkableRegion) parent;
+                        switch (localParent.getArea().getAreaType()) {
+                            case CUBOID:
+                            case SPHERE:
+                                if (localParent.getArea().containsOther(area)) {
+                                    int newPriority = LocalRegions.ensureHigherRegionPriorityFor(region, localParent.getPriority() + 1);
+                                    YetAnotherWorldProtector.LOGGER.info("New priority {} for region {}", newPriority, region.getName());
+                                } else {
+                                    MutableComponent updateAreaFailMsg = new TranslatableComponent("cli.msg.info.region.area.area.update.fail.boundaries", buildRegionInfoLink(parent), buildRegionInfoLink(region));
+                                    sendCmdFeedback(src.getSource(), updateAreaFailMsg);
+                                    return 1;
+                                }
+                                break;
+                            case CYLINDER:
+                            case POLYGON_3D:
+                            case PRISM:
+                                throw new UnsupportedOperationException("Unsupported area type");
                         }
                     }
-                    cuboidRegion.setArea(cuboidArea);
-                    RegionDataManager.save();
-                    MutableComponent updateAreaMsg = new TranslatableComponent("cli.msg.info.region.area.area.update", buildRegionAreaLink(region), buildRegionInfoLink(region));
-                    sendCmdFeedback(src.getSource(), updateAreaMsg);
-                    return 0;
                 case CYLINDER:
-                case SPHERE:
                 case POLYGON_3D:
                 case PRISM:
-                    throw new UnsupportedOperationException("Unsupported region type");
+                    throw new UnsupportedOperationException("Unsupported area type");
             }
+            if (prevAreaType != newAreaType) {
+                MutableComponent updateAreaFailMsg = new TranslatableComponent("cli.msg.info.region.area.update.type.change", buildRegionInfoLink(region), prevAreaType, newAreaType);
+                sendCmdFeedback(src.getSource(), updateAreaFailMsg);
+            }
+            region.setArea(area);
+            RegionDataManager.save();
+            MutableComponent updateAreaMsg = new TranslatableComponent("cli.msg.info.region.area.area.update", buildRegionAreaLink(region), buildRegionInfoLink(region));
+            sendCmdFeedback(src.getSource(), updateAreaMsg);
             return 0;
         } catch (Exception ex) {
             YetAnotherWorldProtector.LOGGER.error("Failed to update area: {}", ex.getMessage());
@@ -242,7 +265,7 @@ public class RegionCommands {
             return res;
         }
         try {
-            ServerPlayerEntity player;
+            ServerPlayer player;
             try {
                 player = src.getSource().getPlayerOrException();
             } catch (CommandSyntaxException e) {
@@ -251,7 +274,6 @@ public class RegionCommands {
             if (MinecraftForge.EVENT_BUS.post(new RegionEvent.RenameRegion(region, region.getName(), regionName, player))) {
                 return 0;
             }
-            // TODO: Test this
             dimCache.renameRegion(region, regionName);
             RegionDataManager.save();
             return 0;
