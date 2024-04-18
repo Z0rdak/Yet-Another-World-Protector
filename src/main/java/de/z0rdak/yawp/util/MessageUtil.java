@@ -1347,16 +1347,6 @@ public class MessageUtil {
         return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, REMOVE_CMD_COLOR);
     }
 
-    /* TODO: extract method for n component(s) [+] */
-    public static IFormattableTextComponent buildDimFlagListLink(IProtectedRegion region) {
-        String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), FLAG.toString());
-        IFormattableTextComponent hoverLink = new TranslationTextComponent("cli.msg.dim.flag.list.link.hover", region.getDim().location().toString());
-        IFormattableTextComponent linkText = new TranslationTextComponent("cli.msg.flag.list.link.text", region.getFlags().size());
-        return region.getFlags().isEmpty()
-                ? new TranslationTextComponent("cli.msg.info.region.flag.link.text", region.getFlags().size())
-                : buildExecuteCmdComponent(linkText, hoverLink, command, RUN_COMMAND, LINK_COLOR);
-    }
-
     /**
      * @param region    the region to build the link for
      * @param names     the names of the players or teams of the group
