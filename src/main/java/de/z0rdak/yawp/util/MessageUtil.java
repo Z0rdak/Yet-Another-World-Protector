@@ -309,13 +309,12 @@ public class MessageUtil {
      * Marked Blocks: [X,Y,Z], ..., [X,Y,Z] [Set]
      */
     public static IFormattableTextComponent buildMarkedBlocksAreaComponent(IMarkableRegion region) {
-        String areaCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), AREA.toString(), SET.toString(), region.getArea().getAreaType().areaType, " ");
         TranslationTextComponent setAreaLinkText = new TranslationTextComponent("cli.msg.info.region.area.area.set.link");
         TranslationTextComponent setAreaLinkHover = new TranslationTextComponent("cli.msg.info.region.area.area.set.hover", region.getName());
         String blocks = String.join(" ", region.getArea().getMarkedBlocks().stream()
                 .map(MessageUtil::buildBlockCoordinateStr)
                 .collect(Collectors.toSet()));
-        String setAreaCmd = appendSubCommand(areaCmd, SET.toString(), region.getArea().getAreaType().areaType, blocks);
+        String setAreaCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), AREA.toString(), SET.toString(), region.getArea().getAreaType().areaType, blocks);
         IFormattableTextComponent setAreaLink = buildExecuteCmdComponent(setAreaLinkText, setAreaLinkHover, setAreaCmd, SUGGEST_COMMAND, LINK_COLOR);
         return buildBlockPosTpLinks(region).append(" ").append(setAreaLink).append(" ");
     }
@@ -324,7 +323,7 @@ public class MessageUtil {
      * TP-Anchor: [X,Y,Z] [Set]
      */
     public static IFormattableTextComponent buildRegionAreaTpComponent(IMarkableRegion region) {
-        IFormattableTextComponent regionTpLink = buildRegionTeleportLink(region);
+        IFormattableTextComponent regionTpLink = buildDimensionalBlockTpLink(region.getDim(), region.getTpTarget());
         IFormattableTextComponent setTpLink = buildRegionSetTpLink(region);
         return regionTpLink.append(" ").append(setTpLink);
     }
