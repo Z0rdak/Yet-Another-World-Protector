@@ -21,30 +21,13 @@ import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
-import com.mojang.brigadier.arguments.BoolArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.z0rdak.yawp.YetAnotherWorldProtector;
-import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
-import de.z0rdak.yawp.commands.arguments.region.AddRegionChildArgumentType;
-import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
-import de.z0rdak.yawp.commands.arguments.region.RemoveRegionChildArgumentType;
-import de.z0rdak.yawp.config.server.RegionConfig;
-import de.z0rdak.yawp.core.area.AreaType;
-import de.z0rdak.yawp.core.area.CuboidArea;
-import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.region.CuboidRegion;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
-import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import de.z0rdak.yawp.util.LocalRegions;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
@@ -56,6 +39,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -158,6 +142,7 @@ public class RegionCommands {
                                                         .executes(ctx -> teleport(ctx, getRegionArgument(ctx), getPlayerArgument(ctx)))))
                                         .then(literal(RENAME)
                                                 .then(Commands.argument(NAME.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Collections.singletonList(getRegionArgument(ctx).getName()), builder))
                                                         .executes(ctx -> renameRegion(ctx, getRegionArgument(ctx), getRegionNameArgument(ctx), getDimCacheArgument(ctx)))))
                                 // Idea: reset player, team, etc. with complete hierarchy
                                 // Scenario: Keep region and children with flags but reset it for new player base
@@ -171,7 +156,7 @@ public class RegionCommands {
     }
 
     private static int setSphereArea(CommandContext<CommandSourceStack> src, IMarkableRegion region, BlockPos center, int radius) {
-        BlockPos newRadius = new BlockPos(radius, radius, radius).offset(0, radius, 0);
+        BlockPos newRadius = center.offset(0, radius, 0);
         return setSphereArea(src, region, center, newRadius);
     }
 
@@ -234,6 +219,7 @@ public class RegionCommands {
                                 throw new UnsupportedOperationException("Unsupported area type");
                         }
                     }
+                    break;
                 case CYLINDER:
                 case POLYGON_3D:
                 case PRISM:
@@ -255,6 +241,10 @@ public class RegionCommands {
     }
 
     private static int renameRegion(CommandContext<CommandSourceStack> src, IMarkableRegion region, String regionName, DimensionRegionCache dimCache) {
+        if (region.getName().equals(regionName)) {
+            sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.dim.info.region.create.name.no-change", regionName));
+            return 1;
+        }
         int res = RegionDataManager.get().isValidRegionName(dimCache.getDimensionalRegion().getDim(), regionName);
         if (res == -1) {
             sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.dim.info.region.create.name.invalid", regionName));
@@ -274,7 +264,9 @@ public class RegionCommands {
             if (MinecraftForge.EVENT_BUS.post(new RegionEvent.RenameRegion(region, region.getName(), regionName, player))) {
                 return 0;
             }
+            String oldName = region.getName();
             dimCache.renameRegion(region, regionName);
+            sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.dim.info.region.create.name.success", buildRegionInfoLink(region), oldName, regionName));
             RegionDataManager.save();
             return 0;
         } catch (IllegalArgumentException ex) {
@@ -398,17 +390,17 @@ public class RegionCommands {
     /**
      * Prompt region area properties like teleport location and area.
      * == Area for [<region>]  ==
-     * Location: [dimInfo] @ [tpCoordinates]
-     * Area: Cuboid, Size: X=69, Y=10, Z=42 [<=expand=>] [<=max=>]
-     * Marked Blocks: [X,Y,Z], ..., [X,Y,Z] [Set] [Show]
-     * TP-Anchor: [X,Y,Z] [Set]
+     * Location: [region] @ [X,Y,Z]
+     * AreaType: Cuboid, Size: X=69, Y=10, Z=42
+     * Marked Blocks: [X,Y,Z], ..., [X,Y,Z]
+     * Actions: [set area] [set TP] [show area] [<=expand=>] [<=max=>]
      */
     private static int promptRegionAreaInfo(CommandSourceStack src, IMarkableRegion region) {
-        sendCmdFeedback(src, buildHeader(new TranslatableComponent("cli.msg.info.header.for", buildRegionAreaLink(region), buildRegionInfoLink(region))));
-        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.area.location", buildDimensionTeleportLink(region)));
+        sendCmdFeedback(src, buildHeader(new TranslatableComponent("cli.msg.info.header.of", buildRegionAreaLink(region), buildRegionInfoLink(region))));
+        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.area.location", buildTeleportLink(region)));
         sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.area.area", buildRegionAreaDetailComponent(region)));
-        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.area.marked", buildMarkedBlocksAreaComponent(region)));
-        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.area.tp", buildRegionAreaTpComponent(region)));
+        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.area.marked", buildAreaMarkedBlocksTpLinks(region)));
+        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.area.actions", buildRegionAreaActionLinks(region)));
         return 0;
     }
 
@@ -439,7 +431,7 @@ public class RegionCommands {
             region.setTpTarget(target);
             RegionDataManager.save();
             MutableComponent newTpTargetLink = buildDimensionalBlockTpLink(region.getDim(), target);
-            sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.info.region.area.location.teleport.set", buildRegionInfoLink(region), newTpTargetLink));
+            sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.info.region.area.tp.set.msg", buildRegionInfoLink(region), newTpTargetLink));
             return 0;
         }
         return 1;
