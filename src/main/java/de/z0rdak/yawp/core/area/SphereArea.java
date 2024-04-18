@@ -32,7 +32,7 @@ public class SphereArea extends CenteredArea {
     }
 
     public static SphereArea expand(SphereArea area, int expansion) {
-        return new SphereArea(area.center, area.radius + expansion);
+        return new SphereArea(area.center, Math.max(area.radius + expansion, 0));
     }
 
     public int getRadius() {
