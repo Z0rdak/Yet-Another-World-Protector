@@ -30,7 +30,6 @@ import net.minecraft.scoreboard.Team;
 import net.minecraft.util.Direction;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.*;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
@@ -168,7 +167,7 @@ public class MessageUtil {
     /***
      * [X,Y,Z], ..., [X,Y,Z]
      */
-    public static IFormattableTextComponent buildBlockPosTpLinks(IMarkableRegion region) {
+    public static IFormattableTextComponent buildAreaMarkedBlocksTpLinks(IMarkableRegion region) {
         List<IFormattableTextComponent> tpLinks = region.getArea().getMarkedBlocks()
                 .stream()
                 .map(pos -> buildDimensionalBlockTpLink(region.getDim(), pos))
@@ -1175,7 +1174,7 @@ public class MessageUtil {
                 buildRegionChildrenLink(region), buildRegionInfoLink(region)));
     }
 
-    // [n regions][+]
+    // [n regions] [+]
     public static IFormattableTextComponent buildDimRegionsLink(DimensionRegionCache dimCache) {
         DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
         String command = buildCommandStr(DIM.toString(), dimRegion.getDim().location().toString(), LIST.toString(), CommandConstants.LOCAL.toString());
@@ -1183,10 +1182,10 @@ public class MessageUtil {
         IFormattableTextComponent listDimRegionsHoverText = new TranslationTextComponent("cli.msg.dim.info.region.list.link.hover", dimRegion.getName());
         IFormattableTextComponent listDimRegionsListLink = buildExecuteCmdComponent(listDimRegionsLinkText, listDimRegionsHoverText, command, RUN_COMMAND, LINK_COLOR);
         IFormattableTextComponent createRegionLink = buildDimCreateRegionLink(dimRegion);
-        return (dimRegion.getChildren().size() == 0) ? listDimRegionsLinkText.append(createRegionLink) : listDimRegionsListLink.append(createRegionLink);
+        return (dimRegion.getChildren().size() == 0) ? listDimRegionsLinkText.append(" ").append(createRegionLink) : listDimRegionsListLink.append(" ").append(createRegionLink);
     }
 
-    // [n children][+]
+    // [n regions] [+]
     public static IFormattableTextComponent buildRegionChildrenLink(IProtectedRegion region) {
         switch (region.getRegionType()) {
             case GLOBAL: {
@@ -1205,14 +1204,14 @@ public class MessageUtil {
                 IFormattableTextComponent listDimRegionsListLink = buildExecuteCmdComponent(listDimRegionsLinkText, listDimRegionsHoverText, command, RUN_COMMAND, LINK_COLOR);
                 return (region.getChildren().size() == 0) ? listDimRegionsLinkText : listDimRegionsListLink;
             }
-            // [n children][+]
+            // [n children] [+]
             case LOCAL: {
                 String regionChildrenListLink = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), CHILDREN.toString());
                 IFormattableTextComponent childrenLinkText = new TranslationTextComponent("cli.msg.info.region.children.link.text", region.getChildren().size());
                 IFormattableTextComponent childrenHoverText = new TranslationTextComponent("cli.msg.info.region.children.link.hover", region.getName());
                 IFormattableTextComponent regionChildrenLink = buildExecuteCmdComponent(childrenLinkText, childrenHoverText, regionChildrenListLink, RUN_COMMAND, LINK_COLOR);
                 IFormattableTextComponent addChildrenLink = buildRegionAddChildrenLink(region);
-                return (region.getChildren().size() == 0) ? childrenLinkText.append(addChildrenLink) : regionChildrenLink.append(addChildrenLink);
+                return (region.getChildren().size() == 0) ? childrenLinkText.append(" ").append(addChildrenLink) : regionChildrenLink.append(" ").append(addChildrenLink);
             }
             default:
                 throw new IllegalStateException("Unexpected value: " + region.getRegionType());
