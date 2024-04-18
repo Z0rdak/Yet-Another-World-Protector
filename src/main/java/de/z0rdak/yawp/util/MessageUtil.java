@@ -181,7 +181,7 @@ public class MessageUtil {
     /***
      * [X,Y,Z], ..., [X,Y,Z]
      */
-    public static MutableComponent buildBlockPosTpLinks(IMarkableRegion region) {
+    public static MutableComponent buildAreaMarkedBlocksTpLinks(IMarkableRegion region) {
         List<MutableComponent> tpLinks = region.getArea().getMarkedBlocks()
                 .stream()
                 .map(pos -> buildDimensionalBlockTpLink(region.getDim(), pos))
@@ -1150,7 +1150,7 @@ public class MessageUtil {
     }
 
 
-    // [n regions][+]
+    // [n regions] [+]
     public static MutableComponent buildDimRegionsLink(DimensionRegionCache dimCache) {
         DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
         String command = buildCommandStr(DIM.toString(), dimRegion.getDim().location().toString(), LIST.toString(), CommandConstants.LOCAL.toString());
@@ -1158,10 +1158,10 @@ public class MessageUtil {
         MutableComponent listDimRegionsHoverText = new TranslatableComponent("cli.msg.dim.info.region.list.link.hover", dimRegion.getName());
         MutableComponent listDimRegionsListLink = buildExecuteCmdComponent(listDimRegionsLinkText, listDimRegionsHoverText, command, RUN_COMMAND, LINK_COLOR);
         MutableComponent createRegionLink = buildDimCreateRegionLink(dimRegion);
-        return (dimRegion.getChildren().size() == 0) ? listDimRegionsLinkText.append(createRegionLink) : listDimRegionsListLink.append(createRegionLink);
+        return (dimRegion.getChildren().size() == 0) ? listDimRegionsLinkText.append(" ").append(createRegionLink) : listDimRegionsListLink.append(" ").append(createRegionLink);
     }
 
-    // [n children][+]
+    // [n regions] [+]
     public static MutableComponent buildRegionChildrenLink(IProtectedRegion region) {
         return switch (region.getRegionType()) {
             case GLOBAL -> {
@@ -1180,14 +1180,14 @@ public class MessageUtil {
                 MutableComponent listDimRegionsListLink = buildExecuteCmdComponent(listDimRegionsLinkText, listDimRegionsHoverText, command, RUN_COMMAND, LINK_COLOR);
                 yield  (region.getChildren().size() == 0) ? listDimRegionsLinkText : listDimRegionsListLink;
             }
-            // [n children][+]
+            // [n children] [+]
             case LOCAL -> {
                 String regionChildrenListLink = buildCommandStr(LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), CHILDREN.toString());
                 MutableComponent childrenLinkText = new TranslatableComponent("cli.msg.info.region.children.link.text", region.getChildren().size());
                 MutableComponent childrenHoverText = new TranslatableComponent("cli.msg.info.region.children.link.hover", region.getName());
                 MutableComponent regionChildrenLink = buildExecuteCmdComponent(childrenLinkText, childrenHoverText, regionChildrenListLink, RUN_COMMAND, LINK_COLOR);
                 MutableComponent addChildrenLink = buildRegionAddChildrenLink(region);
-                yield  (region.getChildren().size() == 0) ? childrenLinkText.append(addChildrenLink) : regionChildrenLink.append(addChildrenLink);
+                yield  (region.getChildren().size() == 0) ? childrenLinkText.append(" ").append(addChildrenLink) : regionChildrenLink.append(" ").append(addChildrenLink);
             }
             default ->
                 throw new IllegalStateException("Unexpected value: " + region.getRegionType());
