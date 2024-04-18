@@ -243,10 +243,11 @@ public class MessageUtil {
     }
 
     private static IFormattableTextComponent buildSphereAreaInfo(SphereArea sphereArea) {
-        IFormattableTextComponent text = new StringTextComponent("Center=" + shortBlockPos(sphereArea.getCenter()))
-                .append(" ")
+        IFormattableTextComponent centerPos = new StringTextComponent(shortBlockPos(sphereArea.getCenter()));
+        return new StringTextComponent("Center: ")
+                .append(buildTextWithHoverMsg(centerPos, centerPos, WHITE))
+                .append(", ")
                 .append(new StringTextComponent("Radius: " + sphereArea.getRadius()));
-        return buildTextWithHoverMsg(text, text, WHITE);
     }
 
     /**
