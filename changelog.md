@@ -19,6 +19,7 @@ time to enable new features and to improve the mod.
 * Add commands to copy region properties
 * Add enhanced flag management and messages
 * Add flag inheritance and overriding for regions
+* Add new Local Region shape: Sphere
 * Add new config options
 * Add the Global Region. It's the parent region of all Dimensional Regions. **One region to rule them all!**
 * API: New events for flag checks. You can now listen to flag checks and cancel them if needed and listen for the
@@ -99,6 +100,17 @@ time to enable new features and to improve the mod.
 * Add interactive CLI support for enhanced flag management
   * TODO: FlagState CLI update
 
+### Sphere Local Region
+
+* Sphere Local Regions are now available. The sphere is defined by the center and the radius. The radius can either be
+  defined by a BlockPos or the radius size. Note that the radius is not counting the center block. Because of this, it
+  is only possible to create spheres with an odd diameter.
+* A sphere with radius 0 will only cover the center block.
+* Add commands to create a Sphere Local Region:
+  * `/wp local <dim> create <region-name> Sphere <center-pos> <radius-pos>`
+  * `/wp local <dim> create <region-name> Sphere <center-pos> <radius>`
+* You can change the area type of the region area at any time from a Cuboid to a Sphere and back.
+
 ### Config
 * `yawp-common.toml` - Add new permission config:
   * `allow_region_tp` - Decides whether teleporting inside/outside a region is allowed for everyone. Useful when using
@@ -139,9 +151,12 @@ time to enable new features and to improve the mod.
 ### Misc
 
 * Add new command to expand the area of a Local Region:
-  * `/wp local <dim> <local> area expand [yMin] [yMax]`.
-  * The optional parameters can be used to set a specific height.
-  * Omitting the parameters will set the region area to the Minecraft version specific build limits
+  * `/wp local <dim> <local> area expand Cuboid [yMin] [yMax]`.
+    * The optional parameters can be used to set a specific height.
+    * Omitting the parameters will set the region area to the Minecraft version specific build limits
+  * `/wp local <dim> <local> area expand Sphere [<inc>]`.
+    * The optional increment can be used to set increment the radius by a specific amount (negative or positive)
+    * Omitting the parameter will increase the radius by 1.
 * Add new command to rename a Local Region: `/wp local <dim> <local> rename <newName>`.
 * Add new commands to add and remove offline players from/to regions.
   * `/wp local <dim> <local> add player <group> by-name <player names separated by space>`.
