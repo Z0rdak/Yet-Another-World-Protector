@@ -97,6 +97,7 @@ public enum CommandConstants {
     TYPE("type"),
     UPDATE("update"),
     VERT("vert"),
+    EXPANSION("expansion"),
     Y_MIN("y-min"),
     Y_MAX("y-max");
 
