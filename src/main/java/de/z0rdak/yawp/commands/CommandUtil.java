@@ -857,14 +857,15 @@ public class CommandUtil {
             break;
             case DIMENSION: {
                 // Parent: [global], [n children], [n regions] [+],
-                MutableComponent globalRegionLink = buildRegionInfoLink(region.getParent(), new TranslationTextComponent("cli.msg.info.region.global.link.hover"));
+                MutableComponent globalRegionLink = buildRegionInfoLink(region.getParent(), new TranslatableComponent("cli.msg.info.region.global.link.hover"));
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(region.getDim());
-                MutableComponent parentAndRegionsLinks = buildInfoComponent("cli.msg.info.dimensions", listChildrenLink)
-                        .append(globalRegionLink)
+                MutableComponent hierarchyLinks = globalRegionLink
                         .append(new TextComponent(", ").withStyle(ChatFormatting.RESET))
                         .append(listChildrenLink)
                         .append(new TextComponent(", ").withStyle(ChatFormatting.RESET))
                         .append(buildDimRegionsLink(dimCache));
+                MutableComponent parentAndRegionsLinks = buildInfoComponent("cli.msg.info.dimensions", hierarchyLinks);
+
                 sendCmdFeedback(ctx.getSource(), parentAndRegionsLinks);
             }
             break;
@@ -875,13 +876,11 @@ public class CommandUtil {
                     // don't show removal link, since it's not possible to remove the parent
                     parentClearLink = new TextComponent("");
                 }
-                MutableComponent regionHierarchy = new TranslatableComponent("cli.msg.info.region.parent")
-                        .append(": ")
-                        .append(buildRegionInfoLink(region.getParent()))
+                MutableComponent hierarchyLinks = buildRegionInfoLink(region.getParent())
                         .append(parentClearLink)
                         .append(new TextComponent(", ").withStyle(ChatFormatting.RESET))
                         .append(listChildrenLink);
-                sendCmdFeedback(ctx.getSource(), regionHierarchy);
+                sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.parent", hierarchyLinks));
             }
             break;
             case TEMPLATE:
