@@ -1187,7 +1187,6 @@ public class MessageUtil {
             case LOCAL -> {
                 // [n children] [+]
                 String regionChildrenListLink = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), CHILDREN.toString());
-
                 MutableComponent regionChildrenLink = buildExecuteCmdComponent(text, hover, regionChildrenListLink, RUN_COMMAND, LINK_COLOR);
                 MutableComponent addChildrenLink = buildRegionAddChildrenLink(region);
                 yield (region.getChildren().isEmpty()) ?
