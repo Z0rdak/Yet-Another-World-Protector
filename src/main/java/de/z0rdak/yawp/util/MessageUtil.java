@@ -991,13 +991,7 @@ public class MessageUtil {
         }
     }
 
-    public static List<IFormattableTextComponent> buildResetDimensionalRegionEntries(IProtectedRegion parent, List<DimensionRegionCache> dimCaches) {
-        return dimCaches.stream()
-                .map(region -> buildRemoveRegionEntry(parent, region.getDimensionalRegion()))
-                .collect(Collectors.toList());
-    }
-
-    public static List<IFormattableTextComponent> buildRemoveRegionEntries(IProtectedRegion parent, List<IMarkableRegion> regions) {
+    public static List<IFormattableTextComponent> buildRemoveRegionEntries(IProtectedRegion parent, List<IProtectedRegion> regions) {
         return regions.stream()
                 .map(region -> buildRemoveRegionEntry(parent, region))
                 .collect(Collectors.toList());
@@ -1147,10 +1141,6 @@ public class MessageUtil {
                 .append(last).append(resetSpace);
     }
 
-    public static IFormattableTextComponent buildRegionChildrenHeader(IProtectedRegion region) {
-        return buildHeader(new TranslationTextComponent("cli.msg.info.header.in", buildRegionChildrenLink(region), buildRegionInfoLink(region)));
-    }
-
     // [x]
     public static IFormattableTextComponent buildParentClearLink(IMarkableRegion region) {
         String clearRegionParentCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), PARENT.toString(), CLEAR.toString(), region.getParent().getName());
@@ -1170,8 +1160,7 @@ public class MessageUtil {
     }
 
     public static IFormattableTextComponent buildRegionListHeader(IProtectedRegion region) {
-        return buildHeader(new TranslationTextComponent("cli.msg.info.header.in",
-                buildRegionChildrenLink(region), buildRegionInfoLink(region)));
+        return buildHeader(new TranslationTextComponent("cli.msg.info.header.in", buildRegionChildrenLink(region), buildRegionInfoLink(region)));
     }
 
     // [n regions] [+]
