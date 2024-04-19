@@ -285,7 +285,12 @@ public class RegionDataManager extends WorldSavedData {
     }
 
     public void resetGlobalRegion() {
+        List<IProtectedRegion> collect = new ArrayList<>(globalRegion.getChildren().values());
         globalRegion = new GlobalRegion();
+        collect.forEach(dr -> {
+            globalRegion.addChild(dr);
+            dr.setParent(globalRegion);
+        });
         save();
     }
 
