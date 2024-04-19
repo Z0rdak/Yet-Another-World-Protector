@@ -983,13 +983,7 @@ public class MessageUtil {
         }
     }
 
-    public static List<MutableComponent> buildResetDimensionalRegionEntries(IProtectedRegion parent, List<DimensionRegionCache> dimCaches) {
-        return dimCaches.stream()
-                .map(region -> buildRemoveRegionEntry(parent, region.getDimensionalRegion()))
-                .collect(Collectors.toList());
-    }
-
-    public static List<MutableComponent> buildRemoveRegionEntries(IProtectedRegion parent, List<IMarkableRegion> regions) {
+    public static List<MutableComponent> buildRemoveRegionEntries(IProtectedRegion parent, List<IProtectedRegion> regions) {
         return regions.stream()
                 .map(region -> buildRemoveRegionEntry(parent, region))
                 .collect(Collectors.toList());
@@ -1107,6 +1101,14 @@ public class MessageUtil {
                 .append(last).append(resetSpace);
     }
 
+    // [x]
+    public static MutableComponent buildParentClearLink(IMarkableRegion region) {
+        String clearRegionParentCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), PARENT.toString(), CLEAR.toString(), region.getParent().getName());
+        MutableComponent parentClearLinkText = new TranslatableComponent("cli.link.remove");
+        MutableComponent parentClearHoverText = new TranslatableComponent("cli.msg.info.region.parent.clear.link.hover", region.getParent().getName());
+        return buildExecuteCmdComponent(parentClearLinkText, parentClearHoverText, clearRegionParentCmd, RUN_COMMAND, REMOVE_CMD_COLOR);
+    }
+
     public static MutableComponent buildRegionChildrenHeader(IProtectedRegion region) {
         return buildHeader(new TranslatableComponent("cli.msg.info.header.in", buildRegionChildrenLink(region), buildRegionInfoLink(region)));
     }
@@ -1145,8 +1147,7 @@ public class MessageUtil {
 
 
     public static MutableComponent buildRegionListHeader(IProtectedRegion region) {
-        return buildHeader(new TranslatableComponent("cli.msg.info.header.in",
-                buildRegionChildrenLink(region), buildRegionInfoLink(region)));
+        return buildHeader(new TranslatableComponent("cli.msg.info.header.in", buildRegionChildrenLink(region), buildRegionInfoLink(region)));
     }
 
 
