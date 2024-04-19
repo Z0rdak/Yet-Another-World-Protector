@@ -91,7 +91,7 @@
   "cli.msg.dim.info.player.removed": "Removed '%s' player '%s' from region %s",
   "cli.msg.dim.info.players.add": "Add player to region",
   "cli.msg.dim.info.region": "Regions",
-  "cli.msg.dim.info.region.children.list.link.hover": "List child regions in %s",
+  "cli.msg.dim.info.region.children.list.link.hover": "List direct child regions of '%s'",
   "cli.msg.dim.info.region.children.list.link.text": "%s child regions(s)",
   "cli.msg.dim.info.region.create.dim.deny": "You don't have the permission to create a region in the dimension %s!",
   "cli.msg.dim.info.region.create.link.hover": "Create region in dimension %s",
@@ -201,9 +201,9 @@
   "cli.msg.info.region.area.actions": "Actions",
   "cli.msg.info.region.children": "Children",
   "cli.msg.info.region.children.add": "Added child %s to region %s",
-  "cli.msg.info.region.children.add.link.hover": "Add child for region %s",
-  "cli.msg.info.region.children.empty": "No children defined for region %s",
-  "cli.msg.info.region.children.link.hover": "Show list of children for region %s",
+  "cli.msg.info.region.children.add.link.hover": "Add child to region %s",
+  "cli.msg.info.region.children.empty": "No children defined in region %s",
+  "cli.msg.info.region.children.link.hover": "Show child region list of '%s'",
   "cli.msg.info.region.children.link.text": "%s children",
   "cli.msg.info.region.children.remove": "Removed child '%s' from region %s",
   "cli.msg.info.region.children.remove.link.hover": "Remove child '%s' from region %s",
@@ -386,5 +386,6 @@
   "help.tooltip.stick.marker.simple.3": "Mark a (Cuboid) region by right-clicking the diagonal opposite corner blocks.",
   "help.tooltip.stick.marker.simple.4": "Set a region teleport position by shift-right-clicking a block.",
   "loading.client.info": "You are loading %s on a client. %s is a server-side only mod. The client only provides Internationalization.",
-  "cli.msg.info.region.area.update.type.change": "AreaType for %s changed from %s to %s"
+  "cli.msg.info.region.area.update.type.change": "AreaType for %s changed from %s to %s",
+  "cli.msg.info.region.global.reset": "Successfully reset global region"
 }

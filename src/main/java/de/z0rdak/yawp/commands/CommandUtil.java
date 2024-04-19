@@ -140,6 +140,10 @@ public class CommandUtil {
 
     public static LiteralArgumentBuilder<CommandSource> buildListSubCommand(Function<CommandContext<CommandSource>, IProtectedRegion> regionSupplier) {
         return literal(LIST)
+                .then(literal(CHILDREN)
+                        .executes(ctx -> promptRegionChildren(ctx, regionSupplier.apply(ctx), 0))
+                        .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
+                                .executes(ctx -> promptRegionChildren(ctx, regionSupplier.apply(ctx), getPageNoArgument(ctx)))))
                 .then(literal(FLAG)
                         .executes(ctx -> promptFlagList(ctx, regionSupplier.apply(ctx), 0))
                         .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
@@ -269,6 +273,39 @@ public class CommandUtil {
                 buildRegionFlagInfoHeader(region), cmd, flagEntries, pageNo,
                 new StringTextComponent(" - ").append(buildAddFlagLink(region)));
         flagPagination.forEach(line -> sendCmdFeedback(ctx.getSource(), line));
+        return 0;
+    }
+
+    public static int promptRegionChildren(CommandContext<CommandSource> ctx, IProtectedRegion region, int pageNo) {
+        String listChildrenCmd = "";
+        IFormattableTextComponent addChildRegionLink = new StringTextComponent("");
+        List<IProtectedRegion> children = new ArrayList<>(region.getChildren().values());
+        if (region.getChildren().isEmpty()) {
+            IFormattableTextComponent noChildrenText = new TranslationTextComponent("cli.msg.info.region.children.empty", buildRegionInfoLink(region));
+            sendCmdFeedback(ctx.getSource(), noChildrenText);
+            return 0;
+        }
+        switch (region.getRegionType()) {
+            case GLOBAL:
+                listChildrenCmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), CHILDREN.toString());
+                break;
+            case DIMENSION:
+                listChildrenCmd = buildCommandStr(DIM.toString(), region.getName(), LIST.toString(), CHILDREN.toString());
+                break;
+            case LOCAL:
+                listChildrenCmd = buildCommandStr(LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), CHILDREN.toString());
+                addChildRegionLink = new StringTextComponent(" - ").append(buildRegionAddChildrenLink(region));
+                break;
+            default:
+                throw new NotImplementedException("Region type not implemented yet");
+        }
+        List<IFormattableTextComponent> regionPagination = buildPaginationComponents(
+                buildRegionListHeader(region),
+                listChildrenCmd,
+                buildRemoveRegionEntries(region, children),
+                pageNo,
+                addChildRegionLink);
+        regionPagination.forEach(line -> sendCmdFeedback(ctx.getSource(), line));
         return 0;
     }
 
