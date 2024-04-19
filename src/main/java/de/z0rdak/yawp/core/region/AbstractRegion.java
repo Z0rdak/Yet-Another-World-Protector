@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.core.region;
 
+import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.CommandUtil;
 import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.IFlag;
@@ -16,7 +17,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.scores.Team;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -261,34 +261,20 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.childrenNames.clear();
     }
 
-    /**
-     * Most error handling and consistency checks are done beforehand by the ArgumentTypes for add and removing children.
-     * Try to add a child region to this region. <br>
-     * 1. The child already has a parent which is a local region  or <br>
-     * 2. The child is the same regions as this or <br>
-     * 3. The child is the parent of this region <br>
-     * 4. The child area is not completely contained by the parent area. (done beforehand)
-     * Also removes child from dimension region
-     * FIXME: since this method does manage more than adding children, it should be renamed; add Global region stuff <br>
-     *
-     * @param child child to add to this region.
-     */
     @Override
-    public void addChild(@Nonnull IProtectedRegion child) {
+    public void addChild(IProtectedRegion child) {
         IProtectedRegion parent = child.getParent();
-        if (parent != null) {
-            if (parent instanceof IMarkableRegion) {
-                if (!parent.equals(this) && this instanceof IMarkableRegion) {
-                    // TODO: Why not allow this, as long as the owner of both regions are the same?
-                    throw new IllegalRegionStateException("Not allowed to \"steal\" child from other parent than a dimensional region");
-                }
-                if (this instanceof DimensionalRegion) {
-                    parent.removeChild(child);
-                }
+        if (parent instanceof IMarkableRegion) {
+            if (!parent.equals(this) && this instanceof IMarkableRegion) {
+                // TODO: Why not allow this, as long as the owner of both regions are the same?
+                throw new IllegalRegionStateException("Not allowed to \"steal\" child from other parent than a dimensional region");
             }
-            if (parent instanceof DimensionalRegion) {
+            if (this instanceof DimensionalRegion) {
                 parent.removeChild(child);
             }
+        }
+        if (parent instanceof DimensionalRegion) {
+            parent.removeChild(child);
         }
         child.setParent(this);
         this.children.put(child.getName(), child);
@@ -313,26 +299,35 @@ public abstract class AbstractRegion implements IProtectedRegion {
     /**
      * FIXME: setParent should not be used directly. Use addChild instead
      * Contains common consistency checks for setting a parent region.
-     * More specific checks and assignments need to be implemented in subclasses.
      *
      * @param parent the parent to set for this region.
      * @throws IllegalRegionStateException when consistency checks are failing.
      */
     public boolean setParent(IProtectedRegion parent) {
-        if (parent instanceof GlobalRegion && this instanceof GlobalRegion) {
-            this.parent = this;
-            this.parentName = GlobalRegion.GLOBAL.toString();
-            return true;
-        }
-        if (parent instanceof GlobalRegion && this instanceof DimensionalRegion) {
+        boolean isParentGlobal = parent.getRegionType() == RegionType.GLOBAL;
+        boolean thisIsGlobalOrDim = (this.getRegionType() == RegionType.GLOBAL || this.getRegionType() == RegionType.DIMENSION);
+        if (isParentGlobal && thisIsGlobalOrDim) {
             this.parent = parent;
             this.parentName = GlobalRegion.GLOBAL.toString();
             return true;
         }
-        if (parent instanceof DimensionalRegion) {
+        if (parent.getRegionType() == RegionType.DIMENSION) {
             this.parent = parent;
             this.parentName = parent.getParentName();
             return true;
+        }
+        if (parent.getRegionType() == RegionType.LOCAL && this.getRegionType() == RegionType.LOCAL) {
+            IMarkableRegion localParent = (IMarkableRegion) parent;
+            IMarkableRegion local = (IMarkableRegion) this;
+            if (localParent.getArea().containsOther(local.getArea())) {
+                this.isMuted = localParent.isMuted();
+                this.parent = localParent;
+                this.parentName = localParent.getParentName();
+                YetAnotherWorldProtector.LOGGER.debug("Setting parent '" + parent.getName() + "' for region '" + this.getName() + "'");
+                return true;
+            } else {
+                return false;
+            }
         }
         if (!parent.getDim().location().equals(GlobalRegion.GLOBAL) || !(parent instanceof GlobalRegion)) {
             if (!parent.getDim().location().equals(this.dimension.location())) {
