@@ -137,7 +137,7 @@ public class RegionDataManager extends SavedData {
             globalRegion = new GlobalRegion(globalNbt);
             YetAnotherWorldProtector.LOGGER.info(new TranslatableComponent("Loaded global region data").getString());
         }
-        globalRegion.setParent(globalRegion);
+
         rdm.dimCacheMap.clear();
         CompoundTag dimensionRegions = nbt.getCompound(DIMENSIONS);
         YetAnotherWorldProtector.LOGGER.info(new TranslatableComponent("Loading region(s) for " + dimensionRegions.getAllKeys().size() + " dimension(s)").getString());
@@ -164,37 +164,40 @@ public class RegionDataManager extends SavedData {
             DimensionRegionCache dimCache = rdm.dimCacheMap.get(dimension);
             if (!dimCache.getRegions().isEmpty()) {
                 YetAnotherWorldProtector.LOGGER.info(new TranslatableComponent("data.nbt.dimensions.load.dim.restore", dimKey).getString());
-
                 DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
                 dimCache.getRegionsInDimension().values().forEach(region -> {
                     // set child references
                     region.getChildrenNames().forEach(childName -> {
-                        IMarkableRegion childRegion = dimCache.getRegion(childName);
-                        region.addChild(childRegion);
+                        if (!dimCache.contains(childName)) {
+                            YetAnotherWorldProtector.LOGGER.error(new TranslationTextComponent("Corrupt save data. Child region '" + childName + "' not found in dimension '" + dimKey + "'!").getString());
+                        } else {
+                            region.addChild(dimCache.getRegion(childName));
+                        }
                     });
-                    // TODO: Replace this and put it into addChild?
                     // set parent reference
                     String parentName = region.getParentName();
                     boolean hasValidParent = parentName != null && !parentName.isEmpty(); // hasNonEmptyStringParent rather
                     if (hasValidParent) {
-                        boolean isDimRegion = region.getRegionType() == RegionType.DIMENSION;
-                        boolean isGlobalRegion = region.getRegionType() == RegionType.GLOBAL;
-                        if (isDimRegion || isGlobalRegion) {
-                            region.setParent(globalRegion);
-                        }
-                        boolean hasDimRegionAsParent = parentName.contains(":");
-                        if (region.getRegionType() == RegionType.LOCAL && hasDimRegionAsParent) { // colons are not allowed in normal region names so this should work fine
-                            region.setParent(dimRegion);
+                        if (region.getRegionType() == RegionType.LOCAL && parentName.equals(dimRegion.getName())) {
+                            dimRegion.addChild(region);
                         } else {
                             if (!dimCache.contains(parentName)) {
-                                throw new IllegalRegionStateException("Corrupt save data. Parent region '" + parentName + "' not found in dimension '" + dimKey + "'!");
+                                YetAnotherWorldProtector.LOGGER.error(new TranslationTextComponent("Corrupt save data. Parent region '" + parentName + "' not found in dimension '" + dimKey + "'!").getString());
+                            } else {
+                                IMarkableRegion parent = dimCache.getRegion(parentName);
+                                if (parent == null) {
+                                    YetAnotherWorldProtector.LOGGER.error(new TranslationTextComponent("Corrupt save data. Parent region '" + parentName + "' not found in dimension '" + dimKey + "'!").getString());
+                                } else {
+                                    parent.addChild(region);
+                                }
                             }
-                            region.setParent(dimCache.getRegion(parentName));
                         }
                     }
                 });
             }
+            globalRegion.addChild(dimCache.getDimensionalRegion());
         }
+        globalRegion.addChild(globalRegion);
         return rdm;
     }
 
@@ -297,7 +300,6 @@ public class RegionDataManager extends SavedData {
         globalRegion = new GlobalRegion();
         collect.forEach(dr -> {
             globalRegion.addChild(dr);
-            dr.setParent(globalRegion);
         });
         save();
     }
