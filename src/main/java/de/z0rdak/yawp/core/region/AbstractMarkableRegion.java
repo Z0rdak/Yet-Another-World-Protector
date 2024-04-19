@@ -3,7 +3,6 @@ package de.z0rdak.yawp.core.region;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.area.AreaType;
-import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -13,7 +12,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 import java.util.HashMap;
-import java.util.Objects;
 
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
@@ -86,52 +84,6 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     @Override
     public IMarkableArea getArea() {
         return area;
-    }
-
-    /**
-     * FIXME: refactor to polymorphic instance method
-     *
-     * @param outer
-     * @param inner
-     * @return
-     */
-    public static boolean fullyContains(IMarkableArea outer, IMarkableArea inner) {
-        boolean haveSameAreaType = outer.getAreaType() == inner.getAreaType();
-        if (Objects.requireNonNull(outer.getAreaType()) == AreaType.CUBOID) {
-            CuboidArea outerCuboid = (CuboidArea) outer;
-            if (haveSameAreaType) {
-                // should always be the case in the first iteration where only cuboids are allowed
-                return outerCuboid.contains((CuboidArea) inner);
-            } else {
-                throw new UnsupportedOperationException("Only cuboid areas are supported currently.");
-            }
-        }
-        throw new UnsupportedOperationException("Only cuboid areas are supported currently.");
-    }
-
-    /**
-     * A IMarkableRegion can have both a Dimensional Region or another IMarkableRegion as its direct parent. <br>
-     * Depending on the type, different properties must be set.
-     *
-     * @param parent the parent to set for this region.
-     */
-    @Override
-    public boolean setParent(IProtectedRegion parent) {
-        if (super.setParent(parent)) {
-            return true;
-        }
-        if (parent instanceof IMarkableRegion markableParentRegion) {
-            if (fullyContains(((IMarkableRegion) parent).getArea(), this.area)) {
-                this.isMuted = markableParentRegion.isMuted();
-                this.parent = markableParentRegion;
-                this.parentName = markableParentRegion.getParentName();
-                YetAnotherWorldProtector.LOGGER.debug("Setting parent '" + parent.getName() + "' for region '" + this.getName() + "'");
-                return true;
-            } else {
-                return false;
-            }
-        }
-        return false;
     }
 
     @Override
