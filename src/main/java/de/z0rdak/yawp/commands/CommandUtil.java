@@ -32,6 +32,7 @@ import net.minecraft.commands.arguments.TeamArgument;
 import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
@@ -145,6 +146,10 @@ public class CommandUtil {
 
     public static LiteralArgumentBuilder<CommandSourceStack> buildListSubCommand(Function<CommandContext<CommandSourceStack>, IProtectedRegion> regionSupplier) {
         return literal(LIST)
+                .then(literal(CHILDREN)
+                        .executes(ctx -> promptRegionChildren(ctx, regionSupplier.apply(ctx), 0))
+                        .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
+                                .executes(ctx -> promptRegionChildren(ctx, regionSupplier.apply(ctx), getPageNoArgument(ctx)))))
                 .then(literal(FLAG)
                         .executes(ctx -> promptFlagList(ctx, regionSupplier.apply(ctx), 0))
                         .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
@@ -216,10 +221,10 @@ public class CommandUtil {
         MutableComponent regionAlertComponent = buildRegionAlertToggleLink(region);
         if (region.getRegionType() == RegionType.DIMENSION) {
             regionEnableComponent
-                    .append(new StringTextComponent(" | ").setStyle(Style.EMPTY.applyFormat(TextFormatting.RESET)))
+                    .append(new TextComponent(" | ").setStyle(Style.EMPTY.applyFormat(ChatFormatting.RESET)))
                     .append(buildAllLocalEnableComponent(getDimCacheArgument(ctx)));
             regionAlertComponent
-                    .append(new StringTextComponent(" | ").setStyle(Style.EMPTY.applyFormat(TextFormatting.RESET)))
+                    .append(new TextComponent(" | ").setStyle(Style.EMPTY.applyFormat(ChatFormatting.RESET)))
                     .append(buildAllLocalAlertToggleLink(getDimCacheArgument(ctx)));
             sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.enable", regionEnableComponent));
             sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.alert", regionAlertComponent));
@@ -228,9 +233,9 @@ public class CommandUtil {
         if (region.getRegionType() == RegionType.LOCAL) {
             sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.name", buildRegionRenameLink(region)));
         }
-        IFormattableTextComponent enableComp = buildInfoComponent("cli.msg.info.region.state.enable", regionEnableComponent);
+        MutableComponent enableComp = buildInfoComponent("cli.msg.info.region.state.enable", regionEnableComponent);
         sendCmdFeedback(ctx.getSource(), enableComp
-                .append(new StringTextComponent(", ").withStyle(TextFormatting.RESET))
+                .append(new TextComponent(", ").withStyle(ChatFormatting.RESET))
                 .append(buildInfoComponent("cli.msg.info.region.state.alert", regionAlertComponent)));
         return 0;
     }
@@ -274,6 +279,39 @@ public class CommandUtil {
                 buildRegionFlagInfoHeader(region), cmd, flagEntries, pageNo,
                 new TextComponent(" - ").append(buildAddFlagLink(region)));
         flagPagination.forEach(line -> sendCmdFeedback(ctx.getSource(), line));
+        return 0;
+    }
+
+    public static int promptRegionChildren(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, int pageNo) {
+        String listChildrenCmd = "";
+        MutableComponent addChildRegionLink = new TextComponent("");
+        List<IProtectedRegion> children = new ArrayList<>(region.getChildren().values());
+        if (region.getChildren().isEmpty()) {
+            MutableComponent noChildrenText = new TranslatableComponent("cli.msg.info.region.children.empty", buildRegionInfoLink(region));
+            sendCmdFeedback(ctx.getSource(), noChildrenText);
+            return 0;
+        }
+        switch (region.getRegionType()) {
+            case GLOBAL:
+                listChildrenCmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), CHILDREN.toString());
+                break;
+            case DIMENSION:
+                listChildrenCmd = buildCommandStr(DIM.toString(), region.getName(), LIST.toString(), CHILDREN.toString());
+                break;
+            case LOCAL:
+                listChildrenCmd = buildCommandStr(LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), CHILDREN.toString());
+                addChildRegionLink = new TextComponent(" - ").append(buildRegionAddChildrenLink(region));
+                break;
+            default:
+                throw new NotImplementedException("Region type not implemented yet");
+        }
+        List<MutableComponent> regionPagination = buildPaginationComponents(
+                buildRegionListHeader(region),
+                listChildrenCmd,
+                buildRemoveRegionEntries(region, children),
+                pageNo,
+                addChildRegionLink);
+        regionPagination.forEach(line -> sendCmdFeedback(ctx.getSource(), line));
         return 0;
     }
 

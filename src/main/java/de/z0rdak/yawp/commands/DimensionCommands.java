@@ -12,10 +12,7 @@ import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.SphereArea;
-import de.z0rdak.yawp.core.region.CuboidRegion;
-import de.z0rdak.yawp.core.region.DimensionalRegion;
-import de.z0rdak.yawp.core.region.IMarkableRegion;
-import de.z0rdak.yawp.core.region.SphereRegion;
+import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
@@ -329,10 +326,13 @@ public class DimensionCommands {
         return 0;
     }
 
+    /**
+     * Note: Could, together with promptChildRegionList, be refactored to a single method
+     */
     private static int promptDimensionRegionList(CommandContext<CommandSourceStack> ctx, DimensionRegionCache dimCache, int pageNo) {
         if (dimCache != null) {
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-            List<IMarkableRegion> regionsForDim = dimCache.getRegionsInDimension()
+            List<IProtectedRegion> regionsForDim = dimCache.getRegionsInDimension()
                     .values()
                     .stream()
                     .sorted(Comparator.comparing(IMarkableRegion::getName))

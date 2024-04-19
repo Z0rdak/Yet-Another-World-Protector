@@ -40,8 +40,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
@@ -79,11 +77,6 @@ public class RegionCommands {
                                                 .then(Commands.argument(CHILD.toString(), StringArgumentType.word())
                                                         .suggests((ctx, builder) -> RemoveRegionChildArgumentType.childRegions().listSuggestions(ctx, builder))
                                                         .executes(ctx -> removeChildren(ctx, getDimCacheArgument(ctx), getRegionArgument(ctx), getChildRegionArgument(ctx))))))
-                                .then(literal(LIST)
-                                        .then(literal(CHILDREN)
-                                                .executes(ctx -> promptRegionChildren(ctx, getRegionArgument(ctx), 0))
-                                                .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
-                                                        .executes(ctx -> promptRegionChildren(ctx, getRegionArgument(ctx), getPageNoArgument(ctx))))))
                                 .then(literal(STATE)
                                         .executes(ctx -> promptLocalRegionState(ctx, getRegionArgument(ctx)))
                                         .then(literal(ALERT)
@@ -357,24 +350,6 @@ public class RegionCommands {
                 return 1;
             }
         }
-    }
-
-    private static int promptRegionChildren(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, int pageNo) {
-        List<IMarkableRegion> children = region.getChildren().values().stream().map(r -> (IMarkableRegion) r).collect(Collectors.toList());
-        MutableComponent childRegionList = new TextComponent("");
-        if (children.isEmpty()) {
-            MutableComponent noChildrenText = new TranslatableComponent("cli.msg.info.region.children.empty", buildRegionInfoLink(region));
-            childRegionList.append(noChildrenText);
-            sendCmdFeedback(ctx.getSource(), childRegionList);
-        }
-        List<MutableComponent> regionPagination = buildPaginationComponents(
-                buildRegionChildrenHeader(region),
-                buildCommandStr(LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), CHILDREN.toString()),
-                buildRemoveRegionEntries(region, children),
-                pageNo,
-                new TextComponent(" - ").append(buildRegionAddChildrenLink(region)));
-        regionPagination.forEach(line -> sendCmdFeedback(ctx.getSource(), line));
-        return 0;
     }
 
     /**
