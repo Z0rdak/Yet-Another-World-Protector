@@ -38,21 +38,6 @@ public final class DimensionalRegion extends AbstractRegion {
         this.parent = RegionDataManager.get().getGlobalRegion();
     }
 
-    /**
-     * A DimensionalRegion can by design only have a global region as its parent.
-     * @param parent the parent to set for this region.
-     */
-    @Override
-    public boolean setParent(IProtectedRegion parent) {
-        if (super.setParent(parent)){
-            return true;
-        }
-        if (!(parent instanceof GlobalRegion)) {
-            throw new IllegalRegionStateException("Cannot set parent for dimensional region");
-        }
-        return true;
-    }
-
     @Override
     public CompoundNBT serializeNBT() {
         return super.serializeNBT();

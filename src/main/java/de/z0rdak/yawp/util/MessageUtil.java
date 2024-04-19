@@ -1198,7 +1198,6 @@ public class MessageUtil {
             case LOCAL: {
                 // [n children] [+]
                 String regionChildrenListLink = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), CHILDREN.toString());
-
                 IFormattableTextComponent regionChildrenLink = buildExecuteCmdComponent(text, hover, regionChildrenListLink, RUN_COMMAND, LINK_COLOR);
                 IFormattableTextComponent addChildrenLink = buildRegionAddChildrenLink(region);
                 return (region.getChildren().isEmpty()) ?

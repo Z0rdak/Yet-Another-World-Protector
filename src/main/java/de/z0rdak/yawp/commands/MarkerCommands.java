@@ -9,7 +9,6 @@ import de.z0rdak.yawp.commands.arguments.region.OwnedRegionArgumentType;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.region.AbstractMarkableRegion;
-import de.z0rdak.yawp.core.region.CuboidRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
@@ -97,7 +96,7 @@ public final class MarkerCommands {
                         if (parentRegion != null) {
                             // should only be a region which has player as owner at this point due to the OwnerRegionArgumentType suggestions
                             if (parentRegion.hasPlayer(player.getUUID(), CommandUtil.OWNER) || hasConfigPermission) {
-                                if (AbstractMarkableRegion.fullyContains(parentRegion.getArea(), region.getArea())) {
+                                if (parentRegion.getArea().containsOther(region.getArea())) {
                                     dimCache.addRegion(dimCache.getDimensionalRegion(), region);
                                     parentRegion.addChild(region);
                                     LocalRegions.ensureHigherRegionPriorityFor(region, RegionConfig.getDefaultPriority());
