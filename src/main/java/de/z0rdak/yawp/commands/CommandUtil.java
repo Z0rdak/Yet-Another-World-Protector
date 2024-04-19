@@ -20,7 +20,6 @@ import de.z0rdak.yawp.handler.flags.HandlerUtil;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
-import de.z0rdak.yawp.util.MessageUtil;
 import de.z0rdak.yawp.util.MojangApiHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -849,31 +848,31 @@ public class CommandUtil {
     }
 
     public static void promptRegionChildrenInfo(CommandContext<CommandSourceStack> ctx, IProtectedRegion region) {
+        MutableComponent listChildrenLink = buildRegionListChildrenLink(region);
         switch (region.getRegionType()) {
             case GLOBAL: {
-                // [n dimensions(s)]
-                sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.dim.region", buildRegionChildrenLink(region)));
+                // Dimensions: [n dimensions(s)]
+                sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.dimensions", listChildrenLink));
             }
             break;
             case DIMENSION: {
-                // Parent: [global], [n children], [n regions][+],
-                MessageUtil.buildRegionChildrenLink(region);
-                MutableComponent globalRegionLink = buildRegionInfoLink(region.getParent(), new TranslatableComponent("cli.msg.info.region.global.link.hover"));
+                // Parent: [global], [n children], [n regions] [+],
+                MutableComponent globalRegionLink = buildRegionInfoLink(region.getParent(), new TranslationTextComponent("cli.msg.info.region.global.link.hover"));
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(region.getDim());
-                MutableComponent regionsAndChildren = new TranslatableComponent("cli.msg.info.region.parent")
-                        .append(": ")
+                MutableComponent parentAndRegionsLinks = buildInfoComponent("cli.msg.info.dimensions", listChildrenLink)
                         .append(globalRegionLink)
                         .append(new TextComponent(", ").withStyle(ChatFormatting.RESET))
-                        .append(buildRegionChildrenLink(region))
+                        .append(listChildrenLink)
                         .append(new TextComponent(", ").withStyle(ChatFormatting.RESET))
                         .append(buildDimRegionsLink(dimCache));
-                sendCmdFeedback(ctx.getSource(), regionsAndChildren);
+                sendCmdFeedback(ctx.getSource(), parentAndRegionsLinks);
             }
             break;
             case LOCAL: {
-                // Parent: [parent][x], [n children][+]
+                // Parent: [parent] [x], [n children] [+]
                 MutableComponent parentClearLink = buildParentClearLink((IMarkableRegion) region);
-                if (region.getParent().getRegionType() != RegionType.LOCAL) {
+                if (region.getParent().getRegionType() == RegionType.DIMENSION) {
+                    // don't show removal link, since it's not possible to remove the parent
                     parentClearLink = new TextComponent("");
                 }
                 MutableComponent regionHierarchy = new TranslatableComponent("cli.msg.info.region.parent")
@@ -881,7 +880,7 @@ public class CommandUtil {
                         .append(buildRegionInfoLink(region.getParent()))
                         .append(parentClearLink)
                         .append(new TextComponent(", ").withStyle(ChatFormatting.RESET))
-                        .append(buildRegionChildrenLink(region));
+                        .append(listChildrenLink);
                 sendCmdFeedback(ctx.getSource(), regionHierarchy);
             }
             break;

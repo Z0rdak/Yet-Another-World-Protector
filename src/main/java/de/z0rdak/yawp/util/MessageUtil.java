@@ -1147,7 +1147,7 @@ public class MessageUtil {
 
 
     public static MutableComponent buildRegionListHeader(IProtectedRegion region) {
-        return buildHeader(new TranslatableComponent("cli.msg.info.header.in", buildRegionChildrenLink(region), buildRegionInfoLink(region)));
+        return buildHeader(new TranslatableComponent("cli.msg.info.header.in", buildRegionListChildrenLink(region), buildRegionInfoLink(region)));
     }
 
 
@@ -1155,40 +1155,44 @@ public class MessageUtil {
     public static MutableComponent buildDimRegionsLink(DimensionRegionCache dimCache) {
         DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
         String command = buildCommandStr(DIM.toString(), dimRegion.getDim().location().toString(), LIST.toString(), CommandConstants.LOCAL.toString());
-        MutableComponent listDimRegionsLinkText = new TranslatableComponent("cli.msg.dim.info.region.list.link.text", dimCache.getRegions().size());
-        MutableComponent listDimRegionsHoverText = new TranslatableComponent("cli.msg.dim.info.region.list.link.hover", dimRegion.getName());
-        MutableComponent listDimRegionsListLink = buildExecuteCmdComponent(listDimRegionsLinkText, listDimRegionsHoverText, command, RUN_COMMAND, LINK_COLOR);
+        MutableComponent text = new TranslatableComponent("cli.msg.dim.info.region.list.link.text", dimCache.getRegions().size());
+        MutableComponent hover = new TranslatableComponent("cli.msg.dim.info.region.list.link.hover", dimRegion.getName());
+        MutableComponent listLocalRegionsLink = buildExecuteCmdComponent(text, hover, command, RUN_COMMAND, LINK_COLOR);
         MutableComponent createRegionLink = buildDimCreateRegionLink(dimRegion);
-        return (dimRegion.getChildren().size() == 0) ? listDimRegionsLinkText.append(" ").append(createRegionLink) : listDimRegionsListLink.append(" ").append(createRegionLink);
+        return (dimRegion.getChildren().isEmpty()) ?
+                text.append(" ").append(createRegionLink) :
+                listLocalRegionsLink.append(" ").append(createRegionLink);
     }
 
-    // [n regions] [+]
-    public static MutableComponent buildRegionChildrenLink(IProtectedRegion region) {
+    public static MutableComponent buildRegionListChildrenLink(IProtectedRegion region) {
+        MutableComponent text = new TranslatableComponent("cli.msg.info.region.children.list.link.text", region.getChildren().size());
+        MutableComponent hover = new TranslatableComponent("cli.msg.info.region.children.list.link.hover", region.getName());
         return switch (region.getRegionType()) {
             case GLOBAL -> {
+                // [n dimensions(s)]
                 Collection<String> dimensionList = RegionDataManager.get().getDimensionList();
-                String command = buildCommandStr(GLOBAL.toString(), LIST.toString(), DIM.toString());
+                String command = buildCommandStr(GLOBAL.toString(), LIST.toString(), CHILDREN.toString());
                 MutableComponent listDimRegionsLinkText = new TranslatableComponent("cli.msg.global.info.region.list.link.text", dimensionList.size());
                 MutableComponent listDimRegionsHoverText = new TranslatableComponent("cli.msg.global.info.region.list.link.hover");
                 yield buildExecuteCmdComponent(listDimRegionsLinkText, listDimRegionsHoverText, command, RUN_COMMAND, LINK_COLOR);
             }
             case DIMENSION -> {
-                // TODO: children not regions
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(region.getDim());
-                String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), CommandConstants.LOCAL.toString());
-                MutableComponent listDimRegionsLinkText = new TranslatableComponent("cli.msg.dim.info.region.list.link.text", dimCache.getRegions().size());
-                MutableComponent listDimRegionsHoverText = new TranslatableComponent("cli.msg.dim.info.region.list.link.hover", region.getName());
-                MutableComponent listDimRegionsListLink = buildExecuteCmdComponent(listDimRegionsLinkText, listDimRegionsHoverText, command, RUN_COMMAND, LINK_COLOR);
-                yield  (region.getChildren().size() == 0) ? listDimRegionsLinkText : listDimRegionsListLink;
+                // [n children] [+]
+                String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), CHILDREN.toString());
+                MutableComponent listDimRegionsListLink = buildExecuteCmdComponent(text, hover, command, RUN_COMMAND, LINK_COLOR);
+                yield (region.getChildren().isEmpty()) ?
+                        text.append(" ").append(buildDimCreateRegionLink(region)) :
+                        listDimRegionsListLink.append(" ").append(buildDimCreateRegionLink(region));
             }
-            // [n children] [+]
             case LOCAL -> {
-                String regionChildrenListLink = buildCommandStr(LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), CHILDREN.toString());
-                MutableComponent childrenLinkText = new TranslatableComponent("cli.msg.info.region.children.link.text", region.getChildren().size());
-                MutableComponent childrenHoverText = new TranslatableComponent("cli.msg.info.region.children.link.hover", region.getName());
-                MutableComponent regionChildrenLink = buildExecuteCmdComponent(childrenLinkText, childrenHoverText, regionChildrenListLink, RUN_COMMAND, LINK_COLOR);
+                // [n children] [+]
+                String regionChildrenListLink = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), CHILDREN.toString());
+
+                MutableComponent regionChildrenLink = buildExecuteCmdComponent(text, hover, regionChildrenListLink, RUN_COMMAND, LINK_COLOR);
                 MutableComponent addChildrenLink = buildRegionAddChildrenLink(region);
-                yield  (region.getChildren().size() == 0) ? childrenLinkText.append(" ").append(addChildrenLink) : regionChildrenLink.append(" ").append(addChildrenLink);
+                yield (region.getChildren().isEmpty()) ?
+                        text.append(" ").append(addChildrenLink) :
+                        regionChildrenLink.append(" ").append(addChildrenLink);
             }
             default ->
                 throw new IllegalStateException("Unexpected value: " + region.getRegionType());
