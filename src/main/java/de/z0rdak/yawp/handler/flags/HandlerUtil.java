@@ -2,6 +2,7 @@ package de.z0rdak.yawp.handler.flags;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
+import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.core.flag.*;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
@@ -203,7 +204,7 @@ public final class HandlerUtil {
         if (player == null) {
             return region.getFlagContainer().flagState(flag.name);
         } else {
-            boolean isPermitted = region.permits(player);
+            boolean isPermitted = region.permits(player) || CommandPermissionConfig.hasConfigPermAndOpByPassFlags(player);
             if (isPermitted) {
                 return FlagState.ALLOWED;
             } else {
