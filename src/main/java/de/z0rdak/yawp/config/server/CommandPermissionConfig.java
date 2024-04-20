@@ -21,6 +21,8 @@ public class CommandPermissionConfig {
     private static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_REGION_TP;
     private static final ForgeConfigSpec.ConfigValue<Boolean> ALLOW_READ_ONLY_CMDS;
     private static final ForgeConfigSpec.ConfigValue<Boolean> DISABLE_CMD_FOR_NON_OP;
+    private static final ForgeConfigSpec.ConfigValue<Boolean> OP_BYPASS_FLAGS;
+    private static final ForgeConfigSpec.ConfigValue<Boolean> AUTO_CHILD_OWNERSHIP;
     private static final ForgeConfigSpec.ConfigValue<Integer> REQUIRED_OP_LEVEL;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> PLAYERS_WITH_PERMISSION;
     private static final ForgeConfigSpec.ConfigValue<Boolean> COMMAND_BLOCK_EXECUTION;
@@ -48,6 +50,12 @@ public class CommandPermissionConfig {
 
         DISABLE_CMD_FOR_NON_OP = BUILDER.comment("Defines whether mod commands are disabled for non-OP players.")
                 .define("disable_cmd_for_non_op", false);
+
+        OP_BYPASS_FLAGS = BUILDER.comment("Defines whether OPs/permitted players are allowed to bypass flags set in regions.")
+                .define("op_bypass_flags", true);
+
+        AUTO_CHILD_OWNERSHIP = BUILDER.comment("Defines whether owners of parent regions have implicit ownership rights for child regions as well")
+                .define("auto_child_ownership", true);
 
         ENABLE_REGION_TP = BUILDER.comment("Defines whether teleport in and out of a region is allowed by everyone. Mostly useful when using something like Waystones inside of regions.")
                 .define("allow_region_tp", false);
@@ -95,8 +103,11 @@ public class CommandPermissionConfig {
     }
 
     public static boolean hasConfigPermission(Player player) {
-        return hasUUIDConfigEntry(player) || hasNeededOpLevel(player) ||
-                player.hasPermissions(REQUIRED_OP_LEVEL.get());
+        return hasUUIDConfigEntry(player) || hasNeededOpLevel(player) || player.hasPermissions(REQUIRED_OP_LEVEL.get());
+    }
+
+    public static boolean hasConfigPermAndOpByPassFlags(Player player) {
+        return hasConfigPermission(player) && OP_BYPASS_FLAGS.get();
     }
 
     public static boolean hasUUIDConfigEntry(Player player) {
