@@ -11,14 +11,11 @@ import net.minecraft.command.Commands;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.util.text.event.ClickEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import static de.z0rdak.yawp.util.MessageUtil.*;
-import static net.minecraft.util.text.TextFormatting.AQUA;
-import static net.minecraft.util.text.TextFormatting.GREEN;
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 
 @Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, bus = FORGE)
@@ -57,27 +54,12 @@ public final class CommandRegistry {
     }
 
     private static int promptHelp(CommandSource src) {
-        sendCmdFeedback(src, buildHeader("cli.msg.help.header"));
-        String command = ArgumentUtil.buildCommandStr(CommandConstants.DIM.toString(), "");
-        IFormattableTextComponent cmdStr = new TranslationTextComponent("cli.msg.help.1", CommandPermissionConfig.BASE_CMD);
-        sendCmdFeedback(src, buildExecuteCmdComponent(
-                new StringTextComponent("=>"),
-                new TranslationTextComponent("help.tooltip.dim"),
-                command, ClickEvent.Action.SUGGEST_COMMAND, GREEN)
-                .append(" ").append(cmdStr));
-        IFormattableTextComponent wikiText1 = new TranslationTextComponent("help.tooltip.info.wiki.1");
-        IFormattableTextComponent wikiText2 = new TranslationTextComponent("help.tooltip.info.wiki.2");
-        IFormattableTextComponent wikiText3 = new TranslationTextComponent("help.tooltip.info.wiki.3");
-        IFormattableTextComponent wikiLinkHover = new TranslationTextComponent("help.tooltip.info.wiki.link.hover");
-        IFormattableTextComponent wikiLink = new TranslationTextComponent("help.tooltip.info.wiki.link.text");
-        IFormattableTextComponent wikiCopyToClipboardLink = buildExecuteCmdComponent(wikiLink, wikiLinkHover, "https://github.com/Z0rdak/Yet-Another-World-Protector/wiki", ClickEvent.Action.OPEN_URL, AQUA);
-        wikiText1.append("\n")
-                .append(wikiText2)
-                .append("\n")
-                .append(wikiText3)
-                .append(": ")
-                .append(wikiCopyToClipboardLink);
-        sendCmdFeedback(src, wikiText1);
+        sendCmdFeedback(src, buildHeader("help.header"));
+        IFormattableTextComponent wikiHint = new TranslationTextComponent("help.tooltip.wiki.detail");
+        IFormattableTextComponent wikiText = new TranslationTextComponent("help.tooltip.wiki");
+        sendCmdFeedback(src, wikiHint);
+        sendCmdFeedback(src, wikiText.append(": ").append(buildWikiLink()));
+        sendCmdFeedback(src, new StringTextComponent(" => ").append(buildHelpStartComponent()));
         return 0;
     }
 }

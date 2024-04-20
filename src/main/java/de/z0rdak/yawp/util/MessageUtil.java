@@ -46,8 +46,7 @@ import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.getFlagMapRecursive;
 import static net.minecraft.util.text.TextFormatting.RESET;
 import static net.minecraft.util.text.TextFormatting.*;
-import static net.minecraft.util.text.event.ClickEvent.Action.RUN_COMMAND;
-import static net.minecraft.util.text.event.ClickEvent.Action.SUGGEST_COMMAND;
+import static net.minecraft.util.text.event.ClickEvent.Action.*;
 
 
 public class MessageUtil {
@@ -331,6 +330,19 @@ public class MessageUtil {
         IFormattableTextComponent bracketedText = TextComponentUtils.wrapInSquareBrackets(text);
         bracketedText.setStyle(bracketedText.getStyle().withColor(color).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText)));
         return bracketedText;
+    }
+
+    public static IFormattableTextComponent buildHelpStartComponent() {
+        String command = ArgumentUtil.buildCommandStr(CommandConstants.GLOBAL.toString(), CommandConstants.INFO.toString());
+        IFormattableTextComponent text = new TranslationTextComponent("help.hint.link.text");
+        IFormattableTextComponent hover = new TranslationTextComponent("help.hint.link.hover", CommandPermissionConfig.BASE_CMD);
+        return buildExecuteCmdComponent(text, hover, command, ClickEvent.Action.RUN_COMMAND, LINK_COLOR);
+    }
+
+    public static IFormattableTextComponent buildWikiLink() {
+        IFormattableTextComponent wikiLinkHover = new TranslationTextComponent("help.tooltip.wiki.link.hover");
+        IFormattableTextComponent wikiLink = new TranslationTextComponent("help.tooltip.wiki.link.text");
+        return buildExecuteCmdComponent(wikiLink, wikiLinkHover, "https://github.com/Z0rdak/Yet-Another-World-Protector/wiki", OPEN_URL, AQUA);
     }
 
     public static IFormattableTextComponent buildHelpSuggestionLink(String translationKey, CommandConstants baseCmd, CommandConstants cmd) {
