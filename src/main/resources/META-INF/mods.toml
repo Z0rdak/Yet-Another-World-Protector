@@ -1,6 +1,6 @@
 modLoader = "javafml" #mandatory
 loaderVersion = "${loader_version_range}" #mandatory
-license = "LGPL v3" #
+license = " AGPL v3" #
 logoFile = "logo.png" #optional
 
 [[mods]] #mandatory

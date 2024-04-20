@@ -199,6 +199,7 @@ time to enable new features and to improve the mod.
 * Moved the flag message examples to the language file to enable I18n support for the examples.
 * Flag list links for regions now also show number of inherited flags in parentheses
 * Rearranged the state CLI page for local regions, trying to give a more concise overview.
+* Changed license from LGPL v3 to AGPL v3.
 
 ## Removed
 
