@@ -16,7 +16,6 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import static de.z0rdak.yawp.util.MessageUtil.*;
 import static net.minecraft.ChatFormatting.AQUA;
 import static net.minecraft.ChatFormatting.GREEN;
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
@@ -57,27 +56,12 @@ public final class CommandRegistry {
     }
 
     private static int promptHelp(CommandSourceStack src) {
-        sendCmdFeedback(src, buildHeader("cli.msg.help.header"));
-        String command = ArgumentUtil.buildCommandStr(CommandConstants.DIM.toString(), "");
-        MutableComponent cmdStr = new TranslatableComponent("cli.msg.help.1", CommandPermissionConfig.BASE_CMD);
-        sendCmdFeedback(src, buildExecuteCmdComponent(
-                new TextComponent("=>"),
-                new TranslatableComponent("help.tooltip.dim"),
-                command, ClickEvent.Action.SUGGEST_COMMAND, GREEN)
-                .append(" ").append(cmdStr));
-        MutableComponent wikiText1 = new TranslatableComponent("help.tooltip.info.wiki.1");
-        MutableComponent wikiText2 = new TranslatableComponent("help.tooltip.info.wiki.2");
-        MutableComponent wikiText3 = new TranslatableComponent("help.tooltip.info.wiki.3");
-        MutableComponent wikiLinkHover = new TranslatableComponent("help.tooltip.info.wiki.link.hover");
-        MutableComponent wikiLink = new TranslatableComponent("help.tooltip.info.wiki.link.text");
-        MutableComponent wikiCopyToClipboardLink = buildExecuteCmdComponent(wikiLink, wikiLinkHover, "https://github.com/Z0rdak/Yet-Another-World-Protector/wiki", ClickEvent.Action.OPEN_URL, AQUA);
-        wikiText1.append("\n")
-                .append(wikiText2)
-                .append("\n")
-                .append(wikiText3)
-                .append(": ")
-                .append(wikiCopyToClipboardLink);
-        sendCmdFeedback(src, wikiText1);
+        sendCmdFeedback(src, buildHeader("help.header"));
+        MutableComponent wikiHint = new TranslatableComponent("help.tooltip.wiki.detail");
+        MutableComponent wikiText = new TranslatableComponent("help.tooltip.wiki");
+        sendCmdFeedback(src, wikiHint);
+        sendCmdFeedback(src, wikiText.append(": ").append(buildWikiLink()));
+        sendCmdFeedback(src, new TextComponent(" => ").append(buildHelpStartComponent()));
         return 0;
     }
 }

@@ -347,6 +347,19 @@ public class MessageUtil {
         return bracketedText;
     }
 
+    public static MutableComponent buildHelpStartComponent() {
+        String command = ArgumentUtil.buildCommandStr(CommandConstants.GLOBAL.toString(), CommandConstants.INFO.toString());
+        MutableComponent text = new TranslatableComponent("help.hint.link.text");
+        MutableComponent hover = new TranslatableComponent("help.hint.link.hover", CommandPermissionConfig.BASE_CMD);
+        return buildExecuteCmdComponent(text, hover, command, ClickEvent.Action.RUN_COMMAND, LINK_COLOR);
+    }
+
+    public static MutableComponent buildWikiLink() {
+        MutableComponent wikiLinkHover = new TranslatableComponent("help.tooltip.wiki.link.hover");
+        MutableComponent wikiLink = new TranslatableComponent("help.tooltip.wiki.link.text");
+        return buildExecuteCmdComponent(wikiLink, wikiLinkHover, "https://github.com/Z0rdak/Yet-Another-World-Protector/wiki", OPEN_URL, AQUA);
+    }
+
     public static MutableComponent buildHelpSuggestionLink(String translationKey, CommandConstants baseCmd, CommandConstants cmd) {
         String command = "/" + CommandPermissionConfig.BASE_CMD + " " + baseCmd + " " + cmd + " ";
         return new TextComponent(" ")
