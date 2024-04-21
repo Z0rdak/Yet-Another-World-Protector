@@ -85,7 +85,6 @@ public class OwnedRegionArgumentType implements ArgumentType<String> {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         if (context.getSource() instanceof CommandSourceStack src) {
@@ -106,7 +105,7 @@ public class OwnedRegionArgumentType implements ArgumentType<String> {
                             List<String> ownedRegions = dimCache.getRegions()
                                     .stream()
                                     .filter(r -> r.hasPlayer(player.getUUID(), CommandUtil.OWNER))
-                                    .filter(r -> ((CuboidArea) r.getArea()).contains(markedArea))
+                                    .filter(r -> (r.getArea()).containsOther(markedArea))
                                     .map(IMarkableRegion::getName)
                                     .collect(Collectors.toList());
                             if (ownedRegions.isEmpty()) {
