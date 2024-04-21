@@ -56,11 +56,6 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.deserializeNBT(nbt);
     }
 
-    @Override
-    public String getParentName() {
-        return parentName;
-    }
-
     protected AbstractRegion(String name, RegistryKey<World> dimension, RegionType type) {
         this.name = name;
         this.dimension = dimension;
@@ -80,6 +75,11 @@ public abstract class AbstractRegion implements IProtectedRegion {
         if (owner != null) {
             this.groups.get(OWNERS).addPlayer(owner.getUUID(), owner.getScoreboardName());
         }
+    }
+
+    @Override
+    public String getParentName() {
+        return parentName;
     }
 
     @Override
