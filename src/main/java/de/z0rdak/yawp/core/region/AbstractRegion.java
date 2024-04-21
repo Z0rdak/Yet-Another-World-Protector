@@ -213,14 +213,12 @@ public abstract class AbstractRegion implements IProtectedRegion {
 
     /**
      * Gets the container for the provided group. Creates a new one if none is existent.
-     * @param group
-     * @return
      */
     @Override
     public PlayerContainer getGroup(String group) {
         if (!this.groups.containsKey(group)) {
             // FIXME: return null instead to signal non-existing group? or manage them properly
-           return this.groups.put(group, new PlayerContainer());
+            return this.groups.put(group, new PlayerContainer());
         }
         return this.groups.get(group);
     }
@@ -240,14 +238,11 @@ public abstract class AbstractRegion implements IProtectedRegion {
     }
 
     public boolean isInGroup(Player player, String group) {
-        return this.groups.get(group).hasPlayer(player.getUUID())
-                || (player.getTeam() != null && this.groups.get(group).hasTeam(player.getTeam().getName()));
+        return this.groups.get(group).hasPlayer(player.getUUID()) || (player.getTeam() != null && this.groups.get(group).hasTeam(player.getTeam().getName()));
     }
 
     /**
      * Will always be called by IMarkableRegion to remove child of type IMarkableRegion
-     *
-     * @param child
      */
     @Override
     public void removeChild(IProtectedRegion child) {
@@ -366,9 +361,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
         }
         if (this.children != null) {
             ListTag childrenList = new ListTag();
-            childrenList.addAll(this.children.keySet().stream()
-                    .map(StringTag::valueOf)
-                    .collect(Collectors.toSet()));
+            childrenList.addAll(this.children.keySet().stream().map(StringTag::valueOf).collect(Collectors.toSet()));
             nbt.put(CHILDREN, childrenList);
         } else {
             nbt.put(CHILDREN, new ListTag());
