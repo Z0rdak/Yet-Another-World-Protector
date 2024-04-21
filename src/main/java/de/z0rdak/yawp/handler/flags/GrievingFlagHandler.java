@@ -4,6 +4,7 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.RegionFlag;
+import de.z0rdak.yawp.util.MessageSender;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
@@ -52,7 +53,7 @@ public class GrievingFlagHandler {
             }
             FlagState flagState = processCheck(checkEvent, null, denyResult -> {
                 event.setCanceled(true);
-                sendFlagMsg(denyResult);
+                MessageSender.sendFlagMsg(denyResult);
             });
             if (flagState == FlagState.DENIED)
                 return;
@@ -64,7 +65,7 @@ public class GrievingFlagHandler {
                 }
                 processCheck(playerTrampleFlagCheck, null, denyResult -> {
                     event.setCanceled(true);
-                    sendFlagMsg(denyResult);
+                    MessageSender.sendFlagMsg(denyResult);
                 });
             } else {
                 FlagCheckEvent entityTrampleFlagCheck = new FlagCheckEvent(event.getPos(), RegionFlag.TRAMPLE_FARMLAND_OTHER, dim, null);
@@ -125,7 +126,7 @@ public class GrievingFlagHandler {
             }
             FlagState flagState = processCheck(checkEvent, null, denyResult -> {
                 event.setCanceled(true);
-                sendFlagMsg(denyResult);
+                MessageSender.sendFlagMsg(denyResult);
             });
             if (flagState == FlagState.DENIED)
                 return;
@@ -136,7 +137,7 @@ public class GrievingFlagHandler {
                 }
                 processCheck(playerCheckEvent, null, denyResult -> {
                     event.setCanceled(true);
-                    sendFlagMsg(denyResult);
+                    MessageSender.sendFlagMsg(denyResult);
                 });
             }
         }
@@ -168,7 +169,7 @@ public class GrievingFlagHandler {
                 }
                 flagState = processCheck(checkEvent, null, denyResult -> {
                     event.setCanceled(true);
-                    sendFlagMsg(denyResult);
+                    MessageSender.sendFlagMsg(denyResult);
                 });
                 if (flagState == FlagState.DENIED)
                     return;
@@ -181,7 +182,7 @@ public class GrievingFlagHandler {
                     }
                     flagState = processCheck(checkEvent, null, denyResult -> {
                         event.setCanceled(true);
-                        sendFlagMsg(denyResult);
+                        MessageSender.sendFlagMsg(denyResult);
                     });
                     if (flagState == FlagState.DENIED) {
                     }
@@ -192,7 +193,7 @@ public class GrievingFlagHandler {
                     }
                     processCheck(checkEvent, null, denyResult -> {
                         event.setCanceled(true);
-                        sendFlagMsg(denyResult);
+                        MessageSender.sendFlagMsg(denyResult);
                     });
                 }
             }
