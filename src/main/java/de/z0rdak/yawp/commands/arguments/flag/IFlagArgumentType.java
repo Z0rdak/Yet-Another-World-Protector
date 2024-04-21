@@ -14,7 +14,6 @@ import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
-import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.util.text.StringTextComponent;
@@ -30,6 +29,7 @@ import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.ADD;
 import static de.z0rdak.yawp.commands.CommandConstants.REMOVE;
+import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
 
 public class IFlagArgumentType implements ArgumentType<String> {
 
@@ -89,12 +89,12 @@ public class IFlagArgumentType implements ArgumentType<String> {
             if (region.containsFlag(flagIdentifier)) {
                 return region.getFlag(flagIdentifier);
             } else {
-                MessageUtil.sendCmdFeedback(context.getSource(), new StringTextComponent("Region '" + region.getName() + "' does not contain flag '" + flagIdentifier + "'!"));
+                sendCmdFeedback(context.getSource(), new StringTextComponent("Region '" + region.getName() + "' does not contain flag '" + flagIdentifier + "'!"));
                 // Should not happen!
                 throw new IllegalArgumentException("Region '" + region.getName() + "' does not contain flag '" + flagIdentifier + "'!");
             }
         } else {
-            MessageUtil.sendCmdFeedback(context.getSource(), new StringTextComponent("Invalid flag identifier: '" + flagIdentifier + "'!"));
+            sendCmdFeedback(context.getSource(), new StringTextComponent("Invalid flag identifier: '" + flagIdentifier + "'!"));
             throw ERROR_INVALID_VALUE.create(flagIdentifier);
         }
     }
@@ -139,7 +139,7 @@ public class IFlagArgumentType implements ArgumentType<String> {
         boolean isCommandSource = context.getSource() instanceof CommandSource;
         if (regionType == null) {
             if (isCommandSource) {
-                MessageUtil.sendCmdFeedback((CommandSource) context.getSource(), new StringTextComponent("Invalid region type supplied"));
+                sendCmdFeedback((CommandSource) context.getSource(), new StringTextComponent("Invalid region type supplied"));
             }
             return Suggestions.empty();
         }
@@ -150,11 +150,11 @@ public class IFlagArgumentType implements ArgumentType<String> {
                 FlagEditType flagEditType = getEditType(context);
                 List<String> flagToSuggest = getSuggestionFlags(flagEditType, region);
                 if (flagEditType == FlagEditType.REMOVE && flagToSuggest.isEmpty()) {
-                    MessageUtil.sendCmdFeedback(src, new StringTextComponent("No flags defined in region '" + region.getName() + "'!"));
+                    sendCmdFeedback(src, new StringTextComponent("No flags defined in region '" + region.getName() + "'!"));
                     return Suggestions.empty();
                 }
                 if (flagEditType == FlagEditType.ADD && flagToSuggest.isEmpty()) {
-                    MessageUtil.sendCmdFeedback(src, new StringTextComponent("Region '" + region.getName() + "' already contains all flags!"));
+                    sendCmdFeedback(src, new StringTextComponent("Region '" + region.getName() + "' already contains all flags!"));
                     return Suggestions.empty();
                 }
                 return ISuggestionProvider.suggest(flagToSuggest, builder);

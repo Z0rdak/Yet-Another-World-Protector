@@ -16,7 +16,6 @@ import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import de.z0rdak.yawp.util.MessageUtil;
 import de.z0rdak.yawp.util.StickType;
 import de.z0rdak.yawp.util.StickUtil;
 import net.minecraft.command.CommandSource;
@@ -33,6 +32,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
 
 public class OwnedRegionArgumentType implements ArgumentType<String> {
 
@@ -59,7 +60,7 @@ public class OwnedRegionArgumentType implements ArgumentType<String> {
         if (region != null) {
             return region;
         } else {
-            MessageUtil.sendCmdFeedback(context.getSource(), new StringTextComponent("No region with name '" + argName + "' defined in dim '" + dimCache.dimensionKey().location() + "'"));
+            sendCmdFeedback(context.getSource(), new StringTextComponent("No region with name '" + argName + "' defined in dim '" + dimCache.dimensionKey().location() + "'"));
             throw ERROR_INVALID_VALUE.create(regionName);
         }
     }
@@ -110,7 +111,7 @@ public class OwnedRegionArgumentType implements ArgumentType<String> {
                                     .map(IMarkableRegion::getName)
                                     .collect(Collectors.toList());
                             if (ownedRegions.isEmpty()) {
-                                MessageUtil.sendCmdFeedback(src, new TranslationTextComponent("You don't have owner permissions for any region in this dimension!'"));
+                                sendCmdFeedback(src, new TranslationTextComponent("You don't have owner permissions for any region in this dimension!'"));
                                 return Suggestions.empty();
                             }
                             return ISuggestionProvider.suggest(ownedRegions, builder);

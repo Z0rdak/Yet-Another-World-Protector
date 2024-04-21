@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.CommandUtil.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
+import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
 import static de.z0rdak.yawp.util.MessageUtil.*;
 
 public class DimensionCommands {

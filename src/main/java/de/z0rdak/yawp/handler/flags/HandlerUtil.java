@@ -7,7 +7,6 @@ import de.z0rdak.yawp.core.flag.*;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.FlyingEntity;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
@@ -32,6 +31,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.core.flag.FlagMessage.REGION_TEMPLATE;
+import static de.z0rdak.yawp.util.MessageSender.sendNotification;
 
 public final class HandlerUtil {
 
@@ -117,7 +117,7 @@ public final class HandlerUtil {
             Map<String, String> msgSubstitutes = FlagMessage.defaultSubstitutesFor(result);
             msgSubstitutes.put(REGION_TEMPLATE, responsibleRegion.getName());
             IFormattableTextComponent flagMsg = FlagMessage.buildFrom(result, msgSubstitutes);
-            MessageUtil.sendNotification(player, flagMsg);
+            sendNotification(player, flagMsg);
         }
     }
 

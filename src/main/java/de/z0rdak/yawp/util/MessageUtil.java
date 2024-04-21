@@ -66,30 +66,6 @@ public class MessageUtil {
         return buildHeader(new TranslationTextComponent(translationKey));
     }
 
-    public static void sendCmdFeedback(CommandSource src, IFormattableTextComponent text) {
-        try {
-            if (src.getEntity() == null) {
-                src.sendSuccess(text, true);
-            } else {
-                sendMessage(src.getPlayerOrException(), text);
-            }
-        } catch (CommandSyntaxException e) {
-            YetAnotherWorldProtector.LOGGER.error(e);
-        }
-    }
-
-    public static void sendCmdFeedback(CommandSource src, String langKey) {
-        sendCmdFeedback(src, new TranslationTextComponent(langKey));
-    }
-
-    public static void sendMessage(PlayerEntity player, String translationKey) {
-        player.sendMessage(new TranslationTextComponent(translationKey), player.getUUID());
-    }
-
-    public static void sendNotification(PlayerEntity player, IFormattableTextComponent msg) {
-        player.displayClientMessage(msg, true);
-    }
-
     public static String buildTeleportCmd(String tpSource, BlockPos target) {
         return "tp " + tpSource + " " + buildBlockCoordinateStr(target);
     }
