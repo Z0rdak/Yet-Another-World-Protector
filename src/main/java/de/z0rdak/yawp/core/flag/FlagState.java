@@ -5,16 +5,32 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public enum FlagState {
-    DISABLED,
+    /**
+     * The flag is disabled, duh!
+     */
+    DISABLED("Disabled"),
     /**
      * The flag is allowed and implicitly active.
      */
-    ALLOWED,
+    ALLOWED("Allowed"),
     /**
      * The flag is denied and implicitly active.
      */
-    DENIED,
-    UNDEFINED;
+    DENIED("Denied"),
+    /**
+     * The flag is undefined and thus not present in a flag container. <br></br>
+     * This state is used to indicate that a flag is not set during flag checks. <br></br>
+     * It is not accessible for users to set this state.
+     *
+     * @see de.z0rdak.yawp.core.flag.FlagContainer
+     */
+    UNDEFINED("Undefined");
+
+    public final String name;
+
+    FlagState(String name) {
+        this.name = name;
+    }
 
     public static FlagState from(boolean value) {
         return value ? ALLOWED : DENIED;
@@ -29,14 +45,14 @@ public enum FlagState {
      * @throws IllegalArgumentException if the value is invalid
      */
     public static FlagState from(String value) throws IllegalArgumentException {
-        switch (value) {
-            case "ALLOWED":
+        switch (value.toLowerCase()) {
+            case "allowed":
                 return ALLOWED;
-            case "DENIED":
+            case "denied":
                 return DENIED;
-            case "DISABLED":
+            case "disabled":
                 return DISABLED;
-            case "UNDEFINED":
+            case "undefined":
                 return UNDEFINED;
             default:
                 throw new IllegalArgumentException("Unknown flag state: " + value);

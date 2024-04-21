@@ -96,7 +96,22 @@ public abstract class AbstractFlag implements IFlag {
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
         this.name = nbt.getString(FLAG_NAME);
-        this.state = FlagState.values()[nbt.getInt(FLAG_STATE)];
+        // Note: this is here for compatibility for the jump from 0.0.3.0-beta1 to 0.0.4.0-beta1
+        // The state was not saved in the nbt before, there was a boolean flag instead
+        if (nbt.contains(FLAG_STATE)) {
+            this.state = FlagState.from(nbt.getString(FLAG_STATE));
+        } else {
+            if (nbt.contains(FLAG_ACTIVE)) {
+                boolean active = nbt.getBoolean(FLAG_ACTIVE);
+                if (active) {
+                    this.state = FlagState.DENIED;
+                } else {
+                    this.state = FlagState.DISABLED;
+                }
+            } else {
+                this.state = FlagState.DISABLED;
+            }
+        }
         this.doesOverride = nbt.getBoolean(OVERRIDE);
         this.type = FlagType.of(nbt.getString(FLAG_TYPE));
         this.msg = new FlagMessage(nbt.getCompound(FLAG_MSG));
