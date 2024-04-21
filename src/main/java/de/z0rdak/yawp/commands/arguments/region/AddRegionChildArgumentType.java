@@ -10,10 +10,8 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
-import de.z0rdak.yawp.core.area.CuboidArea;
-import de.z0rdak.yawp.core.region.AbstractRegion;
-import de.z0rdak.yawp.core.region.CuboidRegion;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
+import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.commands.CommandSourceStack;
@@ -84,13 +82,13 @@ public class AddRegionChildArgumentType implements ArgumentType<String> {
         if (context.getSource() instanceof CommandSourceStack src) {
             DimensionRegionCache dimCache = ArgumentUtil.getDimCacheArgument((CommandContext<CommandSourceStack>) context);
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-            CuboidRegion region = (CuboidRegion) ArgumentUtil.getRegionArgument((CommandContext<CommandSourceStack>) context);
+            IMarkableRegion region = ArgumentUtil.getRegionArgument((CommandContext<CommandSourceStack>) context);
             List<String> potentialChildrenNames = dimRegion.getChildren().values()
                     .stream()
-                    .map(r -> (CuboidRegion) r)
+                    .map(r -> (IMarkableRegion) r)
                     .filter(r -> !r.getName().equals(region.getName()))
-                    .filter(r -> ((CuboidArea) region.getArea()).contains((CuboidArea) r.getArea()))
-                    .map(AbstractRegion::getName)
+                    .filter(r -> (region.getArea()).containsOther(r.getArea()))
+                    .map(IMarkableRegion::getName)
                     .collect(Collectors.toList());
             if (potentialChildrenNames.isEmpty()) {
                 MessageUtil.sendCmdFeedback(src, new TextComponent("There are no valid child regions for region '" + region.getName() + "'."));
