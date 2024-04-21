@@ -182,7 +182,7 @@ public final class FlagCommands {
         FlagState oldState = flag.getState();
         flag.setState(flagState);
         IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), oldState.name(), flagState.name());
-        IFormattableTextComponent msg = new TranslationTextComponent("cli.flag.enable.success.text",
+        IFormattableTextComponent msg = new TranslationTextComponent("cli.flag.state.success.text",
                 buildFlagInfoLink(region, flag), flag.isActive())
                 .append(" ")
                 .append(undoLink);
