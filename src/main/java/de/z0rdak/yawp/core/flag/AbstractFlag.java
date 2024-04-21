@@ -86,7 +86,7 @@ public abstract class AbstractFlag implements IFlag {
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putString(FLAG_NAME, this.name);
-        nbt.putInt(FLAG_STATE, this.state.ordinal());
+        nbt.putString(FLAG_STATE, this.state.name);
         nbt.putBoolean(OVERRIDE, this.doesOverride);
         nbt.putString(FLAG_TYPE, this.type.flagType);
         nbt.put(FLAG_MSG, this.msg.serializeNBT());
