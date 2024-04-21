@@ -4,6 +4,7 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
+import de.z0rdak.yawp.util.MessageSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
@@ -165,7 +166,7 @@ public class WorldFlagHandler {
                     }
                     HandlerUtil.processCheck(checkGeneralEvent, null, denyResult -> {
                         event.setCanceled(true);
-                        sendFlagMsg(denyResult);
+                        MessageSender.sendFlagMsg(denyResult);
                     });
                 }
             }

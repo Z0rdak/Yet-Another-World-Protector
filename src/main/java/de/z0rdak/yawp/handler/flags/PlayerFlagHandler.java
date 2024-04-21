@@ -5,6 +5,7 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.core.flag.FlagState;
+import de.z0rdak.yawp.util.MessageSender;
 import net.minecraft.block.AbstractPressurePlateBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -102,7 +103,7 @@ public final class PlayerFlagHandler {
                 }
                 HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                     event.setCanceled(true);
-                    sendFlagMsg(onDeny);
+                    MessageSender.sendFlagMsg(onDeny);
                 });
             }
         }
@@ -148,7 +149,7 @@ public final class PlayerFlagHandler {
             if (checkEvent != null) {
                 HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                     event.setCanceled(true);
-                    sendFlagMsg(onDeny);
+                    MessageSender.sendFlagMsg(onDeny);
                 });
             }
         }
@@ -163,7 +164,7 @@ public final class PlayerFlagHandler {
             }
             HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                 event.setCanceled(true);
-                sendFlagMsg(onDeny);
+                MessageSender.sendFlagMsg(onDeny);
             });
         }
     }
@@ -179,7 +180,7 @@ public final class PlayerFlagHandler {
                 }
                 HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                     event.setCanceled(true);
-                    sendFlagMsg(onDeny);
+                    MessageSender.sendFlagMsg(onDeny);
                 });
             }
         }
@@ -196,7 +197,7 @@ public final class PlayerFlagHandler {
                 }
                 HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                     event.setCanceled(true);
-                    sendFlagMsg(onDeny);
+                    MessageSender.sendFlagMsg(onDeny);
                 });
             }
         }
@@ -212,7 +213,7 @@ public final class PlayerFlagHandler {
             }
             HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                 event.setCanceled(true);
-                sendFlagMsg(onDeny);
+                MessageSender.sendFlagMsg(onDeny);
             });
         }
     }
@@ -228,7 +229,7 @@ public final class PlayerFlagHandler {
             HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                 event.setCanceled(true);
                 event.setAmount(0);
-                sendFlagMsg(onDeny);
+                MessageSender.sendFlagMsg(onDeny);
             });
         }
     }
@@ -244,7 +245,7 @@ public final class PlayerFlagHandler {
             HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                 event.setCanceled(true);
                 event.getOrb().remove();
-                sendFlagMsg(onDeny);
+                MessageSender.sendFlagMsg(onDeny);
             });
         }
     }
@@ -264,7 +265,7 @@ public final class PlayerFlagHandler {
                 HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                     event.setCanceled(true);
                     event.setAmount(0f);
-                    sendFlagMsg(onDeny);
+                    MessageSender.sendFlagMsg(onDeny);
                 });
             }
         }
@@ -283,7 +284,7 @@ public final class PlayerFlagHandler {
                 HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                     event.setCanceled(true);
                     event.setAmount(0f);
-                    sendFlagMsg(onDeny);
+                    MessageSender.sendFlagMsg(onDeny);
                 });
             }
         }
@@ -308,7 +309,7 @@ public final class PlayerFlagHandler {
                 HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                     event.setCanceled(true);
                     event.setAmount(0f);
-                    sendFlagMsg(onDeny);
+                    MessageSender.sendFlagMsg(onDeny);
                 });
             }
         }
@@ -326,7 +327,7 @@ public final class PlayerFlagHandler {
                 HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                     event.setCanceled(true);
                     event.setStrength(0);
-                    sendFlagMsg(onDeny);
+                    MessageSender.sendFlagMsg(onDeny);
                 });
                 checkEvent = new FlagCheckEvent(dmgTarget.blockPosition(), INVINCIBLE, getEntityDim(dmgTarget), null);
                 if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
@@ -335,7 +336,7 @@ public final class PlayerFlagHandler {
                 HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                     event.setCanceled(true);
                     event.setStrength(0);
-                    sendFlagMsg(onDeny);
+                    MessageSender.sendFlagMsg(onDeny);
                 });
             }
         }
@@ -352,7 +353,7 @@ public final class PlayerFlagHandler {
             HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                 event.setCanceled(true);
                 updateBlockState((World) event.getWorld(), event.getPos());
-                sendFlagMsg(onDeny);
+                MessageSender.sendFlagMsg(onDeny);
             });
         }
     }
@@ -381,7 +382,7 @@ public final class PlayerFlagHandler {
                 HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                     event.setCanceled(true);
                     updateBlockState((World) event.getWorld(), event.getPos());
-                    sendFlagMsg(onDeny);
+                    MessageSender.sendFlagMsg(onDeny);
                 });
             }
         }
@@ -406,7 +407,7 @@ public final class PlayerFlagHandler {
                 }
                 processCheck(checkEvent, null, onDeny -> {
                     event.setCanceled(true);
-                    sendFlagMsg(onDeny);
+                    MessageSender.sendFlagMsg(onDeny);
                 });
             }
         }
@@ -432,7 +433,7 @@ public final class PlayerFlagHandler {
                     }
                     processCheck(checkEvent, null, onDeny -> {
                         event.setCanceled(true);
-                        sendFlagMsg(onDeny);
+                        MessageSender.sendFlagMsg(onDeny);
                     });
                 }
             }
@@ -459,7 +460,7 @@ public final class PlayerFlagHandler {
             }
             HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                 event.setCanceled(true);
-                sendFlagMsg(onDeny);
+                MessageSender.sendFlagMsg(onDeny);
             });
         }
     }
@@ -477,7 +478,7 @@ public final class PlayerFlagHandler {
                 }
                 FlagState flagState = processCheck(checkEvent, null, onDeny -> {
                     event.setCanceled(true);
-                    sendFlagMsg(onDeny);
+                    MessageSender.sendFlagMsg(onDeny);
                 });
                 if (flagState == FlagState.DENIED)
                     return;
@@ -488,7 +489,7 @@ public final class PlayerFlagHandler {
                 }
                 processCheck(checkEvent, null, onDeny -> {
                     event.setCanceled(true);
-                    sendFlagMsg(onDeny);
+                    MessageSender.sendFlagMsg(onDeny);
                 });
                 /* FIXME: refund pearl - duplication bug with e.g. origins mod
                 int count = player.getHeldItem(player.getActiveHand()).getCount();
@@ -512,7 +513,7 @@ public final class PlayerFlagHandler {
             }
             FlagState flagState = processCheck(checkEvent, null, onDeny -> {
                 event.setCanceled(true);
-                sendFlagMsg(onDeny);
+                MessageSender.sendFlagMsg(onDeny);
             });
             if (flagState == FlagState.DENIED)
                 return;
@@ -538,7 +539,7 @@ public final class PlayerFlagHandler {
             if (checkEvent != null) {
                 processCheck(checkEvent, null, onDeny -> {
                     event.setCanceled(true);
-                    sendFlagMsg(onDeny);
+                    MessageSender.sendFlagMsg(onDeny);
                 });
             }
         }
@@ -567,7 +568,7 @@ public final class PlayerFlagHandler {
                     }
                     processCheck(checkEvent, null, onDeny -> {
                         event.setCanceled(true);
-                        sendFlagMsg(onDeny);
+                        MessageSender.sendFlagMsg(onDeny);
                         event.getWorld().updateNeighborsAt(pos.getBlockPos(), event.getWorld().getBlockState(pos.getBlockPos()).getBlock());
                     });
                 }
@@ -580,7 +581,7 @@ public final class PlayerFlagHandler {
                     }
                     processCheck(checkEvent, null, onDeny -> {
                         event.setCanceled(true);
-                        sendFlagMsg(onDeny);
+                        MessageSender.sendFlagMsg(onDeny);
                     });
                 }
                 // check for container access
@@ -591,7 +592,7 @@ public final class PlayerFlagHandler {
                     }
                     processCheck(checkEvent, null, onDeny -> {
                         event.setCanceled(true);
-                        sendFlagMsg(onDeny);
+                        MessageSender.sendFlagMsg(onDeny);
                     });
                 }
             }
@@ -602,7 +603,7 @@ public final class PlayerFlagHandler {
                 }
                 processCheck(checkEvent, null, onDeny -> {
                     event.setCanceled(true);
-                    sendFlagMsg(onDeny);
+                    MessageSender.sendFlagMsg(onDeny);
                 });
             }
         }
@@ -620,7 +621,7 @@ public final class PlayerFlagHandler {
                 }
                 HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                     event.setCanceled(true);
-                    sendFlagMsg(onDeny);
+                    MessageSender.sendFlagMsg(onDeny);
                 });
             }
         }
@@ -637,7 +638,7 @@ public final class PlayerFlagHandler {
             }
             HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                 event.setCanceled(true);
-                sendFlagMsg(onDeny);
+                MessageSender.sendFlagMsg(onDeny);
             });
             if (!hasEmptyHands(player)) {
 
@@ -647,7 +648,7 @@ public final class PlayerFlagHandler {
                 }
                 HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                     event.setCanceled(true);
-                    sendFlagMsg(onDeny);
+                    MessageSender.sendFlagMsg(onDeny);
                 });
             }
         }
@@ -668,7 +669,7 @@ public final class PlayerFlagHandler {
             }
             HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                 event.setCanceled(true);
-                sendFlagMsg(onDeny);
+                MessageSender.sendFlagMsg(onDeny);
             });
             if (!hasEmptyHands(player)) {
                 checkEvent = new FlagCheckEvent(event.getPos(), USE_ENTITIES, getEntityDim(player), player);
@@ -677,7 +678,7 @@ public final class PlayerFlagHandler {
                 }
                 HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                     event.setCanceled(true);
-                    sendFlagMsg(onDeny);
+                    MessageSender.sendFlagMsg(onDeny);
                 });
             }
         }
@@ -695,7 +696,7 @@ public final class PlayerFlagHandler {
                 }
                 HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                     event.setCanceled(true);
-                    sendFlagMsg(onDeny);
+                    MessageSender.sendFlagMsg(onDeny);
                 });
             }
             checkEvent = new FlagCheckEvent(event.getPos(), USE_ITEMS, getEntityDim(player), player);
@@ -704,7 +705,7 @@ public final class PlayerFlagHandler {
             }
             HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                 event.setCanceled(true);
-                sendFlagMsg(onDeny);
+                MessageSender.sendFlagMsg(onDeny);
             });
 
 
@@ -734,7 +735,7 @@ public final class PlayerFlagHandler {
                     playerCheckEventMap.put(player, checkEvent);
                 }
                 for (Map.Entry<PlayerEntity, FlagCheckEvent> entry : playerCheckEventMap.entrySet()) {
-                    FlagState state = HandlerUtil.processCheck(entry.getValue(), null, HandlerUtil::sendFlagMsg);
+                    FlagState state = HandlerUtil.processCheck(entry.getValue(), null, MessageSender::sendFlagMsg);
                     if (state == FlagState.DENIED) {
                         cumulativeState[0] = state;
                     }
@@ -768,7 +769,7 @@ public final class PlayerFlagHandler {
                     }
                     HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                         event.setCanceled(true);
-                        sendFlagMsg(onDeny);
+                        MessageSender.sendFlagMsg(onDeny);
                     });
                 }
                 // scooping fluid (breaking fluid)
@@ -795,7 +796,7 @@ public final class PlayerFlagHandler {
                             }
                             HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                                 event.setCanceled(true);
-                                sendFlagMsg(onDeny);
+                                MessageSender.sendFlagMsg(onDeny);
                             });
                         }
                     }
@@ -818,7 +819,7 @@ public final class PlayerFlagHandler {
             }
             HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                 event.setCanceled(true);
-                sendFlagMsg(onDeny);
+                MessageSender.sendFlagMsg(onDeny);
             });
         }
     }
@@ -833,7 +834,7 @@ public final class PlayerFlagHandler {
             }
             HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                 event.setCanceled(true);
-                sendFlagMsg(onDeny);
+                MessageSender.sendFlagMsg(onDeny);
             });
         } catch (CommandSyntaxException e) {
             // Most likely thrown because command was not send by a player.
@@ -852,7 +853,7 @@ public final class PlayerFlagHandler {
                 }
                 HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                     event.setResult(Event.Result.DENY);
-                    sendFlagMsg(onDeny);
+                    MessageSender.sendFlagMsg(onDeny);
                 });
             });
         }
@@ -870,7 +871,7 @@ public final class PlayerFlagHandler {
                 }
                 HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                     event.setCanceled(true);
-                    sendFlagMsg(onDeny);
+                    MessageSender.sendFlagMsg(onDeny);
                 });
             }
         }
@@ -889,7 +890,7 @@ public final class PlayerFlagHandler {
                 event.setCanceled(true);
                 player.addItem(event.getEntityItem().getItem());
                 player.inventory.setChanged();
-                sendFlagMsg(onDeny);
+                MessageSender.sendFlagMsg(onDeny);
             });
         }
     }
@@ -909,7 +910,7 @@ public final class PlayerFlagHandler {
                 }
                 HandlerUtil.processCheck(checkEvent, null, onDeny -> {
                     event.setCanceled(true);
-                    sendFlagMsg(onDeny);
+                    MessageSender.sendFlagMsg(onDeny);
                 });
                 if (event.isDismounting()) {
                     /* FIXME: Disabled in 1.16.5. Canceling event breaks unmounting. Wait for 1.17 fix: https://bugs.mojang.com/browse/MC-202202

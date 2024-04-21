@@ -2,6 +2,7 @@ package de.z0rdak.yawp.mixin;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.handler.flags.HandlerUtil;
+import de.z0rdak.yawp.util.MessageSender;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.TNTBlock;
 import net.minecraft.entity.player.PlayerEntity;
@@ -34,7 +35,7 @@ public class TntBlockMixin {
                 }
                 HandlerUtil.processCheck(checkEvent, null, denyResult -> {
                     cir.setReturnValue(ActionResultType.CONSUME);
-                    HandlerUtil.sendFlagMsg(denyResult);
+                    MessageSender.sendFlagMsg(denyResult);
                 });
             }
         }

@@ -3,7 +3,10 @@ package de.z0rdak.yawp.handler.flags;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
-import de.z0rdak.yawp.core.flag.*;
+import de.z0rdak.yawp.core.flag.FlagContainer;
+import de.z0rdak.yawp.core.flag.FlagState;
+import de.z0rdak.yawp.core.flag.IFlag;
+import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -19,7 +22,6 @@ import net.minecraft.entity.passive.WaterMobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityEvent;
@@ -29,9 +31,6 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
-import static de.z0rdak.yawp.core.flag.FlagMessage.REGION_TEMPLATE;
-import static de.z0rdak.yawp.util.MessageSender.sendNotification;
 
 public final class HandlerUtil {
 
@@ -97,28 +96,6 @@ public final class HandlerUtil {
                 || entity instanceof FlyingEntity
                 || entity instanceof EnderDragonEntity
                 || entity instanceof ShulkerEntity;
-    }
-
-    /**
-     * Sends the flag message for the given flag check event. <br>     *
-     *
-     * @param result the flag check event to send the message for
-     */
-    public static void sendFlagMsg(FlagCheckResult result) {
-        IProtectedRegion responsibleRegion = result.getResponsible();
-        IFlag flag = responsibleRegion.getFlag(result.getFlagCheck().getRegionFlag().name);
-        if (flag == null || result.getFlagState() == FlagState.UNDEFINED || result.getFlagState() == FlagState.DISABLED) {
-            return;
-        }
-        boolean isFlagMuted = flag.getFlagMsg().isMuted() || responsibleRegion.isMuted();
-        PlayerEntity player = result.getFlagCheck().getPlayer();
-        // If not muted and the event is a player event, send the message
-        if (!isFlagMuted && player instanceof PlayerEntity) {
-            Map<String, String> msgSubstitutes = FlagMessage.defaultSubstitutesFor(result);
-            msgSubstitutes.put(REGION_TEMPLATE, responsibleRegion.getName());
-            IFormattableTextComponent flagMsg = FlagMessage.buildFrom(result, msgSubstitutes);
-            sendNotification(player, flagMsg);
-        }
     }
 
     /**
