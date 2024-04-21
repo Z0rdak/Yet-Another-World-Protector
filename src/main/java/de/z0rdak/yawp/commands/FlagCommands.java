@@ -181,7 +181,7 @@ public final class FlagCommands {
         FlagState oldState = flag.getState();
         flag.setState(flagState);
         MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), oldState.name(), flagState.name());
-        MutableComponent msg = new TranslatableComponent("cli.flag.enable.success.text",
+        MutableComponent msg = new TranslatableComponent("cli.flag.state.success.text",
                 buildFlagInfoLink(region, flag), flag.isActive())
                 .append(" ")
                 .append(undoLink);
