@@ -67,7 +67,7 @@ public enum FlagState {
      */
     public static List<String> ValidFlagStates() {
         // exclude UNDEFINED
-        return Arrays.stream(FlagState.values()).filter(state -> state != UNDEFINED).map(Enum::name).collect(Collectors.toList());
+        return Arrays.stream(FlagState.values()).filter(state -> state != UNDEFINED).map(fs -> fs.name).collect(Collectors.toList());
     }
 
     public static FlagState invert(FlagState state) {
