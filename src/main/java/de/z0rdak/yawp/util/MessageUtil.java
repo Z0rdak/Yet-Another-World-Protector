@@ -502,15 +502,15 @@ public class MessageUtil {
         MutableComponent linkText = new TranslatableComponent("cli.msg.info.region.group.player.list.link.text", players.getPlayers().size());
         return switch (region.getRegionType()) {
             case GLOBAL -> {
-                String cmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), group, PLAYER.toString());
+                String cmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), GROUP.toString(), group, PLAYER.toString());
                 yield buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
             case DIMENSION -> {
-                String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), group, PLAYER.toString());
+                String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), GROUP.toString(), group, PLAYER.toString());
                 yield buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
             case LOCAL -> {
-                String cmd = buildCommandStr(LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), group, PLAYER.toString());
+                String cmd = buildCommandStr(LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), GROUP.toString(), group, PLAYER.toString());
                 yield buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
             default ->
@@ -522,7 +522,6 @@ public class MessageUtil {
      * Teams: [n team(s)] [+]
      * // TODO:
      */
-    // TODO: Link building could be generalized if the command structure would be always the same except the region specific parts
     public static MutableComponent buildTeamListLink(IProtectedRegion region, PlayerContainer teams, String group) {
         MutableComponent hoverText = new TranslatableComponent("cli.msg.info.region.group.team.list.link.hover", group, region.getName());
         MutableComponent linkText = new TranslatableComponent("cli.msg.info.region.group.team.list.link.text", teams.getTeams().size());
