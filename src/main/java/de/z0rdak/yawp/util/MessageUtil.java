@@ -1,7 +1,5 @@
 package de.z0rdak.yawp.util;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.CommandConstants;
 import de.z0rdak.yawp.commands.CommandUtil;
 import de.z0rdak.yawp.commands.RegionCommands;
@@ -23,7 +21,6 @@ import de.z0rdak.yawp.handler.flags.FlagCorrelation;
 import de.z0rdak.yawp.handler.flags.HandlerUtil;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import net.minecraft.command.CommandSource;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.scoreboard.Team;
@@ -530,18 +527,18 @@ public class MessageUtil {
     public static IFormattableTextComponent buildAddToGroupLink(IProtectedRegion region, String group, GroupType groupType) {
         IFormattableTextComponent linkText = new TranslationTextComponent("cli.link.add");
         IFormattableTextComponent hoverText = new TranslationTextComponent("cli.msg.info.region.group." + groupType.name + ".add.link.hover", group, region.getName());
-        String subCmd = buildSubCmdStr(ADD.toString(), GROUP.toString(), groupType.name, group, "");
+        String subCmd = buildSubCmdStr(ADD.toString(), groupType.name, group, "");
         switch (region.getRegionType()) {
             case GLOBAL: {
-                String cmd = buildCommandStr(GLOBAL.toString()) + " " + subCmd;
-                return buildExecuteCmdComponent(linkText, hoverText, cmd, SUGGEST_COMMAND, ADD_CMD_COLOR);
-            }
-            case LOCAL: {
-                String cmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName()) + " " + subCmd;
+                String cmd = buildCommandStr(GLOBAL.toString(), subCmd);
                 return buildExecuteCmdComponent(linkText, hoverText, cmd, SUGGEST_COMMAND, ADD_CMD_COLOR);
             }
             case DIMENSION: {
-                String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString()) + " " + subCmd;
+                String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), subCmd);
+                return buildExecuteCmdComponent(linkText, hoverText, cmd, SUGGEST_COMMAND, ADD_CMD_COLOR);
+            }
+            case LOCAL: {
+                String cmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), subCmd);
                 return buildExecuteCmdComponent(linkText, hoverText, cmd, SUGGEST_COMMAND, ADD_CMD_COLOR);
             }
             default:
@@ -1340,6 +1337,15 @@ public class MessageUtil {
         IFormattableTextComponent linkText = new TranslationTextComponent("cli.link.remove");
         IFormattableTextComponent hoverText = new TranslationTextComponent("cli.msg.info.region.group." + groupType.name + ".remove.link.hover", name, region.getName());
         IFormattableTextComponent regionRemoveLink;
+        if (groupType == GroupType.PLAYER) {
+            PlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByName(name);
+            boolean isOffline = player == null;
+            if (isOffline) {
+                return new StringTextComponent(" - ")
+                        .append(buildRemoveLinkForOfflinePlayer(region, name, groupType, group, linkText, hoverText)).append(" ")
+                        .append(buildGroupInfo(region, name, groupType));
+            }
+        }
         switch (region.getRegionType()) {
             case GLOBAL: {
                 String command = buildCommandStr(GLOBAL.toString(), REMOVE.toString(), groupType.name, group, name);
@@ -1362,6 +1368,26 @@ public class MessageUtil {
         return new StringTextComponent(" - ")
                 .append(regionRemoveLink).append(" ")
                 .append(buildGroupInfo(region, name, groupType));
+    }
+
+    private static IFormattableTextComponent buildRemoveLinkForOfflinePlayer(IProtectedRegion region, String name, GroupType groupType, String group, IFormattableTextComponent linkText, IFormattableTextComponent hoverText) {
+        IFormattableTextComponent regionRemoveLink;
+        switch (region.getRegionType()) {
+            case GLOBAL: {
+                String command = buildCommandStr(GLOBAL.toString(), REMOVE.toString(), groupType.name, group, BY_NAME.toString(), name);
+                return buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, REMOVE_CMD_COLOR);
+            }
+            case DIMENSION: {
+                String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), REMOVE.toString(), groupType.name, group, BY_NAME.toString(), name);
+                return buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, REMOVE_CMD_COLOR);
+            }
+            case LOCAL: {
+                String command = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), REMOVE.toString(), groupType.name, group, BY_NAME.toString(), name);
+                return buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, REMOVE_CMD_COLOR);
+            }
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     public static IFormattableTextComponent buildGroupInfo(IProtectedRegion region, String groupMemberName, GroupType groupType) {
