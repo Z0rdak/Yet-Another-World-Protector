@@ -6,6 +6,10 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public class GlobalRegion extends AbstractRegion {
 
     public static final ResourceLocation GLOBAL = new ResourceLocation("yawp", "global");
@@ -23,6 +27,14 @@ public class GlobalRegion extends AbstractRegion {
         super(name, GLOBAL_DIMENSION, type);
         this.parent = this;
         this.parentName = GLOBAL.toString();
+    }
+
+    @Override
+    public Map<String, IProtectedRegion> getChildren() {
+        Map<String, IProtectedRegion> childrenWithoutGlobal = this.children.entrySet().stream()
+                .filter(e -> e.getValue().getRegionType() != RegionType.GLOBAL)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return Collections.unmodifiableMap(childrenWithoutGlobal);
     }
 
     @Override
