@@ -742,28 +742,31 @@ public class CommandUtil {
     public static void removeInvolvedEntities(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, RegionFlag flag) {
         ResourceKey<Level> dimKey = ResourceKey.create(Registry.DIMENSION_REGISTRY, region.getDim().location());
         MinecraftServer server = ctx.getSource().getServer();
-        ServerLevel regionWorld = server.getLevel(dimKey);
-        if (regionWorld != null) {
-            Predicate<? super Entity> entityFilter = getEntityFilterForFlag(flag);
-            switch (region.getRegionType()) {
-                case GLOBAL: {
-                    server.getAllLevels().forEach(world -> {
-                        List<Entity> entitiesToRemove = getEntitiesToRemove(world, entityFilter, flag);
-                        entitiesToRemove.forEach(world::despawn);
-                    });
-                }
-                break;
-                case DIMENSION: {
-                    List<Entity> entitiesToRemove = getEntitiesToRemove(regionWorld, entityFilter, flag);
-                    entitiesToRemove.forEach(regionWorld::despawn);
-                }
-                break;
-                case LOCAL: {
-                    List<Entity> entitiesToRemove = getEntitiesToRemove(regionWorld, (IMarkableRegion) region, entityFilter);
-                    entitiesToRemove.forEach(regionWorld::despawn);
-                }
-                break;
+        Predicate<? super Entity> entityFilter = getEntityFilterForFlag(flag);
+        switch (region.getRegionType()) {
+            case GLOBAL: {
+                server.getAllLevels().forEach(world -> {
+                    List<Entity> entitiesToRemove = getEntitiesToRemove(world, entityFilter, flag);
+                    entitiesToRemove.forEach(e -> e.setRemoved(Entity.RemovalReason.DISCARDED));
+                });
             }
+            break;
+            case DIMENSION: {
+                ServerLevel regionWorld = server.getLevel(dimKey);
+                if (regionWorld != null) {
+                    List<Entity> entitiesToRemove = getEntitiesToRemove(regionWorld, entityFilter, flag);
+                    entitiesToRemove.forEach(e -> e.setRemoved(Entity.RemovalReason.DISCARDED));
+                }
+            }
+            break;
+            case LOCAL: {
+                ServerLevel regionWorld = server.getLevel(dimKey);
+                if (regionWorld != null) {
+                    List<Entity> entitiesToRemove = getEntitiesToRemove(regionWorld, (IMarkableRegion) region, entityFilter);
+                    entitiesToRemove.forEach(e -> e.setRemoved(Entity.RemovalReason.DISCARDED));
+                }
+            }
+            break;
         }
     }
 
