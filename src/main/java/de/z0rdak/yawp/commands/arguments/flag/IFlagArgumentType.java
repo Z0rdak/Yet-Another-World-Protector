@@ -11,6 +11,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.commands.CommandConstants;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
@@ -27,7 +28,6 @@ import net.minecraft.network.chat.TranslatableComponent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -105,10 +105,13 @@ public class IFlagArgumentType implements ArgumentType<String> {
     }
 
     private <S> FlagEditType getEditType(CommandContext<S> context) {
-        Set<String> nodes = context.getNodes()
+        List<String> nodes = context.getNodes()
                 .stream()
                 .map(node -> node.getNode().getName())
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
+        if (nodes.get(1).equals(CommandConstants.FLAG.toString())) {
+            return FlagEditType.INFO;
+        }
         if (nodes.contains(ADD.toString())) {
             return FlagEditType.ADD;
         }
@@ -130,6 +133,7 @@ public class IFlagArgumentType implements ArgumentType<String> {
                 flags.removeAll(flagsInRegion);
                 return flags;
             case REMOVE: // Only show existing flags
+            case INFO:
                 return flagsInRegion;
             case UNSET:
             default:
@@ -154,7 +158,7 @@ public class IFlagArgumentType implements ArgumentType<String> {
                 IProtectedRegion region = RegionArgumentType.getRegion((CommandContext<CommandSourceStack>) context, regionType);
                 FlagEditType flagEditType = getEditType(context);
                 List<String> flagToSuggest = getSuggestionFlags(flagEditType, region);
-                if (flagEditType == FlagEditType.REMOVE && flagToSuggest.isEmpty()) {
+                if ((flagEditType == FlagEditType.REMOVE || flagEditType == FlagEditType.INFO) && flagToSuggest.isEmpty()) {
                     MessageUtil.sendCmdFeedback(src, new TextComponent("No flags defined in region '" + region.getName() + "'!"));
                     return Suggestions.empty();
                 }
