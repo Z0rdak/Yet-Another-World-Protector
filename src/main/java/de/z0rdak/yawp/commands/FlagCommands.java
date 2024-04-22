@@ -37,7 +37,6 @@ public final class FlagCommands {
     }
 
     public static LiteralArgumentBuilder<CommandSource> build() {
-
         return literal(FLAG)
                 .then(literal(GLOBAL)
                         .then(flagSubCmd((ctx) -> getGlobalRegion())))
@@ -181,9 +180,9 @@ public final class FlagCommands {
     private static int setFlagState(CommandContext<CommandSource> ctx, IProtectedRegion region, IFlag flag, FlagState flagState) {
         FlagState oldState = flag.getState();
         flag.setState(flagState);
-        IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), oldState.name(), flagState.name());
+        IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), flagState.name, oldState.name);
         IFormattableTextComponent msg = new TranslationTextComponent("cli.flag.state.success.text",
-                buildFlagInfoLink(region, flag), flag.getState())
+                buildFlagInfoLink(region, flag), flag.getState().name)
                 .append(" ")
                 .append(undoLink);
         sendCmdFeedback(ctx.getSource(), msg);

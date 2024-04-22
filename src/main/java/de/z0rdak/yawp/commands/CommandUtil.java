@@ -717,6 +717,7 @@ public class CommandUtil {
             }
             if (flag.name.contains("spawning") && FlagConfig.removeEntitiesEnabled()) {
                 removeInvolvedEntities(ctx, region, flag);
+                // TODO: remove entities from regions when changing flag state or override state
             }
             region.addFlag(iFlag);
             RegionDataManager.save();
