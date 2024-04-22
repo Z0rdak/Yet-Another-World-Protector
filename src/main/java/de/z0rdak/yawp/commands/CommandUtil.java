@@ -738,28 +738,31 @@ public class CommandUtil {
     public static void removeInvolvedEntities(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionFlag flag) {
         RegistryKey<World> dimKey = RegistryKey.create(Registry.DIMENSION_REGISTRY, region.getDim().location());
         MinecraftServer server = ctx.getSource().getServer();
-        ServerWorld regionWorld = server.getLevel(dimKey);
-        if (regionWorld != null) {
-            Predicate<? super Entity> entityFilter = getEntityFilterForFlag(flag);
-            switch (region.getRegionType()) {
-                case GLOBAL: {
-                    server.getAllLevels().forEach(world -> {
-                        List<Entity> entitiesToRemove = getEntitiesToRemove(world, entityFilter, flag);
-                        entitiesToRemove.forEach(world::despawn);
-                    });
-                }
-                break;
-                case DIMENSION: {
+        Predicate<? super Entity> entityFilter = getEntityFilterForFlag(flag);
+        switch (region.getRegionType()) {
+            case GLOBAL: {
+                server.getAllLevels().forEach(world -> {
+                    List<Entity> entitiesToRemove = getEntitiesToRemove(world, entityFilter, flag);
+                    entitiesToRemove.forEach(world::despawn);
+                });
+            }
+            break;
+            case DIMENSION: {
+                ServerWorld regionWorld = server.getLevel(dimKey);
+                if (regionWorld != null) {
                     List<Entity> entitiesToRemove = getEntitiesToRemove(regionWorld, entityFilter, flag);
                     entitiesToRemove.forEach(regionWorld::despawn);
                 }
-                break;
-                case LOCAL: {
+            }
+            break;
+            case LOCAL: {
+                ServerWorld regionWorld = server.getLevel(dimKey);
+                if (regionWorld != null) {
                     List<Entity> entitiesToRemove = getEntitiesToRemove(regionWorld, (IMarkableRegion) region, entityFilter);
                     entitiesToRemove.forEach(regionWorld::despawn);
                 }
-                break;
             }
+            break;
         }
     }
 
