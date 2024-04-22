@@ -719,7 +719,7 @@ public class MessageUtil {
                 return buildExecuteCmdComponent(text, hoverText, cmd, RUN_COMMAND, linkColor);
             }
             case DIMENSION: {
-                String cmd = buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().location().toString(), INFO.toString());
+                String cmd = buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().location().toString(), flag.getName(), INFO.toString());
                 return buildExecuteCmdComponent(text, hoverText, cmd, RUN_COMMAND, linkColor);
             }
             case LOCAL: {
