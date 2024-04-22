@@ -803,20 +803,21 @@ public class CommandUtil {
     }
 
     /**
-     * TODO: make this work with areas of different shapes by manually implementing it. <br>
-     * Use the predicate to determine if the entity is within the region
-     * ...area.intersects(entity.getBoundingBox()) ...
+     * Get all entities in the region which are not persistent and match the entityFilter
      */
     private static List<Entity> getEntitiesToRemove(ServerLevel level, IMarkableRegion region, Predicate<? super Entity> entityFilter) {
-        return level.getEntities((Entity) null, ((CuboidArea) region.getArea()).getArea(), entityFilter)
-                .stream()
+        // TODO: could be optimized by getting the chunks around the area only to check
+        return level.getEntities()
+                .filter(entityFilter)
+                .filter(e -> region.getArea().containsOther(new CuboidArea(e.getBoundingBox())))
                 .filter(CommandUtil::isNotPersistent)
                 .collect(Collectors.toList());
+        //return level.getEntities((Entity) null, ((CuboidArea) region.getArea()).getArea(), entityFilter)
+        //        .stream()
+        //        .filter(CommandUtil::isNotPersistent)
+        //        .collect(Collectors.toList());
     }
 
-    /**
-     * TODO: after flags can be negated (either flag is not existent or deactivated...)
-     */
     private static List<Entity> getEntitiesToRemove(ServerLevel level, Predicate<? super Entity> entityFilter, RegionFlag flag) {
         List<Entity> entities = level.getEntities(null, entityFilter);
         return entities.stream()
