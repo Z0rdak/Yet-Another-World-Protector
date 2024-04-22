@@ -90,15 +90,14 @@ time to enable new features and to improve the mod.
 * Child regions now inherit the flags of their parent regions. This means that every region will also inherit the flags
   of the corresponding Dimensional region and the Global Region.
 * Parent regions can now override flags of child regions to enforce flags onto them.
-* Flag pagination now includes parent flags (in italic)
+* Flag pagination now includes parent flags (links to parent flags and the parent itself are shown behind the flag
+  name). The region type is indicated by an indicator. **G** for Global, **D** for Dimensional and **L** for Local
+  Regions.
 * Flag pagination now also sorts flags by region and flag state
-  * WHITE - allowed flags
-  * RED - denied flags
-  * GRAY - disabled flags
-  * DARK GRAY - undefined flags
-* Flag pagination shows overriding flags in a bolt/underline font
+  * Green - allowed flags
+  * Red - denied flags
+  * Gray - disabled flags
 * Add interactive CLI support for enhanced flag management
-  * TODO: FlagState CLI update
 
 ### Sphere Local Region
 
@@ -200,6 +199,7 @@ time to enable new features and to improve the mod.
 * Flag list links for regions now also show number of inherited flags in parentheses
 * Rearranged the state CLI page for local regions, trying to give a more concise overview.
 * Changed license from LGPL v3 to AGPL v3.
+* Change Dimensional Region state CLI to toggle the state (enable and alert) of all Local Regions in the dimension.
 
 ## Removed
 
