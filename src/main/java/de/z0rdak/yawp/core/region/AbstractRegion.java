@@ -258,7 +258,11 @@ public abstract class AbstractRegion implements IProtectedRegion {
 
     @Override
     public void addChild(IProtectedRegion child) {
+        if (this.getRegionType() == RegionType.GLOBAL && child.getRegionType() == RegionType.GLOBAL) {
+            return; // don't add global as its own child
+        }
         IProtectedRegion parent = child.getParent();
+        // TODO: consider current parent, to check if adding child is allowed
         if (parent instanceof IMarkableRegion) {
             if (!parent.equals(this) && this instanceof IMarkableRegion) {
                 // TODO: Why not allow this, as long as the owner of both regions are the same?
