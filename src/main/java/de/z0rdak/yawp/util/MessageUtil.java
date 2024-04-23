@@ -91,9 +91,7 @@ public class MessageUtil {
     }
 
     public static IFormattableTextComponent buildHeader(IFormattableTextComponent header) {
-        return new StringTextComponent(String.valueOf(BOLD))
-                .append(header)
-                .append(new StringTextComponent(String.valueOf(BOLD)));
+        return new TranslationTextComponent("%s %s %s", TextFormatting.BOLD, header, TextFormatting.BOLD);
     }
 
     public static void sendMessage(PlayerEntity player, IFormattableTextComponent textComponent) {
@@ -172,8 +170,9 @@ public class MessageUtil {
         String executeCmdStr = buildDimTeleportCmd(region.getDim(), "@s", region.getTpTarget());
         TranslationTextComponent text = new TranslationTextComponent("cli.msg.info.region.area.tp.link.text", buildBlockPosLinkText(region.getTpTarget()));
         IFormattableTextComponent hover = new TranslationTextComponent("cli.msg.info.region.area.tp.link.hover", region.getName(), region.getDim().location().toString());
-        return buildRegionInfoLink(region).append(" @ ")
-                .append(buildExecuteCmdComponent(text, hover, executeCmdStr, RUN_COMMAND, TP_COLOR));
+        return new TranslationTextComponent("%s @ %s",
+                buildRegionInfoLink(region),
+                buildExecuteCmdComponent(text, hover, executeCmdStr, RUN_COMMAND, TP_COLOR));
     }
 
     public static IFormattableTextComponent buildRegionAreaDetailComponent(IMarkableRegion region) {
@@ -181,13 +180,11 @@ public class MessageUtil {
         IFormattableTextComponent areaInfo = new StringTextComponent(area.getAreaType().areaType);
         switch (area.getAreaType()) {
             case CUBOID:
-                CuboidArea cuboidArea = (CuboidArea) area;
-                return areaInfo.append(", ").append(buildCuboidAreaInfo(cuboidArea));
+                return new TranslationTextComponent("%s, %s", areaInfo, buildCuboidAreaInfo((CuboidArea) area));
             case CYLINDER:
                 throw new NotImplementedException("cylinder");
             case SPHERE:
-                SphereArea sphereArea = (SphereArea) area;
-                return areaInfo.append(", ").append(buildSphereAreaInfo(sphereArea));
+                return new TranslationTextComponent("%s, %s", areaInfo, buildSphereAreaInfo((SphereArea) area));
             case POLYGON_3D:
                 throw new NotImplementedException("polygon");
             case PRISM:
@@ -293,7 +290,7 @@ public class MessageUtil {
      */
     public static IFormattableTextComponent buildRegionAreaActionLinks(IMarkableRegion region) {
         return new TranslationTextComponent("%s %s %s", buildAreaUpdateLink(region), buildRegionSetTpLink(region), buildRegionAreaExpandLink(region));
-        // .append("  ").append(buildShowAreaToggleLink(region));
+        // buildShowAreaToggleLink(region)
     }
 
     public static IFormattableTextComponent buildTextWithHoverMsg(IFormattableTextComponent text, IFormattableTextComponent hoverText, TextFormatting color) {
@@ -586,25 +583,27 @@ public class MessageUtil {
     public static IFormattableTextComponent buildGroupTeamListLink(IProtectedRegion region, String group) {
         // Teams: [n team(s)] [+]
         PlayerContainer playerContainer = region.getGroup(group);
-        IFormattableTextComponent teams = new TranslationTextComponent("cli.msg.info.region.group.team").append(": ");
         IFormattableTextComponent teamAddLink = buildAddToGroupLink(region, group, GroupType.TEAM);
         IFormattableTextComponent teamListLink = playerContainer.hasTeams()
                 ? buildTeamListLink(region, playerContainer, group)
                 : new TranslationTextComponent("cli.msg.info.region.group.team.list.link.text", playerContainer.getTeams().size());
-        teams.append(teamListLink).append(teamAddLink);
-        return teams;
+        return new TranslationTextComponent("%s: %s %s",
+                new TranslationTextComponent("cli.msg.info.region.group.team"),
+                teamListLink,
+                teamAddLink);
     }
 
     public static IFormattableTextComponent buildGroupPlayerListLink(IProtectedRegion region, String group) {
         // Players: [n player(s)] [+]
         PlayerContainer playerContainer = region.getGroup(group);
-        IFormattableTextComponent players = new TranslationTextComponent("cli.msg.info.region.group.player").append(": ");
         IFormattableTextComponent playersAddLink = buildAddToGroupLink(region, group, GroupType.PLAYER);
         IFormattableTextComponent playerListLink = playerContainer.hasPlayers()
                 ? buildPlayerListLink(region, playerContainer, group)
                 : new TranslationTextComponent("cli.msg.info.region.group.player.list.link.text", playerContainer.getPlayers().size());
-        players.append(playerListLink).append(playersAddLink);
-        return players;
+        return new TranslationTextComponent("%s: %s %s",
+                new TranslationTextComponent("cli.msg.info.region.group.player"),
+                playerListLink,
+                playersAddLink);
     }
 
     /**
@@ -1264,14 +1263,13 @@ public class MessageUtil {
         String hoverText = "cli.msg.info.state." + onClickAction;
         String linkText = "cli.msg.info.state.link." + (region.isActive() ? "activate" : "deactivate");
         TextFormatting color = region.isActive() ? ADD_CMD_COLOR : REMOVE_CMD_COLOR;
-        IFormattableTextComponent stateLink = buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, color);
-        return new TranslationTextComponent("cli.msg.info.state")
-                .append(new StringTextComponent(": "))
-                .append(stateLink);
+        return new TranslationTextComponent("%s: %s",
+                new TranslationTextComponent("cli.msg.info.state"),
+                buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, color));
     }
 
     public static IFormattableTextComponent buildInfoComponent(String subjectLangKey, IFormattableTextComponent payload) {
-        return new TranslationTextComponent(subjectLangKey).append(": ").append(payload);
+        return new TranslationTextComponent("%s: %s", new TranslationTextComponent(subjectLangKey), payload);
     }
 
     public static IFormattableTextComponent buildRegionTeleportLink(IMarkableRegion region) {
