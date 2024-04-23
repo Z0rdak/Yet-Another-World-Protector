@@ -38,6 +38,22 @@ public class GlobalRegion extends AbstractRegion {
     }
 
     @Override
+    public boolean setParent(IProtectedRegion parent) {
+        if (parent.getRegionType() == RegionType.GLOBAL) {
+            return super.setParent(parent);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean addChild(IProtectedRegion child) {
+        if (child.getRegionType() == RegionType.DIMENSION) {
+            return super.addChild(child);
+        }
+        return false;
+    }
+
+    @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = super.serializeNBT();
         return nbt;

@@ -39,6 +39,34 @@ public final class DimensionalRegion extends AbstractRegion {
     }
 
     @Override
+    public boolean setParent(IProtectedRegion parent) {
+        if (parent.getRegionType() == RegionType.GLOBAL) {
+            return super.setParent(parent);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean addChild(IProtectedRegion child) {
+        if (child.getRegionType() == RegionType.LOCAL && child.getParent() == null) {
+            String parentName = child.getParentName();
+            if (!parentName.equals(this.name)) {
+                super.addChild(child);
+                ((AbstractRegion) child).parentName = parentName;
+                return true;
+            }
+            return super.addChild(child);
+        }
+        if (child.getRegionType() == RegionType.LOCAL && child.getParent().getRegionType() == RegionType.DIMENSION) {
+            return super.addChild(child);
+        }
+        if (child.getRegionType() == RegionType.LOCAL && !child.getParent().hasChild(child)) {
+            return super.addChild(child);
+        }
+        return false;
+    }
+
+    @Override
     public CompoundNBT serializeNBT() {
         return super.serializeNBT();
     }

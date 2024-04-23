@@ -86,13 +86,11 @@ public interface IProtectedRegion extends INBTSerializable<CompoundNBT> {
 
     String getParentName();
 
-    boolean setParent(IProtectedRegion parent);
-
     Map<String, IProtectedRegion> getChildren();
 
     Set<String> getChildrenNames();
 
-    void addChild(IProtectedRegion child);
+    boolean addChild(IProtectedRegion child);
 
     void removeChild(IProtectedRegion child);
 

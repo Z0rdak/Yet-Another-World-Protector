@@ -52,6 +52,31 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     }
 
     @Override
+    protected boolean setParent(IProtectedRegion parent) {
+        if (this.parent == null && parent.getRegionType() == RegionType.DIMENSION) {
+            return super.setParent(parent);
+        }
+        if (this.parent.getRegionType() == RegionType.LOCAL && parent.getRegionType() == RegionType.DIMENSION) {
+            return super.setParent(parent);
+        }
+        if (this.parent.getRegionType() == RegionType.DIMENSION && parent.getRegionType() == RegionType.LOCAL) {
+            return super.setParent(parent);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean addChild(IProtectedRegion child) {
+        if (child.getRegionType() == RegionType.LOCAL && child.getParent() == null) {
+            return super.addChild(child);
+        }
+        if (child.getRegionType() == RegionType.LOCAL && child.getParent().getRegionType() == RegionType.DIMENSION) {
+            return super.addChild(child);
+        }
+        return false;
+    }
+
+    @Override
     public boolean contains(BlockPos position) {
         return this.area.contains(position);
     }
