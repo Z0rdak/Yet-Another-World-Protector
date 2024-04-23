@@ -74,6 +74,10 @@ public class MessageUtil {
         return "[X=" + target.getX() + ", Y=" + target.getY() + ", Z=" + target.getZ() + "]";
     }
 
+    public static String tinyBlockPos(BlockPos target) {
+        return "[" + buildBlockCoordinateStr(target) + "]";
+    }
+
     public static String buildBlockPosLinkText(BlockPos target) {
         return target.getX() + ", " + target.getY() + ", " + target.getZ();
     }
@@ -811,15 +815,15 @@ public class MessageUtil {
         IFormattableTextComponent text = new TranslationTextComponent("cli.flag.msg.text.set.link.text");
         switch (region.getRegionType()) {
             case GLOBAL: {
-                String cmd = buildCommandStr(FLAG.toString(), GLOBAL.toString(), flag.getName(), MSG.toString(), SET.toString());
+                String cmd = buildCommandStr(FLAG.toString(), GLOBAL.toString(), flag.getName(), MSG.toString(), SET.toString(), flag.getFlagMsg().getMsg());
                 return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, LINK_COLOR);
             }
             case DIMENSION: {
-                String cmd = buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().location().toString(), flag.getName(), MSG.toString(), SET.toString());
+                String cmd = buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().location().toString(), flag.getName(), MSG.toString(), SET.toString(), flag.getFlagMsg().getMsg());
                 return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, LINK_COLOR);
             }
             case LOCAL: {
-                String cmd = buildCommandStr(FLAG.toString(), CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag.getName(), MSG.toString(), SET.toString());
+                String cmd = buildCommandStr(FLAG.toString(), CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag.getName(), MSG.toString(), SET.toString(), flag.getFlagMsg().getMsg());
                 return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, LINK_COLOR);
             }
             default:
