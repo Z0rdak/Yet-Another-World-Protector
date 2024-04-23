@@ -204,65 +204,6 @@ public class RegionDataManager extends WorldSavedData {
         globalRegion.addChild(globalRegion);
     }
 
-    /**
-     * Method which gets called the region data is marked as dirty via the save/markDirty method.
-     *
-     * @param compound nbt data to be filled with the region information.
-     * @return the compound region nbt data to be saved to disk.
-     */
-    @Nonnull
-    @Override
-    public CompoundNBT save(@Nonnull CompoundNBT compound) {
-        compound.put(GLOBAL, globalRegion.serializeNBT());
-        CompoundNBT dimRegionNbtData = new CompoundNBT();
-        // YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.save.amount", this.getTotalRegionAmount(), dimCacheMap.keySet().size()).getString());
-        YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("Saving " + this.getTotalRegionAmount() + " region(s) for " + dimCacheMap.keySet().size() + " dimensions").getString());
-        for (Map.Entry<RegistryKey<World>, DimensionRegionCache> entry : dimCacheMap.entrySet()) {
-            // YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.save.dim.amount", this.getRegionAmount(entry.getKey()), entry.getKey().location().toString()).getString());
-            YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("Saving " + this.getRegionAmount(entry.getKey()) + " region(s) for dimension '" + entry.getKey().location() + "'").getString());
-            String dimensionName = entry.getValue().getDimensionalRegion().getName();
-            dimRegionNbtData.put(dimensionName, entry.getValue().serializeNBT());
-        }
-        compound.put(DIMENSIONS, dimRegionNbtData);
-        return compound;
-    }
-
-    /**
-     * Event handler which creates a new DimensionRegionCache when a dimension is created the first time, by a player loading the dimension.     *
-     *
-     * @param event the EntityTravelToDimensionEvent which serves as a trigger and provides the information which dimension the player is traveling to.
-     */
-    @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
-    public static void addDimKeyOnDimensionChange(EntityTravelToDimensionEvent event) {
-        if (!event.getEntity().getCommandSenderWorld().isClientSide) {
-            if (event.getEntity() instanceof PlayerEntity) {
-                if (!dimCacheMap.containsKey(event.getDimension())) {
-                    DimensionRegionCache cache = regionDataCache.newCacheFor(event.getDimension());
-                    YetAnotherWorldProtector.LOGGER.info("Init region data for dimension '" + cache.dimensionKey().location() + "'..");
-                    save();
-                }
-            }
-        }
-    }
-
-    /**
-     * Event handler which is used to initialize the dimension cache with first dimension entry when a player logs in.
-     *
-     * @param event PlayerLoggedInEvent which serves as a trigger and provides the information about the dimension the player logged in to.
-     */
-    @SubscribeEvent
-    public static void addDimKeyOnPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        if (!event.getPlayer().getCommandSenderWorld().isClientSide) {
-            RegistryKey<World> dim = event.getPlayer().getCommandSenderWorld().dimension();
-            if (!dimCacheMap.containsKey(dim)) {
-                DimensionRegionCache cache = RegionDataManager.get().newCacheFor(dim);
-                YetAnotherWorldProtector.LOGGER.info("Player joining to server in dimension without region data. This should only happen the first time a player is joining.");
-                YetAnotherWorldProtector.LOGGER.info("Init region data for dimension '" + cache.dimensionKey().location() + "'..");
-                save();
-            }
-        }
-    }
-
     public int getTotalRegionAmount() {
         return dimCacheMap.values().stream()
                 .mapToInt(regionCache -> regionCache.getRegionNames().size())
