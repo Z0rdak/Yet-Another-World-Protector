@@ -169,7 +169,7 @@ public class RegionDataManager extends SavedData {
                     // set child references
                     region.getChildrenNames().forEach(childName -> {
                         if (!dimCache.contains(childName)) {
-                            YetAnotherWorldProtector.LOGGER.error(new TranslationTextComponent("Corrupt save data. Child region '" + childName + "' not found in dimension '" + dimKey + "'!").getString());
+                            YetAnotherWorldProtector.LOGGER.error(new TranslatableComponent("Corrupt save data. Child region '" + childName + "' not found in dimension '" + dimKey + "'!").getString());
                         } else {
                             region.addChild(dimCache.getRegion(childName));
                         }
@@ -182,11 +182,11 @@ public class RegionDataManager extends SavedData {
                             dimRegion.addChild(region);
                         } else {
                             if (!dimCache.contains(parentName)) {
-                                YetAnotherWorldProtector.LOGGER.error(new TranslationTextComponent("Corrupt save data. Parent region '" + parentName + "' not found in dimension '" + dimKey + "'!").getString());
+                                YetAnotherWorldProtector.LOGGER.error(new TranslatableComponent("Corrupt save data. Parent region '" + parentName + "' not found in dimension '" + dimKey + "'!").getString());
                             } else {
                                 IMarkableRegion parent = dimCache.getRegion(parentName);
                                 if (parent == null) {
-                                    YetAnotherWorldProtector.LOGGER.error(new TranslationTextComponent("Corrupt save data. Parent region '" + parentName + "' not found in dimension '" + dimKey + "'!").getString());
+                                    YetAnotherWorldProtector.LOGGER.error(new TranslatableComponent("Corrupt save data. Parent region '" + parentName + "' not found in dimension '" + dimKey + "'!").getString());
                                 } else {
                                     parent.addChild(region);
                                 }
