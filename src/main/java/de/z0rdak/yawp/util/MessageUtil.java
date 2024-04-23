@@ -133,9 +133,7 @@ public class MessageUtil {
     }
 
     public static MutableComponent buildHeader(MutableComponent header) {
-        return new TextComponent(String.valueOf(BOLD))
-                .append(header)
-                .append(new TextComponent(String.valueOf(BOLD)));
+        return new TranslatableComponent("%s %s %s", ChatFormatting.BOLD, header, ChatFormatting.BOLD);
     }
 
     public static void sendMessage(Player player, MutableComponent textComponent) {
@@ -214,8 +212,9 @@ public class MessageUtil {
         String executeCmdStr = buildDimTeleportCmd(region.getDim(), "@s", region.getTpTarget());
         MutableComponent text = new TranslatableComponent("cli.msg.info.region.area.tp.link.text", buildBlockPosLinkText(region.getTpTarget()));
         MutableComponent hover = new TranslatableComponent("cli.msg.info.region.area.tp.link.hover", region.getName(), region.getDim().location().toString());
-        return buildRegionInfoLink(region).append(" @ ")
-                .append(buildExecuteCmdComponent(text, hover, executeCmdStr, RUN_COMMAND, TP_COLOR));
+        return new TranslatableComponent("%s @ %s",
+                buildRegionInfoLink(region),
+                buildExecuteCmdComponent(text, hover, executeCmdStr, RUN_COMMAND, TP_COLOR));
     }
 
     public static MutableComponent buildRegionAreaDetailComponent(IMarkableRegion region) {
@@ -223,13 +222,11 @@ public class MessageUtil {
         MutableComponent areaInfo = new TextComponent(area.getAreaType().areaType);
         switch (area.getAreaType()) {
             case CUBOID:
-                CuboidArea cuboidArea = (CuboidArea) area;
-                return areaInfo.append(", ").append(buildCuboidAreaInfo(cuboidArea));
+                return new TranslatableComponent("%s, %s", areaInfo, buildCuboidAreaInfo((CuboidArea) area));
             case CYLINDER:
                 throw new NotImplementedException("cylinder");
             case SPHERE:
-                SphereArea sphereArea = (SphereArea) area;
-                return areaInfo.append(", ").append(buildSphereAreaInfo(sphereArea));
+                return new TranslatableComponent("%s, %s", areaInfo, buildSphereAreaInfo((SphereArea) area));
             case POLYGON_3D:
                 throw new NotImplementedException("polygon");
             case PRISM:
@@ -335,7 +332,7 @@ public class MessageUtil {
      */
     public static MutableComponent buildRegionAreaActionLinks(IMarkableRegion region) {
         return new TranslatableComponent("%s %s %s", buildAreaUpdateLink(region), buildRegionSetTpLink(region), buildRegionAreaExpandLink(region));
-        // .append("  ").append(buildShowAreaToggleLink(region));
+        // buildShowAreaToggleLink(region)
     }
 
     public static MutableComponent buildTextWithHoverMsg(MutableComponent text, MutableComponent hoverText, ChatFormatting color) {
@@ -630,25 +627,27 @@ public class MessageUtil {
     public static MutableComponent buildGroupTeamListLink(IProtectedRegion region, String group) {
         // Teams: [n team(s)] [+]
         PlayerContainer playerContainer = region.getGroup(group);
-        MutableComponent teams = new TranslatableComponent("cli.msg.info.region.group.team").append(": ");
         MutableComponent teamAddLink = buildAddToGroupLink(region, group, GroupType.TEAM);
         MutableComponent teamListLink = playerContainer.hasTeams()
                 ? buildTeamListLink(region, playerContainer, group)
                 : new TranslatableComponent("cli.msg.info.region.group.team.list.link.text", playerContainer.getTeams().size());
-        teams.append(teamListLink).append(teamAddLink);
-        return teams;
+        return new TranslatableComponent("%s: %s %s",
+                new TranslatableComponent("cli.msg.info.region.group.team"),
+                teamListLink,
+                teamAddLink);
     }
 
     public static MutableComponent buildGroupPlayerListLink(IProtectedRegion region, String group) {
         // Players: [n player(s)] [+]
         PlayerContainer playerContainer = region.getGroup(group);
-        MutableComponent players = new TranslatableComponent("cli.msg.info.region.group.player").append(": ");
         MutableComponent playersAddLink = buildAddToGroupLink(region, group, GroupType.PLAYER);
         MutableComponent playerListLink = playerContainer.hasPlayers()
                 ? buildPlayerListLink(region, playerContainer, group)
                 : new TranslatableComponent("cli.msg.info.region.group.player.list.link.text", playerContainer.getPlayers().size());
-        players.append(playerListLink).append(playersAddLink);
-        return players;
+        return new TranslatableComponent("%s: %s %s",
+                new TranslatableComponent("cli.msg.info.region.group.player"),
+                playerListLink,
+                playersAddLink);
     }
 
     /**
@@ -1310,14 +1309,13 @@ public class MessageUtil {
         String hoverText = "cli.msg.info.state." + onClickAction;
         String linkText = "cli.msg.info.state.link." + (region.isActive() ? "activate" : "deactivate");
         ChatFormatting color = region.isActive() ? ADD_CMD_COLOR : REMOVE_CMD_COLOR;
-        MutableComponent stateLink = buildExecuteCmdComponent(linkText, hoverText, command, ClickEvent.Action.RUN_COMMAND, color);
-        return new TranslatableComponent("cli.msg.info.state")
-                .append(new TextComponent(": "))
-                .append(stateLink);
+        return new TranslatableComponent("%s: %s",
+                new TranslatableComponent("cli.msg.info.state"),
+                buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, color));
     }
 
     public static MutableComponent buildInfoComponent(String subjectLangKey, MutableComponent payload) {
-        return new TranslatableComponent(subjectLangKey).append(": ").append(payload);
+        return new TranslatableComponent("%s: %s", new TranslatableComponent(subjectLangKey), payload);
     }
 
     public static MutableComponent buildRegionTeleportLink(IMarkableRegion region) {
