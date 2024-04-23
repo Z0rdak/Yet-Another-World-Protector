@@ -222,9 +222,10 @@ public class MessageUtil {
     private static IFormattableTextComponent buildAreaAxisInfoComponent(CuboidArea cuboidArea, Direction.Axis axis) {
         int min = (int) Math.floor(cuboidArea.getArea().min(axis));
         int max = (int) Math.floor(cuboidArea.getArea().max(axis));
+        int axisSize = Math.max(Math.abs(max - min), 1);
         String axisName = axis.getName().toUpperCase();
         return buildTextWithHoverMsg(
-                new StringTextComponent(axisName + "=" + Math.abs(max - min)),
+                new StringTextComponent(axisName + "=" + axisSize),
                 new StringTextComponent(axisName + ": " + min + " - " + max), WHITE);
     }
 
