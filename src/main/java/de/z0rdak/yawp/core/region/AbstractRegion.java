@@ -1,6 +1,5 @@
 package de.z0rdak.yawp.core.region;
 
-import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.CommandUtil;
 import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.IFlag;
@@ -257,30 +256,6 @@ public abstract class AbstractRegion implements IProtectedRegion {
     }
 
     @Override
-    public void addChild(IProtectedRegion child) {
-        if (this.getRegionType() == RegionType.GLOBAL && child.getRegionType() == RegionType.GLOBAL) {
-            return; // don't add global as its own child
-        }
-        IProtectedRegion parent = child.getParent();
-        // TODO: consider current parent, to check if adding child is allowed
-        if (parent instanceof IMarkableRegion) {
-            if (!parent.equals(this) && this instanceof IMarkableRegion) {
-                // TODO: Why not allow this, as long as the owner of both regions are the same?
-                throw new IllegalRegionStateException("Not allowed to \"steal\" child from other parent than a dimensional region");
-            }
-            if (this instanceof DimensionalRegion) {
-                parent.removeChild(child);
-            }
-        }
-        if (parent instanceof DimensionalRegion) {
-            parent.removeChild(child);
-        }
-        child.setParent(this);
-        this.children.put(child.getName(), child);
-        this.childrenNames.add(child.getName());
-    }
-
-    @Override
     public Map<String, IProtectedRegion> getChildren() {
         return Collections.unmodifiableMap(this.children);
     }
@@ -295,52 +270,20 @@ public abstract class AbstractRegion implements IProtectedRegion {
         return this.children.containsKey(maybeChild.getName());
     }
 
-    /**
-     * FIXME: setParent should not be used directly. Use addChild instead
-     * Contains common consistency checks for setting a parent region.
-     *
-     * @param parent the parent to set for this region.
-     * @throws IllegalRegionStateException when consistency checks are failing.
-     */
-    public boolean setParent(IProtectedRegion parent) {
-        boolean isParentGlobal = parent.getRegionType() == RegionType.GLOBAL;
-        boolean thisIsGlobalOrDim = (this.getRegionType() == RegionType.GLOBAL || this.getRegionType() == RegionType.DIMENSION);
-        if (isParentGlobal && thisIsGlobalOrDim) {
-            this.parent = parent;
-            this.parentName = GlobalRegion.GLOBAL.toString();
-            return true;
-        }
-        if (parent.getRegionType() == RegionType.DIMENSION) {
-            this.parent = parent;
-            this.parentName = parent.getParentName();
-            return true;
-        }
-        if (parent.getRegionType() == RegionType.LOCAL && this.getRegionType() == RegionType.LOCAL) {
-            IMarkableRegion localParent = (IMarkableRegion) parent;
-            IMarkableRegion local = (IMarkableRegion) this;
-            if (localParent.getArea().containsOther(local.getArea())) {
-                this.isMuted = localParent.isMuted();
-                this.parent = localParent;
-                this.parentName = localParent.getParentName();
-                YetAnotherWorldProtector.LOGGER.debug("Setting parent '" + parent.getName() + "' for region '" + this.getName() + "'");
-                return true;
-            } else {
-                return false;
-            }
-        }
-        if (!parent.getDim().location().equals(GlobalRegion.GLOBAL) || !(parent instanceof GlobalRegion)) {
-            if (!parent.getDim().location().equals(this.dimension.location())) {
-                throw new IllegalRegionStateException("Region '" + parent.getName() + "' is not in the same dimension!");
-            }
-        }
-        if (parent.equals(this)) {
-            throw new IllegalRegionStateException("Region '" + parent.getName() + "' can't be its own parent!");
-        }
-        if (children.containsKey(parent.getName())) {
-            throw new IllegalRegionStateException("Parent '" + parent.getName() + "' is already set as child for region '" + this.getName() + "'!");
-        }
-        return parent.hasChild(this);
+    @Override
+    public boolean addChild(IProtectedRegion child) {
+        this.children.put(child.getName(), child);
+        this.childrenNames.add(child.getName());
+        ((AbstractRegion) child).setParent(this);
+        return true;
     }
+
+    protected boolean setParent(IProtectedRegion parent) {
+        this.parent = parent;
+        this.parentName = parent.getName();
+        return true;
+    }
+
 
     public IProtectedRegion getParent() {
         return parent;
@@ -386,15 +329,12 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.groups = new HashMap<>();
         this.groups.put(OWNERS, new PlayerContainer(nbt.getCompound(OWNERS)));
         this.groups.put(MEMBERS, new PlayerContainer(nbt.getCompound(MEMBERS)));
-        if (this.parent == null) {
-            // deserialize parent only if present and if this is no instance of GlobalRegion
-            if (nbt.contains(PARENT, Tag.TAG_STRING) && !(this instanceof GlobalRegion)) {
-                String parentName = nbt.getString(PARENT);
-                if (!parentName.equals("")) {
-                    this.parentName = nbt.getString(PARENT);
-                } else {
-                    this.parentName = null;
-                }
+        if (this.parent == null && nbt.contains(PARENT, Tag.TAG_STRING)) {
+            String parentName = nbt.getString(PARENT);
+            if (!parentName.isEmpty()) {
+                this.parentName = nbt.getString(PARENT);
+            } else {
+                this.parentName = null;
             }
         }
         if (this.children != null && this.children.isEmpty()) {

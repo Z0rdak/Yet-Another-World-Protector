@@ -17,7 +17,10 @@ import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.area.SphereArea;
-import de.z0rdak.yawp.core.region.*;
+import de.z0rdak.yawp.core.region.CuboidRegion;
+import de.z0rdak.yawp.core.region.IMarkableRegion;
+import de.z0rdak.yawp.core.region.IProtectedRegion;
+import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
@@ -268,11 +271,11 @@ public class RegionCommands {
         }
     }
 
+    // TODO: Test removing child does not set priority correct with overlapping regions
     public static int removeChildren(CommandContext<CommandSourceStack> src, DimensionRegionCache dimCache, IProtectedRegion parent, IProtectedRegion child) {
         if (parent.hasChild(child)) {
-            // FIXME: Removing child does not set priority correct with overlapping regions
-            dimCache.getDimensionalRegion().addChild(child); // this also removes the child from the local parent
-            child.setIsActive(false);
+            parent.removeChild(child);
+            dimCache.getDimensionalRegion().addChild(child);
             LocalRegions.ensureLowerRegionPriorityFor((CuboidRegion) child, RegionConfig.getDefaultPriority());
             RegionDataManager.save();
             MutableComponent parentLink = buildRegionInfoLink(parent);
@@ -289,7 +292,9 @@ public class RegionCommands {
     }
 
     public static int addChildren(CommandContext<CommandSourceStack> src, IMarkableRegion parent, IMarkableRegion child) {
-        if (!parent.hasChild(child) && child.getParent() != null && child.getParent() instanceof DimensionalRegion) {
+        boolean parentIsNotNullAndDimension = child.getParent() != null && child.getParent().getRegionType() == RegionType.DIMENSION;
+        if (!parent.hasChild(child) && parentIsNotNullAndDimension) {
+            child.getParent().removeChild(child);
             parent.addChild(child);
             LocalRegions.ensureHigherRegionPriorityFor(child, parent.getPriority() + 1);
             RegionDataManager.save();
