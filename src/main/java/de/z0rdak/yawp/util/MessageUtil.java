@@ -41,7 +41,6 @@ import java.util.stream.Collectors;
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.getFlagMapRecursive;
-import static net.minecraft.util.text.TextFormatting.RESET;
 import static net.minecraft.util.text.TextFormatting.*;
 import static net.minecraft.util.text.event.ClickEvent.Action.*;
 
@@ -252,7 +251,7 @@ public class MessageUtil {
                 IFormattableTextComponent maxExpandLinkHover = new TranslationTextComponent("cli.msg.info.region.area.area.expand-max.link.hover");
                 String maxExpandCmd = appendSubCommand(expandCmd, String.valueOf(RegionCommands.MIN_BUILD_LIMIT), String.valueOf(RegionCommands.MAX_BUILD_LIMIT));
                 IFormattableTextComponent maxExpandLink = buildExecuteCmdComponent(maxExpandLinkText, maxExpandLinkHover, maxExpandCmd, RUN_COMMAND, LINK_COLOR);
-                return expandLink.append(" ").append(maxExpandLink);
+                return new TranslationTextComponent("%s %s", expandLink, maxExpandLink);
             }
             case CYLINDER:
                 throw new NotImplementedException("cylinder");
@@ -293,9 +292,7 @@ public class MessageUtil {
      * [set area] [set TP] [show area] [<=expand=>] [<=max=>]
      */
     public static IFormattableTextComponent buildRegionAreaActionLinks(IMarkableRegion region) {
-        return buildAreaUpdateLink(region).append("  ")
-                .append(buildRegionSetTpLink(region)).append("  ")
-                .append(buildRegionAreaExpandLink(region));
+        return new TranslationTextComponent("%s %s %s", buildAreaUpdateLink(region), buildRegionSetTpLink(region), buildRegionAreaExpandLink(region));
         // .append("  ").append(buildShowAreaToggleLink(region));
     }
 
@@ -320,10 +317,9 @@ public class MessageUtil {
 
     public static IFormattableTextComponent buildHelpSuggestionLink(String translationKey, CommandConstants baseCmd, CommandConstants cmd) {
         String command = "/" + CommandPermissionConfig.BASE_CMD + " " + baseCmd + " " + cmd + " ";
-        return new StringTextComponent(" ")
-                .append(buildExecuteCmdComponent("=>", "chat.link.hover.command.copy", command, SUGGEST_COMMAND, LINK_COLOR))
-                .append(new StringTextComponent(" "))
-                .append(new TranslationTextComponent(translationKey));
+        return new TranslationTextComponent(" %s %s",
+                buildExecuteCmdComponent("=>", "chat.link.hover.command.copy", command, SUGGEST_COMMAND, LINK_COLOR),
+                new TranslationTextComponent(translationKey));
     }
 
     public static IFormattableTextComponent buildRegionEnableComponent(IProtectedRegion region) {
@@ -357,7 +353,7 @@ public class MessageUtil {
         String disableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), STATE.toString(), ENABLE_LOCAL.toString(), Boolean.FALSE.toString());
         IFormattableTextComponent activeAlertLink = buildExecuteCmdComponent(enableLinkTextKey, enableHoverTextKey, enableCmd, RUN_COMMAND, ADD_CMD_COLOR);
         IFormattableTextComponent disableAlertLink = buildExecuteCmdComponent(disableLinkTextKey, disableHoverTextKey, disableCmd, RUN_COMMAND, REMOVE_CMD_COLOR);
-        return activeAlertLink.append(" ").append(disableAlertLink);
+        return new TranslationTextComponent("%s %s", activeAlertLink, disableAlertLink);
     }
 
     public static IFormattableTextComponent buildAllLocalAlertToggleLink(DimensionRegionCache dimCache) {
@@ -369,7 +365,7 @@ public class MessageUtil {
         String disableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), STATE.toString(), ALERT_LOCAL.toString(), Boolean.FALSE.toString());
         IFormattableTextComponent activeAlertLink = buildExecuteCmdComponent(enableLinkTextKey, enableHoverTextKey, enableCmd, RUN_COMMAND, ADD_CMD_COLOR);
         IFormattableTextComponent disableAlertLink = buildExecuteCmdComponent(disableLinkTextKey, disableHoverTextKey, disableCmd, RUN_COMMAND, REMOVE_CMD_COLOR);
-        return activeAlertLink.append(" ").append(disableAlertLink);
+        return new TranslationTextComponent("%s %s", activeAlertLink, disableAlertLink);
     }
 
     public static IFormattableTextComponent buildRegionPriorityComponent(IMarkableRegion region) {
@@ -382,14 +378,11 @@ public class MessageUtil {
         IFormattableTextComponent decLinkText = new TranslationTextComponent("cli.msg.info.region.state.priority.decrease.link.text", defaultPriorityInc);
         IFormattableTextComponent decHoverText = new TranslationTextComponent("cli.msg.info.region.state.priority.decrease.link.hover", defaultPriorityInc);
         IFormattableTextComponent decreaseLink = buildExecuteCmdComponent(decLinkText, decHoverText, decPriorityCmd, RUN_COMMAND, REMOVE_CMD_COLOR);
-        IFormattableTextComponent priorityValue = new StringTextComponent(String.valueOf(region.getPriority()));
         String setPriorityCmd = ArgumentUtil.buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), "");
         IFormattableTextComponent setPriorityLinkText = new TranslationTextComponent("cli.msg.info.region.state.priority.set.link.text", region.getPriority());
         IFormattableTextComponent setPriorityHoverText = new TranslationTextComponent("cli.msg.info.region.state.priority.set.link.hover");
         IFormattableTextComponent setPriorityLink = buildExecuteCmdComponent(setPriorityLinkText, setPriorityHoverText, setPriorityCmd, SUGGEST_COMMAND, LINK_COLOR);
-        return setPriorityLink.append(" ")
-                .append(increaseLink).append(" ")
-                .append(decreaseLink);
+        return new TranslationTextComponent("%s %s %s", setPriorityLink, increaseLink, decreaseLink);
     }
 
     public static IFormattableTextComponent buildRegionAlertToggleLink(IProtectedRegion region) {
@@ -641,10 +634,7 @@ public class MessageUtil {
         IFormattableTextComponent flagRemoveLink = buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, REMOVE_CMD_COLOR);
         IFormattableTextComponent flagQuickActionComponent = buildFlagQuickActionComponent(region, flag, flagLinkColor);
         flagQuickActionComponent.withStyle(formattings);
-        return new StringTextComponent(" - ")
-                .append(flagRemoveLink)
-                .append(" ")
-                .append(flagQuickActionComponent);
+        return new TranslationTextComponent(" - %s %s", flagRemoveLink, flagQuickActionComponent);
     }
 
     /**
@@ -664,17 +654,12 @@ public class MessageUtil {
         IFormattableTextComponent regionTypeIndicator = new StringTextComponent(region.getRegionType().type.substring(0, 1).toUpperCase());
         IFormattableTextComponent hoverText = new TranslationTextComponent("cli.flag.info.hover", flag.getName(), region.getName());
         IFormattableTextComponent flagInfoLink = buildFlagInfoLink(region, flag, flagLinkColor);
-        return flagInfoLink
-                .append(new StringTextComponent(" "))
-                .append(buildFlagInfoLink(region, flag, regionTypeIndicator, hoverText, DARK_PURPLE))
-                .append(" ")
-                //.append(buildFlagStateToggleLink(region, flag)) // [!]
-                //.append("|")
-                .append(buildFlagStateSuggestionLink(region, flag)) // [s]
-                .append(" ")
-                .append(buildFlagMuteToggleLink(region, flag, true)) // [m]
-                .append(" ")
-                .append(buildFlagOverrideToggleLink(region, flag, true)); // [o]
+        return new TranslationTextComponent("%s %s %s %s %s",
+                flagInfoLink,
+                buildFlagInfoLink(region, flag, regionTypeIndicator, hoverText, DARK_PURPLE),
+                buildFlagStateSuggestionLink(region, flag),
+                buildFlagMuteToggleLink(region, flag, true),
+                buildFlagOverrideToggleLink(region, flag, true));
     }
 
     /**
@@ -760,9 +745,7 @@ public class MessageUtil {
                 break;
         }
         IFormattableTextComponent stateInfo = buildTextWithHoverMsg(text, hover, color);
-        return stateInfo
-                .append(" ")
-                .append(buildFlagStateSuggestionLink(region, flag));
+        return new TranslationTextComponent("%s %s", stateInfo, buildFlagStateSuggestionLink(region, flag));
     }
 
     public static IFormattableTextComponent buildFlagStateSuggestionLink(IProtectedRegion region, IFlag flag) {
@@ -926,7 +909,7 @@ public class MessageUtil {
         IFormattableTextComponent editLink = buildFlagMessageEditLink(region, flag);
         IFormattableTextComponent clearLink = buildFlagMessageClearLink(region, flag);
         IFormattableTextComponent flagMsgTextWithHover = buildFlagMessageHoverText(region, flag);
-        return editLink.append(" ").append(clearLink).append(" '").append(flagMsgTextWithHover).append("'");
+        return new TranslationTextComponent("%s %s '%s'", editLink, clearLink, flagMsgTextWithHover);
     }
 
     private static IFormattableTextComponent buildFlagToggleLink(String cmd, String langKey, boolean toggleActiveState, String... subCmds) {
@@ -1008,35 +991,31 @@ public class MessageUtil {
     }
 
     public static IFormattableTextComponent buildRemoveRegionEntry(IProtectedRegion parent, IProtectedRegion region) {
-        Style resetStyle = Style.EMPTY.withColor(WHITE).withHoverEvent(null).withClickEvent(null);
-        IFormattableTextComponent separator = new StringTextComponent(" ").setStyle(resetStyle);
         IFormattableTextComponent regionRemoveLink;
         switch (parent.getRegionType()) {
             case GLOBAL: {
-                regionRemoveLink = buildDimResetComponent((DimensionalRegion) region)
-                        .append(separator)
-                        .append(buildRegionInfoLink(region));
+                regionRemoveLink = new TranslationTextComponent("%s %s", buildDimResetComponent((DimensionalRegion) region), buildRegionInfoLink(region));
                 break;
             }
             case DIMENSION: {
-                IFormattableTextComponent removeLink = buildDimSuggestRegionRemovalLink((IMarkableRegion) region);
-                removeLink.append(separator).append(buildRegionInfoLink(region));
+                IFormattableTextComponent removeLink = new StringTextComponent("");
                 IFormattableTextComponent childIndicator = buildTextWithHoverMsg(new StringTextComponent("*"), new TranslationTextComponent("cli.msg.info.dim.region.child.hover"), GOLD);
                 if (parent.hasChild(region)) {
-                    removeLink.append(childIndicator.setStyle(childIndicator.getStyle().withInsertion("Test")));
+                    removeLink = new TranslationTextComponent("%s %s%s", buildDimSuggestRegionRemovalLink((IMarkableRegion) region), buildRegionInfoLink(region), childIndicator);
+                } else {
+                    removeLink = new TranslationTextComponent("%s %s", buildDimSuggestRegionRemovalLink((IMarkableRegion) region), buildRegionInfoLink(region));
                 }
-                removeLink.append(new StringTextComponent(" @ ").setStyle(resetStyle)).append(buildRegionTeleportLink((IMarkableRegion) region));
-                regionRemoveLink = removeLink;
+                regionRemoveLink = new TranslationTextComponent("%s @ %s", removeLink, buildRegionTeleportLink((IMarkableRegion) region));
                 break;
             }
             case LOCAL: {
-                regionRemoveLink = buildRegionRemoveChildLink(parent, region).append(separator).append(buildRegionInfoLink(region));
+                regionRemoveLink = new TranslationTextComponent("%s %s", buildRegionRemoveChildLink(parent, region), buildRegionInfoLink(region));
                 break;
             }
             default:
                 throw new IllegalArgumentException();
         }
-        return new StringTextComponent(" - ").append(regionRemoveLink);
+        return new TranslationTextComponent(" - %s", regionRemoveLink);
     }
 
     private static IFormattableTextComponent buildDimResetComponent(DimensionalRegion region) {
@@ -1113,20 +1092,12 @@ public class MessageUtil {
     private static IFormattableTextComponent buildPaginationControl(IFormattableTextComponent front, IFormattableTextComponent back, int pageNo, int maxPage, IFormattableTextComponent forward, IFormattableTextComponent last) {
         // [<<]  [<]  x/n  [>]  [>>]
         IFormattableTextComponent pageIndicator = new StringTextComponent((pageNo + 1) + "/" + (maxPage));
-        pageIndicator.setStyle(pageIndicator.getStyle().withColor(RESET).withHoverEvent(null).withClickEvent(null));
-        IFormattableTextComponent resetSpace = new StringTextComponent("  ");
-        resetSpace.setStyle(resetSpace.getStyle().withColor(RESET).withHoverEvent(null).withClickEvent(null));
-        return new StringTextComponent(" ")
-                .append(front).append(resetSpace)
-                .append(back).append(resetSpace)
-                .append(pageIndicator).append(resetSpace)
-                .append(forward).append(resetSpace)
-                .append(last).append(resetSpace);
+        return new TranslationTextComponent(" %s  %s  %s  %s  %s", front, back, pageIndicator, forward, last);
     }
 
     // [x]
     public static IFormattableTextComponent buildParentClearLink(IMarkableRegion region) {
-        String clearRegionParentCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), PARENT.toString(), CLEAR.toString(), region.getParent().getName());
+        String clearRegionParentCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), PARENT.toString(), REMOVE.toString());
         IFormattableTextComponent parentClearLinkText = new TranslationTextComponent("cli.link.remove");
         IFormattableTextComponent parentClearHoverText = new TranslationTextComponent("cli.msg.info.region.parent.clear.link.hover", region.getParent().getName());
         return buildExecuteCmdComponent(parentClearLinkText, parentClearHoverText, clearRegionParentCmd, RUN_COMMAND, REMOVE_CMD_COLOR);
@@ -1137,9 +1108,9 @@ public class MessageUtil {
         String setRegionParentCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), PARENT.toString(), SET.toString(), "");
         IFormattableTextComponent setParentLinkText = new TranslationTextComponent("cli.link.add");
         IFormattableTextComponent setParentHoverText = new TranslationTextComponent("cli.msg.info.region.parent.set.link.hover", region.getName());
-        return new TranslationTextComponent("cli.msg.info.region.parent.null")
-                .append(" ")
-                .append(buildExecuteCmdComponent(setParentLinkText, setParentHoverText, setRegionParentCmd, RUN_COMMAND, GREEN));
+        return new TranslationTextComponent("%s %s",
+                new TranslationTextComponent("cli.msg.info.region.parent.null"),
+                buildExecuteCmdComponent(setParentLinkText, setParentHoverText, setRegionParentCmd, RUN_COMMAND, GREEN));
     }
 
     public static IFormattableTextComponent buildRegionListHeader(IProtectedRegion region) {
@@ -1154,9 +1125,10 @@ public class MessageUtil {
         IFormattableTextComponent hover = new TranslationTextComponent("cli.msg.dim.info.region.list.link.hover", dimRegion.getName());
         IFormattableTextComponent listLocalRegionsLink = buildExecuteCmdComponent(text, hover, command, RUN_COMMAND, LINK_COLOR);
         IFormattableTextComponent createRegionLink = buildDimCreateRegionLink(dimRegion);
-        return (dimRegion.getChildren().isEmpty()) ?
-                text.append(" ").append(createRegionLink) :
-                listLocalRegionsLink.append(" ").append(createRegionLink);
+        if (dimRegion.getChildren().isEmpty()) {
+            return new TranslationTextComponent("%s %s", text, createRegionLink);
+        }
+        return new TranslationTextComponent("%s %s", listLocalRegionsLink, createRegionLink);
     }
 
     public static IFormattableTextComponent buildRegionListChildrenLink(IProtectedRegion region) {
@@ -1175,18 +1147,20 @@ public class MessageUtil {
                 // [n children] [+]
                 String command = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), CHILDREN.toString());
                 IFormattableTextComponent listDimRegionsListLink = buildExecuteCmdComponent(text, hover, command, RUN_COMMAND, LINK_COLOR);
-                return (region.getChildren().isEmpty()) ?
-                        text.append(" ").append(buildDimCreateRegionLink(region)) :
-                        listDimRegionsListLink.append(" ").append(buildDimCreateRegionLink(region));
+                if (region.getChildren().isEmpty()) {
+                    return new TranslationTextComponent("%s %s", text, buildDimCreateRegionLink(region));
+                }
+                return new TranslationTextComponent("%s %s", listDimRegionsListLink, buildDimCreateRegionLink(region));
             }
             case LOCAL: {
                 // [n children] [+]
                 String regionChildrenListLink = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), CHILDREN.toString());
                 IFormattableTextComponent regionChildrenLink = buildExecuteCmdComponent(text, hover, regionChildrenListLink, RUN_COMMAND, LINK_COLOR);
                 IFormattableTextComponent addChildrenLink = buildRegionAddChildrenLink(region);
-                return (region.getChildren().isEmpty()) ?
-                        text.append(" ").append(addChildrenLink) :
-                        regionChildrenLink.append(" ").append(addChildrenLink);
+                if (region.getChildren().isEmpty()) {
+                    return new TranslationTextComponent("%s %s", text, addChildrenLink);
+                }
+                return new TranslationTextComponent("%s %s", regionChildrenLink, addChildrenLink);
             }
             default:
                 throw new IllegalStateException("Unexpected value: " + region.getRegionType());
@@ -1219,7 +1193,7 @@ public class MessageUtil {
                 if (flagsInHierarchy.isEmpty()) {
                     flagListLink = flagListLinkText;
                 }
-                return flagListLink.append(" ").append(buildAddFlagLink(region));
+                return new TranslationTextComponent("%s %s", flagListLink, buildAddFlagLink(region));
             }
             case DIMENSION: {
                 String flagListCmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), FLAG.toString());
@@ -1227,7 +1201,7 @@ public class MessageUtil {
                 if (flagsInHierarchy.isEmpty()) {
                     flagListLink = flagListLinkText;
                 }
-                return flagListLink.append(" ").append(buildAddFlagLink(region));
+                return new TranslationTextComponent("%s %s", flagListLink, buildAddFlagLink(region));
             }
             case LOCAL: {
                 String listCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), FLAG.toString());
@@ -1235,7 +1209,7 @@ public class MessageUtil {
                 if (flagsInHierarchy.isEmpty()) {
                     flagListLink = flagListLinkText;
                 }
-                return flagListLink.append(" ").append(buildAddFlagLink(region));
+                return new TranslationTextComponent("%s %s", flagListLink, buildAddFlagLink(region));
             }
             default:
                 throw new IllegalStateException("Unexpected value: " + region.getRegionType());
@@ -1303,7 +1277,7 @@ public class MessageUtil {
     public static IFormattableTextComponent buildRegionTeleportLink(IMarkableRegion region) {
         String teleportCmd = buildDimTeleportCmd(region.getDim(), "@s", region.getTpTarget());
         IFormattableTextComponent textInfo = new StringTextComponent(buildBlockPosLinkText(region.getTpTarget()));
-        IFormattableTextComponent hoverInfo = new TranslationTextComponent("cli.msg.info.region.area.tp.link.hover", region.getName(), region.getDim().toString());
+        IFormattableTextComponent hoverInfo = new TranslationTextComponent("cli.msg.info.region.area.tp.link.hover", region.getName(), region.getDim().location().toString());
         return buildExecuteCmdComponent(textInfo, hoverInfo, teleportCmd, RUN_COMMAND, TP_COLOR);
     }
 
@@ -1340,9 +1314,8 @@ public class MessageUtil {
             PlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByName(name);
             boolean isOffline = player == null;
             if (isOffline) {
-                return new StringTextComponent(" - ")
-                        .append(buildRemoveLinkForOfflinePlayer(region, name, groupType, group, linkText, hoverText)).append(" ")
-                        .append(buildGroupInfo(region, name, groupType));
+                IFormattableTextComponent offlinePlayerRemoveLink = buildRemoveLinkForOfflinePlayer(region, name, groupType, group, linkText, hoverText);
+                return new TranslationTextComponent(" - %s %s", offlinePlayerRemoveLink, buildGroupInfo(region, name, groupType));
             }
         }
         switch (region.getRegionType()) {
@@ -1364,9 +1337,7 @@ public class MessageUtil {
             default:
                 throw new IllegalArgumentException();
         }
-        return new StringTextComponent(" - ")
-                .append(regionRemoveLink).append(" ")
-                .append(buildGroupInfo(region, name, groupType));
+        return new TranslationTextComponent(" - %s %s", regionRemoveLink, buildGroupInfo(region, name, groupType));
     }
 
     private static IFormattableTextComponent buildRemoveLinkForOfflinePlayer(IProtectedRegion region, String name, GroupType groupType, String group, IFormattableTextComponent linkText, IFormattableTextComponent hoverText) {
@@ -1394,9 +1365,13 @@ public class MessageUtil {
         switch (groupType) {
             case PLAYER: {
                 PlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByName(groupMemberName);
-                res = player == null
-                        ? new StringTextComponent(groupMemberName).withStyle(GRAY).append(" ").append(new TranslationTextComponent("cli.msg.info.player.list.entry.offline"))
-                        : buildPlayerHoverComponent(player);
+                if (player == null) {
+                    res = new TranslationTextComponent("%s %s",
+                            new StringTextComponent(groupMemberName).withStyle(GRAY),
+                            new TranslationTextComponent("cli.msg.info.player.list.entry.offline"));
+                } else {
+                    res = buildPlayerHoverComponent(player);
+                }
                 break;
             }
             case TEAM: {
@@ -1427,6 +1402,8 @@ public class MessageUtil {
     }
 
 
+    // /wp local minecraft:overworld house remove child oven
+    // /wp local minecraft:overworld <parent> remove child <child>
     public static IFormattableTextComponent buildRegionRemoveChildLink(IProtectedRegion region, IProtectedRegion child) {
         String command = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), REMOVE.toString(), CHILD.toString(), child.getName());
         IFormattableTextComponent linkText = new TranslationTextComponent("cli.link.remove");

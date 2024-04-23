@@ -273,7 +273,7 @@ public class CommandUtil {
         }
         List<IFormattableTextComponent> flagPagination = buildPaginationComponents(
                 buildRegionFlagInfoHeader(region), cmd, flagEntries, pageNo,
-                new StringTextComponent(" - ").append(buildAddFlagLink(region)));
+                new TranslationTextComponent(" - %s", buildAddFlagLink(region)));
         flagPagination.forEach(line -> sendCmdFeedback(ctx.getSource(), line));
         return 0;
     }
@@ -296,7 +296,7 @@ public class CommandUtil {
                 break;
             case LOCAL:
                 listChildrenCmd = buildCommandStr(LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), CHILDREN.toString());
-                addChildRegionLink = new StringTextComponent(" - ").append(buildRegionAddChildrenLink(region));
+                addChildRegionLink = new TranslationTextComponent(" - %s", buildRegionAddChildrenLink(region));
                 break;
             default:
                 throw new NotImplementedException("Region type not implemented yet");
@@ -339,7 +339,7 @@ public class CommandUtil {
                 buildGroupHeader(region, group, groupType),
                 cmd, buildRemoveGroupMemberEntries(region, groupNames, groupType, group),
                 pageNo,
-                new StringTextComponent(" - ").append(buildAddToGroupLink(region, group, groupType)));
+                new TranslationTextComponent(" - %s", buildAddToGroupLink(region, group, groupType)));
         groupMemberPagination.forEach(line -> sendCmdFeedback(ctx.getSource(), line));
         return 0;
     }
@@ -350,7 +350,7 @@ public class CommandUtil {
         IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!activate), String.valueOf(activate));
         TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.state.enable.set.value",
                 buildRegionInfoLink(region), region.isActive() ? "active" : "inactive");
-        sendCmdFeedback(ctx.getSource(), msg.append(" ").append(undoLink));
+        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("%s %s", msg, undoLink));
         return 0;
     }
 
@@ -362,29 +362,29 @@ public class CommandUtil {
             IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(showAlert), String.valueOf(!showAlert));
             TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.state.alert.set.value",
                     buildRegionInfoLink(region), region.isMuted() ? "muted" : "active");
-            sendCmdFeedback(ctx.getSource(), msg.append(" ").append(undoLink));
+            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("%s %s", msg, undoLink));
         }
         return 0;
     }
 
-    public static int removeTeam(CommandContext<CommandSource> src, Team team, IProtectedRegion region, String group) {
+    public static int removeTeam(CommandContext<CommandSource> ctx, Team team, IProtectedRegion region, String group) {
         if (!GROUP_LIST.contains(group)) {
-            sendCmdFeedback(src.getSource(), new TranslationTextComponent("cli.msg.region.info.group.invalid", group).withStyle(TextFormatting.RED));
+            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.region.info.group.invalid", group).withStyle(TextFormatting.RED));
             return -1;
         }
-        IFormattableTextComponent undoLink = buildRegionActionUndoLink(src.getInput(), REMOVE, ADD);
+        IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), REMOVE, ADD);
         IFormattableTextComponent teamInfo = buildGroupInfo(region, team.getName(), GroupType.TEAM);
         if (region.getGroup(group).hasTeam(team.getName())) {
             region.removeTeam(team.getName(), group);
             RegionDataManager.save();
             TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.team.removed", teamInfo, group,
                     buildRegionInfoLink(region));
-            sendCmdFeedback(src.getSource(), msg.append(" ").append(undoLink));
+            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("%s %s", msg, undoLink));
             return 0;
         }
         TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.team.not-present", teamInfo, group,
                 buildRegionInfoLink(region));
-        sendCmdFeedback(src.getSource(), msg);
+        sendCmdFeedback(ctx.getSource(), msg);
         return 1;
     }
 
@@ -443,7 +443,7 @@ public class CommandUtil {
             region.removePlayer(playerUuid, group);
             TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.player.removed", playerInfo, group,
                     buildRegionInfoLink(region));
-            sendCmdFeedback(ctx.getSource(), msg.append(" ").append(undoLink));
+            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("%s %s", msg, undoLink));
             RegionDataManager.save();
             return 0;
         }
@@ -526,18 +526,18 @@ public class CommandUtil {
         return addPlayer(src, player.getUUID(), player.getScoreboardName(), region, group);
     }
 
-    private static int addPlayer(CommandContext<CommandSource> src, UUID uuid, String name, IProtectedRegion region, String group) {
+    private static int addPlayer(CommandContext<CommandSource> ctx, UUID uuid, String name, IProtectedRegion region, String group) {
         IFormattableTextComponent regionInfoLink = buildRegionInfoLink(region);
-        IFormattableTextComponent undoLink = buildRegionActionUndoLink(src.getInput(), ADD, REMOVE);
+        IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), ADD, REMOVE);
         if (!region.hasPlayer(uuid, group)) {
             region.addPlayer(uuid, name, group);
             RegionDataManager.save();
             TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.player.added", name, group, regionInfoLink);
-            sendCmdFeedback(src.getSource(), msg.append(" ").append(undoLink));
+            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("%s %s", msg, undoLink));
             return 0;
         }
         TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.player.present", name, group, regionInfoLink);
-        sendCmdFeedback(src.getSource(), msg);
+        sendCmdFeedback(ctx.getSource(), msg);
         return 1;
     }
 
@@ -554,7 +554,7 @@ public class CommandUtil {
             IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), ADD, REMOVE);
             TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.team.added",
                     teamHoverInfo, group, regionInfoLink);
-            sendCmdFeedback(ctx.getSource(), msg.append(" ").append(undoLink));
+            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("%s %s", msg, undoLink));
             return 0;
         }
         TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.team.present",
@@ -575,7 +575,7 @@ public class CommandUtil {
             IFormattableTextComponent msg = new TranslationTextComponent("cli.msg.flag.removed", flag.name,
                     buildRegionInfoLink(region));
             IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), REMOVE, ADD);
-            sendCmdFeedback(ctx.getSource(), msg.append(" ").append(undoLink));
+            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("%s %s", msg, undoLink));
             return 0;
         } else {
             IFormattableTextComponent msg = new TranslationTextComponent("cli.msg.flag.not-present", flag.name,
@@ -725,7 +725,7 @@ public class CommandUtil {
             IFormattableTextComponent msg = new TranslationTextComponent("cli.msg.flag.added",
                     flagLink, buildRegionInfoLink(region));
             IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), ADD, REMOVE);
-            sendCmdFeedback(ctx.getSource(), msg.append(" ").append(undoLink));
+            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("%s %s", msg, undoLink));
             return 0;
         } else {
             IFormattableTextComponent msg = new TranslationTextComponent("cli.msg.flag.present", flag.name,
@@ -858,30 +858,24 @@ public class CommandUtil {
             }
             break;
             case DIMENSION: {
-                // Parent: [global], [n children], [n regions] [+],
+                // Parent: [global], [n children], [n regions] [+]
                 IFormattableTextComponent globalRegionLink = buildRegionInfoLink(region.getParent(), new TranslationTextComponent("cli.msg.info.region.global.link.hover"));
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(region.getDim());
-                IFormattableTextComponent hierarchyLinks = globalRegionLink
-                        .append(new StringTextComponent(", ").withStyle(TextFormatting.RESET))
-                        .append(listChildrenLink)
-                        .append(new StringTextComponent(", ").withStyle(TextFormatting.RESET))
-                        .append(buildDimRegionsLink(dimCache));
-                IFormattableTextComponent parentAndRegionsLinks = buildInfoComponent("cli.msg.info.dimensions", hierarchyLinks);
-
-                sendCmdFeedback(ctx.getSource(), parentAndRegionsLinks);
+                IFormattableTextComponent hierarchyLinks = new TranslationTextComponent("%s, %s, %s", globalRegionLink, buildDimRegionsLink(dimCache), listChildrenLink);
+                sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.dimensions", hierarchyLinks));
             }
             break;
             case LOCAL: {
                 // Parent: [parent] [x], [n children] [+]
-                IFormattableTextComponent parentClearLink = buildParentClearLink((IMarkableRegion) region);
+                IFormattableTextComponent parentClearLink = buildRegionRemoveChildLink(region.getParent(), region); // buildParentClearLink((IMarkableRegion) region);
+                IFormattableTextComponent hierarchyLinks = new StringTextComponent("");
                 if (region.getParent().getRegionType() == RegionType.DIMENSION) {
                     // don't show removal link, since it's not possible to remove the parent
-                    parentClearLink = new StringTextComponent("");
+                    hierarchyLinks = new TranslationTextComponent("%s, %s", buildRegionInfoLink(region.getParent()), listChildrenLink);
                 }
-                IFormattableTextComponent hierarchyLinks = buildRegionInfoLink(region.getParent())
-                        .append(parentClearLink)
-                        .append(new StringTextComponent(", ").withStyle(TextFormatting.RESET))
-                        .append(listChildrenLink);
+                if (region.getParent().getRegionType() == RegionType.LOCAL) {
+                    hierarchyLinks = new TranslationTextComponent("%s %s, %s", buildRegionInfoLink(region.getParent()), parentClearLink, listChildrenLink);
+                }
                 sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.parent", hierarchyLinks));
             }
             break;
