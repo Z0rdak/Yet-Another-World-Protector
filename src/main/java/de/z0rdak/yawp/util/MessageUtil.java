@@ -264,9 +264,10 @@ public class MessageUtil {
     private static MutableComponent buildAreaAxisInfoComponent(CuboidArea cuboidArea, Direction.Axis axis) {
         int min = (int) Math.floor(cuboidArea.getArea().min(axis));
         int max = (int) Math.floor(cuboidArea.getArea().max(axis));
+        int axisSize = Math.max(Math.abs(max - min), 1);
         String axisName = axis.getName().toUpperCase();
         return buildTextWithHoverMsg(
-                new TextComponent(axisName + "=" + Math.abs(max - min)),
+                new TextComponent(axisName + "=" + axisSize),
                 new TextComponent(axisName + ": " + min + " - " + max), WHITE);
     }
 
