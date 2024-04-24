@@ -121,11 +121,6 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         return priority;
     }
 
-    @Override
-    public boolean isMuted() {
-        return isMuted;
-    }
-
     public AreaType getAreaType() {
         return areaType;
     }

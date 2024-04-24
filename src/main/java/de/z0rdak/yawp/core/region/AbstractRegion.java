@@ -155,7 +155,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
 
     @Override
     public boolean isMuted() {
-        return false;
+        return this.isMuted;
     }
 
     @Override
