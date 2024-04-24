@@ -20,6 +20,7 @@ import de.z0rdak.yawp.handler.flags.HandlerUtil;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
+import de.z0rdak.yawp.util.MessageUtil;
 import de.z0rdak.yawp.util.MojangApiHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -267,7 +268,7 @@ public class CommandUtil {
                 break;
         }
 
-        List<MutableComponent> flagEntries = buildRemoveFlagEntries(region);
+        List<MutableComponent> flagEntries = MessageUtil.buildFlagEntries(region);
         if (flagEntries.isEmpty()) {
             sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.empty", buildRegionInfoLink(region)));
             return 1;
