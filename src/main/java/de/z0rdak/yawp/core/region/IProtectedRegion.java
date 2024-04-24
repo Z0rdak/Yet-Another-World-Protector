@@ -48,10 +48,6 @@ public interface IProtectedRegion extends INBTSerializable<CompoundNBT> {
 
     FlagContainer getFlagContainer();
 
-    boolean inheritsFlags();
-
-    void setInheritFlags(boolean inheritFlags);
-
     IFlag getFlag(String flagName);
 
     void addPlayer(PlayerEntity player, String group);
