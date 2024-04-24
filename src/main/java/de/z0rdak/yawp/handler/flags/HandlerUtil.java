@@ -115,6 +115,9 @@ public final class HandlerUtil {
     public static FlagCheckResult evaluate(FlagCheckEvent checkEvent) {
         RegionFlag regionFlag = checkEvent.getRegionFlag();
         IProtectedRegion targetRegion = getResponsible(checkEvent.getTarget(), checkEvent.getDimension());
+        if (targetRegion == null) {
+            return new FlagCheckResult(checkEvent, FlagState.UNDEFINED, null, null);
+        }
         FlagCorrelation responsibleFlag = getResponsibleFlag(targetRegion, regionFlag, null);
         FlagState playerRelatedState = getFlagState(responsibleFlag.getRegion(), regionFlag, checkEvent.getPlayer());
         return new FlagCheckResult(checkEvent, playerRelatedState, responsibleFlag.getRegion(), responsibleFlag.getFlag());
@@ -129,10 +132,18 @@ public final class HandlerUtil {
      * @param dim the dimension to get the responsible region for
      * @return the responsible region for the given position and dimension
      */
+    @Nullable
     private static IProtectedRegion getResponsible(BlockPos pos, ResourceKey<Level> dim) {
         IMarkableRegion region = getInvolvedRegionFor(pos, dim);
         if (region == null) {
-            return RegionDataManager.get().cacheFor(dim).getDimensionalRegion();
+            IProtectedRegion dimRegion = RegionDataManager.get().cacheFor(dim).getDimensionalRegion();
+            if (dimRegion.isActive()) {
+                return dimRegion;
+            } else {
+                return RegionDataManager.get().getGlobalRegion().isActive()
+                        ? RegionDataManager.get().getGlobalRegion()
+                        : null;
+            }
         }
         return region;
     }
