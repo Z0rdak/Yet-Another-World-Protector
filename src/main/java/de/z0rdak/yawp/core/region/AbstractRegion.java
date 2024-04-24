@@ -35,7 +35,6 @@ public abstract class AbstractRegion implements IProtectedRegion {
     protected Map<String, PlayerContainer> groups;
     protected boolean isActive;
     protected boolean isMuted;
-    protected boolean inheritFlags;
     protected IProtectedRegion parent;
     protected String parentName;
     protected Map<String, IProtectedRegion> children;
@@ -50,7 +49,6 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.groups = new HashMap<>();
         this.groups.put(MEMBERS, new PlayerContainer());
         this.groups.put(OWNERS, new PlayerContainer());
-        this.inheritFlags = true;
         this.deserializeNBT(nbt);
     }
 
@@ -64,7 +62,6 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.groups.put(OWNERS, new PlayerContainer());
         this.children = new HashMap<>();
         this.isActive = true;
-        this.inheritFlags = true;
         this.childrenNames = new HashSet<>();
     }
 
@@ -122,14 +119,6 @@ public abstract class AbstractRegion implements IProtectedRegion {
     @Override
     public FlagContainer getFlagContainer() {
         return flags;
-    }
-
-    public boolean inheritsFlags() {
-        return this.inheritFlags;
-    }
-
-    public void setInheritFlags(boolean inheritFlags) {
-        this.inheritFlags = inheritFlags;
     }
 
     @Nullable
@@ -216,7 +205,6 @@ public abstract class AbstractRegion implements IProtectedRegion {
     @Override
     public PlayerContainer getGroup(String group) {
         if (!this.groups.containsKey(group)) {
-            // FIXME: return null instead to signal non-existing group? or manage them properly
             return this.groups.put(group, new PlayerContainer());
         }
         return this.groups.get(group);
@@ -229,7 +217,6 @@ public abstract class AbstractRegion implements IProtectedRegion {
      *
      * @param player to be checked
      * @return true if player is in region list or is an operator, false otherwise
-     * TODO: Add argument for group to check
      */
     @Override
     public boolean permits(Player player) {
@@ -297,7 +284,6 @@ public abstract class AbstractRegion implements IProtectedRegion {
         nbt.putString(REGION_TYPE, this.regionType.type);
         nbt.putBoolean(ACTIVE, this.isActive);
         nbt.putBoolean(MUTED, this.isMuted);
-        nbt.putBoolean(INHERIT_FLAGS, this.inheritFlags);
         nbt.put(FLAGS, this.flags.serializeNBT());
         nbt.put(OWNERS, this.groups.get(OWNERS).serializeNBT());
         nbt.put(MEMBERS, this.groups.get(MEMBERS).serializeNBT());
@@ -324,7 +310,6 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.isActive = nbt.getBoolean(ACTIVE);
         this.isMuted = nbt.getBoolean(MUTED);
         this.regionType = RegionType.of(nbt.getString(REGION_TYPE));
-        this.inheritFlags = nbt.getBoolean(INHERIT_FLAGS);
         this.flags = new FlagContainer(nbt.getCompound(FLAGS));
         this.groups = new HashMap<>();
         this.groups.put(OWNERS, new PlayerContainer(nbt.getCompound(OWNERS)));
@@ -340,7 +325,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
         if (this.children != null && this.children.isEmpty()) {
             if (nbt.contains(CHILDREN, Tag.TAG_LIST)) {
                 ListTag childrenNbt = nbt.getList(CHILDREN, Tag.TAG_STRING);
-                if (childrenNbt.size() > 0) {
+                if (!childrenNbt.isEmpty()) {
                     this.children = new HashMap<>(childrenNbt.size());
                     this.childrenNames = new HashSet<>(childrenNbt.size());
                     for (int i = 0; i < childrenNbt.size(); i++) {
