@@ -932,7 +932,7 @@ public class MessageUtil {
      * If the child flag is dominant, we display the child flag, and add a hint to the parent
      * If the flag is overriden, we format them with strikethrough and add a link to the parent which overrides it
      */
-    public static List<IFormattableTextComponent> buildRemoveFlagEntries(IProtectedRegion region) {
+    public static List<IFormattableTextComponent> buildFlagEntries(IProtectedRegion region) {
         List<IFormattableTextComponent> flagEntries = new ArrayList<>();
         Map<String, FlagCorrelation> flagMapRecursive = getFlagMapRecursive(region, null);
         Map<FlagState, List<FlagCorrelation>> flagStateListMap = LocalRegions.sortFlagsByState(flagMapRecursive);
@@ -943,9 +943,9 @@ public class MessageUtil {
     }
 
     private static List<IFormattableTextComponent> buildFlagEntries(Map<FlagState, List<FlagCorrelation>> flagStateListMap, FlagState state) {
-        List<FlagCorrelation> allowedFlags = flagStateListMap.get(state);
-        allowedFlags.sort(Comparator.comparing(flagCorrelation -> flagCorrelation.getFlag().getName()));
-        return allowedFlags.stream()
+        List<FlagCorrelation> flagsByState = flagStateListMap.get(state);
+        flagsByState.sort(Comparator.comparing(flagCorrelation -> flagCorrelation.getFlag().getName()));
+        return flagsByState.stream()
                 .map(flagCorrelation -> buildRemoveFlagEntry(flagCorrelation.getRegion(), flagCorrelation.getFlag(), colorForState(state)))
                 .collect(Collectors.toList());
     }
