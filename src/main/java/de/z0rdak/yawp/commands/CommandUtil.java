@@ -221,23 +221,19 @@ public class CommandUtil {
         MutableComponent regionEnableComponent = buildRegionEnableComponent(region);
         MutableComponent regionAlertComponent = buildRegionAlertToggleLink(region);
         if (region.getRegionType() == RegionType.DIMENSION) {
-            regionEnableComponent
-                    .append(new TextComponent(" | ").setStyle(Style.EMPTY.applyFormat(ChatFormatting.RESET)))
-                    .append(buildAllLocalEnableComponent(getDimCacheArgument(ctx)));
-            regionAlertComponent
-                    .append(new TextComponent(" | ").setStyle(Style.EMPTY.applyFormat(ChatFormatting.RESET)))
-                    .append(buildAllLocalAlertToggleLink(getDimCacheArgument(ctx)));
-            sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.enable", regionEnableComponent));
-            sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.alert", regionAlertComponent));
+            MutableComponent enableComp = new TranslatableComponent("%s | %s", regionEnableComponent, buildAllLocalEnableComponent(getDimCacheArgument(ctx)));
+            MutableComponent alertComp = new TranslatableComponent("%s | %s", regionAlertComponent, buildAllLocalAlertToggleLink(getDimCacheArgument(ctx)));
+            sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.enable", enableComp));
+            sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.alert", alertComp));
             return 0;
         }
         if (region.getRegionType() == RegionType.LOCAL) {
             sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.name", buildRegionRenameLink(region)));
         }
         MutableComponent enableComp = buildInfoComponent("cli.msg.info.region.state.enable", regionEnableComponent);
-        sendCmdFeedback(ctx.getSource(), enableComp
-                .append(new TextComponent(", ").withStyle(ChatFormatting.RESET))
-                .append(buildInfoComponent("cli.msg.info.region.state.alert", regionAlertComponent)));
+        MutableComponent alertComp = buildInfoComponent("cli.msg.info.region.state.alert", regionAlertComponent);
+        sendCmdFeedback(ctx.getSource(), new TranslatableComponent("%s, %s", enableComp, alertComp));
+
         return 0;
     }
 
@@ -360,15 +356,12 @@ public class CommandUtil {
     }
 
     public static int setAlertState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, boolean showAlert) {
-        boolean oldState = !region.isMuted();
-        region.setIsMuted(showAlert);
+        region.setIsMuted(!showAlert);
         RegionDataManager.save();
-        if (oldState == region.isMuted()) {
-            MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(showAlert), String.valueOf(!showAlert));
-            TranslatableComponent msg = new TranslatableComponent("cli.msg.info.state.alert.set.value",
+        MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!showAlert), String.valueOf(showAlert));
+        MutableComponent msg = new TranslatableComponent("cli.msg.info.state.alert.set.value",
                     buildRegionInfoLink(region), region.isMuted() ? "muted" : "active");
-            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("%s %s", msg, undoLink));
-        }
+        sendCmdFeedback(ctx.getSource(), new TranslatableComponent("%s %s", msg, undoLink));
         return 0;
     }
 

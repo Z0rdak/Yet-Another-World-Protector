@@ -32,7 +32,7 @@ public class GlobalCommands {
                 .then(literal(STATE)
                         .executes(ctx -> CommandUtil.promptRegionState(ctx, getGlobalRegion()))
                         .then(literal(ALERT)
-                                .executes(ctx -> CommandUtil.setAlertState(ctx, getGlobalRegion(), !getGlobalRegion().isMuted()))
+                                .executes(ctx -> CommandUtil.setAlertState(ctx, getGlobalRegion(), getGlobalRegion().isMuted()))
                                 .then(Commands.argument(ALERT.toString(), BoolArgumentType.bool())
                                         .executes(ctx -> CommandUtil.setAlertState(ctx, getGlobalRegion(), getAlertArgument(ctx))))
                         )
