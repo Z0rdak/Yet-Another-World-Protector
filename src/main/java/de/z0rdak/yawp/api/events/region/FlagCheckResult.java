@@ -15,6 +15,7 @@ public class FlagCheckResult extends Event {
 
     private final FlagCheckEvent flagCheck;
 
+    @Nullable
     private final IProtectedRegion responsibleRegion;
 
     @Nullable
@@ -22,13 +23,14 @@ public class FlagCheckResult extends Event {
 
     private FlagState result;
 
-    public FlagCheckResult(FlagCheckEvent flagCheck, FlagState state, IProtectedRegion responsibleRegion, @Nullable IFlag flag) {
+    public FlagCheckResult(FlagCheckEvent flagCheck, FlagState state, @Nullable IProtectedRegion responsibleRegion, @Nullable IFlag flag) {
         this.flagCheck = flagCheck;
         this.responsibleRegion = responsibleRegion;
         this.result = state;
         this.flag = flag;
     }
 
+    @Nullable
     public IProtectedRegion getResponsible() {
         return this.responsibleRegion;
     }
