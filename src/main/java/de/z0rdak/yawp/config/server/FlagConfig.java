@@ -14,7 +14,6 @@ public class FlagConfig {
     private static final ForgeConfigSpec.ConfigValue<Boolean> REMOVE_ENTITIES_FOR_SPAWNING_FLAGS;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> BREAK_FLAG_ENTITIES;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> BREAK_FLAG_ENTITY_TAGS;
-    private static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_FLAG_INHERITANCE;
 
     static {
         final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
@@ -33,16 +32,9 @@ public class FlagConfig {
                 .comment("Toggle to remove entities when adding spawning-* flags.\n true -> remove entities related to this flag\n false -> don't remove entities")
                 .define(Collections.singletonList("remove_entities_for_spawning_flags"), true);
 
-        ENABLE_FLAG_INHERITANCE = BUILDER.comment("Enable flag inheritance.")
-                .define("enable_flag_inheritance", false);
-
         BUILDER.pop();
 
         CONFIG_SPEC = BUILDER.build();
-    }
-
-    public static boolean isFlagInheritanceEnabled() {
-        return ENABLE_FLAG_INHERITANCE.get();
     }
 
     private static List<String> defaultEntityBreakFlagEntries() {
