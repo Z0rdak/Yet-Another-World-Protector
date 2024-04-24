@@ -729,7 +729,7 @@ public class MessageUtil {
 
     public static IFormattableTextComponent buildFlagStateComponent(IProtectedRegion region, IFlag flag) {
         FlagState state = flag.getState();
-        IFormattableTextComponent text = new StringTextComponent(state.name());
+        IFormattableTextComponent text = new StringTextComponent(state.name);
         IFormattableTextComponent hover = StringTextComponent.EMPTY.plainCopy();
         TextFormatting color = WHITE;
         switch (state) {
