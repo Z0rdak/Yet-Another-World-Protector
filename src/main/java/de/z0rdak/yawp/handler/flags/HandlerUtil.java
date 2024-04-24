@@ -211,29 +211,37 @@ public final class HandlerUtil {
 
     public static Map<String, FlagCorrelation> getFlagMapRecursive(IProtectedRegion region, Map<String, FlagCorrelation> carry) {
         if (carry == null) {
-            carry = region.getFlags().stream()
-                    .collect(Collectors.toMap(IFlag::getName, flag -> new FlagCorrelation(region, flag), (a, b) -> b, HashMap::new));
+            carry = region.getFlagContainer().entrySet().stream()
+                    .filter(flag -> flag.getValue().getState() != FlagState.UNDEFINED)
+                    .collect(Collectors.toMap(Map.Entry::getKey, entry -> new FlagCorrelation(region, entry.getValue())));
         }
-        if (region.equals(region.getParent())) { // global region has itself as parent
+        if (region.equals(region.getParent())) {
+            // global region has itself as parent
+            Set<Map.Entry<String, IFlag>> flags = getNonUndefinedFlags(region);
+            for (Map.Entry<String, IFlag> entry : flags) {
+                if (!carry.containsKey(entry.getKey())) {
+                    carry.put(entry.getValue().getName(), new FlagCorrelation(region, entry.getValue()));
+                }
+            }
             return carry;
         }
-        Set<Map.Entry<String, IFlag>> parentFlags = region.getParent().getFlagContainer().entrySet();
+        Set<Map.Entry<String, IFlag>> parentFlags = getNonUndefinedFlags(region.getParent());
         for (Map.Entry<String, IFlag> entry : parentFlags) {
-            String flagName = entry.getKey();
-            IFlag flag = entry.getValue();
-            boolean parentFlagOverrides = flag.doesOverride();
-            boolean existingFlag = carry.containsKey(flagName);
-            if (parentFlagOverrides && existingFlag) {
-                carry.remove(flagName);
-                carry.put(flagName, new FlagCorrelation(region.getParent(), flag));
+            if (!carry.containsKey(entry.getKey())) {
+                carry.put(entry.getValue().getName(), new FlagCorrelation(region.getParent(), entry.getValue()));
             }
-            if (!existingFlag) {
-                carry.put(flagName, new FlagCorrelation(region, flag));
+            if (entry.getValue().doesOverride()) {
+                carry.put(entry.getValue().getName(), new FlagCorrelation(region.getParent(), entry.getValue()));
             }
         }
         return getFlagMapRecursive(region.getParent(), carry);
     }
 
+    private static Set<Map.Entry<String, IFlag>> getNonUndefinedFlags(IProtectedRegion region) {
+        return region.getFlagContainer().entrySet().stream()
+                .filter(flag -> flag.getValue().getState() != FlagState.UNDEFINED)
+                .collect(Collectors.toSet());
+    }
 
 
     /**
@@ -327,12 +335,21 @@ public final class HandlerUtil {
         }
         if (region.equals(region.getParent())) {
             if (region.getFlagContainer().flagState(regionFlag.name) != FlagState.UNDEFINED) {
-                IFlag flag = region.getFlag(regionFlag.name);
-                if (flag.doesOverride()) {
-                    carry = new FlagCorrelation(region, flag);
+                if (carry.getFlag() == null) {
+                    carry = new FlagCorrelation(region, region.getFlag(regionFlag.name));
                 }
             }
             return carry;
+        }
+        FlagState flagState = region.getParent().getFlagContainer().flagState(regionFlag.name);
+        if (flagState == FlagState.ALLOWED || flagState == FlagState.DENIED) {
+            IFlag flag = region.getParent().getFlag(regionFlag.name);
+            if (carry.getFlag() == null) {
+                carry = new FlagCorrelation(region.getParent(), flag);
+            }
+            if (flag.doesOverride()) {
+                carry = new FlagCorrelation(region.getParent(), flag);
+            }
         }
         return getResponsibleFlag(region.getParent(), regionFlag, carry);
     }
