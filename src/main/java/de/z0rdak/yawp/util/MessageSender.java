@@ -48,6 +48,9 @@ public class MessageSender {
      */
     public static void sendFlagMsg(FlagCheckResult result) {
         IProtectedRegion responsibleRegion = result.getResponsible();
+        if (responsibleRegion == null) {
+            return;
+        }
         IFlag flag = responsibleRegion.getFlag(result.getFlagCheck().getRegionFlag().name);
         if (flag == null || result.getFlagState() == FlagState.UNDEFINED || result.getFlagState() == FlagState.DISABLED) {
             return;

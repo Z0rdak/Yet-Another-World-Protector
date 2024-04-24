@@ -89,7 +89,7 @@ public class DimensionCommands {
                         .then(literal(STATE)
                                 .executes(ctx -> CommandUtil.promptRegionState(ctx, getDimCacheArgument(ctx).getDimensionalRegion()))
                                 .then(literal(ALERT)
-                                        .executes(ctx -> CommandUtil.setAlertState(ctx, getDimCacheArgument(ctx).getDimensionalRegion(), !getDimCacheArgument(ctx).getDimensionalRegion().isMuted()))
+                                        .executes(ctx -> CommandUtil.setAlertState(ctx, getDimCacheArgument(ctx).getDimensionalRegion(), (getDimCacheArgument(ctx).getDimensionalRegion().isMuted())))
                                         .then(Commands.argument(ALERT.toString(), BoolArgumentType.bool())
                                                 .executes(ctx -> CommandUtil.setAlertState(ctx, getDimCacheArgument(ctx).getDimensionalRegion(), getAlertArgument(ctx))))
                                 )

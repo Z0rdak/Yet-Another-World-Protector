@@ -324,10 +324,34 @@ public class MessageUtil {
                 new TranslationTextComponent(translationKey));
     }
 
+    public static IFormattableTextComponent buildAllLocalEnableComponent(DimensionRegionCache dimCache) {
+        IFormattableTextComponent enableLinkTextKey = new TranslationTextComponent("cli.msg.info.region.state.alert.all.true.link.text");
+        IFormattableTextComponent enableHoverTextKey = new TranslationTextComponent("cli.msg.info.region.state.alert.all.true.link.hover", dimCache.dimensionKey().location().toString());
+        IFormattableTextComponent disableLinkTextKey = new TranslationTextComponent("cli.msg.info.region.state.alert.all.false.link.text");
+        IFormattableTextComponent disableHoverTextKey = new TranslationTextComponent("cli.msg.info.region.state.alert.all.false.link.hover", dimCache.dimensionKey().location().toString());
+        String enableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), STATE.toString(), ENABLE_LOCAL.toString(), Boolean.TRUE.toString());
+        String disableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), STATE.toString(), ENABLE_LOCAL.toString(), Boolean.FALSE.toString());
+        IFormattableTextComponent activeAlertLink = buildExecuteCmdComponent(enableLinkTextKey, enableHoverTextKey, enableCmd, RUN_COMMAND, GREEN);
+        IFormattableTextComponent disableAlertLink = buildExecuteCmdComponent(disableLinkTextKey, disableHoverTextKey, disableCmd, RUN_COMMAND, RED);
+        return new TranslationTextComponent("%s %s", activeAlertLink, disableAlertLink);
+    }
+
+    public static IFormattableTextComponent buildAllLocalAlertToggleLink(DimensionRegionCache dimCache) {
+        IFormattableTextComponent enableLinkTextKey = new TranslationTextComponent("cli.msg.info.region.state.enable.all.true.link.text");
+        IFormattableTextComponent enableHoverTextKey = new TranslationTextComponent("cli.msg.info.region.state.enable.all.true.link.hover", dimCache.dimensionKey().location().toString());
+        IFormattableTextComponent disableLinkTextKey = new TranslationTextComponent("cli.msg.info.region.state.enable.all.false.link.text");
+        IFormattableTextComponent disableHoverTextKey = new TranslationTextComponent("cli.msg.info.region.state.enable.all.false.link.hover", dimCache.dimensionKey().location().toString());
+        String enableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), STATE.toString(), ALERT_LOCAL.toString(), Boolean.TRUE.toString());
+        String disableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), STATE.toString(), ALERT_LOCAL.toString(), Boolean.FALSE.toString());
+        IFormattableTextComponent activeAlertLink = buildExecuteCmdComponent(enableLinkTextKey, enableHoverTextKey, enableCmd, RUN_COMMAND, GREEN);
+        IFormattableTextComponent disableAlertLink = buildExecuteCmdComponent(disableLinkTextKey, disableHoverTextKey, disableCmd, RUN_COMMAND, RED);
+        return new TranslationTextComponent("%s %s", activeAlertLink, disableAlertLink);
+    }
+
     public static IFormattableTextComponent buildRegionEnableComponent(IProtectedRegion region) {
         String linkTextKey = "cli.msg.info.region.state.enable." + region.isActive() + ".link.text";
         String hoverTextKey = "cli.msg.info.region.state.enable." + !region.isActive() + ".link.hover";
-        TextFormatting color = region.isActive() ? ADD_CMD_COLOR : REMOVE_CMD_COLOR;
+        TextFormatting color = region.isActive() ? GREEN : GRAY;
         switch (region.getRegionType()) {
             case GLOBAL: {
                 String cmd = ArgumentUtil.buildCommandStr(GLOBAL.toString(), STATE.toString(), ENABLE.toString());
@@ -344,30 +368,6 @@ public class MessageUtil {
             default:
                 throw new IllegalStateException("Unexpected value: " + region.getRegionType());
         }
-    }
-
-    public static IFormattableTextComponent buildAllLocalEnableComponent(DimensionRegionCache dimCache) {
-        String enableLinkTextKey = "cli.msg.info.region.state.alert.all.true.link.text";
-        String enableHoverTextKey = "cli.msg.info.region.state.alert.all.true.link.hover";
-        String disableLinkTextKey = "cli.msg.info.region.state.alert.all.false.link.text";
-        String disableHoverTextKey = "cli.msg.info.region.state.alert.all.false.link.hover";
-        String enableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), STATE.toString(), ENABLE_LOCAL.toString(), Boolean.TRUE.toString());
-        String disableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), STATE.toString(), ENABLE_LOCAL.toString(), Boolean.FALSE.toString());
-        IFormattableTextComponent activeAlertLink = buildExecuteCmdComponent(enableLinkTextKey, enableHoverTextKey, enableCmd, RUN_COMMAND, ADD_CMD_COLOR);
-        IFormattableTextComponent disableAlertLink = buildExecuteCmdComponent(disableLinkTextKey, disableHoverTextKey, disableCmd, RUN_COMMAND, REMOVE_CMD_COLOR);
-        return new TranslationTextComponent("%s %s", activeAlertLink, disableAlertLink);
-    }
-
-    public static IFormattableTextComponent buildAllLocalAlertToggleLink(DimensionRegionCache dimCache) {
-        String enableLinkTextKey = "cli.msg.info.region.state.enable.all.true.link.text";
-        String enableHoverTextKey = "cli.msg.info.region.state.enable.all.true.link.hover";
-        String disableLinkTextKey = "cli.msg.info.region.state.enable.all.false.link.text";
-        String disableHoverTextKey = "cli.msg.info.region.state.enable.all.false.link.hover";
-        String enableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), STATE.toString(), ALERT_LOCAL.toString(), Boolean.TRUE.toString());
-        String disableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), STATE.toString(), ALERT_LOCAL.toString(), Boolean.FALSE.toString());
-        IFormattableTextComponent activeAlertLink = buildExecuteCmdComponent(enableLinkTextKey, enableHoverTextKey, enableCmd, RUN_COMMAND, ADD_CMD_COLOR);
-        IFormattableTextComponent disableAlertLink = buildExecuteCmdComponent(disableLinkTextKey, disableHoverTextKey, disableCmd, RUN_COMMAND, REMOVE_CMD_COLOR);
-        return new TranslationTextComponent("%s %s", activeAlertLink, disableAlertLink);
     }
 
     public static IFormattableTextComponent buildRegionPriorityComponent(IMarkableRegion region) {
@@ -390,18 +390,18 @@ public class MessageUtil {
     public static IFormattableTextComponent buildRegionAlertToggleLink(IProtectedRegion region) {
         String linkTextKey = "cli.msg.info.region.state.alert." + !region.isMuted() + ".link.text";
         String hoverTextKey = "cli.msg.info.region.state.alert." + region.isMuted() + ".link.hover";
-        TextFormatting color = region.isMuted() ? REMOVE_CMD_COLOR : ADD_CMD_COLOR;
+        TextFormatting color = region.isMuted() ? GRAY : GREEN;
         switch (region.getRegionType()) {
             case GLOBAL: {
-                String cmd = buildCommandStr(GLOBAL.toString(), STATE.toString(), ALERT.toString(), Boolean.toString(!region.isMuted()));
+                String cmd = buildCommandStr(GLOBAL.toString(), STATE.toString(), ALERT.toString());
                 return buildExecuteCmdComponent(linkTextKey, hoverTextKey, cmd, RUN_COMMAND, color);
             }
             case DIMENSION: {
-                String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), STATE.toString(), ALERT.toString(), Boolean.toString(!region.isMuted()));
+                String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), STATE.toString(), ALERT.toString());
                 return buildExecuteCmdComponent(linkTextKey, hoverTextKey, cmd, RUN_COMMAND, color);
             }
             case LOCAL: {
-                String cmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), ALERT.toString(), Boolean.toString(!region.isMuted()));
+                String cmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), ALERT.toString());
                 return buildExecuteCmdComponent(linkTextKey, hoverTextKey, cmd, RUN_COMMAND, color);
             }
             default:
@@ -813,17 +813,18 @@ public class MessageUtil {
     public static IFormattableTextComponent buildFlagMessageEditLink(IProtectedRegion region, IFlag flag) {
         IFormattableTextComponent hover = new TranslationTextComponent("cli.flag.msg.text.set.link.hover", flag.getName(), region.getName());
         IFormattableTextComponent text = new TranslationTextComponent("cli.flag.msg.text.set.link.text");
+        String msg = "\"" + flag.getFlagMsg().getMsg() + "\"";
         switch (region.getRegionType()) {
             case GLOBAL: {
-                String cmd = buildCommandStr(FLAG.toString(), GLOBAL.toString(), flag.getName(), MSG.toString(), SET.toString(), flag.getFlagMsg().getMsg());
+                String cmd = buildCommandStr(FLAG.toString(), GLOBAL.toString(), flag.getName(), MSG.toString(), SET.toString(), msg);
                 return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, LINK_COLOR);
             }
             case DIMENSION: {
-                String cmd = buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().location().toString(), flag.getName(), MSG.toString(), SET.toString(), flag.getFlagMsg().getMsg());
+                String cmd = buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().location().toString(), flag.getName(), MSG.toString(), SET.toString(), msg);
                 return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, LINK_COLOR);
             }
             case LOCAL: {
-                String cmd = buildCommandStr(FLAG.toString(), CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag.getName(), MSG.toString(), SET.toString(), flag.getFlagMsg().getMsg());
+                String cmd = buildCommandStr(FLAG.toString(), CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag.getName(), MSG.toString(), SET.toString(), msg);
                 return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, LINK_COLOR);
             }
             default:
@@ -854,11 +855,11 @@ public class MessageUtil {
 
     public static IFormattableTextComponent buildFlagMuteToggleLink(IProtectedRegion region, IFlag flag, boolean shortLink) {
         IFormattableTextComponent hover = new TranslationTextComponent("cli.flag.msg.mute.set.link.hover", flag.getName(), region.getName());
-        IFormattableTextComponent text = new TranslationTextComponent("cli.flag.msg.mute.set.link.text." + flag.getFlagMsg().isMuted());
+        IFormattableTextComponent text = new TranslationTextComponent("cli.flag.msg.mute.set.link.text." + !flag.getFlagMsg().isMuted());
         if (shortLink) {
             text = new TranslationTextComponent("cli.flag.msg.mute.set.link.text.toggle");
         }
-        TextFormatting textFormatting = flag.getFlagMsg().isMuted() ? GREEN : GRAY;
+        TextFormatting textFormatting = !flag.getFlagMsg().isMuted() ? GREEN : GRAY;
         switch (region.getRegionType()) {
             case GLOBAL: {
                 String cmd = buildCommandStr(FLAG.toString(), GLOBAL.toString(), flag.getName(), MSG.toString(), MUTE.toString());

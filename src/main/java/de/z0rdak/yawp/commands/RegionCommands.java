@@ -79,7 +79,7 @@ public class RegionCommands {
                                 .then(literal(STATE)
                                         .executes(ctx -> promptLocalRegionState(ctx, getRegionArgument(ctx)))
                                         .then(literal(ALERT)
-                                                .executes(ctx -> CommandUtil.setAlertState(ctx, getRegionArgument(ctx), !getRegionArgument(ctx).isMuted()))
+                                                .executes(ctx -> CommandUtil.setAlertState(ctx, getRegionArgument(ctx), getRegionArgument(ctx).isMuted()))
                                                 .then(Commands.argument(ALERT.toString(), BoolArgumentType.bool())
                                                         .executes(ctx -> CommandUtil.setAlertState(ctx, getRegionArgument(ctx), getAlertArgument(ctx)))))
                                         .then(literal(ENABLE)

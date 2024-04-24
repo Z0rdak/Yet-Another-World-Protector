@@ -40,7 +40,10 @@ import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.util.text.*;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.commons.lang3.NotImplementedException;
@@ -216,23 +219,19 @@ public class CommandUtil {
         IFormattableTextComponent regionEnableComponent = buildRegionEnableComponent(region);
         IFormattableTextComponent regionAlertComponent = buildRegionAlertToggleLink(region);
         if (region.getRegionType() == RegionType.DIMENSION) {
-            regionEnableComponent
-                    .append(new StringTextComponent(" | ").setStyle(Style.EMPTY.applyFormat(TextFormatting.RESET)))
-                    .append(buildAllLocalEnableComponent(getDimCacheArgument(ctx)));
-            regionAlertComponent
-                    .append(new StringTextComponent(" | ").setStyle(Style.EMPTY.applyFormat(TextFormatting.RESET)))
-                    .append(buildAllLocalAlertToggleLink(getDimCacheArgument(ctx)));
-            sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.enable", regionEnableComponent));
-            sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.alert", regionAlertComponent));
+            IFormattableTextComponent enableComp = new TranslationTextComponent("%s | %s", regionEnableComponent, buildAllLocalEnableComponent(getDimCacheArgument(ctx)));
+            IFormattableTextComponent alertComp = new TranslationTextComponent("%s | %s", regionAlertComponent, buildAllLocalAlertToggleLink(getDimCacheArgument(ctx)));
+            sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.enable", enableComp));
+            sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.alert", alertComp));
             return 0;
         }
         if (region.getRegionType() == RegionType.LOCAL) {
             sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.name", buildRegionRenameLink(region)));
         }
         IFormattableTextComponent enableComp = buildInfoComponent("cli.msg.info.region.state.enable", regionEnableComponent);
-        sendCmdFeedback(ctx.getSource(), enableComp
-                .append(new StringTextComponent(", ").withStyle(TextFormatting.RESET))
-                .append(buildInfoComponent("cli.msg.info.region.state.alert", regionAlertComponent)));
+        IFormattableTextComponent alertComp = buildInfoComponent("cli.msg.info.region.state.alert", regionAlertComponent);
+        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("%s, %s", enableComp, alertComp));
+
         return 0;
     }
 
@@ -355,15 +354,12 @@ public class CommandUtil {
     }
 
     public static int setAlertState(CommandContext<CommandSource> ctx, IProtectedRegion region, boolean showAlert) {
-        boolean oldState = !region.isMuted();
-        region.setIsMuted(showAlert);
+        region.setIsMuted(!showAlert);
         RegionDataManager.save();
-        if (oldState == region.isMuted()) {
-            IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(showAlert), String.valueOf(!showAlert));
-            TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.state.alert.set.value",
+        IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!showAlert), String.valueOf(showAlert));
+        TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.state.alert.set.value",
                     buildRegionInfoLink(region), region.isMuted() ? "muted" : "active");
-            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("%s %s", msg, undoLink));
-        }
+        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("%s %s", msg, undoLink));
         return 0;
     }
 
