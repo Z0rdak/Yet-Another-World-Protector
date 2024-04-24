@@ -9,7 +9,6 @@ import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.area.SphereArea;
-import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.group.GroupType;
@@ -18,7 +17,6 @@ import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.handler.flags.FlagCorrelation;
-import de.z0rdak.yawp.handler.flags.HandlerUtil;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.entity.EntityType;
@@ -1187,9 +1185,13 @@ public class MessageUtil {
     }
 
     public static IFormattableTextComponent buildFlagListLink(IProtectedRegion region) {
-        FlagContainer flagsInHierarchy = HandlerUtil.getFlagsRecursive(region, null);
+        Map<String, FlagCorrelation> flagsInHierarchy = getFlagMapRecursive(region, null);
+        IFormattableTextComponent regionFlagNumber = buildTextWithHoverMsg(new TranslationTextComponent("%s", region.getFlags().size()),
+                new TranslationTextComponent("Flags responsible in %s", region.getName()), LINK_COLOR);
+        IFormattableTextComponent parentFlagsNumber = buildTextWithHoverMsg(new TranslationTextComponent("%s", flagsInHierarchy.size() - region.getFlags().size()),
+                new TranslationTextComponent("Flags responsible in parent regions"), LINK_COLOR);
         IFormattableTextComponent flagListLinkText = new TranslationTextComponent("cli.msg.info.region.flag.link.text",
-                region.getFlags().size(), flagsInHierarchy.size() - region.getFlags().size());
+                regionFlagNumber, parentFlagsNumber);
         IFormattableTextComponent flagListHoverText = new TranslationTextComponent("cli.msg.info.region.flag.link.hover", region.getName());
         switch (region.getRegionType()) {
             case GLOBAL: {
