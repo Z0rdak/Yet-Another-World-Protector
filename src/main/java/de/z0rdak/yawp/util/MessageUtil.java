@@ -771,7 +771,7 @@ public class MessageUtil {
 
     public static MutableComponent buildFlagStateComponent(IProtectedRegion region, IFlag flag) {
         FlagState state = flag.getState();
-        MutableComponent text = new TextComponent(state.name());
+        MutableComponent text = new TextComponent(state.name);
         MutableComponent hover = TextComponent.EMPTY.plainCopy();
         ChatFormatting color = WHITE;
         switch (state) {
