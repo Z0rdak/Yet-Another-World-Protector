@@ -1,6 +1,5 @@
 package de.z0rdak.yawp.config.server;
 
-import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.CommandSourceType;
@@ -189,10 +188,6 @@ public class CommandPermissionConfig {
             default:
                 return false;
         }
-    }
-
-    public static boolean hasConfigPermission(CommandContextBuilder<CommandSourceStack> ctx, CommandSourceType cmdSrcType) throws CommandSyntaxException {
-        return hasConfigPermission(ctx.getSource(), cmdSrcType);
     }
 
     public static boolean hasCmdPermission(CommandSourceStack src) {
