@@ -18,7 +18,7 @@ public class CommandPermissionConfig {
     private static final ForgeConfigSpec.ConfigValue<Boolean> ALLOW_READ_ONLY_CMDS;
     private static final ForgeConfigSpec.ConfigValue<Boolean> DISABLE_CMD_FOR_NON_OP;
     private static final ForgeConfigSpec.ConfigValue<Boolean> OP_BYPASS_FLAGS;
-    private static final ForgeConfigSpec.ConfigValue<Boolean> AUTO_CHILD_OWNERSHIP;
+    private static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_HIERARCHY_OWNERSHIP;
     private static final ForgeConfigSpec.ConfigValue<Integer> REQUIRED_OP_LEVEL;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> PLAYERS_WITH_PERMISSION;
     private static final ForgeConfigSpec.ConfigValue<Boolean> COMMAND_BLOCK_EXECUTION;
@@ -50,8 +50,8 @@ public class CommandPermissionConfig {
         OP_BYPASS_FLAGS = BUILDER.comment("Defines whether OPs/permitted players are allowed to bypass flags set in regions.")
                 .define("op_bypass_flags", true);
 
-        AUTO_CHILD_OWNERSHIP = BUILDER.comment("Defines whether owners of parent regions have implicit ownership rights for child regions as well")
-                .define("auto_child_ownership", true);
+        ENABLE_HIERARCHY_OWNERSHIP = BUILDER.comment("Defines whether owners of parent regions have implicit ownership rights for child regions as well")
+                .define("hierarchy_ownership", true);
 
         ENABLE_REGION_TP = BUILDER.comment("Defines whether teleport in and out of a region is allowed by everyone. Mostly useful when using something like Waystones inside of regions.")
                 .define("allow_region_tp", false);
@@ -92,6 +92,10 @@ public class CommandPermissionConfig {
                 .filter(Objects::nonNull)
                 .map(s -> (String) s)
                 .collect(Collectors.toSet());
+    }
+
+    public static boolean isHierarchyOwnershipEnabled() {
+        return ENABLE_HIERARCHY_OWNERSHIP.get();
     }
 
     public static boolean isCommandBlockExecutionAllowed() {
