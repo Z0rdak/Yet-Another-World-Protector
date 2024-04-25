@@ -119,10 +119,17 @@ public class CommandInterceptor {
             if (!isMarkerSubCmd) {
                 return ALLOW_CMD;
             }
-            boolean hasPermission = hasConfigPermission(cmdContext, cmdSrcType);
-            handlePermission(cmdContext.getSource(), hasPermission);
-            return hasPermission ? ALLOW_CMD : CANCEL_CMD;
-
+            if (cmdSrcType == CommandSourceType.PLAYER) {
+                ServerPlayer player = cmdContext.getSource().getPlayerOrException();
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.getLevel().dimension());
+                boolean hasPermission = hasConfigPermission(cmdContext, cmdSrcType);
+                boolean hasRegionPermission = hasRegionHierarchyPermission(dimCache.getDimensionalRegion(), player, CommandUtil.OWNER);
+                hasPermission = hasPermission || hasRegionPermission;
+                handlePermission(cmdContext.getSource(), hasPermission);
+                return hasPermission ? ALLOW_CMD : CANCEL_CMD;
+            }
+            YetAnotherWorldProtector.LOGGER.error("A player is required to execute this command.");
+            return CANCEL_CMD;
         } catch (CommandSyntaxException e) {
             YetAnotherWorldProtector.LOGGER.error(e);
             return CANCEL_CMD;
@@ -386,8 +393,10 @@ Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
                 List<String> nodeNames = ctx.getNodes().stream().map(node -> node.getNode().getName()).collect(Collectors.toList());
                 ServerPlayer player = ctx.getSource().getPlayerOrException();
                 boolean hasConfigPermission = CommandPermissionConfig.hasConfigPermission(player);
-                boolean isOwner = region.isInGroup(player, permissionGroup);
-                return (isOwner || hasConfigPermission) || subCmdPermission.apply(nodeNames);
+                boolean hasRegionPermission = CommandPermissionConfig.isHierarchyOwnershipEnabled()
+                        ? hasRegionHierarchyPermission(region, player, permissionGroup)
+                        : region.isInGroup(player, permissionGroup);
+                return (hasRegionPermission || hasConfigPermission) || subCmdPermission.apply(nodeNames);
             }
             case SERVER:
                 return true;
@@ -396,6 +405,18 @@ Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
             default:
                 return false;
         }
+    }
+
+    private static boolean hasRegionHierarchyPermission(IProtectedRegion region, Player player, String permissionGroup, boolean hasPermission) {
+        if (region.getParent().equals(region)) {
+            return hasPermission || region.isInGroup(player, permissionGroup);
+        }
+        hasPermission = hasPermission || region.isInGroup(player, permissionGroup);
+        return hasRegionHierarchyPermission(region.getParent(), player, permissionGroup, hasPermission);
+    }
+
+    public static boolean hasRegionHierarchyPermission(IProtectedRegion region, Player player, String permissionGroup) {
+        return hasRegionHierarchyPermission(region, player, permissionGroup, false);
     }
 
     private static boolean hasConfigPermission(CommandContextBuilder<CommandSourceStack> ctx, CommandSourceType cmdSrcType) throws CommandSyntaxException {
