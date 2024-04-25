@@ -14,6 +14,7 @@ import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.command.CommandSource;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
@@ -117,10 +118,17 @@ public class CommandInterceptor {
             if (!isMarkerSubCmd) {
                 return ALLOW_CMD;
             }
-            boolean hasPermission = hasConfigPermission(cmdContext, cmdSrcType);
-            handlePermission(cmdContext.getSource(), hasPermission);
-            return hasPermission ? ALLOW_CMD : CANCEL_CMD;
-
+            if (cmdSrcType == CommandSourceType.PLAYER) {
+                ServerPlayerEntity player = cmdContext.getSource().getPlayerOrException();
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.getLevel().dimension());
+                boolean hasPermission = hasConfigPermission(cmdContext, cmdSrcType);
+                boolean hasRegionPermission = hasRegionHierarchyPermission(dimCache.getDimensionalRegion(), player, CommandUtil.OWNER);
+                hasPermission = hasPermission || hasRegionPermission;
+                handlePermission(cmdContext.getSource(), hasPermission);
+                return hasPermission ? ALLOW_CMD : CANCEL_CMD;
+            }
+            YetAnotherWorldProtector.LOGGER.error("A player is required to execute this command.");
+            return CANCEL_CMD;
         } catch (CommandSyntaxException e) {
             YetAnotherWorldProtector.LOGGER.error(e);
             return CANCEL_CMD;
@@ -390,8 +398,10 @@ public class CommandInterceptor {
                 List<String> nodeNames = ctx.getNodes().stream().map(node -> node.getNode().getName()).collect(Collectors.toList());
                 ServerPlayerEntity player = ctx.getSource().getPlayerOrException();
                 boolean hasConfigPermission = CommandPermissionConfig.hasConfigPermission(player);
-                boolean isOwner = region.isInGroup(player, permissionGroup);
-                return (isOwner || hasConfigPermission) || subCmdPermission.apply(nodeNames);
+                boolean hasRegionPermission = CommandPermissionConfig.isHierarchyOwnershipEnabled()
+                        ? hasRegionHierarchyPermission(region, player, permissionGroup)
+                        : region.isInGroup(player, permissionGroup);
+                return (hasRegionPermission || hasConfigPermission) || subCmdPermission.apply(nodeNames);
             }
             case SERVER:
                 return true;
@@ -400,6 +410,18 @@ public class CommandInterceptor {
             default:
                 return false;
         }
+    }
+
+    private static boolean hasRegionHierarchyPermission(IProtectedRegion region, PlayerEntity player, String permissionGroup, boolean hasPermission) {
+        if (region.getParent().equals(region)) {
+            return hasPermission || region.isInGroup(player, permissionGroup);
+        }
+        hasPermission = hasPermission || region.isInGroup(player, permissionGroup);
+        return hasRegionHierarchyPermission(region.getParent(), player, permissionGroup, hasPermission);
+    }
+
+    public static boolean hasRegionHierarchyPermission(IProtectedRegion region, PlayerEntity player, String permissionGroup) {
+        return hasRegionHierarchyPermission(region, player, permissionGroup, false);
     }
 
     private static boolean hasConfigPermission(CommandContextBuilder<CommandSource> ctx, CommandSourceType cmdSrcType) throws CommandSyntaxException {
