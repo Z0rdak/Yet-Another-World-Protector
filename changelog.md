@@ -118,7 +118,7 @@ time to enable new features and to improve the mod.
     to use the mod only for OPs or players which have their UUID entry in the config. Enable this if you don't want the
     YAWP command to be seen by non-permitted users.
   * `hierarchy_ownership`: Defines whether the region hierarchy should be considered for region ownership. If enabled,
-    ownership of parent regions will automatically (implicit) apply to child regions. By default this is set to true.
+    ownership of parent regions will automatically (implicit) apply to child regions. By default, this is set to true.
 * `yawp-flags.toml` - Add new flag configs:
   * `remove_entities_for_spawning_flags`: Toggles the de-spawning of entities when using the `spawning-*` flags.
   * TODO: `break_flag_entities` and `break_flag_entity_tags` are now also used for the `place-blocks` flag.
@@ -210,6 +210,7 @@ time to enable new features and to improve the mod.
 
 * Fix some cli typos
 * Fix parent - child hierarchy inconsistency when deleting children
+* Lang key fixes... well more like a whole overhaul of the language keys
 
 # [0.0.3.0-beta1] - 2024-03-27
 

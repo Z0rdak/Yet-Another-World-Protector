@@ -819,12 +819,15 @@ public class CommandUtil {
         List<Entity> entities = level.getEntities(null, entityFilter);
         return entities.stream()
                 // don't consider entities, which are currently in a Local Region which doesn't have the flag
-                .filter(e -> isInRegionWithoutFlag(level, flag, e))
+                .filter(e -> isNotProtectedByRegion(level, flag, e))
                 .filter(CommandUtil::isNotPersistent)
                 .collect(Collectors.toList());
     }
 
-    private static boolean isInRegionWithoutFlag(ServerLevel level, RegionFlag flag, Entity e) {
+    /**
+     * A null returned from LocalRegions::getRegionWithoutFlag indicates, that there is no region protecting this entity.
+     */
+    private static boolean isNotProtectedByRegion(ServerLevel level, RegionFlag flag, Entity e) {
         return LocalRegions.getRegionWithoutFlag(flag, e.blockPosition(), level.dimension()) == null;
     }
 

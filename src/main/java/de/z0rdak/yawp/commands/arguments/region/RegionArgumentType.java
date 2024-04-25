@@ -12,10 +12,10 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.CommandConstants;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
+import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
-import de.z0rdak.yawp.handler.CommandInterceptor;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.MessageUtil;
@@ -181,7 +181,7 @@ public class RegionArgumentType implements ArgumentType<String> {
 
     private CompletableFuture<Suggestions> suggestRegionsForOwner(SuggestionsBuilder builder, CommandSourceStack src, DimensionRegionCache dimCache) {
         Collection<IMarkableRegion> regions = dimCache.getRegions();
-        boolean hasPermission = CommandInterceptor.hasCmdPermission(src);
+        boolean hasPermission = CommandPermissionConfig.hasCmdPermission(src);
         if (hasPermission) {
             Collection<String> regionNames = dimCache.getRegions().stream().map(IProtectedRegion::getName).collect(Collectors.toSet());
             if (regionNames.isEmpty()) {
@@ -191,9 +191,9 @@ public class RegionArgumentType implements ArgumentType<String> {
                 return SharedSuggestionProvider.suggest(regionNames, builder);
             }
         } else {
-            if (src.getEntity() instanceof Player) {
+            if (src.getEntity() instanceof Player player) {
                 regions = regions.stream()
-                        .filter(region -> region.isInGroup((Player) src.getEntity(), RegionNBT.OWNERS))
+                        .filter(region -> CommandPermissionConfig.hasRegionPermission(region, player))
                         .collect(Collectors.toList());
                 Collection<String> regionNames = regions.stream().map(IProtectedRegion::getName).collect(Collectors.toSet());
                 if (regionNames.isEmpty()) {

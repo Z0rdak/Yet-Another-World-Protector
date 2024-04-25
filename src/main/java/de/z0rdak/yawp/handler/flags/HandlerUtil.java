@@ -10,7 +10,6 @@ import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.handler.CommandInterceptor;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
 import de.z0rdak.yawp.util.MessageUtil;
@@ -202,9 +201,7 @@ public final class HandlerUtil {
         if (player == null) {
             return region.getFlagContainer().flagState(flag.name);
         } else {
-            boolean hasPermission = CommandPermissionConfig.isHierarchyOwnershipEnabled()
-                    ? CommandInterceptor.hasRegionHierarchyPermission(region, player, CommandUtil.OWNER)
-                    : region.permits(player);
+            boolean hasPermission = CommandPermissionConfig.hasRegionPermission(region, player, CommandUtil.OWNER);
             boolean isPermitted = hasPermission || CommandPermissionConfig.hasConfigPermAndOpByPassFlags(player);
             if (isPermitted) {
                 return FlagState.ALLOWED;

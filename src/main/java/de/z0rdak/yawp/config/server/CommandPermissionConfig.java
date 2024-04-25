@@ -1,12 +1,15 @@
 package de.z0rdak.yawp.config.server;
 
+import com.mojang.brigadier.context.CommandContextBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.commands.CommandSourceType;
+import de.z0rdak.yawp.commands.CommandUtil;
+import de.z0rdak.yawp.core.region.IProtectedRegion;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.ServerOpListEntry;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
@@ -149,5 +152,64 @@ public class CommandPermissionConfig {
             }
         }
         return false;
+    }
+
+    public static boolean hasRegionPermission(IProtectedRegion region, Player player) {
+        return hasRegionPermission(region, player, CommandUtil.OWNER);
+    }
+
+    public static boolean hasRegionPermission(IProtectedRegion region, Player player, String permissionGroup) {
+        return isHierarchyOwnershipEnabled()
+                ? hasRegionHierarchyPermission(region, player, permissionGroup)
+                : region.isInGroup(player, permissionGroup);
+    }
+
+    private static boolean hasRegionHierarchyPermission(IProtectedRegion region, Player player, String permissionGroup) {
+        return hasRegionHierarchyPermission(region, player, permissionGroup, false);
+    }
+
+    private static boolean hasRegionHierarchyPermission(IProtectedRegion region, Player player, String permissionGroup, boolean hasPermission) {
+        if (region.getParent().equals(region)) {
+            return hasPermission || region.isInGroup(player, permissionGroup);
+        }
+        hasPermission = hasPermission || region.isInGroup(player, permissionGroup);
+        return hasRegionHierarchyPermission(region.getParent(), player, permissionGroup, hasPermission);
+    }
+
+    public static boolean hasConfigPermission(CommandSourceStack src, CommandSourceType cmdSrcType) throws CommandSyntaxException {
+        switch (cmdSrcType) {
+            case PLAYER: {
+                ServerPlayer player = src.getPlayerOrException();
+                return hasConfigPermission(player);
+            }
+            case SERVER:
+                return true;
+            case COMMAND_BLOCK:
+                return isCommandBlockExecutionAllowed();
+            default:
+                return false;
+        }
+    }
+
+    public static boolean hasConfigPermission(CommandContextBuilder<CommandSourceStack> ctx, CommandSourceType cmdSrcType) throws CommandSyntaxException {
+        return hasConfigPermission(ctx.getSource(), cmdSrcType);
+    }
+
+    public static boolean hasCmdPermission(CommandSourceStack src) {
+        CommandSourceType cmdSrcType = CommandSourceType.of(src);
+        try {
+            return hasConfigPermission(src, cmdSrcType);
+        } catch (CommandSyntaxException e) {
+            return false;
+        }
+    }
+
+    public static boolean isAllowedForNonOp(CommandSourceStack src) {
+        CommandSourceType cmdSrcType = CommandSourceType.of(src);
+        try {
+            return hasConfigPermission(src, cmdSrcType) || CommandPermissionConfig.isCmdEnabledForNonOp();
+        } catch (CommandSyntaxException e) {
+            return false;
+        }
     }
 }
