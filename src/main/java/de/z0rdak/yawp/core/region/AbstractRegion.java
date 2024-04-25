@@ -28,17 +28,17 @@ import static de.z0rdak.yawp.util.constants.RegionNBT.*;
  * an area (dimensions). <br>
  */
 public abstract class AbstractRegion implements IProtectedRegion {
-    protected String name;
+    private String name;
     protected ResourceKey<Level> dimension;
-    protected RegionType regionType;
-    protected FlagContainer flags;
-    protected Map<String, PlayerContainer> groups;
-    protected boolean isActive;
-    protected boolean isMuted;
+    private RegionType regionType;
+    private FlagContainer flags;
+    private Map<String, PlayerContainer> groups;
+    private boolean isActive;
+    private boolean isMuted;
     protected IProtectedRegion parent;
     protected String parentName;
-    protected Map<String, IProtectedRegion> children;
-    protected Set<String> childrenNames;
+    private Map<String, IProtectedRegion> children;
+    private Set<String> childrenNames;
 
     protected AbstractRegion(CompoundTag nbt) {
         this.childrenNames = new HashSet<>(0);
@@ -80,6 +80,10 @@ public abstract class AbstractRegion implements IProtectedRegion {
     @Override
     public String getName() {
         return name;
+    }
+
+    protected void setName(String name) {
+        this.name = name;
     }
 
     @Override
