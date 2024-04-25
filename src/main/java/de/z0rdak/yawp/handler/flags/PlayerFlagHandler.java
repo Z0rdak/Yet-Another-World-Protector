@@ -22,6 +22,7 @@ import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
@@ -363,19 +364,8 @@ public final class PlayerFlagHandler {
     @SubscribeEvent
     public static void onPlayerPlaceBlock(BlockEvent.EntityPlaceEvent event) {
         if (isServerSide(event)) {
-            if (event.getEntity() != null && event.getEntity() instanceof Player player) {
-
-                // TODO: Needs to be checked at right click use?
-                Set<String> entities = FlagConfig.getBreakFlagEntities();
-                boolean isBlockCovered = entities.stream().anyMatch(entity -> {
-                    ResourceLocation entityResourceLocation = new ResourceLocation(entity);
-                    ResourceLocation blockName = event.getPlacedBlock().getBlock().getRegistryName();
-                    return blockName != null && blockName.equals(entityResourceLocation);
-                });
-                if (isBlockCovered) {
-                    // TODO:
-                }
-
+            if (event.getEntity() != null && event.getEntity() instanceof Player) {
+                Player player = (Player) event.getEntity();
                 FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPos(), PLACE_BLOCKS, getEntityDim(player), player);
                 if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                     return;
@@ -395,8 +385,8 @@ public final class PlayerFlagHandler {
             Entity target = event.getTarget();
             Player player = event.getPlayer();
             // FIXME: Tags not considered yet
-            Set<String> entityTags = FlagConfig.getBreakFlagEntityTags();
-            Set<String> entities = FlagConfig.getBreakFlagEntities();
+            Set<String> entityTags = FlagConfig.getCoveredBlockEntityTags();
+            Set<String> entities = FlagConfig.getCoveredBlockEntities();
             boolean isBlockEntityCovered = entities.stream().anyMatch(entity -> {
                 ResourceLocation entityResourceLocation = new ResourceLocation(entity);
                 return target.getType().getRegistryName() != null && target.getType().getRegistryName().equals(entityResourceLocation);
@@ -594,6 +584,24 @@ public final class PlayerFlagHandler {
                 }
             }
             if (!hasEmptyHands) {
+                if (isBlock) {
+                    Set<String> entities = FlagConfig.getCoveredBlockEntities();
+                    boolean isBlockCovered = entities.stream().anyMatch(entity -> {
+                        ResourceLocation entityResourceLocation = new ResourceLocation(entity);
+                        ItemStack itemInHand = player.getItemInHand(event.getHand());
+                        return itemInHand.getItem().getRegistryName() != null && itemInHand.getItem().getRegistryName().equals(entityResourceLocation);
+                    });
+                    if (isBlockCovered) {
+                        FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPos(), PLACE_BLOCKS, dim, player);
+                        if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                            return;
+                        }
+                        processCheck(checkEvent, null, onDeny -> {
+                            event.setCanceled(true);
+                            MessageSender.sendFlagMsg(onDeny);
+                        });
+                    }
+                }
                 FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPos(), USE_ITEMS, dim, player);
                 if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                     return;

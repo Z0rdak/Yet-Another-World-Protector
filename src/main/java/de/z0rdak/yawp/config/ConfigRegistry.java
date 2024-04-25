@@ -62,15 +62,15 @@ public final class ConfigRegistry {
                 }
                 break;
                 case FlagConfig.CONFIG_NAME: {
-                    int numBreakEntityEntries = FlagConfig.getBreakFlagEntities().size();
+                    int numBreakEntityEntries = FlagConfig.getCoveredBlockEntities().size();
                     String loadedBreakEntities = (numBreakEntityEntries > 0
-                            ? ": " + String.join(", ", FlagConfig.getBreakFlagEntities())
+                            ? ": " + String.join(", ", FlagConfig.getCoveredBlockEntities())
                             : "");
                     YetAnotherWorldProtector.LOGGER.info(numBreakEntityEntries + " Block Entity entries read from config" + loadedBreakEntities);
 
-                    int numBreakEntityTagEntries = FlagConfig.getBreakFlagEntityTags().size();
+                    int numBreakEntityTagEntries = FlagConfig.getCoveredBlockEntityTags().size();
                     String loadedBreakEntityTags = (numBreakEntityTagEntries > 0
-                            ? ": " + String.join(", ", FlagConfig.getBreakFlagEntityTags())
+                            ? ": " + String.join(", ", FlagConfig.getCoveredBlockEntityTags())
                             : "");
                     YetAnotherWorldProtector.LOGGER.info(numBreakEntityTagEntries + " Block Entity tag entries read from config" + loadedBreakEntityTags);
                 }
