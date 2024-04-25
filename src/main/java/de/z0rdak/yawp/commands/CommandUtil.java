@@ -817,17 +817,15 @@ public class CommandUtil {
     private static List<Entity> getEntitiesToRemove(ServerWorld level, Predicate<? super Entity> entityFilter, RegionFlag flag) {
         List<Entity> entities = level.getEntities(null, entityFilter);
         return entities.stream()
-                // don't consider entities, which are currently in a Local Region which doesn't have the flag
-                .filter(e -> isNotProtectedByRegion(level, flag, e))
+                .filter(e -> !isProtectedByRegion(level, flag, e)) // That's O(enemyCount * regionCount) complexity, not considering the recursion for the flag check
                 .filter(CommandUtil::isNotPersistent)
                 .collect(Collectors.toList());
     }
 
-    /**
-     * A null returned from LocalRegions::getRegionWithoutFlag indicates, that there is no region protecting this entity.
-     */
-    private static boolean isNotProtectedByRegion(ServerWorld level, RegionFlag flag, Entity e) {
-        return LocalRegions.getRegionWithoutFlag(flag, e.blockPosition(), level.dimension()) == null;
+    private static boolean isProtectedByRegion(ServerWorld level, RegionFlag flag, Entity e) {
+        FlagCheckEvent checkEvent = new FlagCheckEvent(e.blockPosition(), flag, level.dimension(), null);
+        FlagState flagState = processCheck(checkEvent, null, null);
+        return flagState == FlagState.ALLOWED;
     }
 
     public static int promptRegionInfo(CommandContext<CommandSource> ctx, IProtectedRegion region) {
