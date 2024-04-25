@@ -14,6 +14,7 @@ import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.stick.MarkerStick;
+import de.z0rdak.yawp.handler.CommandInterceptor;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.MessageUtil;
@@ -104,12 +105,13 @@ public class OwnedRegionArgumentType implements ArgumentType<String> {
                             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.level.dimension());
                             List<String> ownedRegions = dimCache.getRegions()
                                     .stream()
-                                    .filter(r -> r.hasPlayer(player.getUUID(), CommandUtil.OWNER))
+                                    .filter(r -> CommandInterceptor.hasRegionHierarchyPermission(r, player, CommandUtil.OWNER))
+                                    // .filter(r -> r.hasPlayer(player.getUUID(), CommandUtil.OWNER))
                                     .filter(r -> (r.getArea()).containsOther(markedArea))
                                     .map(IMarkableRegion::getName)
                                     .collect(Collectors.toList());
                             if (ownedRegions.isEmpty()) {
-                                MessageUtil.sendCmdFeedback(src, new TranslatableComponent("You don't have owner permissions for any region in this dimension!'"));
+                                MessageUtil.sendCmdFeedback(src, new TranslatableComponent("There is no local region, which is suitable as parent (no ownership or containment)."));
                                 return Suggestions.empty();
                             }
                             return SharedSuggestionProvider.suggest(ownedRegions, builder);
