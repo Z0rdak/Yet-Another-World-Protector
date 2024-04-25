@@ -186,7 +186,7 @@ public class RegionArgumentType implements ArgumentType<String> {
         if (region != null) {
             return region;
         } else {
-            sendCmdFeedback(context.getSource(), new StringTextComponent("No regions defined in dim '" + dimCache.dimensionKey().location() + "'"));
+            sendCmdFeedback(context.getSource(), new StringTextComponent("No suitable region as parent found in '" + dimCache.dimensionKey().location() + "'"));
             throw ERROR_INVALID_VALUE.create(regionName);
         }
     }
