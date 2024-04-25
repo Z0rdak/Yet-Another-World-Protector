@@ -4,7 +4,6 @@ import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.SphereArea;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
-import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.handler.flags.FlagCorrelation;
@@ -16,8 +15,10 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.apache.commons.lang3.NotImplementedException;
 
-import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public final class LocalRegions {
@@ -83,52 +84,13 @@ public final class LocalRegions {
         return new SphereRegion(regionName, sphereArea, player, dim);
     }
 
-    private static CuboidRegion cuboidRegionFrom(MarkerStick marker, String regionName, Player player) {
-        return cuboidRegionFrom(marker, regionName, player, marker.getDimension());
-    }
-
-    private static CuboidRegion cuboidRegionFrom(MarkerStick marker, String regionName, Player player, ResourceKey<Level> dim) {
+    private static CuboidRegion cuboidRegionFrom(MarkerStick marker, String regionName, PlayerEntity player, RegistryKey<World> dim) {
         List<BlockPos> blocks = marker.getMarkedBlocks();
         CuboidArea cuboidArea = new CuboidArea(blocks.get(0), blocks.get(1));
         if (marker.getTeleportPos() != null) {
             return new CuboidRegion(regionName, cuboidArea, marker.getTeleportPos(), player, dim);
         }
         return new CuboidRegion(regionName, cuboidArea, player, dim);
-    }
-
-    /**
-     * Returns all involved regions for this event.
-     * An involved region is defined as follows: <br>
-     * 1. The region is active- <br>
-     * 2. The region contains the flag- <br>
-     * 3. The containing flag is active.
-     *
-     * @param flag     which must be contained in the region and must be active
-     * @param position the position which must be in the region
-     * @param dim      the dimension to check regions for
-     * @return a list of regions which match the criteria, can be empty.
-     */
-    @Deprecated
-    public static List<IMarkableRegion> getInvolvedRegionsFor(RegionFlag flag, BlockPos position, ResourceKey<Level> dim) {
-        return RegionDataManager.get().getRegionsFor(dim).stream()
-                .filter(IMarkableRegion::isActive)
-                .filter(region -> region.containsFlag(flag) && region.getFlag(flag.name).isActive())
-                .filter(region -> region.contains(position))
-                .collect(Collectors.toList());
-    }
-
-    @Nullable
-    public static IMarkableRegion getRegionWithoutFlag(RegionFlag flag, BlockPos position, ResourceKey<Level> dim) {
-        List<IMarkableRegion> regionsForPos = RegionDataManager.get().getRegionsFor(dim).stream()
-                .filter(IMarkableRegion::isActive)
-                .filter(region -> !region.containsFlag(flag))
-                .filter(region -> region.contains(position))
-                .collect(Collectors.toList());
-        if (regionsForPos.isEmpty()) {
-            return null;
-        } else {
-            return Collections.max(regionsForPos, Comparator.comparing(IMarkableRegion::getPriority));
-        }
     }
 
     public static boolean hasAnyRegionWithSamePriority(IMarkableRegion region, int priority) {
@@ -154,7 +116,7 @@ public final class LocalRegions {
     @Deprecated
     public static void rectifyRegionPriorities(IMarkableRegion parent, int defaultPriority) {
         List<IMarkableRegion> children = getIntersectingRegionsFor(parent);
-        if (children.size() == 0) {
+        if (children.isEmpty()) {
             return;
         }
         for (IMarkableRegion child : children) {

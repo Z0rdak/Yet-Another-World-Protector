@@ -5,11 +5,13 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.commands.arguments.flag.IFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.flag.BooleanFlag;
+import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.group.GroupType;
@@ -60,6 +62,7 @@ import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
+import static de.z0rdak.yawp.handler.flags.HandlerUtil.processCheck;
 import static de.z0rdak.yawp.util.MessageUtil.*;
 
 public class CommandUtil {
@@ -818,17 +821,15 @@ public class CommandUtil {
     private static List<Entity> getEntitiesToRemove(ServerLevel level, Predicate<? super Entity> entityFilter, RegionFlag flag) {
         List<Entity> entities = level.getEntities(null, entityFilter);
         return entities.stream()
-                // don't consider entities, which are currently in a Local Region which doesn't have the flag
-                .filter(e -> isNotProtectedByRegion(level, flag, e))
+                .filter(e -> !isProtectedByRegion(level, flag, e)) // That's O(enemyCount * regionCount) complexity, not considering the recursion for the flag check
                 .filter(CommandUtil::isNotPersistent)
                 .collect(Collectors.toList());
     }
 
-    /**
-     * A null returned from LocalRegions::getRegionWithoutFlag indicates, that there is no region protecting this entity.
-     */
-    private static boolean isNotProtectedByRegion(ServerLevel level, RegionFlag flag, Entity e) {
-        return LocalRegions.getRegionWithoutFlag(flag, e.blockPosition(), level.dimension()) == null;
+    private static boolean isProtectedByRegion(ServerLevel level, RegionFlag flag, Entity e) {
+        FlagCheckEvent checkEvent = new FlagCheckEvent(e.blockPosition(), flag, level.dimension(), null);
+        FlagState flagState = processCheck(checkEvent, null, null);
+        return flagState == FlagState.ALLOWED;
     }
 
     public static int promptRegionInfo(CommandContext<CommandSourceStack> ctx, IProtectedRegion region) {
