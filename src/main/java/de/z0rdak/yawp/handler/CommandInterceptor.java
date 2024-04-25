@@ -120,7 +120,7 @@ public class CommandInterceptor {
             if (cmdSrcType == CommandSourceType.PLAYER) {
                 ServerPlayerEntity player = cmdContext.getSource().getPlayerOrException();
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.getLevel().dimension());
-                boolean hasPermission = hasConfigPermission(cmdContext, cmdSrcType);
+                boolean hasPermission = hasConfigPermission(cmdContext.getSource(), cmdSrcType);
                 boolean hasRegionPermission = hasRegionPermission(dimCache.getDimensionalRegion(), player, CommandUtil.OWNER);
                 hasPermission = hasPermission || hasRegionPermission;
                 handlePermission(cmdContext.getSource(), hasPermission);
