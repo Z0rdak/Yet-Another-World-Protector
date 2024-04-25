@@ -121,7 +121,7 @@ time to enable new features and to improve the mod.
     ownership of parent regions will automatically (implicit) apply to child regions. By default, this is set to true.
 * `yawp-flags.toml` - Add new flag configs:
   * `remove_entities_for_spawning_flags`: Toggles the de-spawning of entities when using the `spawning-*` flags.
-  * TODO: `break_flag_entities` and `break_flag_entity_tags` are now also used for the `place-blocks` flag.
+* `break_flag_entities` and `break_flag_entity_tags` are now also used for the `place-blocks` flag.
 
 ### Global Region
 
@@ -201,6 +201,8 @@ time to enable new features and to improve the mod.
 * Rearranged the state CLI page for local regions, trying to give a more concise overview.
 * Changed license from LGPL v3 to AGPL v3.
 * Change Dimensional Region state CLI to toggle the state (enable and alert) of all Local Regions in the dimension.
+* Rename config value `break_flag_entities` to `covered_block_entities`
+* Rename config value `break_flag_entity_tags` to `covered_block_entity_tags`
 
 ## Removed
 
