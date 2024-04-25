@@ -23,6 +23,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -32,6 +33,7 @@ import java.util.Objects;
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.DimensionCommands.getRandomExample;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
+import static de.z0rdak.yawp.handler.CommandInterceptor.hasRegionHierarchyPermission;
 import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
 import static de.z0rdak.yawp.util.MessageUtil.buildRegionInfoLink;
 import static de.z0rdak.yawp.util.StickUtil.STICK;
@@ -72,8 +74,6 @@ public final class MarkerCommands {
                 sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.name.exists", buildRegionInfoLink(dimCache.getDimensionalRegion()), buildRegionInfoLink(dimCache.getRegion(regionName))));
                 return res;
             }
-
-
             ItemStack maybeStick = player.getMainHandItem();
             if (StickUtil.isVanillaStick(maybeStick)) {
                 StickType stickType = StickUtil.getStickType(maybeStick);
@@ -87,15 +87,16 @@ public final class MarkerCommands {
                         }
 
                         AbstractMarkableRegion region = LocalRegions.regionFrom(player, marker, regionName);
+                        RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
                         if(MinecraftForge.EVENT_BUS.post(new RegionEvent.CreateRegionEvent(region, player))) {
                             return 0;
                         }
-
-                        RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
                         boolean hasConfigPermission = CommandPermissionConfig.hasConfigPermission(player);
+                        boolean hasRegionPermission;
                         if (parentRegion != null) {
                             // should only be a region which has player as owner at this point due to the OwnerRegionArgumentType suggestions
-                            if (parentRegion.hasPlayer(player.getUUID(), CommandUtil.OWNER) || hasConfigPermission) {
+                            hasRegionPermission = hasRegionHierarchyPermission(parentRegion, player, CommandUtil.OWNER);
+                            if (hasRegionPermission || hasConfigPermission) {
                                 if (parentRegion.getArea().containsOther(region.getArea())) {
                                     dimCache.addRegion(dimCache.getDimensionalRegion(), region);
                                     parentRegion.addChild(region);
@@ -112,11 +113,13 @@ public final class MarkerCommands {
                                 return 1;
                             }
                         } else {
-                            if (dimCache.hasOwner(player) || hasConfigPermission) {
+                            hasRegionPermission = hasRegionHierarchyPermission(dimCache.getDimensionalRegion(), player, CommandUtil.OWNER);
+                            if (hasConfigPermission || hasRegionPermission) {
                                 dimCache.addRegion(dimCache.getDimensionalRegion(), region);
                                 LocalRegions.ensureHigherRegionPriorityFor(region, RegionConfig.getDefaultPriority());
                                 RegionDataManager.save();
-                                sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
+                                IFormattableTextComponent feedback = new TranslationTextComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region));
+                                sendCmdFeedback(src, feedback);
                                 return 0;
                             } else {
                                 sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.dim.deny", buildRegionInfoLink(dimCache.getDimensionalRegion())));
@@ -124,7 +127,7 @@ public final class MarkerCommands {
                             }
                         }
                     } else {
-                        sendCmdFeedback(src, new TranslationTextComponent(  "cli.msg.dim.info.region.create.stick.invalid"));
+                        sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.stick.invalid"));
                         return -2;
                     }
                 } else {
