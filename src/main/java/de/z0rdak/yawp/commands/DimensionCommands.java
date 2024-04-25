@@ -282,7 +282,6 @@ public class DimensionCommands {
         } catch (CommandSyntaxException e) {
             player = null;
         }
-
         if(MinecraftForge.EVENT_BUS.post(new RegionEvent.RemoveRegionEvent(region, player))) {
             return 0;
         }
@@ -291,21 +290,17 @@ public class DimensionCommands {
                 sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.dim.region.remove.fail.hasChildren", buildRegionInfoLink(region)));
                 return -1;
             }
-            if (region.getParent() != null) {
-                // TODO: Check, does not seem to work according to bug report
-                /* Reproduce: Parent P, Child C
-                1. delete C
-                2. Save
-                3. Check if Parent P still has child C
-                */
-                region.getParent().removeChild(region);
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(region.getDim());
-                dimCache.getDimensionalRegion().addChild(region);
+            RegionType parentType = region.getParent().getRegionType();
+            if (parentType == RegionType.DIMENSION) {
+                dim.removeRegion(region);
+                RegionDataManager.save();
+                sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.dim.region.remove.confirm", region.getName(), buildRegionInfoLink(dim.getDimensionalRegion())));
+                return 0;
             }
-            dim.removeRegion(region);
-            RegionDataManager.save();
-            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.dim.region.remove.confirm", region.getName(), buildRegionInfoLink(dim.getDimensionalRegion())));
-            return 0;
+            if (parentType == RegionType.LOCAL) {
+                sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.dim.region.remove.fail.hasParent", buildRegionInfoLink(region)));
+                return 1;
+            }
         }
         return 1;
     }
