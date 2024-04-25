@@ -25,13 +25,12 @@ public class GlobalRegion extends AbstractRegion {
 
     protected GlobalRegion(String name, RegionType type) {
         super(name, GLOBAL_DIMENSION, type);
-        this.parent = this;
-        this.parentName = GLOBAL.toString();
+        super.setParent(this);
     }
 
     @Override
     public Map<String, IProtectedRegion> getChildren() {
-        Map<String, IProtectedRegion> childrenWithoutGlobal = this.children.entrySet().stream()
+        Map<String, IProtectedRegion> childrenWithoutGlobal = super.getChildren().entrySet().stream()
                 .filter(e -> e.getValue().getRegionType() != RegionType.GLOBAL)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         return Collections.unmodifiableMap(childrenWithoutGlobal);

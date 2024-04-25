@@ -11,8 +11,6 @@ import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-import java.util.HashMap;
-
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
 /**
@@ -31,7 +29,6 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         this.area = area;
         this.areaType = area.getAreaType();
         this.priority = RegionConfig.getDefaultPriority();
-        this.children = new HashMap<>();
         if (parent != null) {
             this.setParent(parent);
         }
@@ -86,7 +83,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         CompoundNBT nbt = super.serializeNBT();
         nbt.put(TP_POS, NBTUtil.writeBlockPos(this.tpTarget));
         nbt.putInt(PRIORITY, priority);
-        nbt.putBoolean(MUTED, isMuted);
+        nbt.putBoolean(MUTED, this.isMuted());
         nbt.putString(AREA_TYPE, this.areaType.areaType);
         nbt.put(AREA, this.area.serializeNBT());
         return nbt;
@@ -97,11 +94,11 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         super.deserializeNBT(nbt);
         this.tpTarget = NBTUtil.readBlockPos(nbt.getCompound(TP_POS));
         this.priority = nbt.getInt(PRIORITY);
-        this.isMuted = nbt.getBoolean(MUTED);
+        this.setIsMuted(nbt.getBoolean(MUTED));
         AreaType areaType = AreaType.of(nbt.getString(AREA_TYPE));
         if (areaType == null) {
-            YetAnotherWorldProtector.LOGGER.error("Error loading region data for: '" + this.name + "' in dim '" + this.dimension.location() + "'");
-            throw new IllegalArgumentException("Error loading region data for: '" + this.name + "' in dim '" + this.dimension.location() + "'");
+            YetAnotherWorldProtector.LOGGER.error("Error loading region data for: '" + this.getName() + "' in dim '" + this.dimension.location() + "'");
+            throw new IllegalArgumentException("Error loading region data for: '" + this.getName() + "' in dim '" + this.dimension.location() + "'");
         }
         this.areaType = areaType;
     }
@@ -113,7 +110,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
 
     @Override
     public void rename(String newName) {
-        this.name = newName;
+        this.setName(newName);
     }
 
     @Override

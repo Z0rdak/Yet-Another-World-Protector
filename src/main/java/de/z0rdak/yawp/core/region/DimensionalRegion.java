@@ -50,7 +50,7 @@ public final class DimensionalRegion extends AbstractRegion {
     public boolean addChild(IProtectedRegion child) {
         if (child.getRegionType() == RegionType.LOCAL && child.getParent() == null) {
             String parentName = child.getParentName();
-            if (!parentName.equals(this.name)) {
+            if (parentName != null && !parentName.equals(this.getName())) {
                 super.addChild(child);
                 ((AbstractRegion) child).parentName = parentName;
                 return true;
