@@ -43,7 +43,7 @@ public final class CommandRegistry {
 
     private static LiteralArgumentBuilder<CommandSource> buildCommands(String baseCmd) {
         return Commands.literal(baseCmd)
-                .requires(CommandInterceptor::isAllowedForNonOp)
+                .requires(CommandPermissionConfig::isAllowedForNonOp)
                 .executes(ctx -> promptHelp(ctx.getSource()))
                 .then(ArgumentUtil.literal(CommandConstants.HELP)
                         .executes(ctx -> promptHelp(ctx.getSource())))

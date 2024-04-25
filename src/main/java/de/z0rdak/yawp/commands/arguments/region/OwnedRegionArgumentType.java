@@ -11,10 +11,10 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.CommandUtil;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
+import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.stick.MarkerStick;
-import de.z0rdak.yawp.handler.CommandInterceptor;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.StickType;
@@ -107,7 +107,7 @@ public class OwnedRegionArgumentType implements ArgumentType<String> {
                             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.level.dimension());
                             List<String> ownedRegions = dimCache.getRegions()
                                     .stream()
-                                    .filter(r -> CommandInterceptor.hasRegionHierarchyPermission(r, player, CommandUtil.OWNER))
+                                    .filter(r -> CommandPermissionConfig.hasRegionPermission(r, player, CommandUtil.OWNER))
                                     // .filter(r -> r.hasPlayer(player.getUUID(), CommandUtil.OWNER))
                                     .filter(r -> (r.getArea()).containsOther(markedArea))
                                     .map(IMarkableRegion::getName)

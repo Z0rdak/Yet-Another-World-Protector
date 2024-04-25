@@ -14,7 +14,6 @@ import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.command.CommandSource;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
@@ -122,7 +121,7 @@ public class CommandInterceptor {
                 ServerPlayerEntity player = cmdContext.getSource().getPlayerOrException();
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.getLevel().dimension());
                 boolean hasPermission = hasConfigPermission(cmdContext, cmdSrcType);
-                boolean hasRegionPermission = hasRegionHierarchyPermission(dimCache.getDimensionalRegion(), player, CommandUtil.OWNER);
+                boolean hasRegionPermission = hasRegionPermission(dimCache.getDimensionalRegion(), player, CommandUtil.OWNER);
                 hasPermission = hasPermission || hasRegionPermission;
                 handlePermission(cmdContext.getSource(), hasPermission);
                 return hasPermission ? ALLOW_CMD : CANCEL_CMD;
@@ -269,7 +268,7 @@ public class CommandInterceptor {
             // /wp local <dim> <region> area set|... ...
             // needs to be handled separately, because the player also needs permission to modify the region parent
             boolean isAreaModifyCmd = checkSubCmdAtIndex(nodeNames, 4, AREA) && nodeNames.size() > 5;
-            boolean hasParentPermission = hasCmdPermission(src, cmdSrcType, CommandUtil.OWNER, region.getParent());
+            boolean hasParentPermission = hasCmdPermission(cmdContext, cmdSrcType, CommandUtil.OWNER, region.getParent());
             if (isAreaModifyCmd && !hasParentPermission) {
                 handlePermission(src, region.getParent(), false);
                 return CANCEL_CMD;
@@ -374,13 +373,13 @@ public class CommandInterceptor {
     }
 
     @SuppressWarnings("SameParameterValue")
-    private static boolean hasCmdPermission(CommandSource src, CommandSourceType cmdSrcType, String permissionGroup, IProtectedRegion region) throws CommandSyntaxException {
+    private static boolean hasCmdPermission(CommandContextBuilder<CommandSource> ctx, CommandSourceType cmdSrcType, String permissionGroup, IProtectedRegion region) throws CommandSyntaxException {
         switch (cmdSrcType) {
             case PLAYER: {
-                ServerPlayerEntity player = src.getPlayerOrException();
+                ServerPlayerEntity player = ctx.getSource().getPlayerOrException();
                 boolean hasConfigPermission = CommandPermissionConfig.hasConfigPermission(player);
-                boolean isOwner = region.isInGroup(player, permissionGroup);
-                return isOwner || hasConfigPermission;
+                boolean hasRegionPermission = hasRegionPermission(region, player, permissionGroup);
+                return (hasRegionPermission || hasConfigPermission);
             }
             case SERVER:
                 return true;
@@ -398,9 +397,7 @@ public class CommandInterceptor {
                 List<String> nodeNames = ctx.getNodes().stream().map(node -> node.getNode().getName()).collect(Collectors.toList());
                 ServerPlayerEntity player = ctx.getSource().getPlayerOrException();
                 boolean hasConfigPermission = CommandPermissionConfig.hasConfigPermission(player);
-                boolean hasRegionPermission = CommandPermissionConfig.isHierarchyOwnershipEnabled()
-                        ? hasRegionHierarchyPermission(region, player, permissionGroup)
-                        : region.isInGroup(player, permissionGroup);
+                boolean hasRegionPermission = hasRegionPermission(region, player, permissionGroup);
                 return (hasRegionPermission || hasConfigPermission) || subCmdPermission.apply(nodeNames);
             }
             case SERVER:
@@ -409,55 +406,6 @@ public class CommandInterceptor {
                 return isCommandBlockExecutionAllowed();
             default:
                 return false;
-        }
-    }
-
-    private static boolean hasRegionHierarchyPermission(IProtectedRegion region, PlayerEntity player, String permissionGroup, boolean hasPermission) {
-        if (region.getParent().equals(region)) {
-            return hasPermission || region.isInGroup(player, permissionGroup);
-        }
-        hasPermission = hasPermission || region.isInGroup(player, permissionGroup);
-        return hasRegionHierarchyPermission(region.getParent(), player, permissionGroup, hasPermission);
-    }
-
-    public static boolean hasRegionHierarchyPermission(IProtectedRegion region, PlayerEntity player, String permissionGroup) {
-        return hasRegionHierarchyPermission(region, player, permissionGroup, false);
-    }
-
-    private static boolean hasConfigPermission(CommandContextBuilder<CommandSource> ctx, CommandSourceType cmdSrcType) throws CommandSyntaxException {
-        return hasConfigPermission(ctx.getSource(), cmdSrcType);
-    }
-
-    private static boolean hasConfigPermission(CommandSource src, CommandSourceType cmdSrcType) throws CommandSyntaxException {
-        switch (cmdSrcType) {
-            case PLAYER: {
-                ServerPlayerEntity player = src.getPlayerOrException();
-                return CommandPermissionConfig.hasConfigPermission(player);
-            }
-            case SERVER:
-                return true;
-            case COMMAND_BLOCK:
-                return isCommandBlockExecutionAllowed();
-            default:
-                return false;
-        }
-    }
-
-    public static boolean hasCmdPermission(CommandSource src) {
-        CommandSourceType cmdSrcType = CommandSourceType.of(src);
-        try {
-            return hasConfigPermission(src, cmdSrcType);
-        } catch (CommandSyntaxException e) {
-            return false;
-        }
-    }
-
-    public static boolean isAllowedForNonOp(CommandSource src) {
-        CommandSourceType cmdSrcType = CommandSourceType.of(src);
-        try {
-            return hasConfigPermission(src, cmdSrcType) || CommandPermissionConfig.isCmdEnabledForNonOp();
-        } catch (CommandSyntaxException e) {
-            return false;
         }
     }
 }

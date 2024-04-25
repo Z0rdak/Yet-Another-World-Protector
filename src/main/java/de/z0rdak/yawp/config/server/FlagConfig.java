@@ -29,7 +29,7 @@ public class FlagConfig {
                 .defineListAllowEmpty(Collections.singletonList("break_flag_entity_tags"), ArrayList::new, FlagConfig::isValidTagEntry);
 
         REMOVE_ENTITIES_FOR_SPAWNING_FLAGS = BUILDER
-                .comment("Toggle to remove entities when adding spawning-* flags.\n true -> remove entities related to this flag\n false -> don't remove entities")
+                .comment("Toggle to remove entities when adding spawning-* flags.\nEntities with the PersistenceRequired tag will not be removed.\n true -> remove entities related to this flag\n false -> don't remove entities")
                 .define(Collections.singletonList("remove_entities_for_spawning_flags"), true);
 
         BUILDER.pop();

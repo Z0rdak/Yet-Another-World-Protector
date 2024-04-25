@@ -33,7 +33,6 @@ import java.util.Objects;
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.DimensionCommands.getRandomExample;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
-import static de.z0rdak.yawp.handler.CommandInterceptor.hasRegionHierarchyPermission;
 import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
 import static de.z0rdak.yawp.util.MessageUtil.buildRegionInfoLink;
 import static de.z0rdak.yawp.util.StickUtil.STICK;
@@ -95,7 +94,7 @@ public final class MarkerCommands {
                         boolean hasRegionPermission;
                         if (parentRegion != null) {
                             // should only be a region which has player as owner at this point due to the OwnerRegionArgumentType suggestions
-                            hasRegionPermission = hasRegionHierarchyPermission(parentRegion, player, CommandUtil.OWNER);
+                            hasRegionPermission = CommandPermissionConfig.hasRegionPermission(parentRegion, player, CommandUtil.OWNER);
                             if (hasRegionPermission || hasConfigPermission) {
                                 if (parentRegion.getArea().containsOther(region.getArea())) {
                                     dimCache.addRegion(dimCache.getDimensionalRegion(), region);
@@ -113,7 +112,7 @@ public final class MarkerCommands {
                                 return 1;
                             }
                         } else {
-                            hasRegionPermission = hasRegionHierarchyPermission(dimCache.getDimensionalRegion(), player, CommandUtil.OWNER);
+                            hasRegionPermission = CommandPermissionConfig.hasRegionPermission(dimCache.getDimensionalRegion(), player, CommandUtil.OWNER);
                             if (hasConfigPermission || hasRegionPermission) {
                                 dimCache.addRegion(dimCache.getDimensionalRegion(), region);
                                 LocalRegions.ensureHigherRegionPriorityFor(region, RegionConfig.getDefaultPriority());
