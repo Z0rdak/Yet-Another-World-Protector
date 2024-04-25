@@ -5,11 +5,13 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.commands.arguments.flag.IFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.flag.BooleanFlag;
+import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.group.GroupType;
@@ -19,7 +21,6 @@ import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.handler.flags.HandlerUtil;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import de.z0rdak.yawp.util.LocalRegions;
 import de.z0rdak.yawp.util.MessageUtil;
 import de.z0rdak.yawp.util.MojangApiHelper;
 import net.minecraft.command.CommandSource;
@@ -57,6 +58,7 @@ import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
+import static de.z0rdak.yawp.handler.flags.HandlerUtil.processCheck;
 import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
 import static de.z0rdak.yawp.util.MessageUtil.*;
 
@@ -673,12 +675,12 @@ public class CommandUtil {
     public static int clearTeams(CommandContext<CommandSource> ctx, IProtectedRegion region, String groupName) {
         int amount = region.getGroup(groupName).getTeams().size();
         if (amount == 0) {
-            IFormattableTextComponent feedbackMsg = new TranslationTextComponent("cli.msg.region.info.teams.empty", buildRegionInfoLink(region), groupName);
+            IFormattableTextComponent feedbackMsg = new TranslationTextComponent("cli.msg.info.region.teams.empty", buildRegionInfoLink(region), groupName);
             sendCmdFeedback(ctx.getSource(), feedbackMsg);
             return 1;
         }
         region.getGroup(groupName).clearTeams();
-        IFormattableTextComponent feedbackMsg = new TranslationTextComponent("cli.msg.region.info.teams.cleared", buildRegionInfoLink(region), amount, groupName);
+        IFormattableTextComponent feedbackMsg = new TranslationTextComponent("cli.msg.info.region.teams.cleared", buildRegionInfoLink(region), amount, groupName);
         sendCmdFeedback(ctx.getSource(), feedbackMsg);
         RegionDataManager.save();
         return 0;
