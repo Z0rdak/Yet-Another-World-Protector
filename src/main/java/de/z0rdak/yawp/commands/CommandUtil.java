@@ -21,7 +21,6 @@ import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.handler.flags.HandlerUtil;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import de.z0rdak.yawp.util.LocalRegions;
 import de.z0rdak.yawp.util.MessageUtil;
 import de.z0rdak.yawp.util.MojangApiHelper;
 import net.minecraft.ChatFormatting;
@@ -62,6 +61,7 @@ import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
+import static de.z0rdak.yawp.handler.flags.HandlerUtil.processCheck;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.processCheck;
 import static de.z0rdak.yawp.util.MessageUtil.*;
 
@@ -678,12 +678,12 @@ public class CommandUtil {
     public static int clearTeams(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, String groupName) {
         int amount = region.getGroup(groupName).getTeams().size();
         if (amount == 0) {
-            MutableComponent feedbackMsg = new TranslatableComponent("cli.msg.region.info.teams.empty", buildRegionInfoLink(region), groupName);
+            MutableComponent feedbackMsg = new TranslatableComponent("cli.msg.info.region.teams.empty", buildRegionInfoLink(region), groupName);
             sendCmdFeedback(ctx.getSource(), feedbackMsg);
             return 1;
         }
         region.getGroup(groupName).clearTeams();
-        MutableComponent feedbackMsg = new TranslatableComponent("cli.msg.region.info.teams.cleared", buildRegionInfoLink(region), amount, groupName);
+        MutableComponent feedbackMsg = new TranslatableComponent("cli.msg.info.region.teams.cleared", buildRegionInfoLink(region), amount, groupName);
         sendCmdFeedback(ctx.getSource(), feedbackMsg);
         RegionDataManager.save();
         return 0;

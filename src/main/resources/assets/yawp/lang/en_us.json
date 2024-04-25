@@ -375,5 +375,9 @@
   "help.tooltip.stick.marker.simple.4": "Set a region teleport position by shift-right-clicking a block.",
   "loading.client.info": "You are loading %s on a client. %s is a server-side only mod. The client only provides Internationalization.",
   "cli.msg.info.region.area.update.type.change": "AreaType for %s changed from %s to %s",
-  "cli.msg.info.region.global.reset": "Successfully reset global region"
+  "cli.msg.info.region.global.reset": "Successfully reset global region",
+  "cli.msg.info.region.players.empty": "No players (group '%s') present in %s",
+  "cli.msg.info.region.players.cleared": "Cleared %s players of group '%s' for %s",
+  "cli.msg.info.region.teams.empty": "No teams (group '%s') present in %s",
+  "cli.msg.info.region.teams.cleared": "Cleared %s teams of group '%s' for %s"
 }
