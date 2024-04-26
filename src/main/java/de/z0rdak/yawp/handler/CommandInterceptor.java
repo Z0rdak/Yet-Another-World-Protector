@@ -63,7 +63,7 @@ public class CommandInterceptor {
                 String subCmd = nodeNames.get(1);
                 int cancelExecutionResultCode = 0;
                 switch (subCmd) {
-                    case "region":
+                    case "local":
                         if (!nodeNames.contains(CommandConstants.LOCAL.toString())) {
                             cancelExecutionResultCode = 9;
                             break;
