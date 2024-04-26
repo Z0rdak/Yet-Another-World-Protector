@@ -12,6 +12,10 @@ public class BooleanFlag extends AbstractFlag {
         this.deserializeNBT(nbt);
     }
 
+    public BooleanFlag(RegionFlag flag, FlagState state, boolean override) {
+        super(flag.name, flag.type, override, state);
+    }
+
     public BooleanFlag(RegionFlag flag) {
         super(flag.name, flag.type, false, FlagState.DENIED);
     }
