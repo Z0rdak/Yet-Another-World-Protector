@@ -122,7 +122,7 @@ public class ArgumentUtil {
     }
 
     public static Set<RegionFlag> getFlagArguments(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
-        return RegionFlagArgumentType.getFlags(ctx, CommandConstants.FLAG.toString());
+        return RegionFlagArgumentType.getFlags(ctx, CommandConstants.FLAGS.toString());
     }
 
     public static IFlag getIFlagArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {

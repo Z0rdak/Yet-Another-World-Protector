@@ -47,6 +47,7 @@ public enum CommandConstants {
     EXPAND("expand"),
     FLAG("flag"),
     FLAGS("flags"),
+    ALL_FLAGS("all-flags"),
     FLAG_TYPE("flag-type"),
     FALSE("false"),
     TRUE("true"),

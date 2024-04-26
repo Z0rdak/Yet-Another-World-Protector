@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.commands;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -115,9 +116,16 @@ public class CommandUtil {
                                 .then(Commands.argument(TEAM.toString(), TeamArgument.team())
                                         .executes(ctx -> removeTeam(ctx, getTeamArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx))))))
                 .then(literal(FLAG)
-                        .then(Commands.argument(FLAG.toString(), StringArgumentType.greedyString())
+                        .then(Commands.argument(FLAG.toString(), StringArgumentType.word())
                                 .suggests((ctx, builder) -> IFlagArgumentType.flag().listSuggestions(ctx, builder))
-                                .executes(ctx -> removeFlag(ctx, regionSupplier.apply(ctx), getFlagArguments(ctx)))));
+                                .executes(ctx -> removeRegionFlag(ctx, regionSupplier.apply(ctx), getFlagArgument(ctx)))
+                        )
+                )
+                .then(literal(FLAGS)
+                        .then(Commands.argument(FLAGS.toString(), StringArgumentType.greedyString())
+                                .suggests((ctx, builder) -> IFlagArgumentType.flag().listSuggestions(ctx, builder))
+                                .executes(ctx -> removeFlags(ctx, regionSupplier.apply(ctx), getFlagArguments(ctx))))
+                );
     }
 
     public static LiteralArgumentBuilder<CommandSource> buildAddSubCommand(Function<CommandContext<CommandSource>, IProtectedRegion> regionSupplier) {
@@ -141,9 +149,24 @@ public class CommandUtil {
                                 .then(Commands.argument(TEAM.toString(), TeamArgument.team())
                                         .executes(ctx -> addTeam(ctx, getTeamArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx))))))
                 .then(literal(FLAG)
-                        .then(Commands.argument(FLAG.toString(), StringArgumentType.greedyString())
+                        .then(Commands.argument(FLAG.toString(), StringArgumentType.word())
                                 .suggests((ctx, builder) -> IFlagArgumentType.flag().listSuggestions(ctx, builder))
-                                .executes(ctx -> addFlag(ctx, regionSupplier.apply(ctx), getFlagArguments(ctx)))));
+                                .executes(ctx -> addFlag(ctx, regionSupplier.apply(ctx), getFlagArgument(ctx)))
+                                .then(Commands.argument(STATE.toString(), StringArgumentType.word())
+                                        .suggests((ctx, builder) -> ISuggestionProvider.suggest(FlagState.ValidFlagStates(), builder))
+                                        .then(Commands.argument(OVERRIDE.toString(), BoolArgumentType.bool())
+                                                .executes(ctx -> addFlag(ctx, regionSupplier.apply(ctx), getFlagArgument(ctx), getFlagStateArgument(ctx), getOverrideArgument(ctx))))
+                                )
+                        )
+                )
+                .then(literal(FLAGS)
+                        .then(Commands.argument(FLAGS.toString(), StringArgumentType.greedyString())
+                                .suggests((ctx, builder) -> IFlagArgumentType.flag().listSuggestions(ctx, builder))
+                                .executes(ctx -> addFlags(ctx, regionSupplier.apply(ctx), getFlagArguments(ctx))))
+                )
+                .then(literal(ALL_FLAGS)
+                        .executes(ctx -> addAllFlags(ctx, regionSupplier.apply(ctx)))
+                );
     }
 
     public static LiteralArgumentBuilder<CommandSource> buildListSubCommand(Function<CommandContext<CommandSource>, IProtectedRegion> regionSupplier) {
@@ -562,7 +585,7 @@ public class CommandUtil {
         return 1;
     }
 
-    public static int removeFlag(CommandContext<CommandSource> ctx, IProtectedRegion region, Set<RegionFlag> flags) {
+    public static int removeFlags(CommandContext<CommandSource> ctx, IProtectedRegion region, Set<RegionFlag> flags) {
         flags.forEach(flag -> CommandUtil.removeRegionFlag(ctx, region, flag));
         return 0;
     }
@@ -691,12 +714,24 @@ public class CommandUtil {
         return CommandUtil.clearTeams(ctx, region, groupName) + CommandUtil.clearPlayers(ctx, region, groupName);
     }
 
-    public static int addFlag(CommandContext<CommandSource> ctx, IProtectedRegion region, Set<RegionFlag> flags) {
+    public static int addAllFlags(CommandContext<CommandSource> ctx, IProtectedRegion region) {
+        return addFlags(ctx, region, RegionFlag.getFlags());
+    }
+
+    public static int addFlag(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionFlag flag) {
+        return addFlag(ctx, region, flag, FlagState.DENIED, false);
+    }
+
+    public static int addFlag(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionFlag flag, FlagState state, boolean override) {
+        return addRegionFlag(ctx, region, flag, state, override);
+    }
+
+    public static int addFlags(CommandContext<CommandSource> ctx, IProtectedRegion region, Set<RegionFlag> flags) {
         flags.forEach(flag -> CommandUtil.addRegionFlag(ctx, region, flag));
         return 0;
     }
 
-    public static int addRegionFlag(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionFlag flag) {
+    public static int addRegionFlag(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionFlag flag, FlagState state, boolean override) {
         if (region.getRegionType() == RegionType.LOCAL && flag == RegionFlag.ENTER_DIM) {
             IFormattableTextComponent msg = new StringTextComponent("Flag 'enter-dim' is currently not supported for local regions.");
             sendCmdFeedback(ctx.getSource(), msg);
@@ -706,7 +741,7 @@ public class CommandUtil {
             IFlag iFlag;
             switch (flag.type) {
                 case BOOLEAN_FLAG:
-                    iFlag = new BooleanFlag(flag);
+                    iFlag = new BooleanFlag(flag, state, override);
                     break;
                 case LIST_FLAG:
                 case INT_FLAG:
@@ -732,6 +767,10 @@ public class CommandUtil {
             sendCmdFeedback(ctx.getSource(), msg);
             return 1;
         }
+    }
+
+    public static int addRegionFlag(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionFlag flag) {
+        return addRegionFlag(ctx, region, flag, FlagState.DENIED, false);
     }
 
     public static void removeInvolvedEntities(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionFlag flag) {
