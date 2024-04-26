@@ -16,14 +16,14 @@ time to enable new features and to improve the mod.
 
 ## Added
 
-* Add commands to copy region properties
+* Add commands to copy and clear region properties
 * Add enhanced flag management and messages
 * Add flag inheritance and overriding for regions
 * Add new Local Region shape: Sphere
-* Add new config options
 * Add the Global Region. It's the parent region of all Dimensional Regions. **One region to rule them all!**
 * API: New events for flag checks. You can now listen to flag checks and cancel them if needed and listen for the
   result of a check and manipulate the outcome.
+* Add new config options
 
 ### Copy region properties
 * Add new command to copy properties from one Local Region to another Local Region:
@@ -52,8 +52,8 @@ time to enable new features and to improve the mod.
 
 ### Enhanced Flags
 * Flags now have their own dedicated flag message which is shown when the flag is triggered.
-* It's now possible to mute flag messages for each individual flag (it is still possible to mute all flags for the
-  region).
+* It's now possible to mute flag messages for each individual flag (disabling the alert of the region will still mute
+  all flags for the region).
 * Flag messages can contain placeholders for:
   * `{player}` - name of player
   * `{flag}` - name of triggered flag
@@ -65,6 +65,7 @@ time to enable new features and to improve the mod.
     region name.
   * Take a look at [this tool](https://codepen.io/0biwan/pen/ggVemP) for reference as well as
     the [minecraft wiki](https://minecraft.wiki/w/Formatting_codes).
+* The flag message examples are listed in the language file to enable I18n support for the examples.
 
 * Flags now have a *FlagState* instead of just being present/absent. When you add a flag, it will have the denied state
   to keep the same behavior as before. The different flag states are described as follows:
@@ -73,7 +74,7 @@ time to enable new features and to improve the mod.
   * *Disabled* - The flag is disabled for the region and will not be checked.
   * *Undefined* - The flag is not defined for the region.
 * Flags can be disabled to keep the flags in the region but disable the flag check. This is useful when you need to
-  disable a flag but don't want to lose the flag settings.
+  disable a flag but don't want to lose the flag settings (flag message, muted state, etc.).
 * Add commands for enhanced flag management:
   * `/wp flag local <dim> <local> <flag> state <ALLOWED|DENIED|DISABLED>` - set the state for a flag
   * `/wp flag local <dim> <local> <flag> override <true|false>` - sets the flag to override the same flag in child
@@ -93,11 +94,14 @@ time to enable new features and to improve the mod.
 * Flag pagination now includes parent flags (links to parent flags and the parent itself are shown behind the flag
   name). The region type is indicated by an indicator. **G** for Global, **D** for Dimensional and **L** for Local
   Regions.
-* Flag pagination now also sorts flags by region and flag state
+* Flag list links for regions now also show number of flags from parent regions, which are considered for region checks
+  in parentheses.
+* Flag pagination now sorts flags by flag state and then by alphabetical order.
   * Green - allowed flags
   * Red - denied flags
   * Gray - disabled flags
-* Add interactive CLI support for enhanced flag management
+* Flags now have an internal category. This info will also be added to the wiki. The categories are a change to allow
+  some other features to be added in the future. The categories are not final and may still change.
 
 ### Sphere Local Region
 
@@ -126,7 +130,7 @@ time to enable new features and to improve the mod.
 ### Global Region
 
 * The Global Region has the same properties as the Dimensional Regions but is not limited to one dimension. It is the
-  parent region of all Dimensional Regions and active everywhere.
+  parent region of all Dimensional Regions and considered everywhere for flag checks.
 * Add new commands for management of the Global Region:
   * `/wp global info`.
   * `/wp global clear flags|players|teams|group`.
@@ -134,6 +138,7 @@ time to enable new features and to improve the mod.
   * `/wp global remove player|team|flag`.
   * `/wp global list flag|group|dim`.
   * `/wp global state alert|enable`.
+  * `/wp global reset`.
 * Add interactive CLI support for the Global Region
 
 ### API
@@ -148,8 +153,14 @@ time to enable new features and to improve the mod.
 * Add RenameRegion event as subtype of RegionEvent. This event is fired whenever a region is renamed. It can be
   canceled to prevent the renaming.
 
-### Misc
+### Commands
 
+* You can now add multiple flags at once by using the new command syntax:
+  * `/wp ... add flags <flag1> <flag2> ... <flagN>`
+  * `/wp ... add all-flags`
+* You can also remove multiple flags at once using the new command syntax:
+  * `/wp ... remove flags <flag1> <flag2> ... <flagN>`
+* Add interactive CLI support for enhanced flag management
 * Add new command to expand the area of a Local Region:
   * `/wp local <dim> <local> area expand Cuboid [yMin] [yMax]`.
     * The optional parameters can be used to set a specific height.
@@ -164,17 +175,31 @@ time to enable new features and to improve the mod.
   * `/wp local <dim> <local> add player <group> by-uuid <player uuid>`.
   * `/wp local <dim> <local> remove player <group> by-uuid <player uuid>`.
   * Note that you can define multiple names for adding and removing but only one UUID at a time.
-  * Same goes for the Global and Dimensional Regions as well
-* Dimensional Regions now can be muted (as well as their flags, all or individually)
+  * Same goes for the Global and Dimensional Regions as well.
+* There are new commands to clear players, teams, and flags for all region types.
+  * `/wp dim <dim> clear players|teams|flags|group ...`
+  * `/wp global clear players|teams|flags|group ...`
+  * `/wp local <dim> <region> clear players|teams|flags|group ...`
+* Add new command to enable/disable all Local Regions in a dimension:
+  * `/wp dim <dim> state enable-local true|false`
+* Add new command to enable/disable flag alert messages for all Local Regions in a dimension:
+  * `/wp dim <dim> state alert-local true|false`
+* Add new command to delete all Local Regions in a dimension:
+  * `/wp dim <dim> delete-all regions forever seriously`
+* Add new command to reset the Dimensional Region:
+  * `/wp dim <dim> reset dim`
+* Add new command to reset all Local Regions in a Dimensional Region:
+  * `/wp dim <dim> reset regions`
 
 ## Changed
 
-* YAWP can now be used in single-player (open to LAN) worlds. It is still a server-side only mod, but now also works on
-  integrated servers / LAN worlds.
+* YAWP can now be used in single-player (open to LAN) worlds. It is still a server-side only mod, but now also works for
+  integrated servers / LAN worlds and single player worlds.
+* Reworked the layout and design of the CLI to be more user-friendly and consistent for Local, Dimensional and Global
+  Region types where possible.
 * Change flag pagination for regions to include a link to the flag info as well as some quick links.
+* Dimensional Regions now can be muted (as well as their flags, all or individually)
 * Change Dimensional Region CLI to include support for muting regions.
-* Flags now have an internal category. This info will also be added to the wiki. The categories are a change to allow
-  some other features to be added in the future. The categories are not final and may still change.
 * Rename spatial properties to area properties. This change also involves some commands and language keys.
 * Rearranged the area properties CLI page, trying to give a more concise overview.
 * Change command to update Local Region area:
@@ -185,33 +210,34 @@ time to enable new features and to improve the mod.
   * a selected teleport position
 * The RegionMarker now also prompts feedback for marked blocks and a valid area to the player.
 * Rename affiliation to groups. This change also involves some commands and language keys.
-* Change commands to manage Local Regions:
-  * Old: `/wp region <dim> <region> ...`
-  * New: `/wp local <dim> <local> ...`
 * Change commands to manage groups (former known as affiliations):
   * Old: `/wp region <dim> <region> add|list|remove affiliate player|team <member|owner> ...`
   * New: `/wp local <dim> <local> add|list|remove group player|team <member|owner> ...`
+* Change commands to manage Local Regions:
+  * Old: `/wp region <dim> <region> ...`
+  * New: `/wp local <dim> <local> ...`
 * The spawning flags no longer remove entities with the PersistanceRequired tag or a custom name.
 * Renaming a Stick to create a RegionMarker is now disabled to prevent permission issues. This will come back in a
   future update with an overhaul of the RegionMarker.
 * Moved the region name examples (used when creating a new region) to the language file to enable I18n support for the
   examples.
-* Moved the flag message examples to the language file to enable I18n support for the examples.
-* Flag list links for regions now also show number of inherited flags in parentheses
-* Rearranged the state CLI page for local regions, trying to give a more concise overview.
 * Changed license from LGPL v3 to AGPL v3.
 * Change Dimensional Region state CLI to toggle the state (enable and alert) of all Local Regions in the dimension.
 * Rename config value `break_flag_entities` to `covered_block_entities`
 * Rename config value `break_flag_entity_tags` to `covered_block_entity_tags`
+* The region add flag command now has a new syntax:
+  * Old: `/wp ... add flag <flag>`
+  * New: `/wp ... add flag <flag> [state] [override]`
 
 ## Removed
 
-* Remove UpdateRegionEvent, this is replaced by the UpdateArea and RenameRegion events.
+* Remove UpdateRegionEvent introduced in 0.0.3.0-beta1. This is replaced by the UpdateArea and RenameRegion events.
 
 ## Fixed
 
 * Fix some cli typos
 * Fix parent - child hierarchy inconsistency when deleting children
+* It is no longer possible to delete regions which have a Local Region as parent
 * Lang key fixes... well more like a whole overhaul of the language keys
 
 # [0.0.3.0-beta1] - 2024-03-27
