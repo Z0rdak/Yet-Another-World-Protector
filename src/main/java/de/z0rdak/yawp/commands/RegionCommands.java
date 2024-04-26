@@ -135,14 +135,14 @@ public class RegionCommands {
                                         .then(literal(TELEPORT)
                                                 .executes(ctx -> teleport(ctx, getRegionArgument(ctx)))
                                                 .then(Commands.argument(PLAYER.toString(), EntityArgument.player())
-                                                        .executes(ctx -> teleport(ctx, getRegionArgument(ctx), getPlayerArgument(ctx)))))
-                                        .then(literal(RENAME)
-                                                .then(Commands.argument(NAME.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Collections.singletonList(getRegionArgument(ctx).getName()), builder))
-                                                        .executes(ctx -> renameRegion(ctx, getRegionArgument(ctx), getRegionNameArgument(ctx), getDimCacheArgument(ctx)))))
+                                                        .executes(ctx -> teleport(ctx, getRegionArgument(ctx), getPlayerArgument(ctx))))))
+                                .then(literal(RENAME)
+                                        .then(Commands.argument(NAME.toString(), StringArgumentType.word())
+                                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Collections.singletonList(getRegionArgument(ctx).getName()), builder))
+                                                .executes(ctx -> renameRegion(ctx, getRegionArgument(ctx), getRegionNameArgument(ctx), getDimCacheArgument(ctx)))))
                                 // Idea: reset player, team, etc. with complete hierarchy
                                 // Scenario: Keep region and children with flags but reset it for new player base
-                        )
+
                 );
     }
 
