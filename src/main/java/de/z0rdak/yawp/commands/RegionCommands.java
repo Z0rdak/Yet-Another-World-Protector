@@ -30,11 +30,11 @@ import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.BlockPosArgument;
 import net.minecraft.command.arguments.DimensionArgument;
 import net.minecraft.command.arguments.EntityArgument;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.Collections;
@@ -116,29 +116,27 @@ public class RegionCommands {
                                                         .executes(ctx -> expandCuboid(ctx, getRegionArgument(ctx), MIN_BUILD_LIMIT, MAX_BUILD_LIMIT))
                                                         .then(Commands.argument(Y_MIN.toString(), IntegerArgumentType.integer(MIN_BUILD_LIMIT, MAX_BUILD_LIMIT))
                                                                 .then(Commands.argument(Y_MAX.toString(), IntegerArgumentType.integer(MIN_BUILD_LIMIT, MAX_BUILD_LIMIT))
-                                                                        .executes(ctx -> expandCuboid(ctx, getRegionArgument(ctx), IntegerArgumentType.getInteger(ctx, Y_MIN.toString()), IntegerArgumentType.getInteger(ctx, Y_MAX.toString())))))
-                                                )
+                                                                        .executes(ctx -> expandCuboid(ctx, getRegionArgument(ctx), IntegerArgumentType.getInteger(ctx, Y_MIN.toString()), IntegerArgumentType.getInteger(ctx, Y_MAX.toString()))))))
                                                 .then(Commands.literal(AreaType.SPHERE.areaType)
                                                         .executes(ctx -> expandSphere(ctx, getRegionArgument(ctx), 1))
                                                         .then(Commands.argument(EXPANSION.toString(), IntegerArgumentType.integer())
-                                                                .executes(ctx -> expandSphere(ctx, getRegionArgument(ctx), IntegerArgumentType.getInteger(ctx, EXPANSION.toString()))))
-                                                )
+                                                                .executes(ctx -> expandSphere(ctx, getRegionArgument(ctx), IntegerArgumentType.getInteger(ctx, EXPANSION.toString())))))
                                         )
                                         .then(literal(TELEPORT)
                                                 .then(Commands.literal(SET.toString())
                                                         .then(Commands.argument(TARGET.toString(), BlockPosArgument.blockPos())
-                                                                .executes(ctx -> setTeleportPos(ctx, getRegionArgument(ctx), BlockPosArgument.getOrLoadBlockPos(ctx, TARGET.toString())))))))
+                                                                .executes(ctx -> setTeleportPos(ctx, getRegionArgument(ctx), BlockPosArgument.getOrLoadBlockPos(ctx, TARGET.toString())))))
+                                        )
                                         .then(literal(TELEPORT)
                                                 .executes(ctx -> teleport(ctx, getRegionArgument(ctx)))
                                                 .then(Commands.argument(PLAYER.toString(), EntityArgument.player())
-                                                        .executes(ctx -> teleport(ctx, getRegionArgument(ctx), getPlayerArgument(ctx))))))
-                                .then(literal(RENAME)
+                                                        .executes(ctx -> teleport(ctx, getRegionArgument(ctx), getPlayerArgument(ctx)))))
+                                ).then(literal(RENAME)
                                         .then(Commands.argument(NAME.toString(), StringArgumentType.word())
                                                 .suggests((ctx, builder) -> ISuggestionProvider.suggest(Collections.singletonList(getRegionArgument(ctx).getName()), builder))
-                                                .executes(ctx -> renameRegion(ctx, getRegionArgument(ctx), getRegionNameArgument(ctx), getDimCacheArgument(ctx)))))
-                                // Idea: reset player, team, etc. with complete hierarchy
-                                // Scenario: Keep region and children with flags but reset it for new player base
-
+                                                .executes(ctx -> renameRegion(ctx, getRegionArgument(ctx), getRegionNameArgument(ctx), getDimCacheArgument(ctx))))
+                                )
+                        )
                 );
     }
 
