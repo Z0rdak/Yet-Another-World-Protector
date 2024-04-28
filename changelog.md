@@ -76,15 +76,21 @@ time to enable new features and to improve the mod.
 * Flags can be disabled to keep the flags in the region but disable the flag check. This is useful when you need to
   disable a flag but don't want to lose the flag settings (flag message, muted state, etc.).
 * Add commands for enhanced flag management:
-  * `/wp flag local <dim> <local> <flag> state <ALLOWED|DENIED|DISABLED>` - set the state for a flag
+  * `/wp flag local <dim> <local> <flag> state <Allowed|Denied|Disabled>` - set the state for a flag
   * `/wp flag local <dim> <local> <flag> override <true|false>` - sets the flag to override the same flag in child
     regions
   * `/wp flag local <dim> <local> <flag> msg set <msg>` - set a new message for the flag. Check the wiki for a
     description of possible placeholders for messages.
   * `/wp flag local <dim> <local> <flag> msg clear` ...
   * `/wp flag local <dim> <local> <flag> msg mute` ...
-  * `/wp flag dim ...` to manage flag properties for a Dimensional Region
-  * `/wp flag global ...` to manage flag properties for the Global Region
+
+* Also added a command to list the region flags to the flag command
+  * `/wp flag local <dim> <local>` - Lists all flags of the region
+
+The same commands of course work for Dimensional and the Global Regions:
+
+* `/wp flag dim ...` to manage flag properties for a Dimensional Region
+* `/wp flag global ...` to manage flag properties for the Global Region
 
 ### Flag inheritance & overriding for regions
 
