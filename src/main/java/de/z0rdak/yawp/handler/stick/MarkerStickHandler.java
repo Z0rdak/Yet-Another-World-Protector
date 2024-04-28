@@ -45,7 +45,7 @@ public class MarkerStickHandler {
         // add block to NBT list
         int index = marker.getMarkedBlocks().size() % (marker.getAreaType().neededBlocks + 1);
         marker.addMarkedBlock(event.getPos());
-        sendMessage(event.getPlayer(), new TranslationTextComponent("cli.marker.create.mark.block", index, shortBlockPos(event.getPos())));
+        sendMessage(event.getPlayer(), new TranslationTextComponent("cli.marker.create.mark.block", index + 1, shortBlockPos(event.getPos())));
         // check whether marked blocks form a valid marked area
         boolean hasValidArea = marker.checkValidArea();
         involvedItem.getTag().put(STICK, marker.serializeNBT());
@@ -77,7 +77,7 @@ public class MarkerStickHandler {
                     DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.getCommandSenderWorld().dimension());
                     if (dimCache != null){
                         dimCache.addRegion(dimCache.getDimensionalRegion(), region);
-                        LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.getDefaultPriority());
+                        LocalRegions.ensureHigherRegionPriorityFor(region, RegionConfig.getDefaultPriority());
                         marker.reset();
                         outputItem.getTag().put(STICK, marker.serializeNBT());
                         setStickName(outputItem, type);
