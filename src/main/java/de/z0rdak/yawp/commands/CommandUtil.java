@@ -272,7 +272,7 @@ public class CommandUtil {
      */
     public static int promptGroupLinks(CommandContext<CommandSource> ctx, IProtectedRegion region, String group) {
         if (!GROUP_LIST.contains(group)) {
-            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.global.info.group.invalid", group).withStyle(TextFormatting.RED));
+            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.region.info.group.invalid", group).withStyle(TextFormatting.RED));
             return -1;
         }
         sendCmdFeedback(ctx.getSource(), buildGroupHeader(region, group));
@@ -941,7 +941,7 @@ public class CommandUtil {
                 IFormattableTextComponent globalRegionLink = buildRegionInfoLink(region.getParent(), new TranslationTextComponent("cli.msg.info.region.global.link.hover"));
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(region.getDim());
                 IFormattableTextComponent hierarchyLinks = new TranslationTextComponent("%s, %s, %s", globalRegionLink, buildDimRegionsLink(dimCache), listChildrenLink);
-                sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.dimensions", hierarchyLinks));
+                sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.hierarchy", hierarchyLinks));
             }
             break;
             case LOCAL: {
