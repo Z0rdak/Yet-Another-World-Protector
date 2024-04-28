@@ -1,8 +1,11 @@
 # Yet Another World Protector
 
-Yet Another World Protector (YAWP) is _the_ admin tool to protect your minecraft server!
+Yet Another World Protector (YAWP) is _the_ admin tool to protect your minecraft server! Its available for both, (Neo-)
+Forge and Fabric.
 
-It allows admins (and permitted players) to protect their creations against various events/actions of players, mobs and
+YAWP designed to be used on dedicated servers, but can also be used in single player worlds and worlds opened to LAN.
+It allows admins (and players with assigned permission) to protect their creations against various events/actions of
+players, mobs and
 the environment.
 
 Create regions for your builds and apply region flags to protect them.
@@ -13,6 +16,8 @@ the [WorldGuard](https://dev.bukkit.org/projects/worldguard) plugin.
 
 Join our discord if you have any questions or suggestions: [YAWP Discord](https://discord.gg/d7hArKCUtm)
 
+*** 
+
 ![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/yawp-feature-1.png)
 
 ***The mod is currently in its beta state, with many features not yet implemented but to come. These features will
@@ -22,6 +27,7 @@ This mod will be released for Minecraft versions 1.16.5+. If you are living in t
 for Minecraft 1.12.2, I suggest looking into
 using [WorldDefender](https://www.curseforge.com/minecraft/mc-mods/world-defender).
 
+*** 
 ![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/yawp-feature-3.png "Region types")
 
 In YAWP there are three different kinds of regions to protect your server:
@@ -46,7 +52,7 @@ They can't be created manually. They are in fact automatically generated with ea
 Region for the overworld is created when the server is created.
 
 The following Dimensional Regions are created whenever a player travels to a new dimension, thus creating the new
-dimension with their respective Dimensional Region.
+dimension with their respective Dimensional Region. Modded dimensions are supported as well.
 
 ## Local Regions
 
@@ -62,8 +68,10 @@ To create a Local Regions you will need to have the permission of the parent reg
 by marking the area with a RegionMarker and executing the corresponding command or by just using a command without the
 RegionMarker.
 
-For now the area of a region can only be defined as in a cuboid shape, but I am planning to add more shapes for region
-areas in future updates.
+For now the area of a region can be defined as in a cuboid or spherical shape, but I am planning to add more shapes for
+region areas in future updates.
+
+***
 
 ## Properties of regions
 
@@ -81,6 +89,8 @@ configuration. For more information, visit the wiki.
 
 ![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/yawp-feature-4.png "Region hierarchy")
 
+***
+
 TBD
 
 ![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/yawp-feature-5.png "Region groups")
@@ -92,6 +102,8 @@ Owners and Members can be individual players or a [team](https://minecraft.fando
 
 Groups allow you assign specific region permissions to different players and teams. Currently, there are only two
 default groups: **owners** and **members**.
+
+***
 
 ![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/yawp-feature-6.png "")
 
@@ -105,10 +117,19 @@ update, so you can define your own groups and permissions.
 
 If you have trouble with setting up regions, visit the discord for help.
 
+*** 
+
 ![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/yawp-feature-7.png "")
 
-You can add rules to Regions with flags. If the flag is defined, it prevents the defined action associated with the
-flag.
+Flags are the core of the region protection system. They define which actions are allowed or denied in a region. Flags
+can be set to
+
+- **Allowed**, to allow the corresponding action,
+- **Denied**, to deny the corresponding action,
+- **Disabled**, to disable the specific flag for flag checks.
+
+Child regions inherit the flags from their parent regions. It is further possible to override the flag state for child
+regions by setting the **override** property of the flag of the parent region accordingly.
 
 See the [Flags](https://github.com/Z0rdak/Yet-Another-World-Protector/wiki/Flags) page for more details about the
 different flags.
@@ -118,6 +139,8 @@ here: [Flag suggestions](https://github.com/Z0rdak/Yet-Another-World-Protector/i
 
 There will also be more complex flags in the future. Like *ListFlag* which will allow you to define a list of allowed
 blocks/entities/.. which are forbidden in the context of a flag.
+
+***
 
 ![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/yawp-feature-2.png "Interactive CLI")
 
@@ -129,11 +152,18 @@ blocks/entities/.. which are forbidden in the context of a flag.
 
 ![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/local-interactive-cli-info.png)
 
+*** 
+
 ![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/yawp-feature-8.png)
 
 The commands of mod are also designed to be used by the server console and can be executed by command blocks.
 
 This allows you to automate region setups, add/remove players, enable or disable regions, etc.
+***
+
+API
+
+***
 
 ![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/yawp-feature-9.png)
 
@@ -144,6 +174,7 @@ Starting with mod version 0.0.2.9-beta2 and Minecraft Version 1.19.4, YAWP provi
 
 If your language is not yet supported, feel free to reach out to me via discord or issue a pull request via github! :)
 
+*** 
 ![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/yawp-feature-10.png)
 
 The configuration of the mod allows you to control which is allowed to use the mod, sets default flags for Local and
@@ -157,6 +188,8 @@ The configuration is split in different files, covering different topics.
 
 Since YAWP is a server-side mod, the config for it is found in the directory `/serverconfig` in your minecraft world
 directory.
+
+*** 
 
 [![YAWP Wiki](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/web-resources/yawp-feature-11.png 'YAWP Wiki')](https://github.com/Z0rdak/Yet-Another-World-Protector/wiki)
 
@@ -179,14 +212,12 @@ ___
 There are many more features to come. The mod is in active development!
 The following list is not comprehensive.
 
-* Different flag types (List, Effect, ...)
+* Different flag types (List, Effect, ...) for more granular control
+* Data pack driven flag configuration
+* Region boundary visualization
 * Define your own region groups for more granular management of regions (LuckPerms)
 * More granular permission system (combined with the more granular group features)
 * Region templates for easier managing same regions with different spatial properties
 * Region triggers for entering/leaving a region (for displaying messages, executing commands, etc)*
-
-
-* API to manage regions for other mods
-* Events for common regions actions (e.g. creating, deleting regions, adding owners, etc.)
-  Regions with different shapes (Cylinder, Prism, 3DPolygon)*
+* Regions with different shapes (Cylinder, Prism, 3DPolygon)*
 * \<your suggestion here\>
