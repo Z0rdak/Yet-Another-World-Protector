@@ -1,10 +1,10 @@
 package de.z0rdak.yawp.commands;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.CommandSource;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.minecart.CommandBlockMinecartEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.MinecartCommandBlock;
 
 public enum CommandSourceType {
     PLAYER("player"),
@@ -19,14 +19,14 @@ public enum CommandSourceType {
         this.source = source;
     }
 
-    public static CommandSourceType of(CommandSource cmdSrc) throws IllegalArgumentException {
+    public static CommandSourceType of(CommandSourceStack cmdSrc) throws IllegalArgumentException {
         if (cmdSrc == null) {
             throw new IllegalArgumentException("Command source can't be null!");
         }
         try {
             Entity cmdSrcEntity = cmdSrc.getEntityOrException();
-            if (!(cmdSrcEntity instanceof PlayerEntity)) {
-                if (cmdSrcEntity instanceof CommandBlockMinecartEntity) {
+            if (!(cmdSrcEntity instanceof Player)) {
+                if (cmdSrcEntity instanceof MinecartCommandBlock) {
                     return COMMAND_BLOCK;
                 }
                 return NON_PLAYER;

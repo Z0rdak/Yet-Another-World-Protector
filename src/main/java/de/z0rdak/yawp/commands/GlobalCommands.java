@@ -8,11 +8,11 @@ import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ public class GlobalCommands {
     private GlobalCommands() {
     }
 
-    public static LiteralArgumentBuilder<CommandSource> build() {
+    public static LiteralArgumentBuilder<CommandSourceStack> build() {
         return literal(GLOBAL)
                 .executes(ctx -> CommandUtil.promptRegionInfo(ctx, getGlobalRegion()))
                 .then(literal(INFO)
@@ -57,25 +57,25 @@ public class GlobalCommands {
                 .then(literal(RESET).executes(GlobalCommands::resetGlobalRegion));
     }
 
-    private static int promptRegionState(CommandContext<CommandSource> ctx, IProtectedRegion region) {
+    private static int promptRegionState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region) {
         return CommandUtil.promptRegionState(ctx, region);
     }
 
-    public static int resetGlobalRegion(CommandContext<CommandSource> ctx) {
+    public static int resetGlobalRegion(CommandContext<CommandSourceStack> ctx) {
         RegionDataManager.get().resetGlobalRegion();
-        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.global.reset", buildRegionInfoLink(getGlobalRegion())));
+        sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.global.reset", buildRegionInfoLink(getGlobalRegion())));
         return 0;
     }
 
-    private static int promptDimensionalRegions(CommandContext<CommandSource> ctx, GlobalRegion region, int pageNo) {
+    private static int promptDimensionalRegions(CommandContext<CommandSourceStack> ctx, GlobalRegion region, int pageNo) {
         List<DimensionRegionCache> dimCaches = RegionDataManager.getDimensionCaches();
-        List<IFormattableTextComponent> regionPagination = buildPaginationComponents(
+        List<MutableComponent> regionPagination = buildPaginationComponents(
                 buildRegionListHeader(region),
                 buildCommandStr(GLOBAL.toString(), LIST.toString(), DIM.toString()),
                 buildResetDimensionalRegionEntries(region, dimCaches),
                 pageNo,
                 // empty string, since there is now manual creation of dimensional regions
-                new StringTextComponent(""));
+                new TextComponent(""));
         regionPagination.forEach(line -> sendCmdFeedback(ctx.getSource(), line));
         return 0;
     }

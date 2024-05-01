@@ -22,31 +22,33 @@ import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
 import de.z0rdak.yawp.util.MessageUtil;
 import de.z0rdak.yawp.util.MojangApiHelper;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.command.arguments.DimensionArgument;
-import net.minecraft.command.arguments.EntityArgument;
-import net.minecraft.command.arguments.TeamArgument;
-import net.minecraft.command.arguments.UUIDArgument;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.item.ExperienceOrbEntity;
-import net.minecraft.entity.merchant.villager.WanderingTraderEntity;
-import net.minecraft.entity.monster.SlimeEntity;
-import net.minecraft.entity.passive.GolemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.scoreboard.Team;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.DimensionArgument;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.TeamArgument;
+import net.minecraft.commands.arguments.UuidArgument;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.animal.AbstractGolem;
+import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.animal.SnowGolem;
+import net.minecraft.world.entity.monster.Slime;
+import net.minecraft.world.entity.npc.WanderingTrader;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.scores.Team;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.*;
@@ -65,7 +67,7 @@ public class CommandUtil {
     public final static String OWNER = "owners";
     public final static List<String> GROUP_LIST = Arrays.asList(MEMBER, OWNER);
 
-    public static LiteralArgumentBuilder<CommandSource> buildClearSubCommand(Function<CommandContext<CommandSource>, IProtectedRegion> regionSupplier) {
+    public static LiteralArgumentBuilder<CommandSourceStack> buildClearSubCommand(Function<CommandContext<CommandSourceStack>, IProtectedRegion> regionSupplier) {
         return literal(CLEAR)
                 .then(literal(FLAGS)
                         .executes(ctx -> CommandUtil.clearFlags(ctx, regionSupplier.apply(ctx)))
@@ -73,31 +75,31 @@ public class CommandUtil {
                 .then(literal(PLAYERS)
                         .executes(ctx -> CommandUtil.clearPlayers(ctx, regionSupplier.apply(ctx)))
                         .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
-                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(GROUP_LIST, builder))
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(GROUP_LIST, builder))
                                 .executes(ctx -> CommandUtil.clearPlayers(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx))))
                 )
                 .then(literal(TEAMS)
                         .executes(ctx -> CommandUtil.clearTeams(ctx, regionSupplier.apply(ctx)))
                         .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
-                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(GROUP_LIST, builder))
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(GROUP_LIST, builder))
                                 .executes(ctx -> CommandUtil.clearTeams(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx))))
                 )
                 .then(literal(GROUP)
                         .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
-                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(GROUP_LIST, builder))
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(GROUP_LIST, builder))
                                 .executes(ctx -> CommandUtil.clearGroups(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx))))
                 );
     }
 
-    public static LiteralArgumentBuilder<CommandSource> buildRemoveSubCommand(Function<CommandContext<CommandSource>, IProtectedRegion> regionSupplier) {
+    public static LiteralArgumentBuilder<CommandSourceStack> buildRemoveSubCommand(Function<CommandContext<CommandSourceStack>, IProtectedRegion> regionSupplier) {
         return literal(REMOVE)
                 .then(literal(PLAYER)
                         .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
-                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(GROUP_LIST, builder))
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(GROUP_LIST, builder))
                                 .then(Commands.argument(PLAYER.toString(), EntityArgument.players())
                                         .executes(ctx -> removePlayers(ctx, getPlayersArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx))))
                                 .then(literal(BY_UUID)
-                                        .then(Commands.argument(PLAYER_UUID.toString(), UUIDArgument.uuid())
+                                        .then(Commands.argument(PLAYER_UUID.toString(), UuidArgument.uuid())
                                                 .executes(ctx -> removePlayerByUUID(ctx, getPlayerUUIDArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx)))))
                                 .then(literal(BY_NAME)
                                         .then(Commands.argument(PLAYER_NAMES.toString(), StringArgumentType.greedyString())
@@ -106,7 +108,7 @@ public class CommandUtil {
                 )
                 .then(literal(TEAM)
                         .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
-                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(GROUP_LIST, builder))
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(GROUP_LIST, builder))
                                 .then(Commands.argument(TEAM.toString(), TeamArgument.team())
                                         .executes(ctx -> removeTeam(ctx, getTeamArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx))))))
                 .then(literal(FLAG)
@@ -115,15 +117,15 @@ public class CommandUtil {
                                 .executes(ctx -> removeFlag(ctx, regionSupplier.apply(ctx), getFlagArguments(ctx)))));
     }
 
-    public static LiteralArgumentBuilder<CommandSource> buildAddSubCommand(Function<CommandContext<CommandSource>, IProtectedRegion> regionSupplier) {
+    public static LiteralArgumentBuilder<CommandSourceStack> buildAddSubCommand(Function<CommandContext<CommandSourceStack>, IProtectedRegion> regionSupplier) {
         return literal(ADD)
                 .then(literal(PLAYER)
                         .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
-                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(GROUP_LIST, builder))
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(GROUP_LIST, builder))
                                 .then(Commands.argument(PLAYER.toString(), EntityArgument.players())
                                         .executes(ctx -> addPlayers(ctx, getPlayersArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx))))
                                 .then(literal(BY_UUID)
-                                        .then(Commands.argument(PLAYER_UUID.toString(), UUIDArgument.uuid())
+                                        .then(Commands.argument(PLAYER_UUID.toString(), UuidArgument.uuid())
                                                 .executes(ctx -> addPlayerByUuid(ctx, getPlayerUUIDArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx)))))
                                 .then(literal(BY_NAME)
                                         .then(Commands.argument(PLAYER_NAMES.toString(), StringArgumentType.greedyString())
@@ -132,7 +134,7 @@ public class CommandUtil {
                 )
                 .then(literal(TEAM)
                         .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
-                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(GROUP_LIST, builder))
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(GROUP_LIST, builder))
                                 .then(Commands.argument(TEAM.toString(), TeamArgument.team())
                                         .executes(ctx -> addTeam(ctx, getTeamArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx))))))
                 .then(literal(FLAG)
@@ -141,7 +143,7 @@ public class CommandUtil {
                                 .executes(ctx -> addFlag(ctx, regionSupplier.apply(ctx), getFlagArguments(ctx)))));
     }
 
-    public static LiteralArgumentBuilder<CommandSource> buildListSubCommand(Function<CommandContext<CommandSource>, IProtectedRegion> regionSupplier) {
+    public static LiteralArgumentBuilder<CommandSourceStack> buildListSubCommand(Function<CommandContext<CommandSourceStack>, IProtectedRegion> regionSupplier) {
         return literal(LIST)
                 .then(literal(FLAG)
                         .executes(ctx -> promptFlagList(ctx, regionSupplier.apply(ctx), 0))
@@ -149,7 +151,7 @@ public class CommandUtil {
                                 .executes(ctx -> promptFlagList(ctx, regionSupplier.apply(ctx), getPageNoArgument(ctx)))))
                 .then(literal(GROUP)
                         .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
-                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(CommandUtil.GROUP_LIST, builder))
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(CommandUtil.GROUP_LIST, builder))
                                 .executes(ctx -> CommandUtil.promptGroupLinks(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx)))
                                 .then(literal(TEAM)
                                         .executes(ctx -> CommandUtil.promptGroupList(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx), GroupType.TEAM, 0))
@@ -165,7 +167,7 @@ public class CommandUtil {
                 );
     }
 
-    public static LiteralArgumentBuilder<CommandSource> buildCopySubCommand(Function<CommandContext<CommandSource>, IProtectedRegion> srcSupplier) {
+    public static LiteralArgumentBuilder<CommandSourceStack> buildCopySubCommand(Function<CommandContext<CommandSourceStack>, IProtectedRegion> srcSupplier) {
         return literal(COPY)
                 .then(literal(FLAGS)
                         .then(literal(TO_LOCAL)
@@ -183,12 +185,12 @@ public class CommandUtil {
                                         .then(Commands.argument(TARGET_REGION.toString(), StringArgumentType.word())
                                                 .suggests((ctx, builder) -> RegionArgumentType.region().listRegionsInTargetDim(ctx, builder))
                                                 .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> ISuggestionProvider.suggest(GROUP_LIST, builder))
+                                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(GROUP_LIST, builder))
                                                         .executes(ctx -> copyRegionPlayers(ctx, srcSupplier.apply(ctx), getTargetLocalRegionArgument(ctx), getGroupArgument(ctx)))))))
                         .then(literal(TO_DIM)
                                 .then(Commands.argument(TARGET_DIM.toString(), DimensionArgument.dimension())
                                         .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
-                                                .suggests((ctx, builder) -> ISuggestionProvider.suggest(GROUP_LIST, builder))
+                                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(GROUP_LIST, builder))
                                                 .executes(ctx -> copyRegionPlayers(ctx, srcSupplier.apply(ctx), getTargetDimRegionArgument(ctx).getDimensionalRegion(), getGroupArgument(ctx)))))))
                 .then(literal(STATE)
                         .then(literal(TO_LOCAL)
@@ -208,10 +210,10 @@ public class CommandUtil {
      * Enabled: [true|false] | [all-off] [all-on]
      * Alert: [on|off] | [all-off] [all-on]
      */
-    public static int promptRegionState(CommandContext<CommandSource> ctx, IProtectedRegion region) {
-        sendCmdFeedback(ctx.getSource(), buildHeader(new TranslationTextComponent("cli.msg.info.header.for", buildRegionStateLink(region), buildRegionInfoLink(region))));
-        IFormattableTextComponent regionEnableComponent = buildRegionEnableComponent(region);
-        IFormattableTextComponent regionAlertComponent = buildRegionAlertToggleLink(region);
+    public static int promptRegionState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region) {
+        sendCmdFeedback(ctx.getSource(), buildHeader(new TranslatableComponent("cli.msg.info.header.for", buildRegionStateLink(region), buildRegionInfoLink(region))));
+        MutableComponent regionEnableComponent = buildRegionEnableComponent(region);
+        MutableComponent regionAlertComponent = buildRegionAlertToggleLink(region);
         if (region.getRegionType() == RegionType.DIMENSION) {
             regionEnableComponent.append(" | ").append(buildAllLocalEnableComponent(getDimCacheArgument(ctx)));
             regionAlertComponent.append(" | ").append(buildAllLocalAlertToggleLink(getDimCacheArgument(ctx)));
@@ -226,9 +228,9 @@ public class CommandUtil {
      * Players: [n player(s)][+]
      * Teams: [m team(s)][+]
      */
-    public static int promptGroupLinks(CommandContext<CommandSource> ctx, IProtectedRegion region, String group) {
+    public static int promptGroupLinks(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, String group) {
         if (!GROUP_LIST.contains(group)) {
-            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.global.info.group.invalid", group).withStyle(TextFormatting.RED));
+            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.global.info.group.invalid", group).withStyle(ChatFormatting.RED));
             return -1;
         }
         sendCmdFeedback(ctx.getSource(), buildGroupHeader(region, group));
@@ -237,7 +239,7 @@ public class CommandUtil {
         return 0;
     }
 
-    public static int promptFlagList(CommandContext<CommandSource> ctx, IProtectedRegion region, int pageNo) {
+    public static int promptFlagList(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, int pageNo) {
         String cmd = "";
         switch (region.getRegionType()) {
             case GLOBAL:
@@ -252,18 +254,18 @@ public class CommandUtil {
         }
         List<IFlag> flags = LocalRegions.getSortedFlags(region);
         if (flags.isEmpty()) {
-            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.flag.empty", buildRegionInfoLink(region)));
+            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.empty", buildRegionInfoLink(region)));
             return 1;
         }
-        List<IFormattableTextComponent> flagPagination = buildPaginationComponents(
+        List<MutableComponent> flagPagination = buildPaginationComponents(
                 buildRegionFlagInfoHeader(region),
                 cmd, buildRemoveFlagEntries(region, flags), pageNo,
-                new StringTextComponent(" - ").append(buildAddFlagLink(region)));
+                new TextComponent(" - ").append(buildAddFlagLink(region)));
         flagPagination.forEach(line -> sendCmdFeedback(ctx.getSource(), line));
         return 0;
     }
 
-    public static int promptGroupList(CommandContext<CommandSource> ctx, IProtectedRegion region, String group, GroupType groupType, int pageNo) {
+    public static int promptGroupList(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, String group, GroupType groupType, int pageNo) {
         String cmd = "";
         String dim = region.getDim().location().toString();
         switch (region.getRegionType()) {
@@ -278,79 +280,79 @@ public class CommandUtil {
                 break;
         }
         if (!GROUP_LIST.contains(group)) {
-            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.region.info.group.invalid", group).withStyle(TextFormatting.RED));
+            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.region.info.group.invalid", group).withStyle(ChatFormatting.RED));
             return -1;
         }
         List<String> groupNames = getGroupList(region, group, groupType);
         if (groupNames.isEmpty()) {
-            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.group." + groupType.name + ".empty",
+            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.group." + groupType.name + ".empty",
                     group, buildRegionInfoLink(region)));
             return 1;
         }
-        List<IFormattableTextComponent> groupMemberPagination = buildPaginationComponents(
+        List<MutableComponent> groupMemberPagination = buildPaginationComponents(
                 buildGroupHeader(region, group, groupType),
                 cmd, buildRemoveGroupMemberEntries(region, groupNames, groupType, group),
                 pageNo,
-                new StringTextComponent(" - ").append(buildAddToGroupLink(region, group, groupType)));
+                new TextComponent(" - ").append(buildAddToGroupLink(region, group, groupType)));
         groupMemberPagination.forEach(line -> sendCmdFeedback(ctx.getSource(), line));
         return 0;
     }
 
-    public static int setActiveState(CommandContext<CommandSource> ctx, IProtectedRegion region, boolean activate) {
+    public static int setActiveState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, boolean activate) {
         region.setIsActive(activate);
         RegionDataManager.save();
-        IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!activate), String.valueOf(activate));
-        TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.state.enable.set.value",
+        MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!activate), String.valueOf(activate));
+        TranslatableComponent msg = new TranslatableComponent("cli.msg.info.region.state.enable.set.value",
                 buildRegionInfoLink(region), region.isActive() ? "active" : "inactive");
         sendCmdFeedback(ctx.getSource(), msg.append(" ").append(undoLink));
         return 0;
     }
 
-    public static int setAlertState(CommandContext<CommandSource> ctx, IProtectedRegion region, boolean showAlert) {
+    public static int setAlertState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, boolean showAlert) {
         boolean oldState = !region.isMuted();
         region.setIsMuted(showAlert);
         RegionDataManager.save();
         if (oldState == region.isMuted()) {
-            IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(showAlert), String.valueOf(!showAlert));
-            TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.state.alert.set.value",
+            MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(showAlert), String.valueOf(!showAlert));
+            TranslatableComponent msg = new TranslatableComponent("cli.msg.info.state.alert.set.value",
                     buildRegionInfoLink(region), region.isMuted() ? "muted" : "active");
             sendCmdFeedback(ctx.getSource(), msg.append(" ").append(undoLink));
         }
         return 0;
     }
 
-    public static int removeTeam(CommandContext<CommandSource> src, Team team, IProtectedRegion region, String group) {
+    public static int removeTeam(CommandContext<CommandSourceStack> src, Team team, IProtectedRegion region, String group) {
         if (!GROUP_LIST.contains(group)) {
-            sendCmdFeedback(src.getSource(), new TranslationTextComponent("cli.msg.region.info.group.invalid", group).withStyle(TextFormatting.RED));
+            sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.region.info.group.invalid", group).withStyle(ChatFormatting.RED));
             return -1;
         }
-        IFormattableTextComponent undoLink = buildRegionActionUndoLink(src.getInput(), REMOVE, ADD);
-        IFormattableTextComponent teamInfo = buildGroupInfo(region, team.getName(), GroupType.TEAM);
+        MutableComponent undoLink = buildRegionActionUndoLink(src.getInput(), REMOVE, ADD);
+        MutableComponent teamInfo = buildGroupInfo(region, team.getName(), GroupType.TEAM);
         if (region.getGroup(group).hasTeam(team.getName())) {
             region.removeTeam(team.getName(), group);
             RegionDataManager.save();
-            TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.team.removed", teamInfo, group,
+            TranslatableComponent msg = new TranslatableComponent("cli.msg.info.region.group.team.removed", teamInfo, group,
                     buildRegionInfoLink(region));
             sendCmdFeedback(src.getSource(), msg.append(" ").append(undoLink));
             return 0;
         }
-        TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.team.not-present", teamInfo, group,
+        TranslatableComponent msg = new TranslatableComponent("cli.msg.info.region.group.team.not-present", teamInfo, group,
                 buildRegionInfoLink(region));
         sendCmdFeedback(src.getSource(), msg);
         return 1;
     }
 
 
-    private static int removePlayersByName(CommandContext<CommandSource> ctx, Collection<String> playerNames, IProtectedRegion region, String group) {
+    private static int removePlayersByName(CommandContext<CommandSourceStack> ctx, Collection<String> playerNames, IProtectedRegion region, String group) {
         if (!GROUP_LIST.contains(group)) {
-            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.region.info.group.invalid", group).withStyle(TextFormatting.RED));
+            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.region.info.group.invalid", group).withStyle(ChatFormatting.RED));
             return -1;
         }
         playerNames.forEach(playerName -> CommandUtil.removePlayer(ctx, playerName, region, group));
         return 0;
     }
 
-    private static void removePlayer(CommandContext<CommandSource> ctx, String playerName, IProtectedRegion region, String group) {
+    private static void removePlayer(CommandContext<CommandSourceStack> ctx, String playerName, IProtectedRegion region, String group) {
         region.getGroup(group).getPlayers().entrySet()
                 .stream()
                 .filter(e -> e.getValue().equals(playerName))
@@ -358,9 +360,9 @@ public class CommandUtil {
                 .ifPresent(e -> removePlayer(ctx, e.getKey(), playerName, region, group));
     }
 
-    private static int removePlayerByUUID(CommandContext<CommandSource> ctx, UUID playerUuid, IProtectedRegion region, String group) {
+    private static int removePlayerByUUID(CommandContext<CommandSourceStack> ctx, UUID playerUuid, IProtectedRegion region, String group) {
         if (!GROUP_LIST.contains(group)) {
-            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.region.info.group.invalid", group).withStyle(TextFormatting.RED));
+            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.region.info.group.invalid", group).withStyle(ChatFormatting.RED));
             return -1;
         }
         if (region.getGroup(group).hasPlayer(playerUuid)) {
@@ -371,14 +373,14 @@ public class CommandUtil {
     }
 
 
-    private static int removePlayers(CommandContext<CommandSource> ctx, Collection<ServerPlayerEntity> players, IProtectedRegion region, String group) {
+    private static int removePlayers(CommandContext<CommandSourceStack> ctx, Collection<ServerPlayer> players, IProtectedRegion region, String group) {
         players.forEach(player -> CommandUtil.removePlayer(ctx, player, region, group));
         return 0;
     }
 
-    private static int removePlayer(CommandContext<CommandSource> ctx, PlayerEntity player, IProtectedRegion region, String group) {
+    private static int removePlayer(CommandContext<CommandSourceStack> ctx, Player player, IProtectedRegion region, String group) {
         if (!GROUP_LIST.contains(group)) {
-            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.region.info.group.invalid", group).withStyle(TextFormatting.RED));
+            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.region.info.group.invalid", group).withStyle(ChatFormatting.RED));
             return -1;
         }
         if (region.getGroup(group).hasPlayer(player.getUUID())) {
@@ -388,158 +390,158 @@ public class CommandUtil {
         return 1;
     }
 
-    public static int removePlayer(CommandContext<CommandSource> ctx, UUID playerUuid, String playerName, IProtectedRegion region, String group) {
-        IFormattableTextComponent playerInfo = buildGroupInfo(region, playerName, GroupType.PLAYER);
-        IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), REMOVE, ADD);
+    public static int removePlayer(CommandContext<CommandSourceStack> ctx, UUID playerUuid, String playerName, IProtectedRegion region, String group) {
+        MutableComponent playerInfo = buildGroupInfo(region, playerName, GroupType.PLAYER);
+        MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), REMOVE, ADD);
         if (region.getGroup(group).hasPlayer(playerUuid)) {
             region.removePlayer(playerUuid, group);
-            TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.player.removed", playerInfo, group,
+            TranslatableComponent msg = new TranslatableComponent("cli.msg.info.region.group.player.removed", playerInfo, group,
                     buildRegionInfoLink(region));
             sendCmdFeedback(ctx.getSource(), msg.append(" ").append(undoLink));
             RegionDataManager.save();
             return 0;
         }
 
-        TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.player.not-present", playerInfo, group,
+        TranslatableComponent msg = new TranslatableComponent("cli.msg.info.region.group.player.not-present", playerInfo, group,
                 buildRegionInfoLink(region));
         sendCmdFeedback(ctx.getSource(), msg);
         return 1;
     }
 
-    private static int addPlayerByUuid(CommandContext<CommandSource> ctx, UUID playerUuid, IProtectedRegion region, String group) {
+    private static int addPlayerByUuid(CommandContext<CommandSourceStack> ctx, UUID playerUuid, IProtectedRegion region, String group) {
         if (!GROUP_LIST.contains(group)) {
-            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.region.info.group.invalid", group).withStyle(TextFormatting.RED));
+            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.region.info.group.invalid", group).withStyle(ChatFormatting.RED));
             return -1;
         }
         GameProfile cachedProfile = MojangApiHelper.lookupGameProfileInCache(ctx, playerUuid);
         if (cachedProfile != null && cachedProfile.isComplete()) {
-            TranslationTextComponent cacheSuccess = new TranslationTextComponent("cli.msg.info.player.lookup.cache.success", playerUuid.toString());
+            TranslatableComponent cacheSuccess = new TranslatableComponent("cli.msg.info.player.lookup.cache.success", playerUuid.toString());
             sendCmdFeedback(ctx.getSource(), cacheSuccess);
             return addPlayer(ctx, cachedProfile.getId(), cachedProfile.getName(), region, group);
         }
-        TranslationTextComponent cacheMiss = new TranslationTextComponent("cli.msg.info.player.lookup.pending",
+        TranslatableComponent cacheMiss = new TranslatableComponent("cli.msg.info.player.lookup.pending",
                 playerUuid.toString(), "uuid");
         sendCmdFeedback(ctx.getSource(), cacheMiss);
         CompletableFuture.runAsync(() -> MojangApiHelper.getGameProfileInfo(playerUuid, (gameProfile) -> {
             if (gameProfile != null) {
-                TranslationTextComponent lookupSuccess = new TranslationTextComponent("cli.msg.info.player.lookup.api.success", playerUuid.toString());
+                TranslatableComponent lookupSuccess = new TranslatableComponent("cli.msg.info.player.lookup.api.success", playerUuid.toString());
                 sendCmdFeedback(ctx.getSource(), lookupSuccess);
                 addPlayer(ctx, gameProfile.getId(), gameProfile.getName(), region, group);
             } else {
-                TranslationTextComponent lookupFailed = new TranslationTextComponent("cli.msg.info.player.lookup.api.failed", playerUuid.toString());
+                TranslatableComponent lookupFailed = new TranslatableComponent("cli.msg.info.player.lookup.api.failed", playerUuid.toString());
                 sendCmdFeedback(ctx.getSource(), lookupFailed);
             }
         }));
         return 0;
     }
 
-    public static int addPlayersByName(CommandContext<CommandSource> ctx, List<String> playerNames, IProtectedRegion region, String group) {
+    public static int addPlayersByName(CommandContext<CommandSourceStack> ctx, List<String> playerNames, IProtectedRegion region, String group) {
         if (!GROUP_LIST.contains(group)) {
-            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.region.info.group.invalid", group).withStyle(TextFormatting.RED));
+            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.region.info.group.invalid", group).withStyle(ChatFormatting.RED));
             return -1;
         }
         playerNames.forEach(name -> CommandUtil.addPlayerByName(ctx, name, region, group));
         return 0;
     }
 
-    private static int addPlayerByName(CommandContext<CommandSource> ctx, String playerName, IProtectedRegion region, String group) {
+    private static int addPlayerByName(CommandContext<CommandSourceStack> ctx, String playerName, IProtectedRegion region, String group) {
         GameProfile cachedProfile = MojangApiHelper.lookupGameProfileInCache(ctx, playerName);
         if (cachedProfile != null && cachedProfile.isComplete()) {
-            TranslationTextComponent cacheSuccess = new TranslationTextComponent("cli.msg.info.player.lookup.cache.success", playerName);
+            TranslatableComponent cacheSuccess = new TranslatableComponent("cli.msg.info.player.lookup.cache.success", playerName);
             sendCmdFeedback(ctx.getSource(), cacheSuccess);
             return addPlayer(ctx, cachedProfile.getId(), cachedProfile.getName(), region, group);
         }
-        TranslationTextComponent cacheMiss = new TranslationTextComponent("cli.msg.info.player.lookup.pending",
+        TranslatableComponent cacheMiss = new TranslatableComponent("cli.msg.info.player.lookup.pending",
                 playerName, "name");
         sendCmdFeedback(ctx.getSource(), cacheMiss);
         CompletableFuture.runAsync(() -> MojangApiHelper.getGameProfileInfo(playerName, (gameProfile) -> {
             if (gameProfile != null) {
-                TranslationTextComponent lookupSuccess = new TranslationTextComponent("cli.msg.info.player.lookup.api.success", playerName);
+                TranslatableComponent lookupSuccess = new TranslatableComponent("cli.msg.info.player.lookup.api.success", playerName);
                 sendCmdFeedback(ctx.getSource(), lookupSuccess);
                 addPlayer(ctx, gameProfile.getId(), gameProfile.getName(), region, group);
             } else {
-                TranslationTextComponent lookupFailed = new TranslationTextComponent("cli.msg.info.player.lookup.api.failed", playerName);
+                TranslatableComponent lookupFailed = new TranslatableComponent("cli.msg.info.player.lookup.api.failed", playerName);
                 sendCmdFeedback(ctx.getSource(), lookupFailed);
             }
         }));
         return 0;
     }
 
-    public static int addPlayers(CommandContext<CommandSource> ctx, Collection<ServerPlayerEntity> players, IProtectedRegion region, String group) {
+    public static int addPlayers(CommandContext<CommandSourceStack> ctx, Collection<ServerPlayer> players, IProtectedRegion region, String group) {
         players.forEach(player -> CommandUtil.addPlayer(ctx, player, region, group));
         return 0;
     }
 
-    public static int addPlayer(CommandContext<CommandSource> src, PlayerEntity player, IProtectedRegion region, String group) {
+    public static int addPlayer(CommandContext<CommandSourceStack> src, Player player, IProtectedRegion region, String group) {
         if (!GROUP_LIST.contains(group)) {
-            sendCmdFeedback(src.getSource(), new TranslationTextComponent("cli.msg.region.info.group.invalid", group).withStyle(TextFormatting.RED));
+            sendCmdFeedback(src.getSource(), new TranslatableComponent("cli.msg.region.info.group.invalid", group).withStyle(ChatFormatting.RED));
             return -1;
         }
         return addPlayer(src, player.getUUID(), player.getScoreboardName(), region, group);
     }
 
-    private static int addPlayer(CommandContext<CommandSource> src, UUID uuid, String name, IProtectedRegion region, String group) {
-        IFormattableTextComponent regionInfoLink = buildRegionInfoLink(region);
-        IFormattableTextComponent undoLink = buildRegionActionUndoLink(src.getInput(), ADD, REMOVE);
+    private static int addPlayer(CommandContext<CommandSourceStack> src, UUID uuid, String name, IProtectedRegion region, String group) {
+        MutableComponent regionInfoLink = buildRegionInfoLink(region);
+        MutableComponent undoLink = buildRegionActionUndoLink(src.getInput(), ADD, REMOVE);
         if (!region.hasPlayer(uuid, group)) {
             region.addPlayer(uuid, name, group);
             RegionDataManager.save();
-            TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.player.added", name, group, regionInfoLink);
+            TranslatableComponent msg = new TranslatableComponent("cli.msg.info.region.group.player.added", name, group, regionInfoLink);
             sendCmdFeedback(src.getSource(), msg.append(" ").append(undoLink));
             return 0;
         }
-        TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.player.present", name, group, regionInfoLink);
+        TranslatableComponent msg = new TranslatableComponent("cli.msg.info.region.group.player.present", name, group, regionInfoLink);
         sendCmdFeedback(src.getSource(), msg);
         return 1;
     }
 
-    public static int addTeam(CommandContext<CommandSource> ctx, Team team, IProtectedRegion region, String group) {
+    public static int addTeam(CommandContext<CommandSourceStack> ctx, Team team, IProtectedRegion region, String group) {
         if (!GROUP_LIST.contains(group)) {
-            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.region.info.group.invalid", group).withStyle(TextFormatting.RED));
+            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.region.info.group.invalid", group).withStyle(ChatFormatting.RED));
             return -1;
         }
-        IFormattableTextComponent regionInfoLink = buildRegionInfoLink(region);
-        IFormattableTextComponent teamHoverInfo = buildTeamHoverComponent(team);
+        MutableComponent regionInfoLink = buildRegionInfoLink(region);
+        MutableComponent teamHoverInfo = buildTeamHoverComponent(team);
         if (!region.hasTeam(team.getName(), group)) {
             region.addTeam(team.getName(), group);
             RegionDataManager.save();
-            IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), ADD, REMOVE);
-            TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.team.added",
+            MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), ADD, REMOVE);
+            TranslatableComponent msg = new TranslatableComponent("cli.msg.info.region.group.team.added",
                     teamHoverInfo, group, regionInfoLink);
             sendCmdFeedback(ctx.getSource(), msg.append(" ").append(undoLink));
             return 0;
         }
-        TranslationTextComponent msg = new TranslationTextComponent("cli.msg.info.region.group.team.present",
+        TranslatableComponent msg = new TranslatableComponent("cli.msg.info.region.group.team.present",
                 teamHoverInfo, group, regionInfoLink);
         sendCmdFeedback(ctx.getSource(), msg);
         return 1;
     }
 
-    public static int removeFlag(CommandContext<CommandSource> ctx, IProtectedRegion region, Set<RegionFlag> flags) {
+    public static int removeFlag(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, Set<RegionFlag> flags) {
         flags.forEach(flag -> CommandUtil.removeRegionFlag(ctx, region, flag));
         return 0;
     }
 
-    public static int removeRegionFlag(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionFlag flag) {
+    public static int removeRegionFlag(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, RegionFlag flag) {
         if (region.containsFlag(flag)) {
             region.removeFlag(flag.name);
             RegionDataManager.save();
-            IFormattableTextComponent msg = new TranslationTextComponent("cli.msg.flag.removed", flag.name,
+            MutableComponent msg = new TranslatableComponent("cli.msg.flag.removed", flag.name,
                     buildRegionInfoLink(region));
-            IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), REMOVE, ADD);
+            MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), REMOVE, ADD);
             sendCmdFeedback(ctx.getSource(), msg.append(" ").append(undoLink));
             return 0;
         } else {
-            IFormattableTextComponent msg = new TranslationTextComponent("cli.msg.flag.not-present", flag.name,
+            MutableComponent msg = new TranslatableComponent("cli.msg.flag.not-present", flag.name,
                     buildRegionInfoLink(region));
             sendCmdFeedback(ctx.getSource(), msg);
             return 1;
         }
     }
 
-    public static int copyRegionFlags(CommandContext<CommandSource> ctx, IProtectedRegion srcRegion, IProtectedRegion targetRegion) {
+    public static int copyRegionFlags(CommandContext<CommandSourceStack> ctx, IProtectedRegion srcRegion, IProtectedRegion targetRegion) {
         if (srcRegion.getFlags().isEmpty()) {
-            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.flag.empty", buildRegionInfoLink(srcRegion)));
+            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.empty", buildRegionInfoLink(srcRegion)));
             return 1;
         }
         // get the flags which are in the srcRegion but not in the targetRegion
@@ -549,11 +551,11 @@ public class CommandUtil {
         // flagsToCopy.forEach(region::addFlag);
         srcRegion.getFlags().forEach(targetRegion::addFlag);
         RegionDataManager.save();
-        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.copy.region.flags", flagsToCopy.size(), buildRegionInfoLink(srcRegion), buildRegionInfoLink(targetRegion)));
+        sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.copy.region.flags", flagsToCopy.size(), buildRegionInfoLink(srcRegion), buildRegionInfoLink(targetRegion)));
         return 0;
     }
 
-    public static int copyRegionState(CommandContext<CommandSource> ctx, IProtectedRegion srcRegion, IProtectedRegion targetRegion) {
+    public static int copyRegionState(CommandContext<CommandSourceStack> ctx, IProtectedRegion srcRegion, IProtectedRegion targetRegion) {
         targetRegion.setIsActive(srcRegion.isActive());
         targetRegion.setIsMuted(srcRegion.isMuted());
         if (srcRegion instanceof IMarkableRegion && targetRegion instanceof IMarkableRegion) {
@@ -562,11 +564,11 @@ public class CommandUtil {
             regionTarget.setPriority(regionSource.getPriority());
         }
         RegionDataManager.save();
-        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.copy.region.state", buildRegionInfoLink(srcRegion), buildRegionInfoLink(targetRegion)));
+        sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.copy.region.state", buildRegionInfoLink(srcRegion), buildRegionInfoLink(targetRegion)));
         return 0;
     }
 
-    public static int copyRegionPlayers(CommandContext<CommandSource> ctx, IProtectedRegion srcRegion, IProtectedRegion targetRegion, String group) {
+    public static int copyRegionPlayers(CommandContext<CommandSourceStack> ctx, IProtectedRegion srcRegion, IProtectedRegion targetRegion, String group) {
         if (!srcRegion.getGroup(group).getPlayers().isEmpty()) {
             // get the players which are in the srcRegion but not in the targetRegion
             Set<Map.Entry<UUID, String>> playerEntriesToCopy = srcRegion.getGroup(group).getPlayers().entrySet().stream()
@@ -576,80 +578,80 @@ public class CommandUtil {
 
             srcRegion.getGroup(group).getPlayers().forEach((uuid, name) -> targetRegion.getGroup(group).addPlayer(uuid, name));
             RegionDataManager.save();
-            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.copy.region.players", playerEntriesToCopy.size(), group, buildRegionInfoLink(srcRegion), buildRegionInfoLink(targetRegion)));
+            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.copy.region.players", playerEntriesToCopy.size(), group, buildRegionInfoLink(srcRegion), buildRegionInfoLink(targetRegion)));
             return 0;
         }
-        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.group.player.empty", group, buildRegionInfoLink(srcRegion)));
+        sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.group.player.empty", group, buildRegionInfoLink(srcRegion)));
         return 1;
     }
 
-    public static int copyRegionPlayers(CommandContext<CommandSource> ctx, IProtectedRegion region, IProtectedRegion srcRegion) {
+    public static int copyRegionPlayers(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IProtectedRegion srcRegion) {
         return copyRegionPlayers(ctx, region, srcRegion, CommandConstants.MEMBER.toString())
                 + copyRegionPlayers(ctx, region, srcRegion, CommandConstants.OWNER.toString());
     }
 
-    public static int clearFlags(CommandContext<CommandSource> ctx, IProtectedRegion region) {
+    public static int clearFlags(CommandContext<CommandSourceStack> ctx, IProtectedRegion region) {
         int amount = region.getFlags().size();
         if (amount == 0) {
-            IFormattableTextComponent feedbackMsg = new TranslationTextComponent("cli.msg.info.region.flag.empty", buildRegionInfoLink(region));
+            MutableComponent feedbackMsg = new TranslatableComponent("cli.msg.info.region.flag.empty", buildRegionInfoLink(region));
             sendCmdFeedback(ctx.getSource(), feedbackMsg);
             return 1;
         }
         Collection<IFlag> flags = region.getFlags(); // TODO: Undo action link
         region.getFlags().clear();
-        IFormattableTextComponent feedbackMsg = new TranslationTextComponent("cli.msg.info.region.flag.cleared", amount, buildRegionInfoLink(region));
+        MutableComponent feedbackMsg = new TranslatableComponent("cli.msg.info.region.flag.cleared", amount, buildRegionInfoLink(region));
         sendCmdFeedback(ctx.getSource(), feedbackMsg);
         RegionDataManager.save();
         return 0;
     }
 
-    public static int clearPlayers(CommandContext<CommandSource> ctx, IProtectedRegion region) {
+    public static int clearPlayers(CommandContext<CommandSourceStack> ctx, IProtectedRegion region) {
         return clearPlayers(ctx, region, MEMBER) + clearPlayers(ctx, region, OWNER);
     }
 
-    public static int clearPlayers(CommandContext<CommandSource> ctx, IProtectedRegion region, String groupName) {
+    public static int clearPlayers(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, String groupName) {
         int amount = region.getGroup(groupName).getPlayers().size();
         if (amount == 0) {
-            IFormattableTextComponent feedbackMsg = new TranslationTextComponent("cli.msg.info.region.players.empty", buildRegionInfoLink(region), groupName);
+            MutableComponent feedbackMsg = new TranslatableComponent("cli.msg.info.region.players.empty", buildRegionInfoLink(region), groupName);
             sendCmdFeedback(ctx.getSource(), feedbackMsg);
             return 1;
         }
         region.getGroup(groupName).clearPlayers();
-        IFormattableTextComponent feedbackMsg = new TranslationTextComponent("cli.msg.info.region.players.cleared", buildRegionInfoLink(region), amount, groupName);
+        MutableComponent feedbackMsg = new TranslatableComponent("cli.msg.info.region.players.cleared", buildRegionInfoLink(region), amount, groupName);
         sendCmdFeedback(ctx.getSource(), feedbackMsg);
         RegionDataManager.save();
         return 0;
     }
 
-    public static int clearTeams(CommandContext<CommandSource> ctx, IProtectedRegion region) {
+    public static int clearTeams(CommandContext<CommandSourceStack> ctx, IProtectedRegion region) {
         return clearPlayers(ctx, region, MEMBER) + clearPlayers(ctx, region, OWNER);
     }
 
-    public static int clearTeams(CommandContext<CommandSource> ctx, IProtectedRegion region, String groupName) {
+    public static int clearTeams(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, String groupName) {
         int amount = region.getGroup(groupName).getTeams().size();
         if (amount == 0) {
-            IFormattableTextComponent feedbackMsg = new TranslationTextComponent("cli.msg.region.info.teams.empty", buildRegionInfoLink(region), groupName);
+            MutableComponent feedbackMsg = new TranslatableComponent("cli.msg.region.info.teams.empty", buildRegionInfoLink(region), groupName);
             sendCmdFeedback(ctx.getSource(), feedbackMsg);
             return 1;
         }
         region.getGroup(groupName).clearTeams();
-        IFormattableTextComponent feedbackMsg = new TranslationTextComponent("cli.msg.region.info.teams.cleared", buildRegionInfoLink(region), amount, groupName);
+        MutableComponent feedbackMsg = new TranslatableComponent("cli.msg.region.info.teams.cleared", buildRegionInfoLink(region), amount, groupName);
         sendCmdFeedback(ctx.getSource(), feedbackMsg);
         RegionDataManager.save();
         return 0;
     }
 
 
-    public static int clearGroups(CommandContext<CommandSource> ctx, IProtectedRegion region, String groupName) {
+    public static int clearGroups(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, String groupName) {
         return CommandUtil.clearTeams(ctx, region, groupName) + CommandUtil.clearPlayers(ctx, region, groupName);
     }
 
-    public static int addFlag(CommandContext<CommandSource> ctx, IProtectedRegion region, Set<RegionFlag> flags) {
+    public static int addFlag(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, Set<RegionFlag> flags) {
         flags.forEach(flag -> CommandUtil.addRegionFlag(ctx, region, flag));
         return 0;
     }
 
-    public static int addRegionFlag(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionFlag flag) {
+    public static int addRegionFlag(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, RegionFlag flag) {
         if (!region.containsFlag(flag)) {
             IFlag iFlag;
             switch (flag.type) {
@@ -667,24 +669,24 @@ public class CommandUtil {
             }
             region.addFlag(iFlag);
             RegionDataManager.save();
-            IFormattableTextComponent flagLink = buildFlagInfoLink(region, iFlag);
-            IFormattableTextComponent msg = new TranslationTextComponent("cli.msg.flag.added",
+            MutableComponent flagLink = buildFlagInfoLink(region, iFlag);
+            MutableComponent msg = new TranslatableComponent("cli.msg.flag.added",
                     flagLink, buildRegionInfoLink(region));
-            IFormattableTextComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), ADD, REMOVE);
+            MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), ADD, REMOVE);
             sendCmdFeedback(ctx.getSource(), msg.append(" ").append(undoLink));
             return 0;
         } else {
-            IFormattableTextComponent msg = new TranslationTextComponent("cli.msg.flag.present", flag.name,
+            MutableComponent msg = new TranslatableComponent("cli.msg.flag.present", flag.name,
                     buildRegionInfoLink(region));
             sendCmdFeedback(ctx.getSource(), msg);
             return 1;
         }
     }
 
-    public static void removeInvolvedEntities(CommandContext<CommandSource> ctx, IProtectedRegion region, RegionFlag flag) {
-        RegistryKey<World> dimKey = RegistryKey.create(Registry.DIMENSION_REGISTRY, region.getDim().location());
+    public static void removeInvolvedEntities(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, RegionFlag flag) {
+        ResourceKey<Level> dimKey = ResourceKey.create(Registry.DIMENSION_REGISTRY, region.getDim().location());
         MinecraftServer server = ctx.getSource().getServer();
-        ServerWorld regionWorld = server.getLevel(dimKey);
+        ServerLevel regionWorld = server.getLevel(dimKey);
         if (regionWorld != null) {
             Predicate<? super Entity> entityFilter = getEntityFilterForFlag(flag);
             switch (region.getRegionType()) {
@@ -710,8 +712,8 @@ public class CommandUtil {
     }
 
     private static boolean hasEnabledPersistenceFlag(Entity e) {
-        if (e instanceof MobEntity) {
-            MobEntity mob = (MobEntity) e;
+        if (e instanceof Mob) {
+            Mob mob = (Mob) e;
             return mob.isPersistenceRequired();
         }
         return false;
@@ -724,21 +726,21 @@ public class CommandUtil {
     private static Predicate<? super Entity> getEntityFilterForFlag(RegionFlag flag) {
         switch (flag) {
             case SPAWNING_ALL:
-                return e -> !(e instanceof PlayerEntity);
+                return e -> !(e instanceof Player);
             case SPAWNING_MONSTER:
                 return HandlerUtil::isMonster;
             case SPAWNING_ANIMAL:
                 return HandlerUtil::isAnimal;
             case SPAWNING_GOLEM:
-                return e -> e instanceof GolemEntity;
+                return e -> e instanceof SnowGolem || e instanceof IronGolem;
             case SPAWNING_TRADER:
-                return e -> e instanceof WanderingTraderEntity;
+                return e -> e instanceof WanderingTrader;
             case SPAWNING_SLIME:
-                return e -> e instanceof SlimeEntity;
+                return e -> e instanceof Slime;
             case SPAWNING_VILLAGER:
                 return HandlerUtil::isVillager;
             case SPAWNING_XP:
-                return e -> e instanceof ExperienceOrbEntity;
+                return e -> e instanceof ExperienceOrb;
             default:
                 return e -> false;
         }
@@ -749,7 +751,7 @@ public class CommandUtil {
      * Use the predicate to determine if the entity is within the region
      * ...area.intersects(entity.getBoundingBox()) ...
      */
-    private static List<Entity> getEntitiesToRemove(ServerWorld level, IMarkableRegion region, Predicate<? super Entity> entityFilter) {
+    private static List<Entity> getEntitiesToRemove(ServerLevel level, IMarkableRegion region, Predicate<? super Entity> entityFilter) {
         return level.getEntities((Entity) null, ((CuboidArea) region.getArea()).getArea(), entityFilter)
                 .stream()
                 .filter(CommandUtil::isNotPersistent)
@@ -759,7 +761,7 @@ public class CommandUtil {
     /**
      * TODO: after flags can be negated (either flag is not existent or deactivated...)
      */
-    private static List<Entity> getEntitiesToRemove(ServerWorld level, Predicate<? super Entity> entityFilter, RegionFlag flag) {
+    private static List<Entity> getEntitiesToRemove(ServerLevel level, Predicate<? super Entity> entityFilter, RegionFlag flag) {
         List<Entity> entities = level.getEntities(null, entityFilter);
         return entities.stream()
                 // don't consider entities, which are currently in a Local Region which doesn't have the flag
@@ -768,11 +770,11 @@ public class CommandUtil {
                 .collect(Collectors.toList());
     }
 
-    private static boolean isInRegionWithoutFlag(ServerWorld level, RegionFlag flag, Entity e) {
+    private static boolean isInRegionWithoutFlag(ServerLevel level, RegionFlag flag, Entity e) {
         return LocalRegions.getRegionWithoutFlag(flag, e.blockPosition(), level.dimension()) == null;
     }
 
-    public static int promptRegionInfo(CommandContext<CommandSource> ctx, IProtectedRegion region) {
+    public static int promptRegionInfo(CommandContext<CommandSourceStack> ctx, IProtectedRegion region) {
         // == Region [<name>] overview ==
         sendCmdFeedback(ctx.getSource(), buildRegionOverviewHeader(region));
         // Flags: [n flag(s)][+]
@@ -791,7 +793,7 @@ public class CommandUtil {
         return 0;
     }
 
-    public static void promptRegionChildrenInfo(CommandContext<CommandSource> ctx, IProtectedRegion region) {
+    public static void promptRegionChildrenInfo(CommandContext<CommandSourceStack> ctx, IProtectedRegion region) {
         switch (region.getRegionType()) {
             case GLOBAL: {
                 // [n dimensions(s)]
@@ -802,27 +804,27 @@ public class CommandUtil {
                 // Regions: [global], [n children], [n regions][+],
                 MessageUtil.buildRegionChildrenLink(region);
 
-                IFormattableTextComponent globalRegionLink = buildRegionInfoLink(region, new TranslationTextComponent("cli.msg.info.region.global.link.hover"));
+                MutableComponent globalRegionLink = buildRegionInfoLink(region, new TranslatableComponent("cli.msg.info.region.global.link.hover"));
 
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(region.getDim());
 
-                IFormattableTextComponent regionsAndChildren = new TranslationTextComponent("cli.msg.dim.info.region")
+                MutableComponent regionsAndChildren = new TranslatableComponent("cli.msg.dim.info.region")
                         .append(": ")
                         .append(globalRegionLink)
-                        .append(new StringTextComponent(", ").withStyle(TextFormatting.RESET))
+                        .append(new TextComponent(", ").withStyle(ChatFormatting.RESET))
                         .append(buildRegionChildrenLink(region))
-                        .append(new StringTextComponent(", ").withStyle(TextFormatting.RESET))
+                        .append(new TextComponent(", ").withStyle(ChatFormatting.RESET))
                         .append(buildDimRegionsLink(dimCache));
                 sendCmdFeedback(ctx.getSource(), regionsAndChildren);
             }
             break;
             case LOCAL: {
                 // Hierarchy: [parent][x], [n children][+]
-                IFormattableTextComponent regionHierarchy = new TranslationTextComponent("cli.msg.info.region.hierarchy")
+                MutableComponent regionHierarchy = new TranslatableComponent("cli.msg.info.region.hierarchy")
                         .append(": ")
                         .append(buildRegionInfoLink(region))
                         .append(buildParentClearLink((IMarkableRegion) region))
-                        .append(new StringTextComponent(", ").withStyle(TextFormatting.RESET))
+                        .append(new TextComponent(", ").withStyle(ChatFormatting.RESET))
                         .append(buildRegionChildrenLink(region));
                 sendCmdFeedback(ctx.getSource(), regionHierarchy);
             }

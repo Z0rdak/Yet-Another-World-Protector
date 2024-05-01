@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.core.flag;
 
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import java.util.HashSet;
@@ -9,7 +9,7 @@ import java.util.Set;
 
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
-public class FlagMessage implements INBTSerializable<CompoundNBT> {
+public class FlagMessage implements INBTSerializable<CompoundTag> {
 
     public static final String CONFIG_MSG = "config";
     public static final Set<String> MSG_TOKEN;
@@ -42,7 +42,7 @@ public class FlagMessage implements INBTSerializable<CompoundNBT> {
         this.muted = muted;
     }
 
-    public FlagMessage(CompoundNBT msgNbt) {
+    public FlagMessage(CompoundTag msgNbt) {
         this.deserializeNBT(msgNbt);
     }
 
@@ -77,8 +77,8 @@ public class FlagMessage implements INBTSerializable<CompoundNBT> {
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT nbt = new CompoundNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = new CompoundTag();
         nbt.putString(MSG, this.msg);
         nbt.putBoolean(DEFAULT, this.isDefault);
         nbt.putBoolean(MUTED, this.muted);
@@ -86,7 +86,7 @@ public class FlagMessage implements INBTSerializable<CompoundNBT> {
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         this.msg = nbt.getString(MSG);
         this.muted = nbt.getBoolean(MUTED);
         this.isDefault = nbt.getBoolean(DEFAULT);

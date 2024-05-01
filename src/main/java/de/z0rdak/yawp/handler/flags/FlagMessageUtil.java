@@ -5,11 +5,11 @@ import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.util.MessageUtil;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.entity.player.Player;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -36,7 +36,7 @@ public final class FlagMessageUtil {
      * @param player the player to get the substitutes for
      * @return a map with default substitutes for the given flag and region
      */
-    public static Map<String, String> defaultSubstitutes(RegionFlag flag, IProtectedRegion region, BlockPos pos, @Nullable PlayerEntity player) {
+    public static Map<String, String> defaultSubstitutes(RegionFlag flag, IProtectedRegion region, BlockPos pos, @Nullable Player player) {
         Map<String, String> substituteMap = new HashMap<>();
         substituteMap.put(FLAG_TEMPLATE, flag.name);
         substituteMap.put(POS_TEMPLATE, MessageUtil.shortBlockPos(pos));
@@ -64,7 +64,7 @@ public final class FlagMessageUtil {
         if (!isFlagMuted && flagCheck instanceof PlayerFlagEvent) {
             PlayerFlagEvent playerFlagEvent = (PlayerFlagEvent) flagCheck;
             playerFlagEvent.getMsgSubstitutes().put(REGION_TEMPLATE, responsibleRegion.getName());
-            IFormattableTextComponent flagMsg = buildFlagMsg(flag, playerFlagEvent);
+            MutableComponent flagMsg = buildFlagMsg(flag, playerFlagEvent);
             MessageUtil.sendNotification(playerFlagEvent.getPlayer(), flagMsg);
         }
     }
@@ -78,12 +78,12 @@ public final class FlagMessageUtil {
      * @param flag           the flag to build the message for
      * @return the flag message for the given flag check event and flag
      */
-    public static IFormattableTextComponent buildFlagMsg(IFlag flag, PlayerFlagEvent flagCheckEvent) {
+    public static MutableComponent buildFlagMsg(IFlag flag, PlayerFlagEvent flagCheckEvent) {
         String flagMsgTemplate = flag.getFlagMsg().isDefault()
                 ? getI18nFlagMsgTemplate(flag)
                 : flag.getFlagMsg().getMsg();
         String flagMsg = replaceMatches(flagMsgTemplate, flagCheckEvent);
-        return new StringTextComponent(flagMsg);
+        return new TextComponent(flagMsg);
     }
 
     /**
@@ -96,7 +96,7 @@ public final class FlagMessageUtil {
     private static String getI18nFlagMsgTemplate(IFlag flag) {
         RegionFlag regionFlag = RegionFlag.fromId(flag.getName());
         String flagMsgLangKey = regionFlag.categories.contains(FlagCategory.PLAYER) ? "flag.msg.deny." + flag.getName() : "flag.msg.deny.default";
-        return new TranslationTextComponent(flagMsgLangKey).getString();
+        return new TranslatableComponent(flagMsgLangKey).getString();
     }
 
     /**

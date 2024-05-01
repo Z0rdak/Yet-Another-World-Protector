@@ -212,7 +212,7 @@ public class DimensionCommands {
         return 0;
     }
 
-    private static int createCuboidRegion(CommandContext<CommandSourceStack> ctx, String regionName, DimensionRegionCache dimCache, BlockPos pos1, BlockPos pos2, @Nullable ServerPlayerEntity owner) {
+    private static int createCuboidRegion(CommandContext<CommandSourceStack> ctx, String regionName, DimensionRegionCache dimCache, BlockPos pos1, BlockPos pos2, @Nullable ServerPlayer owner) {
         int res = checkValidRegionName(regionName, dimCache);
         if (res == -1) {
             sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.dim.info.region.create.name.invalid", regionName));
@@ -224,9 +224,9 @@ public class DimensionCommands {
         }
         CuboidRegion region = new CuboidRegion(regionName, new CuboidArea(pos1, pos2), owner, dimCache.dimensionKey());
 
-        ServerPlayerEntity player;
+        ServerPlayer player;
         try {
-            player = src.getPlayerOrException();
+            player = ctx.getSource().getPlayerOrException();
         } catch (CommandSyntaxException e) {
             player = null;
         }
@@ -254,9 +254,9 @@ public class DimensionCommands {
     }
 
     private static int deleteRegion(CommandContext<CommandSourceStack> ctx, DimensionRegionCache dim, IMarkableRegion region) {
-        ServerPlayerEntity player;
+        ServerPlayer player;
         try {
-            player = src.getPlayerOrException();
+            player = ctx.getSource().getPlayerOrException();
         } catch (CommandSyntaxException e) {
             player = null;
         }

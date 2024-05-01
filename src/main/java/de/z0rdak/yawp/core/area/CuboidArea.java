@@ -5,7 +5,7 @@ import de.z0rdak.yawp.util.constants.AreaNBT;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.phys.AABB;
 
