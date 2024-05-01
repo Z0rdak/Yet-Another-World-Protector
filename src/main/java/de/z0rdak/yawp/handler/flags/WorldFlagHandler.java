@@ -9,13 +9,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.animal.MushroomCow;
-import net.minecraft.world.entity.animal.Pig;
-import net.minecraft.world.entity.animal.horse.SkeletonHorse;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.npc.AbstractVillager;
-import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
@@ -59,7 +54,7 @@ public class WorldFlagHandler {
             }
             HandlerUtil.processCheck(checkEvent, null, denyResult -> {
                 event.setCanceled(true);
-                event.getLightning().remove();
+                event.getLightning().remove(Entity.RemovalReason.DISCARDED);
             });
         }
     }
@@ -130,7 +125,7 @@ public class WorldFlagHandler {
     @Nullable
     @Deprecated
     // this will be replaced with resource key matching in the next updates, so all these flags will disappear, too.
-    private static FlagCheckEvent getNonPlayerCheckEventFor(Entity entity, BlockPos target, RegistryKey<World> dimension) {
+    private static FlagCheckEvent getNonPlayerCheckEventFor(Entity entity, BlockPos target, ResourceKey<Level> dimension) {
         FlagCheckEvent nonPlayerCheckEvent = null;
         if (entity instanceof ItemEntity) {
             nonPlayerCheckEvent = new FlagCheckEvent(target, USE_PORTAL_ITEMS, dimension, null);

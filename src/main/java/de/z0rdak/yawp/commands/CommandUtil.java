@@ -34,7 +34,6 @@ import net.minecraft.commands.arguments.TeamArgument;
 import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
@@ -44,13 +43,13 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.animal.AbstractGolem;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.animal.SnowGolem;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.scores.Team;
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -62,7 +61,6 @@ import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.processCheck;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.processCheck;
 import static de.z0rdak.yawp.util.MessageUtil.*;
 
@@ -484,26 +482,31 @@ public class CommandUtil {
             sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.region.info.group.invalid", group).withStyle(ChatFormatting.RED));
             return -1;
         }
-        GameProfile cachedProfile = MojangApiHelper.lookupGameProfileInCache(ctx, playerUuid);
-        if (cachedProfile != null && cachedProfile.isComplete()) {
-            TranslatableComponent cacheSuccess = new TranslatableComponent("cli.msg.info.player.lookup.cache.success", playerUuid.toString());
-            sendCmdFeedback(ctx.getSource(), cacheSuccess);
-            return addPlayer(ctx, cachedProfile.getId(), cachedProfile.getName(), region, group);
-        }
-        TranslatableComponent cacheMiss = new TranslatableComponent("cli.msg.info.player.lookup.pending",
-                playerUuid.toString(), "uuid");
-        sendCmdFeedback(ctx.getSource(), cacheMiss);
-        CompletableFuture.runAsync(() -> MojangApiHelper.getGameProfileInfo(playerUuid, (gameProfile) -> {
-            if (gameProfile != null) {
-                TranslatableComponent lookupSuccess = new TranslatableComponent("cli.msg.info.player.lookup.api.success", playerUuid.toString());
-                sendCmdFeedback(ctx.getSource(), lookupSuccess);
-                addPlayer(ctx, gameProfile.getId(), gameProfile.getName(), region, group);
-            } else {
-                TranslatableComponent lookupFailed = new TranslatableComponent("cli.msg.info.player.lookup.api.failed", playerUuid.toString());
-                sendCmdFeedback(ctx.getSource(), lookupFailed);
+        Optional<GameProfile> cachedProfile = MojangApiHelper.lookupGameProfileInCache(ctx, playerUuid);
+        if (cachedProfile.isPresent()) {
+            GameProfile profile = cachedProfile.get();
+            if (profile.isComplete()) {
+                TranslatableComponent cacheSuccess = new TranslatableComponent("cli.msg.info.player.lookup.cache.success", playerUuid.toString());
+                sendCmdFeedback(ctx.getSource(), cacheSuccess);
+                return addPlayer(ctx, profile.getId(), profile.getName(), region, group);
             }
-        }));
-        return 0;
+            return -1;
+        } else {
+            TranslatableComponent cacheMiss = new TranslatableComponent("cli.msg.info.player.lookup.pending",
+                    playerUuid.toString(), "uuid");
+            sendCmdFeedback(ctx.getSource(), cacheMiss);
+            CompletableFuture.runAsync(() -> MojangApiHelper.getGameProfileInfo(playerUuid, (gameProfile) -> {
+                if (gameProfile != null) {
+                    TranslatableComponent lookupSuccess = new TranslatableComponent("cli.msg.info.player.lookup.api.success", playerUuid.toString());
+                    sendCmdFeedback(ctx.getSource(), lookupSuccess);
+                    addPlayer(ctx, gameProfile.getId(), gameProfile.getName(), region, group);
+                } else {
+                    TranslatableComponent lookupFailed = new TranslatableComponent("cli.msg.info.player.lookup.api.failed", playerUuid.toString());
+                    sendCmdFeedback(ctx.getSource(), lookupFailed);
+                }
+            }));
+            return 0;
+        }
     }
 
     public static int addPlayersByName(CommandContext<CommandSourceStack> ctx, List<String> playerNames, IProtectedRegion region, String group) {
@@ -516,26 +519,31 @@ public class CommandUtil {
     }
 
     private static int addPlayerByName(CommandContext<CommandSourceStack> ctx, String playerName, IProtectedRegion region, String group) {
-        GameProfile cachedProfile = MojangApiHelper.lookupGameProfileInCache(ctx, playerName);
-        if (cachedProfile != null && cachedProfile.isComplete()) {
-            TranslatableComponent cacheSuccess = new TranslatableComponent("cli.msg.info.player.lookup.cache.success", playerName);
-            sendCmdFeedback(ctx.getSource(), cacheSuccess);
-            return addPlayer(ctx, cachedProfile.getId(), cachedProfile.getName(), region, group);
-        }
-        TranslatableComponent cacheMiss = new TranslatableComponent("cli.msg.info.player.lookup.pending",
-                playerName, "name");
-        sendCmdFeedback(ctx.getSource(), cacheMiss);
-        CompletableFuture.runAsync(() -> MojangApiHelper.getGameProfileInfo(playerName, (gameProfile) -> {
-            if (gameProfile != null) {
-                TranslatableComponent lookupSuccess = new TranslatableComponent("cli.msg.info.player.lookup.api.success", playerName);
-                sendCmdFeedback(ctx.getSource(), lookupSuccess);
-                addPlayer(ctx, gameProfile.getId(), gameProfile.getName(), region, group);
-            } else {
-                TranslatableComponent lookupFailed = new TranslatableComponent("cli.msg.info.player.lookup.api.failed", playerName);
-                sendCmdFeedback(ctx.getSource(), lookupFailed);
+        Optional<GameProfile> cachedProfile = MojangApiHelper.lookupGameProfileInCache(ctx, playerName);
+        if (cachedProfile.isPresent()) {
+            GameProfile profile = cachedProfile.get();
+            if (profile.isComplete()) {
+                TranslatableComponent cacheSuccess = new TranslatableComponent("cli.msg.info.player.lookup.cache.success", playerName);
+                sendCmdFeedback(ctx.getSource(), cacheSuccess);
+                return addPlayer(ctx, profile.getId(), profile.getName(), region, group);
             }
-        }));
-        return 0;
+            return -1;
+        } else {
+            TranslatableComponent cacheMiss = new TranslatableComponent("cli.msg.info.player.lookup.pending",
+                    playerName, "name");
+            sendCmdFeedback(ctx.getSource(), cacheMiss);
+            CompletableFuture.runAsync(() -> MojangApiHelper.getGameProfileInfo(playerName, (gameProfile) -> {
+                if (gameProfile != null) {
+                    TranslatableComponent lookupSuccess = new TranslatableComponent("cli.msg.info.player.lookup.api.success", playerName);
+                    sendCmdFeedback(ctx.getSource(), lookupSuccess);
+                    addPlayer(ctx, gameProfile.getId(), gameProfile.getName(), region, group);
+                } else {
+                    TranslatableComponent lookupFailed = new TranslatableComponent("cli.msg.info.player.lookup.api.failed", playerName);
+                    sendCmdFeedback(ctx.getSource(), lookupFailed);
+                }
+            }));
+            return 0;
+        }
     }
 
     public static int addPlayers(CommandContext<CommandSourceStack> ctx, Collection<ServerPlayer> players, IProtectedRegion region, String group) {
@@ -629,9 +637,7 @@ public class CommandUtil {
     public static int copyRegionState(CommandContext<CommandSourceStack> ctx, IProtectedRegion srcRegion, IProtectedRegion targetRegion) {
         targetRegion.setIsActive(srcRegion.isActive());
         targetRegion.setIsMuted(srcRegion.isMuted());
-        if (srcRegion instanceof IMarkableRegion && targetRegion instanceof IMarkableRegion) {
-            IMarkableRegion regionSource = (IMarkableRegion) srcRegion;
-            IMarkableRegion regionTarget = (IMarkableRegion) targetRegion;
+        if (srcRegion instanceof IMarkableRegion regionSource && targetRegion instanceof IMarkableRegion regionTarget) {
             regionTarget.setPriority(regionSource.getPriority());
         }
         RegionDataManager.save();
@@ -807,8 +813,7 @@ public class CommandUtil {
     }
 
     private static boolean hasEnabledPersistenceFlag(Entity e) {
-        if (e instanceof Mob) {
-            Mob mob = (Mob) e;
+        if (e instanceof Mob mob) {
             return mob.isPersistenceRequired();
         }
         return false;
@@ -858,7 +863,7 @@ public class CommandUtil {
     }
 
     private static List<Entity> getEntitiesToRemove(ServerLevel level, Predicate<? super Entity> entityFilter, RegionFlag flag) {
-        List<Entity> entities = level.getEntities(null, entityFilter);
+        List<Entity> entities = level.getEntities(EntityTypeTest.forClass(Entity.class), entityFilter);
         return entities.stream()
                 .filter(e -> !isProtectedByRegion(level, flag, e)) // That's O(enemyCount * regionCount) complexity, not considering the recursion for the flag check
                 .filter(CommandUtil::isNotPersistent)

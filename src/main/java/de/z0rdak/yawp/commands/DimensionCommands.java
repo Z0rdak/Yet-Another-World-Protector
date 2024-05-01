@@ -16,28 +16,21 @@ import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
-import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.TeamArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.scores.PlayerTeam;
-import org.apache.commons.lang3.NotImplementedException;
 import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.CommandUtil.*;
@@ -330,7 +323,8 @@ public class DimensionCommands {
             List<IProtectedRegion> regionsForDim = dimCache.getRegionsInDimension()
                     .values()
                     .stream()
-                    .sorted(Comparator.comparing(IMarkableRegion::getName))
+                    .map(r -> (IProtectedRegion) r)
+                    .sorted(Comparator.comparing(IProtectedRegion::getName))
                     .toList();
             if (regionsForDim.isEmpty()) {
                 sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.dim.info.regions.empty", buildRegionInfoLink(dimCache.getDimensionalRegion())));

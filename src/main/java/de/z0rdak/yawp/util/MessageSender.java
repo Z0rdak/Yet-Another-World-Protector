@@ -7,17 +7,17 @@ import de.z0rdak.yawp.core.flag.FlagMessage;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import net.minecraft.command.CommandSource;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.Map;
 
 import static de.z0rdak.yawp.core.flag.FlagMessage.REGION_TEMPLATE;
 
 public class MessageSender {
-    public static void sendCmdFeedback(CommandSource src, IFormattableTextComponent text) {
+    public static void sendCmdFeedback(CommandSourceStack src, MutableComponent text) {
         try {
             if (src.getEntity() == null) {
                 src.sendSuccess(text, true);
@@ -29,15 +29,15 @@ public class MessageSender {
         }
     }
 
-    public static void sendCmdFeedback(CommandSource src, String langKey) {
-        sendCmdFeedback(src, new TranslationTextComponent(langKey));
+    public static void sendCmdFeedback(CommandSourceStack src, String langKey) {
+        sendCmdFeedback(src, new TranslatableComponent(langKey));
     }
 
-    public static void sendMessage(PlayerEntity player, String translationKey) {
-        player.sendMessage(new TranslationTextComponent(translationKey), player.getUUID());
+    public static void sendMessage(Player player, String translationKey) {
+        player.sendMessage(new TranslatableComponent(translationKey), player.getUUID());
     }
 
-    public static void sendNotification(PlayerEntity player, IFormattableTextComponent msg) {
+    public static void sendNotification(Player player, MutableComponent msg) {
         player.displayClientMessage(msg, true);
     }
 
@@ -56,12 +56,12 @@ public class MessageSender {
             return;
         }
         boolean isFlagMuted = flag.getFlagMsg().isMuted() || responsibleRegion.isMuted();
-        PlayerEntity player = result.getFlagCheck().getPlayer();
+        Player player = result.getFlagCheck().getPlayer();
         // If not muted and the event is a player event, send the message
-        if (!isFlagMuted && player instanceof PlayerEntity) {
+        if (!isFlagMuted && player instanceof Player) {
             Map<String, String> msgSubstitutes = FlagMessage.defaultSubstitutesFor(result);
             msgSubstitutes.put(REGION_TEMPLATE, responsibleRegion.getName());
-            IFormattableTextComponent flagMsg = FlagMessage.buildFrom(result, msgSubstitutes);
+            MutableComponent flagMsg = FlagMessage.buildFrom(result, msgSubstitutes);
             sendNotification(player, flagMsg);
         }
     }

@@ -12,7 +12,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.NotNull;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.ArrayList;
@@ -84,7 +83,7 @@ public final class LocalRegions {
         return new SphereRegion(regionName, sphereArea, player, dim);
     }
 
-    private static CuboidRegion cuboidRegionFrom(MarkerStick marker, String regionName, PlayerEntity player, RegistryKey<World> dim) {
+    private static CuboidRegion cuboidRegionFrom(MarkerStick marker, String regionName, Player player, ResourceKey<Level> dim) {
         List<BlockPos> blocks = marker.getMarkedBlocks();
         CuboidArea cuboidArea = new CuboidArea(blocks.get(0), blocks.get(1));
         if (marker.getTeleportPos() != null) {

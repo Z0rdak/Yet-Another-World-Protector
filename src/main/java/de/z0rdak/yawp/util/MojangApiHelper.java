@@ -5,8 +5,8 @@ import com.google.gson.annotations.SerializedName;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.context.CommandContext;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import net.minecraft.command.CommandSource;
-import net.minecraft.server.management.PlayerProfileCache;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.players.GameProfileCache;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -16,6 +16,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -92,18 +93,16 @@ public class MojangApiHelper {
         }
     }
 
-    @Nullable
-    public static GameProfile lookupGameProfileInCache(CommandContext<CommandSource> ctx, String playerName) {
-        PlayerProfileCache profileCache = ctx.getSource().getServer().getProfileCache();
+    public static Optional<GameProfile> lookupGameProfileInCache(CommandContext<CommandSourceStack> ctx, String playerName) {
+        GameProfileCache profileCache = ctx.getSource().getServer().getProfileCache();
         // Uses Mojang's API to retrieve info from player repo. It invokes
         // YggdrasilGameProfileRepository.findProfilesByNames through the PlayerProfileCache
         // which itself makes an HTTP request to Mojang's API
         return profileCache.get(playerName);
     }
 
-    @Nullable
-    public static GameProfile lookupGameProfileInCache(CommandContext<CommandSource> ctx, UUID uuid) {
-        PlayerProfileCache profileCache = ctx.getSource().getServer().getProfileCache();
+    public static Optional<GameProfile> lookupGameProfileInCache(CommandContext<CommandSourceStack> ctx, UUID uuid) {
+        GameProfileCache profileCache = ctx.getSource().getServer().getProfileCache();
         // This in contrast to the name search does not make an HTTP request
         // It just looks up the profile in the cache
         return profileCache.get(uuid);

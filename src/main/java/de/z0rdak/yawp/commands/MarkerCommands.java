@@ -26,6 +26,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.common.MinecraftForge;
+
 import java.util.Collections;
 import java.util.Objects;
 
@@ -89,7 +90,7 @@ public final class MarkerCommands {
                         if(MinecraftForge.EVENT_BUS.post(new RegionEvent.CreateRegionEvent(region, player))) {
                             return 0;
                         }
-                        boolean hasConfigPermission = CommandPermissionConfig.hasPlayerPermission(player);
+                        boolean hasConfigPermission = CommandPermissionConfig.hasConfigPermission(player);
                         boolean hasRegionPermission;
                         if (parentRegion != null) {
                             // should only be a region which has player as owner at this point due to the OwnerRegionArgumentType suggestions

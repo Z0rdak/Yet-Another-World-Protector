@@ -15,14 +15,13 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
@@ -258,9 +257,7 @@ public final class PlayerFlagHandler {
         if (isServerSide(event)) {
             Entity dmgSourceEntity = event.getSource().getDirectEntity();
             Entity hurtEntity = event.getEntityLiving();
-            if (hurtEntity instanceof Player && dmgSourceEntity instanceof Player) {
-                Player playerTarget = (Player) hurtEntity;
-                Player playerSource = (Player) dmgSourceEntity;
+            if (hurtEntity instanceof Player playerTarget && dmgSourceEntity instanceof Player playerSource) {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(playerTarget.blockPosition(), NO_PVP, getEntityDim(playerSource), playerSource);
                 if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                     return;
@@ -278,8 +275,7 @@ public final class PlayerFlagHandler {
     public static void onPlayerHurt(LivingHurtEvent event) {
         if (isServerSide(event)) {
             Entity hurtEntity = event.getEntityLiving();
-            if (hurtEntity instanceof Player) {
-                Player playerTarget = (Player) hurtEntity;
+            if (hurtEntity instanceof Player playerTarget) {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(playerTarget.blockPosition(), INVINCIBLE, getEntityDim(playerTarget), null);
                 if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                     return;
@@ -301,9 +297,7 @@ public final class PlayerFlagHandler {
     public static void onReceiveDmg(LivingDamageEvent event) {
         if (isServerSide(event)) {
             Entity dmgSourceEntity = event.getSource().getDirectEntity();
-            if (dmgSourceEntity instanceof Player && event.getEntityLiving() instanceof Player) {
-                Player dmgTarget = (Player) event.getEntityLiving();
-                Player dmgSource = ((Player) dmgSourceEntity);
+            if (dmgSourceEntity instanceof Player dmgSource && event.getEntityLiving() instanceof Player dmgTarget) {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(dmgTarget.blockPosition(), MELEE_PLAYERS, getEntityDim(dmgSource), dmgSource);
                 if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                     return;
@@ -321,8 +315,7 @@ public final class PlayerFlagHandler {
     @SubscribeEvent
     public static void onPlayerKnockback(LivingKnockBackEvent event) {
         if (isServerSide(event)) {
-            if (event.getEntityLiving() instanceof Player) {
-                Player dmgTarget = (Player) event.getEntityLiving();
+            if (event.getEntityLiving() instanceof Player dmgTarget) {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(dmgTarget.blockPosition(), KNOCKBACK_PLAYERS, getEntityDim(dmgTarget), null);
                 if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                     return;
@@ -364,8 +357,7 @@ public final class PlayerFlagHandler {
     @SubscribeEvent
     public static void onPlayerPlaceBlock(BlockEvent.EntityPlaceEvent event) {
         if (isServerSide(event)) {
-            if (event.getEntity() != null && event.getEntity() instanceof Player) {
-                Player player = (Player) event.getEntity();
+            if (event.getEntity() != null && event.getEntity() instanceof Player player) {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPos(), PLACE_BLOCKS, getEntityDim(player), player);
                 if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                     return;
@@ -728,7 +720,6 @@ public final class PlayerFlagHandler {
         if (isServerSide(event)) {
             Block block = event.getWorld().getBlockState(event.getPos()).getBlock();
             BlockPos pos = event.getPos();
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(event.getPlayer()));
             if (block instanceof BasePressurePlateBlock) {
                 AABB areaAbovePressurePlate = new AABB(pos.getX() - 1, pos.getY(), pos.getZ() - 1, pos.getX() + 1, pos.getY() + 2, pos.getZ() + 1);
                 List<Player> players = event.getWorld().getEntities(EntityType.PLAYER, areaAbovePressurePlate, (player) -> true);
@@ -907,8 +898,7 @@ public final class PlayerFlagHandler {
     public static void onEntityMountAttempt(EntityMountEvent event) {
         if (isServerSide(event)) {
             Entity entityBeingMounted = event.getEntityBeingMounted();
-            if (event.getEntityMounting() instanceof Player) {
-                Player player = (Player) event.getEntityMounting();
+            if (event.getEntityMounting() instanceof Player player) {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(entityBeingMounted.blockPosition(), ANIMAL_MOUNTING, getEntityDim(player), player);
                 if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                     return;

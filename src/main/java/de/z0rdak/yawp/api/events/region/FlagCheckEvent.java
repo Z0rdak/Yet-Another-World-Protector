@@ -1,10 +1,10 @@
 package de.z0rdak.yawp.api.events.region;
 
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 
@@ -24,19 +24,19 @@ public class FlagCheckEvent extends Event {
     /**
      * The dimension in which the flag check is performed, can be used to get the corresponding Dimensional Region.
      */
-    private final RegistryKey<World> dimension;
+    private final ResourceKey<Level> dimension;
     /**
      * The player that triggered the flag check, may be null when no player was involved. This depends on the checked flag.
      */
     @Nullable
-    private final PlayerEntity player;
+    private final Player player;
 
     /**
      * The flag that is checked.
      */
     private final RegionFlag regionFlag;
 
-    public FlagCheckEvent(BlockPos target, RegionFlag regionFlag, RegistryKey<World> dimension, @Nullable PlayerEntity player) {
+    public FlagCheckEvent(BlockPos target, RegionFlag regionFlag, ResourceKey<Level> dimension, @Nullable Player player) {
         this.player = player;
         this.target = target;
         this.dimension = dimension;
@@ -51,12 +51,12 @@ public class FlagCheckEvent extends Event {
         return regionFlag;
     }
 
-    public RegistryKey<World> getDimension() {
+    public ResourceKey<Level> getDimension() {
         return dimension;
     }
 
     @Nullable
-    public PlayerEntity getPlayer() {
+    public Player getPlayer() {
         return player;
     }
 }
