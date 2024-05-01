@@ -6,6 +6,7 @@ import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
+import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
 import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.ChatFormatting;
@@ -36,7 +37,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static de.z0rdak.yawp.core.flag.FlagMessage.REGION_TEMPLATE;
+import static de.z0rdak.yawp.handler.flags.FlagMessageUtil.REGION_TEMPLATE;
 
 public final class HandlerUtil {
 
