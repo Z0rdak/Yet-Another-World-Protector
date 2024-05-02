@@ -14,7 +14,6 @@ import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
@@ -32,7 +31,7 @@ import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
  * Contains event handler for flags not directly related to player actions.
  * E.g.
  */
-@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER, bus = FORGE)
+@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, bus = FORGE)
 public class WorldFlagHandler {
 
     private WorldFlagHandler() {

@@ -37,7 +37,6 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.event.CommandEvent;
@@ -68,7 +67,7 @@ import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 /**
  * Contains flag handler for events directly related/cause to/by players.
  */
-@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER, bus = FORGE)
+@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, bus = FORGE)
 public final class PlayerFlagHandler {
 
     private PlayerFlagHandler() {

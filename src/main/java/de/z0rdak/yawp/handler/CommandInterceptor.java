@@ -15,13 +15,11 @@ import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -146,37 +144,38 @@ public class CommandInterceptor {
      */
     private static int verifyFlagCommandPermission(CommandContextBuilder<CommandSourceStack> cmdContext, List<String> nodeNames, CommandSourceType cmdSrcType) {
         CommandSourceStack src = cmdContext.getSource();
-        boolean isRegionTypeCmd = checkSubCmdAtIndex(nodeNames, 2, LOCAL, DIM, GLOBAL);
-        if (!isRegionTypeCmd) {
-            return ALLOW_CMD;
-        }
-        String regionTypeCmd = nodeNames.get(2);
-        switch (regionTypeCmd) {
-            case "local": {
-                IProtectedRegion region = checkValidLocalRegion(cmdContext);
-                if (region == null) {
-                    return ALLOW_CMD;
-                }
-Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
+        try {
+            boolean isRegionTypeCmd = checkSubCmdAtIndex(nodeNames, 2, LOCAL, DIM, GLOBAL);
+            if (!isRegionTypeCmd) {
+                return ALLOW_CMD;
+            }
+            String regionTypeCmd = nodeNames.get(2);
+            switch (regionTypeCmd) {
+                case "local": {
+                    IProtectedRegion region = checkValidLocalRegion(cmdContext);
+                    if (region == null) {
+                        return ALLOW_CMD;
+                    }
+                    Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
                         //  0   1    2       3      4    5      6
                         // /wp flag local <dim> <region> <flag> enable|msg ...
                         int subCmdIdx = 6;
                         boolean isReadOnlyCmd = checkSubCmdAtIndex(nodes, subCmdIdx, INFO);
                         boolean isFlagShortCmd = nodes.size() == subCmdIdx;
                         return (isFlagShortCmd || isReadOnlyCmd) && isReadOnlyAllowed();
-            };
-            boolean hasPermission = hasCmdPermission(cmdContext, cmdSrcType, CommandUtil.OWNER, region, subCmdPermission);
+                    };
+                    boolean hasPermission = hasCmdPermission(cmdContext, cmdSrcType, CommandUtil.OWNER, region, subCmdPermission);
                     handlePermission(src, region, hasPermission);
                     return hasPermission ? ALLOW_CMD : CANCEL_CMD;
                 }
-            case "dim": {
-                DimensionRegionCache dimCache = checkValidDimRegion(cmdContext);
-                if (dimCache == null) {
-                    return ALLOW_CMD;
-                }
-                IProtectedRegion region = dimCache.getDimensionalRegion();
-            Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
-            //  0   1    2     3    4    5          6
+                case "dim": {
+                    DimensionRegionCache dimCache = checkValidDimRegion(cmdContext);
+                    if (dimCache == null) {
+                        return ALLOW_CMD;
+                    }
+                    IProtectedRegion region = dimCache.getDimensionalRegion();
+                    Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
+                        //  0   1    2     3    4    5          6
                         // /wp flag dim <dim> <flag> enable|msg ...
                         int subCmdIdx = 5;
                         boolean isReadOnlyCmd = checkSubCmdAtIndex(nodes, subCmdIdx, INFO);
@@ -187,23 +186,28 @@ Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
                     handlePermission(src, region, hasPermission);
                     return hasPermission ? ALLOW_CMD : CANCEL_CMD;
                 }
-            case "global": {
-                GlobalRegion region = RegionDataManager.get().getGlobalRegion();Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
+                case "global": {
+                    GlobalRegion region = RegionDataManager.get().getGlobalRegion();
+                    Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
                         //  0   1    2       3      4         5
                         // /wp flag global <flag> enable|msg ...
                         int subCmdIdx = 4;
                         boolean isReadOnlyCmd = checkSubCmdAtIndex(nodes, subCmdIdx, INFO);
                         boolean isFlagShortCmd = nodes.size() == subCmdIdx;
                         return (isFlagShortCmd || isReadOnlyCmd) && isReadOnlyAllowed();
-            };
-            boolean hasPermission = hasCmdPermission(cmdContext, cmdSrcType, CommandUtil.OWNER, region, subCmdPermission);
+                    };
+                    boolean hasPermission = hasCmdPermission(cmdContext, cmdSrcType, CommandUtil.OWNER, region, subCmdPermission);
                     handlePermission(src, region, hasPermission);
                     return hasPermission ? ALLOW_CMD : CANCEL_CMD;
                 }
-            default:
-                break;
+                default:
+                    break;
+            }
+            return ALLOW_CMD;
+        } catch (CommandSyntaxException e) {
+            YetAnotherWorldProtector.LOGGER.error(e);
+            return CANCEL_CMD;
         }
-        return ALLOW_CMD;
     }
 
     /**
@@ -310,8 +314,7 @@ Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
     @Nullable
     private static DimensionRegionCache checkValidDimRegion(CommandContextBuilder<CommandSourceStack> cmdContext) {
         ParsedArgument<CommandSourceStack, ?> dimParsedArgument = cmdContext.getArguments().get(DIM.toString());
-        if (dimParsedArgument != null && dimParsedArgument.getResult() instanceof ResourceLocation) {
-            ResourceLocation dimResLoc = (ResourceLocation) dimParsedArgument.getResult();
+        if (dimParsedArgument != null && dimParsedArgument.getResult() instanceof ResourceLocation dimResLoc) {
             ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, dimResLoc);
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
             if (dimCache == null) {
@@ -326,11 +329,9 @@ Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
     @Nullable
     private static IProtectedRegion checkValidLocalRegion(CommandContextBuilder<CommandSourceStack> cmdContext) {
         ParsedArgument<CommandSourceStack, ?> regionArg = cmdContext.getArguments().get(CommandConstants.LOCAL.toString());
-        if (regionArg != null && regionArg.getResult() instanceof String) {
-            String regionName = (String) regionArg.getResult();
+        if (regionArg != null && regionArg.getResult() instanceof String regionName) {
             ParsedArgument<CommandSourceStack, ?> dimParsedArgument = cmdContext.getArguments().get(DIM.toString());
-            if (dimParsedArgument != null && dimParsedArgument.getResult() instanceof ResourceLocation) {
-                ResourceLocation dimResLoc = (ResourceLocation) dimParsedArgument.getResult();
+            if (dimParsedArgument != null && dimParsedArgument.getResult() instanceof ResourceLocation dimResLoc) {
                 ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, dimResLoc);
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
                 if (!dimCache.contains(regionName)) {

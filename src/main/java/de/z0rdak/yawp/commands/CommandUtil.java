@@ -856,10 +856,10 @@ public class CommandUtil {
                 .filter(e -> region.getArea().containsOther(new CuboidArea(e.getBoundingBox())))
                 .filter(CommandUtil::isNotPersistent)
                 .collect(Collectors.toList());
-        //return level.getEntities((Entity) null, ((CuboidArea) region.getArea()).getArea(), entityFilter)
-        //        .stream()
-        //        .filter(CommandUtil::isNotPersistent)
-        //        .collect(Collectors.toList());
+        return level.getEntities((Entity) null, ((CuboidArea) region.getArea()).getArea(), entityFilter)
+                .stream()
+                .filter(CommandUtil::isNotPersistent)
+                .collect(Collectors.toList());
     }
 
     private static List<Entity> getEntitiesToRemove(ServerLevel level, Predicate<? super Entity> entityFilter, RegionFlag flag) {
