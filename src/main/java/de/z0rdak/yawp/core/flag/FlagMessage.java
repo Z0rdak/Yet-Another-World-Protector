@@ -158,7 +158,9 @@ public class FlagMessage implements INBTSerializable<CompoundTag> {
      * @return the flag message for the given flag check result and substitutes
      */
     public static MutableComponent buildFrom(FlagCheckResult result, Map<String, String> substitutes) {
-        String flagMsgTemplate = result.getFlag().getFlagMsg().isDefault() ? getI18nFlagMsgTemplate(result.getFlag()) : result.getFlag().getFlagMsg().getMsg();
+        String flagMsgTemplate = result.getFlag().getFlagMsg().isDefault()
+                ? getI18nFlagMsgTemplate(result)
+                : result.getFlag().getFlagMsg().getMsg();
         String flagMsg = replaceMatches(flagMsgTemplate, substitutes);
         return new TextComponent(flagMsg);
     }
@@ -167,12 +169,14 @@ public class FlagMessage implements INBTSerializable<CompoundTag> {
      * Returns the flag message template for the given flag from the I18n keys. <br>
      * If the flag has a custom message defined, that message is returned instead. <br>
      *
-     * @param flag the flag to get the default message template for
+     * @param result of the flag check to get the default message template for
      * @return the default flag message template for the given flag
      */
-    private static String getI18nFlagMsgTemplate(IFlag flag) {
-        RegionFlag regionFlag = RegionFlag.fromId(flag.getName());
-        String flagMsgLangKey = regionFlag.categories.contains(FlagCategory.PLAYER) ? "flag.msg.deny." + flag.getName() : "flag.msg.deny.default";
+    private static String getI18nFlagMsgTemplate(FlagCheckResult result) {
+        RegionFlag regionFlag = RegionFlag.fromId(result.getFlag().getName());
+        String langKeyForFlagMsg = "flag.msg.deny." + result.getFlag().getName();
+        String fallBackLangKey = "flag.msg.deny." + result.getResponsible().getRegionType().type + ".default";
+        String flagMsgLangKey = regionFlag.categories.contains(FlagCategory.PLAYER) ? langKeyForFlagMsg : fallBackLangKey;
         return new TranslatableComponent(flagMsgLangKey).getString();
     }
 
