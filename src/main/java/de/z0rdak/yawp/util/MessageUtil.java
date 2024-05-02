@@ -887,20 +887,7 @@ public class MessageUtil {
         IFormattableTextComponent hoverText = new StringTextComponent(flag.getFlagMsg().getMsg());
         // if flag has default msg, use default msg
         if (flag.getFlagMsg().isDefault()) {
-            switch (region.getRegionType()) {
-                case GLOBAL: {
-                    hoverText = new TranslationTextComponent("flag.player.msg.push.deny.global.default");
-                    break;
-                }
-                case DIMENSION: {
-                    hoverText = new TranslationTextComponent("flag.player.msg.push.deny.dim.default");
-                    break;
-                }
-                case LOCAL: {
-                    hoverText = new TranslationTextComponent("flag.player.msg.push.deny.local.default");
-                    break;
-                }
-            }
+            hoverText = new TranslationTextComponent("flag.msg.deny." + region.getRegionType().type + ".default");
         }
         return buildTextWithHoverMsg(flagMsgText, hoverText, WHITE);
     }
