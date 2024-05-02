@@ -12,8 +12,8 @@ import net.minecraft.network.chat.TranslatableComponent;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
-import static de.z0rdak.yawp.util.MessageUtil.buildRegionInfoLink;
-import static de.z0rdak.yawp.util.MessageUtil.sendCmdFeedback;
+import static de.z0rdak.yawp.util.ChatComponentBuilder.buildRegionInfoLink;
+import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
 
 public class GlobalCommands {
 

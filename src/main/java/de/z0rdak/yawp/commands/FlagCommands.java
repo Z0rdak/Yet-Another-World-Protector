@@ -14,7 +14,8 @@ import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import de.z0rdak.yawp.util.MessageUtil;
+import de.z0rdak.yawp.util.ChatComponentBuilder;
+import de.z0rdak.yawp.util.ChatComponentBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -29,7 +30,8 @@ import java.util.function.Function;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
-import static de.z0rdak.yawp.util.MessageUtil.*;
+import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
+import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
 
 public final class FlagCommands {
 
@@ -130,7 +132,7 @@ public final class FlagCommands {
             IFlag flag = region.getFlag(regionFlag.getName());
             return setFlagMuteState(ctx, region, flag, !flag.getFlagMsg().isMuted());
         } else {
-            MessageUtil.sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.not-present",
+            ChatComponentBuilder.sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.not-present",
                     buildRegionInfoLink(region), regionFlag.getName()));
             return 1;
         }
@@ -143,7 +145,7 @@ public final class FlagCommands {
                 buildFlagInfoLink(region, flag), flag.getFlagMsg().isMuted())
                 .append(" ")
                 .append(undoLink);
-        MessageUtil.sendCmdFeedback(ctx.getSource(), msg);
+        ChatComponentBuilder.sendCmdFeedback(ctx.getSource(), msg);
         RegionDataManager.save();
         return 0;
 
@@ -158,7 +160,7 @@ public final class FlagCommands {
                 buildFlagInfoLink(region, flag), flagMsgStr)
                 .append(" ")
                 .append(undoLink);
-        MessageUtil.sendCmdFeedback(ctx.getSource(), msg);
+        ChatComponentBuilder.sendCmdFeedback(ctx.getSource(), msg);
         RegionDataManager.save();
         return 0;
     }
@@ -174,7 +176,7 @@ public final class FlagCommands {
             }
             return setFlagState(ctx, region, regionFlag, flag.getState());
         } else {
-            MessageUtil.sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.not-present",
+            ChatComponentBuilder.sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.not-present",
                     buildRegionInfoLink(region), regionFlag.getName()));
             return 1;
         }
@@ -188,7 +190,7 @@ public final class FlagCommands {
                 buildFlagInfoLink(region, flag), flag.isActive())
                 .append(" ")
                 .append(undoLink);
-        MessageUtil.sendCmdFeedback(ctx.getSource(), msg);
+        ChatComponentBuilder.sendCmdFeedback(ctx.getSource(), msg);
         RegionDataManager.save();
         return 0;
 
@@ -199,7 +201,7 @@ public final class FlagCommands {
             IFlag flag = region.getFlag(regionFlag.getName());
             return setOverride(ctx, region, flag, !flag.doesOverride());
         } else {
-            MessageUtil.sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.not-present",
+            ChatComponentBuilder.sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.not-present",
                     buildRegionInfoLink(region), regionFlag.getName()));
             return 1;
         }
@@ -212,7 +214,7 @@ public final class FlagCommands {
                 buildFlagInfoLink(region, flag), flag.doesOverride())
                 .append(" ")
                 .append(undoLink);
-        MessageUtil.sendCmdFeedback(ctx.getSource(), msg);
+        ChatComponentBuilder.sendCmdFeedback(ctx.getSource(), msg);
         RegionDataManager.save();
         return 0;
     }

@@ -2,7 +2,6 @@ package de.z0rdak.yawp.core.flag;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.MutableComponent;
@@ -15,6 +14,8 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 import static de.z0rdak.yawp.core.flag.FlagCategory.PLAYER;
+import static de.z0rdak.yawp.util.ChatComponentBuilder.shortBlockPos;
+import static de.z0rdak.yawp.util.ChatComponentBuilder.tinyBlockPos;
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
 public class FlagMessage implements INBTSerializable<CompoundTag> {
@@ -118,7 +119,7 @@ public class FlagMessage implements INBTSerializable<CompoundTag> {
     public static Map<String, String> defaultSubstitutes(RegionFlag flag, IProtectedRegion region, BlockPos pos, @Nullable Player player) {
         Map<String, String> substituteMap = new HashMap<>();
         substituteMap.put(FLAG_TEMPLATE, flag.name);
-        substituteMap.put(POS_TEMPLATE, MessageUtil.shortBlockPos(pos));
+        substituteMap.put(POS_TEMPLATE, shortBlockPos(pos));
         substituteMap.put(REGION_TEMPLATE, region.getName());
         substituteMap.put(DIM_TEMPLATE, region.getDim().location().toString());
         if (player != null && flag.categories.contains(PLAYER)) {
@@ -138,7 +139,7 @@ public class FlagMessage implements INBTSerializable<CompoundTag> {
     public static Map<String, String> defaultSubstitutesFor(FlagCheckResult result) {
         Map<String, String> substituteMap = new HashMap<>();
         substituteMap.put(FLAG_TEMPLATE, result.getFlagCheck().getRegionFlag().name);
-        substituteMap.put(POS_TEMPLATE, MessageUtil.tinyBlockPos(result.getFlagCheck().getTarget()));
+        substituteMap.put(POS_TEMPLATE, tinyBlockPos(result.getFlagCheck().getTarget()));
         substituteMap.put(REGION_TEMPLATE, result.getResponsible().getName());
         substituteMap.put(DIM_TEMPLATE, result.getResponsible().getDim().location().toString());
         if (result.getFlagCheck().getPlayer() != null && RegionFlag.hasPlayerCategory(result.getFlagCheck().getRegionFlag())) {

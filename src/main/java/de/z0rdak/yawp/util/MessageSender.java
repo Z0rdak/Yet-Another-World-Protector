@@ -22,7 +22,7 @@ public class MessageSender {
             if (src.getEntity() == null) {
                 src.sendSuccess(text, true);
             } else {
-                MessageUtil.sendMessage(src.getPlayerOrException(), text);
+                ChatComponentBuilder.sendMessage(src.getPlayerOrException(), text);
             }
         } catch (CommandSyntaxException e) {
             YetAnotherWorldProtector.LOGGER.error(e);
