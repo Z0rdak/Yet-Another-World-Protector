@@ -43,9 +43,9 @@ import static net.minecraft.util.text.TextFormatting.*;
 import static net.minecraft.util.text.event.ClickEvent.Action.*;
 
 
-public class MessageUtil {
+public class ChatComponentBuilder {
 
-    private MessageUtil() {
+    private ChatComponentBuilder() {
     }
 
     public final static TextFormatting SUGGEST_COLOR = BLUE;
@@ -282,7 +282,7 @@ public class MessageUtil {
         TranslationTextComponent setAreaLinkText = new TranslationTextComponent("cli.msg.info.region.area.area.set.link");
         TranslationTextComponent setAreaLinkHover = new TranslationTextComponent("cli.msg.info.region.area.area.set.hover", region.getName());
         String blocks = String.join(" ", region.getArea().getMarkedBlocks().stream()
-                .map(MessageUtil::buildBlockCoordinateStr)
+                .map(ChatComponentBuilder::buildBlockCoordinateStr)
                 .collect(Collectors.toSet()));
         String setAreaCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), AREA.toString(), SET.toString(), region.getArea().getAreaType().areaType, blocks);
         return buildExecuteCmdComponent(setAreaLinkText, setAreaLinkHover, setAreaCmd, SUGGEST_COMMAND, LINK_COLOR);

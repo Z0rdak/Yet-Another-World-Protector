@@ -5,7 +5,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
-import de.z0rdak.yawp.handler.CommandInterceptor;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.util.text.IFormattableTextComponent;
@@ -15,8 +14,8 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
 import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
-import static de.z0rdak.yawp.util.MessageUtil.*;
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 
 @Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, bus = FORGE)

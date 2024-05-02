@@ -33,8 +33,8 @@ import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.config.server.CommandPermissionConfig.*;
+import static de.z0rdak.yawp.util.ChatComponentBuilder.buildRegionInfoLink;
 import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
-import static de.z0rdak.yawp.util.MessageUtil.buildRegionInfoLink;
 import static net.minecraft.util.text.TextFormatting.RED;
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 

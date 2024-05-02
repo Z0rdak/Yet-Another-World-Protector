@@ -22,7 +22,6 @@ import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.handler.flags.HandlerUtil;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import de.z0rdak.yawp.util.MessageUtil;
 import de.z0rdak.yawp.util.MojangApiHelper;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
@@ -60,8 +59,8 @@ import java.util.stream.Collectors;
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.processCheck;
+import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
 import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
-import static de.z0rdak.yawp.util.MessageUtil.*;
 
 public class CommandUtil {
 
@@ -291,7 +290,7 @@ public class CommandUtil {
                 break;
         }
 
-        List<IFormattableTextComponent> flagEntries = MessageUtil.buildFlagEntries(region);
+        List<IFormattableTextComponent> flagEntries = buildFlagEntries(region);
         if (flagEntries.isEmpty()) {
             sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.region.flag.empty", buildRegionInfoLink(region)));
             return 1;

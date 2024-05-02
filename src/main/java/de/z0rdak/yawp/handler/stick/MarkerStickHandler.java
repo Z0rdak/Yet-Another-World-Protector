@@ -4,7 +4,6 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.region.AbstractMarkableRegion;
-import de.z0rdak.yawp.core.region.CuboidRegion;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -23,7 +22,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import static de.z0rdak.yawp.commands.CommandConstants.CREATE;
 import static de.z0rdak.yawp.commands.CommandConstants.MARKER;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.buildCommandStr;
-import static de.z0rdak.yawp.util.MessageUtil.*;
+import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
 import static de.z0rdak.yawp.util.StickUtil.*;
 
 public class MarkerStickHandler {

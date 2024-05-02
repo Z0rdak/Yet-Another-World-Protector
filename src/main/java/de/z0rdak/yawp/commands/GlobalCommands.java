@@ -10,8 +10,8 @@ import net.minecraft.util.text.TranslationTextComponent;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
+import static de.z0rdak.yawp.util.ChatComponentBuilder.buildRegionInfoLink;
 import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
-import static de.z0rdak.yawp.util.MessageUtil.buildRegionInfoLink;
 
 public class GlobalCommands {
 
