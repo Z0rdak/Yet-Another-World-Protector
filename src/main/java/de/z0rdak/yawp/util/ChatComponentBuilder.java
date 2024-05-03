@@ -64,14 +64,6 @@ public class ChatComponentBuilder {
     public final static ChatFormatting REMOVE_CMD_COLOR = DARK_RED;
     public static int FIRST_PAGE_IDX = 0;
 
-    public static MutableComponent buildHeader(String translationKey) {
-        return buildHeader(new TranslatableComponent(translationKey));
-    }
-
-    public static String buildTeleportCmd(String tpSource, BlockPos target) {
-        return "tp " + tpSource + " " + buildBlockCoordinateStr(target);
-    }
-
     public static String buildBlockCoordinateStr(BlockPos target) {
         return target.getX() + " " + target.getY() + " " + target.getZ();
     }
@@ -86,18 +78,6 @@ public class ChatComponentBuilder {
 
     public static String buildBlockPosLinkText(BlockPos target) {
         return target.getX() + ", " + target.getY() + ", " + target.getZ();
-    }
-
-    public static String buildExecuteCommandString(ResourceKey<Level> dim, String command) {
-        return "/execute in " + dim.location() + " run " + command;
-    }
-
-    public static String buildDimTeleportCmd(ResourceKey<Level> dim, String tpSource, BlockPos target) {
-        return buildExecuteCommandString(dim, buildTeleportCmd(tpSource, target));
-    }
-
-    public static String buildRegionTpCmd(IMarkableRegion region, String target) {
-        return buildDimTeleportCmd(region.getDim(), target, region.getTpTarget());
     }
 
     public static MutableComponent buildHeader(MutableComponent header) {
@@ -150,35 +130,6 @@ public class ChatComponentBuilder {
         MutableComponent blockPosTpLinkList = new TextComponent("");
         tpLinks.forEach(tpLink -> blockPosTpLinkList.append(tpLink).append(" "));
         return blockPosTpLinkList;
-    }
-
-    /**
-     * [X,Y,Z]
-     */
-    public static MutableComponent buildDimensionalBlockTpLink(ResourceKey<Level> dim, BlockPos target) {
-        String teleportCmd = buildDimTeleportCmd(dim, "@s", target);
-        TranslatableComponent text = new TranslatableComponent("cli.msg.info.region.area.tp.block.link.text", buildBlockPosLinkText(target));
-        TranslatableComponent hover = new TranslatableComponent("cli.msg.info.region.area.tp.block.link.hover");
-        return buildExecuteCmdComponent(text, hover, teleportCmd, RUN_COMMAND, TP_COLOR);
-    }
-
-    public static MutableComponent buildTeleportLink(IMarkableRegion region) {
-        String executeCmdStr = buildDimTeleportCmd(region.getDim(), "@s", region.getTpTarget());
-        TranslatableComponent text = new TranslatableComponent("cli.msg.info.region.area.tp.link.text", buildBlockPosLinkText(region.getTpTarget()));
-        MutableComponent hover = new TranslatableComponent("cli.msg.info.region.area.tp.link.hover", region.getName(), region.getDim().location().toString());
-        return buildExecuteCmdComponent(text, hover, executeCmdStr, RUN_COMMAND, TP_COLOR);
-    }
-
-    /**
-     * [region] @ [X,Y,Z]
-     */
-    public static MutableComponent buildDimensionTeleportLink(IMarkableRegion region) {
-        String executeCmdStr = buildDimTeleportCmd(region.getDim(), "@s", region.getTpTarget());
-        MutableComponent text = new TranslatableComponent("cli.msg.info.region.area.tp.link.text", buildBlockPosLinkText(region.getTpTarget()));
-        MutableComponent hover = new TranslatableComponent("cli.msg.info.region.area.tp.link.hover", region.getName(), region.getDim().location().toString());
-        return new TranslatableComponent("%s @ %s",
-                buildRegionInfoLink(region),
-                buildExecuteCmdComponent(text, hover, executeCmdStr, RUN_COMMAND, TP_COLOR));
     }
 
     public static MutableComponent buildRegionAreaDetailComponent(IMarkableRegion region) {
@@ -317,13 +268,6 @@ public class ChatComponentBuilder {
         MutableComponent wikiLinkHover = new TranslatableComponent("help.tooltip.wiki.link.hover");
         MutableComponent wikiLink = new TranslatableComponent("help.tooltip.wiki.link.text");
         return buildExecuteCmdComponent(wikiLink, wikiLinkHover, "https://github.com/Z0rdak/Yet-Another-World-Protector/wiki", OPEN_URL, AQUA);
-    }
-
-    public static MutableComponent buildHelpSuggestionLink(String translationKey, CommandConstants baseCmd, CommandConstants cmd) {
-        String command = "/" + CommandPermissionConfig.BASE_CMD + " " + baseCmd + " " + cmd + " ";
-        return new TranslatableComponent(" %s %s",
-                buildExecuteCmdComponent("=>", "chat.link.hover.command.copy", command, SUGGEST_COMMAND, LINK_COLOR),
-                new TranslatableComponent(translationKey));
     }
 
     public static MutableComponent buildAllLocalEnableComponent(DimensionRegionCache dimCache) {
@@ -708,31 +652,6 @@ public class ChatComponentBuilder {
         return buildFlagInfoLink(region, flag, LINK_COLOR);
     }
 
-
-    /**
-     * Creates a TextComponent for toggling the flag state between allow and deny <br></br>
-     */
-    public static MutableComponent buildFlagStateToggleLink(IProtectedRegion region, IFlag flag) {
-        switch (region.getRegionType()) {
-            case GLOBAL: {
-                String cmd = buildCommandStr(FLAG.toString(), GLOBAL.toString(), flag.getName());
-                return buildFlagToggleLink(cmd, "state", flag.isActive(), STATE.toString());
-            }
-            case DIMENSION: {
-                String cmd = buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().location().toString(), flag.getName());
-                return buildFlagToggleLink(cmd, "state", flag.isActive(), STATE.toString());
-            }
-            case LOCAL: {
-                String cmd = buildCommandStr(FLAG.toString(), CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag.getName());
-                return buildFlagToggleLink(cmd, "state", flag.isActive(), STATE.toString());
-            }
-            case TEMPLATE:
-                throw new NotImplementedException("No supported yet");
-            default:
-                throw new IllegalStateException("Unexpected value: " + region.getRegionType());
-        }
-    }
-
     public static MutableComponent buildFlagStateComponent(IProtectedRegion region, IFlag flag) {
         FlagState state = flag.getState();
         MutableComponent text = new TextComponent(state.name);
@@ -908,14 +827,6 @@ public class ChatComponentBuilder {
         return new TranslatableComponent("%s %s '%s'", editLink, clearLink, flagMsgTextWithHover);
     }
 
-    private static MutableComponent buildFlagToggleLink(String cmd, String langKey, boolean toggleActiveState, String... subCmds) {
-        String cmdStr = appendSubCommand(cmd, subCmds);
-        MutableComponent linkText = new TranslatableComponent("cli.flag." + langKey + ".link.text");
-        MutableComponent hoverText = new TranslatableComponent("cli.flag." + langKey + ".link.hover");
-        ChatFormatting color = toggleActiveState ? ADD_CMD_COLOR : REMOVE_CMD_COLOR;
-        return buildExecuteCmdComponent(linkText, hoverText, cmdStr, RUN_COMMAND, color);
-    }
-
     /**
      * Show flags for region, with a color of their state
      * But also show parent flags in italic
@@ -1001,7 +912,7 @@ public class ChatComponentBuilder {
                 } else {
                     removeLink = new TranslatableComponent("%s %s", buildDimSuggestRegionRemovalLink((IMarkableRegion) region), buildRegionInfoLink(region));
                 }
-                regionRemoveLink = new TranslatableComponent("%s @ %s", removeLink, buildRegionTeleportLink((IMarkableRegion) region));
+                regionRemoveLink = new TranslatableComponent("%s @ %s", removeLink, buildRegionInfoAndTpLink((IMarkableRegion) region));
                 break;
             }
             case LOCAL: {
@@ -1258,17 +1169,6 @@ public class ChatComponentBuilder {
             default:
                 throw new IllegalStateException("Unexpected value: " + region.getRegionType());
         }
-    }
-
-    public static MutableComponent buildDimEnableLink(IProtectedRegion region) {
-        String command = ArgumentUtil.buildCommandStr(DIM.toString(), region.getDim().location().toString(), ENABLE.toString());
-        String onClickAction = region.isActive() ? "deactivate" : "activate";
-        String hoverText = "cli.msg.info.state." + onClickAction;
-        String linkText = "cli.msg.info.state.link." + (region.isActive() ? "activate" : "deactivate");
-        ChatFormatting color = region.isActive() ? ADD_CMD_COLOR : REMOVE_CMD_COLOR;
-        return new TranslatableComponent("%s: %s",
-                new TranslatableComponent("cli.msg.info.state"),
-                buildExecuteCmdComponent(linkText, hoverText, command, RUN_COMMAND, color));
     }
 
     public static MutableComponent buildInfoComponent(String subjectLangKey, MutableComponent payload) {

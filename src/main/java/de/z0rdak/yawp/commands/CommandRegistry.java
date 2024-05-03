@@ -54,7 +54,7 @@ public final class CommandRegistry {
     }
 
     private static int promptHelp(CommandSourceStack src) {
-        sendCmdFeedback(src, buildHeader("help.header"));
+        sendCmdFeedback(src, buildHeader(new TranslatableComponent("help.header")));
         MutableComponent wikiHint = new TranslatableComponent("help.tooltip.wiki.detail");
         MutableComponent wikiText = new TranslatableComponent("help.tooltip.wiki");
         sendCmdFeedback(src, wikiHint);

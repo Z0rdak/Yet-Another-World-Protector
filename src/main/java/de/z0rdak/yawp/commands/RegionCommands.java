@@ -376,7 +376,7 @@ public class RegionCommands {
      */
     private static int promptRegionAreaInfo(CommandSourceStack src, IMarkableRegion region) {
         sendCmdFeedback(src, buildHeader(new TranslatableComponent("cli.msg.info.header.of", buildRegionAreaLink(region), buildRegionInfoLink(region))));
-        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.area.location", buildTeleportLink(region)));
+        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.area.location", buildRegionTeleportLink(region, null)));
         sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.area.area", buildRegionAreaDetailComponent(region)));
         sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.area.marked", buildAreaMarkedBlocksTpLinks(region)));
         sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.area.actions", buildRegionAreaActionLinks(region)));
