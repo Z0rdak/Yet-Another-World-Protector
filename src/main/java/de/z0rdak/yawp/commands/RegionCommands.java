@@ -38,6 +38,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
@@ -395,11 +396,21 @@ public class RegionCommands {
 
     private static int teleport(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, Player player) {
         try {
-            String teleportCmd = buildRegionTpCmd(region, player.getScoreboardName());
-            ctx.getSource().getServer().getCommands().getDispatcher().execute(teleportCmd, ctx.getSource());
-            YetAnotherWorldProtector.LOGGER.warn("Trying to execute TP: '{}'", teleportCmd);
-            return 0;
+            Player playerEntity = ctx.getSource().getPlayerOrException();
+            ServerLevel level = ctx.getSource().getServer().getLevel(region.getDim());
+            if (level != null) {
+                playerEntity.teleportTo(level, region.getTpTarget().getX(), region.getTpTarget().getY(), region.getTpTarget().getZ(), playerEntity.yRotO, playerEntity.xRotO);
+                return 0;
+            } else {
+                YetAnotherWorldProtector.LOGGER.error("Error executing teleport command. Level is null.");
+                return -1;
+            }
         } catch (CommandSyntaxException e) {
+            ServerLevel level = ctx.getSource().getServer().getLevel(region.getDim());
+            if (level != null) {
+                player.teleportTo(level, region.getTpTarget().getX(), region.getTpTarget().getY(), region.getTpTarget().getZ(), player.yRotO, player.xRotO);
+                return 0;
+            }
             YetAnotherWorldProtector.LOGGER.warn("Error executing teleport command.");
             return -1;
         }

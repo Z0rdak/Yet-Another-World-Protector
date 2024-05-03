@@ -1175,11 +1175,42 @@ public class ChatComponentBuilder {
         return new TranslatableComponent("%s: %s", new TranslatableComponent(subjectLangKey), payload);
     }
 
-    public static MutableComponent buildRegionTeleportLink(IMarkableRegion region) {
-        String teleportCmd = buildDimTeleportCmd(region.getDim(), "@s", region.getTpTarget());
-        MutableComponent textInfo = new TextComponent(buildBlockPosLinkText(region.getTpTarget()));
-        MutableComponent hoverInfo = new TranslatableComponent("cli.msg.info.region.area.tp.link.hover", region.getName(), region.getDim().location().toString());
-        return buildExecuteCmdComponent(textInfo, hoverInfo, teleportCmd, RUN_COMMAND, TP_COLOR);
+
+    public static String buildExecuteCommandString(ResourceKey<Level> dim, String command) {
+        return "/execute in " + dim.location() + " run " + command;
+    }
+
+    public static String buildTeleportCmd(ResourceKey<Level> dim, String tpSource, BlockPos target) {
+        return buildExecuteCommandString(dim, "tp " + tpSource + " " + buildBlockCoordinateStr(target));
+    }
+
+    /**
+     * [X,Y,Z]
+     */
+    public static MutableComponent buildDimensionalBlockTpLink(ResourceKey<Level> dim, BlockPos target) {
+        String teleportCmd = buildTeleportCmd(dim, "@s", target);
+        MutableComponent text = new TranslatableComponent("cli.msg.info.region.area.tp.block.link.text", buildBlockPosLinkText(target));
+        MutableComponent hover = new TranslatableComponent("cli.msg.info.region.area.tp.block.link.hover");
+        return buildExecuteCmdComponent(text, hover, teleportCmd, RUN_COMMAND, TP_COLOR);
+    }
+
+    /**
+     * [region] @ [X,Y,Z]
+     */
+    public static MutableComponent buildRegionInfoAndTpLink(IMarkableRegion region) {
+        return new TranslatableComponent("%s @ %s",
+                buildRegionInfoLink(region),
+                buildRegionTeleportLink(region, null));
+    }
+
+    public static MutableComponent buildRegionTeleportLink(IMarkableRegion region, Player player) {
+        String regionTpCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), AREA.toString(), TELEPORT.toString());
+        if (player != null) {
+            regionTpCmd = appendSubCommand(regionTpCmd, player.getScoreboardName());
+        }
+        MutableComponent text = new TranslatableComponent("cli.msg.info.region.area.tp.link.text", buildBlockPosLinkText(region.getTpTarget()));
+        MutableComponent hover = new TranslatableComponent("cli.msg.info.region.area.tp.link.hover", region.getName(), region.getDim().location().toString());
+        return buildExecuteCmdComponent(text, hover, regionTpCmd, RUN_COMMAND, TP_COLOR);
     }
 
     public static MutableComponent buildRegionSetTpLink(IMarkableRegion region) {
