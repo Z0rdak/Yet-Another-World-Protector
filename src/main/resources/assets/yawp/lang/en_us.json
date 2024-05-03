@@ -234,7 +234,7 @@
   "cli.msg.info.region.group.team.removed": "Removed team '%s' (group '%s') from %s",
   "cli.msg.info.region.hierarchy": "Hierarchy",
   "cli.msg.info.region.link.hover": "Show region info for %s",
-  "cli.msg.info.region.modify.deny": "You don't have the permission to modify the region %s!",
+  "cli.msg.info.region.modify.deny": "[%s] You don't have the permission to execute this command!",
   "cli.msg.info.region.parent": "Parent",
   "cli.msg.info.region.parent.clear": "Reset default parent for %s back to %s",
   "cli.msg.info.region.parent.clear.link.hover": "Clear '%s' as parent region",
