@@ -23,6 +23,7 @@ import static de.z0rdak.yawp.commands.CommandConstants.CREATE;
 import static de.z0rdak.yawp.commands.CommandConstants.MARKER;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.buildCommandStr;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
+import static de.z0rdak.yawp.util.MessageSender.sendMessage;
 import static de.z0rdak.yawp.util.StickUtil.*;
 
 public class MarkerStickHandler {

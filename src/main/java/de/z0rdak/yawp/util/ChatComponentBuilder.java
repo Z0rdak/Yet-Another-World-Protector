@@ -96,10 +96,6 @@ public class ChatComponentBuilder {
         return new TranslationTextComponent("%s %s %s", TextFormatting.BOLD, header, TextFormatting.BOLD);
     }
 
-    public static void sendMessage(PlayerEntity player, IFormattableTextComponent textComponent) {
-        player.sendMessage(textComponent, player.getUUID());
-    }
-
     public static IFormattableTextComponent buildExecuteCmdComponent(String linkText, String hoverText, String command, ClickEvent.Action eventAction, TextFormatting color) {
         IFormattableTextComponent text = TextComponentUtils.wrapInSquareBrackets(new TranslationTextComponent(linkText));
         return text.setStyle(text.getStyle()
