@@ -243,27 +243,31 @@ public class CommandInterceptor {
             return CANCEL_CMD;
         }
         try {
+            /* TODO:
+                Check if tp is outside region and inside parent region for permission to tp ?
+                This is a valid concern, but it is not considered and up to the user to manage this for now.
+            */
             Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
-                //  0   1    2       3      4
+                int subCmdIdx = nodes.indexOf(AREA.toString());
+                subCmdIdx = 4;
+                // nodes.size() > 5
+                //  0   1      2      3      4    5
+                // /wp local <dim> <region> area ...
+                boolean isAreaWriteCmd = checkSubCmdAtIndex(nodes, subCmdIdx, AREA) && nodes.size() > subCmdIdx + 1;
+                // nodes.size() == 6
+                //  0   1      2      3      4    5
+                // /wp local <dim> <region> area  tp
+                boolean isRegionTpCmd = isAreaWriteCmd && checkSubCmdAtIndex(nodes, subCmdIdx + 1, TELEPORT) && nodes.size() == subCmdIdx + 2;
+                // nodes.size() == 4 || (  nodes.size() == 5 + INFO || LIST  )
+                //  0   1      2      3        4
                 // /wp local <dim> <region> info|list ...
-                int subCmdIdx = 4;
                 boolean isReadOnlyCmd = checkSubCmdAtIndex(nodes, subCmdIdx, INFO, LIST);
                 boolean isExtendedInfoCmd = checkSubCmdAtIndex(nodes, subCmdIdx, STATE, AREA) && nodes.size() == subCmdIdx + 1;
                 boolean isRegionShortCmd = nodes.size() == subCmdIdx;
-                //  0   1    2       3      4    5    6
-                // /wp local <dim> <region> area tp <player>
-                boolean isAreaModifyCmd = checkSubCmdAtIndex(nodeNames, subCmdIdx, AREA) && nodeNames.size() > subCmdIdx + 1;
-                boolean isRegionTpCmd = isAreaModifyCmd && checkSubCmdAtIndex(nodeNames, subCmdIdx + 1, TELEPORT) && nodeNames.size() >= subCmdIdx + 2;
-                boolean isRegionTpAndAllowed = isRegionTpCmd && CommandPermissionConfig.allowRegionTp();
-                /* TODO: Check if tp is outside region and inside parent region for permission to tp ?
-                   IMarkableRegion localRegion = (IMarkableRegion) region;
-                   boolean tpIsOutSideRegionButInsideParent = localRegion.getTpTarget()
-                */
-                // TODO: If owner of parent region, allow for setting tp point outside of region
                 boolean isReadOnlyAndAllowed = (isRegionShortCmd || isReadOnlyCmd || isExtendedInfoCmd) && isReadOnlyAllowed();
+                boolean isRegionTpAndAllowed = isRegionTpCmd && CommandPermissionConfig.allowRegionTp();
                 return isReadOnlyAndAllowed || isRegionTpAndAllowed;
             };
-            boolean hasPermission = hasCmdPermission(cmdContext, cmdSrcType, CommandUtil.OWNER, region, subCmdPermission);
             //  0    1      2      3       4     5     6
             // /wp local <dim> <region> area set|... ...
             // needs to be handled separately, because the player also needs permission to modify the region parent
@@ -273,6 +277,7 @@ public class CommandInterceptor {
                 handlePermission(src, region.getParent(), false);
                 return CANCEL_CMD;
             }
+            boolean hasPermission = hasCmdPermission(cmdContext, cmdSrcType, CommandUtil.OWNER, region, subCmdPermission);
             handlePermission(src, region, hasPermission);
             return hasPermission ? ALLOW_CMD : CANCEL_CMD;
         } catch (CommandSyntaxException e) {
