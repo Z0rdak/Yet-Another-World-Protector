@@ -388,13 +388,23 @@ public class RegionCommands {
         }
     }
 
-    private static int teleport(CommandContext<CommandSource> ctx, IMarkableRegion region, PlayerEntity player) {
+    private static int teleport(CommandContext<CommandSource> ctx, IMarkableRegion region, ServerPlayerEntity player) {
         try {
-            String teleportCmd = buildRegionTpCmd(region, player.getScoreboardName());
-            ctx.getSource().getServer().getCommands().getDispatcher().execute(teleportCmd, ctx.getSource());
-            YetAnotherWorldProtector.LOGGER.warn("Trying to execute TP: '{}'", teleportCmd);
-            return 0;
+            ServerPlayerEntity playerEntity = ctx.getSource().getPlayerOrException();
+            ServerWorld level = ctx.getSource().getServer().getLevel(region.getDim());
+            if (level != null) {
+                playerEntity.teleportTo(level, region.getTpTarget().getX(), region.getTpTarget().getY(), region.getTpTarget().getZ(), playerEntity.yRot, playerEntity.xRot);
+                return 0;
+            } else {
+                YetAnotherWorldProtector.LOGGER.error("Error executing teleport command. Level is null.");
+                return -1;
+            }
         } catch (CommandSyntaxException e) {
+            ServerWorld level = ctx.getSource().getServer().getLevel(region.getDim());
+            if (level != null) {
+                player.teleportTo(level, region.getTpTarget().getX(), region.getTpTarget().getY(), region.getTpTarget().getZ(), player.yRot, player.xRot);
+                return 0;
+            }
             YetAnotherWorldProtector.LOGGER.warn("Error executing teleport command.");
             return -1;
         }
