@@ -247,6 +247,8 @@ public class CommandInterceptor {
                 Check if tp is outside region and inside parent region for permission to tp ?
                 This is a valid concern, but it is not considered and up to the user to manage this for now.
             */
+            int subCmdIndex = nodeNames.indexOf(AREA.toString());
+            subCmdIndex = 4;
             Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
                 int subCmdIdx = nodes.indexOf(AREA.toString());
                 subCmdIdx = 4;
@@ -255,9 +257,9 @@ public class CommandInterceptor {
                 // /wp local <dim> <region> area ...
                 boolean isAreaWriteCmd = checkSubCmdAtIndex(nodes, subCmdIdx, AREA) && nodes.size() > subCmdIdx + 1;
                 // nodes.size() == 6
-                //  0   1      2      3      4    5
-                // /wp local <dim> <region> area  tp
-                boolean isRegionTpCmd = isAreaWriteCmd && checkSubCmdAtIndex(nodes, subCmdIdx + 1, TELEPORT) && nodes.size() == subCmdIdx + 2;
+                //  0   1      2      3      4    5     6
+                // /wp local <dim> <region> area  tp [player]
+                boolean isRegionTpCmd = isAreaWriteCmd && checkSubCmdAtIndex(nodes, subCmdIdx + 1, TELEPORT) && nodes.size() >= subCmdIdx + 2;
                 // nodes.size() == 4 || (  nodes.size() == 5 + INFO || LIST  )
                 //  0   1      2      3        4
                 // /wp local <dim> <region> info|list ...
@@ -268,10 +270,16 @@ public class CommandInterceptor {
                 boolean isRegionTpAndAllowed = isRegionTpCmd && CommandPermissionConfig.allowRegionTp();
                 return isReadOnlyAndAllowed || isRegionTpAndAllowed;
             };
+            // nodes.size() > 5
+            //  0   1      2      3      4    5
+            // /wp local <dim> <region> area ...
+            boolean isAreaWriteCmd = checkSubCmdAtIndex(nodeNames, subCmdIndex, AREA) && nodeNames.size() > subCmdIndex + 1;
             //  0    1      2      3       4     5     6
-            // /wp local <dim> <region> area set|... ...
+            // /wp local <dim> <region> area set|expand ...
             // needs to be handled separately, because the player also needs permission to modify the region parent
-            boolean isAreaModifyCmd = checkSubCmdAtIndex(nodeNames, 4, AREA) && nodeNames.size() > 5;
+            boolean isAreaSetCmd = isAreaWriteCmd && checkSubCmdAtIndex(nodeNames, subCmdIndex + 1, SET) && nodeNames.size() > subCmdIndex + 2;
+            boolean isAreaExpandCmd = isAreaWriteCmd && checkSubCmdAtIndex(nodeNames, subCmdIndex + 1, EXPAND) && nodeNames.size() > subCmdIndex + 2;
+            boolean isAreaModifyCmd = isAreaWriteCmd && (isAreaExpandCmd || isAreaSetCmd);
             boolean hasParentPermission = hasCmdPermission(cmdContext, cmdSrcType, CommandUtil.OWNER, region.getParent());
             if (isAreaModifyCmd && !hasParentPermission) {
                 handlePermission(src, region.getParent(), false);
@@ -400,7 +408,8 @@ public class CommandInterceptor {
                 ServerPlayer player = ctx.getSource().getPlayerOrException();
                 boolean hasConfigPermission = CommandPermissionConfig.hasConfigPermission(player);
                 boolean hasRegionPermission = hasRegionPermission(region, player, permissionGroup);
-                return (hasRegionPermission || hasConfigPermission) || subCmdPermission.apply(nodeNames);
+                boolean hasSubCmdPermission = subCmdPermission.apply(nodeNames);
+                return (hasRegionPermission || hasConfigPermission) || hasSubCmdPermission;
             }
             case SERVER:
                 return true;
