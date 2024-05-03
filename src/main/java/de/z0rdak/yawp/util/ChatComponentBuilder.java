@@ -68,44 +68,12 @@ public class ChatComponentBuilder {
         return buildHeader(new TranslatableComponent(translationKey));
     }
 
-    public static void sendCmdFeedback(CommandSourceStack src, MutableComponent text) {
-        try {
-            if (src.getEntity() == null) {
-                src.sendSuccess(text, true);
-            } else {
-                sendMessage(src.getPlayerOrException(), text);
-            }
-        } catch (CommandSyntaxException e) {
-            YetAnotherWorldProtector.LOGGER.error(e);
-        }
-    }
-
-    public static void sendCmdFeedback(CommandSourceStack src, String langKey) {
-        sendCmdFeedback(src, new TranslatableComponent(langKey));
-    }
-
-    public static void sendMessage(Player player, String translationKey) {
-        player.sendMessage(new TranslatableComponent(translationKey), player.getUUID());
-    }
-
-    public static void sendNotification(Player player, MutableComponent msg) {
-        player.displayClientMessage(msg, true);
-    }
-
     public static String buildTeleportCmd(String tpSource, BlockPos target) {
         return "tp " + tpSource + " " + buildBlockCoordinateStr(target);
     }
 
     public static String buildBlockCoordinateStr(BlockPos target) {
         return target.getX() + " " + target.getY() + " " + target.getZ();
-    }
-
-    public static String buildTeleportLinkText(ResourceKey<Level> dim, BlockPos target) {
-        return buildTeleportLinkText(dim.location().toString(), target);
-    }
-
-    public static String buildTeleportLinkText(String regionName, BlockPos target) {
-        return regionName + " @ [" + buildBlockPosLinkText(target) + "]";
     }
 
     public static String shortBlockPos(BlockPos target) {
@@ -134,10 +102,6 @@ public class ChatComponentBuilder {
 
     public static MutableComponent buildHeader(MutableComponent header) {
         return new TranslatableComponent("%s %s %s", ChatFormatting.BOLD, header, ChatFormatting.BOLD);
-    }
-
-    public static void sendMessage(Player player, MutableComponent textComponent) {
-        player.sendMessage(textComponent, player.getUUID());
     }
 
     public static MutableComponent buildExecuteCmdComponent(String linkText, String hoverText, String command, ClickEvent.Action eventAction, ChatFormatting color) {

@@ -22,7 +22,7 @@ public class MessageSender {
             if (src.getEntity() == null) {
                 src.sendSuccess(text, true);
             } else {
-                ChatComponentBuilder.sendMessage(src.getPlayerOrException(), text);
+                sendMessage(src.getPlayerOrException(), text);
             }
         } catch (CommandSyntaxException e) {
             YetAnotherWorldProtector.LOGGER.error(e);
@@ -35,6 +35,10 @@ public class MessageSender {
 
     public static void sendMessage(Player player, String translationKey) {
         player.sendMessage(new TranslatableComponent(translationKey), player.getUUID());
+    }
+
+    public static void sendMessage(Player player, MutableComponent textComponent) {
+        player.sendMessage(textComponent, player.getUUID());
     }
 
     public static void sendNotification(Player player, MutableComponent msg) {
