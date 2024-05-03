@@ -55,7 +55,7 @@ public class MarkerStickHandler {
             IFormattableTextComponent cmdText = new TranslationTextComponent("cli.marker.create.link.text");
             IFormattableTextComponent cmdHoverText = new TranslationTextComponent("cli.marker.create.link.hover");
             String cmd = buildCommandStr(MARKER.toString(), CREATE.toString(), "");
-            IFormattableTextComponent markerCmdSuggestionLink = buildExecuteCmdComponent(cmdText, cmdHoverText, cmd, ClickEvent.Action.SUGGEST_COMMAND, SUGGEST_COLOR);
+            IFormattableTextComponent markerCmdSuggestionLink = buildExecuteCmdComponent(cmdText, cmdHoverText, cmd, ClickEvent.Action.SUGGEST_COMMAND, LINK_COLOR);
             sendMessage(event.getPlayer(), new TranslationTextComponent("cli.marker.create.mark.valid", markerCmdSuggestionLink));
         }
     }
