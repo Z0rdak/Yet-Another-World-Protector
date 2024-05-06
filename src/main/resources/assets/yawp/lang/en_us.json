@@ -101,7 +101,8 @@
   "cli.msg.dim.info.region.create.stick.no-player": "This command can only be executed as a player!",
   "cli.msg.dim.info.region.create.stick.reset": "RegionMarker successfully reset!",
   "cli.msg.dim.info.region.create.stick.success": "RegionMarker added to your inventory!",
-  "cli.msg.dim.info.region.create.success": "Successfully created region %s",
+  "cli.msg.dim.info.region.create.success": "Successfully created region %s (with parent %s)",
+  "cli.msg.dim.info.region.create.error": "Error creating region %s",
   "cli.msg.dim.info.region.info.deny": "You don't have permission to view the region information for %s!",
   "cli.msg.dim.info.region.list.link.hover": "List regions in %s",
   "cli.msg.dim.info.region.list.link.text": "%s region(s)",
@@ -379,5 +380,10 @@
   "cli.msg.info.region.players.empty": "No players (group '%s') present in %s",
   "cli.msg.info.region.players.cleared": "Cleared %s players of group '%s' for %s",
   "cli.msg.info.region.teams.empty": "No teams (group '%s') present in %s",
-  "cli.msg.info.region.teams.cleared": "Cleared %s teams of group '%s' for %s"
+  "cli.msg.info.region.teams.cleared": "Cleared %s teams of group '%s' for %s",
+  "cli.msg.dim.info.region.create.fail.multiple-containment": "There are multiple containing regions as valid parents, please specify one of them.",
+  "cli.arg.region.owned.empty": "There is no suitable Local Region as parent",
+  "cli.arg.region.owned.no-containment": "There is no suitable Local Region as parent for %s (no ownership or containment)",
+  "cli.arg.region.owned.empty.using-dim": "There is no suitable Local Region as parent for %s (no ownership or containment). Using %s as parent.",
+  "cli.arg.region.owned.invalid": "Supplied region is not owned or suitable as parent for %s"
 }
