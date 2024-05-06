@@ -264,7 +264,7 @@ public class DimensionCommands {
         if (dim.contains(region.getName())) {
             MutableComponent removeRegionLink = buildRemoveRegionLink(region);
             sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.dim.region.remove.attempt",
-                    buildRegionInfoLink(region), buildRegionInfoLink(dim.getDimensionalRegion(), removeRegionLink)));
+                    buildRegionInfoLink(region), buildRegionInfoLink(dim.getDimensionalRegion()), removeRegionLink));
             return 0;
         }
         return 1;
