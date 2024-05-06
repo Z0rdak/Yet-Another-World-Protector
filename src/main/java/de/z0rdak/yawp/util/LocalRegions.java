@@ -14,10 +14,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.NotImplementedException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public final class LocalRegions {
@@ -144,11 +141,28 @@ public final class LocalRegions {
         return markableRegion.getPriority();
     }
 
-    public static List<IMarkableRegion> getIntersectingRegions(IMarkableRegion region) {
-        return RegionDataManager.get().getRegionsFor(region.getDim()).stream()
-                .filter(r -> !r.equals(region)) // filter input region from the result
+    public static RegionOverlappingInfo getOverlappingRegions(IMarkableRegion region) {
+        Collection<IMarkableRegion> regionsInDim = RegionDataManager.get().getRegionsFor(region.getDim()).stream()
+                .filter(r -> !r.equals(region))
+                .collect(Collectors.toList());
+        List<IMarkableRegion> intersectingRegions = regionsInDim.stream()
                 .filter(r -> (region.getArea()).intersects((r).getArea()))
                 .collect(Collectors.toList());
+        List<IMarkableRegion> containingRegions = regionsInDim.stream()
+                .filter(r -> region.getArea().containsOther(r.getArea()))
+                .collect(Collectors.toList());
+        return new RegionOverlappingInfo(region, intersectingRegions, containingRegions);
+    }
+
+    public static RegionOverlappingInfo getOverlappingOwned(IMarkableRegion region, PlayerEntity player) {
+        RegionOverlappingInfo overlappingRegions = getOverlappingRegions(region);
+        List<IMarkableRegion> intersecting = overlappingRegions.intersectingRegions.stream()
+                .filter(r -> r.permits(player))
+                .collect(Collectors.toList());
+        List<IMarkableRegion> contained = overlappingRegions.containingRegions.stream()
+                .filter(r -> r.permits(player))
+                .collect(Collectors.toList());
+        return new RegionOverlappingInfo(region, intersecting, contained);
     }
 
     public static List<IMarkableRegion> getIntersectingRegionsFor(IMarkableRegion markableRegion) {
@@ -172,6 +186,30 @@ public final class LocalRegions {
                 .filter(region -> (markableRegion.getArea()).intersects((region).getArea()))
                 .filter(r -> r.getPriority() == markableRegion.getPriority())
                 .collect(Collectors.toList());
+    }
+
+    public static class RegionOverlappingInfo {
+        public final IMarkableRegion region;
+        public final List<IMarkableRegion> intersectingRegions;
+        public final List<IMarkableRegion> containingRegions;
+
+        public RegionOverlappingInfo(IMarkableRegion region, List<IMarkableRegion> intersectingRegions, List<IMarkableRegion> containingRegions) {
+            this.region = region;
+            this.intersectingRegions = intersectingRegions;
+            this.containingRegions = containingRegions;
+        }
+
+        public boolean hasOverlapping() {
+            return !intersectingRegions.isEmpty() || !containingRegions.isEmpty();
+        }
+
+        public boolean hasIntersecting() {
+            return !intersectingRegions.isEmpty();
+        }
+
+        public boolean hasContaining() {
+            return !containingRegions.isEmpty();
+        }
     }
 
 }
