@@ -265,7 +265,7 @@ public class DimensionCommands {
         if (dim.contains(region.getName())) {
             IFormattableTextComponent removeRegionLink = buildRemoveRegionLink(region);
             sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.info.dim.region.remove.attempt",
-                    buildRegionInfoLink(region), buildRegionInfoLink(dim.getDimensionalRegion(), removeRegionLink)));
+                    buildRegionInfoLink(region), buildRegionInfoLink(dim.getDimensionalRegion()), removeRegionLink));
             return 0;
         }
         return 1;
