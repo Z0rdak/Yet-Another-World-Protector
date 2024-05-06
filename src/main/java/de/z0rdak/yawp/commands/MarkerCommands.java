@@ -2,14 +2,16 @@ package de.z0rdak.yawp.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
 import de.z0rdak.yawp.commands.arguments.region.OwnedRegionArgumentType;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
-import de.z0rdak.yawp.core.region.AbstractMarkableRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
+import de.z0rdak.yawp.core.region.IProtectedRegion;
+import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -47,9 +49,9 @@ public final class MarkerCommands {
     public static LiteralArgumentBuilder<CommandSourceStack> build() {
         return literal(MARKER)
                 .then(literal(GIVE)
-                        .executes(ctx -> giveMarkerStick(ctx.getSource())))
+                        .executes(MarkerCommands::giveMarkerStick))
                 .then(literal(RESET)
-                        .executes(ctx -> resetStick(ctx.getSource())))
+                        .executes(MarkerCommands::resetStick))
                 .then(literal(CREATE)
                         .then(Commands.argument(CommandConstants.NAME.toString(), StringArgumentType.word())
                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Collections.singletonList(getRandomExample()), builder))
@@ -85,7 +87,7 @@ public final class MarkerCommands {
                             return 1;
                         }
 
-                        AbstractMarkableRegion region = LocalRegions.regionFrom(player, marker, regionName);
+                        IMarkableRegion region = LocalRegions.regionFrom(player, marker, regionName);
                         RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
                         if(MinecraftForge.EVENT_BUS.post(new RegionEvent.CreateRegionEvent(region, player))) {
                             return 0;
@@ -144,9 +146,9 @@ public final class MarkerCommands {
     }
 
 
-    private static int resetStick(CommandSourceStack src) {
+    private static int resetStick(CommandContext<CommandSourceStack> ctx) {
         try {
-            Player player = src.getPlayerOrException();
+            Player player = ctx.getSource().getPlayerOrException();
             ItemStack mainHandItem = player.getMainHandItem();
             // is valid stick
             if (!mainHandItem.equals(ItemStack.EMPTY)
@@ -156,30 +158,30 @@ public final class MarkerCommands {
                 if (Objects.requireNonNull(stickType) == StickType.MARKER) {
                     mainHandItem = StickUtil.initMarkerNbt(mainHandItem, StickType.MARKER, player.getCommandSenderWorld().dimension());
                     // Note: When different area types are available: Get stick, reset it, and save it back.
-                    sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.stick.reset"));
+                    sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.dim.info.region.create.stick.reset"));
                     return 0;
                 } else {
-                    sendCmdFeedback(src, new TranslatableComponent( "cli.msg.dim.info.region.create.stick.missing").withStyle(RED));
+                    sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.dim.info.region.create.stick.missing").withStyle(RED));
                     return 1;
                 }
             } else {
-                sendCmdFeedback(src, new TranslatableComponent( "cli.msg.dim.info.region.create.stick.missing").withStyle(RED));
+                sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.dim.info.region.create.stick.missing").withStyle(RED));
                 return 1;
             }
         } catch (CommandSyntaxException e) {
-            sendCmdFeedback(src, new TranslatableComponent(  "cli.msg.dim.info.region.create.stick.no-player").withStyle(RED));
+            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.dim.info.region.create.stick.no-player").withStyle(RED));
             return 1;
         }
     }
 
-    public static int giveMarkerStick(CommandSourceStack src) {
+    public static int giveMarkerStick(CommandContext<CommandSourceStack> ctx) {
         try {
-            Player targetPlayer = src.getPlayerOrException();
+            Player targetPlayer = ctx.getSource().getPlayerOrException();
             ItemStack markerStick = StickUtil.initMarkerNbt(Items.STICK.getDefaultInstance(), StickType.MARKER, targetPlayer.level.dimension());
             targetPlayer.addItem(markerStick);
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.stick.success"));
+            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.dim.info.region.create.stick.success"));
         } catch (CommandSyntaxException e) {
-            sendCmdFeedback(src, new TranslatableComponent("cli.msg.dim.info.region.create.stick.no-player").withStyle(RED));
+            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.dim.info.region.create.stick.no-player").withStyle(RED));
             return 1;
         }
         return 0;
