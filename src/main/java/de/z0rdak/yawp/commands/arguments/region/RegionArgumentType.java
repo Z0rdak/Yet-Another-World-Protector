@@ -73,14 +73,14 @@ public class RegionArgumentType implements ArgumentType<String> {
         String regionName = context.getArgument(argName, String.class);
         DimensionRegionCache dimCache = ArgumentUtil.getDimCacheArgument(context);
         if (!dimCache.contains(regionName)) {
-            sendCmdFeedback(context.getSource(), new StringTextComponent("No region with name '" + regionName + "' defined in dim '" + dimCache.dimensionKey().location() + "'"));
+            sendCmdFeedback(context.getSource(), new StringTextComponent("No region with name '" + regionName + "' defined in dim '" + dimCache.getDimensionalRegion().getName() + "'"));
             throw ERROR_INVALID_VALUE.create(regionName);
         }
         IMarkableRegion region = dimCache.getRegion(regionName);
         if (region != null) {
             return region;
         } else {
-            sendCmdFeedback(context.getSource(), new StringTextComponent("No regions defined in dim '" + dimCache.dimensionKey().location() + "'"));
+            sendCmdFeedback(context.getSource(), new StringTextComponent("No regions defined in dim '" + dimCache.getDimensionalRegion().getName() + "'"));
             throw ERROR_INVALID_VALUE.create(regionName);
         }
     }
@@ -97,14 +97,14 @@ public class RegionArgumentType implements ArgumentType<String> {
                 DimensionRegionCache dimCache = ArgumentUtil.getDimCacheArgument(context);
                 String regionName = context.getArgument(CommandConstants.LOCAL.toString(), String.class);
                 if (!dimCache.contains(regionName)) {
-                    sendCmdFeedback(context.getSource(), new StringTextComponent("No region with name '" + regionName + "' defined in dim '" + dimCache.dimensionKey().location() + "'"));
+                    sendCmdFeedback(context.getSource(), new StringTextComponent("No region with name '" + regionName + "' defined in dim '" + dimCache.getDimensionalRegion().getName() + "'"));
                     throw ERROR_INVALID_VALUE.create(regionName);
                 }
                 IMarkableRegion region = dimCache.getRegion(regionName);
                 if (region != null) {
                     return region;
                 } else {
-                    sendCmdFeedback(context.getSource(), new StringTextComponent("No regions defined in dim '" + dimCache.dimensionKey().location() + "'"));
+                    sendCmdFeedback(context.getSource(), new StringTextComponent("No regions defined in dim '" + dimCache.getDimensionalRegion().getName() + "'"));
                     throw ERROR_INVALID_VALUE.create(regionName);
                 }
             }
@@ -140,14 +140,14 @@ public class RegionArgumentType implements ArgumentType<String> {
         String regionName = context.getArgument(argName, String.class);
         DimensionRegionCache dimCache = ArgumentUtil.getTargetDimRegionArgument(context);
         if (!dimCache.contains(regionName)) {
-            sendCmdFeedback(context.getSource(), new StringTextComponent("No region with name '" + regionName + "' defined in dim '" + dimCache.dimensionKey().location() + "'"));
+            sendCmdFeedback(context.getSource(), new StringTextComponent("No region with name '" + regionName + "' defined in dim '" + dimCache.getDimensionalRegion().getName() + "'"));
             throw ERROR_INVALID_VALUE.create(regionName);
         }
         IMarkableRegion region = dimCache.getRegion(regionName);
         if (region != null) {
             return region;
         } else {
-            sendCmdFeedback(context.getSource(), new StringTextComponent("No regions defined in dim '" + dimCache.dimensionKey().location() + "'"));
+            sendCmdFeedback(context.getSource(), new StringTextComponent("No regions defined in dim '" + dimCache.getDimensionalRegion().getName() + "'"));
             throw ERROR_INVALID_VALUE.create(regionName);
         }
     }
@@ -211,7 +211,7 @@ public class RegionArgumentType implements ArgumentType<String> {
         if (hasPermission) {
             Collection<String> regionNames = dimCache.getRegions().stream().map(IProtectedRegion::getName).collect(Collectors.toSet());
             if (regionNames.isEmpty()) {
-                sendCmdFeedback(src, new StringTextComponent("No regions defined in dim '" + dimCache.dimensionKey().location() + "'"));
+                sendCmdFeedback(src, new StringTextComponent("No regions defined in dim '" + dimCache.getDimensionalRegion().getName() + "'"));
                 return Suggestions.empty();
             } else {
                 return ISuggestionProvider.suggest(regionNames, builder);
@@ -224,7 +224,7 @@ public class RegionArgumentType implements ArgumentType<String> {
                         .collect(Collectors.toList());
                 Collection<String> regionNames = regions.stream().map(IProtectedRegion::getName).collect(Collectors.toSet());
                 if (regionNames.isEmpty()) {
-                    sendCmdFeedback(src, new StringTextComponent("No regions defined in dim '" + dimCache.dimensionKey().location() + "'"));
+                    sendCmdFeedback(src, new StringTextComponent("No regions defined in dim '" + dimCache.getDimensionalRegion().getName() + "'"));
                     return Suggestions.empty();
                 }
                 return ISuggestionProvider.suggest(regionNames, builder);

@@ -222,7 +222,7 @@ public class RegionDataManager extends WorldSavedData {
                     globalRegion.addChild(dimCache.getDimensionalRegion());
                     dimCacheMap.put(dimension, dimCache);
                     dimensionDataNames.add(dimKey);
-                    YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.loaded.dim.amount", dimCache.getRegions().size(), dimCache.dimensionKey().location().toString()).getString());
+                    YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.loaded.dim.amount", dimCache.getRegions().size(), dimCache.getDimensionalRegion().getName()).getString());
                 }
             }
         }

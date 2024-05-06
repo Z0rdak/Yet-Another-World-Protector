@@ -263,11 +263,11 @@ public class ChatComponentBuilder {
 
     public static IFormattableTextComponent buildAllLocalEnableComponent(DimensionRegionCache dimCache) {
         IFormattableTextComponent enableLinkTextKey = new TranslationTextComponent("cli.msg.info.region.state.alert.all.true.link.text");
-        IFormattableTextComponent enableHoverTextKey = new TranslationTextComponent("cli.msg.info.region.state.alert.all.true.link.hover", dimCache.dimensionKey().location().toString());
+        IFormattableTextComponent enableHoverTextKey = new TranslationTextComponent("cli.msg.info.region.state.alert.all.true.link.hover", dimCache.getDimensionalRegion().getName());
         IFormattableTextComponent disableLinkTextKey = new TranslationTextComponent("cli.msg.info.region.state.alert.all.false.link.text");
-        IFormattableTextComponent disableHoverTextKey = new TranslationTextComponent("cli.msg.info.region.state.alert.all.false.link.hover", dimCache.dimensionKey().location().toString());
-        String enableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), STATE.toString(), ENABLE_LOCAL.toString(), Boolean.TRUE.toString());
-        String disableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), STATE.toString(), ENABLE_LOCAL.toString(), Boolean.FALSE.toString());
+        IFormattableTextComponent disableHoverTextKey = new TranslationTextComponent("cli.msg.info.region.state.alert.all.false.link.hover", dimCache.getDimensionalRegion().getName());
+        String enableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.getDimensionalRegion().getName(), STATE.toString(), ENABLE_LOCAL.toString(), Boolean.TRUE.toString());
+        String disableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.getDimensionalRegion().getName(), STATE.toString(), ENABLE_LOCAL.toString(), Boolean.FALSE.toString());
         IFormattableTextComponent activeAlertLink = buildExecuteCmdComponent(enableLinkTextKey, enableHoverTextKey, enableCmd, RUN_COMMAND, GREEN);
         IFormattableTextComponent disableAlertLink = buildExecuteCmdComponent(disableLinkTextKey, disableHoverTextKey, disableCmd, RUN_COMMAND, RED);
         return new TranslationTextComponent("%s %s", activeAlertLink, disableAlertLink);
@@ -275,11 +275,11 @@ public class ChatComponentBuilder {
 
     public static IFormattableTextComponent buildAllLocalAlertToggleLink(DimensionRegionCache dimCache) {
         IFormattableTextComponent enableLinkTextKey = new TranslationTextComponent("cli.msg.info.region.state.enable.all.true.link.text");
-        IFormattableTextComponent enableHoverTextKey = new TranslationTextComponent("cli.msg.info.region.state.enable.all.true.link.hover", dimCache.dimensionKey().location().toString());
+        IFormattableTextComponent enableHoverTextKey = new TranslationTextComponent("cli.msg.info.region.state.enable.all.true.link.hover", dimCache.getDimensionalRegion().getName());
         IFormattableTextComponent disableLinkTextKey = new TranslationTextComponent("cli.msg.info.region.state.enable.all.false.link.text");
-        IFormattableTextComponent disableHoverTextKey = new TranslationTextComponent("cli.msg.info.region.state.enable.all.false.link.hover", dimCache.dimensionKey().location().toString());
-        String enableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), STATE.toString(), ALERT_LOCAL.toString(), Boolean.TRUE.toString());
-        String disableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), STATE.toString(), ALERT_LOCAL.toString(), Boolean.FALSE.toString());
+        IFormattableTextComponent disableHoverTextKey = new TranslationTextComponent("cli.msg.info.region.state.enable.all.false.link.hover", dimCache.getDimensionalRegion().getName());
+        String enableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.getDimensionalRegion().getName(), STATE.toString(), ALERT_LOCAL.toString(), Boolean.TRUE.toString());
+        String disableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.getDimensionalRegion().getName(), STATE.toString(), ALERT_LOCAL.toString(), Boolean.FALSE.toString());
         IFormattableTextComponent activeAlertLink = buildExecuteCmdComponent(enableLinkTextKey, enableHoverTextKey, enableCmd, RUN_COMMAND, GREEN);
         IFormattableTextComponent disableAlertLink = buildExecuteCmdComponent(disableLinkTextKey, disableHoverTextKey, disableCmd, RUN_COMMAND, RED);
         return new TranslationTextComponent("%s %s", activeAlertLink, disableAlertLink);
@@ -865,14 +865,14 @@ public class ChatComponentBuilder {
      * Currently not used in the CLI for obvious reasons. <br></br>
      */
     public static IFormattableTextComponent buildRemoveAllRegionsAttemptLink(DimensionRegionCache dimCache) {
-        String cmd = buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), DELETE_ALL.toString(), REGIONS.toString());
+        String cmd = buildCommandStr(DIM.toString(), dimCache.getDimensionalRegion().getName(), DELETE_ALL.toString(), REGIONS.toString());
         IFormattableTextComponent hover = new TranslationTextComponent("cli.msg.info.dim.region.remove.all.link.hover", dimCache.getDimensionalRegion().getName());
         IFormattableTextComponent text = new TranslationTextComponent("cli.link.remove");
         return buildExecuteCmdComponent(text, hover, cmd, RUN_COMMAND, REMOVE_CMD_COLOR);
     }
 
     public static IFormattableTextComponent buildRemoveAllRegionsLink(DimensionRegionCache dimCache) {
-        String cmd = buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), DELETE_ALL.toString(), REGIONS.toString(), FOREVER.toString(), SERIOUSLY.toString());
+        String cmd = buildCommandStr(DIM.toString(), dimCache.getDimensionalRegion().getName(), DELETE_ALL.toString(), REGIONS.toString(), FOREVER.toString(), SERIOUSLY.toString());
         IFormattableTextComponent hover = new TranslationTextComponent("cli.msg.info.dim.region.remove.all.link.hover", dimCache.getDimensionalRegion().getName());
         IFormattableTextComponent text = new TranslationTextComponent("cli.link.remove");
         return buildExecuteCmdComponent(text, hover, cmd, RUN_COMMAND, REMOVE_CMD_COLOR);
@@ -1010,7 +1010,8 @@ public class ChatComponentBuilder {
     }
 
     public static IFormattableTextComponent buildRegionListHeader(IProtectedRegion region) {
-        return buildHeader(new TranslationTextComponent("cli.msg.info.header.in", buildRegionListChildrenLink(region), buildRegionInfoLink(region)));
+        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(region.getDim());
+        return buildHeader(new TranslationTextComponent("cli.msg.info.header.in", buildDimRegionsLink(dimCache), buildRegionInfoLink(region)));
     }
 
     // [n regions] [+]

@@ -61,7 +61,7 @@ public class OwnedRegionArgumentType implements ArgumentType<String> {
         if (region != null) {
             return region;
         } else {
-            sendCmdFeedback(context.getSource(), new StringTextComponent("No region with name '" + argName + "' defined in dim '" + dimCache.dimensionKey().location() + "'"));
+            sendCmdFeedback(context.getSource(), new StringTextComponent("No region with name '" + argName + "' defined in dim '" + dimCache.getDimensionalRegion().getName() + "'"));
             throw ERROR_INVALID_VALUE.create(regionName);
         }
     }
