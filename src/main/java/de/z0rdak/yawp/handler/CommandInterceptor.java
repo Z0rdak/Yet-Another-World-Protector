@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.handler;
 
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -118,10 +119,36 @@ public class CommandInterceptor {
                 return ALLOW_CMD;
             }
             if (cmdSrcType == CommandSourceType.PLAYER) {
+                boolean isCreateCmd = checkSubCmdAtIndex(nodeNames, 2, CREATE);
+                // 0   1      2       3      4
+                // wp marker create <name> >parent>
+                boolean isParentArgProvided = nodeNames.size() >= 5 && nodeNames.get(4) != null;
+
                 ServerPlayerEntity player = cmdContext.getSource().getPlayerOrException();
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.getLevel().dimension());
                 boolean hasPermission = hasConfigPermission(cmdContext.getSource(), cmdSrcType);
-                boolean hasRegionPermission = hasRegionPermission(dimCache.getDimensionalRegion(), player, CommandUtil.OWNER);
+                boolean hasRegionPermission = false;
+                if (isCreateCmd) {
+                    if (isParentArgProvided) {
+                        /**
+                         * TODO: Include the containment check, then remove the locig from RegionArgumentType and MarkerCommands
+                         * @see de.z0rdak.yawp.commands.arguments.region.RegionArgumentType#getOwnedRegion(CommandContext, String)
+                         * @see de.z0rdak.yawp.commands.MarkerCommands#createRegion(CommandContext, String, IProtectedRegion)
+                         */
+                        ParsedArgument<CommandSource, ?> commandSourceParsedArgument = cmdContext.getArguments().get(nodeNames.get(4));
+                        if (commandSourceParsedArgument.getResult() instanceof String) {
+                            String parentName = (String) commandSourceParsedArgument.getResult();
+                            IMarkableRegion parent = dimCache.getRegion(parentName);
+                            if (parent != null) {
+                                hasRegionPermission = hasRegionPermission(parent, player, CommandUtil.OWNER);
+                            }
+                        }
+                    } else { // assuming dimensional regions as parent
+                        hasRegionPermission = hasRegionPermission(dimCache.getDimensionalRegion(), player, CommandUtil.OWNER);
+                    }
+                } else {
+                    hasRegionPermission = hasRegionPermission(dimCache.getDimensionalRegion(), player, CommandUtil.OWNER);
+                }
                 hasPermission = hasPermission || hasRegionPermission;
                 handlePermission(cmdContext.getSource(), hasPermission);
                 return hasPermission ? ALLOW_CMD : CANCEL_CMD;
