@@ -162,7 +162,7 @@ public class RegionDataManager extends SavedData {
                     globalRegion.addChild(dimCache.getDimensionalRegion());
                     rdm.dimCacheMap.put(dimension, dimCache);
                     rdm.dimensionDataNames.add(dimKey);
-                    YetAnotherWorldProtector.LOGGER.info(new TranslatableComponent("data.nbt.dimensions.loaded.dim.amount", dimCache.getRegions().size(), dimCache.dimensionKey().location().toString()).getString());
+                    YetAnotherWorldProtector.LOGGER.info(new TranslatableComponent("data.nbt.dimensions.loaded.dim.amount", dimCache.getRegions().size(), dimCache.getDimensionalRegion().getName()).getString());
                 }
             }
         }

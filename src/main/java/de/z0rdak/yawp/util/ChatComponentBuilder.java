@@ -272,11 +272,11 @@ public class ChatComponentBuilder {
 
     public static MutableComponent buildAllLocalEnableComponent(DimensionRegionCache dimCache) {
         MutableComponent enableLinkTextKey = new TranslatableComponent("cli.msg.info.region.state.alert.all.true.link.text");
-        MutableComponent enableHoverTextKey = new TranslatableComponent("cli.msg.info.region.state.alert.all.true.link.hover", dimCache.dimensionKey().location().toString());
+        MutableComponent enableHoverTextKey = new TranslatableComponent("cli.msg.info.region.state.alert.all.true.link.hover", dimCache.getDimensionalRegion().getName());
         MutableComponent disableLinkTextKey = new TranslatableComponent("cli.msg.info.region.state.alert.all.false.link.text");
-        MutableComponent disableHoverTextKey = new TranslatableComponent("cli.msg.info.region.state.alert.all.false.link.hover", dimCache.dimensionKey().location().toString());
-        String enableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), STATE.toString(), ENABLE_LOCAL.toString(), Boolean.TRUE.toString());
-        String disableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), STATE.toString(), ENABLE_LOCAL.toString(), Boolean.FALSE.toString());
+        MutableComponent disableHoverTextKey = new TranslatableComponent("cli.msg.info.region.state.alert.all.false.link.hover", dimCache.getDimensionalRegion().getName());
+        String enableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.getDimensionalRegion().getName(), STATE.toString(), ENABLE_LOCAL.toString(), Boolean.TRUE.toString());
+        String disableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.getDimensionalRegion().getName(), STATE.toString(), ENABLE_LOCAL.toString(), Boolean.FALSE.toString());
         MutableComponent activeAlertLink = buildExecuteCmdComponent(enableLinkTextKey, enableHoverTextKey, enableCmd, RUN_COMMAND, GREEN);
         MutableComponent disableAlertLink = buildExecuteCmdComponent(disableLinkTextKey, disableHoverTextKey, disableCmd, RUN_COMMAND, RED);
         return new TranslatableComponent("%s %s", activeAlertLink, disableAlertLink);
@@ -284,11 +284,11 @@ public class ChatComponentBuilder {
 
     public static MutableComponent buildAllLocalAlertToggleLink(DimensionRegionCache dimCache) {
         MutableComponent enableLinkTextKey = new TranslatableComponent("cli.msg.info.region.state.enable.all.true.link.text");
-        MutableComponent enableHoverTextKey = new TranslatableComponent("cli.msg.info.region.state.enable.all.true.link.hover", dimCache.dimensionKey().location().toString());
+        MutableComponent enableHoverTextKey = new TranslatableComponent("cli.msg.info.region.state.enable.all.true.link.hover", dimCache.getDimensionalRegion().getName());
         MutableComponent disableLinkTextKey = new TranslatableComponent("cli.msg.info.region.state.enable.all.false.link.text");
-        MutableComponent disableHoverTextKey = new TranslatableComponent("cli.msg.info.region.state.enable.all.false.link.hover", dimCache.dimensionKey().location().toString());
-        String enableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), STATE.toString(), ALERT_LOCAL.toString(), Boolean.TRUE.toString());
-        String disableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), STATE.toString(), ALERT_LOCAL.toString(), Boolean.FALSE.toString());
+        MutableComponent disableHoverTextKey = new TranslatableComponent("cli.msg.info.region.state.enable.all.false.link.hover", dimCache.getDimensionalRegion().getName());
+        String enableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.getDimensionalRegion().getName(), STATE.toString(), ALERT_LOCAL.toString(), Boolean.TRUE.toString());
+        String disableCmd = ArgumentUtil.buildCommandStr(DIM.toString(), dimCache.getDimensionalRegion().getName(), STATE.toString(), ALERT_LOCAL.toString(), Boolean.FALSE.toString());
         MutableComponent activeAlertLink = buildExecuteCmdComponent(enableLinkTextKey, enableHoverTextKey, enableCmd, RUN_COMMAND, GREEN);
         MutableComponent disableAlertLink = buildExecuteCmdComponent(disableLinkTextKey, disableHoverTextKey, disableCmd, RUN_COMMAND, RED);
         return new TranslatableComponent("%s %s", activeAlertLink, disableAlertLink);
@@ -876,14 +876,14 @@ public class ChatComponentBuilder {
      * Currently not used in the CLI for obvious reasons. <br></br>
      */
     public static MutableComponent buildRemoveAllRegionsAttemptLink(DimensionRegionCache dimCache) {
-        String cmd = buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), DELETE_ALL.toString(), REGIONS.toString());
+        String cmd = buildCommandStr(DIM.toString(), dimCache.getDimensionalRegion().getName(), DELETE_ALL.toString(), REGIONS.toString());
         MutableComponent hover = new TranslatableComponent("cli.msg.info.dim.region.remove.all.link.hover", dimCache.getDimensionalRegion().getName());
         MutableComponent text = new TranslatableComponent("cli.link.remove");
         return buildExecuteCmdComponent(text, hover, cmd, RUN_COMMAND, REMOVE_CMD_COLOR);
     }
 
     public static MutableComponent buildRemoveAllRegionsLink(DimensionRegionCache dimCache) {
-        String cmd = buildCommandStr(DIM.toString(), dimCache.dimensionKey().location().toString(), DELETE_ALL.toString(), REGIONS.toString(), FOREVER.toString(), SERIOUSLY.toString());
+        String cmd = buildCommandStr(DIM.toString(), dimCache.getDimensionalRegion().getName(), DELETE_ALL.toString(), REGIONS.toString(), FOREVER.toString(), SERIOUSLY.toString());
         MutableComponent hover = new TranslatableComponent("cli.msg.info.dim.region.remove.all.link.hover", dimCache.getDimensionalRegion().getName());
         MutableComponent text = new TranslatableComponent("cli.link.remove");
         return buildExecuteCmdComponent(text, hover, cmd, RUN_COMMAND, REMOVE_CMD_COLOR);
@@ -1022,7 +1022,8 @@ public class ChatComponentBuilder {
 
 
     public static MutableComponent buildRegionListHeader(IProtectedRegion region) {
-        return buildHeader(new TranslatableComponent("cli.msg.info.header.in", buildRegionListChildrenLink(region), buildRegionInfoLink(region)));
+        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(region.getDim());
+        return buildHeader(new TranslatableComponent("cli.msg.info.header.in", buildDimRegionsLink(dimCache), buildRegionInfoLink(region)));
     }
 
 

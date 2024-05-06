@@ -348,12 +348,12 @@ public class CommandInterceptor {
                 ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, dimResLoc);
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
                 if (!dimCache.contains(regionName)) {
-                    sendCmdFeedback(cmdContext.getSource(), new TextComponent("No region with name '" + regionName + "' defined in dim '" + dimCache.dimensionKey().location() + "'"));
+                    sendCmdFeedback(cmdContext.getSource(), new TextComponent("No region with name '" + regionName + "' defined in dim '" + dimCache.getDimensionalRegion().getName() + "'"));
                     return null;
                 }
                 IMarkableRegion region = dimCache.getRegion(regionName);
                 if (region == null) {
-                    sendCmdFeedback(cmdContext.getSource(), new TextComponent("No region with name '" + regionName + "' defined in dim '" + dimCache.dimensionKey().location() + "'"));
+                    sendCmdFeedback(cmdContext.getSource(), new TextComponent("No region with name '" + regionName + "' defined in dim '" + dimCache.getDimensionalRegion().getName() + "'"));
                     return null;
                 }
                 return region;
