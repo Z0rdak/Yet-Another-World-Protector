@@ -2,14 +2,16 @@ package de.z0rdak.yawp.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
 import de.z0rdak.yawp.commands.arguments.region.OwnedRegionArgumentType;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
-import de.z0rdak.yawp.core.region.AbstractMarkableRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
+import de.z0rdak.yawp.core.region.IProtectedRegion;
+import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -144,9 +146,9 @@ public final class MarkerCommands {
     }
 
 
-    private static int resetStick(CommandSource src) {
+    private static int resetStick(CommandContext<CommandSource> ctx) {
         try {
-            PlayerEntity player = src.getPlayerOrException();
+            PlayerEntity player = ctx.getSource().getPlayerOrException();
             ItemStack mainHandItem = player.getMainHandItem();
             // is valid stick
             if (!mainHandItem.equals(ItemStack.EMPTY)
@@ -156,30 +158,30 @@ public final class MarkerCommands {
                 if (Objects.requireNonNull(stickType) == StickType.MARKER) {
                     mainHandItem = StickUtil.initMarkerNbt(mainHandItem, StickType.MARKER, player.getCommandSenderWorld().dimension());
                     // Note: When different area types are available: Get stick, reset it, and save it back.
-                    sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.stick.reset"));
+                    sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.stick.reset"));
                     return 0;
                 } else {
-                    sendCmdFeedback(src, new TranslationTextComponent( "cli.msg.dim.info.region.create.stick.missing").withStyle(RED));
+                    sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.stick.missing").withStyle(RED));
                     return 1;
                 }
             } else {
-                sendCmdFeedback(src, new TranslationTextComponent( "cli.msg.dim.info.region.create.stick.missing").withStyle(RED));
+                sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.stick.missing").withStyle(RED));
                 return 1;
             }
         } catch (CommandSyntaxException e) {
-            sendCmdFeedback(src, new TranslationTextComponent(  "cli.msg.dim.info.region.create.stick.no-player").withStyle(RED));
+            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.stick.no-player").withStyle(RED));
             return 1;
         }
     }
 
-    public static int giveMarkerStick(CommandSource src) {
+    public static int giveMarkerStick(CommandContext<CommandSource> ctx) {
         try {
-            PlayerEntity targetPlayer = src.getPlayerOrException();
+            PlayerEntity targetPlayer = ctx.getSource().getPlayerOrException();
             ItemStack markerStick = StickUtil.initMarkerNbt(Items.STICK.getDefaultInstance(), StickType.MARKER, targetPlayer.level.dimension());
             targetPlayer.addItem(markerStick);
-            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.stick.success"));
+            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.stick.success"));
         } catch (CommandSyntaxException e) {
-            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.stick.no-player").withStyle(RED));
+            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.stick.no-player").withStyle(RED));
             return 1;
         }
         return 0;
