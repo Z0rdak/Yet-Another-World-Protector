@@ -7,8 +7,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
+import de.z0rdak.yawp.commands.arguments.region.ContainingOwnedRegionArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
-import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.CuboidArea;
@@ -22,7 +22,6 @@ import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.BlockPosArgument;
 import net.minecraft.command.arguments.DimensionArgument;
-import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.IFormattableTextComponent;
@@ -121,10 +120,11 @@ public class DimensionCommands {
                                                                         .executes(ctx -> createCuboidRegion(ctx, getRegionNameArgument(ctx), getDimCacheArgument(ctx),
                                                                                 BlockPosArgument.getOrLoadBlockPos(ctx, POS1.toString()),
                                                                                 BlockPosArgument.getOrLoadBlockPos(ctx, POS2.toString()), null))
-                                                                        .then(Commands.argument(CommandConstants.OWNER.toString(), EntityArgument.player())
+                                                                        .then(Commands.argument(CommandConstants.PARENT.toString(), StringArgumentType.word())
+                                                                                .suggests((ctx, builder) -> ContainingOwnedRegionArgumentType.owningRegions().listSuggestions(ctx, builder))
                                                                                 .executes(ctx -> createCuboidRegion(ctx, getRegionNameArgument(ctx), getDimCacheArgument(ctx),
                                                                                         BlockPosArgument.getOrLoadBlockPos(ctx, POS1.toString()),
-                                                                                        BlockPosArgument.getOrLoadBlockPos(ctx, POS2.toString()), getOwnerArgument(ctx))))))
+                                                                                        BlockPosArgument.getOrLoadBlockPos(ctx, POS2.toString()), getContainingOwnedRegionArgument(ctx))))))
                                                 )
                                                 .then(Commands.literal(AreaType.SPHERE.areaType)
                                                         .then(Commands.argument(CENTER_POS.toString(), BlockPosArgument.blockPos())
@@ -132,10 +132,11 @@ public class DimensionCommands {
                                                                         .executes(ctx -> createSphereRegion(ctx, getRegionNameArgument(ctx), getDimCacheArgument(ctx),
                                                                                 BlockPosArgument.getOrLoadBlockPos(ctx, CENTER_POS.toString()),
                                                                                 BlockPosArgument.getOrLoadBlockPos(ctx, RADIUS_POS.toString()), null))
-                                                                        .then(Commands.argument(CommandConstants.OWNER.toString(), EntityArgument.player())
+                                                                        .then(Commands.argument(CommandConstants.PARENT.toString(), StringArgumentType.word())
+                                                                                .suggests((ctx, builder) -> ContainingOwnedRegionArgumentType.owningRegions().listSuggestions(ctx, builder))
                                                                                 .executes(ctx -> createSphereRegion(ctx, getRegionNameArgument(ctx), getDimCacheArgument(ctx),
                                                                                         BlockPosArgument.getOrLoadBlockPos(ctx, CENTER_POS.toString()),
-                                                                                        BlockPosArgument.getOrLoadBlockPos(ctx, RADIUS_POS.toString()), getOwnerArgument(ctx))))))
+                                                                                        BlockPosArgument.getOrLoadBlockPos(ctx, RADIUS_POS.toString()), getContainingOwnedRegionArgument(ctx))))))
                                                 )
                                                 .then(Commands.literal(AreaType.SPHERE.areaType)
                                                         .then(Commands.argument(CENTER_POS.toString(), BlockPosArgument.blockPos())
@@ -143,10 +144,11 @@ public class DimensionCommands {
                                                                         .executes(ctx -> createSphereRegion(ctx, getRegionNameArgument(ctx), getDimCacheArgument(ctx),
                                                                                 BlockPosArgument.getOrLoadBlockPos(ctx, CENTER_POS.toString()),
                                                                                 IntegerArgumentType.getInteger(ctx, RADIUS.toString()), null))
-                                                                        .then(Commands.argument(CommandConstants.OWNER.toString(), EntityArgument.player())
+                                                                        .then(Commands.argument(CommandConstants.PARENT.toString(), StringArgumentType.word())
+                                                                                .suggests((ctx, builder) -> ContainingOwnedRegionArgumentType.owningRegions().listSuggestions(ctx, builder))
                                                                                 .executes(ctx -> createSphereRegion(ctx, getRegionNameArgument(ctx), getDimCacheArgument(ctx),
                                                                                         BlockPosArgument.getOrLoadBlockPos(ctx, CENTER_POS.toString()),
-                                                                                        IntegerArgumentType.getInteger(ctx, RADIUS.toString()), getOwnerArgument(ctx))))))
+                                                                                        IntegerArgumentType.getInteger(ctx, RADIUS.toString()), getContainingOwnedRegionArgument(ctx))))))
                                                 )
                                         )
                                 )
@@ -217,7 +219,7 @@ public class DimensionCommands {
         return 0;
     }
 
-    private static int createRegion(CommandContext<CommandSource> ctx, String regionName, DimensionRegionCache dimCache, IMarkableRegion region) {
+    private static int createRegion(CommandContext<CommandSource> ctx, String regionName, DimensionRegionCache dimCache, IMarkableRegion region, IProtectedRegion parent) {
         int res = RegionDataManager.get().isValidRegionName(dimCache.getDimensionalRegion().getDim(), regionName);
         if (res == -1) {
             sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.name.invalid", regionName));
@@ -233,32 +235,43 @@ public class DimensionCommands {
         } catch (CommandSyntaxException e) {
             player = null;
         }
-
         if(MinecraftForge.EVENT_BUS.post(new RegionEvent.CreateRegionEvent(region, player))) {
             return 0;
         }
-
+        if (parent.getRegionType() != RegionType.LOCAL || parent.getRegionType() != RegionType.DIMENSION) {
+            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.error", buildRegionInfoLink(parent)));
+            return -1;
+        }
         RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
-        dimCache.addRegion(dimCache.getDimensionalRegion(), region);
+        dimCache.addRegion(parent, region);
         LocalRegions.ensureHigherRegionPriorityFor(region, RegionConfig.getDefaultPriority());
         RegionDataManager.save();
-        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
+        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region), buildRegionInfoLink(region)));
         return 0;
     }
 
-    private static int createCuboidRegion(CommandContext<CommandSource> ctx, String regionName, DimensionRegionCache dimCache, BlockPos pos1, BlockPos pos2, @Nullable ServerPlayerEntity owner) {
-        CuboidRegion region = new CuboidRegion(regionName, new CuboidArea(pos1, pos2), owner, dimCache.dimensionKey());
-        return createRegion(ctx, regionName, dimCache, region);
+    private static int createCuboidRegion(CommandContext<CommandSource> ctx, String regionName, DimensionRegionCache dimCache, BlockPos pos1, BlockPos pos2, @Nullable IProtectedRegion parent) {
+        CuboidRegion region = new CuboidRegion(regionName, new CuboidArea(pos1, pos2), null, dimCache.dimensionKey());
+        if (parent == null) {
+            return createRegion(ctx, regionName, dimCache, region, dimCache.getDimensionalRegion());
+        }
+        return createRegion(ctx, regionName, dimCache, region, parent);
     }
 
-    private static int createSphereRegion(CommandContext<CommandSource> ctx, String regionName, DimensionRegionCache dimCache, BlockPos centerPos, BlockPos radiusPos, @Nullable ServerPlayerEntity owner) {
-        SphereRegion region = new SphereRegion(regionName, new SphereArea(centerPos, radiusPos), owner, dimCache.dimensionKey());
-        return createRegion(ctx, regionName, dimCache, region);
+    private static int createSphereRegion(CommandContext<CommandSource> ctx, String regionName, DimensionRegionCache dimCache, BlockPos centerPos, BlockPos radiusPos, @Nullable IProtectedRegion parent) {
+        SphereRegion region = new SphereRegion(regionName, new SphereArea(centerPos, radiusPos), null, dimCache.dimensionKey());
+        if (parent == null) {
+            return createRegion(ctx, regionName, dimCache, region, dimCache.getDimensionalRegion());
+        }
+        return createRegion(ctx, regionName, dimCache, region, parent);
     }
 
-    private static int createSphereRegion(CommandContext<CommandSource> ctx, String regionName, DimensionRegionCache dimCache, BlockPos centerPos, int radius, @Nullable ServerPlayerEntity owner) {
-        SphereRegion region = new SphereRegion(regionName, new SphereArea(centerPos, radius), owner, dimCache.dimensionKey());
-        return createRegion(ctx, regionName, dimCache, region);
+    private static int createSphereRegion(CommandContext<CommandSource> ctx, String regionName, DimensionRegionCache dimCache, BlockPos centerPos, int radius, @Nullable IProtectedRegion parent) {
+        SphereRegion region = new SphereRegion(regionName, new SphereArea(centerPos, radius), null, dimCache.dimensionKey());
+        if (parent == null) {
+            return createRegion(ctx, regionName, dimCache, region, dimCache.getDimensionalRegion());
+        }
+        return createRegion(ctx, regionName, dimCache, region, parent);
     }
 
     private static int attemptDeleteRegion(CommandContext<CommandSource> ctx, DimensionRegionCache dim, IMarkableRegion region) {
