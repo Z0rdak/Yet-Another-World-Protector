@@ -10,6 +10,7 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.CommandConstants;
 import de.z0rdak.yawp.commands.arguments.flag.IFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.flag.RegionFlagArgumentType;
+import de.z0rdak.yawp.commands.arguments.region.ContainingOwnedRegionArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.core.area.AreaType;
@@ -92,8 +93,8 @@ public class ArgumentUtil {
         return RegionArgumentType.getRegion(ctx, CHILD.toString());
     }
 
-    public static IMarkableRegion getParentRegionArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
-        return RegionArgumentType.getRegionInPlayerDim(ctx, PARENT.toString());
+    public static IMarkableRegion getContainingOwnedRegionArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
+        return ContainingOwnedRegionArgumentType.getRegion(ctx, PARENT.toString());
     }
 
     public static ServerPlayerEntity getPlayerArgument(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
