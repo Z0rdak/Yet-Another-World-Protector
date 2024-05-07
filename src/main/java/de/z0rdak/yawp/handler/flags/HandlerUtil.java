@@ -33,6 +33,8 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static de.z0rdak.yawp.config.server.CommandPermissionConfig.hasRegionPermission;
+
 public final class HandlerUtil {
 
     /**
@@ -173,11 +175,6 @@ public final class HandlerUtil {
         }
     }
 
-    public static FlagState getFlagState(BlockPos pos, RegistryKey<World> dim, RegionFlag flag, @Nullable PlayerEntity player) {
-        IProtectedRegion region = getResponsible(pos, dim);
-        return getFlagState(region, flag, player);
-    }
-
     /**
      * Gets the flag state for the given region and flag. <br>
      * If the player is null, the flag state is returned as is. <br>
@@ -193,7 +190,7 @@ public final class HandlerUtil {
         if (player == null) {
             return region.getFlagContainer().flagState(flag.name);
         } else {
-            boolean hasPermission = CommandPermissionConfig.hasRegionPermission(region, player, CommandUtil.OWNER);
+            boolean hasPermission = hasRegionPermission(region, player, CommandUtil.OWNER) || hasRegionPermission(region, player, CommandUtil.MEMBER);
             boolean isPermitted = hasPermission || CommandPermissionConfig.hasConfigPermAndOpByPassFlags(player);
             if (isPermitted) {
                 return FlagState.ALLOWED;
