@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.util;
 
+import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.stick.AbstractStick;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import net.minecraft.ChatFormatting;
@@ -14,6 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 
 import static net.minecraft.ChatFormatting.*;
@@ -33,6 +35,20 @@ public final class StickUtil {
     public static final String STICK_ID = "stick-id";
     public static final String STICK = "stick";
 
+    @Nullable
+    public static IMarkableArea getMarkedArea(ItemStack stick) {
+        if (isVanillaStick(stick) && isMarker(stick)) {
+            CompoundTag stickNBT = StickUtil.getStickNBT(stick);
+            if (stickNBT != null) {
+                MarkerStick marker = new MarkerStick(stickNBT);
+                if (!marker.isValidArea()) {
+                    return null;
+                }
+                return LocalRegions.areaFrom(marker);
+            }
+        }
+        return null;
+    }
 
     public static void applyEnchantmentGlint(ItemStack item) {
         CompoundTag dummy = new CompoundTag();
@@ -101,6 +117,10 @@ public final class StickUtil {
             }
         }
         return StickType.UNKNOWN;
+    }
+
+    public static boolean isMarker(ItemStack stick) {
+        return getStickType(stick) == StickType.MARKER;
     }
 
     public static CompoundTag getStickNBT(ItemStack stick) {
