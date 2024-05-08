@@ -1,0 +1,3 @@
+IVEN#2107 for the mod logo.
+Reincarnaciya for the russian translation.
+ptefar#7680 aka. petersv5 for the helping with flag parity for the fabric port.
