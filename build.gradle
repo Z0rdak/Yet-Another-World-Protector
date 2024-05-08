@@ -6,7 +6,7 @@ plugins {
     id 'net.neoforged.gradle.userdev' version '7.0.97'
 }
 
-version = mod_version
+version = "${minecraft_version}-${mod_version}-neoforge"
 group = mod_group_id
 
 repositories {

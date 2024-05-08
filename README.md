@@ -1,28 +1,35 @@
+# Introduction
 
-Installation information
-=======
+Yet Another World Protector, or YAWP for short, is a server-side mod which allows you to protect your creations against various different events/actions of players, mobs and the environment. It was inspired by the forge mod [WorldProtector](https://www.curseforge.com/minecraft/mc-mods/worldprotector) and the [WorldGuard](https://dev.bukkit.org/projects/worldguard) plugin.
 
-This template repository can be directly cloned to get you started with a new
-mod. Simply create a new repository cloned from this one, by following the
-instructions at [github](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
+***The mod is currently in its beta state, with many features not yet implemented but to come. These features will include most of the things you know from WorldProtector and WorldGuard.***
 
-Once you have your clone, simply open the repository in the IDE of your choice. The usual recommendation for an IDE is either IntelliJ IDEA or Eclipse.
+This mod will be released for Minecraft versions 1.16.5+. If you are living in the past and are looking for a version for Minecraft 1.12.2, I suggest looking into using [WorldDefender](https://www.curseforge.com/minecraft/mc-mods/world-defender).
 
-> **Note**: For Eclipse, use tasks in `Launch Group` instead of ones founds in `Java Application`. A preparation task must run before launching the game. NeoGradle uses launch groups to do these subsequently.
+# Contribution
 
-If at any point you are missing libraries in your IDE, or you've run into problems you can
-run `gradlew --refresh-dependencies` to refresh the local cache. `gradlew clean` to reset everything 
-{this does not affect your code} and then start the process again.
+Found a bug? Or do you have an idea for a new flag or just general suggestions for the mod?
 
-Mapping Names:
-============
-By default, the MDK is configured to use the official mapping names from Mojang for methods and fields 
-in the Minecraft codebase. These names are covered by a specific license. All modders should be aware of this
-license, if you do not agree with it you can change your mapping names to other crowdsourced names in your 
-build.gradle. For the latest license text, refer to the mapping file itself, or the reference copy here:
-https://github.com/NeoForged/NeoForm/blob/main/Mojang.md
+Don't hesitate to propose them to me. Just hop on to our discord server! Or alternatively, open a
+new [issue](https://github.com/Z0rdak/Yet-Another-World-Protector/issues) on our GitHub page!
 
-Additional Resources: 
-==========
-Community Documentation: https://docs.neoforged.net/  
-NeoForged Discord: https://discord.neoforged.net/
+# Credits
+
+- Special thanks to IVEN#2107 for the mod logo!
+- Special thanks to Reincarnaciya for the russian translation!
+- Special thanks to petersv5 aka. ptefar, for help porting flags to fabric!
+
+# License
+
+This mod is released under the GNU LESSER GENERAL PUBLIC LICENSE Version 3.
+
+# Links
+
+* [Yet Another World Protector - Discord]( https://discord.gg/d7hArKCUtm)
+* [Yet Another World Protector - Github](https://github.com/Z0rdak/Yet-Another-World-Protector)
+* [Yet Another World Protector - Curseforge](https://www.curseforge.com/minecraft/mc-mods/yawp)
+* [Yet Another World Protector - Modrinth](https://modrinth.com/mod/yawp)
+
+# Development roadmap
+
+See [Wiki](https://github.com/Z0rdak/Yet-Another-World-Protector/wiki)<!-- @IGNORE PREVIOUS: link -->
