@@ -6,6 +6,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,7 +27,7 @@ public class CuboidArea extends AbstractArea {
     }
 
     public CuboidArea(BlockPos p1, BlockPos p2) {
-        this(new Box(p1, p2));
+        this(new Box(new Vec3d(p1.getX(), p1.getY(), p1.getZ()), new Vec3d(p2.getX(), p2.getY(), p2.getZ())));
         this.p1 = p1;
         this.p2 = p2;
     }
@@ -97,7 +98,7 @@ public class CuboidArea extends AbstractArea {
         super.deserializeNBT(nbt);
         this.p1 = NbtHelper.toBlockPos(nbt.getCompound(AreaNBT.P1));
         this.p2 = NbtHelper.toBlockPos(nbt.getCompound(AreaNBT.P2));
-        this.area = new Box(p1, p2);
+        this.area = new Box(new Vec3d(p1.getX(), p1.getY(), p1.getZ()), new Vec3d(p2.getX(), p2.getY(), p2.getZ()));
     }
 
     @Override

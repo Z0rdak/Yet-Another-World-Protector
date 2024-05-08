@@ -97,7 +97,6 @@ public abstract class ExplosionMixin {
         }
     }
 
-    @Shadow
     public abstract DamageSource getDamageSource();
 
     @Inject(method = "collectBlocksAndDamageEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getOtherEntities(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/Box;)Ljava/util/List;"), cancellable = true, allow = 1)
@@ -122,7 +121,7 @@ public abstract class ExplosionMixin {
 
             for (int v = 0; v < affectedEntities.size(); ++v) {
                 Entity entity = affectedEntities.get(v);
-                if (!entity.isImmuneToExplosion()) {
+                if (!entity.isImmuneToExplosion(explosion)) {
                     double w = Math.sqrt(entity.squaredDistanceTo(vec3d)) / (double) q;
                     if (w <= 1.0) {
                         double x = entity.getX() - this.x;

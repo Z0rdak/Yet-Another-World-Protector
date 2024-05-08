@@ -317,7 +317,7 @@ public class DimensionCommands {
             if (affiliationType.equals(MEMBER.toString())) {
                 if (dimCache.getDimensionalRegion().hasMember(player.getUuid())) {
                     dimCache.getDimensionalRegion().removeMember(player);
-                    MutableText playerInfo = buildAffiliateInfo(dimCache.getDimensionalRegion(), player.getEntityName(), AffiliationType.PLAYER);
+                    MutableText playerInfo = buildAffiliateInfo(dimCache.getDimensionalRegion(), player.getNameForScoreboard(), AffiliationType.PLAYER);
                     sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.dim.info.player.removed", "Removed '%s' player '%s' from region %s",
                             affiliationType, playerInfo, buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION)).append(" ").append(undoLink));
                     RegionDataManager.save();
@@ -327,7 +327,7 @@ public class DimensionCommands {
             if (affiliationType.equals(OWNER.toString())) {
                 if (dimCache.getDimensionalRegion().hasOwner(player.getUuid())) {
                     dimCache.getDimensionalRegion().removeOwner(player);
-                    MutableText playerInfo = buildAffiliateInfo(dimCache.getDimensionalRegion(), player.getEntityName(), AffiliationType.PLAYER);
+                    MutableText playerInfo = buildAffiliateInfo(dimCache.getDimensionalRegion(), player.getNameForScoreboard(), AffiliationType.PLAYER);
                     sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.dim.info.player.removed", "Removed '%s' player '%s' from region %s",
                             affiliationType, playerInfo, buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION)).append(" ").append(undoLink));
                     RegionDataManager.save();
