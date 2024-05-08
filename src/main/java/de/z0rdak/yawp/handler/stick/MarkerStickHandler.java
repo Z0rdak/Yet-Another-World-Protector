@@ -3,7 +3,7 @@ package de.z0rdak.yawp.handler.stick;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.area.AreaType;
-import de.z0rdak.yawp.core.region.AbstractMarkableRegion;
+import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -72,7 +72,7 @@ public class MarkerStickHandler {
             String regionName = outputItem.getHoverName().getString();
             MarkerStick marker = new MarkerStick(stickNBT);
             if (marker.isValidArea()) {
-                AbstractMarkableRegion region = LocalRegions.regionFrom(player, marker, regionName);
+                IMarkableRegion region = LocalRegions.regionFrom(player, marker, regionName);
                 if (region != null) {
                     DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.getCommandSenderWorld().dimension());
                     if (dimCache != null){
