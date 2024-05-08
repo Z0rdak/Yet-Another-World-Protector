@@ -77,7 +77,7 @@ public class Polygon3DArea extends AbstractArea {
         NbtCompound nbt = super.serializeNBT();
         NbtList pointList = new NbtList();
         this.positions.forEach((point) -> {
-            NbtCompound pointNbt = NbtHelper.fromBlockPos(point);
+            NbtElement pointNbt = NbtHelper.fromBlockPos(point);
             pointList.add(pointNbt);
         });
         nbt.put(AreaNBT.BLOCKS, pointList);

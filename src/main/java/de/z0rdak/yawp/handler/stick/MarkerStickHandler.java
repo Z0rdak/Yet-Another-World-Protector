@@ -34,7 +34,8 @@ public class MarkerStickHandler {
             if (!involvedItem.equals(ItemStack.EMPTY) && isVanillaStick(involvedItem)) {
                 StickType stickType = getStickType(involvedItem);
                 if (Objects.requireNonNull(stickType) == StickType.MARKER) {
-                    MarkerStick marker = new MarkerStick(involvedItem.getNbt().getCompound(STICK));
+                    NbtCompound stickTag = getStickTag(involvedItem);
+                    MarkerStick marker = new MarkerStick(stickTag);
                     AreaType areaType = marker.getAreaType();
                     if (areaType == null) {
                         YetAnotherWorldProtector.LOGGER.warn("Unknown area type on marking - should really not happening");

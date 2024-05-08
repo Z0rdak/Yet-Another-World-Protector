@@ -94,7 +94,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     @Override
     public void deserializeNBT(NbtCompound nbt) {
         super.deserializeNBT(nbt);
-        this.tpTarget = NbtHelper.toBlockPos(nbt.getCompound(TP_POS));
+        this.tpTarget = NbtHelper.toBlockPos(nbt, TP_POS).orElseThrow();
         this.priority = nbt.getInt(PRIORITY);
         this.isMuted = nbt.getBoolean(MUTED);
         AreaType areaType = AreaType.of(nbt.getString(AREA_TYPE));

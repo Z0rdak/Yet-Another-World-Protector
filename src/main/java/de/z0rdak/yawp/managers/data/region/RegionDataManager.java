@@ -16,6 +16,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
@@ -118,7 +119,7 @@ public class RegionDataManager extends PersistentState {
         }
     }
 
-    public static RegionDataManager load(NbtCompound nbt) {
+    private static RegionDataManager load(NbtCompound nbt, RegistryWrapper.WrapperLookup wrapperLookup) {
         RegionDataManager rdm = new RegionDataManager();
         rdm.dimCacheMap.clear();
         NbtCompound dimensionRegions = nbt.getCompound(DIMENSIONS);
@@ -230,7 +231,7 @@ public class RegionDataManager extends PersistentState {
      * @return the compound region nbt data to be saved to disk.
      */
     @Override
-    public NbtCompound writeNbt(NbtCompound compound) {
+    public NbtCompound writeNbt(NbtCompound compound, RegistryWrapper.WrapperLookup registryLookup) {
         NbtCompound dimRegionNbtData = new NbtCompound();
         YetAnotherWorldProtector.LOGGER.info(Text.translatableWithFallback("data.nbt.dimensions.save.amount", "Saving %s region(s) for %s dimensions", this.getTotalRegionAmount(), dimCacheMap.keySet().size()).getString());
         for (Map.Entry<RegistryKey<World>, DimensionRegionCache> entry : dimCacheMap.entrySet()) {

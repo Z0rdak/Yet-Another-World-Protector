@@ -38,7 +38,7 @@ public class SectionArea extends AbstractArea {
     @Override
     public void deserializeNBT(NbtCompound nbt) {
         super.deserializeNBT(nbt);
-        this.section = ChunkSectionPos.from(NbtHelper.toBlockPos(nbt.getCompound(POS)));
+        this.section = ChunkSectionPos.from(NbtHelper.toBlockPos(nbt, POS).orElseThrow());
     }
 
     @Override

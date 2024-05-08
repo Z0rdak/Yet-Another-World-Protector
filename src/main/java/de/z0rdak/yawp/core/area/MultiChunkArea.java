@@ -33,7 +33,7 @@ public class MultiChunkArea extends AbstractArea {
         this.chunks.stream()
                 .map(ChunkPos::getStartPos)
                 .forEach((point) -> {
-                    NbtCompound pointNbt = NbtHelper.fromBlockPos(point);
+                    NbtElement pointNbt = NbtHelper.fromBlockPos(point);
                     pointList.add(pointNbt);
                 });
         nbt.put(AreaNBT.BLOCKS, pointList);

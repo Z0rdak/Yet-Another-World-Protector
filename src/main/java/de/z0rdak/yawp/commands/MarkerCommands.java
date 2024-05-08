@@ -85,7 +85,7 @@ public final class MarkerCommands {
             if (StickUtil.isVanillaStick(maybeStick)) {
                 StickType stickType = StickUtil.getStickType(maybeStick);
                 if (stickType == StickType.MARKER) {
-                    NbtCompound stickNBT = StickUtil.getStickNBT(maybeStick);
+                    NbtCompound stickNBT = StickUtil.getStickTag(maybeStick);
                     if (stickNBT != null) {
                         MarkerStick marker = new MarkerStick(stickNBT);
                         if (!marker.isValidArea()) {

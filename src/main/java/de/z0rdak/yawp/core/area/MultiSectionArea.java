@@ -36,7 +36,7 @@ public class MultiSectionArea extends AbstractArea {
         this.sections.stream()
                 .map(ChunkSectionPos::getMinPos)
                 .forEach((point) -> {
-                    NbtCompound pointNbt = NbtHelper.fromBlockPos(point);
+                    NbtElement pointNbt = NbtHelper.fromBlockPos(point);
                     pointList.add(pointNbt);
                 });
         nbt.put(AreaNBT.BLOCKS, pointList);

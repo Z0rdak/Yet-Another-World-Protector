@@ -38,7 +38,7 @@ public class ChunkArea extends AbstractArea {
     @Override
     public void deserializeNBT(NbtCompound nbt) {
         super.deserializeNBT(nbt);
-        this.chunk = new ChunkPos(NbtHelper.toBlockPos(nbt.getCompound(POS)));
+        this.chunk = new ChunkPos(NbtHelper.toBlockPos(nbt, POS).orElseThrow());
     }
 
     @Override

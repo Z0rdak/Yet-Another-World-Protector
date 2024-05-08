@@ -5,10 +5,10 @@ import de.z0rdak.yawp.commands.CommandRegistry;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
-import fuzs.forgeconfigapiport.api.config.v2.ForgeConfigRegistry;
-import fuzs.forgeconfigapiport.api.config.v2.ModConfigEvents;
+import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeConfigRegistry;
+import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeModConfigEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.fml.config.ModConfig;
 
 import java.util.stream.Collectors;
 
@@ -19,13 +19,12 @@ public final class ConfigRegistry {
     private ConfigRegistry(){}
 
     public static void register(){
-        ModConfigEvents.loading(MODID).register(ConfigRegistry::onModLoading);
-        ModConfigEvents.reloading(MODID).register(ConfigRegistry::onModReloading);
-
+        NeoForgeModConfigEvents.loading(MODID).register(ConfigRegistry::onModLoading);
+        NeoForgeModConfigEvents.reloading(MODID).register(ConfigRegistry::onModReloading);
         // registering configuration
-        ForgeConfigRegistry.INSTANCE.register(MODID, ModConfig.Type.SERVER, CommandPermissionConfig.CONFIG_SPEC, CommandPermissionConfig.CONFIG_NAME);
-        ForgeConfigRegistry.INSTANCE.register(MODID, ModConfig.Type.SERVER, FlagConfig.CONFIG_SPEC, FlagConfig.CONFIG_NAME);
-        ForgeConfigRegistry.INSTANCE.register(MODID, ModConfig.Type.SERVER, RegionConfig.CONFIG_SPEC, RegionConfig.CONFIG_NAME);
+        NeoForgeConfigRegistry.INSTANCE.register(MODID, ModConfig.Type.SERVER, CommandPermissionConfig.CONFIG_SPEC, CommandPermissionConfig.CONFIG_NAME);
+        NeoForgeConfigRegistry.INSTANCE.register(MODID, ModConfig.Type.SERVER, FlagConfig.CONFIG_SPEC, FlagConfig.CONFIG_NAME);
+        NeoForgeConfigRegistry.INSTANCE.register(MODID, ModConfig.Type.SERVER, RegionConfig.CONFIG_SPEC, RegionConfig.CONFIG_NAME);
     }
 
     private static void onModReloading(ModConfig modConfig) {

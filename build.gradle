@@ -1,14 +1,16 @@
 plugins {
-	id 'fabric-loom' version '1.4-SNAPSHOT'
+	id 'fabric-loom' version '1.6-SNAPSHOT'
 	id 'maven-publish'
 }
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
 
-archivesBaseName = project.archives_base_name
-version = project.minecraft_version + "-" + project.mod_version + "-fabric"
+
+version = project.mod_version
 group = project.maven_group
+
+base {
+	archivesName = project.archives_base_name
+}
 
 repositories {
 	mavenCentral()
@@ -31,21 +33,18 @@ dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+	// mappings loom.officialMojangMappings()
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	implementation 'com.electronwill.night-config:core:3.6.5'
-	implementation 'com.electronwill.night-config:toml:3.6.5'
+	implementation 'com.electronwill.night-config:core:3.6.7'
+	implementation 'com.electronwill.night-config:toml:3.6.7'
 
 	// all required ids for this version are found here: https://www.curseforge.com/minecraft/mc-mods/forge-config-api-port-fabric/files/3671141
-
-	// 1.20
-	// modImplementation "curse.maven:forge-config-api-port-fabric-547434:4576917"
-	// modImplementation "curse.maven:forge-config-api-port-fabric-547434:4762497"
-	modImplementation "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:9.0.0"
-
+	modImplementation "curse.maven:forge-config-api-port-fabric-547434:5303707" // 1.20.6
+	// modApi "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:20.6.0"
 
 	// Uncomment the following line to enable the deprecated Fabric API modules. 
 	// These are included in the Fabric API production distribution and allow you to update your mod to the latest modules at a later more convenient time.
@@ -62,8 +61,7 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-	// Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
-	it.options.release = 17
+	it.options.release = 21
 }
 
 java {
@@ -71,18 +69,21 @@ java {
 	// if it is present.
 	// If you remove this line, sources will not be generated.
 	withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 jar {
 	from("LICENSE.txt") {
-		rename { "${it}_${project.archivesBaseName}" }
+		rename { "${it}_${project.base.archivesName.get()}"}
 	}
 }
 
 // configure the maven publication
 publishing {
 	publications {
-		mavenJava(MavenPublication) {
+		create("mavenJava", MavenPublication) {
+			artifactId = project.archives_base_name
 			from components.java
 		}
 	}

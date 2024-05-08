@@ -95,8 +95,8 @@ public class CuboidArea extends AbstractArea {
     @Override
     public void deserializeNBT(NbtCompound nbt) {
         super.deserializeNBT(nbt);
-        this.p1 = NbtHelper.toBlockPos(nbt.getCompound(AreaNBT.P1));
-        this.p2 = NbtHelper.toBlockPos(nbt.getCompound(AreaNBT.P2));
+        this.p1 = NbtHelper.toBlockPos(nbt, AreaNBT.P1).orElseThrow();
+        this.p2 = NbtHelper.toBlockPos(nbt, AreaNBT.P2).orElseThrow();
         this.area = Box.enclosing(p1, p2);
     }
 

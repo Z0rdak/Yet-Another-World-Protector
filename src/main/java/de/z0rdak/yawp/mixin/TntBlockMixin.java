@@ -26,10 +26,9 @@ import net.minecraft.world.World;
 @Mixin(TntBlock.class)
 public class TntBlockMixin {
 
-    @Inject(method = "onUse", at = @At("HEAD"), cancellable = true, allow = 1)
-    public void onUseFlintAndSteel(BlockState state, World world, BlockPos pos, PlayerEntity player2, Hand hand, BlockHitResult hit, CallbackInfoReturnable<ActionResult> cir) {
-        ItemStack itemStack = player2.getStackInHand(hand);
-        if (sameItemStackIgnoreDurability(itemStack, Items.FLINT_AND_STEEL.getDefaultStack()) || itemStack.isOf(Items.FIRE_CHARGE)) {
+    @Inject(method = "onUseWithItem", at = @At("HEAD"), cancellable = true, allow = 1)
+    public void onUseFlintAndSteel(ItemStack item, BlockState state, World world, BlockPos pos, PlayerEntity player2, Hand hand, BlockHitResult hit, CallbackInfoReturnable<ActionResult> cir) {
+        if (sameItemStackIgnoreDurability(item) || item.isOf(Items.FIRE_CHARGE)) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.getRegistryKey());
             FlagCheckEvent flagCheck = checkPlayerEvent(player2, pos, IGNITE_EXPLOSIVES, dimCache.getDimensionalRegion());
             if (flagCheck.isDenied()) {
@@ -39,9 +38,9 @@ public class TntBlockMixin {
         }
     }
 
-    private static boolean sameItemStackIgnoreDurability(ItemStack left, ItemStack right){
+    private static boolean sameItemStackIgnoreDurability(ItemStack left){
         if (!left.isDamageable()) {
-            return ItemStack.canCombine(left, right);
+            return left.isOf(Items.FLINT_AND_STEEL);
         } else {
             return false;
         }
