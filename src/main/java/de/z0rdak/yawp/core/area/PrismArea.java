@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.core.area;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -13,7 +14,7 @@ public class PrismArea extends AbstractArea {
 
     public PrismArea(CompoundTag nbt) {
         super(nbt);
-        this.deserializeNBT(nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     public PrismArea() {
@@ -34,15 +35,15 @@ public class PrismArea extends AbstractArea {
 
     // TODO: implementation
     @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        CompoundTag nbt = super.serializeNBT(provider);
         throw new NotImplementedException("Missing serializeNBT implementation in PrismArea");
     }
 
     // TODO: implementation
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        super.deserializeNBT(provider, nbt);
         throw new NotImplementedException("Missing deserializeNBT implementation in PrismArea");
     }
 

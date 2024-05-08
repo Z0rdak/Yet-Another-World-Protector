@@ -2,6 +2,7 @@ package de.z0rdak.yawp.core.area;
 
 import de.z0rdak.yawp.util.constants.AreaNBT;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
@@ -23,12 +24,12 @@ public class MultiChunkArea extends AbstractArea {
 
     protected MultiChunkArea(CompoundTag nbt) {
         super(nbt);
-        this.deserializeNBT(nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        CompoundTag nbt = super.serializeNBT(provider);
         ListTag pointList = new ListTag();
         this.chunks.stream()
                 .map(ChunkPos::getWorldPosition)
@@ -41,8 +42,8 @@ public class MultiChunkArea extends AbstractArea {
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        super.deserializeNBT(provider, nbt);
         this.chunks.clear();
         ListTag posList = nbt.getList(AreaNBT.BLOCKS, Tag.TAG_COMPOUND);
         for (int i = 0; i < posList.size(); i++) {

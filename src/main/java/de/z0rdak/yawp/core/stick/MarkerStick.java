@@ -52,7 +52,7 @@ public class MarkerStick extends AbstractStick implements INBTSerializable<Compo
 
     public MarkerStick(CompoundTag nbt) {
         super(StickType.MARKER);
-        this.deserializeNBT(nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     public void cycleMode() {
@@ -116,8 +116,8 @@ public class MarkerStick extends AbstractStick implements INBTSerializable<Compo
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        CompoundTag nbt = super.serializeNBT(provider);
         nbt.putString(STICK_ID, UUID.randomUUID().toString());
         nbt.putBoolean(VALID_AREA, this.isValidArea);
         nbt.putString(AREA_TYPE, this.areaType.areaType);
@@ -133,8 +133,8 @@ public class MarkerStick extends AbstractStick implements INBTSerializable<Compo
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        super.deserializeNBT(provider, nbt);
         this.isValidArea = nbt.getBoolean(VALID_AREA);
         this.areaType = AreaType.of(nbt.getString(AREA_TYPE));
         boolean isTpSet = nbt.getBoolean(IS_TP_SET);

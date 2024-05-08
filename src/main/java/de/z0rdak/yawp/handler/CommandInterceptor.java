@@ -21,11 +21,11 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.ToolActions;
 import net.neoforged.neoforge.event.CommandEvent;
 import net.neoforged.neoforge.event.ServerChatEvent;
-import net.neoforged.neoforge.event.TickEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.EntityMobGriefingEvent;
 import net.neoforged.neoforge.event.entity.EntityMountEvent;
@@ -37,7 +37,6 @@ import net.neoforged.neoforge.event.level.*;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 import static de.z0rdak.yawp.util.MessageUtil.sendCmdFeedback;
-import static net.neoforged.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,7 +48,7 @@ import static de.z0rdak.yawp.core.region.RegionType.LOCAL;
 import static de.z0rdak.yawp.util.MessageUtil.buildRegionInfoLink;
 import static net.minecraft.ChatFormatting.RED;
 
-@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER, bus = FORGE)
+@EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER, bus = EventBusSubscriber.Bus.GAME)
 public class CommandInterceptor {
 
     /**

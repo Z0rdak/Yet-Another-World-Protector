@@ -2,6 +2,7 @@ package de.z0rdak.yawp.core.area;
 
 import de.z0rdak.yawp.util.constants.AreaNBT;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -26,12 +27,12 @@ public class MultiSectionArea extends AbstractArea {
 
     protected MultiSectionArea(CompoundTag nbt) {
         super(nbt);
-        this.deserializeNBT(nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        CompoundTag nbt = super.serializeNBT(provider);
         ListTag pointList = new ListTag();
         this.sections.stream()
                 .map(SectionPos::origin)
@@ -44,8 +45,8 @@ public class MultiSectionArea extends AbstractArea {
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        super.deserializeNBT(provider, nbt);
         this.sections.clear();
         ListTag posList = nbt.getList(AreaNBT.BLOCKS, Tag.TAG_COMPOUND);
         for (int i = 0; i < posList.size(); i++) {

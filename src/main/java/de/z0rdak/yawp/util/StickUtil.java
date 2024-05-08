@@ -51,7 +51,7 @@ public final class StickUtil {
         CompoundTag itemTag = stick.hasTag() ? stick.getTag() : new CompoundTag();
         if (itemTag != null) {
             if (Objects.requireNonNull(type) == StickType.MARKER) {
-                CompoundTag compoundNBT = new MarkerStick(dim).serializeNBT();
+                CompoundTag compoundNBT = new MarkerStick(dim).serializeNBT(provider);
                 itemTag.put(STICK, compoundNBT);
                 stick.setTag(itemTag);
             }

@@ -1,8 +1,10 @@
 package de.z0rdak.yawp.core.flag;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.neoforged.neoforge.common.util.INBTSerializable;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.HashMap;
 import java.util.Set;
@@ -19,7 +21,7 @@ public class FlagContainer extends HashMap<String, IFlag> implements INBTSeriali
 
     public FlagContainer(CompoundTag nbt){
         this();
-        this.deserializeNBT(nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     public FlagContainer(){
@@ -37,18 +39,18 @@ public class FlagContainer extends HashMap<String, IFlag> implements INBTSeriali
     }
 
     @Override
-    public CompoundTag serializeNBT() {
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag nbt = new CompoundTag();
         this.forEach((flagName, iFlag) -> {
             if (RegionFlag.contains(flagName)) {
-                nbt.put(flagName, iFlag.serializeNBT());
+                nbt.put(flagName, iFlag.serializeNBT(provider));
             }
         });
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
         Set<String> flagKeys = nbt.getAllKeys();
         flagKeys.forEach( key -> {
             CompoundTag flagNbt = nbt.getCompound(key);

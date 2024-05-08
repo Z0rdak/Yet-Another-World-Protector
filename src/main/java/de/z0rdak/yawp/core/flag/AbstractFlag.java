@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.core.flag;
 
 import de.z0rdak.yawp.util.constants.RegionNBT;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
@@ -29,7 +30,7 @@ public abstract class AbstractFlag implements IFlag {
     }
 
     public AbstractFlag(CompoundTag nbt) {
-        this.deserializeNBT(nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     @Override
@@ -63,7 +64,7 @@ public abstract class AbstractFlag implements IFlag {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag nbt = new CompoundTag();
         nbt.putString(FLAG_NAME, this.flagIdentifier);
         nbt.putBoolean(FLAG_ACTIVE, this.isActive);
@@ -73,7 +74,7 @@ public abstract class AbstractFlag implements IFlag {
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
         this.flagIdentifier = nbt.getString(FLAG_NAME);
         this.isActive = nbt.getBoolean(FLAG_ACTIVE);
         this.inverted = nbt.getBoolean(IS_INVERTED);

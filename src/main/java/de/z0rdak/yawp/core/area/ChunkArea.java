@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.core.area;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.level.ChunkPos;
@@ -25,19 +26,19 @@ public class ChunkArea extends AbstractArea {
 
     protected ChunkArea(CompoundTag nbt) {
         super(nbt);
-        this.deserializeNBT(nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        CompoundTag nbt = super.serializeNBT(provider);
         nbt.put(POS, NbtUtils.writeBlockPos(this.chunk.getWorldPosition()));
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        super.deserializeNBT(provider, nbt);
         this.chunk = new ChunkPos(NbtUtils.readBlockPos(nbt.getCompound(POS)));
     }
 

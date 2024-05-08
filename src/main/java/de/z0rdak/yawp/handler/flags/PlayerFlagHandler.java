@@ -38,17 +38,18 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.ToolActions;
 import net.neoforged.neoforge.event.CommandEvent;
 import net.neoforged.neoforge.event.ServerChatEvent;
-import net.neoforged.neoforge.event.TickEvent;
 import net.neoforged.neoforge.event.entity.EntityMountEvent;
 import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
 import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
 import net.neoforged.neoforge.event.entity.living.*;
 import net.neoforged.neoforge.event.entity.player.*;
 import net.neoforged.neoforge.event.level.*;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
@@ -57,29 +58,29 @@ import java.util.Set;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
-import static net.neoforged.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 /**
  * Contains flag handler for events directly related/cause to/by players.
  */
-@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER, bus = FORGE)
+@EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER, bus = EventBusSubscriber.Bus.GAME)
 public final class PlayerFlagHandler {
 
     private PlayerFlagHandler() {
     }
 
     @SubscribeEvent
-    public static void onElytraFlying(TickEvent.PlayerTickEvent event) {
-        if (isServerSide(event.player) && event.phase == TickEvent.Phase.END) {
-            ResourceKey<Level> entityDim = getEntityDim(event.player);
+    public static void onElytraFlying(PlayerTickEvent.Post event) {
+        if (isServerSide(event.getEntity())) {
+            ResourceKey<Level> entityDim = getEntityDim(event.getEntity());
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(entityDim);
             if (dimCache != null) {
                 // FIXME: This check first
-                if (event.player.isFallFlying()) {
-                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(event.player, event.player.blockPosition(), NO_FLIGHT, dimCache.getDimensionalRegion());
+                if (event.getEntity().isFallFlying()) {
+                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(event.getEntity(), event.getEntity().blockPosition(), NO_FLIGHT, dimCache.getDimensionalRegion());
                     if (flagCheckEvent.isDenied()) {
                         sendFlagDeniedMsg(flagCheckEvent);
-                        event.player.stopFallFlying();
+                        event.getEntity().stopFallFlying();
                     }
                 }
             }

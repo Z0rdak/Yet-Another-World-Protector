@@ -3,6 +3,7 @@ package de.z0rdak.yawp.core.area;
 import de.z0rdak.yawp.util.AreaUtil;
 import de.z0rdak.yawp.util.constants.AreaNBT;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.phys.AABB;
@@ -38,7 +39,7 @@ public class CuboidArea extends AbstractArea {
 
     public CuboidArea(CompoundTag nbt) {
         super(nbt);
-        this.deserializeNBT(nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     @Override
@@ -85,16 +86,16 @@ public class CuboidArea extends AbstractArea {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        CompoundTag nbt = super.serializeNBT(provider);
         nbt.put(AreaNBT.P1, NbtUtils.writeBlockPos(this.p1));
         nbt.put(AreaNBT.P2, NbtUtils.writeBlockPos(this.p2));
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        super.deserializeNBT(provider, nbt);
         this.p1 = NbtUtils.readBlockPos(nbt.getCompound(AreaNBT.P1));
         this.p2 = NbtUtils.readBlockPos(nbt.getCompound(AreaNBT.P2));
         this.area = new AABB(new Vec3(this.p1.getX(), this.p1.getY(), this.p1.getZ()), new Vec3(this.p2.getX(), this.p2.getY(), this.p2.getZ()));

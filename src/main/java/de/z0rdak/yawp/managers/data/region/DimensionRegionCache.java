@@ -5,6 +5,7 @@ import de.z0rdak.yawp.core.affiliation.PlayerContainer;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.*;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
@@ -30,7 +31,7 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
     }
 
     public DimensionRegionCache(CompoundTag nbt) {
-        this.deserializeNBT(nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     public DimensionRegionCache(DimensionalRegion dimensionalRegion) {
@@ -111,19 +112,19 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag nbt = new CompoundTag();
-        nbt.put(DIM_REGION, this.dimensionalRegion.serializeNBT());
+        nbt.put(DIM_REGION, this.dimensionalRegion.serializeNBT(provider));
         CompoundTag regions = new CompoundTag();
         this.regionsInDimension.forEach((name, region) -> {
-            regions.put(name, region.serializeNBT());
+            regions.put(name, region.serializeNBT(provider));
         });
         nbt.put(REGIONS, regions);
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
         if (nbt.contains(DIM_REGION, Tag.TAG_COMPOUND)) {
             this.dimensionalRegion = new DimensionalRegion(nbt.getCompound(DIM_REGION));
         } else {

@@ -18,21 +18,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.Event;
-import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.common.ToolActions;
-import net.neoforged.neoforge.event.CommandEvent;
-import net.neoforged.neoforge.event.ServerChatEvent;
-import net.neoforged.neoforge.event.TickEvent;
 import net.neoforged.neoforge.event.entity.*;
-import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
-import net.neoforged.neoforge.event.entity.living.*;
-import net.neoforged.neoforge.event.entity.player.*;
 import net.neoforged.neoforge.event.level.*;
-import net.neoforged.neoforge.registries.NeoForgeRegistries;
-import static net.neoforged.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
@@ -41,7 +30,7 @@ import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
  * Contains event handler for flags not directly related to player actions.
  * E.g.
  */
-@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER, bus = FORGE)
+@EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER, bus = EventBusSubscriber.Bus.GAME)
 public class WorldFlagHandler {
 
     private WorldFlagHandler() {

@@ -12,15 +12,15 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 import static de.z0rdak.yawp.util.MessageUtil.*;
 import static net.minecraft.ChatFormatting.AQUA;
 import static net.minecraft.ChatFormatting.GREEN;
-import static net.neoforged.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
+import static net.neoforged.fml.common.EventBusSubscriber.Bus.GAME;
 
-@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER, bus = FORGE)
+@EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER, bus = GAME)
 public final class CommandRegistry {
 
     private CommandRegistry() {

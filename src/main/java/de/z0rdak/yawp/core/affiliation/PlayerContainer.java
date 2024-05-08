@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.core.affiliation;
 
 import de.z0rdak.yawp.util.constants.RegionNBT;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -8,6 +9,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.scores.Team;
 import net.neoforged.neoforge.common.util.INBTSerializable;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,7 +21,7 @@ public class PlayerContainer implements IMemberContainer, INBTSerializable<Compo
 
     public PlayerContainer(CompoundTag nbt){
         this();
-        this.deserializeNBT(nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     public PlayerContainer(){
@@ -96,7 +98,7 @@ public class PlayerContainer implements IMemberContainer, INBTSerializable<Compo
     }
 
     @Override
-    public CompoundTag serializeNBT() {
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag nbt = new CompoundTag();
         // serialize player data
         ListTag playerList = new ListTag();
@@ -117,7 +119,7 @@ public class PlayerContainer implements IMemberContainer, INBTSerializable<Compo
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
         // deserialize players data
         this.players.clear();
         ListTag playerLists = nbt.getList(RegionNBT.PLAYERS, Tag.TAG_COMPOUND);

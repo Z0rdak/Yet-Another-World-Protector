@@ -12,7 +12,7 @@ public final class PolygonRegion extends AbstractMarkableRegion {
 
     public PolygonRegion(CompoundTag nbt) {
         super(nbt);
-        this.deserializeNBT(nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     public PolygonRegion(String name, Polygon3DArea area, Player owner, ResourceKey<Level> dimension) {
@@ -24,8 +24,8 @@ public final class PolygonRegion extends AbstractMarkableRegion {
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        super.deserializeNBT(provider, nbt);
         this.area = new Polygon3DArea(nbt.getCompound(RegionNBT.AREA));
     }
 }

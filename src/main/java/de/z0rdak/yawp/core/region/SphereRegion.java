@@ -12,7 +12,7 @@ public final class SphereRegion extends AbstractMarkableRegion {
 
     public SphereRegion(CompoundTag nbt) {
         super(nbt);
-        this.deserializeNBT(nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     public SphereRegion(String name, SphereArea area, Player player, ResourceKey<Level> dimension) {
@@ -24,8 +24,8 @@ public final class SphereRegion extends AbstractMarkableRegion {
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        super.deserializeNBT(provider, nbt);
         this.area = new SphereArea(nbt.getCompound(RegionNBT.AREA));
     }
 }

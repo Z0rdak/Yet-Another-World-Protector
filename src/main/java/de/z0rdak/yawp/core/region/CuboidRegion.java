@@ -16,7 +16,7 @@ public final class CuboidRegion extends AbstractMarkableRegion {
 
     public CuboidRegion(CompoundTag nbt) {
         super(nbt);
-        this.deserializeNBT(nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     public CuboidRegion(String name, CuboidArea area, Player owner, ResourceKey<Level> dimension) {
@@ -29,8 +29,8 @@ public final class CuboidRegion extends AbstractMarkableRegion {
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        super.deserializeNBT(provider, nbt);
         this.area = new CuboidArea(nbt.getCompound(RegionNBT.AREA));
     }
 }

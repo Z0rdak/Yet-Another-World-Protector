@@ -51,7 +51,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
 
     public AbstractMarkableRegion(CompoundTag nbt){
         super(nbt);
-        this.deserializeNBT(nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     @Override
@@ -60,8 +60,8 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        CompoundTag nbt = super.serializeNBT(provider);
         nbt.put(TP_POS, NbtUtils.writeBlockPos(this.tpTarget));
         nbt.putInt(PRIORITY, priority);
         nbt.putBoolean(MUTED, isMuted);
@@ -71,8 +71,8 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        super.deserializeNBT(provider, nbt);
         this.tpTarget = NbtUtils.readBlockPos(nbt.getCompound(TP_POS));
         this.priority = nbt.getInt(PRIORITY);
         this.isMuted = nbt.getBoolean(MUTED);

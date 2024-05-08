@@ -20,9 +20,9 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import java.util.Objects;
 
 import static de.z0rdak.yawp.util.StickUtil.*;
-import static net.neoforged.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
+import net.neoforged.fml.common.EventBusSubscriber;
 
-@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER, bus = FORGE)
+@EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER, bus = EventBusSubscriber.Bus.GAME)
 public class StickInteractionHandler {
 
     private StickInteractionHandler() {

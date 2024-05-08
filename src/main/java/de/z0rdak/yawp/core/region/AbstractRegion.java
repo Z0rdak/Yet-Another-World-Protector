@@ -4,6 +4,7 @@ import de.z0rdak.yawp.core.affiliation.PlayerContainer;
 import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -51,7 +52,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.flags = new FlagContainer();
         this.members = new PlayerContainer();
         this.owners = new PlayerContainer();
-        this.deserializeNBT(nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     protected AbstractRegion(String name, RegionType type) {
@@ -362,15 +363,15 @@ public abstract class AbstractRegion implements IProtectedRegion {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag nbt = new CompoundTag();
         nbt.putString(NAME, this.name);
         nbt.putString(DIM, dimension.location().toString());
         nbt.putString(REGION_TYPE, this.regionType.type);
         nbt.putBoolean(ACTIVE, this.isActive);
-        nbt.put(FLAGS, this.flags.serializeNBT());
-        nbt.put(OWNERS, this.owners.serializeNBT());
-        nbt.put(MEMBERS, this.members.serializeNBT());
+        nbt.put(FLAGS, this.flags.serializeNBT(provider));
+        nbt.put(OWNERS, this.owners.serializeNBT(provider));
+        nbt.put(MEMBERS, this.members.serializeNBT(provider));
         if (this.parent != null) {
             nbt.putString(PARENT, this.parent.getName());
         } else {
@@ -389,7 +390,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
         this.name = nbt.getString(NAME);
         this.dimension = ResourceKey.create(Registries.DIMENSION,
                 new ResourceLocation(nbt.getString(DIM)));

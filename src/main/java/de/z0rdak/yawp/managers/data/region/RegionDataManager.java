@@ -9,6 +9,7 @@ import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -23,22 +24,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.common.ToolActions;
-import net.neoforged.neoforge.event.CommandEvent;
-import net.neoforged.neoforge.event.ServerChatEvent;
-import net.neoforged.neoforge.event.TickEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.*;
-import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
-import net.neoforged.neoforge.event.entity.living.*;
 import net.neoforged.neoforge.event.entity.player.*;
-import net.neoforged.neoforge.event.level.*;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
-import net.neoforged.neoforge.registries.NeoForgeRegistries;
-import static net.neoforged.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.apache.commons.lang3.NotImplementedException;
@@ -51,7 +42,7 @@ import java.util.stream.Collectors;
 import static de.z0rdak.yawp.util.constants.RegionNBT.DIMENSIONS;
 import static de.z0rdak.yawp.util.constants.RegionNBT.REGIONS;
 
-@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER)
+@EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER)
 public class RegionDataManager extends SavedData {
 
     /**
@@ -129,7 +120,7 @@ public class RegionDataManager extends SavedData {
         }
     }
 
-    public static RegionDataManager load(CompoundTag nbt) {
+    public static RegionDataManager load(CompoundTag nbt, HolderLookup.Provider provider) {
         RegionDataManager rdm = new RegionDataManager();
         rdm.dimCacheMap.clear();
         CompoundTag dimensionRegions = nbt.getCompound(DIMENSIONS);
@@ -242,7 +233,7 @@ public class RegionDataManager extends SavedData {
      */
     @Nonnull
     @Override
-    public CompoundTag save(@Nonnull CompoundTag compound) {
+    public CompoundTag save(CompoundTag compound, HolderLookup.Provider pRegistries) {
         CompoundTag dimRegionNbtData = new CompoundTag();
         YetAnotherWorldProtector.LOGGER.info(Component.translatableWithFallback("data.nbt.dimensions.save.amount", "Saving %s region(s) for %s dimensions", this.getTotalRegionAmount(), dimCacheMap.keySet().size()).getString());
         for (Map.Entry<ResourceKey<Level>, DimensionRegionCache> entry : dimCacheMap.entrySet()) {
