@@ -6,27 +6,26 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.OperatorEntry;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class CommandPermissionConfig {
 
-    public static final ForgeConfigSpec CONFIG_SPEC;
+    public static final ModConfigSpec CONFIG_SPEC;
     public static final String CONFIG_NAME = YetAnotherWorldProtector.MODID + "-common.toml";
-    // TODO: Dedicated permission to teleport to region
-    public static final ForgeConfigSpec.ConfigValue<Boolean> ALLOW_READ_ONLY_CMDS;
-    public static final ForgeConfigSpec.ConfigValue<Integer> REQUIRED_OP_LEVEL;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> COMMAND_BLOCK_EXECUTION;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> PLAYERS_WITH_PERMISSION;
-    public static final ForgeConfigSpec.ConfigValue<Integer> WP_COMMAND_ALTERNATIVE;
+    public static final ModConfigSpec.ConfigValue<Boolean> ALLOW_READ_ONLY_CMDS;
+    public static final ModConfigSpec.ConfigValue<Integer> REQUIRED_OP_LEVEL;
+    public static final ModConfigSpec.ConfigValue<Boolean> COMMAND_BLOCK_EXECUTION;
+    public static final ModConfigSpec.ConfigValue<Integer> WP_COMMAND_ALTERNATIVE;
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> PLAYERS_WITH_PERMISSION;
     public static final String[] WP_CMDS = new String[]{"wp", "yawp"};
     public static String BASE_CMD = "wp";
     private static MinecraftServer serverInstance;
 
     static {
-        final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+        final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
         BUILDER.push("YetAnotherWorldProtector mod server configuration").build();
 

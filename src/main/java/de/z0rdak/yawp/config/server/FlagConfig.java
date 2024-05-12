@@ -1,20 +1,20 @@
 package de.z0rdak.yawp.config.server;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class FlagConfig {
 
-    public static final ForgeConfigSpec CONFIG_SPEC;
+    public static final ModConfigSpec CONFIG_SPEC;
     public static final String CONFIG_NAME = YetAnotherWorldProtector.MODID + "-flags.toml";
-    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> BREAK_FLAG_ENTITIES;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> BREAK_FLAG_ENTITY_TAGS;
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> BREAK_FLAG_ENTITIES;
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> BREAK_FLAG_ENTITY_TAGS;
 
     static {
-        final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+        final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
         BUILDER.push("YetAnotherWorldProtector mod flag configuration").build();
 
