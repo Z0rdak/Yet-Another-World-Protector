@@ -59,6 +59,9 @@ public abstract class ExplosionMixin {
     @Final
     private Map<PlayerEntity, Vec3d> affectedPlayers;
 
+    @Shadow
+    private DamageSource damageSource;
+
     private static void filterExplosionTargets(Explosion explosion, World world, List<Entity> affectedEntities) {
         DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.getRegistryKey());
         if (dimCache != null) {
@@ -96,9 +99,6 @@ public abstract class ExplosionMixin {
             }
         }
     }
-
-    @Shadow
-    private DamageSource damageSource;
 
     @Inject(method = "collectBlocksAndDamageEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getOtherEntities(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/Box;)Ljava/util/List;"), cancellable = true, allow = 1)
     public void onExplosion(CallbackInfo ci) {

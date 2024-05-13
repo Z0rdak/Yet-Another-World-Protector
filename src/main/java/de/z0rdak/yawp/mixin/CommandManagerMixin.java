@@ -12,19 +12,19 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
 
 @Mixin(CommandManager.class)
 public abstract class CommandManagerMixin {
 
-    @Inject(method = "execute", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/CommandDispatcher;execute(Lcom/mojang/brigadier/ParseResults;)I"), cancellable = true)
-    public void execute(ParseResults<ServerCommandSource> parseResults, String command, CallbackInfoReturnable<Integer> cir) {
+    @Inject(method = "execute", at = @At(value = "HEAD"), cancellable = true)
+    public void execute(ParseResults<ServerCommandSource> parseResults, String command, CallbackInfo ci) {
         // check mod command permissions
         int result = CommandInterceptor.handleModCommands(parseResults, command);
         if (result != 0) {
-            cir.setReturnValue(1);
+            ci.cancel();
         }
 
         // check exec-command flag
@@ -36,7 +36,7 @@ public abstract class CommandManagerMixin {
                 FlagCheckEvent.PlayerFlagEvent flagCheck = checkPlayerEvent(player, player.getBlockPos(), RegionFlag.EXECUTE_COMMAND, dimCache.getDimensionalRegion());
                 if (flagCheck.isDenied()) {
                     sendFlagDeniedMsg(flagCheck);
-                    cir.setReturnValue(1);
+                    ci.cancel();
                 }
             }
         }
