@@ -5,7 +5,6 @@ import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ExperienceOrbEntity;
-import net.minecraft.entity.TntEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.SlimeEntity;
@@ -13,7 +12,6 @@ import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.entity.passive.SnowGolemEntity;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.passive.WanderingTraderEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
@@ -87,30 +85,31 @@ public class ServerWorldMixin {
                     cir.setReturnValue(false);
                 }
             }
-
         }
-
     }
 
-    @Inject(method = "createExplosion", at = @At("HEAD"), cancellable = true, allow = 1)
+    /**
+     * Returning a null explosion will cause this event to be canceled.
+     * An arrow on fire or fire charge shot by an e.g. dispenser will cause the type of the explosion to be ExplosionSourceType.TNT
+     * TODO: Investigate causes of BLOW and BLOCK
+     */
+    @Inject(method = "createExplosion", at = @At("HEAD"), cancellable = true)
     public void onIgniteExplosive(@Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionBehavior behavior, double x, double y, double z, float power, boolean createFire, World.ExplosionSourceType explosionSourceType, ParticleEffect particle, ParticleEffect emitterParticle, SoundEvent soundEvent, CallbackInfoReturnable<Explosion> cir) {
         ServerWorld world = (ServerWorld) (Object) this;
-        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.getRegistryKey());
-        // Extra check for player initiated explosion here. Should normally be prevented by not allowing 
-        // the ignition to begin with.
-        if (entity instanceof TntEntity tntEntity && tntEntity.getOwner() instanceof PlayerEntity player) {
-            FlagCheckEvent flagCheck = checkPlayerEvent(player, new BlockPos((int) x, (int) y, (int) z), IGNITE_EXPLOSIVES, dimCache.getDimensionalRegion());
-            if (flagCheck.isDenied()) {
-                sendFlagDeniedMsg(flagCheck, player);
-                Explosion explosion = world.createExplosion(entity, damageSource, behavior, x, y, z, power, createFire, ExplosionSourceType.NONE, particle, emitterParticle, soundEvent);
-                cir.setReturnValue(explosion);
+        if (isServerSide(world)) {
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.getRegistryKey());
+            if (explosionSourceType == ExplosionSourceType.TNT ||
+                    explosionSourceType == ExplosionSourceType.BLOCK) {
+                FlagCheckEvent flagCheck = checkTargetEvent(new BlockPos((int) x, (int) y, (int) z), IGNITE_EXPLOSIVES, dimCache.getDimensionalRegion());
+                if (flagCheck.isDenied()) {
+                    cir.setReturnValue(null);
+                }
             }
-        }
-        if (explosionSourceType == ExplosionSourceType.MOB) {
-            FlagCheckEvent flagCheck = checkTargetEvent(new BlockPos((int) x, (int) y, (int) z), MOB_GRIEFING, dimCache.getDimensionalRegion());
-            if (flagCheck.isDenied()) {
-                Explosion explosion = world.createExplosion(entity, damageSource, behavior, x, y, z, power, createFire, ExplosionSourceType.NONE, particle, emitterParticle, soundEvent);
-                cir.setReturnValue(explosion);
+            if (explosionSourceType == ExplosionSourceType.MOB) {
+                FlagCheckEvent flagCheck = checkTargetEvent(new BlockPos((int) x, (int) y, (int) z), MOB_GRIEFING, dimCache.getDimensionalRegion());
+                if (flagCheck.isDenied()) {
+                    cir.setReturnValue(null);
+                }
             }
         }
     }

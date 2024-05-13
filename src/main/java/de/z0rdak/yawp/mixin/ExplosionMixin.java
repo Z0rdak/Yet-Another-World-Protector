@@ -59,6 +59,10 @@ public abstract class ExplosionMixin {
     @Final
     private Map<PlayerEntity, Vec3d> affectedPlayers;
 
+    @Shadow
+    @Final
+    private DamageSource damageSource;
+
     private static void filterExplosionTargets(Explosion explosion, World world, List<Entity> affectedEntities) {
         DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.getRegistryKey());
         if (dimCache != null) {
@@ -97,8 +101,6 @@ public abstract class ExplosionMixin {
         }
     }
 
-    public abstract DamageSource getDamageSource();
-
     @Inject(method = "collectBlocksAndDamageEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getOtherEntities(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/Box;)Ljava/util/List;"), cancellable = true, allow = 1)
     public void onExplosion(CallbackInfo ci) {
         Explosion explosion = (Explosion) (Object) this;
@@ -134,7 +136,7 @@ public abstract class ExplosionMixin {
                             z /= aa;
                             double ab = getExposure(vec3d, entity);
                             double ac = (1.0 - w) * ab;
-                            entity.damage(this.getDamageSource(), (float) ((int) ((ac * ac + ac) / 2.0 * 7.0 * (double) q + 1.0)));
+                            entity.damage(this.damageSource, (float) ((int) ((ac * ac + ac) / 2.0 * 7.0 * (double) q + 1.0)));
                             double ad = ac;
                             if (entity instanceof LivingEntity) {
                                 ad = ProtectionEnchantment.transformExplosionKnockback((LivingEntity) entity, ac);
