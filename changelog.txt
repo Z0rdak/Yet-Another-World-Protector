@@ -1,3 +1,7 @@
+# [0.0.2.9-beta4] - 2024-05-13
+## Fixed
+* [Fabric] Fix sweet berries and glow berries not considered by the place-blocks flag
+* [Fabric] Fix issue with the ignite-explosives flag and a crash with explosions
 # [0.0.2.9-beta3] - 2023-08-12
 ## Fixed
 * [Forge] Fix place-blocks and no-walker-freeze flags not working together properly
