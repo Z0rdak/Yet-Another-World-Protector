@@ -19,7 +19,7 @@ import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
 @Mixin(CommandManager.class)
 public abstract class CommandManagerMixin {
 
-    @Inject(method = "execute", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/CommandDispatcher;execute(Lcom/mojang/brigadier/ParseResults;)I"), cancellable = true)
+    @Inject(method = "execute", at = @At(value = "HEAD"), cancellable = true)
     public void execute(ParseResults<ServerCommandSource> parseResults, String command, CallbackInfoReturnable<Integer> cir) {
         // check mod command permissions
         int result = CommandInterceptor.handleModCommands(parseResults, command);
