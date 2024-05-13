@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.managers.data.region;
 
+import com.mojang.datafixers.types.Type;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.flag.BooleanFlag;
@@ -77,8 +78,7 @@ public class RegionDataManager extends PersistentState {
                 ServerWorld overworld = serverInstance.getOverworld();
                 if (!overworld.isClient) {
                     PersistentStateManager storage = overworld.getPersistentStateManager();
-                    Type<RegionDataManager> rdmt = new Type<>(RegionDataManager::new, RegionDataManager::load, DataFixTypes.SAVED_DATA_MAP_DATA);
-                    regionDataCache = storage.getOrCreate(rdmt, DATA_NAME);
+                    regionDataCache = storage.getOrCreate(RegionDataManager::load, RegionDataManager::new, DATA_NAME);
                 }
             }
         }
@@ -107,8 +107,7 @@ public class RegionDataManager extends PersistentState {
             }
             if (!serverWorld.isClient && serverWorld.getRegistryKey().getValue().equals(new Identifier("minecraft:overworld"))) {
                 PersistentStateManager storage = serverWorld.getPersistentStateManager();
-                Type<RegionDataManager> rdmt = new Type<>(RegionDataManager::new, RegionDataManager::load, DataFixTypes.SAVED_DATA_MAP_DATA);
-                RegionDataManager data = storage.getOrCreate(rdmt, DATA_NAME);
+                RegionDataManager data = storage.getOrCreate(RegionDataManager::load, RegionDataManager::new, DATA_NAME);
                 storage.set(DATA_NAME, data);
                 regionDataCache = data;
                 YetAnotherWorldProtector.LOGGER.info(Text.translatableWithFallback("data.nbt.dimensions.load.success", "Loaded %s region(s) for %s dimension(s)", data.getTotalRegionAmount(), data.getDimensionAmount()).getString());
