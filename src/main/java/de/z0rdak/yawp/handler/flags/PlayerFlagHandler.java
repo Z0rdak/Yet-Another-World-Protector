@@ -62,7 +62,6 @@ public final class PlayerFlagHandler {
     private static TypedActionResult<ItemStack> onUseItem(PlayerEntity player, World world, Hand hand) {
         if (isServerSide(world)) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
-
             if (!hasEmptyHands(player)) {
                 FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, player.getBlockPos(), USE_ENTITIES, dimCache.getDimensionalRegion());
                 if (flagCheckEvent.isDenied()) {
@@ -70,10 +69,6 @@ public final class PlayerFlagHandler {
                     return TypedActionResult.fail(player.getStackInHand(hand));
                 }
             }
-
-            // TODO: Cover sweetberries, glowberries and so on... how?
-            // TODO: Look at forge implementation
-
             FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, player.getBlockPos(), USE_ITEMS, dimCache.getDimensionalRegion());
             if (flagCheckEvent.isDenied()) {
                 sendFlagDeniedMsg(flagCheckEvent);
@@ -88,13 +83,14 @@ public final class PlayerFlagHandler {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.getRegistryKey());
             BlockPos targetPos = blockHitResult.getBlockPos();
             boolean hasEmptyHands = hasEmptyHands(player);
-            boolean hasStackInHand = !player.getStackInHand(hand).isEmpty();
+            ItemStack stackInHand = player.getStackInHand(hand);
             boolean isSneakingWithEmptyHands = player.isSneaking() && hasEmptyHands;
+            boolean isBlock = blockHitResult.getType() == HitResult.Type.BLOCK;
 
             //  // does this include water blocks and placing lilly pads for example?
-            if (blockHitResult.getType() == HitResult.Type.BLOCK) {
+            if (isBlock) {
                 // allow player to place blocks when shift clicking usable bock
-                if ((isSneakingWithEmptyHands || !player.isSneaking()) || !hasStackInHand) {
+                if ((isSneakingWithEmptyHands || !player.isSneaking()) || hasEmptyHands) {
                     FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, targetPos, USE_BLOCKS, dimCache.getDimensionalRegion());
                     if (flagCheckEvent.isDenied()) {
                         sendFlagDeniedMsg(flagCheckEvent);
@@ -102,28 +98,27 @@ public final class PlayerFlagHandler {
                     }
                 }
             }
-
             if (!hasEmptyHands) {
-                // TODO: Not covering berry bush, needs to be on place item?
                 FlagCheckEvent.PlayerFlagEvent useItemCheck = checkPlayerEvent(player, player.getBlockPos(), USE_ITEMS, dimCache.getDimensionalRegion());
                 if (useItemCheck.isDenied()) {
                     sendFlagDeniedMsg(useItemCheck);
                     return ActionResult.FAIL;
                 }
-            }
 
-            if (hasStackInHand && player.getStackInHand(hand).getUseAction() == UseAction.NONE) {
-                // Player attempting to place block
-                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, blockHitResult.getBlockPos(), PLACE_BLOCKS, dimCache.getDimensionalRegion());
-                if (flagCheckEvent.isDenied()) {
-                    sendFlagDeniedMsg(flagCheckEvent);
-                    // sync inventory
-                    player.getInventory().updateItems();
-                    return ActionResult.FAIL;
+                // TODO: FIXME This needs to be improved like to custom check used in forge
+                boolean isBerry = stackInHand.isOf(Items.GLOW_BERRIES) || stackInHand.isOf(Items.SWEET_BERRIES);
+                UseAction useAction = stackInHand.getUseAction();
+                if (useAction == UseAction.NONE || (isBerry && useAction == UseAction.EAT)) {
+                    // Player attempting to place block
+                    FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, blockHitResult.getBlockPos(), PLACE_BLOCKS, dimCache.getDimensionalRegion());
+                    if (flagCheckEvent.isDenied()) {
+                        sendFlagDeniedMsg(flagCheckEvent);
+                        // sync inventory
+                        player.getInventory().updateItems();
+                        return ActionResult.FAIL;
+                    }
                 }
             }
-
-
         }
         return ActionResult.PASS;
     }
