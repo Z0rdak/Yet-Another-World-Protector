@@ -6,8 +6,6 @@ import de.z0rdak.yawp.util.MessageSender;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.TNTBlock;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -24,20 +22,17 @@ import static de.z0rdak.yawp.core.flag.RegionFlag.IGNITE_EXPLOSIVES;
 @Mixin(TNTBlock.class)
 public class TntBlockMixin {
 
-    @Inject(method = "use", at = @At("HEAD"), cancellable = true, allow = 1)
+    @Inject(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/TNTBlock;catchFire(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/Direction;Lnet/minecraft/entity/LivingEntity;)V"), cancellable = true, allow = 1)
     public void onUseFlintAndSteel(BlockState state, World world, BlockPos pos, PlayerEntity player2, Hand hand, BlockRayTraceResult hit, CallbackInfoReturnable<ActionResultType> cir) {
         if (!world.isClientSide) {
-            ItemStack itemStack = player2.getItemInHand(hand);
-            if (itemStack.sameItemStackIgnoreDurability(Items.FLINT_AND_STEEL.getDefaultInstance()) || itemStack.sameItem(Items.FIRE_CHARGE.getDefaultInstance())) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(pos, IGNITE_EXPLOSIVES, world.dimension(), player2);
-                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
-                    return;
-                }
-                HandlerUtil.processCheck(checkEvent, null, denyResult -> {
-                    cir.setReturnValue(ActionResultType.CONSUME);
-                    MessageSender.sendFlagMsg(denyResult);
-                });
+            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, IGNITE_EXPLOSIVES, world.dimension(), player2);
+            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                return;
             }
+            HandlerUtil.processCheck(checkEvent, null, denyResult -> {
+                cir.setReturnValue(ActionResultType.CONSUME);
+                MessageSender.sendFlagMsg(denyResult);
+            });
         }
     }
 }
