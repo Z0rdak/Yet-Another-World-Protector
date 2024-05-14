@@ -146,7 +146,7 @@
   "cli.msg.info.header.for": "== %s for %s ==",
   "cli.msg.info.header.of": "== %s of %s ==",
   "cli.msg.info.header.in": "== %s in %s ==",
-  "cli.msg.info.pagination.error.index": "Invalid page index supplied: %s (Try 0-%s)",
+  "cli.msg.info.pagination.error.index": "Invalid page index supplied: %s (Try [0..%s])",
   "cli.msg.info.pagination.first.hover": "First page",
   "cli.msg.info.pagination.first.text": "⏮",
   "cli.msg.info.pagination.last.hover": "Last page",

@@ -17,6 +17,7 @@
     "MixinSlimeEntity",
     "MixinWaterMobEntity",
     "PlayerEntityMixin",
+    "ServerWorldMixin",
     "TntBlockMixin"
   ],
   "client": [],
