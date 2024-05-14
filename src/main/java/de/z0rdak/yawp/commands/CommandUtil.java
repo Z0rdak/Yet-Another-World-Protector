@@ -181,6 +181,10 @@ public class CommandUtil {
                         .executes(ctx -> promptFlagList(ctx, regionSupplier.apply(ctx), 0))
                         .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
                                 .executes(ctx -> promptFlagList(ctx, regionSupplier.apply(ctx), getPageNoArgument(ctx)))))
+                .then(literal(REGION_FLAG)
+                        .executes(ctx -> promptRegionFlagList(ctx, regionSupplier.apply(ctx), 0))
+                        .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
+                                .executes(ctx -> promptRegionFlagList(ctx, regionSupplier.apply(ctx), getPageNoArgument(ctx)))))
                 .then(literal(GROUP)
                         .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(CommandUtil.GROUP_LIST, builder))
@@ -279,6 +283,9 @@ public class CommandUtil {
         return 0;
     }
 
+    /**
+     * List of flags of the provided region and its parents
+     */
     public static int promptFlagList(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, int pageNo) {
         String cmd = "";
         switch (region.getRegionType()) {
@@ -294,6 +301,35 @@ public class CommandUtil {
         }
 
         List<MutableComponent> flagEntries = buildFlagEntries(region);
+        if (flagEntries.isEmpty()) {
+            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.empty", buildRegionInfoLink(region)));
+            return 1;
+        }
+        List<MutableComponent> flagPagination = buildPaginationComponents(
+                buildRegionFlagInfoHeader(region), cmd, flagEntries, pageNo,
+                new TranslatableComponent(" - %s", buildAddFlagLink(region)));
+        flagPagination.forEach(line -> sendCmdFeedback(ctx.getSource(), line));
+        return 0;
+    }
+
+    /**
+     * List of flags only of the provided region
+     */
+    public static int promptRegionFlagList(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, int pageNo) {
+        String cmd = "";
+        switch (region.getRegionType()) {
+            case GLOBAL:
+                cmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), REGION_FLAG.toString());
+                break;
+            case DIMENSION:
+                cmd = buildCommandStr(DIM.toString(), region.getName(), LIST.toString(), REGION_FLAG.toString());
+                break;
+            case LOCAL:
+                cmd = buildCommandStr(LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), REGION_FLAG.toString());
+                break;
+        }
+
+        List<MutableComponent> flagEntries = buildRegionFlagEntries(region);
         if (flagEntries.isEmpty()) {
             sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.empty", buildRegionInfoLink(region)));
             return 1;
@@ -880,7 +916,7 @@ public class CommandUtil {
     public static int promptRegionInfo(CommandContext<CommandSourceStack> ctx, IProtectedRegion region) {
         // == Region [<name>] overview ==
         sendCmdFeedback(ctx.getSource(), buildRegionOverviewHeader(region));
-        // Flags: [n flag(s)][+]
+        // Flags: [n] | [m] flag(s)] [+]
         sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.flag", buildFlagListLink(region)));
         if (region.getRegionType() == RegionType.LOCAL) {
             IMarkableRegion markableRegion = (IMarkableRegion) region;
@@ -889,7 +925,9 @@ public class CommandUtil {
         }
         // Groups: [owners], [members], [<listGroups>]
         sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.group", buildGroupLinks(region)));
-        // Regions: [global], [n children], [n regions][+], ||   [n dimensions(s)]  || Parent: [parent][x], [n children][+]
+        // Regions: [global], [n children], [n regions][+],
+        // Dimensions: [n dimensions(s)]
+        // Parent: [parent][x], [n children][+]
         promptRegionChildrenInfo(ctx, region);
         // State: [State]
         sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state", buildRegionStateLink(region)));

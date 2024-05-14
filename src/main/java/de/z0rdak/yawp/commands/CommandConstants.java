@@ -46,6 +46,7 @@ public enum CommandConstants {
     OVERRIDE("override"),
     EXPAND("expand"),
     FLAG("flag"),
+    REGION_FLAG("region-flag"),
     FLAGS("flags"),
     ALL_FLAGS("all-flags"),
     FLAG_TYPE("flag-type"),

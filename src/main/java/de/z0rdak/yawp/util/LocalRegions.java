@@ -1,10 +1,17 @@
 package de.z0rdak.yawp.util;
 
+import de.z0rdak.yawp.commands.CommandUtil;
+import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.core.area.CuboidArea;
+import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.area.SphereArea;
+import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
-import de.z0rdak.yawp.core.region.*;
+import de.z0rdak.yawp.core.region.CuboidRegion;
+import de.z0rdak.yawp.core.region.IMarkableRegion;
+import de.z0rdak.yawp.core.region.IProtectedRegion;
+import de.z0rdak.yawp.core.region.SphereRegion;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.handler.flags.FlagCorrelation;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -14,6 +21,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.apache.commons.lang3.NotImplementedException;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -39,6 +47,17 @@ public final class LocalRegions {
         return flags;
     }
 
+    public static Map<FlagState, List<IFlag>> sortFlagsByState(IProtectedRegion region) {
+        List<IFlag> denied = getFlagsWithState(region.getFlagContainer(), FlagState.DENIED);
+        List<IFlag> allowed = getFlagsWithState(region.getFlagContainer(), FlagState.ALLOWED);
+        List<IFlag> disabled = getFlagsWithState(region.getFlagContainer(), FlagState.DISABLED);
+        HashMap<FlagState, List<IFlag>> flagStateListMap = new HashMap<>();
+        flagStateListMap.put(FlagState.DENIED, denied);
+        flagStateListMap.put(FlagState.ALLOWED, allowed);
+        flagStateListMap.put(FlagState.DISABLED, disabled);
+        return flagStateListMap;
+    }
+
     public static Map<FlagState, List<FlagCorrelation>> sortFlagsByState(Map<String, FlagCorrelation> flagMap) {
         List<FlagCorrelation> denied = getCorrelationByState(flagMap, FlagState.DENIED);
         List<FlagCorrelation> allowed = getCorrelationByState(flagMap, FlagState.ALLOWED);
@@ -56,11 +75,17 @@ public final class LocalRegions {
                 .collect(Collectors.toList());
     }
 
-    public static AbstractMarkableRegion regionFrom(Player player, MarkerStick marker, String regionName) {
+    public static List<IFlag> getFlagsWithState(FlagContainer flags, FlagState state) {
+        return flags.values().stream()
+                .filter(flag -> flag.getState() == state)
+                .collect(Collectors.toList());
+    }
+
+    public static IMarkableRegion regionFrom(Player player, MarkerStick marker, String regionName) {
         return regionFrom(player, marker, regionName, marker.getDimension());
     }
 
-    public static AbstractMarkableRegion regionFrom(Player player, MarkerStick marker, String regionName, ResourceKey<Level> dim) {
+    public static IMarkableRegion regionFrom(Player player, MarkerStick marker, String regionName, ResourceKey<Level> dim) {
         switch (marker.getAreaType()) {
             case CUBOID:
                 return cuboidRegionFrom(marker, regionName, player, dim);
@@ -154,7 +179,7 @@ public final class LocalRegions {
         return new RegionOverlappingInfo(region, intersectingRegions, containingRegions);
     }
 
-    public static RegionOverlappingInfo getOverlappingOwned(IMarkableRegion region, PlayerEntity player) {
+    public static RegionOverlappingInfo getOverlappingOwned(IMarkableRegion region, Player player) {
         RegionOverlappingInfo overlappingRegions = getOverlappingRegions(region);
         List<IMarkableRegion> intersecting = overlappingRegions.intersectingRegions.stream()
                 .filter(r -> r.permits(player))

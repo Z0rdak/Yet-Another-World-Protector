@@ -46,6 +46,7 @@ import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.CommandUtil.GROUP_LIST;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.getFlagMapRecursive;
+import static de.z0rdak.yawp.util.LocalRegions.getFlagsWithState;
 import static net.minecraft.ChatFormatting.RESET;
 import static net.minecraft.ChatFormatting.*;
 import static net.minecraft.network.chat.ClickEvent.Action.*;
@@ -591,13 +592,11 @@ public class ChatComponentBuilder {
 
     /**
      * Creates a TextComponent with a Link for displaying the flag info. <br></br>
-     * Text: [flagname] [+]|[#] [!] [$] <br></br>
+     * Text: [flagname] [regionTypeIdentifier] [s] [m] [o] <br></br>
      * Where <br></br>
-     * - [!] is a quick link to toggle the flag active state, <br></br>
      * - [s] is a suggest link to change the flag state, <br></br>
-     * - [m] is a quick link to toggle the flag override state, <br></br>
-     * - [o] is a quick link to toggle the flag mute state, <br></br>
-     * FIXME: Regiontype indicator is still D even though the flags are from G
+     * - [m] is a quick link to toggle the flag mute state, <br></br>
+     * - [o] is a quick link to toggle the flag override state, <br></br>
      * @param region
      * @param flag
      * @return text component for quick flag actions [flagname] [regionTypeIdentifier] [s] [m] [o]
@@ -842,6 +841,22 @@ public class ChatComponentBuilder {
         flagEntries.addAll(buildFlagEntries(flagStateListMap, FlagState.DENIED));
         flagEntries.addAll(buildFlagEntries(flagStateListMap, FlagState.DISABLED));
         return flagEntries;
+    }
+
+    public static List<MutableComponent> buildRegionFlagEntries(IProtectedRegion region) {
+        List<MutableComponent> flagEntries = new ArrayList<>();
+        flagEntries.addAll(buildRegionFlagEntries(region, FlagState.ALLOWED));
+        flagEntries.addAll(buildRegionFlagEntries(region, FlagState.DENIED));
+        flagEntries.addAll(buildRegionFlagEntries(region, FlagState.DISABLED));
+        return flagEntries;
+    }
+
+    private static List<MutableComponent> buildRegionFlagEntries(IProtectedRegion region, FlagState state) {
+        List<IFlag> flagsByState = getFlagsWithState(region.getFlagContainer(), state);
+        flagsByState.sort(Comparator.comparing(IFlag::getName));
+        return flagsByState.stream()
+                .map(flag -> buildRemoveFlagEntry(region, flag, colorForState(state)))
+                .collect(Collectors.toList());
     }
 
     private static List<MutableComponent> buildFlagEntries(Map<FlagState, List<FlagCorrelation>> flagStateListMap, FlagState state) {

@@ -41,7 +41,7 @@ public final class FlagCommands {
     public static LiteralArgumentBuilder<CommandSourceStack> build() {
         return literal(FLAG)
                 .then(literal(GLOBAL)
-                        .executes(ctx -> CommandUtil.promptFlagList(ctx, getGlobalRegion(), 0))
+                        .executes(ctx -> CommandUtil.promptRegionFlagList(ctx, getGlobalRegion(), 0))
                         .then(flagSubCmd((ctx) -> getGlobalRegion())))
                 .then(literal(DIM)
                         .then(flagDimSubCommands()))
@@ -51,7 +51,7 @@ public final class FlagCommands {
 
     public static RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> flagDimSubCommands() {
         return Commands.argument(DIM.toString(), DimensionArgument.dimension())
-                .executes(ctx -> CommandUtil.promptFlagList(ctx, getDimCacheArgument(ctx).getDimensionalRegion(), 0))
+                .executes(ctx -> CommandUtil.promptRegionFlagList(ctx, getDimCacheArgument(ctx).getDimensionalRegion(), 0))
                 .then(flagSubCmd((ctx) -> getDimCacheArgument(ctx).getDimensionalRegion()));
     }
 
@@ -59,7 +59,7 @@ public final class FlagCommands {
         return Commands.argument(DIM.toString(), DimensionArgument.dimension())
                 .then(Commands.argument(CommandConstants.LOCAL.toString(), StringArgumentType.word())
                         .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestions(ctx, builder))
-                        .executes(ctx -> CommandUtil.promptFlagList(ctx, getDimCacheArgument(ctx).getDimensionalRegion(), 0))
+                        .executes(ctx -> CommandUtil.promptRegionFlagList(ctx, getDimCacheArgument(ctx).getDimensionalRegion(), 0))
                         .then(flagSubCmd(ArgumentUtil::getRegionArgument))
                 );
     }
