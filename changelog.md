@@ -231,7 +231,8 @@ The same commands of course work for Dimensional and the Global Regions:
 * Change Dimensional Region state CLI to toggle the state (enable and alert) of all Local Regions in the dimension.
 * Rename config value `break_flag_entities` to `covered_block_entities`
 * Rename config value `break_flag_entity_tags` to `covered_block_entity_tags`
-* The region add flag command now has a new syntax:
+* The region add flag command now has a new syntax. The state and override flag are optional and default to _Denied_ and
+  _false_.
   * Old: `/wp ... add flag <flag>`
   * New: `/wp ... add flag <flag> [state] [override]`
 

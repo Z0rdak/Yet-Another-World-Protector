@@ -155,6 +155,7 @@ public class CommandUtil {
                                 .executes(ctx -> addFlag(ctx, regionSupplier.apply(ctx), getFlagArgument(ctx)))
                                 .then(Commands.argument(STATE.toString(), StringArgumentType.word())
                                         .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(FlagState.ValidFlagStates(), builder))
+                                        .executes(ctx -> addFlag(ctx, regionSupplier.apply(ctx), getFlagArgument(ctx), getFlagStateArgument(ctx), false))
                                         .then(Commands.argument(OVERRIDE.toString(), BoolArgumentType.bool())
                                                 .executes(ctx -> addFlag(ctx, regionSupplier.apply(ctx), getFlagArgument(ctx), getFlagStateArgument(ctx), getOverrideArgument(ctx))))
                                 )
