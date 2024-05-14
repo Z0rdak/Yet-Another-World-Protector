@@ -102,6 +102,10 @@ The same commands of course work for Dimensional and the Global Regions:
   Regions.
 * Flag list links for regions now also show number of flags from parent regions, which are considered for region checks
   in parentheses.
+* The commands to list the flags of a region (`/wp ... list flag`) are now prompting all responsible flags of the
+  region, including the flags of the parent regions.
+* A new command has been added to only prompt the flags only of the supplied region
+  * `/wp ... list region-flag`
 * Flag pagination now sorts flags by flag state and then by alphabetical order.
   * Green - allowed flags
   * Red - denied flags
@@ -119,6 +123,7 @@ The same commands of course work for Dimensional and the Global Regions:
   * `/wp local <dim> create <region-name> Sphere <center-pos> <radius-pos>`
   * `/wp local <dim> create <region-name> Sphere <center-pos> <radius>`
 * You can change the area type of the region area at any time from a Cuboid to a Sphere and back.
+* Support to create Spherical Regions with the RegionMarker will be added soon
 
 ### Config
 * `yawp-common.toml` - Add new permission config:
@@ -142,9 +147,10 @@ The same commands of course work for Dimensional and the Global Regions:
   * `/wp global clear flags|players|teams|group`.
   * `/wp global add player|team|flag`.
   * `/wp global remove player|team|flag`.
-  * `/wp global list flag|group|dim`.
+  * `/wp global list flag|region-flag|group|dim`.
   * `/wp global state alert|enable`.
   * `/wp global reset`.
+  * `/wp global ...`
 * Add interactive CLI support for the Global Region
 
 ### API
