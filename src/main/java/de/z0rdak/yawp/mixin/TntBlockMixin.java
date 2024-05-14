@@ -24,20 +24,17 @@ import static de.z0rdak.yawp.core.flag.RegionFlag.IGNITE_EXPLOSIVES;
 @Mixin(TntBlock.class)
 public class TntBlockMixin {
 
-    @Inject(method = "use", at = @At("HEAD"), cancellable = true, allow = 1)
+    @Inject(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/TntBlock;onCaughtFire(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction;Lnet/minecraft/world/entity/LivingEntity;)V"), cancellable = true, allow = 1)
     public void onUseFlintAndSteel(BlockState state, Level world, BlockPos pos, Player player2, InteractionHand hand, BlockHitResult hit, CallbackInfoReturnable<InteractionResult> cir) {
         if (!world.isClientSide) {
-            ItemStack itemStack = player2.getItemInHand(hand);
-            if (itemStack.sameItemStackIgnoreDurability(Items.FLINT_AND_STEEL.getDefaultInstance()) || itemStack.sameItem(Items.FIRE_CHARGE.getDefaultInstance())) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(pos, IGNITE_EXPLOSIVES, world.dimension(), player2);
-                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
-                    return;
-                }
-                HandlerUtil.processCheck(checkEvent, null, denyResult -> {
-                    cir.setReturnValue(InteractionResult.CONSUME);
-                    MessageSender.sendFlagMsg(denyResult);
-                });
+            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, IGNITE_EXPLOSIVES, world.dimension(), player2);
+            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                return;
             }
+            HandlerUtil.processCheck(checkEvent, null, denyResult -> {
+                cir.setReturnValue(InteractionResult.CONSUME);
+                MessageSender.sendFlagMsg(denyResult);
+            });
         }
     }
 }

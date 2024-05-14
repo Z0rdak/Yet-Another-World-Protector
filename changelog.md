@@ -253,6 +253,8 @@ The same commands of course work for Dimensional and the Global Regions:
 * It is no longer possible to delete regions which have a Local Region as parent
 * Lang key fixes... well more like a whole overhaul of the language keys
 * Fix region teleport command not working properly for non-ops
+* Fix entry point for ignite-explosive flag mixin
+* Fix ignite-explosive flag not considering explosions not caused by players
 
 # [0.0.3.0-beta1] - 2024-03-27
 
