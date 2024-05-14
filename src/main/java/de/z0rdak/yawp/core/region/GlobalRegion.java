@@ -9,6 +9,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class GlobalRegion extends AbstractRegion {
@@ -35,6 +36,15 @@ public class GlobalRegion extends AbstractRegion {
                 .filter(e -> e.getValue().getRegionType() != RegionType.GLOBAL)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         return Collections.unmodifiableMap(childrenWithoutGlobal);
+    }
+
+    @Override
+    public Set<String> getChildrenNames() {
+        Set<String> childrenWithoutGlobal = super.getChildren().values().stream()
+                .filter(iProtectedRegion -> iProtectedRegion.getRegionType() != RegionType.GLOBAL)
+                .map(IProtectedRegion::getName)
+                .collect(Collectors.toSet());
+        return Collections.unmodifiableSet(childrenWithoutGlobal);
     }
 
     @Override
