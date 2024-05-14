@@ -9,6 +9,7 @@
     "FireBlockMixin",
     "LeavesBlockMixin",
     "PlayerEntityMixin",
+    "ServerWorldMixin",
     "TntBlockMixin"
   ],
   "client": [],
