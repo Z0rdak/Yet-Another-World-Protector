@@ -1099,39 +1099,79 @@ public class ChatComponentBuilder {
         return buildExecuteCmdComponent(createRegionLinkText, createRegionHoverText, dimCreateRegionCmd, SUGGEST_COMMAND, ADD_CMD_COLOR);
     }
 
-    public static IFormattableTextComponent buildFlagListLink(IProtectedRegion region) {
+    /**
+     * [n] responsible flag(s) | [m] flag(s) [+]
+     * With the responsible flags being the applied flags for this region, including the parent flags
+     * and the later are only the flags defined in this region, whether they are applied, active or not
+     *
+     * @param region the to build the flag list link component for
+     * @return [n] responsible flag(s) | [m] flag(s) [+]
+     */
+    public static IFormattableTextComponent buildResponsibleFlagListLink(IProtectedRegion region) {
         Map<String, FlagCorrelation> flagsInHierarchy = getFlagMapRecursive(region, null);
-        IFormattableTextComponent regionFlagNumber = buildTextWithHoverMsg(new TranslationTextComponent("%s", region.getFlags().size()),
-                new TranslationTextComponent("Flags responsible in %s", region.getName()), LINK_COLOR);
-        IFormattableTextComponent parentFlagsNumber = buildTextWithHoverMsg(new TranslationTextComponent("%s", flagsInHierarchy.size() - region.getFlags().size()),
-                new TranslationTextComponent("Flags responsible in parent regions"), LINK_COLOR);
-        IFormattableTextComponent flagListLinkText = new TranslationTextComponent("cli.msg.info.region.flag.link.text",
-                regionFlagNumber, parentFlagsNumber);
-        IFormattableTextComponent flagListHoverText = new TranslationTextComponent("cli.msg.info.region.flag.link.hover", region.getName());
+        IFormattableTextComponent responsibleFlagsNumber = buildTextWithHoverMsg(new TranslationTextComponent("%s", flagsInHierarchy.size()),
+                new TranslationTextComponent("cli.msg.info.region.flag.responsible.number.hover", flagsInHierarchy.size(), region.getName()), LINK_COLOR);
+        IFormattableTextComponent responsibleFlagListHoverText = new TranslationTextComponent("cli.msg.info.region.flag.responsible.link.hover", region.getName());
         switch (region.getRegionType()) {
             case GLOBAL: {
                 String flagListCmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), FLAG.toString());
-                IFormattableTextComponent flagListLink = buildExecuteCmdComponent(flagListLinkText, flagListHoverText, flagListCmd, RUN_COMMAND, LINK_COLOR);
-                if (flagsInHierarchy.isEmpty()) {
-                    flagListLink = flagListLinkText;
-                }
-                return new TranslationTextComponent("%s %s", flagListLink, buildAddFlagLink(region));
+                IFormattableTextComponent responsibleFlagListLink = buildExecuteCmdComponent(responsibleFlagsNumber, responsibleFlagListHoverText, flagListCmd, RUN_COMMAND, LINK_COLOR);
+                IFormattableTextComponent responsibleFlagsComp = flagsInHierarchy.isEmpty() ? responsibleFlagsNumber : responsibleFlagListLink;
+                return new TranslationTextComponent("cli.msg.info.region.flag.responsible.link.text", responsibleFlagsComp);
             }
             case DIMENSION: {
                 String flagListCmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), FLAG.toString());
-                IFormattableTextComponent flagListLink = buildExecuteCmdComponent(flagListLinkText, flagListHoverText, flagListCmd, RUN_COMMAND, LINK_COLOR);
-                if (flagsInHierarchy.isEmpty()) {
-                    flagListLink = flagListLinkText;
-                }
-                return new TranslationTextComponent("%s %s", flagListLink, buildAddFlagLink(region));
+                IFormattableTextComponent responsibleFlagListLink = buildExecuteCmdComponent(responsibleFlagsNumber, responsibleFlagListHoverText, flagListCmd, RUN_COMMAND, LINK_COLOR);
+                IFormattableTextComponent responsibleFlagsComp = flagsInHierarchy.isEmpty() ? responsibleFlagsNumber : responsibleFlagListLink;
+                return new TranslationTextComponent("cli.msg.info.region.flag.responsible.link.text", responsibleFlagsComp);
             }
             case LOCAL: {
-                String listCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), FLAG.toString());
-                IFormattableTextComponent flagListLink = buildExecuteCmdComponent(flagListLinkText, flagListHoverText, listCmd, RUN_COMMAND, LINK_COLOR);
-                if (flagsInHierarchy.isEmpty()) {
-                    flagListLink = flagListLinkText;
-                }
-                return new TranslationTextComponent("%s %s", flagListLink, buildAddFlagLink(region));
+                String flagListCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), FLAG.toString());
+                IFormattableTextComponent responsibleFlagListLink = buildExecuteCmdComponent(responsibleFlagsNumber, responsibleFlagListHoverText, flagListCmd, RUN_COMMAND, LINK_COLOR);
+                IFormattableTextComponent responsibleFlagsComp = flagsInHierarchy.isEmpty() ? responsibleFlagsNumber : responsibleFlagListLink;
+                return new TranslationTextComponent("cli.msg.info.region.flag.responsible.link.text", responsibleFlagsComp);
+            }
+            default:
+                throw new IllegalStateException("Unexpected value: " + region.getRegionType());
+        }
+    }
+
+    public static IFormattableTextComponent buildFlagsListLink(IProtectedRegion region) {
+        if (region.getRegionType() == RegionType.GLOBAL) {
+            return buildRegionFlagListLink(region);
+        }
+        return new TranslationTextComponent("%s | %s", buildResponsibleFlagListLink(region), buildRegionFlagListLink(region));
+    }
+
+    // [m] flag(s) [+]
+    public static IFormattableTextComponent buildRegionFlagListLink(IProtectedRegion region) {
+        IFormattableTextComponent regionFlagNumber = buildTextWithHoverMsg(new TranslationTextComponent("%s", region.getFlags().size()),
+                new TranslationTextComponent("cli.msg.info.region.flag.number.hover", region.getFlags().size(), region.getName()), LINK_COLOR);
+        IFormattableTextComponent flagListHoverText = new TranslationTextComponent("cli.msg.info.region.flag.link.hover", region.getName());
+        switch (region.getRegionType()) {
+            case GLOBAL: {
+                String regionFlagListCmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), REGION_FLAG.toString());
+                IFormattableTextComponent regionFlagListLink = buildExecuteCmdComponent(regionFlagNumber, flagListHoverText, regionFlagListCmd, RUN_COMMAND, LINK_COLOR);
+                IFormattableTextComponent regionFlagsComp = region.getFlags().isEmpty() ? regionFlagNumber : regionFlagListLink;
+                return new TranslationTextComponent("%s %s",
+                        new TranslationTextComponent("cli.msg.info.region.flag.region.link.text", regionFlagsComp),
+                        buildAddFlagLink(region));
+            }
+            case DIMENSION: {
+                String regionFlagListCmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), REGION_FLAG.toString());
+                IFormattableTextComponent regionFlagListLink = buildExecuteCmdComponent(regionFlagNumber, flagListHoverText, regionFlagListCmd, RUN_COMMAND, LINK_COLOR);
+                IFormattableTextComponent regionFlagsComp = region.getFlags().isEmpty() ? regionFlagNumber : regionFlagListLink;
+                return new TranslationTextComponent("%s %s",
+                        new TranslationTextComponent("cli.msg.info.region.flag.region.link.text", regionFlagsComp),
+                        buildAddFlagLink(region));
+            }
+            case LOCAL: {
+                String regionFlagListCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), REGION_FLAG.toString());
+                IFormattableTextComponent regionFlagListLink = buildExecuteCmdComponent(regionFlagNumber, flagListHoverText, regionFlagListCmd, RUN_COMMAND, LINK_COLOR);
+                IFormattableTextComponent regionFlagsComp = region.getFlags().isEmpty() ? regionFlagNumber : regionFlagListLink;
+                return new TranslationTextComponent("%s %s",
+                        new TranslationTextComponent("cli.msg.info.region.flag.region.link.text", regionFlagsComp),
+                        buildAddFlagLink(region));
             }
             default:
                 throw new IllegalStateException("Unexpected value: " + region.getRegionType());
