@@ -21,6 +21,7 @@ import de.z0rdak.yawp.core.group.GroupType;
 import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.handler.flags.HandlerUtil;
+import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.handler.flags.FlagCorrelation;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -170,7 +171,7 @@ public class ChatComponentBuilder {
         int diameter = (sphereArea.getRadius() * 2) + 1;
         MutableComponent centerPos = new TextComponent(buildBlockPosLinkText(sphereArea.getCenterPos()));
         return new TranslatableComponent("cli.msg.info.region.area.area.size.text.sphere",
-                buildTextWithHoverMsg(centerPos, centerPos, WHITE), sphereArea.getRadius(), diameter);
+                buildTextWithHoverAndBracketsMsg(centerPos, centerPos, WHITE), sphereArea.getRadius(), diameter);
     }
 
     /**
@@ -182,7 +183,7 @@ public class ChatComponentBuilder {
         int max = (int) Math.floor(cuboidArea.getArea().max(axis));
         int axisSize = Math.max(Math.abs(max - min), 1);
         String axisName = axis.getName().toUpperCase();
-        return buildTextWithHoverMsg(
+        return buildTextWithHoverAndBracketsMsg(
                 new TextComponent(axisName + "=" + axisSize),
                 new TextComponent(axisName + ": " + min + " - " + max), WHITE);
     }
@@ -252,10 +253,15 @@ public class ChatComponentBuilder {
         // buildShowAreaToggleLink(region)
     }
 
-    public static MutableComponent buildTextWithHoverMsg(MutableComponent text, MutableComponent hoverText, ChatFormatting color) {
+    public static MutableComponent buildTextWithHoverAndBracketsMsg(MutableComponent text, MutableComponent hoverText, ChatFormatting color) {
         MutableComponent bracketedText = ComponentUtils.wrapInSquareBrackets(text);
         bracketedText.setStyle(bracketedText.getStyle().withColor(color).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText)));
         return bracketedText;
+    }
+
+    public static MutableComponent buildTextWithHoverMsg(MutableComponent text, MutableComponent hoverText, ChatFormatting color) {
+        text.setStyle(text.getStyle().withColor(color).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText)));
+        return text;
     }
 
     public static MutableComponent buildHelpStartComponent() {
@@ -670,7 +676,7 @@ public class ChatComponentBuilder {
                 hover = new TranslatableComponent("cli.flag.state.disabled.info.hover");
                 break;
         }
-        MutableComponent stateInfo = buildTextWithHoverMsg(text, hover, color);
+        MutableComponent stateInfo = buildTextWithHoverAndBracketsMsg(text, hover, color);
         return new TranslatableComponent("%s %s", stateInfo, buildFlagStateSuggestionLink(region, flag));
     }
 
@@ -701,7 +707,7 @@ public class ChatComponentBuilder {
         MutableComponent linkText = new TranslatableComponent("cli.flag.msg.text.link.text." + flag.doesOverride());
         MutableComponent hoverText = new TranslatableComponent("cli.flag.msg.text.link.hover." + flag.doesOverride());
         ChatFormatting color = flag.doesOverride() ? ChatFormatting.GREEN : ChatFormatting.GRAY;
-        return buildTextWithHoverMsg(linkText, hoverText, color);
+        return buildTextWithHoverAndBracketsMsg(linkText, hoverText, color);
     }
 
 
@@ -813,7 +819,7 @@ public class ChatComponentBuilder {
         if (flag.getFlagMsg().isDefault()) {
             hoverText = new TranslatableComponent("flag.msg.deny." + region.getRegionType().type + ".default");
         }
-        return buildTextWithHoverMsg(flagMsgText, hoverText, WHITE);
+        return buildTextWithHoverAndBracketsMsg(flagMsgText, hoverText, WHITE);
     }
 
     /**
@@ -921,7 +927,7 @@ public class ChatComponentBuilder {
             }
             case DIMENSION: {
                 MutableComponent removeLink = new TextComponent("");
-                MutableComponent childIndicator = buildTextWithHoverMsg(new TextComponent("*"), new TranslatableComponent("cli.msg.info.dim.region.child.hover"), GOLD);
+                MutableComponent childIndicator = buildTextWithHoverAndBracketsMsg(new TextComponent("*"), new TranslatableComponent("cli.msg.info.dim.region.child.hover"), GOLD);
                 if (parent.hasChild(region)) {
                     removeLink = new TranslatableComponent("%s %s%s", buildDimSuggestRegionRemovalLink((IMarkableRegion) region), buildRegionInfoLink(region), childIndicator);
                 } else {
@@ -1364,39 +1370,11 @@ public class ChatComponentBuilder {
         return buildExecuteCmdComponent(revertLinkText, revertLinkHover, revertCmd, RUN_COMMAND, DARK_RED);
     }
 
-    public static MutableComponent buildRegionFlagInfoHeader(IProtectedRegion region) {
-        MutableComponent res;
-        switch (region.getRegionType()) {
-            case GLOBAL:
-                res = buildHeader(new TranslatableComponent("cli.msg.info.header.in", buildFlagListLink(region), buildRegionInfoLink(region)));
-                break;
-            case DIMENSION:
-                res = buildHeader(new TranslatableComponent("cli.msg.info.header.in", buildFlagListLink(region), buildRegionInfoLink(region)));
-                break;
-            case LOCAL:
-                res = buildHeader(new TranslatableComponent("cli.msg.info.header.in", buildFlagListLink(region), buildRegionInfoLink(region)));
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + region.getRegionType());
-        }
-        return res;
+    public static MutableComponent buildRegionFlagInfoHeader(IProtectedRegion region, MutableComponent flagListLink) {
+        return buildHeader(new TranslatableComponent("cli.msg.info.header.in", flagListLink, buildRegionInfoLink(region)));
     }
 
     public static MutableComponent buildFlagInfoHeader(IProtectedRegion region, IFlag flag) {
-        MutableComponent res;
-        switch (region.getRegionType()) {
-            case DIMENSION:
-                res = buildHeader(new TranslatableComponent("cli.msg.info.header.flag.in", buildFlagInfoLink(region, flag), buildRegionInfoLink(region)));
-                break;
-            case LOCAL:
-                res = buildHeader(new TranslatableComponent("cli.msg.info.header.flag.in", buildFlagInfoLink(region, flag), buildRegionInfoLink(region)));
-                break;
-            case GLOBAL:
-                res = buildHeader(new TranslatableComponent("cli.msg.info.header.flag.in", buildFlagInfoLink(region, flag), buildRegionInfoLink(region)));
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + region.getRegionType());
-        }
-        return res;
+        return buildHeader(new TranslatableComponent("cli.msg.info.header.flag.in", buildFlagInfoLink(region, flag), buildRegionInfoLink(region)));
     }
 }
