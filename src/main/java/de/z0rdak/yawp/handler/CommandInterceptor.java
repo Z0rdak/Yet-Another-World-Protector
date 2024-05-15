@@ -1,6 +1,5 @@
 package de.z0rdak.yawp.handler;
 
-import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -21,6 +20,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -123,18 +123,12 @@ public class CommandInterceptor {
                 // 0   1      2       3      4
                 // wp marker create <name> >parent>
                 boolean isParentArgProvided = nodeNames.size() >= 5 && nodeNames.get(4) != null;
-
-                ServerPlayer player = cmdContext.getSource().getPlayerOrException();
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.getLevel().dimension());
+                Player player = cmdContext.getSource().getPlayerOrException();
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.getCommandSenderWorld().dimension());
                 boolean hasPermission = hasConfigPermission(cmdContext.getSource(), cmdSrcType);
                 boolean hasRegionPermission = false;
                 if (isCreateCmd) {
                     if (isParentArgProvided) {
-                        /**
-                         * TODO: Include the containment check, then remove the locig from RegionArgumentType and MarkerCommands
-                         * @see de.z0rdak.yawp.commands.arguments.region.RegionArgumentType#getOwnedRegion(CommandContext, String)
-                         * @see de.z0rdak.yawp.commands.MarkerCommands#createRegion(CommandContext, String, IProtectedRegion)
-                         */
                         ParsedArgument<CommandSourceStack, ?> commandSourceParsedArgument = cmdContext.getArguments().get(nodeNames.get(4));
                         if (commandSourceParsedArgument.getResult() instanceof String) {
                             String parentName = (String) commandSourceParsedArgument.getResult();
@@ -413,7 +407,7 @@ public class CommandInterceptor {
     private static boolean hasCmdPermission(CommandContextBuilder<CommandSourceStack> ctx, CommandSourceType cmdSrcType, String permissionGroup, IProtectedRegion region) throws CommandSyntaxException {
         switch (cmdSrcType) {
             case PLAYER: {
-                ServerPlayer player = ctx.getSource().getPlayerOrException();
+                Player player = ctx.getSource().getPlayerOrException();
                 boolean hasConfigPermission = CommandPermissionConfig.hasConfigPermission(player);
                 boolean hasRegionPermission = hasRegionPermission(region, player, permissionGroup);
                 return (hasRegionPermission || hasConfigPermission);
@@ -432,7 +426,7 @@ public class CommandInterceptor {
         switch (cmdSrcType) {
             case PLAYER: {
                 List<String> nodeNames = ctx.getNodes().stream().map(node -> node.getNode().getName()).collect(Collectors.toList());
-                ServerPlayer player = ctx.getSource().getPlayerOrException();
+                Player player = ctx.getSource().getPlayerOrException();
                 boolean hasConfigPermission = CommandPermissionConfig.hasConfigPermission(player);
                 boolean hasRegionPermission = hasRegionPermission(region, player, permissionGroup);
                 boolean hasSubCmdPermission = subCmdPermission.apply(nodeNames);
