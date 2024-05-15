@@ -305,8 +305,9 @@ public class CommandUtil {
             sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.empty", buildRegionInfoLink(region)));
             return 1;
         }
+        MutableComponent flagListLink = buildResponsibleFlagListLink(region);
         List<MutableComponent> flagPagination = buildPaginationComponents(
-                buildRegionFlagInfoHeader(region), cmd, flagEntries, pageNo,
+                buildRegionFlagInfoHeader(region, flagListLink), cmd, flagEntries, pageNo,
                 new TranslatableComponent(" - %s", buildAddFlagLink(region)));
         flagPagination.forEach(line -> sendCmdFeedback(ctx.getSource(), line));
         return 0;
@@ -334,8 +335,9 @@ public class CommandUtil {
             sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.empty", buildRegionInfoLink(region)));
             return 1;
         }
+        IFormattableTextComponent flagListLink = buildRegionFlagListLink(region);
         List<MutableComponent> flagPagination = buildPaginationComponents(
-                buildRegionFlagInfoHeader(region), cmd, flagEntries, pageNo,
+                buildRegionFlagInfoHeader(region, flagListLink), cmd, flagEntries, pageNo,
                 new TranslatableComponent(" - %s", buildAddFlagLink(region)));
         flagPagination.forEach(line -> sendCmdFeedback(ctx.getSource(), line));
         return 0;
@@ -917,7 +919,7 @@ public class CommandUtil {
         // == Region [<name>] overview ==
         sendCmdFeedback(ctx.getSource(), buildRegionOverviewHeader(region));
         // Flags: [n] | [m] flag(s)] [+]
-        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.flag", buildFlagListLink(region)));
+        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.flag", buildFlagsListLink(region)));
         if (region.getRegionType() == RegionType.LOCAL) {
             IMarkableRegion markableRegion = (IMarkableRegion) region;
             // Area: [Area]
