@@ -16,6 +16,7 @@ import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
+import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.handler.flags.FlagCorrelation;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -161,7 +162,7 @@ public class ChatComponentBuilder {
         int diameter = (sphereArea.getRadius() * 2) + 1;
         IFormattableTextComponent centerPos = new StringTextComponent(buildBlockPosLinkText(sphereArea.getCenterPos()));
         return new TranslationTextComponent("cli.msg.info.region.area.area.size.text.sphere",
-                buildTextWithHoverMsg(centerPos, centerPos, WHITE), sphereArea.getRadius(), diameter);
+                buildTextWithHoverAndBracketsMsg(centerPos, centerPos, WHITE), sphereArea.getRadius(), diameter);
     }
 
     /**
@@ -173,7 +174,7 @@ public class ChatComponentBuilder {
         int max = (int) Math.floor(cuboidArea.getArea().max(axis));
         int axisSize = Math.max(Math.abs(max - min), 1);
         String axisName = axis.getName().toUpperCase();
-        return buildTextWithHoverMsg(
+        return buildTextWithHoverAndBracketsMsg(
                 new StringTextComponent(axisName + "=" + axisSize),
                 new StringTextComponent(axisName + ": " + min + " - " + max), WHITE);
     }
@@ -243,10 +244,15 @@ public class ChatComponentBuilder {
         // buildShowAreaToggleLink(region)
     }
 
-    public static IFormattableTextComponent buildTextWithHoverMsg(IFormattableTextComponent text, IFormattableTextComponent hoverText, TextFormatting color) {
+    public static IFormattableTextComponent buildTextWithHoverAndBracketsMsg(IFormattableTextComponent text, IFormattableTextComponent hoverText, TextFormatting color) {
         IFormattableTextComponent bracketedText = TextComponentUtils.wrapInSquareBrackets(text);
         bracketedText.setStyle(bracketedText.getStyle().withColor(color).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText)));
         return bracketedText;
+    }
+
+    public static IFormattableTextComponent buildTextWithHoverMsg(IFormattableTextComponent text, IFormattableTextComponent hoverText, TextFormatting color) {
+        text.setStyle(text.getStyle().withColor(color).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText)));
+        return text;
     }
 
     public static IFormattableTextComponent buildHelpStartComponent() {
@@ -659,7 +665,7 @@ public class ChatComponentBuilder {
                 hover = new TranslationTextComponent("cli.flag.state.disabled.info.hover");
                 break;
         }
-        IFormattableTextComponent stateInfo = buildTextWithHoverMsg(text, hover, color);
+        IFormattableTextComponent stateInfo = buildTextWithHoverAndBracketsMsg(text, hover, color);
         return new TranslationTextComponent("%s %s", stateInfo, buildFlagStateSuggestionLink(region, flag));
     }
 
@@ -690,7 +696,7 @@ public class ChatComponentBuilder {
         IFormattableTextComponent linkText = new TranslationTextComponent("cli.flag.msg.text.link.text." + flag.doesOverride());
         IFormattableTextComponent hoverText = new TranslationTextComponent("cli.flag.msg.text.link.hover." + flag.doesOverride());
         TextFormatting color = flag.doesOverride() ? TextFormatting.GREEN : TextFormatting.GRAY;
-        return buildTextWithHoverMsg(linkText, hoverText, color);
+        return buildTextWithHoverAndBracketsMsg(linkText, hoverText, color);
     }
 
 
@@ -802,7 +808,7 @@ public class ChatComponentBuilder {
         if (flag.getFlagMsg().isDefault()) {
             hoverText = new TranslationTextComponent("flag.msg.deny." + region.getRegionType().type + ".default");
         }
-        return buildTextWithHoverMsg(flagMsgText, hoverText, WHITE);
+        return buildTextWithHoverAndBracketsMsg(flagMsgText, hoverText, WHITE);
     }
 
     /**
@@ -910,7 +916,7 @@ public class ChatComponentBuilder {
             }
             case DIMENSION: {
                 IFormattableTextComponent removeLink = new StringTextComponent("");
-                IFormattableTextComponent childIndicator = buildTextWithHoverMsg(new StringTextComponent("*"), new TranslationTextComponent("cli.msg.info.dim.region.child.hover"), GOLD);
+                IFormattableTextComponent childIndicator = buildTextWithHoverAndBracketsMsg(new StringTextComponent("*"), new TranslationTextComponent("cli.msg.info.dim.region.child.hover"), GOLD);
                 if (parent.hasChild(region)) {
                     removeLink = new TranslationTextComponent("%s %s%s", buildDimSuggestRegionRemovalLink((IMarkableRegion) region), buildRegionInfoLink(region), childIndicator);
                 } else {
@@ -1360,41 +1366,11 @@ public class ChatComponentBuilder {
         return buildExecuteCmdComponent(revertLinkText, revertLinkHover, revertCmd, RUN_COMMAND, DARK_RED);
     }
 
-    // The content of the branches is the same for now but we keep it in place, in case we want to change it later
-    public static IFormattableTextComponent buildRegionFlagInfoHeader(IProtectedRegion region) {
-        IFormattableTextComponent res;
-        switch (region.getRegionType()) {
-            case GLOBAL:
-                res = buildHeader(new TranslationTextComponent("cli.msg.info.header.in", buildFlagListLink(region), buildRegionInfoLink(region)));
-                break;
-            case DIMENSION:
-                res = buildHeader(new TranslationTextComponent("cli.msg.info.header.in", buildFlagListLink(region), buildRegionInfoLink(region)));
-                break;
-            case LOCAL:
-                res = buildHeader(new TranslationTextComponent("cli.msg.info.header.in", buildFlagListLink(region), buildRegionInfoLink(region)));
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + region.getRegionType());
-        }
-        return res;
+    public static IFormattableTextComponent buildRegionFlagInfoHeader(IProtectedRegion region, IFormattableTextComponent flagListLink) {
+        return buildHeader(new TranslationTextComponent("cli.msg.info.header.in", flagListLink, buildRegionInfoLink(region)));
     }
 
-    // The content of the branches is the same for now but we keep it in place, in case we want to change it later
     public static IFormattableTextComponent buildFlagInfoHeader(IProtectedRegion region, IFlag flag) {
-        IFormattableTextComponent res;
-        switch (region.getRegionType()) {
-            case DIMENSION:
-                res = buildHeader(new TranslationTextComponent("cli.msg.info.header.flag.in", buildFlagInfoLink(region, flag), buildRegionInfoLink(region)));
-                break;
-            case LOCAL:
-                res = buildHeader(new TranslationTextComponent("cli.msg.info.header.flag.in", buildFlagInfoLink(region, flag), buildRegionInfoLink(region)));
-                break;
-            case GLOBAL:
-                res = buildHeader(new TranslationTextComponent("cli.msg.info.header.flag.in", buildFlagInfoLink(region, flag), buildRegionInfoLink(region)));
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + region.getRegionType());
-        }
-        return res;
+        return buildHeader(new TranslationTextComponent("cli.msg.info.header.flag.in", buildFlagInfoLink(region, flag), buildRegionInfoLink(region)));
     }
 }
