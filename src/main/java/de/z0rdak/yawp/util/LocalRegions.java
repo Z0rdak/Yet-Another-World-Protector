@@ -194,21 +194,54 @@ public final class LocalRegions {
                 .filter(r -> !r.equals(region))
                 .collect(Collectors.toList());
         List<IMarkableRegion> intersectingRegions = regionsInDim.stream()
-                .filter(r -> (region.getArea()).intersects((r).getArea()))
+                .filter(r -> r.getArea().intersects(region.getArea()))
                 .collect(Collectors.toList());
         List<IMarkableRegion> containingRegions = regionsInDim.stream()
-                .filter(r -> region.getArea().containsOther(r.getArea()))
+                .filter(r -> r.getArea().containsOther(region.getArea()))
                 .collect(Collectors.toList());
         return new RegionOverlappingInfo(region, intersectingRegions, containingRegions);
+    }
+
+    public static RegionOverlappingInfo getOverlappingRegions(IMarkableArea area, RegistryKey<World> dim) {
+        Collection<IMarkableRegion> regionsInDim = RegionDataManager.get().getRegionsFor(dim);
+        List<IMarkableRegion> intersectingRegions = regionsInDim.stream()
+                .filter(r -> r.getArea().intersects(area))
+                .collect(Collectors.toList());
+        List<IMarkableRegion> containingRegions = regionsInDim.stream()
+                .filter(r -> r.getArea().containsOther(area))
+                .collect(Collectors.toList());
+        return new RegionOverlappingInfo(null, intersectingRegions, containingRegions);
     }
 
     public static RegionOverlappingInfo getOverlappingOwned(IMarkableRegion region, Player player) {
         RegionOverlappingInfo overlappingRegions = getOverlappingRegions(region);
         List<IMarkableRegion> intersecting = overlappingRegions.intersectingRegions.stream()
-                .filter(r -> r.permits(player))
+                .filter(r -> r.isInGroup(player, CommandUtil.OWNER))
                 .collect(Collectors.toList());
         List<IMarkableRegion> contained = overlappingRegions.containingRegions.stream()
-                .filter(r -> r.permits(player))
+                .filter(r -> r.isInGroup(player, CommandUtil.OWNER))
+                .collect(Collectors.toList());
+        return new RegionOverlappingInfo(region, intersecting, contained);
+    }
+
+    public static RegionOverlappingInfo getOverlappingWithPermission(IMarkableArea area, PlayerEntity player) {
+        RegionOverlappingInfo overlappingRegions = getOverlappingRegions(area, player.getCommandSenderWorld().dimension());
+        List<IMarkableRegion> intersecting = overlappingRegions.intersectingRegions.stream()
+                .filter(r -> CommandPermissionConfig.hasRegionPermission(r, player, CommandUtil.OWNER))
+                .collect(Collectors.toList());
+        List<IMarkableRegion> contained = overlappingRegions.containingRegions.stream()
+                .filter(r -> CommandPermissionConfig.hasRegionPermission(r, player, CommandUtil.OWNER))
+                .collect(Collectors.toList());
+        return new RegionOverlappingInfo(null, intersecting, contained);
+    }
+
+    public static RegionOverlappingInfo getOverlappingWithPermission(IMarkableRegion region, PlayerEntity player) {
+        RegionOverlappingInfo overlappingRegions = getOverlappingRegions(region);
+        List<IMarkableRegion> intersecting = overlappingRegions.intersectingRegions.stream()
+                .filter(r -> CommandPermissionConfig.hasRegionPermission(r, player, CommandUtil.OWNER))
+                .collect(Collectors.toList());
+        List<IMarkableRegion> contained = overlappingRegions.containingRegions.stream()
+                .filter(r -> CommandPermissionConfig.hasRegionPermission(r, player, CommandUtil.OWNER))
                 .collect(Collectors.toList());
         return new RegionOverlappingInfo(region, intersecting, contained);
     }
@@ -237,11 +270,12 @@ public final class LocalRegions {
     }
 
     public static class RegionOverlappingInfo {
+        @Nullable
         public final IMarkableRegion region;
         public final List<IMarkableRegion> intersectingRegions;
         public final List<IMarkableRegion> containingRegions;
 
-        public RegionOverlappingInfo(IMarkableRegion region, List<IMarkableRegion> intersectingRegions, List<IMarkableRegion> containingRegions) {
+        public RegionOverlappingInfo(@Nullable IMarkableRegion region, List<IMarkableRegion> intersectingRegions, List<IMarkableRegion> containingRegions) {
             this.region = region;
             this.intersectingRegions = intersectingRegions;
             this.containingRegions = containingRegions;
