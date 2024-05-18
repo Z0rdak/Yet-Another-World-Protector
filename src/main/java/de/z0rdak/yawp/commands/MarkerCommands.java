@@ -6,12 +6,11 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
-import de.z0rdak.yawp.commands.arguments.region.OwnedRegionArgumentType;
+import de.z0rdak.yawp.commands.arguments.region.ContainingOwnedRegionArgumentType;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -25,7 +24,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -49,99 +47,105 @@ public final class MarkerCommands {
     public static LiteralArgumentBuilder<CommandSource> build() {
         return literal(MARKER)
                 .then(literal(GIVE)
-                        .executes(ctx -> giveMarkerStick(ctx.getSource())))
+                        .executes(MarkerCommands::giveMarkerStick))
                 .then(literal(RESET)
-                        .executes(ctx -> resetStick(ctx.getSource())))
+                        .executes(MarkerCommands::resetStick))
                 .then(literal(CREATE)
                         .then(Commands.argument(CommandConstants.NAME.toString(), StringArgumentType.word())
                                 .suggests((ctx, builder) -> ISuggestionProvider.suggest(Collections.singletonList(getRandomExample()), builder))
-                                .executes(ctx -> createRegion(ctx.getSource(), getRegionNameArgument(ctx), null))
+                                .executes(ctx -> createMarkedRegion(ctx, getRegionNameArgument(ctx), null))
                                 .then(Commands.argument(PARENT.toString(), StringArgumentType.word())
-                                        .suggests((ctx, builder) -> OwnedRegionArgumentType.region().listSuggestions(ctx, builder))
-                                        .executes(ctx -> createRegion(ctx.getSource(), getRegionNameArgument(ctx), getParentRegionArgument(ctx))))))
+                                        .suggests((ctx, builder) -> ContainingOwnedRegionArgumentType.owningRegions().listSuggestionsWithMarker(ctx, builder))
+                                        .executes(ctx -> createMarkedRegion(ctx, getRegionNameArgument(ctx), getContainingOwnedRegionArgument(ctx))))))
                 ;
     }
 
-    private static int createRegion(CommandSource src, String regionName, IMarkableRegion parentRegion) {
-        try {
-            PlayerEntity player = src.getPlayerOrException();
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.level.dimension());
-            int res = RegionDataManager.get().isValidRegionName(dimCache.getDimensionalRegion().getDim(), regionName);
-            if (res == -1) {
-                sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.name.invalid", regionName));
-                return res;
-            }
-            if (res == 1) {
-                sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.name.exists", buildRegionInfoLink(dimCache.getDimensionalRegion()), buildRegionInfoLink(dimCache.getRegion(regionName))));
-                return res;
-            }
-            ItemStack maybeStick = player.getMainHandItem();
-            if (StickUtil.isVanillaStick(maybeStick)) {
-                StickType stickType = StickUtil.getStickType(maybeStick);
-                if (stickType == StickType.MARKER) {
-                    CompoundNBT stickNBT = StickUtil.getStickNBT(maybeStick);
-                    if (stickNBT != null) {
-                        MarkerStick marker = new MarkerStick(stickNBT);
-                        if (!marker.isValidArea()) {
-                            sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.stick.area.invalid").withStyle(RED));
-                            return 1;
-                        }
-
-                        AbstractMarkableRegion region = LocalRegions.regionFrom(player, marker, regionName);
-                        RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
-                        if(MinecraftForge.EVENT_BUS.post(new RegionEvent.CreateRegionEvent(region, player))) {
-                            return 0;
-                        }
-                        boolean hasConfigPermission = CommandPermissionConfig.hasConfigPermission(player);
-                        boolean hasRegionPermission;
-                        if (parentRegion != null) {
-                            // should only be a region which has player as owner at this point due to the OwnerRegionArgumentType suggestions
-                            hasRegionPermission = CommandPermissionConfig.hasRegionPermission(parentRegion, player, CommandUtil.OWNER);
-                            if (hasRegionPermission || hasConfigPermission) {
-                                if (parentRegion.getArea().containsOther(region.getArea())) {
-                                    dimCache.addRegion(dimCache.getDimensionalRegion(), region);
-                                    parentRegion.addChild(region);
-                                    LocalRegions.ensureHigherRegionPriorityFor(region, RegionConfig.getDefaultPriority());
-                                    RegionDataManager.save();
-                                    sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region)));
-                                    return 0;
-                                } else {
-                                    sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.stick.area.invalid.parent", buildRegionInfoLink(parentRegion)));
-                                    return -1;
-                                }
-                            } else {
-                                sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.local.deny", buildRegionInfoLink(parentRegion)));
-                                return 1;
-                            }
-                        } else {
-                            hasRegionPermission = CommandPermissionConfig.hasRegionPermission(dimCache.getDimensionalRegion(), player, CommandUtil.OWNER);
-                            if (hasConfigPermission || hasRegionPermission) {
-                                dimCache.addRegion(dimCache.getDimensionalRegion(), region);
-                                LocalRegions.ensureHigherRegionPriorityFor(region, RegionConfig.getDefaultPriority());
-                                RegionDataManager.save();
-                                IFormattableTextComponent feedback = new TranslationTextComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region));
-                                sendCmdFeedback(src, feedback);
-                                return 0;
-                            } else {
-                                sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.dim.deny", buildRegionInfoLink(dimCache.getDimensionalRegion())));
-                                return 2;
-                            }
-                        }
-                    } else {
-                        sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.stick.invalid"));
-                        return -2;
+    public static IMarkableRegion fromMarkedBlocks(CommandContext<CommandSource> ctx, String regionName) throws CommandSyntaxException {
+        PlayerEntity player = ctx.getSource().getPlayerOrException();
+        ItemStack maybeStick = player.getMainHandItem();
+        if (StickUtil.isVanillaStick(maybeStick)) {
+            StickType stickType = StickUtil.getStickType(maybeStick);
+            if (stickType == StickType.MARKER) {
+                CompoundNBT stickNBT = StickUtil.getStickNBT(maybeStick);
+                if (stickNBT != null) {
+                    MarkerStick marker = new MarkerStick(stickNBT);
+                    if (!marker.isValidArea()) {
+                        sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.stick.area.invalid").withStyle(RED));
+                        return null;
                     }
+                    return LocalRegions.regionFrom(player, marker, regionName);
                 } else {
-                    sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.stick.missing").withStyle(RED));
-                    return -2;
+                    sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.stick.invalid"));
+                    return null;
                 }
             } else {
-                sendCmdFeedback(src, new TranslationTextComponent("cli.msg.dim.info.region.create.stick.missing").withStyle(RED));
-                return -2;
+                sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.stick.missing").withStyle(RED));
+                return null;
+            }
+        } else {
+            sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.stick.missing").withStyle(RED));
+            return null;
+        }
+    }
+
+    private static int createMarkedRegion(CommandContext<CommandSource> ctx, String regionName, IMarkableRegion parentRegion) {
+        try {
+            PlayerEntity player = ctx.getSource().getPlayerOrException();
+            if (parentRegion == null) {
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.level.dimension());
+                return createRegion(ctx, regionName, dimCache.getDimensionalRegion());
+            } else {
+                return createRegion(ctx, regionName, parentRegion);
             }
         } catch (CommandSyntaxException e) {
             YetAnotherWorldProtector.LOGGER.error(e);
             return -3;
+        }
+    }
+
+    private static int createRegion(CommandContext<CommandSource> ctx, String regionName, IProtectedRegion parentRegion) {
+        try {
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(ctx.getSource().getLevel().dimension());
+            int res = RegionDataManager.get().isValidRegionName(dimCache.getDimensionalRegion().getDim(), regionName);
+            if (res == -1) {
+                sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.name.invalid", regionName));
+                return res;
+            }
+            if (res == 1) {
+                sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.name.exists", buildRegionInfoLink(dimCache.getDimensionalRegion()), buildRegionInfoLink(dimCache.getRegion(regionName))));
+                return res;
+            }
+            PlayerEntity player = ctx.getSource().getPlayerOrException();
+            IMarkableRegion region = fromMarkedBlocks(ctx, regionName);
+            if (region == null) {
+                sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.stick.area.invalid").withStyle(RED));
+                return -1;
+            }
+            LocalRegions.RegionOverlappingInfo overlapping = LocalRegions.getOverlappingWithPermission(region, player);
+            if (!overlapping.hasContaining()) {
+                sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.arg.region.owned.invalid", parentRegion.getName()));
+                return 1;
+            }
+            RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
+            if (MinecraftForge.EVENT_BUS.post(new RegionEvent.CreateRegionEvent(region, player))) {
+                return 1;
+            }
+            boolean hasConfigPermission = CommandPermissionConfig.hasConfigPermission(player);
+            boolean hasRegionPermission = CommandPermissionConfig.hasRegionPermission(parentRegion, player, CommandUtil.OWNER);
+            if (hasConfigPermission || hasRegionPermission) {
+                dimCache.addRegion(dimCache.getDimensionalRegion(), region);
+                parentRegion.addChild(region);
+                LocalRegions.ensureHigherRegionPriorityFor(region, RegionConfig.getDefaultPriority());
+                RegionDataManager.save();
+                sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region), buildRegionInfoLink(parentRegion)));
+                return 0;
+            } else {
+                sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.region.create.local.deny", buildRegionInfoLink(parentRegion)));
+                return 1;
+            }
+        } catch (CommandSyntaxException e) {
+            YetAnotherWorldProtector.LOGGER.error(e);
+            return -1;
         }
     }
 
