@@ -120,8 +120,8 @@ The same commands of course work for Dimensional and the Global Regions:
   is only possible to create spheres with an odd diameter.
 * A sphere with radius 0 will only cover the center block.
 * Add commands to create a Sphere Local Region:
-  * `/wp local <dim> create <region-name> Sphere <center-pos> <radius-pos>`
-  * `/wp local <dim> create <region-name> Sphere <center-pos> <radius>`
+  * `/wp local <dim> create <region-name> Sphere <center-pos> <radius-pos> [<parent-region>]`
+  * `/wp local <dim> create <region-name> Sphere <center-pos> <radius> [<parent-region>]`
 * You can change the area type of the region area at any time from a Cuboid to a Sphere and back.
 * Support to create Spherical Regions with the RegionMarker will be added soon
 
@@ -217,6 +217,16 @@ The same commands of course work for Dimensional and the Global Regions:
 * Change command to update Local Region area:
   * Old: `/wp region <dim> <region> area Cuboid <pos1> <pos2>`
   * New: `/wp local <dim> <local> area set Cuboid <pos1> <pos2>`
+* When creating a Local Region you can no longer supply the owner of the region. Instead, you can optionally supply the
+  region parent:
+  * e.g.: `/wp local <dim> create <region-name> Cuboid <center-pos> <radius-pos> [<parent-region>]`
+  * The argument will try to suggest only owned regions that fully include the new region. This will also be checked
+    when executing the command. If the provided region is invalid, the Dimensional Region will be used instead.
+  * Omitting the parent, will also set the Dimensional Region as parent
+* Creating a Local Region with the RegionMarker and the correlated command now also requires you to provide the parent
+  region.
+  * If there are multiple valid options available, you are required to select one.
+  * If no parent is provided, the Dimensional Region will be used as parent.
 * Improved RegionMarker indicators for marked blocks. It's item name now shows colored indicators for
   * the amount of blocks which needs to be marked for a valid area
   * a selected teleport position
@@ -255,6 +265,8 @@ The same commands of course work for Dimensional and the Global Regions:
 * Fix region teleport command not working properly for non-ops
 * Fix entry point for ignite-explosive flag mixin
 * Fix ignite-explosive flag not considering explosions not caused by players
+* The command `/wp marker create ...` and `/wp dim <dim> create local ...` now properly checks for permission for the
+  parent region
 
 # [0.0.3.0-beta1] - 2024-03-27
 
