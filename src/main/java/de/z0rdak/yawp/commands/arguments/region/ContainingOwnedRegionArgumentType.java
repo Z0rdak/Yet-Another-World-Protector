@@ -31,7 +31,6 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TranslationTextComponent;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -61,8 +60,6 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
         return new ContainingOwnedRegionArgumentType();
     }
 
-    // FIXME: not correct
-    @Nullable
     public static IMarkableRegion getRegion(CommandContext<CommandSource> context, String argName) throws CommandSyntaxException {
         String containingRegionName = context.getArgument(argName, String.class);
         PlayerEntity player;
@@ -70,7 +67,7 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
         DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(context.getSource().getLevel().dimension());
         IMarkableRegion region = dimCache.getRegion(containingRegionName);
         if (region == null) {
-            return null;
+            throw ERROR_INVALID_VALUE.create(containingRegionName);
         }
         try {
             player = context.getSource().getPlayerOrException();
