@@ -12,7 +12,6 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.CuboidRegion;
-import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.TextComponent;
@@ -22,6 +21,8 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
 
 public class RegionFlagArgumentType implements ArgumentType<String> {
 
@@ -45,7 +46,7 @@ public class RegionFlagArgumentType implements ArgumentType<String> {
         if (RegionFlag.contains(flagIdentifier)) {
             return RegionFlag.fromId(flagIdentifier);
         } else {
-            MessageUtil.sendCmdFeedback(context.getSource(), new TextComponent("Invalid flag identifier: '" + flagIdentifier + "'!"));
+            sendCmdFeedback(context.getSource(), new TextComponent("Invalid flag identifier: '" + flagIdentifier + "'!"));
             throw ERROR_INVALID_VALUE.create(flagIdentifier);
         }
     }
@@ -81,7 +82,7 @@ public class RegionFlagArgumentType implements ArgumentType<String> {
                     if (RegionFlag.contains(flag))
                         return true;
                     else {
-                        MessageUtil.sendCmdFeedback(context.getSource(), new TextComponent("Invalid flag identifier: '" + flag + "'!"));
+                        sendCmdFeedback(context.getSource(), new TextComponent("Invalid flag identifier: '" + flag + "'!"));
                         return false;
                     }
                 })
@@ -102,8 +103,7 @@ public class RegionFlagArgumentType implements ArgumentType<String> {
     @Override
     @SuppressWarnings("unchecked")
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        if (context.getSource() instanceof CommandSourceStack) {
-            CommandSourceStack src = (CommandSourceStack) context.getSource();
+        if (context.getSource() instanceof CommandSourceStack src) {
             CuboidRegion region = (CuboidRegion) ArgumentUtil.getRegionArgument((CommandContext<CommandSourceStack>) context);
             List<String> flagNames = RegionFlag.getFlagNames();
 
@@ -120,10 +120,10 @@ public class RegionFlagArgumentType implements ArgumentType<String> {
             }
             if (flagNames.isEmpty()) {
                 if (input.contains("add")) {
-                    MessageUtil.sendCmdFeedback(src, new TextComponent("There are no flag left to add for this region '" + region.getName() + "'."));
+                    sendCmdFeedback(src, new TextComponent("There are no flag left to add for this region '" + region.getName() + "'."));
                 }
                 if (input.contains("remove")) {
-                    MessageUtil.sendCmdFeedback(src, new TextComponent("Region '" + region.getName() + "' does not contain any flags."));
+                    sendCmdFeedback(src, new TextComponent("Region '" + region.getName() + "' does not contain any flags."));
                 }
                 return Suggestions.empty();
             }

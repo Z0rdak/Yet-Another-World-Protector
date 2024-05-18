@@ -335,7 +335,7 @@ public class CommandUtil {
             sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.empty", buildRegionInfoLink(region)));
             return 1;
         }
-        IFormattableTextComponent flagListLink = buildRegionFlagListLink(region);
+        MutableComponent flagListLink = buildRegionFlagListLink(region);
         List<MutableComponent> flagPagination = buildPaginationComponents(
                 buildRegionFlagInfoHeader(region, flagListLink), cmd, flagEntries, pageNo,
                 new TranslatableComponent(" - %s", buildAddFlagLink(region)));

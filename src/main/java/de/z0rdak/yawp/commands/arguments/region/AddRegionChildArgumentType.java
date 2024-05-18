@@ -13,7 +13,6 @@ import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
-import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.TextComponent;
@@ -25,6 +24,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
 
 public class AddRegionChildArgumentType implements ArgumentType<String> {
 
@@ -91,7 +92,7 @@ public class AddRegionChildArgumentType implements ArgumentType<String> {
                     .map(IMarkableRegion::getName)
                     .collect(Collectors.toList());
             if (potentialChildrenNames.isEmpty()) {
-                MessageUtil.sendCmdFeedback(src, new TextComponent("There are no valid child regions for region '" + region.getName() + "'."));
+                sendCmdFeedback(src, new TextComponent("There are no valid child regions for region '" + region.getName() + "'."));
                 return Suggestions.empty();
             }
             return SharedSuggestionProvider.suggest(potentialChildrenNames, builder);

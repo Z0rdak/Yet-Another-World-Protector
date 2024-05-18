@@ -14,8 +14,6 @@ import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import de.z0rdak.yawp.util.ChatComponentBuilder;
-import de.z0rdak.yawp.util.ChatComponentBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -132,7 +130,7 @@ public final class FlagCommands {
             IFlag flag = region.getFlag(regionFlag.getName());
             return setFlagMuteState(ctx, region, flag, !flag.getFlagMsg().isMuted());
         } else {
-            ChatComponentBuilder.sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.not-present",
+            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.not-present",
                     buildRegionInfoLink(region), regionFlag.getName()));
             return 1;
         }
@@ -145,7 +143,7 @@ public final class FlagCommands {
                 buildFlagInfoLink(region, flag), flag.getFlagMsg().isMuted())
                 .append(" ")
                 .append(undoLink);
-        ChatComponentBuilder.sendCmdFeedback(ctx.getSource(), msg);
+        sendCmdFeedback(ctx.getSource(), msg);
         RegionDataManager.save();
         return 0;
 
@@ -160,7 +158,7 @@ public final class FlagCommands {
                 buildFlagInfoLink(region, flag), flagMsgStr)
                 .append(" ")
                 .append(undoLink);
-        ChatComponentBuilder.sendCmdFeedback(ctx.getSource(), msg);
+        sendCmdFeedback(ctx.getSource(), msg);
         RegionDataManager.save();
         return 0;
     }
@@ -176,7 +174,7 @@ public final class FlagCommands {
             }
             return setFlagState(ctx, region, regionFlag, flag.getState());
         } else {
-            ChatComponentBuilder.sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.not-present",
+            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.not-present",
                     buildRegionInfoLink(region), regionFlag.getName()));
             return 1;
         }
@@ -190,7 +188,7 @@ public final class FlagCommands {
                 buildFlagInfoLink(region, flag), flag.isActive())
                 .append(" ")
                 .append(undoLink);
-        ChatComponentBuilder.sendCmdFeedback(ctx.getSource(), msg);
+        sendCmdFeedback(ctx.getSource(), msg);
         RegionDataManager.save();
         return 0;
 
@@ -201,7 +199,7 @@ public final class FlagCommands {
             IFlag flag = region.getFlag(regionFlag.getName());
             return setOverride(ctx, region, flag, !flag.doesOverride());
         } else {
-            ChatComponentBuilder.sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.not-present",
+            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.not-present",
                     buildRegionInfoLink(region), regionFlag.getName()));
             return 1;
         }
@@ -214,7 +212,7 @@ public final class FlagCommands {
                 buildFlagInfoLink(region, flag), flag.doesOverride())
                 .append(" ")
                 .append(undoLink);
-        ChatComponentBuilder.sendCmdFeedback(ctx.getSource(), msg);
+        sendCmdFeedback(ctx.getSource(), msg);
         RegionDataManager.save();
         return 0;
     }

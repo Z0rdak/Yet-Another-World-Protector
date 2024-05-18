@@ -2,12 +2,12 @@ package de.z0rdak.yawp.mixin;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.handler.flags.HandlerUtil;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.ExplosionContext;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraftforge.common.MinecraftForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.IGNITE_EXPLOSIVES;
 
-@Mixin(ServerWorld.class)
+@Mixin(ServerLevel.class)
 public class ServerWorldMixin {
 
     /**
@@ -27,10 +27,10 @@ public class ServerWorldMixin {
      * TODO: Test if this is needed or ignition is fully covered by events
      */
     @Inject(method = "explode", at = @At("HEAD"), cancellable = true, allow = 1)
-    public void onIgniteExplosive(@Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionContext behavior, double x, double y, double z, float power, boolean createFire, Explosion.Mode explosionMode, CallbackInfoReturnable<Explosion> cir) {
-        ServerWorld world = (ServerWorld) (Object) this;
+    public void onIgniteExplosive(@Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionDamageCalculator behavior, double x, double y, double z, float power, boolean createFire, Explosion.BlockInteraction explosionMode, CallbackInfoReturnable<Explosion> cir) {
+        ServerLevel world = (ServerLevel) (Object) this;
         if (!world.isClientSide) {
-            if (explosionMode == Explosion.Mode.BREAK || explosionMode == Explosion.Mode.DESTROY) {
+            if (explosionMode == Explosion.BlockInteraction.BREAK || explosionMode == Explosion.BlockInteraction.DESTROY) {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(new BlockPos((int) x, (int) y, (int) z), IGNITE_EXPLOSIVES, world.dimension(), null);
                 if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                     return;

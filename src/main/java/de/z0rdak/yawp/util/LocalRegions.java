@@ -202,7 +202,7 @@ public final class LocalRegions {
         return new RegionOverlappingInfo(region, intersectingRegions, containingRegions);
     }
 
-    public static RegionOverlappingInfo getOverlappingRegions(IMarkableArea area, RegistryKey<World> dim) {
+    public static RegionOverlappingInfo getOverlappingRegions(IMarkableArea area, ResourceKey<Level> dim) {
         Collection<IMarkableRegion> regionsInDim = RegionDataManager.get().getRegionsFor(dim);
         List<IMarkableRegion> intersectingRegions = regionsInDim.stream()
                 .filter(r -> r.getArea().intersects(area))
@@ -224,7 +224,7 @@ public final class LocalRegions {
         return new RegionOverlappingInfo(region, intersecting, contained);
     }
 
-    public static RegionOverlappingInfo getOverlappingWithPermission(IMarkableArea area, PlayerEntity player) {
+    public static RegionOverlappingInfo getOverlappingWithPermission(IMarkableArea area, Player player) {
         RegionOverlappingInfo overlappingRegions = getOverlappingRegions(area, player.getCommandSenderWorld().dimension());
         List<IMarkableRegion> intersecting = overlappingRegions.intersectingRegions.stream()
                 .filter(r -> CommandPermissionConfig.hasRegionPermission(r, player, CommandUtil.OWNER))
@@ -235,7 +235,7 @@ public final class LocalRegions {
         return new RegionOverlappingInfo(null, intersecting, contained);
     }
 
-    public static RegionOverlappingInfo getOverlappingWithPermission(IMarkableRegion region, PlayerEntity player) {
+    public static RegionOverlappingInfo getOverlappingWithPermission(IMarkableRegion region, Player player) {
         RegionOverlappingInfo overlappingRegions = getOverlappingRegions(region);
         List<IMarkableRegion> intersecting = overlappingRegions.intersectingRegions.stream()
                 .filter(r -> CommandPermissionConfig.hasRegionPermission(r, player, CommandUtil.OWNER))

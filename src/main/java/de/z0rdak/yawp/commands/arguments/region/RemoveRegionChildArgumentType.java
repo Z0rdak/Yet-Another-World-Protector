@@ -12,7 +12,6 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.TextComponent;
@@ -24,6 +23,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
 
 public class RemoveRegionChildArgumentType implements ArgumentType<String> {
 
@@ -83,7 +84,7 @@ public class RemoveRegionChildArgumentType implements ArgumentType<String> {
                     .map(IProtectedRegion::getName)
                     .collect(Collectors.toList());
             if (childNames.isEmpty()) {
-                MessageUtil.sendCmdFeedback(src, new TextComponent("Region '" + region.getName() + "' has no children."));
+                sendCmdFeedback(src, new TextComponent("Region '" + region.getName() + "' has no children."));
                 return Suggestions.empty();
             }
             return SharedSuggestionProvider.suggest(childNames, builder);

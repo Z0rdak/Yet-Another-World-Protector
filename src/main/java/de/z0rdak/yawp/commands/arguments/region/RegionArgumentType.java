@@ -18,8 +18,6 @@ import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import de.z0rdak.yawp.util.MessageUtil;
-import de.z0rdak.yawp.util.constants.RegionNBT;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.TextComponent;
@@ -171,8 +169,7 @@ public class RegionArgumentType implements ArgumentType<String> {
     @SuppressWarnings("unchecked")
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        if (context.getSource() instanceof CommandSourceStack) {
-            CommandSourceStack src = (CommandSourceStack) context.getSource();
+        if (context.getSource() instanceof CommandSourceStack src) {
             DimensionRegionCache dimCache = ArgumentUtil.getDimCacheArgument((CommandContext<CommandSourceStack>) context);
             return suggestRegionsForOwner(builder, src, dimCache);
         } else {
@@ -209,8 +206,7 @@ public class RegionArgumentType implements ArgumentType<String> {
 
     @SuppressWarnings("unchecked")
     public <S> CompletableFuture<Suggestions> listRegionsInTargetDim(CommandContext<S> context, SuggestionsBuilder builder) {
-        if (context.getSource() instanceof CommandSourceStack) {
-            CommandSourceStack src = (CommandSourceStack) context.getSource();
+        if (context.getSource() instanceof CommandSourceStack src) {
             try {
                 DimensionRegionCache dimCache = ArgumentUtil.getTargetDimRegionArgument((CommandContext<CommandSourceStack>) context);
                 return suggestRegionsForOwner(builder, src, dimCache);

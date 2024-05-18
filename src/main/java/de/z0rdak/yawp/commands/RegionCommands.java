@@ -24,10 +24,6 @@ import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
-import de.z0rdak.yawp.core.region.CuboidRegion;
-import de.z0rdak.yawp.core.region.DimensionalRegion;
-import de.z0rdak.yawp.core.region.IMarkableRegion;
-import de.z0rdak.yawp.core.region.IProtectedRegion;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -36,11 +32,9 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.Collections;
@@ -394,9 +388,9 @@ public class RegionCommands {
         }
     }
 
-    private static int teleport(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, Player player) {
+    private static int teleport(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, ServerPlayer player) {
         try {
-            Player playerEntity = ctx.getSource().getPlayerOrException();
+            ServerPlayer playerEntity = ctx.getSource().getPlayerOrException();
             ServerLevel level = ctx.getSource().getServer().getLevel(region.getDim());
             if (level != null) {
                 playerEntity.teleportTo(level, region.getTpTarget().getX(), region.getTpTarget().getY(), region.getTpTarget().getZ(), playerEntity.yRotO, playerEntity.xRotO);

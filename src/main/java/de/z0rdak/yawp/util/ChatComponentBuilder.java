@@ -1,32 +1,25 @@
 package de.z0rdak.yawp.util;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.math.Vector3d;
-import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.CommandConstants;
-import de.z0rdak.yawp.commands.RegionCommands;
 import de.z0rdak.yawp.commands.RegionCommands;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
-import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.area.SphereArea;
-import de.z0rdak.yawp.core.flag.BooleanFlag;
-import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.group.GroupType;
 import de.z0rdak.yawp.core.group.PlayerContainer;
-import de.z0rdak.yawp.core.region.*;
-import de.z0rdak.yawp.handler.flags.HandlerUtil;
+import de.z0rdak.yawp.core.region.DimensionalRegion;
+import de.z0rdak.yawp.core.region.IMarkableRegion;
+import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.handler.flags.FlagCorrelation;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.ChatFormatting;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.NbtUtils;
@@ -48,7 +41,6 @@ import static de.z0rdak.yawp.commands.CommandUtil.GROUP_LIST;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.getFlagMapRecursive;
 import static de.z0rdak.yawp.util.LocalRegions.getFlagsWithState;
-import static net.minecraft.ChatFormatting.RESET;
 import static net.minecraft.ChatFormatting.*;
 import static net.minecraft.network.chat.ClickEvent.Action.*;
 
@@ -1186,9 +1178,9 @@ public class ChatComponentBuilder {
                         new TranslatableComponent("cli.msg.info.region.flag.region.link.text", regionFlagsComp),
                         buildAddFlagLink(region));
             }
-            default ->
+            default:
                 throw new IllegalStateException("Unexpected value: " + region.getRegionType());
-        };
+        }
     }
 
     public static MutableComponent buildAddFlagLink(IProtectedRegion region) {

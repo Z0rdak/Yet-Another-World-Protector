@@ -1,10 +1,8 @@
 package de.z0rdak.yawp.commands.arguments.flag;
 
-import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -17,9 +15,6 @@ import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
-import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.core.region.RegionType;
-import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.TextComponent;
@@ -34,6 +29,7 @@ import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.ADD;
 import static de.z0rdak.yawp.commands.CommandConstants.REMOVE;
+import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
 
 public class IFlagArgumentType implements ArgumentType<String> {
 
@@ -94,12 +90,12 @@ public class IFlagArgumentType implements ArgumentType<String> {
             if (region.containsFlag(flagIdentifier)) {
                 return region.getFlag(flagIdentifier);
             } else {
-                MessageUtil.sendCmdFeedback(context.getSource(), new TextComponent("Region '" + region.getName() + "' does not contain flag '" + flagIdentifier + "'!"));
+                sendCmdFeedback(context.getSource(), new TextComponent("Region '" + region.getName() + "' does not contain flag '" + flagIdentifier + "'!"));
                 // Should not happen!
                 throw new IllegalArgumentException("Region '" + region.getName() + "' does not contain flag '" + flagIdentifier + "'!");
             }
         } else {
-            MessageUtil.sendCmdFeedback(context.getSource(), new TextComponent("Invalid flag identifier: '" + flagIdentifier + "'!"));
+            sendCmdFeedback(context.getSource(), new TextComponent("Invalid flag identifier: '" + flagIdentifier + "'!"));
             throw ERROR_INVALID_VALUE.create(flagIdentifier);
         }
     }
@@ -148,7 +144,7 @@ public class IFlagArgumentType implements ArgumentType<String> {
         boolean isCommandSource = context.getSource() instanceof CommandSourceStack;
         if (regionType == null) {
             if (isCommandSource) {
-                MessageUtil.sendCmdFeedback((CommandSourceStack) context.getSource(), new TextComponent("Invalid region type supplied"));
+                sendCmdFeedback((CommandSourceStack) context.getSource(), new TextComponent("Invalid region type supplied"));
             }
             return Suggestions.empty();
         }
@@ -159,11 +155,11 @@ public class IFlagArgumentType implements ArgumentType<String> {
                 FlagEditType flagEditType = getEditType(context);
                 List<String> flagToSuggest = getSuggestionFlags(flagEditType, region);
                 if ((flagEditType == FlagEditType.REMOVE || flagEditType == FlagEditType.INFO) && flagToSuggest.isEmpty()) {
-                    MessageUtil.sendCmdFeedback(src, new TextComponent("No flags defined in region '" + region.getName() + "'!"));
+                    sendCmdFeedback(src, new TextComponent("No flags defined in region '" + region.getName() + "'!"));
                     return Suggestions.empty();
                 }
                 if (flagEditType == FlagEditType.ADD && flagToSuggest.isEmpty()) {
-                    MessageUtil.sendCmdFeedback(src, new TextComponent("Region '" + region.getName() + "' already contains all flags!"));
+                    sendCmdFeedback(src, new TextComponent("Region '" + region.getName() + "' already contains all flags!"));
                     return Suggestions.empty();
                 }
                 return SharedSuggestionProvider.suggest(flagToSuggest, builder);
