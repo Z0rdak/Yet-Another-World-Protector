@@ -4,13 +4,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-// TODO: registry or datapack for area with their area types
 public enum AreaType {
 
     CUBOID("Cuboid", 2),
     CYLINDER("Cylinder", 3),
     SPHERE("Sphere", 2),
-    // TODO: config values for polygon and prism
     POLYGON_3D("Polygon", 3, 20),
     PRISM("Prism", 3, 10),
     CHUNK("Chunk", 1, 1),

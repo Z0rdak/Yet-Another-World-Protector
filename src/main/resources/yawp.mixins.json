@@ -8,10 +8,11 @@
   ],
   "client": [],
   "server": [
-    "FrostWalkerEnchantmentMixin",
     "FireBlockMixin",
+    "FrostWalkerEnchantmentMixin",
     "LeavesBlockMixin",
     "PlayerEntityMixin",
+    "ServerWorldMixin",
     "TntBlockMixin"
   ]
 }

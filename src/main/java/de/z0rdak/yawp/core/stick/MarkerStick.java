@@ -13,7 +13,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.util.INBTSerializable;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -28,24 +27,11 @@ public class MarkerStick extends AbstractStick implements INBTSerializable<Compo
     private boolean isValidArea;
     private List<BlockPos> markedBlocks;
 
-    public MarkerStick(AreaType areaType, boolean isValidArea, List<BlockPos> markedBlocks, ResourceKey<Level> dim) {
-        this(areaType, isValidArea, markedBlocks, dim, null);
-    }
-
-    public MarkerStick(AreaType areaType, boolean isValidArea, List<BlockPos> markedBlocks, ResourceKey<Level> dim, BlockPos tpPos) {
-        super(StickType.MARKER);
-        this.areaType = areaType;
-        this.isValidArea = isValidArea;
-        this.markedBlocks = markedBlocks;
-        this.dimension = dim;
-        this.teleportPos = tpPos;
-    }
-
     public MarkerStick(ResourceKey<Level> dim) {
         super(StickType.MARKER);
         this.areaType = AreaType.CUBOID;
         this.isValidArea = false;
-        this.markedBlocks = new ArrayList<>();
+        this.markedBlocks = new ArrayList<>(this.areaType.maxBlocks);
         this.dimension = dim;
         this.teleportPos = null;
     }
@@ -61,7 +47,7 @@ public class MarkerStick extends AbstractStick implements INBTSerializable<Compo
     }
 
     public void reset() {
-        this.markedBlocks = new ArrayList<>();
+        this.markedBlocks = new ArrayList<>(this.areaType.maxBlocks);
         this.isValidArea = false;
         this.teleportPos = null;
     }
@@ -143,7 +129,7 @@ public class MarkerStick extends AbstractStick implements INBTSerializable<Compo
         }
         this.dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(nbt.getString(DIM)));
         ListTag markedBlocksNBT = nbt.getList(MARKED_BLOCKS, Tag.TAG_COMPOUND);
-        this.markedBlocks = new ArrayList<>();
+        this.markedBlocks = new ArrayList<>(this.areaType.maxBlocks);
         markedBlocksNBT.forEach(block -> this.markedBlocks.add(NbtUtils.readBlockPos((CompoundTag) block)));
     }
 }

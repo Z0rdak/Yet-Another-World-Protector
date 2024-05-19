@@ -4,54 +4,72 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class GlobalRegion extends AbstractRegion {
 
     public static final ResourceLocation GLOBAL = new ResourceLocation("yawp", "global");
     public static final ResourceKey<Level> GLOBAL_DIMENSION = ResourceKey.create(Registries.DIMENSION, GLOBAL);
 
-    protected GlobalRegion(CompoundTag nbt) {
+    public GlobalRegion(CompoundTag nbt) {
         super(nbt);
     }
 
     public GlobalRegion() {
-        this("global", RegionType.GLOBAL);
+        this(GLOBAL.toString(), RegionType.GLOBAL);
     }
 
     protected GlobalRegion(String name, RegionType type) {
         super(name, GLOBAL_DIMENSION, type);
-    }
-
-    protected GlobalRegion(String name, RegionType regionType, Player owner) {
-        super(name, GLOBAL_DIMENSION, regionType, owner);
+        super.setParent(this);
     }
 
     @Override
-    public boolean setParent(@Nonnull IProtectedRegion parent) {
-        throw new IllegalRegionStateException("Attempt to set parent for global region");
+    public Map<String, IProtectedRegion> getChildren() {
+        Map<String, IProtectedRegion> childrenWithoutGlobal = super.getChildren().entrySet().stream()
+                .filter(e -> e.getValue().getRegionType() != RegionType.GLOBAL)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return Collections.unmodifiableMap(childrenWithoutGlobal);
     }
 
-    @Nullable
     @Override
-    public IProtectedRegion getParent() {
-        return null;
+    public Set<String> getChildrenNames() {
+        Set<String> childrenWithoutGlobal = super.getChildren().values().stream()
+                .filter(iProtectedRegion -> iProtectedRegion.getRegionType() != RegionType.GLOBAL)
+                .map(IProtectedRegion::getName)
+                .collect(Collectors.toSet());
+        return Collections.unmodifiableSet(childrenWithoutGlobal);
+    }
+
+    @Override
+    public boolean setParent(IProtectedRegion parent) {
+        if (parent.getRegionType() == RegionType.GLOBAL) {
+            return super.setParent(parent);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean addChild(IProtectedRegion child) {
+        if (child.getRegionType() == RegionType.DIMENSION) {
+            return super.addChild(child);
+        }
+        return false;
     }
 
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag nbt = super.serializeNBT();
-        nbt.putBoolean("global", true);
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-        boolean isGlobal = nbt.getBoolean("global");
     }
 }

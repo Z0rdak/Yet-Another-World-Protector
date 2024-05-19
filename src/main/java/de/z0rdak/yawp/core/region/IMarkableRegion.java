@@ -28,7 +28,6 @@ public interface IMarkableRegion extends IProtectedRegion {
 
    void setPriority(int priority);
 
-   boolean isMuted();
+    void rename(String newName);
 
-   void setIsMuted(boolean isMuted);
 }

@@ -7,9 +7,11 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.ChunkPos;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MultiChunkArea extends AbstractArea {
@@ -60,5 +62,21 @@ public class MultiChunkArea extends AbstractArea {
     @Override
     public List<BlockPos> getMarkedBlocks() {
         return this.chunks.stream().map(ChunkPos::getWorldPosition).collect(Collectors.toList());
+    }
+
+    @Override
+    public Set<BlockPos> getHull() {
+        throw new NotImplementedException("ChunkArea.getHull() not implemented yet");
+    }
+
+
+    @Override
+    public boolean containsOther(IMarkableArea other) {
+        throw new NotImplementedException("Not yet implemented");
+    }
+
+    @Override
+    public boolean intersects(IMarkableArea other) {
+        throw new NotImplementedException("Not yet implemented");
     }
 }

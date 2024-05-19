@@ -3,22 +3,27 @@ package de.z0rdak.yawp.handler.stick;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.area.AreaType;
-import de.z0rdak.yawp.core.region.AbstractMarkableRegion;
-import de.z0rdak.yawp.core.region.CuboidRegion;
+import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
-import de.z0rdak.yawp.util.MessageUtil;
 import de.z0rdak.yawp.util.StickType;
 import de.z0rdak.yawp.util.StickUtil;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.event.entity.player.AnvilRepairEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
+import static de.z0rdak.yawp.commands.CommandConstants.CREATE;
+import static de.z0rdak.yawp.commands.CommandConstants.MARKER;
+import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.buildCommandStr;
+import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
+import static de.z0rdak.yawp.util.MessageSender.sendMessage;
 import static de.z0rdak.yawp.util.StickUtil.*;
 
 public class MarkerStickHandler {
@@ -27,26 +32,36 @@ public class MarkerStickHandler {
         MarkerStick marker = new MarkerStick(involvedItem.getTag().getCompound(STICK));
         AreaType areaType = marker.getAreaType();
         if (areaType == null) {
-            YetAnotherWorldProtector.LOGGER.warn("Unknown area type on marking - should really not happening");
-            return;
+            YetAnotherWorldProtector.LOGGER.error("Unknown area type on marking - should really not happening");
+            throw new IllegalArgumentException("Unexpected value. AreaType is null");
         }
         if (event.getEntity().isShiftKeyDown()) {
             marker.setTeleportPos(event.getPos());
             involvedItem.getTag().put(STICK, marker.serializeNBT());
+            setStickName(involvedItem, StickType.MARKER);
+            sendMessage(event.getEntity(), Component.translatableWithFallback("cli.marker.create.mark.tp-pos", "Marked teleport position at %s", shortBlockPos(event.getPos())));
             return;
         }
         // add block to NBT list
+        int index = marker.getMarkedBlocks().size() % (marker.getAreaType().neededBlocks + 1);
         marker.addMarkedBlock(event.getPos());
+        sendMessage(event.getEntity(), Component.translatableWithFallback("cli.marker.create.mark.block", "Marked block %s at %s", index + 1, shortBlockPos(event.getPos())));
         // check whether marked blocks form a valid marked area
-        marker.checkValidArea();
+        boolean hasValidArea = marker.checkValidArea();
         involvedItem.getTag().put(STICK, marker.serializeNBT());
         setStickName(involvedItem, StickType.MARKER);
+        if (hasValidArea) {
+            // send info about valid area and how to create a region
+            MutableComponent cmdText = Component.translatableWithFallback("cli.marker.create.link.text", "Create a new region!");
+            MutableComponent cmdHoverText = Component.translatableWithFallback("cli.marker.create.link.hover", "Create region with marked blocks from RegionMarker");
+            String cmd = buildCommandStr(MARKER.toString(), CREATE.toString(), "");
+            MutableComponent markerCmdSuggestionLink = buildExecuteCmdComponent(cmdText, cmdHoverText, cmd, ClickEvent.Action.SUGGEST_COMMAND, LINK_COLOR);
+            sendMessage(event.getEntity(), Component.translatableWithFallback("cli.marker.create.mark.valid", "The marked area is valid! %s", markerCmdSuggestionLink));
+        }
     }
-
 
     /**
      * Create a region from the NBT data of the renamed region marker.
-     * TODO: Make parent selectable for creating region, this is needed to check if a player is allowed to create a region with the stick
      */
     public static void onCreateRegion(AnvilRepairEvent event) {
         ItemStack outputItem = event.getOutput();
@@ -57,28 +72,27 @@ public class MarkerStickHandler {
             String regionName = outputItem.getHoverName().getString();
             MarkerStick marker = new MarkerStick(stickNBT);
             if (marker.isValidArea()) {
-                AbstractMarkableRegion region = LocalRegions.regionFrom(player, marker, regionName);
+                IMarkableRegion region = LocalRegions.regionFrom(player, marker, regionName);
                 if (region != null) {
                     DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.getCommandSenderWorld().dimension());
                     if (dimCache != null) {
-                        dimCache.addRegion(region);
-                        LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) region, RegionConfig.DEFAULT_REGION_PRIORITY.get());
+                        dimCache.addRegion(dimCache.getDimensionalRegion(), region);
+                        LocalRegions.ensureHigherRegionPriorityFor(region, RegionConfig.getDefaultPriority());
                         marker.reset();
                         outputItem.getTag().put(STICK, marker.serializeNBT());
                         setStickName(outputItem, type);
-                        // TODO: Reset marker on dimChange?
                         RegionDataManager.save();
                     } else {
-                        MessageUtil.sendMessage(player, Component.translatableWithFallback("Player dimension not matching marker data", "Player dimension not matching marker data"));
+                        sendMessage(player, Component.translatableWithFallback("Player dimension not matching marker data", "Player dimension not matching marker data"));
                     }
                 } else {
-                    MessageUtil.sendMessage(player, Component.translatableWithFallback("Invalid region type", "Invalid region type"));
+                    sendMessage(player, Component.translatableWithFallback("Invalid region type", "Invalid region type"));
                 }
             } else {
-                MessageUtil.sendMessage(player, Component.translatableWithFallback("Could not create region", "Could not create region"));
+                sendMessage(player, Component.translatableWithFallback("Could not create region", "Could not create region"));
             }
         } else {
-            MessageUtil.sendMessage(player, Component.translatableWithFallback("Invalid stick type / NBT data", "Invalid stick type / NBT data"));
+            sendMessage(player, Component.translatableWithFallback("Invalid stick type / NBT data", "Invalid stick type / NBT data"));
         }
     }
 
