@@ -274,7 +274,7 @@ public class CommandUtil {
      */
     public static int promptGroupLinks(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, String group) {
         if (!GROUP_LIST.contains(group)) {
-            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.global.info.group.invalid", group).withStyle(ChatFormatting.RED));
+            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.region.info.group.invalid", group).withStyle(ChatFormatting.RED));
             return -1;
         }
         sendCmdFeedback(ctx.getSource(), buildGroupHeader(region, group));
@@ -890,19 +890,15 @@ public class CommandUtil {
      */
     private static List<Entity> getEntitiesToRemove(ServerLevel level, IMarkableRegion region, Predicate<? super Entity> entityFilter) {
         // TODO: could be optimized by getting the chunks around the area only to check
-        return level.getEntities()
-                .filter(entityFilter)
+        List<? extends Entity> entities = level.getEntities(EntityTypeTest.forClass(Entity.class), entityFilter);
+        return entities.stream()
                 .filter(e -> region.getArea().containsOther(new CuboidArea(e.getBoundingBox())))
-                .filter(CommandUtil::isNotPersistent)
-                .collect(Collectors.toList());
-        return level.getEntities((Entity) null, ((CuboidArea) region.getArea()).getArea(), entityFilter)
-                .stream()
                 .filter(CommandUtil::isNotPersistent)
                 .collect(Collectors.toList());
     }
 
     private static List<Entity> getEntitiesToRemove(ServerLevel level, Predicate<? super Entity> entityFilter, RegionFlag flag) {
-        List<Entity> entities = level.getEntities(EntityTypeTest.forClass(Entity.class), entityFilter);
+        List<? extends Entity> entities = level.getEntities(EntityTypeTest.forClass(Entity.class), entityFilter);
         return entities.stream()
                 .filter(e -> !isProtectedByRegion(level, flag, e)) // That's O(enemyCount * regionCount) complexity, not considering the recursion for the flag check
                 .filter(CommandUtil::isNotPersistent)
@@ -949,7 +945,7 @@ public class CommandUtil {
                 MutableComponent globalRegionLink = buildRegionInfoLink(region.getParent(), new TranslatableComponent("cli.msg.info.region.global.link.hover"));
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(region.getDim());
                 MutableComponent hierarchyLinks = new TranslatableComponent("%s, %s, %s", globalRegionLink, buildDimRegionsLink(dimCache), listChildrenLink);
-                sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.dimensions", hierarchyLinks));
+                sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.hierarchy", hierarchyLinks));
             }
             break;
             case LOCAL: {
