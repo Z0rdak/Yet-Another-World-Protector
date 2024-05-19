@@ -5,13 +5,13 @@
   "package": "de.z0rdak.yawp.mixin",
   "refmap": "${mod_id}.refmap.json",
   "mixins": [
-  ],
-  "client": [],
-  "server": [
-    "FrostWalkerEnchantmentMixin",
     "FireBlockMixin",
+    "FrostWalkerEnchantmentMixin",
     "LeavesBlockMixin",
     "PlayerEntityMixin",
+    "ServerWorldMixin",
     "TntBlockMixin"
-  ]
+  ],
+  "client": [],
+  "server": []
 }

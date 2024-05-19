@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import static de.z0rdak.yawp.util.constants.RegionNBT.FLAG_TYPE;
@@ -14,26 +15,16 @@ import static de.z0rdak.yawp.util.constants.RegionNBT.FLAG_TYPE;
  * [Key] FlagName -> [Value] IFlag <br>
  * E.g. "break_blocks" -> BooleanFlag {"value": false, ...}
  */
-public class FlagContainer extends HashMap<String, IFlag> implements INBTSerializable<CompoundTag> {
+public class FlagContainer extends HashMap<String, IFlag> implements INBTSerializable<CompoundTag>, IFlagContainer {
 
 
-    public FlagContainer(CompoundTag nbt){
+    public FlagContainer(CompoundTag nbt) {
         this();
         this.deserializeNBT(nbt);
     }
 
-    public FlagContainer(){
+    public FlagContainer() {
         super();
-    }
-
-    public FlagContainer(IFlag flag) {
-        this();
-        this.put(flag);
-    }
-
-    public FlagContainer(Set<IFlag> flags) {
-        this();
-        flags.forEach(this::put);
     }
 
     @Override
@@ -72,15 +63,42 @@ public class FlagContainer extends HashMap<String, IFlag> implements INBTSeriali
         });
     }
 
-    public void put(IFlag flag) {
-        this.put(flag.getFlagIdentifier(), flag);
+    public FlagContainer deepCopy() {
+        return new FlagContainer(this.serializeNBT());
     }
 
-    public boolean contains(RegionFlag flag) {
-        return this.containsKey(flag.name);
+    public void put(IFlag flag) {
+        this.put(flag.getName(), flag);
+    }
+
+    public FlagState flagState(String flagName) {
+        if (this.contains(flagName)) {
+            return this.get(flagName).getState();
+        } else
+            return FlagState.UNDEFINED;
+    }
+
+    public Map<String, IFlag> getActiveFlags() {
+        Map<String, IFlag> activeFlags = new HashMap<>();
+        this.forEach((k, v) -> {
+            if (v.isActive()) {
+                activeFlags.put(k, v);
+            }
+        });
+        return activeFlags;
     }
 
     public boolean contains(String flag) {
         return this.containsKey(flag);
+    }
+
+    public void updateFlag(IFlag flag) {
+        this.put(flag);
+    }
+
+    public void toggleFlag(String flag, boolean enable) {
+        if (this.contains(flag)) {
+            this.get(flag).setState(enable ? FlagState.ALLOWED : FlagState.DENIED);
+        }
     }
 }

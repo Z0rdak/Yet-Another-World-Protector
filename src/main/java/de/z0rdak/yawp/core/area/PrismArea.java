@@ -6,6 +6,7 @@ import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class PrismArea extends AbstractArea {
 
@@ -26,20 +27,17 @@ public class PrismArea extends AbstractArea {
         this.blockNodes = blockNodes;
     }
 
-    // TODO: implementation
     @Override
     public boolean contains(BlockPos pos) {
         throw new NotImplementedException("Missing contains implementation in PrismArea");
     }
 
-    // TODO: implementation
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag nbt = super.serializeNBT();
         throw new NotImplementedException("Missing serializeNBT implementation in PrismArea");
     }
 
-    // TODO: implementation
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
@@ -49,5 +47,21 @@ public class PrismArea extends AbstractArea {
     @Override
     public List<BlockPos> getMarkedBlocks() {
         return this.blockNodes;
+    }
+
+    @Override
+    public Set<BlockPos> getHull() {
+        throw new NotImplementedException("ChunkArea.getHull() not implemented yet");
+    }
+
+
+    @Override
+    public boolean containsOther(IMarkableArea other) {
+        throw new NotImplementedException("Not yet implemented");
+    }
+
+    @Override
+    public boolean intersects(IMarkableArea other) {
+        throw new NotImplementedException("Not yet implemented");
     }
 }

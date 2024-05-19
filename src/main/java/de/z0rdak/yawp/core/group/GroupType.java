@@ -1,16 +1,16 @@
-package de.z0rdak.yawp.core.affiliation;
+package de.z0rdak.yawp.core.group;
 
-public enum AffiliationType {
+public enum GroupType {
     PLAYER("player"),
     TEAM("team");
 
     public final String name;
 
-    AffiliationType(String name) {
+    GroupType(String name) {
         this.name = name;
     }
 
-    public static AffiliationType of(String name) {
+    public static GroupType of(String name) {
         switch (name) {
             case "player":
                 return PLAYER;

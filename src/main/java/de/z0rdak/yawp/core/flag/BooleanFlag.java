@@ -2,8 +2,6 @@ package de.z0rdak.yawp.core.flag;
 
 import net.minecraft.nbt.CompoundTag;
 
-import static de.z0rdak.yawp.core.flag.FlagType.BOOLEAN_FLAG;
-
 /**
  * A simple boolean state flag.
  */
@@ -14,12 +12,12 @@ public class BooleanFlag extends AbstractFlag {
         this.deserializeNBT(nbt);
     }
 
-    public BooleanFlag(String flag, boolean isAllowed) {
-        super(flag, BOOLEAN_FLAG, isAllowed);
+    public BooleanFlag(RegionFlag flag, FlagState state, boolean override) {
+        super(flag.name, flag.type, override, state);
     }
 
     public BooleanFlag(RegionFlag flag) {
-        super(flag.name, flag.type, false, true);
+        super(flag.name, flag.type, false, FlagState.DENIED);
     }
 
     @Override
@@ -31,10 +29,5 @@ public class BooleanFlag extends AbstractFlag {
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-    }
-
-    @Override
-    public boolean isAllowed(Object... args) {
-        return isActive() && (this.isInverted());
     }
 }

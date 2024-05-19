@@ -1,25 +1,22 @@
 package de.z0rdak.yawp.managers.data.region;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import de.z0rdak.yawp.core.affiliation.PlayerContainer;
 import de.z0rdak.yawp.core.area.AreaType;
-import de.z0rdak.yawp.core.flag.IFlag;
+import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.core.region.*;
-
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
-
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nullable;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
@@ -30,7 +27,7 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
     private DimensionalRegion dimensionalRegion;
 
     public DimensionRegionCache(ResourceKey<Level> dim) {
-        this(new DimensionalRegion(dim));
+        this(new DimensionalRegion(dim, RegionDataManager.get().getGlobalRegion()));
     }
 
     public DimensionRegionCache(CompoundTag nbt) {
@@ -62,9 +59,9 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
         return dimensionalRegion;
     }
 
-    public void addRegion(IMarkableRegion region) {
-        this.dimensionalRegion.addChild(region);
-        this.regionsInDimension.put(region.getName(), region);
+    public void addRegion(IProtectedRegion parent, IMarkableRegion child) {
+        parent.addChild(child);
+        this.regionsInDimension.put(child.getName(), child);
     }
 
     @Nullable
@@ -83,16 +80,26 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
     public void removeRegion(IMarkableRegion region) {
         if (this.contains(region.getName())) {
             this.regionsInDimension.remove(region.getName());
+            if (region.getParent().getRegionType() == RegionType.DIMENSION) {
+                region.getParent().removeChild(region);
+            }
         }
     }
 
+    public void clearRegions() {
+        this.regionsInDimension.clear();
+        this.dimensionalRegion.clearChildren();
+    }
 
     public void renameRegion(IMarkableRegion region, String regionName) {
+        if (this.regionsInDimension.containsKey(regionName)) {
+            throw new IllegalArgumentException("Region with name '" + regionName + "' already exists in dimension '" + this.dimensionalRegion.getName() + "'!");
+        }
         IMarkableRegion currentRegion = this.regionsInDimension.get(region.getName());
-        // TODO: Rename me -> remove region, clone region, change name, add region, restore hierarchy
-        // TODO: update children name in parent
         IProtectedRegion parent = currentRegion.getParent();
-        this.regionsInDimension.put(regionName, currentRegion);
+        this.removeRegion(currentRegion);
+        currentRegion.rename(regionName);
+        this.addRegion(parent, currentRegion);
     }
 
     public boolean contains(String regionName) {
@@ -101,17 +108,6 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
 
     public IMarkableRegion get(String regionName) {
         return regionsInDimension.get(regionName);
-    }
-
-    public Set<String> getDimFlagNames() {
-        return this.dimensionalRegion.getFlags()
-                .stream()
-                .map(IFlag::getFlagIdentifier)
-                .collect(Collectors.toSet());
-    }
-
-    public List<IFlag> getDimFlags() {
-        return new ArrayList<>(this.dimensionalRegion.getFlags());
     }
 
     @Override
@@ -131,7 +127,6 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
         if (nbt.contains(DIM_REGION, Tag.TAG_COMPOUND)) {
             this.dimensionalRegion = new DimensionalRegion(nbt.getCompound(DIM_REGION));
         } else {
-            // TODO: Add dimKey as property to nbt compound to init new default dimensional region
             throw new IllegalArgumentException("Unable to load dimensional region data from NBT");
         }
         this.regionsInDimension = new HashMap<>();
@@ -142,7 +137,7 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
             if (areaType != null) {
                 YetAnotherWorldProtector.LOGGER.debug("Loading region data for region '" + regionName + "'");
                 IMarkableRegion newRegion = DimensionRegionCache.deserializeLocalRegion(areaType, regionNbt);
-                this.addRegion(newRegion);
+                this.addRegion(this.getDimensionalRegion(), newRegion);
             } else {
                 YetAnotherWorldProtector.LOGGER.error("Unable to read region type for region '" + regionName + "'!");
             }
@@ -150,15 +145,15 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
     }
 
     public boolean hasOwner(Player player) {
-        PlayerContainer owners = this.dimensionalRegion.getOwners();
-        return owners.containsPlayer(player.getUUID())
-                || (player.getTeam() != null && owners.containsTeam(player.getTeam()));
+        PlayerContainer owners = this.dimensionalRegion.getGroup(OWNERS);
+        return owners.hasPlayer(player.getUUID())
+                || (player.getTeam() != null && owners.hasTeam(player.getTeam().getName()));
     }
 
     public boolean hasMember(Player player) {
-        PlayerContainer members = this.dimensionalRegion.getMembers();
-        return members.containsPlayer(player.getUUID())
-                || (player.getTeam() != null && members.containsTeam(player.getTeam()));
+        PlayerContainer members = this.dimensionalRegion.getGroup(MEMBERS);
+        return members.hasPlayer(player.getUUID())
+                || (player.getTeam() != null && members.hasTeam(player.getTeam().getName()));
     }
 
     public static IMarkableRegion deserializeLocalRegion(AreaType areaType, CompoundTag regionNbt) {

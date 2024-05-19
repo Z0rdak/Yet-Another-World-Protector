@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.core.region;
 
+import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
@@ -13,12 +14,12 @@ import net.minecraft.world.level.Level;
 public final class DimensionalRegion extends AbstractRegion {
 
     public DimensionalRegion(ResourceKey<Level> dimensionKey) {
-        super(dimensionKey.location().toString(), RegionType.DIMENSION);
+        super(dimensionKey.location().toString(), dimensionKey, RegionType.DIMENSION);
         this.dimension = dimensionKey;
     }
 
     public DimensionalRegion(ResourceKey<Level> dimensionKey, IProtectedRegion parent) {
-        super(dimensionKey.location().toString(), RegionType.DIMENSION);
+        super(dimensionKey.location().toString(), dimensionKey, RegionType.DIMENSION);
         this.dimension = dimensionKey;
         if (!(parent instanceof GlobalRegion)) {
             throw new IllegalArgumentException("Illegal parent region for dimensional region");
@@ -28,28 +29,41 @@ public final class DimensionalRegion extends AbstractRegion {
 
     public DimensionalRegion(CompoundTag nbt) {
         super(nbt);
-        // TODO: Set global region parent
+        this.parent = RegionDataManager.get().getGlobalRegion();
         this.deserializeNBT(nbt);
     }
 
     public DimensionalRegion(String dimensionKey) {
         this(ResourceKey.create(Registries.DIMENSION, new ResourceLocation(dimensionKey)));
+        this.parent = RegionDataManager.get().getGlobalRegion();
     }
 
-    /**
-     * A DimensionalRegion can by design only have a global region as its parent.
-     *
-     * @param parent the parent to set for this region.
-     */
     @Override
     public boolean setParent(IProtectedRegion parent) {
-        if (super.setParent(parent)) {
-            return true;
+        if (parent.getRegionType() == RegionType.GLOBAL) {
+            return super.setParent(parent);
         }
-        if (!(parent instanceof GlobalRegion)) {
-            throw new IllegalRegionStateException("Cannot set parent for dimensional region");
+        return false;
+    }
+
+    @Override
+    public boolean addChild(IProtectedRegion child) {
+        if (child.getRegionType() == RegionType.LOCAL && child.getParent() == null) {
+            String parentName = child.getParentName();
+            if (parentName != null && !parentName.equals(this.getName())) {
+                super.addChild(child);
+                ((AbstractRegion) child).parentName = parentName;
+                return true;
+            }
+            return super.addChild(child);
         }
-        return true;
+        if (child.getRegionType() == RegionType.LOCAL && child.getParent().getRegionType() == RegionType.DIMENSION) {
+            return super.addChild(child);
+        }
+        if (child.getRegionType() == RegionType.LOCAL && !child.getParent().hasChild(child)) {
+            return super.addChild(child);
+        }
+        return false;
     }
 
     @Override

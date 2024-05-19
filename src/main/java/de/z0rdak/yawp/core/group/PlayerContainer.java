@@ -1,12 +1,10 @@
-package de.z0rdak.yawp.core.affiliation;
+package de.z0rdak.yawp.core.group;
 
 import de.z0rdak.yawp.util.constants.RegionNBT;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.scores.Team;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import java.util.*;
@@ -14,8 +12,8 @@ import java.util.stream.Collectors;
 
 public class PlayerContainer implements IMemberContainer, INBTSerializable<CompoundTag> {
 
-    private Set<String> teams;
-    private Map<UUID, String> players;
+    private final Set<String> teams;
+    private final Map<UUID, String> players;
 
     public PlayerContainer(CompoundTag nbt){
         this();
@@ -46,23 +44,18 @@ public class PlayerContainer implements IMemberContainer, INBTSerializable<Compo
     }
 
     @Override
-    public boolean containsPlayer(UUID playerUUID) {
+    public boolean hasPlayer(UUID playerUUID) {
         return this.players.containsKey(playerUUID);
     }
 
     @Override
-    public boolean containsTeam(String team) {
+    public boolean hasTeam(String team) {
         return this.teams.contains(team);
     }
 
     @Override
-    public boolean containsTeam(Team team) {
-        return this.teams.contains(team.getName());
-    }
-
-    @Override
-    public void addPlayer(Player player) {
-        this.players.put(player.getUUID(), player.getScoreboardName());
+    public void addPlayer(UUID uuid, String name) {
+        this.players.put(uuid, name);
     }
 
     @Override
@@ -71,13 +64,8 @@ public class PlayerContainer implements IMemberContainer, INBTSerializable<Compo
     }
 
     @Override
-    public void addTeam(Team team) {
-        this.teams.add(team.getName());
-    }
-
-    @Override
-    public void removePlayer(Player player) {
-        this.players.remove(player.getUUID());
+    public void clearPlayers() {
+        this.players.clear();
     }
 
     @Override
@@ -91,8 +79,8 @@ public class PlayerContainer implements IMemberContainer, INBTSerializable<Compo
     }
 
     @Override
-    public void removeTeam(Team team) {
-        this.teams.remove(team.getName());
+    public void clearTeams() {
+        this.teams.clear();
     }
 
     @Override

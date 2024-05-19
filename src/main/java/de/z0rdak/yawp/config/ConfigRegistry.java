@@ -16,9 +16,10 @@ import static de.z0rdak.yawp.YetAnotherWorldProtector.MODID;
 
 public final class ConfigRegistry {
 
-    private ConfigRegistry(){}
+    private ConfigRegistry() {
+    }
 
-    public static void register(){
+    public static void register() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(ConfigRegistry::onConfigLoading);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(ConfigRegistry::onConfigReloading);
 
@@ -32,11 +33,12 @@ public final class ConfigRegistry {
         if (event.getConfig().getModId().equals(MODID)) {
             switch (event.getConfig().getFileName()) {
                 case CommandPermissionConfig.CONFIG_NAME: {
-                    CommandPermissionConfig.BASE_CMD = CommandPermissionConfig.WP_CMDS[CommandPermissionConfig.WP_COMMAND_ALTERNATIVE.get()];
+                    CommandPermissionConfig.BASE_CMD = CommandPermissionConfig.getBaseCmd();
                     if (ModList.get().isLoaded("journeymap")) {
-                        CommandPermissionConfig.BASE_CMD = CommandPermissionConfig.WP_CMDS[1];
+                        CommandPermissionConfig.BASE_CMD = CommandPermissionConfig.getBaseCmdAlt();
                         YetAnotherWorldProtector.LOGGER.info("Detected JourneyMap to be loaded beside YAWP.");
                     }
+                    YetAnotherWorldProtector.LOGGER.info("Setting YAWP base command to '/" + CommandPermissionConfig.BASE_CMD + "'");
                     int numOfUuidsWithPermission = CommandPermissionConfig.UUIDsWithPermission().size();
                     String uuidsWithPermission = (numOfUuidsWithPermission > 0
                             ? ": " + String.join(", ", CommandPermissionConfig.UUIDsWithPermission())
@@ -60,15 +62,15 @@ public final class ConfigRegistry {
                 }
                 break;
                 case FlagConfig.CONFIG_NAME: {
-                    int numBreakEntityEntries = FlagConfig.getBreakFlagEntities().size();
+                    int numBreakEntityEntries = FlagConfig.getCoveredBlockEntities().size();
                     String loadedBreakEntities = (numBreakEntityEntries > 0
-                            ? ": " + String.join(", ", FlagConfig.getBreakFlagEntities())
+                            ? ": " + String.join(", ", FlagConfig.getCoveredBlockEntities())
                             : "");
                     YetAnotherWorldProtector.LOGGER.info(numBreakEntityEntries + " Block Entity entries read from config" + loadedBreakEntities);
 
-                    int numBreakEntityTagEntries = FlagConfig.getBreakFlagEntityTags().size();
+                    int numBreakEntityTagEntries = FlagConfig.getCoveredBlockEntityTags().size();
                     String loadedBreakEntityTags = (numBreakEntityTagEntries > 0
-                            ? ": " + String.join(", ", FlagConfig.getBreakFlagEntityTags())
+                            ? ": " + String.join(", ", FlagConfig.getCoveredBlockEntityTags())
                             : "");
                     YetAnotherWorldProtector.LOGGER.info(numBreakEntityTagEntries + " Block Entity tag entries read from config" + loadedBreakEntityTags);
                 }
