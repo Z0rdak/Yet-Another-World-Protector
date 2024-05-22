@@ -121,11 +121,13 @@ tasks.withType(ProcessResources).configureEach {
             mod_version            : mod_version,
             mod_authors            : mod_authors,
             mod_description        : mod_description,
-            mod_credits            : mod_credits
+            mod_credits      : mod_credits,
+            mod_homepage     : mod_homepage,
+            mod_issue_tracker: mod_issue_tracker
     ]
     inputs.properties replaceProperties
 
-    filesMatching(['META-INF/neoforge.mods.toml', 'pack.mcmeta', 'yawp.mixins.json', 'mcmod.info']) {
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta', 'yawp.mixins.json', 'mcmod.info']) {
         expand replaceProperties
     }
 }
