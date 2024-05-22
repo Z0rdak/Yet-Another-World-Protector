@@ -10,7 +10,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -20,7 +19,6 @@ import java.util.Map;
 
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
-@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID)
 public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
 
     private Map<String, IMarkableRegion> regionsInDimension;
