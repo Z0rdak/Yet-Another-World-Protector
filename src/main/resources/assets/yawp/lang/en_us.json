@@ -102,7 +102,7 @@
   "cli.msg.dim.info.region.create.stick.reset": "RegionMarker successfully reset!",
   "cli.msg.dim.info.region.create.stick.success": "RegionMarker added to your inventory!",
   "cli.msg.dim.info.region.create.success": "Successfully created region %s (with parent %s)",
-  "cli.msg.dim.info.region.create.error": "Error creating region %s",
+  "cli.msg.dim.info.region.create.error": "Error creating region with parent %s",
   "cli.msg.dim.info.region.info.deny": "You don't have permission to view the region information for %s!",
   "cli.msg.dim.info.region.list.link.hover": "List regions in %s",
   "cli.msg.dim.info.region.list.link.text": "%s region(s)",

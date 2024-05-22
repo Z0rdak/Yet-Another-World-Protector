@@ -10,7 +10,6 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
@@ -150,7 +149,13 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
             CommandSource src = (CommandSource) context.getSource();
             try {
                 IMarkableArea markedArea = null;
-                AreaType areaType = ArgumentUtil.getAreaTypeArgument(ctx);
+                AreaType areaType = null;
+                if (ctx.getInput().contains(AreaType.CUBOID.areaType)) {
+                    areaType = AreaType.CUBOID;
+                }
+                if (ctx.getInput().contains(AreaType.SPHERE.areaType)) {
+                    areaType = AreaType.SPHERE;
+                }
                 switch (areaType) {
                     case CUBOID:
                         BlockPos p1 = BlockPosArgument.getOrLoadBlockPos(ctx, POS1.toString());
