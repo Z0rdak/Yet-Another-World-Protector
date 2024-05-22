@@ -5,12 +5,12 @@ import de.z0rdak.yawp.commands.CommandRegistry;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
-import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import static de.z0rdak.yawp.YetAnotherWorldProtector.MODID;
 
@@ -19,13 +19,13 @@ public final class ConfigRegistry {
     private ConfigRegistry() {
     }
 
-    public static void register() {
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(ConfigRegistry::onConfigLoading);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(ConfigRegistry::onConfigReloading);
-
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, CommandPermissionConfig.CONFIG_SPEC, CommandPermissionConfig.CONFIG_NAME);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, FlagConfig.CONFIG_SPEC, FlagConfig.CONFIG_NAME);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, RegionConfig.CONFIG_SPEC, RegionConfig.CONFIG_NAME);
+    public static void register(IEventBus modEventBus) {
+        modEventBus.addListener(ConfigRegistry::onConfigLoading);
+        modEventBus.addListener(ConfigRegistry::onConfigReloading);
+        ModLoadingContext modLoadingContext = ModLoadingContext.get();
+        modLoadingContext.registerConfig(ModConfig.Type.SERVER, CommandPermissionConfig.CONFIG_SPEC, CommandPermissionConfig.CONFIG_NAME);
+        modLoadingContext.registerConfig(ModConfig.Type.SERVER, FlagConfig.CONFIG_SPEC, FlagConfig.CONFIG_NAME);
+        modLoadingContext.registerConfig(ModConfig.Type.SERVER, RegionConfig.CONFIG_SPEC, RegionConfig.CONFIG_NAME);
     }
 
     @SubscribeEvent

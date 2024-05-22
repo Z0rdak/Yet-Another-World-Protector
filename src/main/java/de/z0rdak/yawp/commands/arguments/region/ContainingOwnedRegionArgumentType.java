@@ -44,7 +44,7 @@ import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
 public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
 
     public static final Pattern VALID_NAME_PATTERN = Pattern.compile("^[A-Za-z]+[A-Za-z\\d\\-]+[A-Za-z\\d]+$");
-    private static final Collection<String> EXAMPLES = Stream.of(new String[]{"spawn", "arena4pvp", "shop", "nether-hub"})
+    private static final Collection<String> EXAMPLES = Stream.of("spawn", "arena4pvp", "shop", "nether-hub")
             .collect(Collectors.toSet());
     private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(Component.translatableWithFallback("cli.arg.region.parse.invalid", "Unable to parse region name!"));
     private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
@@ -144,8 +144,8 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
      */
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         if (context.getSource() instanceof CommandSourceStack src) {
-            CommandContext<CommandSourceStack> ctx = (CommandContext<CommandSourceStack>) context;
             try {
+                CommandContext<CommandSourceStack> ctx = (CommandContext<CommandSourceStack>) context;
                 IMarkableArea markedArea = null;
                 AreaType areaType = null;
                 if (ctx.getInput().contains(AreaType.CUBOID.areaType)) {
