@@ -238,7 +238,7 @@ public class DimensionCommands {
         if(MinecraftForge.EVENT_BUS.post(new RegionEvent.CreateRegionEvent(region, player))) {
             return 0;
         }
-        if (parent.getRegionType() != RegionType.LOCAL || parent.getRegionType() != RegionType.DIMENSION) {
+        if (parent.getRegionType() != RegionType.DIMENSION && parent.getRegionType() != RegionType.LOCAL) {
             sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.dim.info.region.create.error", buildRegionInfoLink(parent)));
             return -1;
         }
@@ -246,7 +246,7 @@ public class DimensionCommands {
         dimCache.addRegion(parent, region);
         LocalRegions.ensureHigherRegionPriorityFor(region, RegionConfig.getDefaultPriority());
         RegionDataManager.save();
-        sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region), buildRegionInfoLink(region)));
+        sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.dim.info.region.create.success", buildRegionInfoLink(region), buildRegionInfoLink(parent)));
         return 0;
     }
 
