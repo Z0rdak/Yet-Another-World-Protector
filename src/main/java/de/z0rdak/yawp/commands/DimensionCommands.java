@@ -21,7 +21,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.DimensionArgument;
-import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.MutableComponent;
@@ -166,9 +165,12 @@ public class DimensionCommands {
     private static int setActiveStateForAllLocal(CommandContext<CommandSourceStack> ctx, DimensionRegionCache dimCache, boolean enable) {
         if (dimCache != null) {
             dimCache.getRegionsInDimension().values().forEach(region -> region.setIsActive(enable));
-            String state = enable ? "Enabled" : "Disabled";
-            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.state.enable.all.set.value",
-                    state, buildRegionInfoLink(dimCache.getDimensionalRegion())));
+            if (enable)
+                sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.state.enable.all.set.on.value",
+                        buildRegionInfoLink(dimCache.getDimensionalRegion())));
+            else
+                sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.state.enable.all.set.off.value",
+                        buildRegionInfoLink(dimCache.getDimensionalRegion())));
             RegionDataManager.save();
             return 0;
         } else {
@@ -179,9 +181,12 @@ public class DimensionCommands {
     private static int setAlertStateForAllLocal(CommandContext<CommandSourceStack> ctx, DimensionRegionCache dimCache, boolean mute) {
         if (dimCache != null) {
             dimCache.getRegionsInDimension().values().forEach(region -> region.setIsMuted(mute));
-            String state = mute ? "Enabled" : "Disabled";
-            sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.state.alert.all.set.value",
-                    state, buildRegionInfoLink(dimCache.getDimensionalRegion())));
+            if (mute)
+                sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.state.alert.all.set.on.value",
+                        buildRegionInfoLink(dimCache.getDimensionalRegion())));
+            else
+                sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.state.alert.all.set.off.value",
+                        buildRegionInfoLink(dimCache.getDimensionalRegion())));
             RegionDataManager.save();
             return 0;
         } else {
