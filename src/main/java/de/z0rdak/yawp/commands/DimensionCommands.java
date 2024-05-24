@@ -164,9 +164,12 @@ public class DimensionCommands {
     private static int setActiveStateForAllLocal(CommandContext<CommandSourceStack> ctx, DimensionRegionCache dimCache, boolean enable) {
         if (dimCache != null) {
             dimCache.getRegionsInDimension().values().forEach(region -> region.setIsActive(enable));
-            String state = enable ? "Enabled" : "Disabled";
-            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.state.enable.all.set.value",
-                    state, buildRegionInfoLink(dimCache.getDimensionalRegion())));
+            if (enable)
+                sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.state.enable.all.set.on.value",
+                        "Activates alert for all local regions of %s", buildRegionInfoLink(dimCache.getDimensionalRegion())));
+            else
+                sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.state.enable.all.set.off.value",
+                        "Deactivated all local regions of %s", buildRegionInfoLink(dimCache.getDimensionalRegion())));
             RegionDataManager.save();
             return 0;
         } else {
@@ -177,9 +180,12 @@ public class DimensionCommands {
     private static int setAlertStateForAllLocal(CommandContext<CommandSourceStack> ctx, DimensionRegionCache dimCache, boolean mute) {
         if (dimCache != null) {
             dimCache.getRegionsInDimension().values().forEach(region -> region.setIsMuted(mute));
-            String state = mute ? "Enabled" : "Disabled";
-            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.state.alert.all.set.value",
-                    state, buildRegionInfoLink(dimCache.getDimensionalRegion())));
+            if (mute)
+                sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.state.alert.all.set.on.value",
+                        "Activated alert for all local regions of %s", buildRegionInfoLink(dimCache.getDimensionalRegion())));
+            else
+                sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.state.alert.all.set.off.value",
+                        "Deactivated alert for all local regions of %s", buildRegionInfoLink(dimCache.getDimensionalRegion())));
             RegionDataManager.save();
             return 0;
         } else {
