@@ -1,7 +1,6 @@
 # Yet Another World Protector
 
-Yet Another World Protector (YAWP) is _the_ admin tool to protect your minecraft server! Its available for both, (Neo-)
-Forge and Fabric.
+Yet Another World Protector (YAWP) is _the_ admin tool to protect your minecraft server (dedicated or LAN as well as single-player!). It's available for both, (Neo-) Forge and Fabric.
 
 YAWP designed to be used on dedicated servers, but can also be used in single player worlds and worlds opened to LAN.
 It allows admins (and players with assigned permission) to protect their creations against various events/actions of
@@ -23,9 +22,9 @@ Join our discord if you have any questions or suggestions: [YAWP Discord](https:
 ***The mod is currently in its beta state, with many features not yet implemented but to come. These features will
 include most of the things you know from WorldProtector and WorldGuard.***
 
-This mod will be released for Minecraft versions 1.16.5+. If you are living in the past and are looking for a version
-for Minecraft 1.12.2, I suggest looking into
-using [WorldDefender](https://www.curseforge.com/minecraft/mc-mods/world-defender).
+This mod will be released for Minecraft versions 1.16.5+. If you are living in the past and are looking for a version for Minecraft 1.12.2, I suggest looking into using [WorldDefender](https://www.curseforge.com/minecraft/mc-mods/world-defender).
+
+Starting with Minecraft **1.20.4**, YAWP will no longer be available for Forge and adapt **NeoForge** instead.
 
 *** 
 ![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/img/yawp-feature-03.png "Region types")
