@@ -507,7 +507,7 @@ public class ChatComponentBuilder {
 
     public static MutableComponent buildGroupHeader(IProtectedRegion region, String group) {
         MutableComponent groupLink = buildGroupLink(region, group, getGroupSize(region, group));
-        return buildHeader(Component.translatableWithFallback("cli.msg.info.header.in", "== %s in %s ==", "", groupLink, buildRegionInfoLink(region)));
+        return buildHeader(Component.translatableWithFallback("cli.msg.info.header.in", "== %s in %s ==", groupLink, buildRegionInfoLink(region)));
     }
 
     public static MutableComponent buildGroupHeader(IProtectedRegion region, String group, GroupType groupType) {
@@ -515,20 +515,20 @@ public class ChatComponentBuilder {
         return Component.translatableWithFallback("cli.msg.info.region.group." + groupType.name + ".list", fallback, buildRegionInfoLink(region), group);
     }
 
-    public static MutableComponent buildGroupLink(IProtectedRegion region, String group, int groupSie) {
-        MutableComponent linkText = Component.translatableWithFallback("cli.msg.info.region.group.list.link.text", "%s %s(s)", groupSie, group);
+    public static MutableComponent buildGroupLink(IProtectedRegion region, String group, int groupSize) {
+        MutableComponent linkText = Component.translatableWithFallback("cli.msg.info.region.group.list.link.text", "%s %s(s)", groupSize, group);
         MutableComponent hoverText = Component.translatableWithFallback("cli.msg.info.region.group.list.link.hover", "List '%s' for region %s", group, region.getName());
         switch (region.getRegionType()) {
             case GLOBAL: {
-                String cmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), group);
+                String cmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), GROUP.toString(), group);
                 return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
             case LOCAL: {
-                String cmd = buildCommandStr(LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), group);
+                String cmd = buildCommandStr(LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), GROUP.toString(), group);
                 return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
             case DIMENSION: {
-                String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), group);
+                String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), GROUP.toString(), group);
                 return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
             default:
@@ -1052,13 +1052,6 @@ public class ChatComponentBuilder {
                 Component.translatableWithFallback("cli.msg.info.region.parent.null", "No parent set"),
                 buildExecuteCmdComponent(setParentLinkText, setParentHoverText, setRegionParentCmd, RUN_COMMAND, GREEN));
     }
-
-
-    public static MutableComponent buildRegionListHeader(IProtectedRegion region) {
-        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(region.getDim());
-        return buildHeader(Component.translatableWithFallback("cli.msg.info.header.in", "== %s in %s ==", buildDimRegionsLink(dimCache), buildRegionInfoLink(region)));
-    }
-
 
     // [n regions] [+]
     public static MutableComponent buildDimRegionsLink(DimensionRegionCache dimCache) {
