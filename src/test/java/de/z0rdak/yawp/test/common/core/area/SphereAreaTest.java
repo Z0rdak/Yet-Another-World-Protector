@@ -132,7 +132,9 @@ public class SphereAreaTest {
             BlockPos radiusPos = new BlockPos(0, radius, 0);
             SphereArea sa1 = new SphereArea(new BlockPos(0, 0, 0), radiusPos);
             SphereArea sa2 = new SphereArea(new BlockPos(0, 0, 0), radius);
-            assertEquals(sa1.getCenter(), sa2.getCenter());
+            assertEquals(sa1.getCenter().x, sa2.getCenter().x);
+            assertEquals(sa1.getCenter().y, sa2.getCenter().y);
+            assertEquals(sa1.getCenter().z, sa2.getCenter().z);
             assertEquals(sa1.getRadius(), sa2.getRadius());
             assertArrayEquals(sa1.getMarkedBlocks().toArray(), sa2.getMarkedBlocks().toArray());
         }
