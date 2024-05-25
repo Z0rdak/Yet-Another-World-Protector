@@ -364,8 +364,9 @@ public class CommandUtil {
             default:
                 throw new NotImplementedException("Region type not implemented yet");
         }
+        IFormattableTextComponent regionListHeader = buildHeader(new TranslationTextComponent("cli.msg.info.header.in", buildRegionListChildrenLink(region), buildRegionInfoLink(region)));
         List<IFormattableTextComponent> regionPagination = buildPaginationComponents(
-                buildRegionListHeader(region),
+                regionListHeader,
                 listChildrenCmd,
                 buildRemoveRegionEntries(region, children),
                 pageNo,

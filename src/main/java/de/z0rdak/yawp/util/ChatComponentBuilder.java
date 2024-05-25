@@ -508,8 +508,8 @@ public class ChatComponentBuilder {
         return new TranslationTextComponent("cli.msg.info.region.group." + groupType.name + ".list", buildRegionInfoLink(region), group);
     }
 
-    public static IFormattableTextComponent buildGroupLink(IProtectedRegion region, String group, int groupSie) {
-        IFormattableTextComponent linkText = new TranslationTextComponent("cli.msg.info.region.group.list.link.text", groupSie, group);
+    public static IFormattableTextComponent buildGroupLink(IProtectedRegion region, String group, int groupSize) {
+        IFormattableTextComponent linkText = new TranslationTextComponent("cli.msg.info.region.group.list.link.text", groupSize, group);
         IFormattableTextComponent hoverText = new TranslationTextComponent("cli.msg.info.region.group.list.link.hover", group, region.getName());
         switch (region.getRegionType()) {
             case GLOBAL: {

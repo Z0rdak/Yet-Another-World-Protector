@@ -351,8 +351,9 @@ public class DimensionCommands {
                 sendCmdFeedback(ctx.getSource(), new TranslationTextComponent("cli.msg.dim.info.regions.empty", buildRegionInfoLink(dimCache.getDimensionalRegion())));
                 return -1;
             }
+            IFormattableTextComponent dimRegionsHeader = buildHeader(new TranslationTextComponent("cli.msg.info.header.in", buildDimRegionsLink(dimCache), buildRegionInfoLink(dimRegion)));
             List<IFormattableTextComponent> regionPagination = buildPaginationComponents(
-                    buildRegionListHeader(dimRegion),
+                    dimRegionsHeader,
                     buildCommandStr(DIM.toString(), dimRegion.getName(), LIST.toString(), CommandConstants.LOCAL.toString()),
                     buildRemoveRegionEntries(dimRegion, regionsForDim),
                     pageNo,
