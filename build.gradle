@@ -166,7 +166,8 @@ task replaceResources(type: Copy) {
                     "mod_authors": mod_authors, "mod_description": mod_description, "minecraft_version": minecraft_version,
                     "minecraft_version_range": minecraft_version_range, "forge_version_range": forge_version_range,
                     "loader_version_range": loader_version_range, "mod_credits": mod_credits,
-                    "resource_pack_desc": resource_pack_desc, "mod_issue_tracker": mod_issue_tracker
+                    "resource_pack_desc": resource_pack_desc, "mod_issue_tracker": mod_issue_tracker,
+                    "mod_license": mod_license, "mod_homepage": mod_homepage
         }
     }
     with spec
