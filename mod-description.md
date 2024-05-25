@@ -1,6 +1,6 @@
 # Yet Another World Protector
 
-Yet Another World Protector (YAWP) is _the_ admin tool to protect your minecraft server (dedicated or LAN as well as single-player!). It's available for both, (Neo-) Forge and Fabric.
+Yet Another World Protector (YAWP) is _the_ admin tool to protect your minecraft server (dedicated or LAN as well as single-player!). It's available for (Neo-) Forge and Fabric.
 
 YAWP designed to be used on dedicated servers, but can also be used in single player worlds and worlds opened to LAN.
 It allows admins (and players with assigned permission) to protect their creations against various events/actions of
