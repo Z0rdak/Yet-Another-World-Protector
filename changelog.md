@@ -1,4 +1,4 @@
-# [0.0.4.0-beta1] - 2024-04-30
+# [0.0.4.0-beta1] - 2024-05-25
 
 **Warning/Disclaimer:** This update introduces **breaking changes**. Please make sure to back up your world before
 updating to this version.
@@ -282,7 +282,8 @@ The same commands of course work for Dimensional and the Global Regions:
   deletion.
 
 ## Changed
-* Bump forge version to latest (36.2.42)
+
+* Bump forge version to latest
 
 # [0.0.2.9-beta3] - 2023-08-12
 ## Fixed
