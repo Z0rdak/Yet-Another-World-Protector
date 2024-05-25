@@ -13,15 +13,9 @@ Found a bug? Or do you have an idea for a new flag or just general suggestions f
 Don't hesitate to propose them to me. Just hop on to our discord server! Or alternatively, open a
 new [issue](https://github.com/Z0rdak/Yet-Another-World-Protector/issues) on our GitHub page!
 
-# Credits
-
-- Special thanks to IVEN#2107 for the mod logo!
-- Special thanks to Reincarnaciya for the russian translation!
-- Special thanks to petersv5 aka. ptefar, for help porting flags to fabric!
-
 # License
 
-This mod is released under the GNU LESSER GENERAL PUBLIC LICENSE Version 3.
+This mod is released under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3.
 
 # Links
 
