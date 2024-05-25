@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.managers.data.region;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.commands.CommandUtil;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.core.region.*;
@@ -143,13 +144,13 @@ public class DimensionRegionCache implements INBTSerializable<CompoundTag> {
     }
 
     public boolean hasOwner(Player player) {
-        PlayerContainer owners = this.dimensionalRegion.getGroup(OWNERS);
+        PlayerContainer owners = this.dimensionalRegion.getGroup(CommandUtil.OWNER);
         return owners.hasPlayer(player.getUUID())
                 || (player.getTeam() != null && owners.hasTeam(player.getTeam().getName()));
     }
 
     public boolean hasMember(Player player) {
-        PlayerContainer members = this.dimensionalRegion.getGroup(MEMBERS);
+        PlayerContainer members = this.dimensionalRegion.getGroup(CommandUtil.MEMBER);
         return members.hasPlayer(player.getUUID())
                 || (player.getTeam() != null && members.hasTeam(player.getTeam().getName()));
     }

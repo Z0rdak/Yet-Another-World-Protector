@@ -511,20 +511,20 @@ public class ChatComponentBuilder {
         return new TranslatableComponent("cli.msg.info.region.group." + groupType.name + ".list", buildRegionInfoLink(region), group);
     }
 
-    public static MutableComponent buildGroupLink(IProtectedRegion region, String group, int groupSie) {
-        MutableComponent linkText = new TranslatableComponent("cli.msg.info.region.group.list.link.text", groupSie, group);
+    public static MutableComponent buildGroupLink(IProtectedRegion region, String group, int groupSize) {
+        MutableComponent linkText = new TranslatableComponent("cli.msg.info.region.group.list.link.text", groupSize, group);
         MutableComponent hoverText = new TranslatableComponent("cli.msg.info.region.group.list.link.hover", group, region.getName());
         switch (region.getRegionType()) {
             case GLOBAL: {
-                String cmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), group);
+                String cmd = buildCommandStr(GLOBAL.toString(), LIST.toString(), CommandConstants.GROUP.toString(), group);
                 return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
             case LOCAL: {
-                String cmd = buildCommandStr(LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), group);
+                String cmd = buildCommandStr(LOCAL.toString(), region.getDim().location().toString(), region.getName(), LIST.toString(), CommandConstants.GROUP.toString(), group);
                 return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
             case DIMENSION: {
-                String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), group);
+                String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), LIST.toString(), CommandConstants.GROUP.toString(), group);
                 return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
             }
             default:

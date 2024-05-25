@@ -14,7 +14,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.scores.Team;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -47,8 +46,8 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.parent = null;
         this.flags = new FlagContainer();
         this.groups = new HashMap<>();
-        this.groups.put(MEMBERS, new PlayerContainer());
-        this.groups.put(OWNERS, new PlayerContainer());
+        this.groups.put(CommandUtil.MEMBER, new PlayerContainer());
+        this.groups.put(CommandUtil.OWNER, new PlayerContainer());
         this.deserializeNBT(nbt);
     }
 
@@ -58,8 +57,8 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.regionType = type;
         this.flags = new FlagContainer();
         this.groups = new HashMap<>();
-        this.groups.put(MEMBERS, new PlayerContainer());
-        this.groups.put(OWNERS, new PlayerContainer());
+        this.groups.put(CommandUtil.MEMBER, new PlayerContainer());
+        this.groups.put(CommandUtil.OWNER, new PlayerContainer());
         this.children = new HashMap<>();
         this.isActive = true;
         this.childrenNames = new HashSet<>();
@@ -68,7 +67,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
     protected AbstractRegion(String name, ResourceKey<Level> dimension, RegionType regionType, Player owner) {
         this(name, dimension, regionType);
         if (owner != null) {
-            this.groups.get(OWNERS).addPlayer(owner.getUUID(), owner.getScoreboardName());
+            this.groups.get(CommandUtil.OWNER).addPlayer(owner.getUUID(), owner.getScoreboardName());
         }
     }
 

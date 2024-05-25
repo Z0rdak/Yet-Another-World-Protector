@@ -366,8 +366,9 @@ public class CommandUtil {
             default:
                 throw new NotImplementedException("Region type not implemented yet");
         }
+        MutableComponent regionListHeader = buildHeader(new TranslatableComponent("cli.msg.info.header.in", buildRegionListChildrenLink(region), buildRegionInfoLink(region)));
         List<MutableComponent> regionPagination = buildPaginationComponents(
-                buildRegionListHeader(region),
+                regionListHeader,
                 listChildrenCmd,
                 buildRemoveRegionEntries(region, children),
                 pageNo,
