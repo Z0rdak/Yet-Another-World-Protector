@@ -350,8 +350,9 @@ public class DimensionCommands {
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.regions.empty", "No regions defined in %s", buildRegionInfoLink(dimCache.getDimensionalRegion())));
                 return -1;
             }
+            MutableComponent dimRegionsHeader = buildHeader(Component.translatableWithFallback("cli.msg.info.header.in", "== %s in %s ==", buildDimRegionsLink(dimCache), buildRegionInfoLink(dimRegion)));
             List<MutableComponent> regionPagination = buildPaginationComponents(
-                    buildRegionListHeader(dimRegion),
+                    dimRegionsHeader,
                     buildCommandStr(DIM.toString(), dimRegion.getName(), LIST.toString(), CommandConstants.LOCAL.toString()),
                     buildRemoveRegionEntries(dimRegion, regionsForDim),
                     pageNo,
