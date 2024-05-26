@@ -3,11 +3,13 @@ package de.z0rdak.yawp.core.area;
 import de.z0rdak.yawp.util.AreaUtil;
 import de.z0rdak.yawp.util.constants.AreaNBT;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
+import org.apache.commons.lang3.NotImplementedException;
 
-import static de.z0rdak.yawp.util.AreaUtil.distance;
+import java.util.Set;
+
+import static de.z0rdak.yawp.util.AreaUtil.distanceManhattan;
 import static de.z0rdak.yawp.util.AreaUtil.length;
 
 /**
@@ -23,8 +25,8 @@ public class VerticalCylinderArea extends CenteredArea {
     public VerticalCylinderArea(BlockPos centerBottomPos, BlockPos scopePos) {
         super(centerBottomPos, AreaType.CYLINDER);
         this.centerTopPos = new BlockPos(centerBottomPos.getX(), scopePos.getY(), centerBottomPos.getZ());
-        this.radius = (int) (distance(centerBottomPos, new BlockPos(scopePos.getX(), centerBottomPos.getY(), scopePos.getZ())));
-        this.distance = (int) (distance(centerBottomPos, this.centerTopPos) + 0.5);
+        this.radius = distanceManhattan(centerBottomPos, new BlockPos(scopePos.getX(), centerBottomPos.getY(), scopePos.getZ()));
+        this.distance = distanceManhattan(centerBottomPos, this.centerTopPos);
     }
 
     public VerticalCylinderArea(BlockPos centerBottomPos, int radius, int distance) {
@@ -36,7 +38,7 @@ public class VerticalCylinderArea extends CenteredArea {
 
     public VerticalCylinderArea(CompoundTag nbt) {
         super(nbt);
-        this.deserializeNBT(provider, nbt);
+        this.deserializeNBT(nbt);
     }
 
     public Vec3i getCenter() {
@@ -55,9 +57,14 @@ public class VerticalCylinderArea extends CenteredArea {
         boolean b2 = multiply(pos.subtract(centerTopPos), dist).compareTo(BlockPos.ZERO) <= 0;
         boolean isBetweenPlanes = b1 && b2;
         BlockPos crossProduct = pos.subtract(center).cross(dist);
-        double distance = length(crossProduct) / distance(centerTopPos, center);
-        boolean isInsideSurface = distance <= (radius - 0.5);
+        double distance = length(crossProduct) / distanceManhattan(centerTopPos, center);
+        boolean isInsideSurface = distance <= radius;
         return isBetweenPlanes && isInsideSurface;
+    }
+
+    @Override
+    public Set<BlockPos> getHull() {
+        throw new NotImplementedException("ChunkArea.getHull() not implemented yet");
     }
 
     public int getDistance() {
@@ -68,23 +75,34 @@ public class VerticalCylinderArea extends CenteredArea {
         return radius;
     }
 
-    public BlockPos multiply(BlockPos p1, BlockPos p2){
+    public BlockPos multiply(BlockPos p1, BlockPos p2) {
         return new BlockPos(p1.getX() * p2.getX(), p1.getY() * p2.getY(), p1.getZ() * p2.getZ());
     }
 
     @Override
-    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
-        CompoundTag nbt = super.serializeNBT(provider);
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = super.serializeNBT();
         nbt.putInt(AreaNBT.RADIUS, this.radius);
         nbt.putInt(AreaNBT.HEIGHT, this.distance);
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
-        super.deserializeNBT(provider, nbt);
+    public void deserializeNBT(CompoundTag nbt) {
+        super.deserializeNBT(nbt);
         this.distance = nbt.getInt(AreaNBT.RADIUS);
         this.radius = nbt.getInt(AreaNBT.HEIGHT);
+    }
+
+
+    @Override
+    public boolean containsOther(IMarkableArea other) {
+        throw new NotImplementedException("Not yet implemented");
+    }
+
+    @Override
+    public boolean intersects(IMarkableArea other) {
+        throw new NotImplementedException("Not yet implemented");
     }
 
     // Cylinder [x,y,z] with radius r and height h

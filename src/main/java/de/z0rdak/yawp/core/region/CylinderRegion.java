@@ -12,7 +12,7 @@ public final class CylinderRegion extends AbstractMarkableRegion {
 
     public CylinderRegion(CompoundTag nbt) {
         super(nbt);
-        this.deserializeNBT(provider, nbt);
+        this.deserializeNBT(nbt);
     }
 
     public CylinderRegion(String name, VerticalCylinderArea area, Player owner, ResourceKey<Level> dimension) {
@@ -24,8 +24,8 @@ public final class CylinderRegion extends AbstractMarkableRegion {
     }
 
     @Override
-    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
-        super.deserializeNBT(provider, nbt);
+    public void deserializeNBT(CompoundTag nbt) {
+        super.deserializeNBT(nbt);
         this.area = new VerticalCylinderArea(nbt.getCompound(RegionNBT.AREA));
     }
 }

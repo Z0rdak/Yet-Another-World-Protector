@@ -2,14 +2,15 @@ package de.z0rdak.yawp.core.area;
 
 import de.z0rdak.yawp.util.constants.AreaNBT;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MultiSectionArea extends AbstractArea {
@@ -27,12 +28,12 @@ public class MultiSectionArea extends AbstractArea {
 
     protected MultiSectionArea(CompoundTag nbt) {
         super(nbt);
-        this.deserializeNBT(provider, nbt);
+        this.deserializeNBT(nbt);
     }
 
     @Override
-    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
-        CompoundTag nbt = super.serializeNBT(provider);
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = super.serializeNBT();
         ListTag pointList = new ListTag();
         this.sections.stream()
                 .map(SectionPos::origin)
@@ -45,8 +46,8 @@ public class MultiSectionArea extends AbstractArea {
     }
 
     @Override
-    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
-        super.deserializeNBT(provider, nbt);
+    public void deserializeNBT(CompoundTag nbt) {
+        super.deserializeNBT(nbt);
         this.sections.clear();
         ListTag posList = nbt.getList(AreaNBT.BLOCKS, Tag.TAG_COMPOUND);
         for (int i = 0; i < posList.size(); i++) {
@@ -64,6 +65,21 @@ public class MultiSectionArea extends AbstractArea {
     @Override
     public List<BlockPos> getMarkedBlocks() {
         return this.sections.stream().map(SectionPos::origin).collect(Collectors.toList());
+    }
+
+    @Override
+    public Set<BlockPos> getHull() {
+        throw new NotImplementedException("ChunkArea.getHull() not implemented yet");
+    }
+
+    @Override
+    public boolean containsOther(IMarkableArea other) {
+        throw new NotImplementedException("Not yet implemented");
+    }
+
+    @Override
+    public boolean intersects(IMarkableArea other) {
+        throw new NotImplementedException("Not yet implemented");
     }
 
 }

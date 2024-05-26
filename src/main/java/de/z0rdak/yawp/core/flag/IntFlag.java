@@ -1,12 +1,14 @@
 package de.z0rdak.yawp.core.flag;
 
 import net.minecraft.nbt.CompoundTag;
+import org.apache.commons.lang3.NotImplementedException;
 
 import static de.z0rdak.yawp.core.flag.FlagType.INT_FLAG;
 
 /**
  * Will be used for applying effects with a specific value and interval
  */
+@Deprecated
 public class IntFlag extends AbstractFlag {
     private int value;
     private int tickInterval;
@@ -19,7 +21,7 @@ public class IntFlag extends AbstractFlag {
 
     public IntFlag(CompoundTag nbt){
         super(nbt);
-        this.deserializeNBT(provider, nbt);
+        this.deserializeNBT(nbt);
     }
 
     public int getValue() {
@@ -39,20 +41,14 @@ public class IntFlag extends AbstractFlag {
     }
 
     @Override
-    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
-        CompoundTag nbt = super.serializeNBT(provider);
-        // TODO
-        return nbt;
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = super.serializeNBT();
+        throw new NotImplementedException("Missing serializeNBT implementation in IntFlag");
     }
 
     @Override
-    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
-        super.deserializeNBT(provider, nbt);
-        // TODO
-    }
-
-    @Override
-    public boolean isAllowed(Object... args) {
-        return false;
+    public void deserializeNBT(CompoundTag nbt) {
+        super.deserializeNBT(nbt);
+        throw new NotImplementedException("Missing deserializeNBT implementation in IntFlag");
     }
 }

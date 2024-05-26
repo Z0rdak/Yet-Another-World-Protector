@@ -7,10 +7,7 @@ import java.util.Set;
 
 import static de.z0rdak.yawp.core.flag.FlagType.LIST_FLAG;
 
-// TODO: List of Strings which can represent everything
-// List can be assinged to ListFlag, for reusability
-// ListFlag only checks List against entity/item/or something
-// ListFlag defines what entries are expected: ResourceLocation, Tags, etc...
+@Deprecated
 public class ListFlag extends AbstractFlag {
 
     public Set<String> resourceKey;
@@ -22,7 +19,7 @@ public class ListFlag extends AbstractFlag {
 
     public ListFlag(CompoundTag nbt) {
         super(nbt);
-        this.deserializeNBT(provider, nbt);
+        this.deserializeNBT(nbt);
     }
 
     public boolean containsKey(String key){
@@ -30,25 +27,18 @@ public class ListFlag extends AbstractFlag {
     }
 
     public boolean allows(String key){
-        return this.containsKey(key) && isInverted();
+        return this.containsKey(key) && doesOverride();
     }
 
     @Override
-    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
-        CompoundTag nbt = super.serializeNBT(provider);
-        // TODO
-        return nbt;
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = super.serializeNBT();
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
-    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
-        super.deserializeNBT(provider, nbt);
-        // TODO
-    }
-
-    @Override
-    public boolean isAllowed(Object... args) {
-        // should be... List<ResourceLocation> || List<String> ||...
-        return false;
+    public void deserializeNBT(CompoundTag nbt) {
+        super.deserializeNBT(nbt);
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 }

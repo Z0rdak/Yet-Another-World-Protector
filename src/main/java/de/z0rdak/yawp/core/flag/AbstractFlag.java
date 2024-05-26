@@ -1,90 +1,126 @@
 package de.z0rdak.yawp.core.flag;
 
-import de.z0rdak.yawp.util.constants.RegionNBT;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
 public abstract class AbstractFlag implements IFlag {
 
-    protected String flagIdentifier;
-    protected FlagType flagType;
+    protected String name;
+    protected FlagType type;
+    protected FlagState state;
+    protected boolean doesOverride;
+    protected FlagMessage msg;
 
-    protected boolean isActive;
-    protected boolean inverted;
-
-    public AbstractFlag(String flagIdentifier, FlagType flagType) {
-        this(flagIdentifier, flagType, false, true);
+    public AbstractFlag(String name, FlagType type, boolean override) {
+        this(name, type, override, FlagState.DENIED);
     }
 
-    public AbstractFlag(String flagIdentifier, FlagType flagType, boolean inverted) {
-        this(flagIdentifier, flagType, inverted, true);
+    public AbstractFlag(String name, FlagType type, boolean override, FlagState state) {
+        this.name = name;
+        this.type = type;
+        this.state = state;
+        this.doesOverride = override;
+        this.msg = FlagMessage.DEFAULT_FLAG_MSG;
     }
 
-    public AbstractFlag(String flagIdentifier, FlagType flagType, boolean inverted, boolean isActive) {
-        this.flagIdentifier = flagIdentifier;
-        this.flagType = flagType;
-        this.isActive = isActive;
-        this.inverted = inverted;
+    public AbstractFlag(String name, FlagType type) {
+        this(name, type, false, FlagState.DENIED);
+    }
+
+    public AbstractFlag(String name, FlagType type, boolean override, FlagState state, String msg) {
+        this(name, type, override, state);
+        this.msg = new FlagMessage(msg);
     }
 
     public AbstractFlag(CompoundTag nbt) {
-        this.deserializeNBT(provider, nbt);
+        this.deserializeNBT(nbt);
     }
 
     @Override
-    public FlagType getFlagType() {
-        return this.flagType;
+    public FlagType getType() {
+        return this.type;
     }
 
     @Override
-    public String getFlagIdentifier() {
-        return this.flagIdentifier;
+    public String getName() {
+        return this.name;
     }
 
     @Override
     public boolean isActive() {
-        return this.isActive;
+        return this.state == FlagState.ALLOWED || this.state == FlagState.DENIED;
     }
 
     @Override
-    public void setIsActive(boolean active) {
-        this.isActive = active;
+    public FlagState getState() {
+        return this.state;
     }
 
     @Override
-    public boolean isInverted() {
-        return this.inverted;
+    public void setState(FlagState state) {
+        this.state = state;
     }
 
     @Override
-    public void setInverted(boolean inverted) {
-        this.inverted = inverted;
+    public boolean doesOverride() {
+        return this.doesOverride;
     }
 
     @Override
-    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+    public void setOverride(boolean override) {
+        this.doesOverride = override;
+    }
+
+    @Override
+    public FlagMessage getFlagMsg() {
+        return this.msg;
+    }
+
+    @Override
+    public void setFlagMsg(FlagMessage msg) {
+        this.msg = msg;
+    }
+
+    @Override
+    public CompoundTag serializeNBT() {
         CompoundTag nbt = new CompoundTag();
-        nbt.putString(FLAG_NAME, this.flagIdentifier);
-        nbt.putBoolean(FLAG_ACTIVE, this.isActive);
-        nbt.putBoolean(IS_INVERTED, this.inverted);
-        nbt.putString(RegionNBT.FLAG_TYPE, this.flagType.flagType);
+        nbt.putString(FLAG_NAME, this.name);
+        nbt.putString(FLAG_STATE, this.state.name);
+        nbt.putBoolean(OVERRIDE, this.doesOverride);
+        nbt.putString(FLAG_TYPE, this.type.flagType);
+        nbt.put(FLAG_MSG, this.msg.serializeNBT());
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
-        this.flagIdentifier = nbt.getString(FLAG_NAME);
-        this.isActive = nbt.getBoolean(FLAG_ACTIVE);
-        this.inverted = nbt.getBoolean(IS_INVERTED);
-        this.flagType = FlagType.of(nbt.getString(RegionNBT.FLAG_TYPE));
+    public void deserializeNBT(CompoundTag nbt) {
+        this.name = nbt.getString(FLAG_NAME);
+        // Note: this is here for compatibility for the jump from 0.0.3.0-beta1 to 0.0.4.0-beta1
+        // The state was not saved in the nbt before, there was a boolean flag instead
+        if (nbt.contains(FLAG_STATE)) {
+            this.state = FlagState.from(nbt.getString(FLAG_STATE));
+        } else {
+            if (nbt.contains(FLAG_ACTIVE)) {
+                boolean active = nbt.getBoolean(FLAG_ACTIVE);
+                if (active) {
+                    this.state = FlagState.DENIED;
+                } else {
+                    this.state = FlagState.DISABLED;
+                }
+            } else {
+                this.state = FlagState.DISABLED;
+            }
+        }
+        this.doesOverride = nbt.getBoolean(OVERRIDE);
+        this.type = FlagType.of(nbt.getString(FLAG_TYPE));
+        this.msg = new FlagMessage(nbt.getCompound(FLAG_MSG));
     }
 
     @Override
     public int compareTo(IFlag o) {
-        int nameComparsionRes = this.flagIdentifier.compareTo(o.getFlagIdentifier());
-        int activeComparsionRes = this.isActive && !o.isActive() ? 1 : !this.isActive && o.isActive() ? -1 : 0;
-        return nameComparsionRes + activeComparsionRes;
+        int nameComparisonRes = this.name.compareTo(o.getName());
+        int stateResult = this.state.compareTo(o.getState());
+        return nameComparisonRes + stateResult;
     }
 }

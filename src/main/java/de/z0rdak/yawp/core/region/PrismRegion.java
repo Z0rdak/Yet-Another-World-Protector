@@ -12,7 +12,7 @@ public final class PrismRegion extends AbstractMarkableRegion {
 
     public PrismRegion(CompoundTag nbt){
         super(nbt);
-        this.deserializeNBT(provider, nbt);
+        this.deserializeNBT(nbt);
     }
 
     public PrismRegion(String name, PrismArea area, Player owner, ResourceKey<Level> dimension) {
@@ -24,8 +24,8 @@ public final class PrismRegion extends AbstractMarkableRegion {
     }
 
     @Override
-    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
-        super.deserializeNBT(provider, nbt);
+    public void deserializeNBT(CompoundTag nbt) {
+        super.deserializeNBT(nbt);
         this.area = new PrismArea(nbt.getCompound(RegionNBT.AREA));
     }
 }

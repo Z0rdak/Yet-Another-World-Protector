@@ -1,7 +1,9 @@
 package de.z0rdak.yawp.util;
 
+import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.stick.AbstractStick;
 import de.z0rdak.yawp.core.stick.MarkerStick;
+import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -12,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 
 import static net.minecraft.ChatFormatting.*;
@@ -31,6 +34,8 @@ public final class StickUtil {
     public static final String STICK_ID = "stick-id";
     public static final String STICK = "stick";
 
+    private static final String MARKED_BLOCK_INDICATOR = "X";
+
     public static void applyEnchantmentGlint(ItemStack item) {
         CompoundTag dummy = new CompoundTag();
         dummy.putString("id", "");
@@ -39,24 +44,7 @@ public final class StickUtil {
         enchantmentList.add(dummy);
         item.addTagElement("Enchantments", enchantmentList);
     }
-
-    /**
-     * Set init (default) nbt value for sticks
-     *
-     * @param stick stick item
-     * @param type  stick type to create
-     * @param dim   dimension tag to set for sticks
-     */
-    public static void initStickTag(ItemStack stick, StickType type, ResourceKey<Level> dim) {
-        CompoundTag itemTag = stick.hasTag() ? stick.getTag() : new CompoundTag();
-        if (itemTag != null) {
-            if (Objects.requireNonNull(type) == StickType.MARKER) {
-                CompoundTag compoundNBT = new MarkerStick(dim).serializeNBT(provider);
-                itemTag.put(STICK, compoundNBT);
-                stick.setTag(itemTag);
-            }
-        }
-    }
+    private static final String UNMARKED_BLOCK_INDICATOR = "#";
 
     public static ItemStack initMarkerNbt(ItemStack stack, StickType type, ResourceKey<Level> dim) {
         stack.setCount(1);
@@ -99,6 +87,7 @@ public final class StickUtil {
         }
         return StickType.UNKNOWN;
     }
+    private static final String TP_POS_INDICATOR = "TP";
 
     public static CompoundTag getStickNBT(ItemStack stick) {
         if (stick.getTag() != null && stick.hasTag()
@@ -108,15 +97,103 @@ public final class StickUtil {
             return null;
         }
     }
+    private static final ChatFormatting MARKED_BLOCK_COLOR = GREEN;
+    private static final ChatFormatting UNMARKED_BLOCK_COLOR = RED;
+    private static final ChatFormatting UNMARKED_POS_COLOR = AQUA;
+
+    /**
+     * Set init (default) nbt value for sticks
+     *
+     * @param stick stick item
+     * @param type  stick type to create
+     * @param dim   dimension tag to set for sticks
+     */
+    public static void initStickTag(ItemStack stick, StickType type, ResourceKey<Level> dim) {
+        CompoundTag itemTag = stick.hasTag() ? stick.getTag() : new CompoundTag();
+        if (itemTag != null) {
+            if (Objects.requireNonNull(type) == StickType.MARKER) {
+                CompoundTag compoundNBT = new MarkerStick(dim).serializeNBT();
+                itemTag.put(STICK, compoundNBT);
+                stick.setTag(itemTag);
+            }
+        }
+    }
+
+    @Nullable
+    public static IMarkableArea getMarkedArea(ItemStack stick) {
+        if (isVanillaStick(stick) && isMarker(stick)) {
+            CompoundTag stickNBT = StickUtil.getStickNBT(stick);
+            if (stickNBT != null) {
+                MarkerStick marker = new MarkerStick(stickNBT);
+                if (!marker.isValidArea()) {
+                    return null;
+                }
+                return LocalRegions.areaFrom(marker);
+            }
+        }
+        return null;
+    }
+
+    public static boolean isMarker(ItemStack stick) {
+        return getStickType(stick) == StickType.MARKER;
+    }
 
     public static void setStickName(ItemStack stick, StickType type) {
-        String displayName = "";
         if (Objects.requireNonNull(type) == StickType.MARKER) {
             MarkerStick marker = new MarkerStick(getStickNBT(stick));
-            String validFlag = marker.isValidArea() ? (GREEN + "*" + GOLD) : "";
-            displayName = GOLD + type.stickName + " (" + marker.getAreaType().areaType + "" + validFlag + ")";
+            boolean isTpPosSet = marker.getTeleportPos() != null;
+            MutableComponent markerIndicators = buildRegionMarkerIndicators(marker)
+                    .append(" ")
+                    .append(buildTpPosIndicator(isTpPosSet));
+            MutableComponent markerHoverName = buildStickName(marker)
+                    .append(" ")
+                    .append(markerIndicators);
+            stick.setHoverName(markerHoverName);
         }
-        stick.setHoverName(Component.literal(displayName));
+    }
+
+    private static MutableComponent buildStickName(MarkerStick marker) {
+        MutableComponent stickName = Component.literal(marker.getStickType().stickName).withStyle(GOLD);
+        MutableComponent areaType = Component.literal(" (").append(marker.getAreaType().areaType).append(")");
+        return stickName.append(areaType);
+    }
+
+    /**
+     * @param isMarked
+     * @return [X] or [#]
+     */
+    private static MutableComponent buildMarkerIndicator(boolean isMarked) {
+        String indicator = isMarked ? MARKED_BLOCK_INDICATOR : UNMARKED_BLOCK_INDICATOR;
+        ChatFormatting color = isMarked ? MARKED_BLOCK_COLOR : UNMARKED_BLOCK_COLOR;
+        MutableComponent indicatorComp = Component.literal(indicator).withStyle(color);
+        MutableComponent closedResetComp = Component.literal("]").withStyle(RESET);
+        return Component.literal("[").append(indicatorComp).append(closedResetComp);
+    }
+
+    private static MutableComponent buildTpPosIndicator(boolean isMarked) {
+        ChatFormatting color = isMarked ? MARKED_BLOCK_COLOR : UNMARKED_POS_COLOR;
+        MutableComponent indicatorComp = Component.literal(TP_POS_INDICATOR).withStyle(color);
+        MutableComponent closedResetComp = Component.literal("]").withStyle(RESET);
+        return Component.literal("[").append(indicatorComp).append(closedResetComp);
+    }
+
+    /**
+     * RegionMarker [x][x] [TP]
+     *
+     * @param marker
+     * @return
+     */
+    private static MutableComponent buildRegionMarkerIndicators(MarkerStick marker) {
+        MutableComponent regionMarkerIndicators = Component.literal("");
+        int maxBlocks = marker.getAreaType().maxBlocks;
+        int amountUnmarked = maxBlocks - marker.getMarkedBlocks().size();
+        for (int i = 0; i < marker.getMarkedBlocks().size(); i++) {
+            regionMarkerIndicators.append(buildMarkerIndicator(true));
+        }
+        for (int i = 0; i < amountUnmarked; i++) {
+            regionMarkerIndicators.append(buildMarkerIndicator(false));
+        }
+        return regionMarkerIndicators;
     }
 
     public static void setStickToolTip(ItemStack stick, StickType type) {
@@ -135,10 +212,10 @@ public final class StickUtil {
 
     private static ListTag getMarkerToolTip() {
         ListTag lore = new ListTag();
-        lore.add(buildLoreTextLine(Component.translatable("Used to mark a new region."), "#ff4d4d"));
-        lore.add(buildLoreTextLine(Component.translatable("Keep the Region Marker in your hand while creating a region!"), "#ff4d4d"));
-        lore.add(buildLoreTextLine(Component.translatable("Mark a (Cuboid) region by right-clicking the diagonal opposite corner blocks.").withStyle(ITALIC), "#808080"));
-        lore.add(buildLoreTextLine(Component.translatable("The green star on the RegionMarker indicates a valid area.").withStyle(ITALIC), "#808080"));
+        lore.add(buildLoreTextLine(Component.translatableWithFallback("help.tooltip.stick.marker.simple.1", "Used to mark a new region."), "#ff4d4d"));
+        lore.add(buildLoreTextLine(Component.translatableWithFallback("help.tooltip.stick.marker.simple.2", "Keep the Region Marker in your hand while creating a region!"), "#ff4d4d"));
+        lore.add(buildLoreTextLine(Component.literal(ITALIC + "").append(Component.translatableWithFallback("help.tooltip.stick.marker.simple.3", "Mark a (Cuboid) region by right-clicking the diagonal opposite corner blocks.")), "#808080"));
+        lore.add(buildLoreTextLine(Component.literal(ITALIC + "").append(Component.translatableWithFallback("help.tooltip.stick.marker.simple.4", "Set a region teleport position by shift-right-clicking a block.")), "#808080"));
         return lore;
     }
 

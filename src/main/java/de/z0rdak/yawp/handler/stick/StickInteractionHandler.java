@@ -10,19 +10,16 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.AnvilRepairEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-
 
 import java.util.Objects;
 
 import static de.z0rdak.yawp.util.StickUtil.*;
-import net.neoforged.fml.common.EventBusSubscriber;
 
-@EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, value = Dist.DEDICATED_SERVER, bus = EventBusSubscriber.Bus.GAME)
+@EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, bus = EventBusSubscriber.Bus.GAME)
 public class StickInteractionHandler {
 
     private StickInteractionHandler() {
@@ -31,8 +28,6 @@ public class StickInteractionHandler {
     @SubscribeEvent
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (!event.getLevel().isClientSide) {
-            Player player = event.getEntity();
-            // TODO: Maybe check if player is allowed to mark block
             ItemStack involvedItemStack = event.getItemStack();
             if (!involvedItemStack.equals(ItemStack.EMPTY) && isVanillaStick(involvedItemStack)) {
                 StickType stickType = getStickType(involvedItemStack);
@@ -64,7 +59,7 @@ public class StickInteractionHandler {
                 if (event.getEntity().isShiftKeyDown() && targetIsAir) {
                     StickType stickType = getStickType(involvedItemStack);
                     if (Objects.requireNonNull(stickType) == StickType.MARKER) {
-                        // FIXME: cycling mode is disabled for now because there is only one working area type
+                        // Note: cycling mode is disabled for now because there is only one working area type
                         //MarkerStickHandler.onCycleRegionMarker(involvedItemStack);
                     }
                 }
@@ -76,7 +71,6 @@ public class StickInteractionHandler {
      * Handles action when renaming mod sticks in an anvil.
      * This is used to create a mod stick or to define a region by renaming a valid RegionMarker stick.
      */
-    @SubscribeEvent
     public static void onStickRename(AnvilRepairEvent event) {
         Player player = event.getEntity();
         if (!player.getCommandSenderWorld().isClientSide) {

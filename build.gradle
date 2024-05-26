@@ -120,7 +120,11 @@ tasks.withType(ProcessResources).configureEach {
             mod_license            : mod_license,
             mod_version            : mod_version,
             mod_authors            : mod_authors,
-            mod_description        : mod_description
+            mod_description   : mod_description,
+            mod_credits       : mod_credits,
+            mod_homepage      : mod_homepage,
+            mod_issue_tracker : mod_issue_tracker,
+            resource_pack_desc: resource_pack_desc
     ]
     inputs.properties replaceProperties
 

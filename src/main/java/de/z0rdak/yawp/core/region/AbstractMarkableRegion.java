@@ -3,7 +3,6 @@ package de.z0rdak.yawp.core.region;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.area.AreaType;
-import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -11,9 +10,6 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-
-import java.util.HashMap;
-import java.util.Objects;
 
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
@@ -24,7 +20,6 @@ import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 public abstract class AbstractMarkableRegion extends AbstractRegion implements IMarkableRegion {
 
     protected int priority;
-    protected boolean isMuted;
     protected IMarkableArea area;
     protected AreaType areaType;
     protected BlockPos tpTarget;
@@ -33,8 +28,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         super(name, dimension, RegionType.LOCAL, owner);
         this.area = area;
         this.areaType = area.getAreaType();
-        this.priority = RegionConfig.DEFAULT_REGION_PRIORITY.get();
-        this.children = new HashMap<>();
+        this.priority = RegionConfig.getDefaultPriority();
         if (parent != null) {
             this.setParent(parent);
         }
@@ -51,7 +45,32 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
 
     public AbstractMarkableRegion(CompoundTag nbt){
         super(nbt);
-        this.deserializeNBT(provider, nbt);
+        this.deserializeNBT(nbt);
+    }
+
+    @Override
+    protected boolean setParent(IProtectedRegion parent) {
+        if (this.parent == null && parent.getRegionType() == RegionType.DIMENSION) {
+            return super.setParent(parent);
+        }
+        if (this.parent.getRegionType() == RegionType.LOCAL && parent.getRegionType() == RegionType.DIMENSION) {
+            return super.setParent(parent);
+        }
+        if (this.parent.getRegionType() == RegionType.DIMENSION && parent.getRegionType() == RegionType.LOCAL) {
+            return super.setParent(parent);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean addChild(IProtectedRegion child) {
+        if (child.getRegionType() == RegionType.LOCAL && child.getParent() == null) {
+            return super.addChild(child);
+        }
+        if (child.getRegionType() == RegionType.LOCAL && child.getParent().getRegionType() == RegionType.DIMENSION) {
+            return super.addChild(child);
+        }
+        return false;
     }
 
     @Override
@@ -60,26 +79,26 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     }
 
     @Override
-    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
-        CompoundTag nbt = super.serializeNBT(provider);
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = super.serializeNBT();
         nbt.put(TP_POS, NbtUtils.writeBlockPos(this.tpTarget));
         nbt.putInt(PRIORITY, priority);
-        nbt.putBoolean(MUTED, isMuted);
+        nbt.putBoolean(MUTED, this.isMuted());
         nbt.putString(AREA_TYPE, this.areaType.areaType);
         nbt.put(AREA, this.area.serializeNBT());
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
-        super.deserializeNBT(provider, nbt);
+    public void deserializeNBT(CompoundTag nbt) {
+        super.deserializeNBT(nbt);
         this.tpTarget = NbtUtils.readBlockPos(nbt.getCompound(TP_POS));
         this.priority = nbt.getInt(PRIORITY);
-        this.isMuted = nbt.getBoolean(MUTED);
+        this.setIsMuted(nbt.getBoolean(MUTED));
         AreaType areaType = AreaType.of(nbt.getString(AREA_TYPE));
         if (areaType == null) {
-            YetAnotherWorldProtector.LOGGER.error("Error loading region data for: '" + this.name + "' in dim '" + this.dimension.location() + "'");
-            throw new IllegalArgumentException("Error loading region data for: '" + this.name + "' in dim '" + this.dimension.location() + "'");
+            YetAnotherWorldProtector.LOGGER.error("Error loading region data for: '" + this.getName() + "' in dim '" + this.dimension.location() + "'");
+            throw new IllegalArgumentException("Error loading region data for: '" + this.getName() + "' in dim '" + this.dimension.location() + "'");
         }
         this.areaType = areaType;
     }
@@ -89,59 +108,14 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         return area;
     }
 
-    /**
-     * FIXME: refactor to polymorphic instance method
-     *
-     * @param outer
-     * @param inner
-     * @return
-     */
-    public static boolean fullyContains(IMarkableArea outer, IMarkableArea inner) {
-        boolean haveSameAreaType = outer.getAreaType() == inner.getAreaType();
-        if (Objects.requireNonNull(outer.getAreaType()) == AreaType.CUBOID) {
-            CuboidArea outerCuboid = (CuboidArea) outer;
-            if (haveSameAreaType) {
-                // should always be the case in the first iteration where only cuboids are allowed
-                return outerCuboid.contains((CuboidArea) inner);
-            } else {
-                throw new UnsupportedOperationException("Only cuboid areas are supported currently.");
-            }
-        }
-        throw new UnsupportedOperationException("Only cuboid areas are supported currently.");
-    }
-
-    /**
-     * A IMarkableRegion can have both a Dimensional Region or another IMarkableRegion as its direct parent. <br>
-     * Depending on the type, different properties must be set.
-     *
-     * @param parent the parent to set for this region.
-     */
     @Override
-    public boolean setParent(IProtectedRegion parent) {
-        if (super.setParent(parent)) {
-            return true;
-        }
-        if (parent instanceof IMarkableRegion markableParentRegion) {
-            if (fullyContains(((IMarkableRegion) parent).getArea(), this.area)) {
-                this.isMuted = markableParentRegion.isMuted();
-                this.parent = markableParentRegion;
-                YetAnotherWorldProtector.LOGGER.debug("Setting parent '" + parent.getName() + "' for region '" + this.getName() + "'");
-                return true;
-            } else {
-                return false;
-            }
-        }
-        return false;
+    public void rename(String newName) {
+        this.setName(newName);
     }
 
     @Override
     public int getPriority() {
         return priority;
-    }
-
-    @Override
-    public boolean isMuted() {
-        return isMuted;
     }
 
     public AreaType getAreaType() {
@@ -156,11 +130,6 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     @Override
     public void setPriority(int priority) {
         this.priority = priority;
-    }
-
-    @Override
-    public void setIsMuted(boolean isMuted) {
-        this.isMuted = isMuted;
     }
 
     @Override
