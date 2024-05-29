@@ -12,9 +12,10 @@ Assign players or vanilla teams to regions, so they can manage their own regions
 
 YAWP was inspired by the forge mod [WorldProtector](https://www.curseforge.com/minecraft/mc-mods/worldprotector) and
 the [WorldGuard](https://dev.bukkit.org/projects/worldguard) plugin.
+***
 
-Join our discord if you have any questions or suggestions: [YAWP Discord](https://discord.gg/d7hArKCUtm)
-
+| [Discord](https://discord.gg/d7hArKCUtm) | [Paypal](https://www.paypal.com/donate/?hosted_button_id=XV65M85SPMD3Y) | [Patreon](https://www.patreon.com/z0rdak) | [Github](https://github.com/Z0rdak/Yet-Another-World-Protector) | [Wiki](https://github.com/Z0rdak/Yet-Another-World-Protector/wiki) | [Issues](https://github.com/Z0rdak/Yet-Another-World-Protector/issues) | [Curseforge](https://www.curseforge.com/minecraft/mc-mods/yawp) | [Modrinth](https://modrinth.com/mod/yawp) |
+|:----------------------------------------:|:-----------------------------------------------------------------------:|:-----------------------------------------:|:---------------------------------------------------------------:|:------------------------------------------------------------------:|:----------------------------------------------------------------------:|:---------------------------------------------------------------:|:-----------------------------------------:|
 *** 
 
 ![](https://raw.githubusercontent.com/Z0rdak/Yet-Another-World-Protector/online-pages/img/yawp-feature-01.png)
