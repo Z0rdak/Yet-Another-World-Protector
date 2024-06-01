@@ -5,11 +5,14 @@ import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+
+import java.util.Optional;
 
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
@@ -43,9 +46,9 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         this.tpTarget = tpTarget;
     }
 
-    public AbstractMarkableRegion(CompoundTag nbt){
-        super(nbt);
-        this.deserializeNBT(nbt);
+    public AbstractMarkableRegion(HolderLookup.Provider provider, CompoundTag nbt) {
+        super(provider, nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     @Override
@@ -79,20 +82,21 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        CompoundTag nbt = super.serializeNBT(provider);
         nbt.put(TP_POS, NbtUtils.writeBlockPos(this.tpTarget));
         nbt.putInt(PRIORITY, priority);
         nbt.putBoolean(MUTED, this.isMuted());
         nbt.putString(AREA_TYPE, this.areaType.areaType);
-        nbt.put(AREA, this.area.serializeNBT());
+        nbt.put(AREA, this.area.serializeNBT(provider));
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
-        this.tpTarget = NbtUtils.readBlockPos(nbt.getCompound(TP_POS));
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        super.deserializeNBT(provider, nbt);
+        Optional<BlockPos> blockPos = NbtUtils.readBlockPos(nbt, TP_POS);
+        blockPos.ifPresent(pos -> this.tpTarget = pos);
         this.priority = nbt.getInt(PRIORITY);
         this.setIsMuted(nbt.getBoolean(MUTED));
         AreaType areaType = AreaType.of(nbt.getString(AREA_TYPE));

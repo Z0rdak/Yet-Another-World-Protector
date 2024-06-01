@@ -4,15 +4,13 @@ import de.z0rdak.yawp.util.AreaUtil;
 import de.z0rdak.yawp.util.constants.AreaNBT;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.phys.AABB;
 import org.apache.commons.lang3.NotImplementedException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -40,9 +38,9 @@ public class CuboidArea extends AbstractArea {
         this.p2 = AreaUtil.getHigherPos(p1, p2);
     }
 
-    public CuboidArea(CompoundTag nbt) {
-        super(nbt);
-        this.deserializeNBT(nbt);
+    public CuboidArea(HolderLookup.Provider provider, CompoundTag nbt) {
+        super(provider, nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     @Override
@@ -222,18 +220,20 @@ public class CuboidArea extends AbstractArea {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        CompoundTag nbt = super.serializeNBT(provider);
         nbt.put(AreaNBT.P1, NbtUtils.writeBlockPos(this.p1));
         nbt.put(AreaNBT.P2, NbtUtils.writeBlockPos(this.p2));
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
-        this.p1 = NbtUtils.readBlockPos(nbt.getCompound(AreaNBT.P1));
-        this.p2 = NbtUtils.readBlockPos(nbt.getCompound(AreaNBT.P2));
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        super.deserializeNBT(provider, nbt);
+        Optional<BlockPos> blockPos1 = NbtUtils.readBlockPos(nbt, AreaNBT.P1);
+        Optional<BlockPos> blockPos2 = NbtUtils.readBlockPos(nbt, AreaNBT.P2);
+        blockPos1.ifPresent(pos -> this.p1 = pos);
+        blockPos2.ifPresent(pos -> this.p2 = pos);
         this.area = new AABB(p1.getX(), p1.getY(), p1.getZ(), p2.getX(), p2.getY(), p2.getZ());
     }
 

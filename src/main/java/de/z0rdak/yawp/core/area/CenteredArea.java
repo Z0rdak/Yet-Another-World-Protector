@@ -1,12 +1,14 @@
 package de.z0rdak.yawp.core.area;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public abstract class CenteredArea extends AbstractArea {
 
@@ -16,9 +18,9 @@ public abstract class CenteredArea extends AbstractArea {
         super(areaType);
     }
 
-    public CenteredArea(CompoundTag nbt) {
-        super(nbt);
-        this.deserializeNBT(nbt);
+    public CenteredArea(HolderLookup.Provider provider, CompoundTag nbt) {
+        super(provider, nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     public CenteredArea(BlockPos center, AreaType areaType) {
@@ -40,16 +42,17 @@ public abstract class CenteredArea extends AbstractArea {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        CompoundTag nbt = super.serializeNBT(provider);
         nbt.put("center", NbtUtils.writeBlockPos(this.center));
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
-        this.center = NbtUtils.readBlockPos(nbt.getCompound("center"));
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        super.deserializeNBT(provider, nbt);
+        Optional<BlockPos> blockPos = NbtUtils.readBlockPos(nbt, "center");
+        blockPos.ifPresent(pos -> this.center = pos);
     }
 
     @Override

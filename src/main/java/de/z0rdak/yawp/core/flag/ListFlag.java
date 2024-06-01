@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.core.flag;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.HashSet;
@@ -17,9 +18,9 @@ public class ListFlag extends AbstractFlag {
         resourceKey = new HashSet<>(0);
     }
 
-    public ListFlag(CompoundTag nbt) {
-        super(nbt);
-        this.deserializeNBT(nbt);
+    public ListFlag(HolderLookup.Provider provider, CompoundTag nbt) {
+        super(provider, nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     public boolean containsKey(String key){
@@ -31,14 +32,14 @@ public class ListFlag extends AbstractFlag {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        CompoundTag nbt = super.serializeNBT(provider);
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        super.deserializeNBT(provider, nbt);
         throw new UnsupportedOperationException("Not implemented yet");
     }
 }

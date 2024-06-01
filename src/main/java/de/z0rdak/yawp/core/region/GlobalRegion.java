@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.core.region;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
@@ -16,8 +17,8 @@ public class GlobalRegion extends AbstractRegion {
     public static final ResourceLocation GLOBAL = new ResourceLocation("yawp", "global");
     public static final ResourceKey<Level> GLOBAL_DIMENSION = ResourceKey.create(Registries.DIMENSION, GLOBAL);
 
-    public GlobalRegion(CompoundTag nbt) {
-        super(nbt);
+    public GlobalRegion(HolderLookup.Provider provider, CompoundTag nbt) {
+        super(provider, nbt);
     }
 
     public GlobalRegion() {
@@ -63,13 +64,13 @@ public class GlobalRegion extends AbstractRegion {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        CompoundTag nbt = super.serializeNBT(provider);
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        super.deserializeNBT(provider, nbt);
     }
 }

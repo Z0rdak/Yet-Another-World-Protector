@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.core.flag;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
@@ -33,8 +34,8 @@ public abstract class AbstractFlag implements IFlag {
         this.msg = new FlagMessage(msg);
     }
 
-    public AbstractFlag(CompoundTag nbt) {
-        this.deserializeNBT(nbt);
+    public AbstractFlag(HolderLookup.Provider provider, CompoundTag nbt) {
+        this.deserializeNBT(provider, nbt);
     }
 
     @Override
@@ -83,18 +84,18 @@ public abstract class AbstractFlag implements IFlag {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag nbt = new CompoundTag();
         nbt.putString(FLAG_NAME, this.name);
         nbt.putString(FLAG_STATE, this.state.name);
         nbt.putBoolean(OVERRIDE, this.doesOverride);
         nbt.putString(FLAG_TYPE, this.type.flagType);
-        nbt.put(FLAG_MSG, this.msg.serializeNBT());
+        nbt.put(FLAG_MSG, this.msg.serializeNBT(provider));
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
         this.name = nbt.getString(FLAG_NAME);
         // Note: this is here for compatibility for the jump from 0.0.3.0-beta1 to 0.0.4.0-beta1
         // The state was not saved in the nbt before, there was a boolean flag instead
@@ -114,7 +115,7 @@ public abstract class AbstractFlag implements IFlag {
         }
         this.doesOverride = nbt.getBoolean(OVERRIDE);
         this.type = FlagType.of(nbt.getString(FLAG_TYPE));
-        this.msg = new FlagMessage(nbt.getCompound(FLAG_MSG));
+        this.msg = new FlagMessage(provider, nbt.getCompound(FLAG_MSG));
     }
 
     @Override

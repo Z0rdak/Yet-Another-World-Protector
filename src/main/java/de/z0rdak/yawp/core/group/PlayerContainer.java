@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.core.group;
 
 import de.z0rdak.yawp.util.constants.RegionNBT;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -14,9 +15,9 @@ public class PlayerContainer implements IMemberContainer {
     private final Set<String> teams;
     private final Map<UUID, String> players;
 
-    public PlayerContainer(CompoundTag nbt) {
+    public PlayerContainer(HolderLookup.Provider provider, CompoundTag nbt) {
         this();
-        this.deserializeNBT(nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     public PlayerContainer() {
@@ -83,7 +84,7 @@ public class PlayerContainer implements IMemberContainer {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag nbt = new CompoundTag();
         // serialize player data
         ListTag playerList = new ListTag();
@@ -104,7 +105,7 @@ public class PlayerContainer implements IMemberContainer {
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
         // deserialize players data
         this.players.clear();
         ListTag playerLists = nbt.getList(RegionNBT.PLAYERS, Tag.TAG_COMPOUND);

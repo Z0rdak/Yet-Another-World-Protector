@@ -139,7 +139,7 @@ public class RegionDataManager extends SavedData {
             globalRegion = new GlobalRegion();
         } else {
             CompoundTag globalNbt = nbt.getCompound(GLOBAL);
-            globalRegion = new GlobalRegion(globalNbt);
+            globalRegion = new GlobalRegion(provider, globalNbt);
             globalRegion.setParent(globalRegion);
             YetAnotherWorldProtector.LOGGER.info(Component.translatable("Loaded global region data").getString());
         }
@@ -161,7 +161,7 @@ public class RegionDataManager extends SavedData {
                     } else {
                         YetAnotherWorldProtector.LOGGER.info(Component.translatable("No region data for dimension '" + dimKey + "' found").getString());
                     }
-                    DimensionRegionCache dimCache = new DimensionRegionCache(dimCacheNbt);
+                    DimensionRegionCache dimCache = new DimensionRegionCache(provider, dimCacheNbt);
                     globalRegion.addChild(dimCache.getDimensionalRegion());
                     rdm.dimCacheMap.put(dimension, dimCache);
                     rdm.dimensionDataNames.add(dimKey);
@@ -253,7 +253,7 @@ public class RegionDataManager extends SavedData {
     @Nonnull
     @Override
     public CompoundTag save(@Nonnull CompoundTag compound, HolderLookup.Provider provider) {
-        compound.put(GLOBAL, globalRegion.serializeNBT());
+        compound.put(GLOBAL, globalRegion.serializeNBT(provider));
         CompoundTag dimRegionNbtData = new CompoundTag();
         // YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.save.amount", this.getTotalRegionAmount(), dimCacheMap.keySet().size()).getString());
         YetAnotherWorldProtector.LOGGER.info(Component.translatable("Saving " + this.getTotalRegionAmount() + " region(s) for " + dimCacheMap.keySet().size() + " dimensions").getString());
@@ -261,7 +261,7 @@ public class RegionDataManager extends SavedData {
             // YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.save.dim.amount", this.getRegionAmount(entry.getKey()), entry.getKey().location().toString()).getString());
             YetAnotherWorldProtector.LOGGER.info(Component.translatable("Saving " + this.getRegionAmount(entry.getKey()) + " region(s) for dimension '" + entry.getKey().location() + "'").getString());
             String dimensionName = entry.getValue().getDimensionalRegion().getName();
-            dimRegionNbtData.put(dimensionName, entry.getValue().serializeNBT());
+            dimRegionNbtData.put(dimensionName, entry.getValue().serializeNBT(provider));
         }
         compound.put(DIMENSIONS, dimRegionNbtData);
         return compound;

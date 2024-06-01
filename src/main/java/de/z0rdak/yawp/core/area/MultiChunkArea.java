@@ -1,7 +1,9 @@
 package de.z0rdak.yawp.core.area;
 
+import de.z0rdak.yawp.util.AreaUtil;
 import de.z0rdak.yawp.util.constants.AreaNBT;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
@@ -23,19 +25,19 @@ public class MultiChunkArea extends AbstractArea {
         chunks = new ArrayList<>();
     }
 
-    protected MultiChunkArea(CompoundTag nbt) {
-        super(nbt);
-        this.deserializeNBT(nbt);
+    protected MultiChunkArea(HolderLookup.Provider provider, CompoundTag nbt) {
+        super(provider, nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        CompoundTag nbt = super.serializeNBT(provider);
         ListTag pointList = new ListTag();
         this.chunks.stream()
                 .map(ChunkPos::getWorldPosition)
                 .forEach((point) -> {
-                    CompoundTag pointNbt = NbtUtils.writeBlockPos(point);
+                    Tag pointNbt = NbtUtils.writeBlockPos(point);
                     pointList.add(pointNbt);
                 });
         nbt.put(AreaNBT.BLOCKS, pointList);
@@ -43,12 +45,12 @@ public class MultiChunkArea extends AbstractArea {
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        super.deserializeNBT(provider, nbt);
         this.chunks.clear();
         ListTag posList = nbt.getList(AreaNBT.BLOCKS, Tag.TAG_COMPOUND);
         for (int i = 0; i < posList.size(); i++) {
-            BlockPos pos = NbtUtils.readBlockPos(posList.getCompound(i));
+            BlockPos pos = AreaUtil.readBlockPos(posList.getCompound(i));
             this.chunks.add(new ChunkPos(pos));
         }
     }

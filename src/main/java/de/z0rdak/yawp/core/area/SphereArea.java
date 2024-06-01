@@ -3,6 +3,7 @@ package de.z0rdak.yawp.core.area;
 import de.z0rdak.yawp.util.AreaUtil;
 import de.z0rdak.yawp.util.constants.AreaNBT;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.AABB;
 import org.apache.commons.lang3.NotImplementedException;
@@ -17,9 +18,9 @@ public class SphereArea extends CenteredArea {
 
     private int radius;
 
-    public SphereArea(CompoundTag nbt) {
-        super(nbt);
-        this.deserializeNBT(nbt);
+    public SphereArea(HolderLookup.Provider provider, CompoundTag nbt) {
+        super(provider, nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     public SphereArea(BlockPos centerPos, BlockPos scopePos) {
@@ -112,15 +113,15 @@ public class SphereArea extends CenteredArea {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        CompoundTag nbt = super.serializeNBT(provider);
         nbt.putInt(AreaNBT.RADIUS, this.radius);
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        super.deserializeNBT(provider, nbt);
         this.radius = nbt.getInt(AreaNBT.RADIUS);
     }
 

@@ -1,8 +1,10 @@
 package de.z0rdak.yawp.core.flag;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.neoforged.neoforge.common.util.INBTSerializable;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,28 +20,46 @@ import static de.z0rdak.yawp.util.constants.RegionNBT.FLAG_TYPE;
 public class FlagContainer extends HashMap<String, IFlag> implements INBTSerializable<CompoundTag>, IFlagContainer {
 
 
-    public FlagContainer(CompoundTag nbt) {
+    public FlagContainer(HolderLookup.Provider provider, CompoundTag nbt) {
         this();
-        this.deserializeNBT(nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     public FlagContainer() {
         super();
     }
 
+    public FlagContainer(FlagContainer flagContainer) {
+        this();
+        flagContainer.forEach((flagName, iFlag) -> {
+            if (RegionFlag.contains(flagName)) {
+                IFlag copy;
+                switch (iFlag.getType()) {
+                    case BOOLEAN_FLAG: {
+                        copy = new BooleanFlag((BooleanFlag) iFlag);
+                    }
+                    break;
+                    default:
+                        throw new NotImplementedException("");
+                }
+                this.put(flagName, copy);
+            }
+        });
+    }
+
     @Override
-    public CompoundTag serializeNBT() {
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag nbt = new CompoundTag();
         this.forEach((flagName, iFlag) -> {
             if (RegionFlag.contains(flagName)) {
-                nbt.put(flagName, iFlag.serializeNBT());
+                nbt.put(flagName, iFlag.serializeNBT(provider));
             }
         });
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
         Set<String> flagKeys = nbt.getAllKeys();
         flagKeys.forEach( key -> {
             CompoundTag flagNbt = nbt.getCompound(key);
@@ -47,13 +67,13 @@ public class FlagContainer extends HashMap<String, IFlag> implements INBTSeriali
             if (flagType != null) {
                 switch (flagType) {
                     case BOOLEAN_FLAG:
-                        this.put(key, new BooleanFlag(flagNbt));
+                        this.put(key, new BooleanFlag(provider, flagNbt));
                         break;
                     case LIST_FLAG:
-                        this.put(key, new ListFlag(flagNbt));
+                        this.put(key, new ListFlag(provider, flagNbt));
                         break;
                     case INT_FLAG:
-                        this.put(key, new IntFlag(flagNbt));
+                        this.put(key, new IntFlag(provider, flagNbt));
                         break;
                 }
             } else {
@@ -64,7 +84,7 @@ public class FlagContainer extends HashMap<String, IFlag> implements INBTSeriali
     }
 
     public FlagContainer deepCopy() {
-        return new FlagContainer(this.serializeNBT());
+        return new FlagContainer(this);
     }
 
     public void put(IFlag flag) {

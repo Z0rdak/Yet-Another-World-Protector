@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.core.flag;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -19,9 +20,9 @@ public class IntFlag extends AbstractFlag {
         this.tickInterval = tickInterval;
     }
 
-    public IntFlag(CompoundTag nbt){
-        super(nbt);
-        this.deserializeNBT(nbt);
+    public IntFlag(HolderLookup.Provider provider, CompoundTag nbt) {
+        super(provider, nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     public int getValue() {
@@ -41,14 +42,14 @@ public class IntFlag extends AbstractFlag {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        CompoundTag nbt = super.serializeNBT(provider);
         throw new NotImplementedException("Missing serializeNBT implementation in IntFlag");
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        super.deserializeNBT(provider, nbt);
         throw new NotImplementedException("Missing deserializeNBT implementation in IntFlag");
     }
 }

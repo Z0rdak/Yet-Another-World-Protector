@@ -15,7 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.EntityStruckByLightningEvent;
 import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
@@ -25,13 +25,12 @@ import javax.annotation.Nullable;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
-import static net.neoforged.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 
 /**
  * Contains event handler for flags not directly related to player actions.
  * E.g.
  */
-@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, bus = FORGE)
+@EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, bus = EventBusSubscriber.Bus.GAME)
 public class WorldFlagHandler {
 
     private WorldFlagHandler() {

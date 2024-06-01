@@ -16,9 +16,8 @@ import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.EntityMobGriefingEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDestroyBlockEvent;
@@ -32,9 +31,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
-import static net.neoforged.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
+import static net.neoforged.fml.common.EventBusSubscriber.Bus.GAME;
 
-@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, bus = FORGE)
+@EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, bus = GAME)
 public class GrievingFlagHandler {
 
     private GrievingFlagHandler() {
@@ -208,7 +207,7 @@ public class GrievingFlagHandler {
                     return;
                 }
                 FlagState flagState = processCheck(checkEvent, null, denyResult -> {
-                    event.setResult(Event.Result.DENY);
+                    event.setCanGrief(false);
                 });
                 if (flagState == FlagState.DENIED)
                     return;
@@ -218,7 +217,7 @@ public class GrievingFlagHandler {
                         return;
                     }
                     processCheck(checkEvent, null, denyResult -> {
-                        event.setResult(Event.Result.DENY);
+                        event.setCanGrief(false);
                     });
                 }
             }

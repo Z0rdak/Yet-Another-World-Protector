@@ -1,7 +1,9 @@
 package de.z0rdak.yawp.core.area;
 
+import de.z0rdak.yawp.util.AreaUtil;
 import de.z0rdak.yawp.util.constants.AreaNBT;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
@@ -27,9 +29,9 @@ public class Polygon3DArea extends AbstractArea {
         this.positions = positions;
     }
 
-    public Polygon3DArea(CompoundTag nbt) {
-        super(nbt);
-        this.deserializeNBT(nbt);
+    public Polygon3DArea(HolderLookup.Provider provider, CompoundTag nbt) {
+        super(provider, nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     public List<BlockPos> getPositions() {
@@ -72,11 +74,11 @@ public class Polygon3DArea extends AbstractArea {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        CompoundTag nbt = super.serializeNBT(provider);
         ListTag pointList = new ListTag();
         this.positions.forEach((point) -> {
-            CompoundTag pointNbt = NbtUtils.writeBlockPos(point);
+            Tag pointNbt = NbtUtils.writeBlockPos(point);
             pointList.add(pointNbt);
         });
         nbt.put(AreaNBT.BLOCKS, pointList);
@@ -84,12 +86,12 @@ public class Polygon3DArea extends AbstractArea {
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
         this.positions.clear();
-        this.deserializeNBT(nbt);
+        this.deserializeNBT(provider, nbt);
         ListTag pointList = nbt.getList(AreaNBT.BLOCKS, Tag.TAG_COMPOUND);
         for (int i = 0; i < pointList.size(); i++) {
-            BlockPos pos = NbtUtils.readBlockPos(pointList.getCompound(i));
+            BlockPos pos = AreaUtil.readBlockPos(pointList.getCompound(i));
             this.positions.add(pos);
         }
     }

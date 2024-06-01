@@ -3,6 +3,7 @@ package de.z0rdak.yawp.core.region;
 import de.z0rdak.yawp.core.area.VerticalCylinderArea;
 import de.z0rdak.yawp.util.constants.RegionNBT;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
@@ -10,9 +11,9 @@ import net.minecraft.world.level.Level;
 
 public final class CylinderRegion extends AbstractMarkableRegion {
 
-    public CylinderRegion(CompoundTag nbt) {
-        super(nbt);
-        this.deserializeNBT(nbt);
+    public CylinderRegion(HolderLookup.Provider provider, CompoundTag nbt) {
+        super(provider, nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     public CylinderRegion(String name, VerticalCylinderArea area, Player owner, ResourceKey<Level> dimension) {
@@ -24,8 +25,8 @@ public final class CylinderRegion extends AbstractMarkableRegion {
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
-        this.area = new VerticalCylinderArea(nbt.getCompound(RegionNBT.AREA));
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        super.deserializeNBT(provider, nbt);
+        this.area = new VerticalCylinderArea(provider, nbt.getCompound(RegionNBT.AREA));
     }
 }

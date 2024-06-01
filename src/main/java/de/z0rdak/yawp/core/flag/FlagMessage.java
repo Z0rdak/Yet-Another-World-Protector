@@ -3,6 +3,7 @@ package de.z0rdak.yawp.core.flag;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -51,13 +52,19 @@ public class FlagMessage implements INBTSerializable<CompoundTag> {
         this.isDefault = msg.toLowerCase(Locale.ROOT).equals(CONFIG_MSG);
     }
 
+    public FlagMessage(FlagMessage msg) {
+        this.msg = msg.msg;
+        this.muted = msg.muted;
+        this.isDefault = msg.isDefault;
+    }
+
     public FlagMessage(String msg, boolean muted) {
         this(msg);
         this.muted = muted;
     }
 
-    public FlagMessage(CompoundTag msgNbt) {
-        this.deserializeNBT(msgNbt);
+    public FlagMessage(HolderLookup.Provider provider, CompoundTag msgNbt) {
+        this.deserializeNBT(provider, msgNbt);
     }
 
     /**
@@ -182,7 +189,7 @@ public class FlagMessage implements INBTSerializable<CompoundTag> {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag nbt = new CompoundTag();
         nbt.putString(MSG, this.msg);
         nbt.putBoolean(DEFAULT, this.isDefault);
@@ -191,7 +198,7 @@ public class FlagMessage implements INBTSerializable<CompoundTag> {
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
         this.msg = nbt.getString(MSG);
         this.muted = nbt.getBoolean(MUTED);
         this.isDefault = nbt.getBoolean(DEFAULT);

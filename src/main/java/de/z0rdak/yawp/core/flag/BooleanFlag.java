@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.core.flag;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 
 /**
@@ -7,9 +8,9 @@ import net.minecraft.nbt.CompoundTag;
  */
 public class BooleanFlag extends AbstractFlag {
 
-    public BooleanFlag(CompoundTag nbt) {
-        super(nbt);
-        this.deserializeNBT(nbt);
+    public BooleanFlag(HolderLookup.Provider provider, CompoundTag nbt) {
+        super(provider, nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     public BooleanFlag(RegionFlag flag, FlagState state, boolean override) {
@@ -20,14 +21,19 @@ public class BooleanFlag extends AbstractFlag {
         super(flag.name, flag.type, false, FlagState.DENIED);
     }
 
+    public BooleanFlag(BooleanFlag flag) {
+        super(flag.name, flag.type, flag.doesOverride, flag.state);
+        this.msg = new FlagMessage(flag.msg);
+    }
+
     @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        CompoundTag nbt = super.serializeNBT(provider);
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        super.deserializeNBT(provider, nbt);
     }
 }

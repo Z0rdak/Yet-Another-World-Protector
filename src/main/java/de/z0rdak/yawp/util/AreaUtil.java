@@ -2,6 +2,7 @@ package de.z0rdak.yawp.util;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.AABB;
 
 import java.util.HashSet;
@@ -11,6 +12,13 @@ import java.util.StringJoiner;
 public final class AreaUtil {
 
     private AreaUtil(){}
+
+    public static BlockPos readBlockPos(CompoundTag nbt) {
+        int x = nbt.getInt("x");
+        int y = nbt.getInt("y");
+        int z = nbt.getInt("z");
+        return new BlockPos(x, y, z);
+    }
 
     public static double distance(BlockPos a, BlockPos b) {
         return Math.sqrt(Math.pow(b.getX() - a.getX(), 2)

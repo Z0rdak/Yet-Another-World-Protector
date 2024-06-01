@@ -3,6 +3,7 @@ package de.z0rdak.yawp.core.region;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.util.constants.RegionNBT;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
@@ -14,9 +15,9 @@ import net.minecraft.world.level.Level;
  */
 public final class CuboidRegion extends AbstractMarkableRegion {
 
-    public CuboidRegion(CompoundTag nbt) {
-        super(nbt);
-        this.deserializeNBT(nbt);
+    public CuboidRegion(HolderLookup.Provider provider, CompoundTag nbt) {
+        super(provider, nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     public CuboidRegion(String name, CuboidArea area, Player owner, ResourceKey<Level> dimension) {
@@ -29,8 +30,8 @@ public final class CuboidRegion extends AbstractMarkableRegion {
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
-        this.area = new CuboidArea(nbt.getCompound(RegionNBT.AREA));
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        super.deserializeNBT(provider, nbt);
+        this.area = new CuboidArea(provider, nbt.getCompound(RegionNBT.AREA));
     }
 }

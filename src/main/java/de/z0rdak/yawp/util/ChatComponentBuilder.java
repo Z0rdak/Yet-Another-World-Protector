@@ -398,19 +398,19 @@ public class ChatComponentBuilder {
             case GLOBAL: {
                 MutableComponent dumpLinkText = Component.translatableWithFallback("cli.msg.global.overview.header.dump.link.text", "Global overview");
                 MutableComponent dumpLinkHover = Component.translatableWithFallback("cli.msg.global.overview.header.dump.link.hover", "Copy Global Region NBT to clipboard");
-                MutableComponent clipBoardDumpLink = buildExecuteCmdComponent(dumpLinkText, dumpLinkHover, NbtUtils.prettyPrint(region.serializeNBT()), ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
+                MutableComponent clipBoardDumpLink = buildExecuteCmdComponent(dumpLinkText, dumpLinkHover, NbtUtils.prettyPrint(region.serializeNBT(null)), ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
                 return buildHeader(Component.translatableWithFallback("cli.msg.info.header.for", "== %s for %s ==", clipBoardDumpLink, buildRegionInfoLink(region)));
             }
             case DIMENSION: {
                 MutableComponent dumpLinkText = Component.translatableWithFallback("cli.msg.dim.overview.header.dump.link.text", "Dimension overview");
                 MutableComponent dumpLinkHover = Component.translatableWithFallback("cli.msg.dim.overview.header.dump.link.hover", "Copy Dimensional Region NBT to clipboard");
-                MutableComponent clipBoardDumpLink = buildExecuteCmdComponent(dumpLinkText, dumpLinkHover, NbtUtils.prettyPrint(region.serializeNBT()), ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
+                MutableComponent clipBoardDumpLink = buildExecuteCmdComponent(dumpLinkText, dumpLinkHover, NbtUtils.prettyPrint(region.serializeNBT(null)), ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
                 return buildHeader(Component.translatableWithFallback("cli.msg.info.header.for", "== %s for %s ==", clipBoardDumpLink, buildRegionInfoLink(region)));
             }
             case LOCAL: {
                 MutableComponent dumpLinkText = Component.translatableWithFallback("cli.msg.local.overview.header.dump.link.text", "Region overview");
                 MutableComponent dumpLinkHover = Component.translatableWithFallback("cli.msg.local.overview.header.dump.link.hover", "Copy Local Region NBT to clipboard");
-                MutableComponent clipBoardDumpLink = buildExecuteCmdComponent(dumpLinkText, dumpLinkHover, NbtUtils.prettyPrint(region.serializeNBT()), ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
+                MutableComponent clipBoardDumpLink = buildExecuteCmdComponent(dumpLinkText, dumpLinkHover, NbtUtils.prettyPrint(region.serializeNBT(null)), ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
                 return buildHeader(Component.translatableWithFallback("cli.msg.info.header.for", "== %s for %s ==", clipBoardDumpLink, buildRegionInfoLink(region)));
             }
             default:

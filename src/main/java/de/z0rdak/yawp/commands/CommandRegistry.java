@@ -10,14 +10,13 @@ import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
 import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
-import static net.neoforged.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 
-@Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, bus = FORGE)
+@EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, bus = EventBusSubscriber.Bus.GAME)
 public final class CommandRegistry {
 
     private CommandRegistry() {

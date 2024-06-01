@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.core.area;
 
 import de.z0rdak.yawp.util.constants.RegionNBT;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 
 public abstract class AbstractArea implements IMarkableArea {
@@ -11,8 +12,8 @@ public abstract class AbstractArea implements IMarkableArea {
         this.areaType = areaType;
     }
 
-    protected AbstractArea(CompoundTag nbt) {
-        this.deserializeNBT(nbt);
+    protected AbstractArea(HolderLookup.Provider provider, CompoundTag nbt) {
+        this.deserializeNBT(provider, nbt);
     }
 
     public AreaType getAreaType() {
@@ -20,14 +21,14 @@ public abstract class AbstractArea implements IMarkableArea {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag nbt = new CompoundTag();
         nbt.putString(RegionNBT.AREA_TYPE, this.areaType.areaType);
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
         this.areaType = AreaType.of(nbt.getString(RegionNBT.AREA_TYPE));
     }
 }

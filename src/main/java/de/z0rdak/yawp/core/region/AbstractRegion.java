@@ -5,6 +5,7 @@ import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.group.PlayerContainer;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -39,7 +40,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
     private Map<String, IProtectedRegion> children;
     private Set<String> childrenNames;
 
-    protected AbstractRegion(CompoundTag nbt) {
+    protected AbstractRegion(HolderLookup.Provider provider, CompoundTag nbt) {
         this.childrenNames = new HashSet<>(0);
         this.children = new HashMap<>(0);
         this.parentName = null;
@@ -48,7 +49,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.groups = new HashMap<>();
         this.groups.put(CommandUtil.MEMBER, new PlayerContainer());
         this.groups.put(CommandUtil.OWNER, new PlayerContainer());
-        this.deserializeNBT(nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     protected AbstractRegion(String name, ResourceKey<Level> dimension, RegionType type) {
@@ -280,16 +281,16 @@ public abstract class AbstractRegion implements IProtectedRegion {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag nbt = new CompoundTag();
         nbt.putString(NAME, this.name);
         nbt.putString(DIM, this.dimension.location().toString());
         nbt.putString(REGION_TYPE, this.regionType.type);
         nbt.putBoolean(ACTIVE, this.isActive);
         nbt.putBoolean(MUTED, this.isMuted);
-        nbt.put(FLAGS, this.flags.serializeNBT());
-        nbt.put(OWNERS, this.groups.get(OWNERS).serializeNBT());
-        nbt.put(MEMBERS, this.groups.get(MEMBERS).serializeNBT());
+        nbt.put(FLAGS, this.flags.serializeNBT(provider));
+        nbt.put(OWNERS, this.groups.get(OWNERS).serializeNBT(provider));
+        nbt.put(MEMBERS, this.groups.get(MEMBERS).serializeNBT(provider));
         if (this.parent != null) {
             nbt.putString(PARENT, this.parent.getName());
         } else {
@@ -306,17 +307,17 @@ public abstract class AbstractRegion implements IProtectedRegion {
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
         this.name = nbt.getString(NAME);
         this.dimension = ResourceKey.create(Registries.DIMENSION,
                 new ResourceLocation(nbt.getString(DIM)));
         this.isActive = nbt.getBoolean(ACTIVE);
         this.isMuted = nbt.getBoolean(MUTED);
         this.regionType = RegionType.of(nbt.getString(REGION_TYPE));
-        this.flags = new FlagContainer(nbt.getCompound(FLAGS));
+        this.flags = new FlagContainer(provider, nbt.getCompound(FLAGS));
         this.groups = new HashMap<>();
-        this.groups.put(OWNERS, new PlayerContainer(nbt.getCompound(OWNERS)));
-        this.groups.put(MEMBERS, new PlayerContainer(nbt.getCompound(MEMBERS)));
+        this.groups.put(OWNERS, new PlayerContainer(provider, nbt.getCompound(OWNERS)));
+        this.groups.put(MEMBERS, new PlayerContainer(provider, nbt.getCompound(MEMBERS)));
         if (this.parent == null && nbt.contains(PARENT, Tag.TAG_STRING)) {
             String parentName = nbt.getString(PARENT);
             if (!parentName.isEmpty()) {

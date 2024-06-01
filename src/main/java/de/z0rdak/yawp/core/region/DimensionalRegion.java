@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.core.region;
 
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
@@ -27,10 +28,10 @@ public final class DimensionalRegion extends AbstractRegion {
         this.setParent(parent);
     }
 
-    public DimensionalRegion(CompoundTag nbt) {
-        super(nbt);
+    public DimensionalRegion(HolderLookup.Provider provider, CompoundTag nbt) {
+        super(provider, nbt);
         this.parent = RegionDataManager.get().getGlobalRegion();
-        this.deserializeNBT(nbt);
+        this.deserializeNBT(provider, nbt);
     }
 
     public DimensionalRegion(String dimensionKey) {
@@ -67,13 +68,13 @@ public final class DimensionalRegion extends AbstractRegion {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        return super.serializeNBT();
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        return super.serializeNBT(provider);
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        super.deserializeNBT(provider, nbt);
     }
 
     @Override
