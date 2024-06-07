@@ -55,6 +55,14 @@ public class RegionConfig {
         return CLI_PAGINATION_ENTRY_SIZE.get();
     }
 
+    public static int getDefaultPriority() {
+        return DEFAULT_REGION_PRIORITY.get();
+    }
+
+    public static int getDefaultPriorityInc() {
+        return CLI_REGION_DEFAULT_PRIORITY_INC.get();
+    }
+
     public static Set<String> getDefaultFlags() {
         return RegionConfig.REGION_DEFAULT_FLAGS.get().stream()
                 .filter(Objects::nonNull)

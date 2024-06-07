@@ -7,93 +7,85 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import de.z0rdak.yawp.commands.arguments.flag.RegionFlagArgumentType;
+import de.z0rdak.yawp.api.events.region.RegionEvent;
+import de.z0rdak.yawp.api.events.region.RegionEvents;
+import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.commands.arguments.region.AddRegionChildArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RemoveRegionChildArgumentType;
 import de.z0rdak.yawp.config.server.RegionConfig;
-import de.z0rdak.yawp.core.affiliation.AffiliationType;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.CuboidArea;
-import de.z0rdak.yawp.core.flag.BooleanFlag;
-import de.z0rdak.yawp.core.flag.IFlag;
-import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.core.region.*;
-import de.z0rdak.yawp.core.stick.AbstractStick;
-import de.z0rdak.yawp.core.stick.MarkerStick;
-import de.z0rdak.yawp.handler.flags.HandlerUtil;
+import de.z0rdak.yawp.core.area.IMarkableArea;
+import de.z0rdak.yawp.core.area.SphereArea;
+import de.z0rdak.yawp.core.region.CuboidRegion;
+import de.z0rdak.yawp.core.region.IMarkableRegion;
+import de.z0rdak.yawp.core.region.IProtectedRegion;
+import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
-import de.z0rdak.yawp.util.StickException;
-import de.z0rdak.yawp.util.StickType;
-import de.z0rdak.yawp.util.StickUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.BlockPosArgumentType;
 import net.minecraft.command.argument.DimensionArgumentType;
 import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.command.argument.TeamArgumentType;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.ExperienceOrbEntity;
-import net.minecraft.entity.mob.SlimeEntity;
-import net.minecraft.entity.passive.GolemEntity;
-import net.minecraft.entity.passive.WanderingTraderEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.scoreboard.Team;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.util.TypeFilter;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import java.util.Collections;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
-import static de.z0rdak.yawp.commands.DimensionCommands.checkValidRegionName;
-import static de.z0rdak.yawp.core.region.RegionType.LOCAL;
-import static de.z0rdak.yawp.util.CommandUtil.*;
-import static de.z0rdak.yawp.util.MessageUtil.*;
-import static net.minecraft.util.Formatting.RESET;
+import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
+import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
+import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
+
 
 public class RegionCommands {
+
+    public final static int MIN_BUILD_LIMIT = 0;
+    public final static int MAX_BUILD_LIMIT = 255;
 
     private RegionCommands() {
     }
 
-    public final static String MEMBER = "member";
-    public final static String OWNER = "owner";
-
     public static LiteralArgumentBuilder<ServerCommandSource> build() {
-        List<String> affiliationList = Arrays.asList(MEMBER, OWNER);
-
-        return literal(REGION)
+        return literal(LOCAL)
                 .then(CommandManager.argument(DIM.toString(), DimensionArgumentType.dimension())
-                        .then(CommandManager.argument(REGION.toString(), StringArgumentType.word())
+                        .then(CommandManager.argument(LOCAL.toString(), StringArgumentType.word())
                                 .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestions(ctx, builder))
-                                .executes(ctx -> promptRegionInfo(ctx.getSource(), getRegionArgument(ctx)))
+                                .executes(ctx -> CommandUtil.promptRegionInfo(ctx, getRegionArgument(ctx)))
                                 .then(literal(INFO)
-                                        .executes(ctx -> promptRegionInfo(ctx.getSource(), getRegionArgument(ctx))))
-                                .then(literal(SPATIAL)
-                                        .executes(ctx -> promptRegionSpatialProperties(ctx.getSource(), getRegionArgument(ctx))))
+                                        .executes(ctx -> CommandUtil.promptRegionInfo(ctx, getRegionArgument(ctx))))
+                                .then(CommandUtil.buildClearSubCommand(ArgumentUtil::getRegionArgument))
+                                .then(CommandUtil.buildAddSubCommand(ArgumentUtil::getRegionArgument))
+                                .then(CommandUtil.buildListSubCommand(ArgumentUtil::getRegionArgument))
+                                .then(CommandUtil.buildRemoveSubCommand(ArgumentUtil::getRegionArgument))
+                                .then(CommandUtil.buildCopySubCommand(ArgumentUtil::getRegionArgument))
+                                .then(literal(ADD)
+                                        .then(literal(CHILD)
+                                                .then(CommandManager.argument(CHILD.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> AddRegionChildArgumentType.potentialChildRegions().listSuggestions(ctx, builder))
+                                                        .executes(ctx -> addChildren(ctx, getRegionArgument(ctx), getChildRegionArgument(ctx))))))
+                                .then(literal(REMOVE)
+                                        .then(literal(CHILD)
+                                                .then(CommandManager.argument(CHILD.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> RemoveRegionChildArgumentType.childRegions().listSuggestions(ctx, builder))
+                                                        .executes(ctx -> removeChildren(ctx, getDimCacheArgument(ctx), getRegionArgument(ctx), getChildRegionArgument(ctx))))))
                                 .then(literal(STATE)
-                                        .executes(ctx -> promptRegionState(ctx.getSource(), getRegionArgument(ctx)))
+                                        .executes(ctx -> promptLocalRegionState(ctx, getRegionArgument(ctx)))
                                         .then(literal(ALERT)
-                                                .executes(ctx -> setAlertState(ctx, getRegionArgument(ctx)))
+                                                .executes(ctx -> CommandUtil.setAlertState(ctx, getRegionArgument(ctx), getRegionArgument(ctx).isMuted()))
                                                 .then(CommandManager.argument(ALERT.toString(), BoolArgumentType.bool())
-                                                        .executes(ctx -> setAlertState(ctx, getRegionArgument(ctx), getAlertArgument(ctx)))))
+                                                        .executes(ctx -> CommandUtil.setAlertState(ctx, getRegionArgument(ctx), getAlertArgument(ctx)))))
                                         .then(literal(ENABLE)
-                                                .executes(ctx -> setEnableState(ctx, getRegionArgument(ctx)))
+                                                .executes(ctx -> CommandUtil.setActiveState(ctx, getRegionArgument(ctx), !getRegionArgument(ctx).isActive()))
                                                 .then(CommandManager.argument(ENABLE.toString(), BoolArgumentType.bool())
-                                                        .executes(ctx -> setEnableState(ctx, getRegionArgument(ctx), getEnableArgument(ctx)))))
+                                                        .executes(ctx -> CommandUtil.setActiveState(ctx, getRegionArgument(ctx), getEnableArgument(ctx)))))
                                         .then(literal(PRIORITY)
                                                 .then(CommandManager.argument(PRIORITY.toString(), IntegerArgumentType.integer())
                                                         .executes(ctx -> setPriority(ctx, getRegionArgument(ctx), getPriorityArgument(ctx))))
@@ -103,163 +95,134 @@ public class RegionCommands {
                                                 .then(literal(DEC)
                                                         .then(CommandManager.argument(PRIORITY.toString(), IntegerArgumentType.integer())
                                                                 .executes(ctx -> setPriority(ctx, getRegionArgument(ctx), getPriorityArgument(ctx), -1))))))
-                                .then(literal(LIST)
-                                        .then(literal(FLAG)
-                                                .executes(ctx -> promptRegionFlags(ctx.getSource(), getRegionArgument(ctx), 0))
-                                                .then(CommandManager.argument(PAGE.toString(), IntegerArgumentType.integer(0))
-                                                        .executes(ctx -> promptRegionFlags(ctx.getSource(), getRegionArgument(ctx), getPageNoArgument(ctx)))))
-                                        .then(literal(CommandConstants.OWNER)
-                                                .executes(ctx -> promptRegionAffiliates(ctx.getSource(), getRegionArgument(ctx), OWNER))
-                                                .then(literal(TEAM)
-                                                        .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), OWNER, AffiliationType.TEAM, 0))
-                                                        .then(CommandManager.argument(PAGE.toString(), IntegerArgumentType.integer(0))
-                                                                .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), OWNER, AffiliationType.TEAM, getPageNoArgument(ctx)))))
-                                                .then(literal(PLAYER)
-                                                        .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), OWNER, AffiliationType.PLAYER, 0))
-                                                        .then(CommandManager.argument(PAGE.toString(), IntegerArgumentType.integer(0))
-                                                                .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), OWNER, AffiliationType.PLAYER, getPageNoArgument(ctx))))
-                                                ))
-                                        .then(literal(CommandConstants.MEMBER)
-                                                .executes(ctx -> promptRegionAffiliates(ctx.getSource(), getRegionArgument(ctx), MEMBER))
-                                                .then(literal(TEAM)
-                                                        .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), MEMBER, AffiliationType.TEAM, 0))
-                                                        .then(CommandManager.argument(PAGE.toString(), IntegerArgumentType.integer(0))
-                                                                .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), MEMBER, AffiliationType.TEAM, getPageNoArgument(ctx)))))
-                                                .then(literal(PLAYER)
-                                                        .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), MEMBER, AffiliationType.PLAYER, 0))
-                                                        .then(CommandManager.argument(PAGE.toString(), IntegerArgumentType.integer(0))
-                                                                .executes(ctx -> promptRegionAffiliationList(ctx.getSource(), getRegionArgument(ctx), MEMBER, AffiliationType.PLAYER, getPageNoArgument(ctx))))
-                                                ))
-                                        .then(literal(CHILDREN)
-                                                .executes(ctx -> promptRegionChildren(ctx.getSource(), getRegionArgument(ctx), 0))
-                                                .then(CommandManager.argument(PAGE.toString(), IntegerArgumentType.integer(0))
-                                                        .executes(ctx -> promptRegionChildren(ctx.getSource(), getRegionArgument(ctx), getPageNoArgument(ctx))))
-                                        ))
                                 .then(literal(AREA)
-                                        .then(CommandManager.literal(AreaType.CUBOID.areaType)
-                                                .then(CommandManager.argument("pos1", BlockPosArgumentType.blockPos())
-                                                        .then(CommandManager.argument("pos2", BlockPosArgumentType.blockPos())
-                                                                .executes(ctx -> updateArea(ctx, getRegionArgument(ctx), AreaType.CUBOID,
-                                                                        BlockPosArgumentType.getBlockPos(ctx, "pos1"),
-                                                                        BlockPosArgumentType.getBlockPos(ctx, "pos2")))))
-                                        ))
-                                // .then(literal(NAME)
-                                //         .then(CommandManager.argument(REGION.toString(), StringArgumentType.word())
-                                //                 .executes(ctx -> renameRegion(ctx, getRegionArgument(ctx), getRegionNameArgument(ctx), getDimCacheArgument(ctx)))
-                                //         )
-                                // )
-                                // TODO: Only with marker
-                                //.then(literal(UPDATE)
-                                //        .then(CommandManager.argument(AREA.toString(), StringArgumentType.word())
-                                //                .suggests((ctx, builder) -> AreaArgumentType.areaType().listSuggestions(ctx, builder))
-                                //                .executes(ctx -> updateRegion(ctx.getSource(), getRegionArgument(ctx)))))
-                                .then(literal(ADD)
-                                        .then(literal(PLAYER)
-                                                .then(CommandManager.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> CommandSource.suggestMatching(affiliationList, builder))
-                                                        .then(CommandManager.argument(PLAYER.toString(), EntityArgumentType.player())
-                                                                .executes(ctx -> addPlayer(ctx, getPlayerArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx)))))
-                                                .then(CommandManager.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> CommandSource.suggestMatching(affiliationList, builder))
-                                                        .then(CommandManager.argument(PLAYER.toString(), EntityArgumentType.player())
-                                                                .executes(ctx -> addPlayer(ctx, getPlayerArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx))))))
-                                        .then(literal(CommandConstants.TEAM)
-                                                .then(CommandManager.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> CommandSource.suggestMatching(affiliationList, builder))
-                                                        .then(CommandManager.argument(CommandConstants.TEAM.toString(), TeamArgumentType.team())
-                                                                .executes(ctx -> addTeam(ctx, getTeamArgumentType(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx)))))
-                                                .then(CommandManager.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> CommandSource.suggestMatching(affiliationList, builder))
-                                                        .then(CommandManager.argument(CommandConstants.TEAM.toString(), TeamArgumentType.team())
-                                                                .executes(ctx -> addTeam(ctx, getTeamArgumentType(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx))))))
-                                        .then(literal(FLAG)
-                                                .then(CommandManager.argument(FLAG.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> RegionFlagArgumentType.flag().listSuggestions(ctx, builder))
-                                                        .executes(ctx -> addFlag(ctx, getRegionArgument(ctx), getFlagArgument(ctx)))))
-                                        .then(literal(CHILD)
-                                                .then(CommandManager.argument(CHILD.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> AddRegionChildArgumentType.potentialChildRegions().listSuggestions(ctx, builder))
-                                                        .executes(ctx -> addChildren(ctx, getRegionArgument(ctx), getChildRegionArgument(ctx))))))
-                                .then(literal(REMOVE)
-                                        .then(literal(PLAYER)
-                                                .then(CommandManager.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> CommandSource.suggestMatching(affiliationList, builder))
-                                                        .then(CommandManager.argument(PLAYER.toString(), EntityArgumentType.player())
-                                                                .executes(ctx -> removePlayer(ctx, getPlayerArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx)))))
-                                                .then(CommandManager.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> CommandSource.suggestMatching(affiliationList, builder))
-                                                        .then(CommandManager.argument(PLAYER.toString(), EntityArgumentType.player())
-                                                                .executes(ctx -> removePlayer(ctx, getPlayerArgument(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx))))))
-                                        .then(literal(CommandConstants.TEAM)
-                                                .then(CommandManager.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> CommandSource.suggestMatching(affiliationList, builder))
-                                                        .then(CommandManager.argument(CommandConstants.TEAM.toString(), TeamArgumentType.team())
-                                                                .executes(ctx -> removeTeam(ctx, getTeamArgumentType(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx)))))
-                                                .then(CommandManager.argument(CommandConstants.AFFILIATION.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> CommandSource.suggestMatching(affiliationList, builder))
-                                                        .then(CommandManager.argument(CommandConstants.TEAM.toString(), TeamArgumentType.team())
-                                                                .executes(ctx -> removeTeam(ctx, getTeamArgumentType(ctx), getRegionArgument(ctx), getAffiliationArgument(ctx))))))
-                                        .then(literal(FLAG)
-                                                .then(CommandManager.argument(FLAG.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> RegionFlagArgumentType.flag().listSuggestions(ctx, builder))
-                                                        .executes(ctx -> removeFlag(ctx, getRegionArgument(ctx), getFlagArgument(ctx)))))
-                                        .then(literal(CHILD)
-                                                .then(CommandManager.argument(CHILD.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> RemoveRegionChildArgumentType.childRegions().listSuggestions(ctx, builder))
-                                                        .executes(ctx -> removeChildren(ctx, getDimCacheArgument(ctx), getRegionArgument(ctx), getChildRegionArgument(ctx))))))
-                                /* TODO: Facade for reverse child setting ?
-                                .then(literal(PARENT)
+                                        .executes(ctx -> promptRegionAreaInfo(ctx.getSource(), getRegionArgument(ctx)))
                                         .then(literal(SET)
-                                                .then(CommandManager.argument(PARENT_REGION.toString(), StringArgumentType.word())
-                                                        .suggests((ctx, builder) -> SetRegionParentArgumentType.parentRegion().listSuggestions(ctx, builder))
-                                                        .executes(ctx -> setRegionParent(ctx.getSource(), RegionArgumentType.getRegion(ctx, REGION.toString()), RegionArgumentType.getRegion(ctx, PARENT_REGION.toString())))))
-                                        .then(literal(CLEAR)
-                                                .executes(ctx -> clearRegionParent(ctx.getSource(), RegionArgumentType.getRegion(ctx, REGION.toString())))))
-                                 */
-                                .then(literal(TELEPORT)
-                                        .executes(ctx -> teleport(ctx.getSource(), getRegionArgument(ctx)))
-                                        .then(CommandManager.argument(PLAYER.toString(), EntityArgumentType.player())
-                                                .executes(ctx -> teleport(ctx.getSource(), getRegionArgument(ctx), getPlayerArgument(ctx))))
-                                        .then(CommandManager.literal(SET.toString())
-                                                .then(CommandManager.argument(TARGET.toString(), BlockPosArgumentType.blockPos())
-                                                        .executes(ctx -> setTeleportPos(ctx, getRegionArgument(ctx), BlockPosArgumentType.getBlockPos(ctx, TARGET.toString()))))))));
+                                                .then(CommandManager.literal(AreaType.CUBOID.areaType)
+                                                        .then(CommandManager.argument(POS1.toString(), BlockPosArgumentType.blockPos())
+                                                                .then(CommandManager.argument(POS2.toString(), BlockPosArgumentType.blockPos())
+                                                                        .executes(ctx -> setCuboidArea(ctx, getRegionArgument(ctx), BlockPosArgumentType.getLoadedBlockPos(ctx, POS1.toString()), BlockPosArgumentType.getLoadedBlockPos(ctx, POS2.toString()))))))
+                                                .then(CommandManager.literal(AreaType.SPHERE.areaType)
+                                                        .then(CommandManager.argument(CENTER_POS.toString(), BlockPosArgumentType.blockPos())
+                                                                .then(CommandManager.argument(RADIUS_POS.toString(), BlockPosArgumentType.blockPos())
+                                                                        .executes(ctx -> setSphereArea(ctx, getRegionArgument(ctx), BlockPosArgumentType.getLoadedBlockPos(ctx, CENTER_POS.toString()), BlockPosArgumentType.getLoadedBlockPos(ctx, RADIUS_POS.toString()))))))
+                                                .then(CommandManager.literal(AreaType.SPHERE.areaType)
+                                                        .then(CommandManager.argument(CENTER_POS.toString(), BlockPosArgumentType.blockPos())
+                                                                .then(CommandManager.argument(RADIUS.toString(), IntegerArgumentType.integer(0))
+                                                                        .executes(ctx -> setSphereArea(ctx, getRegionArgument(ctx), BlockPosArgumentType.getLoadedBlockPos(ctx, CENTER_POS.toString()), IntegerArgumentType.getInteger(ctx, RADIUS.toString()))))))
+                                        )
+                                        .then(literal(EXPAND)
+                                                .then(CommandManager.literal(AreaType.CUBOID.areaType)
+                                                        .executes(ctx -> expandCuboid(ctx, getRegionArgument(ctx), MIN_BUILD_LIMIT, MAX_BUILD_LIMIT))
+                                                        .then(CommandManager.argument(Y_MIN.toString(), IntegerArgumentType.integer(MIN_BUILD_LIMIT, MAX_BUILD_LIMIT))
+                                                                .then(CommandManager.argument(Y_MAX.toString(), IntegerArgumentType.integer(MIN_BUILD_LIMIT, MAX_BUILD_LIMIT))
+                                                                        .executes(ctx -> expandCuboid(ctx, getRegionArgument(ctx), IntegerArgumentType.getInteger(ctx, Y_MIN.toString()), IntegerArgumentType.getInteger(ctx, Y_MAX.toString()))))))
+                                                .then(CommandManager.literal(AreaType.SPHERE.areaType)
+                                                        .executes(ctx -> expandSphere(ctx, getRegionArgument(ctx), 1))
+                                                        .then(CommandManager.argument(EXPANSION.toString(), IntegerArgumentType.integer())
+                                                                .executes(ctx -> expandSphere(ctx, getRegionArgument(ctx), IntegerArgumentType.getInteger(ctx, EXPANSION.toString())))))
+                                        )
+                                        .then(literal(TELEPORT)
+                                                .then(CommandManager.literal(SET.toString())
+                                                        .then(CommandManager.argument(TARGET.toString(), BlockPosArgumentType.blockPos())
+                                                                .executes(ctx -> setTeleportPos(ctx, getRegionArgument(ctx), BlockPosArgumentType.getLoadedBlockPos(ctx, TARGET.toString())))))
+                                        )
+                                        .then(literal(TELEPORT)
+                                                .executes(ctx -> teleport(ctx, getRegionArgument(ctx)))
+                                                .then(CommandManager.argument(PLAYER.toString(), EntityArgumentType.player())
+                                                        .executes(ctx -> teleport(ctx, getRegionArgument(ctx), getPlayerArgument(ctx)))))
+                                ).then(literal(RENAME)
+                                        .then(CommandManager.argument(NAME.toString(), StringArgumentType.word())
+                                                .suggests((ctx, builder) -> CommandSource.suggestMatching(Collections.singletonList(getRegionArgument(ctx).getName()), builder))
+                                                .executes(ctx -> renameRegion(ctx, getRegionArgument(ctx), getRegionNameArgument(ctx), getDimCacheArgument(ctx))))
+                                )
+                        )
+                );
     }
 
-    private static int updateArea(CommandContext<ServerCommandSource> src, IMarkableRegion region, AreaType areaType, BlockPos pos1, BlockPos pos2) {
+    private static int expandSphere(CommandContext<ServerCommandSource> ctx, IMarkableRegion region, int expansion) {
+        SphereArea expand = SphereArea.expand((SphereArea) region.getArea(), expansion);
+        return updateArea(ctx, region, expand);
+    }
+
+    private static int setSphereArea(CommandContext<ServerCommandSource> ctx, IMarkableRegion region, BlockPos center, int radius) {
+        BlockPos newRadius = center.add(0, radius, 0);
+        return setSphereArea(ctx, region, center, newRadius);
+    }
+
+    private static int setSphereArea(CommandContext<ServerCommandSource> ctx, IMarkableRegion region, BlockPos center, BlockPos radiusPos) {
+        return updateArea(ctx, region, new SphereArea(center, radiusPos));
+    }
+
+    private static int setCuboidArea(CommandContext<ServerCommandSource> ctx, IMarkableRegion region, BlockPos p1, BlockPos p2) {
+        return updateArea(ctx, region, new CuboidArea(p1, p2));
+    }
+
+    private static int expandCuboid(CommandContext<ServerCommandSource> ctx, IMarkableRegion region, int yMin, int yMax) {
+        CuboidArea expand = CuboidArea.expand((CuboidArea) region.getArea(), yMin, yMax);
+        return updateArea(ctx, region, expand);
+    }
+
+    private static int updateArea(CommandContext<ServerCommandSource> ctx, IMarkableRegion region, IMarkableArea area) {
         try {
+            AreaType prevAreaType = region.getArea().getAreaType();
+            AreaType newAreaType = area.getAreaType();
             IProtectedRegion parent = region.getParent();
-            // TODO: Contains method for regions, with dimensional always returning true if dim is the same
+            // TODO: Implement a contains method for regions, with dimensional always returning true if dim is the same
             // IMarkableRegions would use the area contains method
-            switch (areaType) {
+
+            ServerPlayerEntity player;
+            try {
+                player = ctx.getSource().getPlayerOrThrow();
+            } catch (CommandSyntaxException e) {
+                player = null;
+            }
+            if (RegionEvents.UPDATE_AREA.invoker().updateArea(new RegionEvent.UpdateArea(region, area, player))) {
+                return 0;
+            }
+
+            // Note: this check can be remove once the area types are all implemented, it's just here to catch any errors
+            switch (newAreaType) {
                 case CUBOID:
-                    CuboidArea cuboidArea = new CuboidArea(pos1, pos2);
-                    CuboidRegion cuboidRegion = (CuboidRegion) region;
-                    if (parent instanceof DimensionalRegion) {
-                        int newPriority = LocalRegions.ensureHigherRegionPriorityFor(cuboidRegion, RegionConfig.DEFAULT_REGION_PRIORITY.get());
+                case SPHERE:
+                    if (parent.getRegionType() == RegionType.DIMENSION) {
+                        int newPriority = LocalRegions.ensureHigherRegionPriorityFor(region, RegionConfig.getDefaultPriority());
                         YetAnotherWorldProtector.LOGGER.info("New priority {} for region {}", newPriority, region.getName());
                     }
-                    if (parent instanceof IMarkableRegion localParentRegion) {
-                        CuboidArea parentArea = (CuboidArea) localParentRegion.getArea();
-                        if (parentArea.contains(cuboidArea)) {
-                            int newPriority = LocalRegions.ensureHigherRegionPriorityFor(cuboidRegion, localParentRegion.getPriority() + 1);
-                            YetAnotherWorldProtector.LOGGER.info("New priority {} for region {}", newPriority, region.getName());
-                        } else {
-                            MutableText updateAreaFailMsg = Text.translatableWithFallback("cli.msg.info.region.spatial.area.update.fail.boundaries", "Parent region %s does not fully contain new are for region %s", buildRegionInfoLink(parent, LOCAL), buildRegionInfoLink(region, LOCAL));
-                            sendCmdFeedback(src.getSource(), updateAreaFailMsg);
-                            return 1;
+                    if (parent.getRegionType() == RegionType.LOCAL) {
+                        IMarkableRegion localParent = (IMarkableRegion) parent;
+                        switch (localParent.getArea().getAreaType()) {
+                            case CUBOID:
+                            case SPHERE:
+                                if (localParent.getArea().containsOther(area)) {
+                                    int newPriority = LocalRegions.ensureHigherRegionPriorityFor(region, localParent.getPriority() + 1);
+                                    YetAnotherWorldProtector.LOGGER.info("New priority {} for region {}", newPriority, region.getName());
+                                } else {
+                                    MutableText updateAreaFailMsg = Text.translatableWithFallback("cli.msg.info.region.area.area.update.fail.boundaries", "Parent region %s does not fully contain new are for region %s", buildRegionInfoLink(parent), buildRegionInfoLink(region));
+                                    sendCmdFeedback(ctx.getSource(), updateAreaFailMsg);
+                                    return 1;
+                                }
+                                break;
+                            case CYLINDER:
+                            case POLYGON_3D:
+                            case PRISM:
+                                throw new UnsupportedOperationException("Unsupported area type");
                         }
                     }
-                    cuboidRegion.setArea(cuboidArea);
-                    RegionDataManager.save();
-                    MutableText updateAreaMsg = Text.translatableWithFallback("cli.msg.info.region.spatial.area.update", "Updated %s for region %s", buildRegionSpatialPropLink(region), buildRegionInfoLink(region, LOCAL));
-                    sendCmdFeedback(src.getSource(), updateAreaMsg);
-                    return 0;
+                    break;
                 case CYLINDER:
-                case SPHERE:
                 case POLYGON_3D:
                 case PRISM:
-                    throw new UnsupportedOperationException("Unsupported region type");
+                    throw new UnsupportedOperationException("Unsupported area type");
             }
+            if (prevAreaType != newAreaType) {
+                MutableText updateAreaFailMsg = Text.translatableWithFallback("cli.msg.info.region.area.update.type.change", "AreaType for %s changed from %s to %s", buildRegionInfoLink(region), prevAreaType, newAreaType);
+                sendCmdFeedback(ctx.getSource(), updateAreaFailMsg);
+            }
+            region.setArea(area);
+            RegionDataManager.save();
+            MutableText updateAreaMsg = Text.translatableWithFallback("cli.msg.info.region.area.area.update", "Updated %s for region %s", buildRegionAreaLink(region), buildRegionInfoLink(region));
+            sendCmdFeedback(ctx.getSource(), updateAreaMsg);
             return 0;
         } catch (Exception ex) {
             YetAnotherWorldProtector.LOGGER.error("Failed to update area: {}", ex.getMessage());
@@ -267,307 +230,85 @@ public class RegionCommands {
         }
     }
 
-    private static int renameRegion(CommandContext<ServerCommandSource> src, IMarkableRegion region, String regionName, DimensionRegionCache dimCache) {
-        int res = checkValidRegionName(regionName, dimCache);
+    private static int renameRegion(CommandContext<ServerCommandSource> ctx, IMarkableRegion region, String regionName, DimensionRegionCache dimCache) {
+        if (region.getName().equals(regionName)) {
+            sendCmdFeedback(ctx.getSource(), Text.translatableWithFallback("cli.msg.dim.info.region.create.name.no-change", regionName));
+            return 1;
+        }
+        int res = RegionDataManager.get().isValidRegionName(dimCache.getDimensionalRegion().getDim(), regionName);
         if (res == -1) {
-            sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.dim.info.region.create.name.invalid", "Invalid region name supplied: '%s'",regionName));
+            sendCmdFeedback(ctx.getSource(), Text.translatableWithFallback("cli.msg.dim.info.region.create.name.invalid", regionName));
             return res;
         }
         if (res == 1) {
-            sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.dim.info.region.create.name.exists", "Dimension %s already contains region with name %s",dimCache.getDimensionalRegion().getName(), buildRegionInfoLink(dimCache.getRegion(regionName), LOCAL)));
+            sendCmdFeedback(ctx.getSource(), Text.translatableWithFallback("cli.msg.dim.info.region.create.name.exists", "Dimension %s already contains region with name %s", dimCache.getDimensionalRegion().getName(), buildRegionInfoLink(dimCache.getRegion(regionName))));
             return res;
         }
-        // FIXME:
-        dimCache.renameRegion(region, regionName);
-        RegionDataManager.save();
-        return 0;
-    }
-
-    private static int removeTeam(CommandContext<ServerCommandSource> src, Team team, IMarkableRegion region, String affiliation) {
-        MutableText undoLink = buildRegionActionUndoLink(src.getInput(), REMOVE, ADD);
-        switch (affiliation) {
-            case "member":
-                if (region.hasMember(team.getName())) {
-                    region.removeMember(team);
-                    RegionDataManager.save();
-                    sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.affiliation.team.removed", "Removed team '%s' from region %s",
-                            team.getName(), buildRegionInfoLink(region, LOCAL)).append(" ").append(undoLink));
-                }
-                break;
-            case "owner":
-                if (region.hasOwner(team.getName())) {
-                    region.removeOwner(team);
-                    RegionDataManager.save();
-                    sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.affiliation.team.removed", "Removed team '%s' from region %s",
-                            team.getName(), buildRegionInfoLink(region, LOCAL)).append(" ").append(undoLink));
-                }
-                break;
-            default:
-                return 1;
-        }
-        return 0;
-    }
-
-    private static int addTeam(CommandContext<ServerCommandSource> src, Team team, IMarkableRegion region, String affiliation) {
-        MutableText undoLink = buildRegionActionUndoLink(src.getInput(), ADD, REMOVE);
-        switch (affiliation) {
-            case "member":
-                if (!region.hasMember(team.getName())) {
-                    region.addMember(team);
-                    RegionDataManager.save();
-                    sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.affiliation.team.added","Added team '%s' with as '%s' to region %s",
-                            team.getName(), affiliation, buildRegionInfoLink(region, LOCAL)).append(" ").append(undoLink));
-                }
-                break;
-            case "owner":
-                if (!region.hasOwner(team.getName())) {
-                    region.addOwner(team);
-                    RegionDataManager.save();
-                    sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.affiliation.team.added","Added team '%s' with as '%s' to region %s",
-                            team.getName(), affiliation, buildRegionInfoLink(region, LOCAL)).append(" ").append(undoLink));
-                }
-                break;
-            default:
-                return 1;
-        }
-        return 0;
-    }
-
-    // TODO: Option to remove player by name
-    private static int removePlayer(CommandContext<ServerCommandSource> src, String playerName, IMarkableRegion region, String affiliation) {
-        return 1;
-    }
-
-    private static int removePlayer(CommandContext<ServerCommandSource> src, ServerPlayerEntity player, IMarkableRegion region, String affiliation) {
-        MutableText undoLink = buildRegionActionUndoLink(src.getInput(), REMOVE, ADD);
-        switch (affiliation) {
-            case "member":
-                if (region.hasMember(player.getUuid())) {
-                    region.removeMember(player);
-                    RegionDataManager.save();
-                    sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.affiliation.player.removed","Removed player '%s' from region %s",
-                            buildPlayerHoverComponent(player), buildRegionInfoLink(region, LOCAL)).append(" ").append(undoLink));
-                }
-                break;
-            case "owner":
-                if (region.hasOwner(player.getUuid())) {
-                    region.removeOwner(player);
-                    RegionDataManager.save();
-                    sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.affiliation.player.removed","Removed player '%s' from region %s",
-                            buildPlayerHoverComponent(player), buildRegionInfoLink(region, LOCAL)).append(" ").append(undoLink));
-                }
-                break;
-            default:
-                return 1;
-        }
-        return 0;
-    }
-
-    private static int addPlayer(CommandContext<ServerCommandSource> src, ServerPlayerEntity player, IMarkableRegion region, String affiliation) {
-        MutableText undoLink = buildRegionActionUndoLink(src.getInput(), ADD, REMOVE);
-        switch (affiliation) {
-            case "member":
-                if (!region.hasMember(player.getUuid())) {
-                    region.addMember(player);
-                    RegionDataManager.save();
-                    sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.affiliation.player.added","Added player '%s' as '%s' to region %s",
-                            buildPlayerHoverComponent(player), affiliation, buildRegionInfoLink(region, LOCAL)).append(" ").append(undoLink));
-                }
-                break;
-            case "owner":
-                if (!region.hasOwner(player.getUuid())) {
-                    region.addOwner(player);
-                    RegionDataManager.save();
-                    sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.affiliation.player.added","Added player '%s' as '%s' to region %s",
-                            buildPlayerHoverComponent(player), affiliation, buildRegionInfoLink(region, LOCAL)).append(" ").append(undoLink));
-                }
-                break;
-            default:
-                return 1;
-        }
-        return 0;
-    }
-
-    private static int removeChildren(CommandContext<ServerCommandSource> src, DimensionRegionCache dimCache, IMarkableRegion parent, IMarkableRegion child) {
-        if (parent.hasChild(child)) {
-            // FIXME: Removing child does not set priority correct with overlapping regions
-            dimCache.getDimensionalRegion().addChild(child); // this also removes the child from the local parent
-            child.setIsActive(false);
-            LocalRegions.ensureLowerRegionPriorityFor((CuboidRegion) child, RegionConfig.DEFAULT_REGION_PRIORITY.get());
+        try {
+            ServerPlayerEntity player;
+            try {
+                player = ctx.getSource().getPlayerOrThrow();
+            } catch (CommandSyntaxException e) {
+                player = null;
+            }
+            if (RegionEvents.RENAME_REGION.invoker().renameRegion(new RegionEvent.RenameRegion(region, region.getName(), regionName, player))) {
+                return 0;
+            }
+            String oldName = region.getName();
+            dimCache.renameRegion(region, regionName);
+            sendCmdFeedback(ctx.getSource(), Text.translatableWithFallback("cli.msg.dim.info.region.create.name.success", "Changed name of region %s from '%s' to '%s'", buildRegionInfoLink(region), oldName, regionName));
             RegionDataManager.save();
-            MutableText parentLink = buildRegionInfoLink(parent, LOCAL);
-            MutableText notLongerChildLink = buildRegionInfoLink(child, LOCAL);
-            MutableText dimensionalLink = buildRegionInfoLink(dimCache.getDimensionalRegion(), RegionType.DIMENSION);
-            sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.children.remove", "Removed child '%s' from region %s", notLongerChildLink, parentLink));
-            sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.parent.clear", "Reset default parent for %s back to %s", notLongerChildLink, dimensionalLink));
+            return 0;
+        } catch (IllegalArgumentException ex) {
+            sendCmdFeedback(ctx.getSource(), Text.translatableWithFallback("cli.msg.dim.info.region.create.name.exists", "Dimension %s already contains region with name %s", dimCache.getDimensionalRegion().getName(), buildRegionInfoLink(dimCache.getRegion(regionName))));
+            return 1;
+        }
+    }
+
+    // TODO: Test removing child does not set priority correct with overlapping regions
+    public static int removeChildren(CommandContext<ServerCommandSource> ctx, DimensionRegionCache dimCache, IProtectedRegion parent, IProtectedRegion child) {
+        if (parent.hasChild(child)) {
+            parent.removeChild(child);
+            dimCache.getDimensionalRegion().addChild(child);
+            LocalRegions.ensureLowerRegionPriorityFor((CuboidRegion) child, RegionConfig.getDefaultPriority());
+            RegionDataManager.save();
+            MutableText parentLink = buildRegionInfoLink(parent);
+            MutableText notLongerChildLink = buildRegionInfoLink(child);
+            MutableText dimensionalLink = buildRegionInfoLink(dimCache.getDimensionalRegion());
+            MutableText undoLink = buildRegionActionUndoLink(ctx.getInput(), REMOVE, ADD);
+            sendCmdFeedback(ctx.getSource(), Text.translatableWithFallback("cli.msg.info.region.children.remove", "Removed child '%s' from region %s", notLongerChildLink, parentLink).append(" ")
+                    .append(undoLink));
+            sendCmdFeedback(ctx.getSource(), Text.translatableWithFallback("cli.msg.info.region.parent.clear", "Reset default parent for %s back to %s", notLongerChildLink, dimensionalLink));
             return 0;
         }
         // should not happen, due to RemoveRegionChildArgumentType should only provide valid child regions
         return -1;
     }
 
-    private static int addChildren(CommandContext<ServerCommandSource> src, IMarkableRegion parent, IMarkableRegion child) {
-        if (!parent.hasChild(child) && child.getParent() != null && child.getParent() instanceof DimensionalRegion) {
+    public static int addChildren(CommandContext<ServerCommandSource> ctx, IMarkableRegion parent, IMarkableRegion child) {
+        boolean parentIsNotNullAndDimension = child.getParent() != null && child.getParent().getRegionType() == RegionType.DIMENSION;
+        if (!parent.hasChild(child) && parentIsNotNullAndDimension) {
+            child.getParent().removeChild(child);
             parent.addChild(child);
-            LocalRegions.ensureHigherRegionPriorityFor((CuboidRegion) child, parent.getPriority() + 1);
+            LocalRegions.ensureHigherRegionPriorityFor(child, parent.getPriority() + 1);
             RegionDataManager.save();
-            MutableText parentLink = buildRegionInfoLink(parent, LOCAL);
-            MutableText childLink = buildRegionInfoLink(child, LOCAL);
-            MutableText undoLink = buildRegionActionUndoLink(src.getInput(), ADD, REMOVE);
-            sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.children.add", "Added child %s to region %s", childLink, parentLink).append(" ").append(undoLink));
+            MutableText parentLink = buildRegionInfoLink(parent);
+            MutableText childLink = buildRegionInfoLink(child);
+            MutableText undoLink = buildRegionActionUndoLink(ctx.getInput(), ADD, REMOVE);
+            sendCmdFeedback(ctx.getSource(), Text.translatableWithFallback("cli.msg.info.region.children.add", "Added child %s to region %s", childLink, parentLink).append(" ")
+                    .append(undoLink));
             return 0;
         }
         // should not happen, due to AddRegionChildArgumentType should only provide valid child regions
         return -1;
     }
 
-
-    // Adds default flag for provided RegionFlag
-    private static int addFlag(CommandContext<ServerCommandSource> src, IMarkableRegion region, RegionFlag flag) {
-        if (!region.containsFlag(flag)) {
-            IFlag iFlag = null;
-            switch (flag.type) {
-                case BOOLEAN_FLAG:
-                    iFlag = new BooleanFlag(flag);
-                    region.addFlag(iFlag);
-                    break;
-                case LIST_FLAG:
-                case INT_FLAG:
-                    break;
-            }
-            // TODO: More general: Trigger for adding flags?
-            if (flag.name.contains("spawning")) {
-                removeInvolvedEntities(src, region, flag);
-            }
-            RegionDataManager.save();
-            // TODO: flag cmd info link
-            sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.flags.added", "Added flag '%s' to region %s",buildFlagQuickInfo(iFlag),
-                    buildRegionInfoLink(region, LOCAL)).append(" ").append(buildRegionActionUndoLink(src.getInput(), ADD, REMOVE)));
-            return 0;
-        }
-        return 1;
-    }
-
-    public static void removeInvolvedEntities(CommandContext<ServerCommandSource> src, IProtectedRegion region, RegionFlag flag) {
-        // FIXME: Level is where the command source is, not the target level of the region
-        ServerWorld level = src.getSource().getWorld();
-        Predicate<? super Entity> entityFilter = getEntityFilterForFlag(flag);
-        if (region instanceof DimensionalRegion) {
-            List<Entity> entities = getEntitiesToRemove(level, entityFilter, flag);
-            entities.forEach(e -> e.setRemoved(Entity.RemovalReason.DISCARDED));
-        }
-        if (region instanceof IMarkableRegion) {
-            List<Entity> entities = getEntitiesToRemove(level, (IMarkableRegion) region, entityFilter);
-            entities.forEach(e -> e.setRemoved(Entity.RemovalReason.DISCARDED));
-        }
-        if (region instanceof GlobalRegion) {
-            Map<ServerWorld, List<Entity>> entities = getEntitiesToRemove((GlobalRegion) region, entityFilter);
-            entities.forEach((world, entityList) -> {
-                entityList.forEach(e -> e.setRemoved(Entity.RemovalReason.DISCARDED));
-            });
-        }
-    }
-
-    private static Predicate<? super Entity> getEntityFilterForFlag(RegionFlag flag) {
-        switch (flag) {
-            case SPAWNING_ALL:
-                // FIXME: does not remove ExperienceOrbEntity
-                return e -> !(e instanceof PlayerEntity);
-            case SPAWNING_MONSTER:
-                return HandlerUtil::isMonster;
-            case SPAWNING_ANIMAL:
-                return HandlerUtil::isAnimal;
-            case SPAWNING_GOLEM:
-                return e -> e instanceof GolemEntity;
-            case SPAWNING_TRADER:
-                return e -> e instanceof WanderingTraderEntity;
-            case SPAWNING_SLIME:
-                return e -> e instanceof SlimeEntity;
-            case SPAWNING_VILLAGER:
-                return HandlerUtil::isVillager;
-            case SPAWNING_XP:
-                return e -> e instanceof ExperienceOrbEntity;
-            default:
-                return e -> false;
-        }
-    }
-
-    private static List<Entity> getEntitiesToRemove(ServerWorld level, IMarkableRegion region, Predicate<? super Entity> entityFilter) {
-        // TODO: make this work with areas of different shapes by manually implementing it
-        // TODO: Use the predicate to determine if the entity is within the region
-        // area.intersects(entity.getBoundingBox()) ...
-        return level.getOtherEntities((Entity) null, ((CuboidArea) region.getArea()).getArea(), entityFilter);
-    }
-
-    private static Map<ServerWorld, List<Entity>> getEntitiesToRemove(GlobalRegion region, Predicate<? super Entity> entityFilter) {
-        // FIXME: Exclude entities from Local Regions or DimensionalRegions with flag
-        return new HashMap<>();
-    }
-
-    private static List<Entity> getEntitiesToRemove(ServerWorld level, Predicate<? super Entity> entityFilter, RegionFlag flag) {
-        List<? extends Entity> entities = level.getEntitiesByType(TypeFilter.instanceOf(Entity.class), entityFilter);
-        // List<Entity> entities = level.getEntities(null, entityFilter);
-        // don't consider entities, which are currently in a Local Region which doesn't have the flag
-        // TODO: fixme after flags can be negated (either flag is not existent or deactivated...)
-        return entities.stream()
-                .filter(e -> isInRegionWithoutFlag(level, flag, e))
-                .collect(Collectors.toList());
-    }
-
-    private static boolean isInRegionWithoutFlag(ServerWorld level, RegionFlag flag, Entity e) {
-        return LocalRegions.getRegionWithoutFlag(flag, e.getBlockPos(), level.getRegistryKey()) == null;
-    }
-
-    private static int removeFlag(CommandContext<ServerCommandSource> src, IMarkableRegion region, RegionFlag flag) {
-        if (region.containsFlag(flag)) {
-            region.removeFlag(flag.name);
-            RegionDataManager.save();
-            sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.flags.removed","Removed flag '%s' from region %s",
-                    flag.name, buildRegionInfoLink(region, LOCAL)).append(" ").append(buildRegionActionUndoLink(src.getInput(), REMOVE, ADD)));
-            return 0;
-        }
-        return 1;
-    }
-
-    private static int setAlertState(CommandContext<ServerCommandSource> src, IMarkableRegion region, boolean showAlert) {
-        boolean oldState = !region.isMuted();
-        region.setIsMuted(showAlert);
-        RegionDataManager.save();
-        if (oldState == region.isMuted()) {
-            boolean isEnabled = !region.isMuted();
-            MutableText undoLink = buildRegionActionUndoLink(src.getInput(), showAlert ? TRUE : FALSE, showAlert ? FALSE : TRUE);
-            sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.state.alert.set.value","Changed alert state for region %s: %s -> %s",
-                    buildRegionInfoLink(region, LOCAL), oldState, isEnabled).append(" ").append(undoLink));
-        }
-        return 0;
-    }
-
-    private static int setAlertState(CommandContext<ServerCommandSource> src, IMarkableRegion region) {
-        return setAlertState(src, region, !region.isMuted());
-    }
-
-    private static int setEnableState(CommandContext<ServerCommandSource> src, IMarkableRegion region, boolean enable) {
-        boolean oldState = region.isActive();
-        region.setIsActive(enable);
-        RegionDataManager.save();
-        if (oldState != region.isActive()) {
-            MutableText undoLink = buildRegionActionUndoLink(src.getInput(), enable ? TRUE : FALSE, enable ? FALSE : TRUE);
-            sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.state.enable.set.value","Changed enable state for region %s: %s -> %s",
-                    buildRegionInfoLink(region, LOCAL), oldState, region.isActive()).append(" ").append(undoLink));
-        }
-        return 0;
-    }
-
-    private static int setEnableState(CommandContext<ServerCommandSource> src, IMarkableRegion region) {
-        return setEnableState(src, region, !region.isActive());
-    }
-
-    private static int setPriority(CommandContext<ServerCommandSource> src, IMarkableRegion region, int priority, int factor) {
+    public static int setPriority(CommandContext<ServerCommandSource> ctx, IMarkableRegion region, int priority, int factor) {
         long newValue = (long) region.getPriority() + ((long) priority * factor);
         if (Integer.MAX_VALUE - newValue > 0) {
-            return setPriority(src, region, (int) newValue);
+            return setPriority(ctx, region, (int) newValue);
         } else {
-            sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.warn.region.state.priority.set.invalid", "Unable to change priority for region %s: %s is to high/low", buildRegionInfoLink(region, LOCAL), newValue));
+            sendCmdFeedback(ctx.getSource(), Text.translatableWithFallback("cli.msg.warn.region.state.priority.set.invalid", "Unable to change priority for region %s: %s is to high/low", buildRegionInfoLink(region), newValue));
             return -1;
         }
     }
@@ -575,230 +316,108 @@ public class RegionCommands {
     /**
      * Attempt to set new priority for the given region. <br>
      * Fails if region priority is used by an overlapping region at same hierarchy level.
-     *
-     * @param src
-     * @param region
-     * @param priority
-     * @return
      */
-    private static int setPriority(CommandContext<ServerCommandSource> src, IMarkableRegion region, int priority) {
-        CuboidRegion cuboidRegion = (CuboidRegion) region;
-        List<CuboidRegion> intersectingRegions = LocalRegions.getIntersectingRegionsFor(cuboidRegion);
-        boolean existRegionWithSamePriority = intersectingRegions
-                .stream()
-                .anyMatch(r -> r.getPriority() == priority);
+    public static int setPriority(CommandContext<ServerCommandSource> ctx, IMarkableRegion region, int priority) {
         IProtectedRegion parent = region.getParent();
         if (parent instanceof IMarkableRegion) {
             int parentPriority = ((IMarkableRegion) parent).getPriority();
             if (parentPriority >= priority) {
-                MutableText updatePriorityFailMsg = Text.translatableWithFallback("cli.msg.info.region.state.priority.set.fail.to-low", "Unable to set priority for region %s. The priority is not higher than its parents priority", buildRegionInfoLink(region, LOCAL));
-                sendCmdFeedback(src.getSource(), updatePriorityFailMsg);
+                MutableText updatePriorityFailMsg = Text.translatableWithFallback("cli.msg.info.region.state.priority.set.fail.to-low", "Unable to set priority for region %s. The priority is not higher than its parents priority", buildRegionInfoLink(region));
+                sendCmdFeedback(ctx.getSource(), updatePriorityFailMsg);
                 return 1;
             }
         }
+        CuboidRegion cuboidRegion = (CuboidRegion) region;
+        boolean existRegionWithSamePriority = LocalRegions.hasAnyRegionWithSamePriority(cuboidRegion, priority);
         if (existRegionWithSamePriority) {
-            MutableText updatePriorityFailMsg = Text.translatableWithFallback("cli.msg.info.region.state.priority.set.fail.same", "Unable to set priority for region %s. There is already another region with priority %s.", buildRegionInfoLink(region, LOCAL), priority);
-            sendCmdFeedback(src.getSource(), updatePriorityFailMsg);
+            MutableText updatePriorityFailMsg = Text.translatableWithFallback("cli.msg.info.region.state.priority.set.fail.same", "Unable to set priority for region %s. There is already another region with priority %s.", buildRegionInfoLink(region), priority);
+            sendCmdFeedback(ctx.getSource(), updatePriorityFailMsg);
             return 1;
         } else {
             int oldPriority = region.getPriority();
             if (oldPriority != priority) {
                 region.setPriority(priority);
                 RegionDataManager.save();
-                MutableText undoLink = buildRegionActionUndoLink(src.getInput(), String.valueOf(oldPriority), String.valueOf(priority));
-                sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.state.priority.set.success","Changed priority for region %s: %s -> %s",
-                        buildRegionInfoLink(region, LOCAL), oldPriority, region.getPriority()).append(" ").append(undoLink));
+                MutableText undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(oldPriority), String.valueOf(priority));
+                sendCmdFeedback(ctx.getSource(), Text.translatableWithFallback("cli.msg.info.region.state.priority.set.success", "Changed priority for region %s: %s -> %s",
+                                buildRegionInfoLink(region), oldPriority, region.getPriority())
+                        .append(" ")
+                        .append(undoLink));
                 return 0;
             } else {
-                sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.state.priority.set.fail.no-change", "Unable to set priority for region %s. The priority is the same.",buildRegionInfoLink(region, LOCAL)));
+                sendCmdFeedback(ctx.getSource(), Text.translatableWithFallback("cli.msg.info.region.state.priority.set.fail.no-change", "Unable to set priority for region %s. The priority is the same.", buildRegionInfoLink(region)));
                 return 1;
             }
         }
     }
 
-    private static int promptRegionInfo(ServerCommandSource src, IMarkableRegion region) {
-        // == Region [<name>] overview ==
-        sendCmdFeedback(src, buildRegionOverviewHeader(region, LOCAL));
-        // Flags: [n flag(s)][+]
-        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.flag", "Flags", buildFlagListLink(region, RegionType.LOCAL)));
-        // Spatial: [Spatial Properties]
-        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.spatial", "Spatial", buildRegionSpatialPropLink(region)));
-        // Affiliations: [owners], [members], [<listAffiliations>]
-        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.affiliation", "Affiliation", buildAffiliationLinks(region, RegionType.LOCAL)));
-        // Hierarchy: [parent][-|+], [n children][+]
-        MutableText regionHierarchy = Text.translatableWithFallback("cli.msg.info.region.hierarchy", "Hierarchy")
-                .append(": ")
-                .append(buildRegionParentLink(region))
-                .append(Text.literal(", ").formatted(RESET))
-                .append(buildRegionChildrenLink(region, LOCAL));
-        sendCmdFeedback(src, regionHierarchy);
-        // State: [State]
-        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.state", "State", buildRegionStateLink(region)));
-        return 0;
-    }
-
-    private static int promptRegionChildren(ServerCommandSource src, IMarkableRegion region, int pageNo) {
-        List<IMarkableRegion> children = region.getChildren().values().stream().map(r -> (IMarkableRegion) r).collect(Collectors.toList());
-        MutableText childRegionList = Text.literal("");
-        if (children.isEmpty()) {
-            MutableText noChildrenText = Text.translatableWithFallback("cli.msg.info.region.children.empty", "No children defined for region %s", buildRegionInfoLink(region, LOCAL));
-            childRegionList.append(noChildrenText);
-            sendCmdFeedback(src, childRegionList);
-        }
-        List<MutableText> regionPagination = buildPaginationComponents(
-                buildRegionChildrenHeader(region, LOCAL),
-                buildCommandStr(REGION.toString(), region.getDim().getValue().toString(), region.getName(), LIST.toString(), CHILDREN.toString()),
-                buildRemoveRegionEntries(region, children, LOCAL),
-                pageNo,
-                Text.literal(" - ").append(buildRegionAddChildrenLink(region)));
-        regionPagination.forEach(line -> sendCmdFeedback(src, line));
-        return 0;
-    }
-
     /**
-     * == Affiliation '%s' for '%s'==
-     * Players: [n player(s)][+]
-     * Teams: [m team(s)][+]
-     */
-    private static int promptRegionAffiliates(ServerCommandSource src, IMarkableRegion region, String affiliation) {
-        sendCmdFeedback(src, buildAffiliationHeader(region, affiliation, RegionType.LOCAL));
-        sendCmdFeedback(src, buildAffiliationPlayerListLink(region, affiliation, RegionType.LOCAL));
-        sendCmdFeedback(src, buildAffiliationTeamListLink(region, affiliation, RegionType.LOCAL));
-        return 0;
-    }
-
-    private static int promptRegionAffiliationList(ServerCommandSource src, IMarkableRegion region, String affiliation, AffiliationType affiliationType, int pageNo) {
-        List<String> affiliateNames = getAffiliateList(region, affiliation, affiliationType);
-        if (affiliateNames.isEmpty()) {
-            String fallback = "No " + affiliationType.name + "s defined as '%s' in %s";
-            String key = "cli.msg.info.region.affiliation." + affiliationType.name + ".empty";
-            sendCmdFeedback(src, Text.translatableWithFallback(key, fallback, affiliation, buildRegionInfoLink(region, LOCAL)));
-            return 1;
-        }
-        List<MutableText> regionPagination = buildPaginationComponents(
-                buildAffiliationHeader(region, affiliation, affiliationType, RegionType.LOCAL),
-                buildCommandStr(REGION.toString(), region.getDim().getValue().toString(), region.getName(), LIST.toString(), affiliation, affiliationType.name),
-                buildRemoveAffiliationEntries(region, affiliateNames, affiliationType, affiliation, RegionType.LOCAL),
-                pageNo,
-                Text.literal(" - ").append(buildAddAffiliateLink(region, affiliation, affiliationType, RegionType.LOCAL)));
-        regionPagination.forEach(line -> sendCmdFeedback(src, line));
-        return 0;
-    }
-
-    /**
-     * Prompt region spatial properties like teleport location and area.
-     * == Region [<name>] spatial properties ==
-     * Location: [dimInfo]@[tpCoordinates]
-     * Area: [spatialProperties]
-     *
-     * @param src
-     * @param region
-     * @return
-     */
-    public static int promptRegionSpatialProperties(ServerCommandSource src, IMarkableRegion region) {
-        sendCmdFeedback(src, buildHeader(Text.translatableWithFallback("cli.msg.info.header.for", "== %s for %s ==", buildRegionSpatialPropLink(region), buildRegionInfoLink(region, LOCAL))));
-        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.spatial.location", "Location", buildDimensionTeleportLink(region)));
-        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.spatial.area", "Area", buildRegionAreaDetailComponent(region)));
-        return 0;
-    }
-
-    /**
-     * Prompt the region state to the command issuer.
-     * ==  [state] for [<name>]  ==
-     * Enabled: [true|false]
+     * Prompt the common region state and the local region priority info
      * Priority: n [#][+5][-5]
-     * Alert: [on|off]
-     *
-     * @param src
-     * @param region
-     * @return
      */
-    public static int promptRegionState(ServerCommandSource src, IMarkableRegion region) {
-        sendCmdFeedback(src, buildHeader(Text.translatableWithFallback("cli.msg.info.header.for",  "== %s for %s ==", buildRegionStateLink(region), buildRegionInfoLink(region, LOCAL))));
-        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.state.priority", "Priority", buildRegionPriorityComponent(region)));
-        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.state.enable", "Enabled", buildRegionEnableComponent(region)));
-        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.state.alert", "Alert", buildRegionAlertComponentLink(region)));
+    private static int promptLocalRegionState(CommandContext<ServerCommandSource> ctx, IMarkableRegion region) {
+        CommandUtil.promptRegionState(ctx, region);
+        sendCmdFeedback(ctx.getSource(), buildInfoComponent("cli.msg.info.region.state.priority", "Priority", buildRegionPriorityComponent(region)));
         return 0;
     }
 
-    public static int promptRegionFlags(ServerCommandSource src, IMarkableRegion region, int pageNo) {
-        if (region.getFlags().isEmpty()) {
-            sendCmdFeedback(src, Text.translatableWithFallback("cli.msg.info.region.flag.empty", "No flags defined in region %s", buildRegionInfoLink(region, LOCAL)));
-            return 1;
-        }
-        List<IFlag> flags = LocalRegions.getSortedFlags(region);
-        List<MutableText> flagPagination = buildPaginationComponents(
-                buildFlagHeader(region, LOCAL),
-                buildCommandStr(REGION.toString(), region.getDim().getValue().toString(), region.getName(), LIST.toString(), FLAG.toString()),
-                buildRemoveFlagEntries(region, flags, LOCAL),
-                pageNo,
-                Text.literal(" - ").append(buildRegionAddFlagLink(region))
-        );
-        flagPagination.forEach(line -> sendCmdFeedback(src, line));
+    /**
+     * Prompt region area properties like teleport location and area.
+     * == Area for [<region>]  ==
+     * Location: [region] @ [X,Y,Z]
+     * AreaType: Cuboid, Size: X=69, Y=10, Z=42
+     * Marked Blocks: [X,Y,Z], ..., [X,Y,Z]
+     * Actions: [set area] [set TP] [show area] [<=expand=>] [<=max=>]
+     */
+    private static int promptRegionAreaInfo(ServerCommandSource src, IMarkableRegion region) {
+        sendCmdFeedback(src, buildHeader(Text.translatableWithFallback("cli.msg.info.header.of", "== %s of %s ==", buildRegionAreaLink(region), buildRegionInfoLink(region))));
+        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.area.location", "Location", buildRegionTeleportLink(region, null)));
+        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.area.area", "Area", buildRegionAreaDetailComponent(region)));
+        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.area.marked", "Marked Blocks", buildAreaMarkedBlocksTpLinks(region)));
+        sendCmdFeedback(src, buildInfoComponent("cli.msg.info.region.area.actions", "Actions", buildRegionAreaActionLinks(region)));
         return 0;
     }
 
-    // TODO: Only with region marker
-    // assumption: regions are only updated with the region marker when in the same dimension
-    private static int updateRegion(CommandContext<ServerCommandSource> src, IMarkableRegion region) {
+    private static int teleport(CommandContext<ServerCommandSource> ctx, IMarkableRegion region) {
         try {
-            PlayerEntity player = src.getSource().getPlayerOrThrow();
-            ItemStack maybeStick = player.getMainHandStack();
-            if (StickUtil.isVanillaStick(maybeStick)) {
-                try {
-                    AbstractStick abstractStick = StickUtil.getStick(maybeStick);
-                    if (abstractStick.getStickType() == StickType.MARKER) {
-                        MarkerStick marker = (MarkerStick) abstractStick;
-                        // TODO: RegionDataManager.get().update(regionName, marker);
-                    }
-                } catch (StickException e) {
-                    sendCmdFeedback(src.getSource(), "CommandSource is not player. Aborting.. Needs RegionMarker with Block-NBT data in player hand");
-                }
+            ServerPlayerEntity player = ctx.getSource().getPlayerOrThrow();
+            return teleport(ctx, region, player);
+        } catch (CommandSyntaxException e) {
+            YetAnotherWorldProtector.LOGGER.warn("Unable to teleport command source to region. Most likely not a player");
+            return -1;
+        }
+    }
+
+    private static int teleport(CommandContext<ServerCommandSource> ctx, IMarkableRegion region, ServerPlayerEntity player) {
+        try {
+            ServerPlayerEntity playerEntity = ctx.getSource().getPlayerOrThrow();
+            ServerWorld level = ctx.getSource().getServer().getWorld(region.getDim());
+            if (level != null) {
+                playerEntity.teleport(level, region.getTpTarget().getX(), region.getTpTarget().getY(), region.getTpTarget().getZ(), playerEntity.getYaw(), playerEntity.getPitch());
+                return 0;
+            } else {
+                YetAnotherWorldProtector.LOGGER.error("Error executing teleport command. Level is null.");
+                return -1;
             }
         } catch (CommandSyntaxException e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    // TODO
-    private static int listRegionsAround(ServerCommandSource source) {
-
-        return 0;
-    }
-
-    private static int teleport(ServerCommandSource src, IMarkableRegion region) {
-        try {
-            ServerPlayerEntity player = src.getPlayerOrThrow();
-            src.getServer().getCommandManager().getDispatcher().execute(buildRegionTpCmd(region, player.getEntityName()), src);
-            return 0;
-        } catch (CommandSyntaxException e) {
-            YetAnotherWorldProtector.LOGGER.warn("Unable to teleport command source to region.");
-            return -1;
-        }
-    }
-
-    private static int teleport(ServerCommandSource src, IMarkableRegion region, PlayerEntity player) {
-        try {
-            src.getServer().getCommandManager().getDispatcher().execute(buildRegionTpCmd(region, player.getEntityName()), src);
-            return 0;
-        } catch (CommandSyntaxException e) {
+            ServerWorld level = ctx.getSource().getServer().getWorld(region.getDim());
+            if (level != null) {
+                player.teleport(level, region.getTpTarget().getX(), region.getTpTarget().getY(), region.getTpTarget().getZ(), player.getYaw(), player.getPitch());
+                return 0;
+            }
             YetAnotherWorldProtector.LOGGER.warn("Error executing teleport command.");
-            // TODO: error executing tp command
             return -1;
         }
     }
 
-    // Todo: Enable/Disable teleporting? - Only for owners?
-    private static int setTeleportPos(CommandContext<ServerCommandSource> src, IMarkableRegion region, BlockPos target) {
+    private static int setTeleportPos(CommandContext<ServerCommandSource> ctx, IMarkableRegion region, BlockPos target) {
         if (!region.getTpTarget().equals(target)) {
             region.setTpTarget(target);
             RegionDataManager.save();
             MutableText newTpTargetLink = buildDimensionalBlockTpLink(region.getDim(), target);
-            sendCmdFeedback(src.getSource(), Text.translatableWithFallback("cli.msg.info.region.spatial.location.teleport.set", "Set new teleport target for region %s: '%s'", buildRegionInfoLink(region, LOCAL), newTpTargetLink));
+            sendCmdFeedback(ctx.getSource(), Text.translatableWithFallback("cli.msg.info.region.area.tp.set.msg", "Set new teleport anchor for %s to %s", buildRegionInfoLink(region), newTpTargetLink));
             return 0;
         }
         return 1;
     }
-
 }

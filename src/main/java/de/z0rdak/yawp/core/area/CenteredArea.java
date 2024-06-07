@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.core.area;
 
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.util.math.BlockPos;
@@ -12,7 +13,7 @@ public abstract class CenteredArea extends AbstractArea {
 
     protected BlockPos center;
 
-    public CenteredArea(AreaType areaType) {
+    public CenteredArea(AreaType areaType){
         super(areaType);
     }
 
@@ -28,6 +29,10 @@ public abstract class CenteredArea extends AbstractArea {
 
     public Vec3i getCenter() {
         return new Vec3i(this.center.getX(), this.center.getY(), this.center.getZ());
+    }
+
+    public BlockPos getCenterPos() {
+        return this.center;
     }
 
     @Override

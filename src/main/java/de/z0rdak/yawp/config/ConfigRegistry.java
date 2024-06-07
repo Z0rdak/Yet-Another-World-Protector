@@ -38,15 +38,15 @@ public final class ConfigRegistry {
         if (modConfig.getModId().equals(MODID)) {
             switch (modConfig.getFileName()) {
                 case CommandPermissionConfig.CONFIG_NAME: {
-                    CommandPermissionConfig.BASE_CMD = CommandPermissionConfig.WP_CMDS[CommandPermissionConfig.WP_COMMAND_ALTERNATIVE.get()];
+                    CommandPermissionConfig.BASE_CMD = CommandPermissionConfig.getBaseCmd();
                     if (FabricLoader.getInstance().isModLoaded("journeymap")) {
-                        CommandPermissionConfig.BASE_CMD = CommandPermissionConfig.WP_CMDS[1];
+                        CommandPermissionConfig.BASE_CMD = CommandPermissionConfig.getBaseCmdAlt();
                         YetAnotherWorldProtector.LOGGER.info("Detected JourneyMap to be loaded beside YAWP.");
                     }
                     YetAnotherWorldProtector.LOGGER.info("Setting YAWP base command to '/" + CommandPermissionConfig.BASE_CMD + "'");
                     int numOfUuidsWithPermission = CommandPermissionConfig.UUIDsWithPermission().size();
                     String uuidsWithPermission = (numOfUuidsWithPermission > 0
-                            ? ": " + CommandPermissionConfig.UUIDsWithPermission().stream().map(uuid -> "'" + uuid + "'").collect(Collectors.joining(", "))
+                            ? ": " + String.join(", ", CommandPermissionConfig.UUIDsWithPermission())
                             : "");
                     YetAnotherWorldProtector.LOGGER.info(numOfUuidsWithPermission + " UUID(s) with permission read from config" + uuidsWithPermission);
                     CommandRegistry.register(CommandPermissionConfig.BASE_CMD);
@@ -55,27 +55,27 @@ public final class ConfigRegistry {
                 case RegionConfig.CONFIG_NAME: {
                     int numLocalDefaultFlags = RegionConfig.getDefaultFlags().size();
                     String loadedLocalFlags = (numLocalDefaultFlags > 0
-                            ? ": " + RegionConfig.getDefaultFlags().stream().map(flag -> "'" + flag + "'").collect(Collectors.joining(", "))
+                            ? ": " + String.join(", ", RegionConfig.getDefaultFlags())
                             : "");
                     YetAnotherWorldProtector.LOGGER.info(numLocalDefaultFlags + " default flag(s) for Local Regions read from config" + loadedLocalFlags);
 
                     int numDimDefaultFlags = RegionConfig.getDefaultDimFlags().size();
                     String loadedDimFlags = (numDimDefaultFlags > 0
-                            ? ": " + RegionConfig.getDefaultDimFlags().stream().map(flag -> "'" + flag + "'").collect(Collectors.joining(", "))
+                            ? ": " + String.join(", ", RegionConfig.getDefaultDimFlags())
                             : "");
                     YetAnotherWorldProtector.LOGGER.info(numDimDefaultFlags + " default flag(s) for Dimensional Regions read from config" + loadedDimFlags);
                 }
                 break;
                 case FlagConfig.CONFIG_NAME: {
-                    int numBreakEntityEntries = FlagConfig.getBreakFlagEntities().size();
+                    int numBreakEntityEntries = FlagConfig.getCoveredBlockEntities().size();
                     String loadedBreakEntities = (numBreakEntityEntries > 0
-                            ? ": " + FlagConfig.getBreakFlagEntities().stream().map(entry -> "'" + entry + "'").collect(Collectors.joining(", "))
+                            ? ": " + String.join(", ", FlagConfig.getCoveredBlockEntities())
                             : "");
                     YetAnotherWorldProtector.LOGGER.info(numBreakEntityEntries + " Block Entity entries read from config" + loadedBreakEntities);
 
-                    int numBreakEntityTagEntries = FlagConfig.getBreakFlagEntityTags().size();
+                    int numBreakEntityTagEntries = FlagConfig.getCoveredBlockEntityTags().size();
                     String loadedBreakEntityTags = (numBreakEntityTagEntries > 0
-                            ? ": " + FlagConfig.getBreakFlagEntityTags().stream().map(tag -> "'" + tag + "'").collect(Collectors.joining(", "))
+                            ? ": " + String.join(", ", FlagConfig.getCoveredBlockEntityTags())
                             : "");
                     YetAnotherWorldProtector.LOGGER.info(numBreakEntityTagEntries + " Block Entity tag entries read from config" + loadedBreakEntityTags);
                 }

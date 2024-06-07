@@ -1,12 +1,15 @@
 package de.z0rdak.yawp.core.area;
 
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import static de.z0rdak.yawp.util.constants.AreaNBT.POS;
 
@@ -49,6 +52,22 @@ public class ChunkArea extends AbstractArea {
     @Override
     public List<BlockPos> getMarkedBlocks() {
         return Collections.singletonList(this.chunk.getStartPos());
+    }
+
+    @Override
+    public Set<BlockPos> getHull() {
+        throw new NotImplementedException("ChunkArea.getHull() not implemented yet");
+    }
+
+
+    @Override
+    public boolean containsOther(IMarkableArea other) {
+        throw new NotImplementedException("Not yet implemented");
+    }
+
+    @Override
+    public boolean intersects(IMarkableArea other) {
+        throw new NotImplementedException("Not yet implemented");
     }
 
 }

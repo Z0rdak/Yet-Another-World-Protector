@@ -189,8 +189,8 @@ public abstract class PlayerMixin {
             // check every other entity if it is in the list of entities to protect
             // this is for BlockEntities which are not covered by the block breaking flag
             // FIXME: Tags are not yet considered
-            Set<String> entityTags = FlagConfig.getBreakFlagEntityTags();
-            Set<String> entities = FlagConfig.getBreakFlagEntities();
+            Set<String> entityTags = FlagConfig.getCoveredBlockEntityTags();
+            Set<String> entities = FlagConfig.getCoveredBlockEntities();
             boolean isBlockEntityCovered = entities.stream()
                     .anyMatch(entity -> EntityType.getId(target.getType()).equals(new Identifier(entity)));
             if (isBlockEntityCovered) {

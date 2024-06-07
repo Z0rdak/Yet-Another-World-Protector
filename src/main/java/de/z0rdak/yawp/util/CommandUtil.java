@@ -41,11 +41,11 @@ public class CommandUtil {
     }
 
     public static String getRegionNameArgument(CommandContext<ServerCommandSource> ctx) {
-        return StringArgumentType.getString(ctx, REGION.toString());
+        return StringArgumentType.getString(ctx, LOCAL.toString());
     }
 
     public static IMarkableRegion getRegionArgument(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        return RegionArgumentType.getRegion(ctx, REGION.toString());
+        return RegionArgumentType.getRegion(ctx, LOCAL.toString());
     }
 
     public static IMarkableRegion getChildRegionArgument(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
@@ -73,14 +73,14 @@ public class CommandUtil {
     }
 
     public static String getAffiliationArgument(CommandContext<ServerCommandSource> ctx) {
-        return StringArgumentType.getString(ctx, CommandConstants.AFFILIATION.toString());
+        return StringArgumentType.getString(ctx, CommandConstants.GROUP.toString());
     }
 
     public static ServerPlayerEntity getOwnerArgument(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         return EntityArgumentType.getPlayer(ctx, CommandConstants.OWNER.toString());
     }
 
-    public static Team getTeamArgumentType(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+    public static Team getTeamArgument(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         return TeamArgumentType.getTeam(ctx, CommandConstants.TEAM.toString());
     }
 

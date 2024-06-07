@@ -9,21 +9,20 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.CuboidRegion;
-import de.z0rdak.yawp.util.CommandUtil;
-import de.z0rdak.yawp.util.MessageUtil;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-// TODO: When flag types are implemented there must be different ArgumentTypes for each flag type
+import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
+
 public class RegionFlagArgumentType implements ArgumentType<String> {
 
     public static final Pattern VALID_FLAG_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z\\-][A-Za-z]$");
@@ -41,12 +40,12 @@ public class RegionFlagArgumentType implements ArgumentType<String> {
         return new RegionFlagArgumentType();
     }
 
-    public static RegionFlag getFlag(CommandContext<ServerCommandSource> context, String argName) throws CommandSyntaxException {
-        String flagIdentifier = context.getArgument(argName, String.class);
+    public static RegionFlag getFlag(CommandContext<ServerCommandSource> ctx, String argName) throws CommandSyntaxException {
+        String flagIdentifier = ctx.getArgument(argName, String.class);
         if (RegionFlag.contains(flagIdentifier)) {
             return RegionFlag.fromId(flagIdentifier);
         } else {
-            MessageUtil.sendCmdFeedback(context.getSource(), Text.literal(("Invalid flag identifier: '" + flagIdentifier + "'!")));
+            sendCmdFeedback(ctx.getSource(), Text.literal("Invalid flag identifier: '" + flagIdentifier + "'!"));
             throw ERROR_INVALID_VALUE.create(flagIdentifier);
         }
     }
@@ -74,45 +73,62 @@ public class RegionFlagArgumentType implements ArgumentType<String> {
         }
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        if (context.getSource() instanceof ServerCommandSource src) {
-            try {
-                CuboidRegion region = (CuboidRegion) CommandUtil.getRegionArgument((CommandContext<ServerCommandSource>) context);
-                List<String> flagNames = RegionFlag.getFlagNames();
-
-                String input = context.getInput();
-                if (input.contains("add")) {
-                    flagNames = flagNames.stream()
-                            .filter(flagName -> !region.containsFlag(flagName))
-                            .collect(Collectors.toList());
-                }
-                if (input.contains("remove")) {
-                    flagNames = flagNames.stream()
-                            .filter(region::containsFlag)
-                            .collect(Collectors.toList());
-                }
-                if (flagNames.isEmpty()) {
-                    if (input.contains("add")) {
-                        MessageUtil.sendCmdFeedback(src, Text.literal(("There are no flag left to add for this region '" + region.getName() + "'.")));
+    public static Set<RegionFlag> getFlags(CommandContext<ServerCommandSource> ctx, String argName) throws CommandSyntaxException {
+        String flagIdentifiers = ctx.getArgument(argName, String.class);
+        Set<String> flagsList = new HashSet<>(Arrays.asList(flagIdentifiers.split(" ")));
+        Set<RegionFlag> regionFlags = flagsList.stream()
+                .filter(flag -> {
+                    if (RegionFlag.contains(flag))
+                        return true;
+                    else {
+                        sendCmdFeedback(ctx.getSource(), Text.literal("Invalid flag identifier: '" + flag + "'!"));
+                        return false;
                     }
-                    if (input.contains("remove")) {
-                        MessageUtil.sendCmdFeedback(src, Text.literal(("Region '" + region.getName() + "' does not contain any flags.")));
-                    }
-                    return Suggestions.empty();
-                }
-                return CommandSource.suggestMatching(flagNames, builder);
-            } catch (CommandSyntaxException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            return Suggestions.empty();
+                })
+                .map(RegionFlag::fromId)
+                .collect(Collectors.toSet());
+        if (regionFlags.isEmpty()) {
+            throw ERROR_INVALID_VALUE.create(flagIdentifiers);
         }
+        return regionFlags;
     }
 
     @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
+    }
+
+    // TODO: Replace usages with IFlagArgumentType where possible
+    @Override
+    @SuppressWarnings("unchecked")
+    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> ctx, SuggestionsBuilder builder) {
+        if (ctx.getSource() instanceof ServerCommandSource src) {
+            CuboidRegion region = (CuboidRegion) ArgumentUtil.getRegionArgument((CommandContext<ServerCommandSource>) ctx);
+            List<String> flagNames = RegionFlag.getFlagNames();
+
+            String input = ctx.getInput();
+            if (input.contains("add")) {
+                flagNames = flagNames.stream()
+                        .filter(flagName -> !region.containsFlag(flagName))
+                        .collect(Collectors.toList());
+            }
+            if (input.contains("remove")) {
+                flagNames = flagNames.stream()
+                        .filter(region::containsFlag)
+                        .collect(Collectors.toList());
+            }
+            if (flagNames.isEmpty()) {
+                if (input.contains("add")) {
+                    sendCmdFeedback(src, Text.literal("There are no flag left to add for this region '" + region.getName() + "'."));
+                }
+                if (input.contains("remove")) {
+                    sendCmdFeedback(src, Text.literal("Region '" + region.getName() + "' does not contain any flags."));
+                }
+                return Suggestions.empty();
+            }
+            return CommandSource.suggestMatching(flagNames, builder);
+        } else {
+            return Suggestions.empty();
+        }
     }
 }

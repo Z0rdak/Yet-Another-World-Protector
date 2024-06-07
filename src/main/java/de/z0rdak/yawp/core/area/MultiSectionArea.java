@@ -1,14 +1,17 @@
 package de.z0rdak.yawp.core.area;
 
 import de.z0rdak.yawp.util.constants.AreaNBT;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkSectionPos;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MultiSectionArea extends AbstractArea {
@@ -63,6 +66,21 @@ public class MultiSectionArea extends AbstractArea {
     @Override
     public List<BlockPos> getMarkedBlocks() {
         return this.sections.stream().map(ChunkSectionPos::getMinPos).collect(Collectors.toList());
+    }
+
+    @Override
+    public Set<BlockPos> getHull() {
+        throw new NotImplementedException("ChunkArea.getHull() not implemented yet");
+    }
+
+    @Override
+    public boolean containsOther(IMarkableArea other) {
+        throw new NotImplementedException("Not yet implemented");
+    }
+
+    @Override
+    public boolean intersects(IMarkableArea other) {
+        throw new NotImplementedException("Not yet implemented");
     }
 
 }

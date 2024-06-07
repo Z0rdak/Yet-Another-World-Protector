@@ -1,8 +1,6 @@
-package de.z0rdak.yawp.core.affiliation;
+package de.z0rdak.yawp.core.group;
 
-import de.z0rdak.yawp.core.INbtSerializable;
 import de.z0rdak.yawp.util.constants.RegionNBT;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -12,17 +10,17 @@ import net.minecraft.scoreboard.Team;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class PlayerContainer implements IMemberContainer, INbtSerializable<NbtCompound> {
+public class PlayerContainer implements IMemberContainer {
 
     private final Set<String> teams;
     private final Map<UUID, String> players;
 
-    public PlayerContainer(NbtCompound nbt) {
+    public PlayerContainer(NbtCompound nbt){
         this();
         this.deserializeNBT(nbt);
     }
 
-    public PlayerContainer() {
+    public PlayerContainer(){
         this.teams = new HashSet<>(0);
         this.players = new HashMap<>(0);
     }
@@ -46,23 +44,18 @@ public class PlayerContainer implements IMemberContainer, INbtSerializable<NbtCo
     }
 
     @Override
-    public boolean containsPlayer(UUID playerUUID) {
+    public boolean hasPlayer(UUID playerUUID) {
         return this.players.containsKey(playerUUID);
     }
 
     @Override
-    public boolean containsTeam(String team) {
+    public boolean hasTeam(String team) {
         return this.teams.contains(team);
     }
 
     @Override
-    public boolean containsTeam(Team team) {
-        return this.teams.contains(team.getName());
-    }
-
-    @Override
-    public void addPlayer(PlayerEntity player) {
-        this.players.put(player.getUuid(), player.getEntityName());
+    public void addPlayer(UUID uuid, String name) {
+        this.players.put(uuid, name);
     }
 
     @Override
@@ -71,13 +64,8 @@ public class PlayerContainer implements IMemberContainer, INbtSerializable<NbtCo
     }
 
     @Override
-    public void addTeam(Team team) {
-        this.teams.add(team.getName());
-    }
-
-    @Override
-    public void removePlayer(PlayerEntity player) {
-        this.players.remove(player.getUuid());
+    public void clearPlayers() {
+        this.players.clear();
     }
 
     @Override
@@ -91,8 +79,8 @@ public class PlayerContainer implements IMemberContainer, INbtSerializable<NbtCo
     }
 
     @Override
-    public void removeTeam(Team team) {
-        this.teams.remove(team.getName());
+    public void clearTeams() {
+        this.teams.clear();
     }
 
     @Override
@@ -100,7 +88,7 @@ public class PlayerContainer implements IMemberContainer, INbtSerializable<NbtCo
         NbtCompound nbt = new NbtCompound();
         // serialize player data
         NbtList playerList = new NbtList();
-        players.forEach((uuid, name) -> {
+        players.forEach( (uuid, name) -> {
             NbtCompound playerNBT = new NbtCompound();
             playerNBT.putUuid(RegionNBT.UUID, uuid);
             playerNBT.putString(RegionNBT.NAME, name);

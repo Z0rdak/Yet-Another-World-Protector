@@ -2,9 +2,12 @@ package de.z0rdak.yawp.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.util.CommandUtil;
-import de.z0rdak.yawp.util.MessageUtil;
+import de.z0rdak.yawp.util.ChatComponentBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -12,12 +15,10 @@ import net.minecraft.text.ClickEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 
-import static de.z0rdak.yawp.util.MessageUtil.*;
-import static de.z0rdak.yawp.util.MessageUtil.sendCmdFeedback;
-import static net.minecraft.util.Formatting.AQUA;
-import static net.minecraft.util.Formatting.GREEN;
+import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
+import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
 
-public class CommandRegistry {
+public final class CommandRegistry {
 
     private CommandRegistry() {
     }
@@ -41,35 +42,24 @@ public class CommandRegistry {
 
     private static LiteralArgumentBuilder<ServerCommandSource> buildCommands(String baseCmd) {
         return CommandManager.literal(baseCmd)
+                .requires(CommandPermissionConfig::isAllowedForNonOp)
                 .executes(ctx -> promptHelp(ctx.getSource()))
-                .then(CommandUtil.literal(CommandConstants.HELP)
+                .then(ArgumentUtil.literal(CommandConstants.HELP)
                         .executes(ctx -> promptHelp(ctx.getSource())))
-                .then(DimensionCommands.build())
+                .then(FlagCommands.build())
                 .then(MarkerCommands.build())
+                .then(GlobalCommands.build())
+                .then(DimensionCommands.build())
                 .then(RegionCommands.build());
     }
 
     private static int promptHelp(ServerCommandSource src) {
-        sendCmdFeedback(src, buildHeader("cli.msg.help.header", "YetAnotherWorldProtector help"));
-        String command = CommandUtil.buildCommandStr(CommandConstants.DIM.toString());
-        MutableText cmdStr = Text.translatableWithFallback("cli.msg.help.1", "Use '/%s dim info | list | add | remove | activate' to manage dimensional regions.", CommandPermissionConfig.BASE_CMD);
-        sendCmdFeedback(src, buildExecuteCmdComponent(
-                Text.literal("=> "),
-                Text.translatableWithFallback("help.tooltip.dim", "Manage dimensional regions with /wp dim <dim> ..."),
-                command, ClickEvent.Action.SUGGEST_COMMAND, GREEN).append(cmdStr));
-        MutableText wikiText1 = Text.translatableWithFallback("help.tooltip.info.wiki.1","The in-game help is under construction.");
-        MutableText wikiText2 = Text.translatableWithFallback("help.tooltip.info.wiki.2","Visit the online wiki for a guide on how to use the mod.");
-        MutableText wikiText3 = Text.translatableWithFallback("help.tooltip.info.wiki.3",  "Online-Wiki");
-        MutableText wikiLinkHover = Text.translatableWithFallback("help.tooltip.info.wiki.link.hover","Open Wiki in default browser");
-        MutableText wikiLink = Text.translatableWithFallback("help.tooltip.info.wiki.link.text","https://github.com/Z0rdak/Yet-Another-World-Protector/wiki");
-        MutableText wikiCopyToClipboardLink = buildExecuteCmdComponent(wikiLink, wikiLinkHover, "", ClickEvent.Action.OPEN_URL, AQUA);
-        wikiText1.append("\n")
-                .append(wikiText2)
-                .append("\n")
-                .append(wikiText3)
-                .append(": ")
-                .append(wikiCopyToClipboardLink);
-        sendCmdFeedback(src, wikiText1);
+        sendCmdFeedback(src, buildHeader(Text.translatableWithFallback("help.header", "== Yet Another World Protector - Help ==")));
+        MutableText wikiHint = Text.translatableWithFallback("help.tooltip.wiki.detail", "The in-game help is under construction. Visit the online wiki for a guide on how to use the mod.");
+        MutableText wikiText = Text.translatableWithFallback("help.tooltip.wiki", "Online-Wiki");
+        sendCmdFeedback(src, wikiHint);
+        sendCmdFeedback(src, wikiText.append(": ").append(buildWikiLink()));
+        sendCmdFeedback(src, Text.literal(" => ").append(buildHelpStartComponent()));
         return 0;
     }
 }

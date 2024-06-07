@@ -1,14 +1,13 @@
 package de.z0rdak.yawp.core.region;
 
 import de.z0rdak.yawp.core.INbtSerializable;
-import de.z0rdak.yawp.core.affiliation.PlayerContainer;
 import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
+import de.z0rdak.yawp.core.group.PlayerContainer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryKey;
-import net.minecraft.scoreboard.Team;
 import net.minecraft.world.World;
 
 import java.util.Collection;
@@ -35,6 +34,8 @@ public interface IProtectedRegion extends INbtSerializable<NbtCompound> {
 
     RegistryKey<World> getDim();
 
+    RegionType getRegionType();
+
     void addFlag(IFlag flag);
 
     void removeFlag(String flag);
@@ -49,55 +50,49 @@ public interface IProtectedRegion extends INbtSerializable<NbtCompound> {
 
     IFlag getFlag(String flagName);
 
-    void updateFlag(IFlag flag);
+    void addPlayer(PlayerEntity player, String group);
 
-    void addMember(PlayerEntity player);
+    void addPlayer(UUID uuid, String playerName, String group);
 
-    void addMember(Team team);
+    void addTeam(String teamName, String group);
 
-    void addOwner(PlayerEntity player);
+    void removeTeam(String teamName, String group);
 
-    void addOwner(Team team);
+    void removePlayer(UUID playerUuid, String group);
 
-    void removeMember(PlayerEntity player);
+    boolean hasTeam(String teamName, String group);
 
-    void removeOwner(PlayerEntity player);
+    boolean hasPlayer(UUID playerUuid, String group);
 
-    void removeMember(Team team);
+    PlayerContainer getGroup(String group);
 
-    void removeOwner(Team team);
+    boolean permits(PlayerEntity player);
 
-    boolean hasOwner(String teamName);
-
-    boolean hasOwner(UUID playerUuid);
-
-    boolean hasMember(String teamName);
-
-    boolean hasMember(UUID playerUuid);
+    boolean isInGroup(PlayerEntity player, String group);
 
     boolean isActive();
 
     void setIsActive(boolean isActive);
 
-    PlayerContainer getMembers();
+    boolean isMuted();
 
-    PlayerContainer getOwners();
-
-    boolean permits(PlayerEntity player);
+    void setIsMuted(boolean isMuted);
 
     IProtectedRegion getParent();
 
     String getParentName();
 
-    boolean setParent(IProtectedRegion parent);
-
     Map<String, IProtectedRegion> getChildren();
 
     Set<String> getChildrenNames();
 
-    void addChild(IProtectedRegion child);
+    boolean addChild(IProtectedRegion child);
 
     void removeChild(IProtectedRegion child);
+
+    void clearChildren();
+
+    void resetGroups();
 
     boolean hasChild(IProtectedRegion child);
 }

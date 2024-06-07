@@ -9,10 +9,11 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.util.CommandUtil;
-import de.z0rdak.yawp.util.MessageUtil;
+import de.z0rdak.yawp.util.ChatComponentBuilder;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
@@ -23,6 +24,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
 
 public class RemoveRegionChildArgumentType implements ArgumentType<String> {
 
@@ -45,13 +48,10 @@ public class RemoveRegionChildArgumentType implements ArgumentType<String> {
     @Override
     public String parse(StringReader reader) throws CommandSyntaxException {
         int i = reader.getCursor();
-
-        // FIXME: Pattern only matches chars, not the valid name
         while (reader.canRead() && String.valueOf(reader.peek()).matches(Pattern.compile("^[A-Za-z\\d\\-]$").pattern())) {
             reader.skip();
         }
         String s = reader.getString().substring(i, reader.getCursor());
-
         try {
             boolean isValidName = s.matches(VALID_NAME_PATTERN.pattern());
             if (isValidName) {
@@ -78,21 +78,17 @@ public class RemoveRegionChildArgumentType implements ArgumentType<String> {
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         if (context.getSource() instanceof ServerCommandSource src) {
-            try {
-                IMarkableRegion region = CommandUtil.getRegionArgument((CommandContext<ServerCommandSource>) context);
-                List<String> childNames = region.getChildren()
-                        .values()
-                        .stream()
-                        .map(IProtectedRegion::getName)
-                        .collect(Collectors.toList());
-                if (childNames.isEmpty()) {
-                    MessageUtil.sendCmdFeedback(src, Text.literal(("Region '" + region.getName() + "' has no children.")));
-                    return Suggestions.empty();
-                }
-                return CommandSource.suggestMatching(childNames, builder);
-            } catch (CommandSyntaxException e) {
-                throw new RuntimeException(e);
+            IMarkableRegion region = ArgumentUtil.getRegionArgument((CommandContext<ServerCommandSource>) context);
+            List<String> childNames = region.getChildren()
+                    .values()
+                    .stream()
+                    .map(IProtectedRegion::getName)
+                    .collect(Collectors.toList());
+            if (childNames.isEmpty()) {
+                sendCmdFeedback(src, Text.literal("Region '" + region.getName() + "' has no children."));
+                return Suggestions.empty();
             }
+            return CommandSource.suggestMatching(childNames, builder);
         } else {
             return Suggestions.empty();
         }

@@ -3,87 +3,53 @@ package de.z0rdak.yawp.core.flag;
 import de.z0rdak.yawp.core.INbtSerializable;
 import net.minecraft.nbt.NbtCompound;
 
-/**
- * ListFlag
- * Blacklist or Whitelist
- * <p>
- * Usable for placing/breaking blocks, item usage
- * Granular entity spawn control
- * <p>
- * /rs flag add <region> <flag>
- * /rs flag add <region> block-blacklist <modid:block> [... <modid:block>]
- * Remove all blocks from blacklist and blacklist itself
- * /rs flag remove <region> block-blacklist
- * Removes all given blocks from blacklist
- * /rs flag remove <region> block-blacklist <modid:block> [... <modid:block>]
- * Removes all blocks from blacklist
- * /rs flag remove <region> block-blacklist clear
- * <p>
- * NumberFlag
- * /rs flag add <region> max-level 30
- * /rs flag add <region>
- * <p>
- * // Trigger
- * /rs trigger <region> on-leave clear-xp
- */
 public interface IFlag extends INbtSerializable<NbtCompound>, Comparable<IFlag> {
 
     /**
      * Get the unique identifier for the flag. <br>
      * The valid flags are currently stored as an enum. <br>
-     * Mod:Name -> ResourceLocation in future.
+     * Mod:Name -> ResourceLocation in the future.
      *
      * @return unique name for flag.
      * @see RegionFlag
      */
-    String getFlagIdentifier();
+    String getName();
 
     /**
-     * Returns the flag type of the flag.
-     *
+     * Returns the flag type of the flag.     *
      * @return the flag type enum value of the flag.
      * @see FlagType
      */
-    FlagType getFlagType();
+    FlagType getType();
 
     /**
-     * Returns whether the flag is inverted for flag checks. <br>
-     * If true the flag is treated as a whitelist flag (flag action is allowed), <br>
-     * otherwise is treated like a blacklist (flag action is prohibited).
+     * Returns whether the flag does override the same flag defined in child regions. <br>
      *
-     * @return true if the flag acts as a whitelist flag, false otherwise.
+     * @return true if the flag overrides the same flag in child regions
      */
-    boolean isInverted();
+    boolean doesOverride();
 
     /**
-     * Set the inverted state of the flag.
-     *
-     * @param inverted true sets flag to act like a whitelist flag, false sets flag to be a blacklist flag.
+     * Set the override state of the flag. <br>
+     * When true, it overrides the same flag in child regions.
+     * @param doesOverride overrides the same flag in child regions if set to true
      */
-    void setInverted(boolean inverted);
+    void setOverride(boolean doesOverride);
 
     /**
-     * Returns whether the flag is active in the region. <br>
+     * Returns whether the flag is active in the region. <br></br>
+     * This means the flag state is either ALLOWED or DENIED. <br></br>
      * Disabled flags are not considered for flag checks.
      *
      * @return true if flag is active, false otherwise.
      */
     boolean isActive();
 
-    /**
-     * Set the active state of the flag.
-     *
-     * @param active true activates the flag, false disables the flag for checks.
-     */
-    void setIsActive(boolean active);
+    FlagState getState();
 
-    /**
-     * FIXME: should work, but hacky workaround
-     * Returns whether the flag allows the flag action considering the optional arguments
-     *
-     * @param args optional arguments to be used in flag check
-     * @return whether the flag allows the flag action
-     */
-    boolean isAllowed(Object... args);
+    void setState(FlagState state);
 
+    FlagMessage getFlagMsg();
+
+    void setFlagMsg(FlagMessage msg);
 }

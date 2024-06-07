@@ -3,30 +3,24 @@ package de.z0rdak.yawp.core.stick;
 import de.z0rdak.yawp.core.INbtSerializable;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.util.StickType;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static de.z0rdak.yawp.util.StickUtil.STICK_ID;
+import static de.z0rdak.yawp.util.StickUtil.*;
 
 public class MarkerStick extends AbstractStick implements INbtSerializable<NbtCompound> {
-
-    public static final String MARKED_BLOCKS = "blocks";
-    public static final String VALID_AREA = "valid";
-    public static final String AREA_TYPE = "type";
-    public static final String DIM = "dim";
-    public static final String TP_POS = "tp_pos";
-    public static final String IS_TP_SET = "is_tp_set";
 
     private BlockPos teleportPos;
     private RegistryKey<World> dimension;
@@ -34,24 +28,11 @@ public class MarkerStick extends AbstractStick implements INbtSerializable<NbtCo
     private boolean isValidArea;
     private List<BlockPos> markedBlocks;
 
-    public MarkerStick(AreaType areaType, boolean isValidArea, List<BlockPos> markedBlocks, RegistryKey<World> dim) {
-        this(areaType, isValidArea, markedBlocks, dim, null);
-    }
-
-    public MarkerStick(AreaType areaType, boolean isValidArea, List<BlockPos> markedBlocks, RegistryKey<World> dim, BlockPos tpPos) {
-        super(StickType.MARKER);
-        this.areaType = areaType;
-        this.isValidArea = isValidArea;
-        this.markedBlocks = markedBlocks;
-        this.dimension = dim;
-        this.teleportPos = tpPos;
-    }
-
     public MarkerStick(RegistryKey<World> dim) {
         super(StickType.MARKER);
         this.areaType = AreaType.CUBOID;
         this.isValidArea = false;
-        this.markedBlocks = new ArrayList<>();
+        this.markedBlocks = new ArrayList<>(this.areaType.maxBlocks);
         this.dimension = dim;
         this.teleportPos = null;
     }
@@ -67,7 +48,7 @@ public class MarkerStick extends AbstractStick implements INbtSerializable<NbtCo
     }
 
     public void reset() {
-        this.markedBlocks = new ArrayList<>();
+        this.markedBlocks = new ArrayList<>(this.areaType.maxBlocks);
         this.isValidArea = false;
         this.teleportPos = null;
     }
@@ -149,7 +130,7 @@ public class MarkerStick extends AbstractStick implements INbtSerializable<NbtCo
         }
         this.dimension = RegistryKey.of(RegistryKeys.WORLD, new Identifier(nbt.getString(DIM)));
         NbtList markedBlocksNBT = nbt.getList(MARKED_BLOCKS, NbtElement.COMPOUND_TYPE);
-        this.markedBlocks = new ArrayList<>();
+        this.markedBlocks = new ArrayList<>(this.areaType.maxBlocks);
         markedBlocksNBT.forEach(block -> this.markedBlocks.add(NbtHelper.toBlockPos((NbtCompound) block)));
     }
 }

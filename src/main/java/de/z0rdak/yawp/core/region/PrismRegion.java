@@ -2,15 +2,15 @@ package de.z0rdak.yawp.core.region;
 
 import de.z0rdak.yawp.core.area.PrismArea;
 import de.z0rdak.yawp.util.constants.RegionNBT;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryKey;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
 
 public final class PrismRegion extends AbstractMarkableRegion {
 
-    public PrismRegion(NbtCompound nbt) {
+    public PrismRegion(NbtCompound nbt){
         super(nbt);
         this.deserializeNBT(nbt);
     }

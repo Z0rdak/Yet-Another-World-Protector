@@ -12,11 +12,14 @@ public final class RegionNBT {
     public static final String ACTIVE = "active";
     public static final String PLAYERS = "players";
     public static final String FLAGS = "flags";
+    public static final String INHERIT_FLAGS = "inherits_flags";
     public static final String MUTED = "muted";
+    public static final String DEFAULT = "default";
     public static final String AREA = "area";
     public static final String AREA_TYPE = "area_type";
     public static final String FLAG_TYPE = "flag_type";
     public static final String REGIONS = "regions";
+    public static final String GLOBAL = "global";
     public static final String DIMENSIONS = "dimensions";
     public static final String DIM_REGION = "dimRegion";
     public static final String PARENT = "parent";
@@ -27,8 +30,12 @@ public final class RegionNBT {
 
     public static final String FLAG = "flag";
     public static final String FLAG_NAME = "flag_name";
+
+    public static final String MSG = "msg";
+    public static final String FLAG_MSG = "flag_msg";
     public static final String FLAG_ACTIVE = "is_active";
-    public static final String IS_INVERTED = "inverted";
+    public static final String FLAG_STATE = "state";
+    public static final String OVERRIDE = "override";
     public static final String FLAG_VALUE = "value";
     public static final String IS_DENIED = "isDenied";
     public static final String OWNERS = "owners";
