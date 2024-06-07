@@ -7,7 +7,9 @@ import java.util.stream.Collectors;
 public enum FlagType {
 
     BOOLEAN_FLAG("BooleanFlag"),
+    @Deprecated
     LIST_FLAG("ListFlag"),
+    @Deprecated
     INT_FLAG("IntFlag");
 
     public final String flagType;
@@ -29,7 +31,7 @@ public enum FlagType {
         }
     }
 
-    public static Set<String> getFlagTypes() {
+    public static Set<String> getFlagTypes(){
         return Arrays.stream(FlagType.values())
                 .map(type -> type.flagType)
                 .collect(Collectors.toSet());

@@ -43,12 +43,6 @@ public final class PlayerFlagHandler {
     }
 
     public static void registerEventHandler() {
-
-        // ServerEntityEvents.EQUIPMENT_CHANGE
-        // EntitySleepEvents.ALLOW_BED
-        // EntitySleepEvents.ALLOW_SLEEP_TIME
-        // EntitySleepEvents.ALLOW_RESETTING_TIME
-        // EntitySleepEvents.ALLOW_NEARBY_MONSTERS.register(PlayerFlagHandler::onSleepingWithStrangers);
         EntitySleepEvents.ALLOW_SLEEPING.register(PlayerFlagHandler::onAllowSleeping);
         EntitySleepEvents.ALLOW_SETTING_SPAWN.register(PlayerFlagHandler::onSettingSpawn);
         PlayerBlockBreakEvents.BEFORE.register(PlayerFlagHandler::onBreakBlock);
@@ -109,7 +103,7 @@ public final class PlayerFlagHandler {
                 boolean isBerry = stackInHand.isOf(Items.GLOW_BERRIES) || stackInHand.isOf(Items.SWEET_BERRIES);
                 UseAction useAction = stackInHand.getUseAction();
                 if (useAction == UseAction.NONE || (isBerry && useAction == UseAction.EAT)) {
-                    // Player attempting to place block
+                    // PlayerEntity attempting to place block
                     FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, blockHitResult.getBlockPos(), PLACE_BLOCKS, dimCache.getDimensionalRegion());
                     if (flagCheckEvent.isDenied()) {
                         sendFlagDeniedMsg(flagCheckEvent);

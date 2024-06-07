@@ -1,9 +1,10 @@
 package de.z0rdak.yawp.core.region;
 
-import de.z0rdak.yawp.core.affiliation.PlayerContainer;
+import de.z0rdak.yawp.commands.CommandUtil;
 import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
+import de.z0rdak.yawp.core.group.PlayerContainer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -11,11 +12,10 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.scoreboard.Team;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.UUID;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,18 +27,17 @@ import static de.z0rdak.yawp.util.constants.RegionNBT.*;
  * an area (dimensions). <br>
  */
 public abstract class AbstractRegion implements IProtectedRegion {
-    protected String name;
+    private String name;
     protected RegistryKey<World> dimension;
-    protected RegionType regionType;
-    protected FlagContainer flags;
-    protected PlayerContainer owners;
-    protected PlayerContainer members;
-    protected boolean isActive;
-
+    private RegionType regionType;
+    private FlagContainer flags;
+    private Map<String, PlayerContainer> groups;
+    private boolean isActive;
+    private boolean isMuted;
     protected IProtectedRegion parent;
     protected String parentName;
-    protected Map<String, IProtectedRegion> children;
-    protected Set<String> childrenNames;
+    private Map<String, IProtectedRegion> children;
+    private Set<String> childrenNames;
 
     protected AbstractRegion(NbtCompound nbt) {
         this.childrenNames = new HashSet<>(0);
@@ -46,51 +45,29 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.parentName = null;
         this.parent = null;
         this.flags = new FlagContainer();
-        this.members = new PlayerContainer();
-        this.owners = new PlayerContainer();
+        this.groups = new HashMap<>();
+        this.groups.put(CommandUtil.MEMBER, new PlayerContainer());
+        this.groups.put(CommandUtil.OWNER, new PlayerContainer());
         this.deserializeNBT(nbt);
     }
 
-    protected AbstractRegion(String name, RegionType type) {
-        this.name = name;
-        this.regionType = type;
-        this.flags = new FlagContainer();
-        this.members = new PlayerContainer();
-        this.owners = new PlayerContainer();
-        this.isActive = true;
-        this.children = new HashMap<>();
-    }
-
-
-    // TODO: Check constructors with new parameter
     protected AbstractRegion(String name, RegistryKey<World> dimension, RegionType type) {
         this.name = name;
         this.dimension = dimension;
         this.regionType = type;
         this.flags = new FlagContainer();
-        this.members = new PlayerContainer();
-        this.owners = new PlayerContainer();
+        this.groups = new HashMap<>();
+        this.groups.put(CommandUtil.MEMBER, new PlayerContainer());
+        this.groups.put(CommandUtil.OWNER, new PlayerContainer());
         this.children = new HashMap<>();
         this.isActive = true;
-    }
-
-    /**
-     * Minimal constructor to create an abstract region by supplying a name, type and an owner.
-     *
-     * @param name  name of the region
-     * @param owner region owner
-     */
-    protected AbstractRegion(String name, RegionType regionType, PlayerEntity owner) {
-        this(name, regionType);
-        if (owner != null) {
-            this.owners.addPlayer(owner);
-        }
+        this.childrenNames = new HashSet<>();
     }
 
     protected AbstractRegion(String name, RegistryKey<World> dimension, RegionType regionType, PlayerEntity owner) {
         this(name, dimension, regionType);
         if (owner != null) {
-            this.owners.addPlayer(owner);
+            this.groups.get(CommandUtil.OWNER).addPlayer(owner.getUuid(), owner.getEntityName());
         }
     }
 
@@ -104,9 +81,18 @@ public abstract class AbstractRegion implements IProtectedRegion {
         return name;
     }
 
+    protected void setName(String name) {
+        this.name = name;
+    }
+
     @Override
     public RegistryKey<World> getDim() {
         return dimension;
+    }
+
+    @Override
+    public RegionType getRegionType() {
+        return this.regionType;
     }
 
     @Override
@@ -120,7 +106,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
     }
 
     public boolean containsFlag(RegionFlag flag) {
-        return this.flags.contains(flag);
+        return this.flags.contains(flag.name);
     }
 
     @Override
@@ -138,28 +124,13 @@ public abstract class AbstractRegion implements IProtectedRegion {
         return flags;
     }
 
+    @Nullable
     @Override
     public IFlag getFlag(String flagName) {
         if (this.flags.contains(flagName)) {
             return this.flags.get(flagName);
         } else {
             return null;
-        }
-    }
-
-    public void updateFlag(IFlag flag) {
-        this.flags.put(flag);
-    }
-
-    public void toggleFlag(String flag, boolean enable) {
-        if (this.containsFlag(flag)) {
-            this.flags.get(flag).setIsActive(enable);
-        }
-    }
-
-    public void invertFlag(String flag) {
-        if (this.containsFlag(flag)) {
-            this.flags.get(flag).setInverted(this.flags.get(flag).isInverted());
         }
     }
 
@@ -174,76 +145,72 @@ public abstract class AbstractRegion implements IProtectedRegion {
     }
 
     @Override
-    public void addMember(PlayerEntity player) {
-        this.members.addPlayer(player);
+    public boolean isMuted() {
+        return this.isMuted;
     }
 
     @Override
-    public void addMember(Team team) {
-        this.members.addTeam(team);
+    public void setIsMuted(boolean isMuted) {
+        this.isMuted = isMuted;
+    }
+
+    @Override
+    public void addPlayer(PlayerEntity player, String group) {
+        this.getGroup(group).addPlayer(player.getUuid(), player.getEntityName());
+    }
+
+    @Override
+    public void addPlayer(UUID uuid, String playerName, String group) {
+        this.getGroup(group).addPlayer(uuid, playerName);
     }
 
 
     @Override
-    public void addOwner(PlayerEntity player) {
-        this.owners.addPlayer(player);
+    public void addTeam(String teamName, String group) {
+        this.getGroup(group).addTeam(teamName);
     }
 
     @Override
-    public void addOwner(Team team) {
-        this.owners.addTeam(team);
+    public void removeTeam(String teamName, String group) {
+        this.getGroup(group).removeTeam(teamName);
+    }
+
+    public void resetGroups() {
+        this.groups.clear();
+        this.groups.put(MEMBERS, new PlayerContainer());
+        this.groups.put(OWNERS, new PlayerContainer());
     }
 
     @Override
-    public void removeMember(PlayerEntity player) {
-        this.members.removePlayer(player);
-
+    public void removePlayer(UUID playerUuid, String group) {
+        if (group.equals("*")) {
+            for (String g : this.groups.keySet()) {
+                this.getGroup(g).removePlayer(playerUuid);
+            }
+            return;
+        }
+        this.getGroup(group).removePlayer(playerUuid);
     }
 
     @Override
-    public void removeMember(Team team) {
-        this.members.removeTeam(team.getName());
-
+    public boolean hasTeam(String teamName, String group) {
+        return this.getGroup(group).hasTeam(teamName);
     }
 
     @Override
-    public void removeOwner(PlayerEntity player) {
-        this.owners.removePlayer(player);
+    public boolean hasPlayer(UUID playerUuid, String group) {
+        return this.getGroup(group).hasPlayer(playerUuid);
     }
 
+    /**
+     * Gets the container for the provided group. Creates a new one if none is existent.
+     */
     @Override
-    public void removeOwner(Team team) {
-        this.owners.removeTeam(team);
-    }
-
-    @Override
-    public boolean hasOwner(String teamName) {
-        return this.owners.containsTeam(teamName);
-    }
-
-    @Override
-    public boolean hasOwner(UUID playerUuid) {
-        return this.owners.containsPlayer(playerUuid);
-    }
-
-    @Override
-    public boolean hasMember(String teamName) {
-        return this.members.containsTeam(teamName);
-    }
-
-    @Override
-    public boolean hasMember(UUID playerUuid) {
-        return this.members.containsPlayer(playerUuid);
-    }
-
-    @Override
-    public PlayerContainer getMembers() {
-        return this.members;
-    }
-
-    @Override
-    public PlayerContainer getOwners() {
-        return owners;
+    public PlayerContainer getGroup(String group) {
+        if (!this.groups.containsKey(group)) {
+            return this.groups.put(group, new PlayerContainer());
+        }
+        return this.groups.get(group);
     }
 
     /**
@@ -256,57 +223,26 @@ public abstract class AbstractRegion implements IProtectedRegion {
      */
     @Override
     public boolean permits(PlayerEntity player) {
-        boolean isOwner = this.owners.containsPlayer(player.getUuid())
-                || (player.getScoreboardTeam() != null && this.owners.containsTeam(player.getScoreboardTeam().getName()));
-        boolean isMember = this.members.containsPlayer(player.getUuid())
-                || (player.getScoreboardTeam() != null && this.members.containsTeam(player.getScoreboardTeam().getName()));
-        return isOwner || isMember;
+        return isInGroup(player, CommandUtil.OWNER) || isInGroup(player, CommandUtil.MEMBER);
+    }
+
+    public boolean isInGroup(PlayerEntity player, String group) {
+        return this.groups.get(group).hasPlayer(player.getUuid()) || (player.getScoreboardTeam() != null && this.groups.get(group).hasTeam(player.getScoreboardTeam().getName()));
     }
 
     /**
      * Will always be called by IMarkableRegion to remove child of type IMarkableRegion
-     *
-     * @param child
      */
     @Override
     public void removeChild(IProtectedRegion child) {
         this.children.remove(child.getName());
+        this.childrenNames.remove(child.getName());
     }
 
-    /**
-     * TODO: Global region stuff
-     * Most error handling and consistency checks are done beforehand by the ArgumentTypes for add and removing children.
-     * Try to add a child region to this region. <br>
-     * 1. The child already has a parent which is a local region  or <br>
-     * 2. The child is the same regions as this or <br>
-     * 3. The child is the parent of this region <br>
-     * 4. The child area is not completely contained by the parent area. (done beforehand)
-     * Also removes child from dimension region
-     * FIXME: since this method does manage more than adding children, it should be renamed
-     *
-     * @param child child to add to this region.
-     */
     @Override
-    public void addChild(IProtectedRegion child) {
-        IProtectedRegion childParent = child.getParent();
-        if (childParent != null) {
-            boolean hasDimRegionParent = childParent instanceof DimensionalRegion;
-            boolean hasLocalRegionParent = childParent instanceof IMarkableRegion;
-            if (hasLocalRegionParent) {
-                if (!childParent.equals(this) && this instanceof IMarkableRegion) {
-                    // TODO: Why not allow this, as long as the owner of both regions are the same?
-                    throw new IllegalRegionStateException("Not allowed to \"steal\" child from other parent than a dimensional region");
-                }
-                if (this instanceof DimensionalRegion) {
-                    childParent.removeChild(child);
-                }
-            }
-            if (hasDimRegionParent) {
-                childParent.removeChild(child);
-            }
-        }
-        child.setParent(this);
-        this.children.put(child.getName(), child);
+    public void clearChildren() {
+        this.children.clear();
+        this.childrenNames.clear();
     }
 
     @Override
@@ -324,32 +260,20 @@ public abstract class AbstractRegion implements IProtectedRegion {
         return this.children.containsKey(maybeChild.getName());
     }
 
-    /**
-     * FIXME: setParent should not be used directly. Use addChild instead
-     * Contains common consistency checks for setting a parent region.
-     * More specific checks and assignments need to be implemented in subclasses.
-     *
-     * @param parent the parent to set for this region.
-     * @throws IllegalRegionStateException when consistency checks are failing.
-     */
-    public boolean setParent(IProtectedRegion parent) {
-        if (parent instanceof DimensionalRegion) {
-            this.parent = parent;
-            return true;
-        }
-        if (!parent.getDim().getValue().equals(GlobalRegion.GLOBAL) || !(parent instanceof GlobalRegion)) {
-            if (!parent.getDim().getValue().equals(this.dimension.getValue())) {
-                throw new IllegalRegionStateException("Region '" + parent.getName() + "' is not in the same dimension!");
-            }
-        }
-        if (parent.equals(this)) {
-            throw new IllegalRegionStateException("Region '" + parent.getName() + "' can't be its own parent!");
-        }
-        if (children.containsKey(parent.getName())) {
-            throw new IllegalRegionStateException("Parent '" + parent.getName() + "' is already set as child for region '" + this.getName() + "'!");
-        }
-        return parent.hasChild(this);
+    @Override
+    public boolean addChild(IProtectedRegion child) {
+        this.children.put(child.getName(), child);
+        this.childrenNames.add(child.getName());
+        ((AbstractRegion) child).setParent(this);
+        return true;
     }
+
+    protected boolean setParent(IProtectedRegion parent) {
+        this.parent = parent;
+        this.parentName = parent.getName();
+        return true;
+    }
+
 
     public IProtectedRegion getParent() {
         return parent;
@@ -362,9 +286,10 @@ public abstract class AbstractRegion implements IProtectedRegion {
         nbt.putString(DIM, dimension.getValue().toString());
         nbt.putString(REGION_TYPE, this.regionType.type);
         nbt.putBoolean(ACTIVE, this.isActive);
+        nbt.putBoolean(MUTED, this.isMuted);
         nbt.put(FLAGS, this.flags.serializeNBT());
-        nbt.put(OWNERS, this.owners.serializeNBT());
-        nbt.put(MEMBERS, this.members.serializeNBT());
+        nbt.put(OWNERS, this.groups.get(OWNERS).serializeNBT());
+        nbt.put(MEMBERS, this.groups.get(MEMBERS).serializeNBT());
         if (this.parent != null) {
             nbt.putString(PARENT, this.parent.getName());
         } else {
@@ -372,9 +297,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
         }
         if (this.children != null) {
             NbtList childrenList = new NbtList();
-            childrenList.addAll(this.children.keySet().stream()
-                    .map(NbtString::of)
-                    .collect(Collectors.toSet()));
+            childrenList.addAll(this.children.keySet().stream().map(NbtString::of).collect(Collectors.toSet()));
             nbt.put(CHILDREN, childrenList);
         } else {
             nbt.put(CHILDREN, new NbtList());
@@ -387,25 +310,24 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.name = nbt.getString(NAME);
         this.dimension = RegistryKey.of(RegistryKeys.WORLD, new Identifier(nbt.getString(DIM)));
         this.isActive = nbt.getBoolean(ACTIVE);
+        this.isMuted = nbt.getBoolean(MUTED);
         this.regionType = RegionType.of(nbt.getString(REGION_TYPE));
         this.flags = new FlagContainer(nbt.getCompound(FLAGS));
-        this.owners = new PlayerContainer(nbt.getCompound(OWNERS));
-        this.members = new PlayerContainer(nbt.getCompound(MEMBERS));
-        if (this.parent == null) {
-            // deserialize parent only if present and if this is no instance of GlobalRegion
-            if (nbt.contains(PARENT, NbtElement.STRING_TYPE) && !(this instanceof GlobalRegion)) {
-                String parentName = nbt.getString(PARENT);
-                if (!parentName.equals("")) {
-                    this.parentName = nbt.getString(PARENT);
-                } else {
-                    this.parentName = null;
-                }
+        this.groups = new HashMap<>();
+        this.groups.put(OWNERS, new PlayerContainer(nbt.getCompound(OWNERS)));
+        this.groups.put(MEMBERS, new PlayerContainer(nbt.getCompound(MEMBERS)));
+        if (this.parent == null && nbt.contains(PARENT, NbtElement.STRING_TYPE)) {
+            String parentName = nbt.getString(PARENT);
+            if (!parentName.isEmpty()) {
+                this.parentName = nbt.getString(PARENT);
+            } else {
+                this.parentName = null;
             }
         }
         if (this.children != null && this.children.isEmpty()) {
             if (nbt.contains(CHILDREN, NbtElement.LIST_TYPE)) {
                 NbtList childrenNbt = nbt.getList(CHILDREN, NbtElement.STRING_TYPE);
-                if (childrenNbt.size() > 0) {
+                if (!childrenNbt.isEmpty()) {
                     this.children = new HashMap<>(childrenNbt.size());
                     this.childrenNames = new HashSet<>(childrenNbt.size());
                     for (int i = 0; i < childrenNbt.size(); i++) {

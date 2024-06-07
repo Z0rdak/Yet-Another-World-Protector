@@ -1,8 +1,9 @@
 package de.z0rdak.yawp.managers.data.region;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.commands.CommandUtil;
 import de.z0rdak.yawp.core.INbtSerializable;
-import de.z0rdak.yawp.core.affiliation.PlayerContainer;
+import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.*;
@@ -13,6 +14,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,7 +27,7 @@ public class DimensionRegionCache implements INbtSerializable<NbtCompound> {
     private DimensionalRegion dimensionalRegion;
 
     public DimensionRegionCache(RegistryKey<World> dim) {
-        this(new DimensionalRegion(dim));
+        this(new DimensionalRegion(dim, RegionDataManager.get().getGlobalRegion()));
     }
 
     public DimensionRegionCache(NbtCompound nbt) {
@@ -35,10 +37,6 @@ public class DimensionRegionCache implements INbtSerializable<NbtCompound> {
     public DimensionRegionCache(DimensionalRegion dimensionalRegion) {
         this.dimensionalRegion = dimensionalRegion;
         this.regionsInDimension = new HashMap<>();
-    }
-
-    public Map<String, IMarkableRegion> getRegionsInDimension() {
-        return Collections.unmodifiableMap(regionsInDimension);
     }
 
     private static String getDataName(DimensionalRegion dim) {
@@ -66,12 +64,21 @@ public class DimensionRegionCache implements INbtSerializable<NbtCompound> {
         }
     }
 
+    public RegistryKey<World> dimensionKey() {
+        return this.dimensionalRegion.getDim();
+    }
+
     public DimensionalRegion getDimensionalRegion() {
         return dimensionalRegion;
     }
 
-    public IMarkableRegion getRegion(String regionName) {
-        return this.regionsInDimension.get(regionName);
+    public Map<String, IMarkableRegion> getRegionsInDimension() {
+        return Collections.unmodifiableMap(regionsInDimension);
+    }
+
+    public void addRegion(IProtectedRegion parent, IMarkableRegion child) {
+        parent.addChild(child);
+        this.regionsInDimension.put(child.getName(), child);
     }
 
     public Collection<String> getRegionNames() {
@@ -82,24 +89,23 @@ public class DimensionRegionCache implements INbtSerializable<NbtCompound> {
         return regionsInDimension.values();
     }
 
+    @Nullable
+    public IMarkableRegion getRegion(String regionName) {
+        return this.regionsInDimension.get(regionName);
+    }
+
     public void removeRegion(IMarkableRegion region) {
         if (this.contains(region.getName())) {
             this.regionsInDimension.remove(region.getName());
+            if (region.getParent().getRegionType() == RegionType.DIMENSION) {
+                region.getParent().removeChild(region);
+            }
         }
     }
 
-    public void renameRegion(IMarkableRegion region, String regionName) {
-        IMarkableRegion currentRegion = this.regionsInDimension.get(region.getName());
-        // TODO: Rename me -> remove region, clone region, change name, add region, restore hierarchy
-        // TODO: update children name in parent
-        IProtectedRegion parent = currentRegion.getParent();
-        this.regionsInDimension.put(regionName, currentRegion);
-    }
-
-
     public void clearRegions() {
         this.regionsInDimension.clear();
-        RegionDataManager.save();
+        this.dimensionalRegion.clearChildren();
     }
 
     public boolean contains(String regionName) {
@@ -108,38 +114,6 @@ public class DimensionRegionCache implements INbtSerializable<NbtCompound> {
 
     public IMarkableRegion get(String regionName) {
         return regionsInDimension.get(regionName);
-    }
-
-    public RegistryKey<World> dimensionKey() {
-        return this.dimensionalRegion.getDim();
-    }
-
-    public void addRegion(IMarkableRegion region) {
-        this.dimensionalRegion.addChild(region);
-        this.regionsInDimension.put(region.getName(), region);
-    }
-
-    public Set<String> getDimFlagNames() {
-        return this.dimensionalRegion.getFlags()
-                .stream()
-                .map(IFlag::getFlagIdentifier)
-                .collect(Collectors.toSet());
-    }
-
-    public List<IFlag> getDimFlags() {
-        return new ArrayList<>(this.dimensionalRegion.getFlags());
-    }
-
-    public boolean hasOwner(PlayerEntity player) {
-        PlayerContainer owners = this.dimensionalRegion.getOwners();
-        return owners.containsPlayer(player.getUuid())
-                || (player.getScoreboardTeam() != null && owners.containsTeam((Team) player.getScoreboardTeam()));
-    }
-
-    public boolean hasMember(PlayerEntity player) {
-        PlayerContainer members = this.dimensionalRegion.getMembers();
-        return members.containsPlayer(player.getUuid())
-                || (player.getScoreboardTeam() != null && members.containsTeam((Team) player.getScoreboardTeam()));
     }
 
     @Override
@@ -154,12 +128,22 @@ public class DimensionRegionCache implements INbtSerializable<NbtCompound> {
         return nbt;
     }
 
+    public void renameRegion(IMarkableRegion region, String regionName) {
+        if (this.regionsInDimension.containsKey(regionName)) {
+            throw new IllegalArgumentException("Region with name '" + regionName + "' already exists in dimension '" + this.dimensionalRegion.getName() + "'!");
+        }
+        IMarkableRegion currentRegion = this.regionsInDimension.get(region.getName());
+        IProtectedRegion parent = currentRegion.getParent();
+        this.removeRegion(currentRegion);
+        currentRegion.rename(regionName);
+        this.addRegion(parent, currentRegion);
+    }
+
     @Override
     public void deserializeNBT(NbtCompound nbt) {
         if (nbt.contains(DIM_REGION, NbtElement.COMPOUND_TYPE)) {
             this.dimensionalRegion = new DimensionalRegion(nbt.getCompound(DIM_REGION));
         } else {
-            // TODO: Add dimKey as property to nbt compound to init new default dimensional region
             throw new IllegalArgumentException("Unable to load dimensional region data from NBT");
         }
         this.regionsInDimension = new HashMap<>();
@@ -170,11 +154,22 @@ public class DimensionRegionCache implements INbtSerializable<NbtCompound> {
             if (areaType != null) {
                 YetAnotherWorldProtector.LOGGER.debug("Loading region data for region '" + regionName + "'");
                 IMarkableRegion newRegion = DimensionRegionCache.deserializeLocalRegion(areaType, regionNbt);
-                this.addRegion(newRegion);
+                this.addRegion(this.getDimensionalRegion(), newRegion);
             } else {
                 YetAnotherWorldProtector.LOGGER.error("Unable to read region type for region '" + regionName + "'!");
             }
         });
     }
 
+    public boolean hasOwner(PlayerEntity player) {
+        PlayerContainer owners = this.dimensionalRegion.getGroup(CommandUtil.OWNER);
+        return owners.hasPlayer(player.getUuid())
+                || (player.getScoreboardTeam() != null && owners.hasTeam(player.getScoreboardTeam().getName()));
+    }
+
+    public boolean hasMember(PlayerEntity player) {
+        PlayerContainer members = this.dimensionalRegion.getGroup(CommandUtil.MEMBER);
+        return members.hasPlayer(player.getUuid())
+                || (player.getScoreboardTeam() != null && members.hasTeam(player.getScoreboardTeam().getName()));
+    }
 }

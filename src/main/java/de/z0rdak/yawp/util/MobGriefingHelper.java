@@ -15,18 +15,18 @@ public final class MobGriefingHelper {
 
     MobGriefingHelper() {}
 
-    public static Boolean preventGrief(Entity entity) {   
+    public static boolean preventGrief(Entity entity) {
         World world = entity.getWorld();
         return preventGrief(world, entity);
     }
 
-    public static Boolean preventGrief(World world, Entity entity) {   
+    public static boolean preventGrief(World world, Entity entity) {
         DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(entity));
         FlagCheckEvent flagCheck = checkTargetEvent(entity.getBlockPos(), MOB_GRIEFING, dimCache.getDimensionalRegion());
         return flagCheck.isDenied();
     }
 
-    public static Boolean preventGrief(World world, BlockPos pos) {   
+    public static boolean preventGrief(World world, BlockPos pos) {
         DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.getRegistryKey());
         FlagCheckEvent flagCheck = checkTargetEvent(pos, MOB_GRIEFING, dimCache.getDimensionalRegion());
         return flagCheck.isDenied();

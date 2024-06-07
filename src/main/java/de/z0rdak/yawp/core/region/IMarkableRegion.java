@@ -14,21 +14,20 @@ import net.minecraft.util.math.BlockPos;
  */
 public interface IMarkableRegion extends IProtectedRegion {
 
-    IMarkableArea getArea();
+   IMarkableArea getArea();
 
-    void setArea(IMarkableArea area);
+   void setArea(IMarkableArea area);
 
-    boolean contains(BlockPos position);
+   boolean contains(BlockPos position);
 
-    BlockPos getTpTarget();
+   BlockPos getTpTarget();
 
-    void setTpTarget(BlockPos pos);
+   void setTpTarget(BlockPos pos);
 
-    int getPriority();
+   int getPriority();
 
-    void setPriority(int priority);
+   void setPriority(int priority);
 
-    boolean isMuted();
+    void rename(String newName);
 
-    void setIsMuted(boolean isMuted);
 }

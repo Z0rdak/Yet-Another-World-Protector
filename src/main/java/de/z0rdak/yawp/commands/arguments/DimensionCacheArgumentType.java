@@ -40,6 +40,20 @@ public class DimensionCacheArgumentType implements ArgumentType<DimensionRegionC
         }
     }
 
+    @Override
+    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
+        if (context.getSource()  instanceof ServerCommandSource) {
+            return CommandSource.suggestMatching(RegionDataManager.get().getDimensionList(), builder);
+        } else {
+            return Suggestions.empty();
+        }
+    }
+
+    @Override
+    public Collection<String> getExamples() {
+        return EXAMPLES;
+    }
+
     public static DimensionCacheArgumentType dimRegion() {
         return new DimensionCacheArgumentType();
     }
@@ -56,20 +70,6 @@ public class DimensionCacheArgumentType implements ArgumentType<DimensionRegionC
         } else {
             throw ERROR_INVALID_VALUE.create(resourcelocation.toString());
         }
-    }
-
-    @Override
-    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        if (context.getSource() instanceof ServerCommandSource) {
-            return CommandSource.suggestMatching(RegionDataManager.get().getDimensionList(), builder);
-        } else {
-            return Suggestions.empty();
-        }
-    }
-
-    @Override
-    public Collection<String> getExamples() {
-        return EXAMPLES;
     }
 
     @Override

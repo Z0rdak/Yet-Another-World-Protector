@@ -1,10 +1,10 @@
 package de.z0rdak.yawp.core.flag;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import de.z0rdak.yawp.core.INbtSerializable;
 import net.minecraft.nbt.NbtCompound;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import static de.z0rdak.yawp.util.constants.RegionNBT.FLAG_TYPE;
@@ -14,7 +14,7 @@ import static de.z0rdak.yawp.util.constants.RegionNBT.FLAG_TYPE;
  * [Key] FlagName -> [Value] IFlag <br>
  * E.g. "break_blocks" -> BooleanFlag {"value": false, ...}
  */
-public class FlagContainer extends HashMap<String, IFlag> implements INbtSerializable<NbtCompound> {
+public class FlagContainer extends HashMap<String, IFlag> implements IFlagContainer {
 
 
     public FlagContainer(NbtCompound nbt) {
@@ -24,16 +24,6 @@ public class FlagContainer extends HashMap<String, IFlag> implements INbtSeriali
 
     public FlagContainer() {
         super();
-    }
-
-    public FlagContainer(IFlag flag) {
-        this();
-        this.put(flag);
-    }
-
-    public FlagContainer(Set<IFlag> flags) {
-        this();
-        flags.forEach(this::put);
     }
 
     @Override
@@ -50,7 +40,7 @@ public class FlagContainer extends HashMap<String, IFlag> implements INbtSeriali
     @Override
     public void deserializeNBT(NbtCompound nbt) {
         Set<String> flagKeys = nbt.getKeys();
-        flagKeys.forEach(key -> {
+        flagKeys.forEach( key -> {
             NbtCompound flagNbt = nbt.getCompound(key);
             FlagType flagType = FlagType.of(flagNbt.getString(FLAG_TYPE));
             if (flagType != null) {
@@ -72,15 +62,42 @@ public class FlagContainer extends HashMap<String, IFlag> implements INbtSeriali
         });
     }
 
-    public void put(IFlag flag) {
-        this.put(flag.getFlagIdentifier(), flag);
+    public FlagContainer deepCopy() {
+        return new FlagContainer(this.serializeNBT());
     }
 
-    public boolean contains(RegionFlag flag) {
-        return this.containsKey(flag.name);
+    public void put(IFlag flag) {
+        this.put(flag.getName(), flag);
+    }
+
+    public FlagState flagState(String flagName) {
+        if (this.contains(flagName)) {
+            return this.get(flagName).getState();
+        } else
+            return FlagState.UNDEFINED;
+    }
+
+    public Map<String, IFlag> getActiveFlags() {
+        Map<String, IFlag> activeFlags = new HashMap<>();
+        this.forEach((k, v) -> {
+            if (v.isActive()) {
+                activeFlags.put(k, v);
+            }
+        });
+        return activeFlags;
     }
 
     public boolean contains(String flag) {
         return this.containsKey(flag);
+    }
+
+    public void updateFlag(IFlag flag) {
+        this.put(flag);
+    }
+
+    public void toggleFlag(String flag, boolean enable) {
+        if (this.contains(flag)) {
+            this.get(flag).setState(enable ? FlagState.ALLOWED : FlagState.DENIED);
+        }
     }
 }

@@ -1,16 +1,20 @@
 package de.z0rdak.yawp.util;
 
+import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.stick.AbstractStick;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -30,6 +34,8 @@ public final class StickUtil {
     public static final String STICK_TYPE = "stick_type";
     public static final String STICK_ID = "stick-id";
     public static final String STICK = "stick";
+
+    private static final String MARKED_BLOCK_INDICATOR = "X";
 
     public static void applyEnchantmentGlint(ItemStack item) {
         NbtCompound dummy = new NbtCompound();
@@ -99,6 +105,7 @@ public final class StickUtil {
         }
         return StickType.UNKNOWN;
     }
+    private static final String UNMARKED_BLOCK_INDICATOR = "#";
 
     public static NbtCompound getStickNBT(ItemStack stick) {
         if (stick.getNbt() != null && stick.hasNbt()
@@ -108,15 +115,86 @@ public final class StickUtil {
             return null;
         }
     }
+    private static final String TP_POS_INDICATOR = "TP";
+    private static final Formatting MARKED_BLOCK_COLOR = GREEN;
+    private static final Formatting UNMARKED_BLOCK_COLOR = RED;
+    private static final Formatting UNMARKED_POS_COLOR = AQUA;
+
+    @Nullable
+    public static IMarkableArea getMarkedArea(ItemStack stick) {
+        if (isVanillaStick(stick) && isMarker(stick)) {
+            NbtCompound stickNBT = StickUtil.getStickNBT(stick);
+            if (stickNBT != null) {
+                MarkerStick marker = new MarkerStick(stickNBT);
+                if (!marker.isValidArea()) {
+                    return null;
+                }
+                return LocalRegions.areaFrom(marker);
+            }
+        }
+        return null;
+    }
+
+    public static boolean isMarker(ItemStack stick) {
+        return getStickType(stick) == StickType.MARKER;
+    }
 
     public static void setStickName(ItemStack stick, StickType type) {
-        String displayName = "";
         if (Objects.requireNonNull(type) == StickType.MARKER) {
             MarkerStick marker = new MarkerStick(getStickNBT(stick));
-            String validFlag = marker.isValidArea() ? (GREEN + "*" + GOLD) : "";
-            displayName = GOLD + type.stickName + " (" + marker.getAreaType().areaType + "" + validFlag + ")";
+            boolean isTpPosSet = marker.getTeleportPos() != null;
+            MutableText markerIndicators = buildRegionMarkerIndicators(marker)
+                    .append(" ")
+                    .append(buildTpPosIndicator(isTpPosSet));
+            MutableText markerHoverName = buildStickName(marker)
+                    .append(" ")
+                    .append(markerIndicators);
+            stick.setCustomName(markerHoverName);
         }
-        stick.setCustomName(Text.literal((displayName)));
+    }
+
+    private static MutableText buildStickName(MarkerStick marker) {
+        MutableText stickName = Text.literal(marker.getStickType().stickName).formatted(GOLD);
+        MutableText areaType = Text.literal(" (").append(marker.getAreaType().areaType).append(")");
+        return stickName.append(areaType);
+    }
+
+    /**
+     * @param isMarked
+     * @return [X] or [#]
+     */
+    private static MutableText buildMarkerIndicator(boolean isMarked) {
+        String indicator = isMarked ? MARKED_BLOCK_INDICATOR : UNMARKED_BLOCK_INDICATOR;
+        Formatting color = isMarked ? MARKED_BLOCK_COLOR : UNMARKED_BLOCK_COLOR;
+        MutableText indicatorComp = Text.literal(indicator).formatted(color);
+        MutableText closedResetComp = Text.literal("]").formatted(RESET);
+        return Text.literal("[").append(indicatorComp).append(closedResetComp);
+    }
+
+    private static MutableText buildTpPosIndicator(boolean isMarked) {
+        Formatting color = isMarked ? MARKED_BLOCK_COLOR : UNMARKED_POS_COLOR;
+        MutableText indicatorComp = Text.literal(TP_POS_INDICATOR).formatted(color);
+        MutableText closedResetComp = Text.literal("]").formatted(RESET);
+        return Text.literal("[").append(indicatorComp).append(closedResetComp);
+    }
+
+    /**
+     * RegionMarker [x][x] [TP]
+     *
+     * @param marker
+     * @return
+     */
+    private static MutableText buildRegionMarkerIndicators(MarkerStick marker) {
+        MutableText regionMarkerIndicators = Text.literal("");
+        int maxBlocks = marker.getAreaType().maxBlocks;
+        int amountUnmarked = maxBlocks - marker.getMarkedBlocks().size();
+        for (int i = 0; i < marker.getMarkedBlocks().size(); i++) {
+            regionMarkerIndicators.append(buildMarkerIndicator(true));
+        }
+        for (int i = 0; i < amountUnmarked; i++) {
+            regionMarkerIndicators.append(buildMarkerIndicator(false));
+        }
+        return regionMarkerIndicators;
     }
 
     public static void setStickToolTip(ItemStack stick, StickType type) {
@@ -135,18 +213,18 @@ public final class StickUtil {
 
     private static NbtList getMarkerToolTip() {
         NbtList lore = new NbtList();
-        lore.add(buildLoreTextLine(Text.translatable("help.tooltip.stick.marker.simple.1"), "#ff4d4d"));
-        lore.add(buildLoreTextLine(Text.translatable("help.tooltip.stick.marker.simple.2"), "#ff4d4d"));
-        lore.add(buildLoreTextLine(Text.translatable("help.tooltip.stick.marker.simple.3").formatted(ITALIC), "#808080"));
-        lore.add(buildLoreTextLine(Text.translatable("help.tooltip.stick.marker.simple.4").formatted(ITALIC), "#808080"));
+        lore.add(buildLoreTextLine(Text.translatableWithFallback("help.tooltip.stick.marker.simple.1", "Used to mark a new region."), "#ff4d4d"));
+        lore.add(buildLoreTextLine(Text.translatableWithFallback("help.tooltip.stick.marker.simple.2", "Keep the Region Marker in your hand while creating a region!"), "#ff4d4d"));
+        lore.add(buildLoreTextLine(Text.literal(ITALIC + "").append(Text.translatableWithFallback("help.tooltip.stick.marker.simple.3", "Mark a (Cuboid) region by right-clicking the diagonal opposite corner blocks.")), "#808080"));
+        lore.add(buildLoreTextLine(Text.literal(ITALIC + "").append(Text.translatableWithFallback("help.tooltip.stick.marker.simple.4", "Set a region teleport position by shift-right-clicking a block.")), "#808080"));
         return lore;
     }
 
-    private static NbtString buildLoreTextLine(String text, String hexColor) {
+    private static NbtElement buildLoreTextLine(String text, String hexColor) {
         return NbtString.of("{\"text\":\"" + text + "\", \"color\":\"" + hexColor + "\"}");
     }
 
-    private static NbtString buildLoreTextLine(MutableText text, String hexColor) {
+    private static NbtElement buildLoreTextLine(MutableText text, String hexColor) {
         return buildLoreTextLine(text.getString(), hexColor);
     }
 

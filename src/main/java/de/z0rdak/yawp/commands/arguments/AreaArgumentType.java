@@ -35,20 +35,6 @@ public class AreaArgumentType implements ArgumentType<AreaType> {
 
     private static final Pattern VALID_AREA_NAME_CHAR_PATTERN = Pattern.compile("^[A-Za-z]$");
 
-    public static AreaArgumentType areaType() {
-        return new AreaArgumentType();
-    }
-
-    public static AreaType getAreaType(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        String area = context.getArgument(CommandConstants.AREA.toString(), String.class);
-        AreaType areaType = AreaType.of(area);
-        if (areaType == null) {
-            throw ERROR_INVALID_VALUE.create(areaType);
-        } else {
-            return areaType;
-        }
-    }
-
     @Override
     public AreaType parse(StringReader reader) throws CommandSyntaxException {
         int i = reader.getCursor();
@@ -63,7 +49,6 @@ public class AreaArgumentType implements ArgumentType<AreaType> {
             } else {
                 throw new IllegalArgumentException("Invalid area type supplied");
             }
-            // TODO: Make own AreaTypeException? would be overkill... but..
         } catch (IllegalArgumentException argumentException) {
             reader.setCursor(i);
             YetAnotherWorldProtector.LOGGER.error("Error parsing area type");
@@ -83,5 +68,19 @@ public class AreaArgumentType implements ArgumentType<AreaType> {
     @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
+    }
+
+    public static AreaArgumentType areaType() {
+        return new AreaArgumentType();
+    }
+
+    public static AreaType getAreaType(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        String area = context.getArgument(CommandConstants.AREA.toString(), String.class);
+        AreaType areaType = AreaType.of(area);
+        if (areaType == null) {
+            throw ERROR_INVALID_VALUE.create(areaType);
+        } else {
+            return areaType;
+        }
     }
 }

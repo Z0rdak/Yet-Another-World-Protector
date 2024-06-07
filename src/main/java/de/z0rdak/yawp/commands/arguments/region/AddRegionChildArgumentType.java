@@ -9,13 +9,12 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import de.z0rdak.yawp.core.area.CuboidArea;
-import de.z0rdak.yawp.core.region.AbstractRegion;
-import de.z0rdak.yawp.core.region.CuboidRegion;
+import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
+import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.util.CommandUtil;
-import de.z0rdak.yawp.util.MessageUtil;
+import de.z0rdak.yawp.util.ChatComponentBuilder;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
@@ -26,6 +25,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
 
 public class AddRegionChildArgumentType implements ArgumentType<String> {
 
@@ -48,8 +49,6 @@ public class AddRegionChildArgumentType implements ArgumentType<String> {
     @Override
     public String parse(StringReader reader) throws CommandSyntaxException {
         int i = reader.getCursor();
-
-        // FIXME: Pattern only matches chars, not the valid name
         while (reader.canRead() && String.valueOf(reader.peek()).matches(Pattern.compile("^[A-Za-z\\d\\-]$").pattern())) {
             reader.skip();
         }
@@ -83,25 +82,21 @@ public class AddRegionChildArgumentType implements ArgumentType<String> {
     // TODO: Extend suggestions for any region and check if their parents are dim or local regions
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         if (context.getSource() instanceof ServerCommandSource src) {
-            try {
-                DimensionRegionCache dimCache = CommandUtil.getDimCacheArgument((CommandContext<ServerCommandSource>) context);
-                DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-                CuboidRegion region = (CuboidRegion) CommandUtil.getRegionArgument((CommandContext<ServerCommandSource>) context);
-                List<String> potentialChildrenNames = dimRegion.getChildren().values()
-                        .stream()
-                        .map(r -> (CuboidRegion) r)
-                        .filter(r -> !r.getName().equals(region.getName()))
-                        .filter(r -> ((CuboidArea) region.getArea()).contains((CuboidArea) r.getArea()))
-                        .map(AbstractRegion::getName)
-                        .collect(Collectors.toList());
-                if (potentialChildrenNames.isEmpty()) {
-                    MessageUtil.sendCmdFeedback(src, Text.literal(("There are no valid child regions for region '" + region.getName() + "'.")));
-                    return Suggestions.empty();
-                }
-                return CommandSource.suggestMatching(potentialChildrenNames, builder);
-            } catch (CommandSyntaxException e) {
-                throw new RuntimeException(e);
+            DimensionRegionCache dimCache = ArgumentUtil.getDimCacheArgument((CommandContext<ServerCommandSource>) context);
+            DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
+            IMarkableRegion region = ArgumentUtil.getRegionArgument((CommandContext<ServerCommandSource>) context);
+            List<String> potentialChildrenNames = dimRegion.getChildren().values()
+                    .stream()
+                    .map(r -> (IMarkableRegion) r)
+                    .filter(r -> !r.getName().equals(region.getName()))
+                    .filter(r -> (region.getArea()).containsOther(r.getArea()))
+                    .map(IMarkableRegion::getName)
+                    .collect(Collectors.toList());
+            if (potentialChildrenNames.isEmpty()) {
+                sendCmdFeedback(src, Text.literal("There are no valid child regions for region '" + region.getName() + "'."));
+                return Suggestions.empty();
             }
+            return CommandSource.suggestMatching(potentialChildrenNames, builder);
         } else {
             return Suggestions.empty();
         }
