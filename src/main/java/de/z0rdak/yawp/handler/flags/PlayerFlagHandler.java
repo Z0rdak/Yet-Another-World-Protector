@@ -1,8 +1,12 @@
 package de.z0rdak.yawp.handler.flags;
 
+import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.region.RegionEvents;
+import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
+import de.z0rdak.yawp.util.MessageSender;
 import net.fabricmc.fabric.api.entity.event.v1.EntityElytraEvents;
 import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
@@ -192,10 +196,12 @@ public final class PlayerFlagHandler {
     private static boolean onElytraFlight(LivingEntity livingEntity) {
         if (!livingEntity.getWorld().isClient) {
             if (livingEntity instanceof PlayerEntity player) {
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(HandlerUtil.getEntityDim(player));
-                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = HandlerUtil.checkPlayerEvent(player, player.getBlockPos(), USE_ELYTRA, dimCache.getDimensionalRegion());
-                handleAndSendMsg(flagCheckEvent);
-                return !flagCheckEvent.isDenied();
+                FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), BREAK_BLOCKS, player.getWorld().getRegistryKey(), player);
+                if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent)) {
+                    return true;
+                }
+                FlagState flagState = processCheck(checkEvent, null, MessageSender::sendFlagMsg);
+                return flagState == FlagState.DENIED;
             }
         }
         return true;
@@ -203,32 +209,36 @@ public final class PlayerFlagHandler {
 
     private static boolean onBreakBlock(World world, PlayerEntity player, BlockPos blockPos, BlockState blockState, BlockEntity blockEntity) {
         if (isServerSide(world)) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.getRegistryKey());
-            FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, blockPos, BREAK_BLOCKS, dimCache.getDimensionalRegion());
-            handleAndSendMsg(flagCheckEvent);
-            return !flagCheckEvent.isDenied();
+            FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, BREAK_BLOCKS, player.getWorld().getRegistryKey(), player);
+            if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent)) {
+                return true;
+            }
+            FlagState flagState = processCheck(checkEvent, null, MessageSender::sendFlagMsg);
+            return flagState == FlagState.DENIED;
         }
         return true;
     }
 
     private static boolean onSettingSpawn(PlayerEntity player, BlockPos blockPos) {
         if (isServerSide(player)) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
-            FlagCheckEvent.PlayerFlagEvent flagCheck = checkPlayerEvent(player, blockPos, RegionFlag.SET_SPAWN, dimCache.getDimensionalRegion());
-            if (flagCheck.isDenied()) {
-                sendFlagDeniedMsg(flagCheck);
-                return false;
+            FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, SET_SPAWN, player.getWorld().getRegistryKey(), player);
+            if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent)) {
+                return true;
             }
+            FlagState flagState = processCheck(checkEvent, null, MessageSender::sendFlagMsg);
+            return flagState == FlagState.DENIED;
         }
         return true;
     }
 
     private static PlayerEntity.SleepFailureReason onAllowSleeping(PlayerEntity player, BlockPos blockPos) {
         if (isServerSide(player)) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
-            FlagCheckEvent.PlayerFlagEvent flagCheck = checkPlayerEvent(player, blockPos, RegionFlag.SLEEP, dimCache.getDimensionalRegion());
-            if (flagCheck.isDenied()) {
-                sendFlagDeniedMsg(flagCheck);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, SLEEP, player.getWorld().getRegistryKey(), player);
+            if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent)) {
+                return null;
+            }
+            FlagState flagState = processCheck(checkEvent, null, MessageSender::sendFlagMsg);
+            if (flagState != FlagState.DENIED) {
                 return PlayerEntity.SleepFailureReason.NOT_POSSIBLE_HERE;
             }
         }
