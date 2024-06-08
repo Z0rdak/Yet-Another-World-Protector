@@ -1,7 +1,9 @@
 package de.z0rdak.yawp.mixin;
 
+import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.region.RegionEvents;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
-import de.z0rdak.yawp.handler.flags.FlagCheckEvent;
+import de.z0rdak.yawp.handler.flags.HandlerUtil;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.entity.mob.EndermanEntity;
@@ -13,7 +15,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.ENDERMAN_GRIEFING;
 import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.checkTargetEvent;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.getEntityDim;
 
 @Mixin(targets = "net.minecraft.entity.mob.EndermanEntity$PlaceBlockGoal")
@@ -27,15 +28,20 @@ public abstract class EnderManEntityPlaceBlockGoalMixin {
         if (this.enderman.getCarriedBlock() == null) {
             cir.setReturnValue(false);
         }
-        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(self));
-        DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-        FlagCheckEvent flagCheck = checkTargetEvent(self.getBlockPos(), ENDERMAN_GRIEFING, dimRegion);
-        if (flagCheck.isDenied()) {
-            cir.setReturnValue(false);
+        FlagCheckEvent checkEvent = new FlagCheckEvent(self.getBlockPos(), ENDERMAN_GRIEFING, getEntityDim(self), null);
+        if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent)) {
+            return;
         }
-        flagCheck = checkTargetEvent(self.getBlockPos(), MOB_GRIEFING, dimRegion);
-        if (flagCheck.isDenied()) {
+        HandlerUtil.processCheck(checkEvent, null, deny -> {
             cir.setReturnValue(false);
+        });
+
+        checkEvent = new FlagCheckEvent(self.getBlockPos(), MOB_GRIEFING, getEntityDim(self), null);
+        if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent)) {
+            return;
         }
+        HandlerUtil.processCheck(checkEvent, null, deny -> {
+            cir.setReturnValue(false);
+        });
     }
 }

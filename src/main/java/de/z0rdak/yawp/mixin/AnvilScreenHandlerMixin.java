@@ -12,6 +12,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+// Note: this mixin is currently disabled (not added to yawp.mixins.json)
+// TODO: Remove with WorldEdit integration feature
 @Mixin(AnvilScreenHandler.class)
 public abstract class AnvilScreenHandlerMixin {
 
