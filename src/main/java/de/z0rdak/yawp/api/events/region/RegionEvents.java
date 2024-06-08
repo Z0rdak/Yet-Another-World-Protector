@@ -15,6 +15,10 @@ import net.fabricmc.fabric.api.event.EventFactory;
  */
 public final class RegionEvents {
 
+    public static boolean post(FlagCheckEvent checkEvent){
+        return RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent);
+    }
+    
     private RegionEvents() {
     }
 
