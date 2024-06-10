@@ -3,7 +3,6 @@ package de.z0rdak.yawp.handler.flags;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.api.events.region.RegionEvents;
 import de.z0rdak.yawp.core.flag.FlagState;
-import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.MessageSender;
@@ -35,6 +34,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+import static de.z0rdak.yawp.api.events.region.RegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
 
@@ -159,28 +159,30 @@ public final class PlayerFlagHandler {
 
     private static ActionResult onUseEntity(PlayerEntity player, World world, Hand hand, Entity entity, @Nullable EntityHitResult entityHitResult) {
         if (isServerSide(world)) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
-
-            FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, entity.getBlockPos(), USE_ENTITIES, dimCache.getDimensionalRegion());
-            if (flagCheckEvent.isDenied()) {
-                sendFlagDeniedMsg(flagCheckEvent);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(entity.getBlockPos(), USE_ENTITIES, getDimKey(player), player);
+            if (post(checkEvent))
+                return ActionResult.PASS;
+            FlagState flagState = processCheck(checkEvent, null, MessageSender::sendFlagMsg);
+            if (flagState == FlagState.DENIED)
                 return ActionResult.FAIL;
-            }
+
 
             if (!hasEmptyHands(player)) {
-                FlagCheckEvent.PlayerFlagEvent useItemCheck = checkPlayerEvent(player, entity.getBlockPos(), USE_ITEMS, dimCache.getDimensionalRegion());
-                if (useItemCheck.isDenied()) {
-                    sendFlagDeniedMsg(useItemCheck);
+                checkEvent = new FlagCheckEvent(entity.getBlockPos(), USE_ITEMS, getDimKey(player), player);
+                if (post(checkEvent))
+                    return ActionResult.PASS;
+                flagState = processCheck(checkEvent, null, MessageSender::sendFlagMsg);
+                if (flagState == FlagState.DENIED)
                     return ActionResult.FAIL;
-                }
             }
 
             if (entity instanceof StorageMinecartEntity) {
-                flagCheckEvent = checkPlayerEvent(player, entity.getBlockPos(), CONTAINER_ACCESS, dimCache.getDimensionalRegion());
-                if (flagCheckEvent.isDenied()) {
-                    sendFlagDeniedMsg(flagCheckEvent);
+                checkEvent = new FlagCheckEvent(player.getBlockPos(), CONTAINER_ACCESS, getDimKey(player), player);
+                if (post(checkEvent)) 
+                    return ActionResult.PASS;
+                flagState = processCheck(checkEvent, null, MessageSender::sendFlagMsg);
+                if (flagState == FlagState.DENIED)
                     return ActionResult.FAIL;
-                }
             }
             return ActionResult.PASS;
         }
@@ -194,10 +196,10 @@ public final class PlayerFlagHandler {
 
 
     private static boolean onElytraFlight(LivingEntity livingEntity) {
-        if (!livingEntity.getWorld().isClient) {
+        if (isServerSide(livingEntity.getWorld())) {
             if (livingEntity instanceof PlayerEntity player) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), BREAK_BLOCKS, player.getWorld().getRegistryKey(), player);
-                if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent)) {
+                FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), BREAK_BLOCKS, getDimKey(player), player);
+                if (post(checkEvent)) {
                     return true;
                 }
                 FlagState flagState = processCheck(checkEvent, null, MessageSender::sendFlagMsg);
@@ -209,8 +211,8 @@ public final class PlayerFlagHandler {
 
     private static boolean onBreakBlock(World world, PlayerEntity player, BlockPos blockPos, BlockState blockState, BlockEntity blockEntity) {
         if (isServerSide(world)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, BREAK_BLOCKS, player.getWorld().getRegistryKey(), player);
-            if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent)) {
+            FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, BREAK_BLOCKS, getDimKey(player), player);
+            if (post(checkEvent)) {
                 return true;
             }
             FlagState flagState = processCheck(checkEvent, null, MessageSender::sendFlagMsg);
@@ -221,8 +223,8 @@ public final class PlayerFlagHandler {
 
     private static boolean onSettingSpawn(PlayerEntity player, BlockPos blockPos) {
         if (isServerSide(player)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, SET_SPAWN, player.getWorld().getRegistryKey(), player);
-            if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent)) {
+            FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, SET_SPAWN, getDimKey(player), player);
+            if (post(checkEvent)) {
                 return true;
             }
             FlagState flagState = processCheck(checkEvent, null, MessageSender::sendFlagMsg);
@@ -233,8 +235,8 @@ public final class PlayerFlagHandler {
 
     private static PlayerEntity.SleepFailureReason onAllowSleeping(PlayerEntity player, BlockPos blockPos) {
         if (isServerSide(player)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, SLEEP, player.getWorld().getRegistryKey(), player);
-            if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent)) {
+            FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, SLEEP, getDimKey(player), player);
+            if (post(checkEvent)) {
                 return null;
             }
             FlagState flagState = processCheck(checkEvent, null, MessageSender::sendFlagMsg);
