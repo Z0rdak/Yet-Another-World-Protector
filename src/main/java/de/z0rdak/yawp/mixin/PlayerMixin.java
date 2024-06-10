@@ -1,10 +1,13 @@
 package de.z0rdak.yawp.mixin;
 
+import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.region.RegionEvents;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.handler.flags.FlagCheckEvent;
+import de.z0rdak.yawp.handler.flags.HandlerUtil;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
+import de.z0rdak.yawp.util.MessageSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.damage.DamageSource;
@@ -38,12 +41,13 @@ public abstract class PlayerMixin {
     private void onDropItem(ItemStack stack, boolean retainOwnership, CallbackInfoReturnable<ItemStack> cir) {
         PlayerEntity player = (PlayerEntity) (Object) this;
         if (isServerSide(player)) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
-            FlagCheckEvent.PlayerFlagEvent flagCheck = checkPlayerEvent(player, player.getBlockPos(), RegionFlag.ITEM_DROP, dimCache.getDimensionalRegion());
-            if (flagCheck.isDenied()) {
-                sendFlagDeniedMsg(flagCheck);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), ITEM_DROP, getEntityDim(player), player);
+            if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent))
+                return;
+            HandlerUtil.processCheck(checkEvent, null, deny -> {
+                MessageSender.sendFlagMsg(deny);
                 cir.setReturnValue(null);
-            }
+            });
         }
     }
 
@@ -55,33 +59,37 @@ public abstract class PlayerMixin {
      */
     @Inject(method = "addExperienceLevels", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onGainLevels(int levels, CallbackInfo ci) {
-        PlayerEntity target = (PlayerEntity) (Object) this;
-        if (isServerSide(target)) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(target));
-            FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(target, target.getBlockPos(), LEVEL_FREEZE, dimCache.getDimensionalRegion());
-            if (flagCheckEvent.isDenied()) {
-                sendFlagDeniedMsg(flagCheckEvent);
+        PlayerEntity player = (PlayerEntity) (Object) this;
+        if (isServerSide(player)) {
+            FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), LEVEL_FREEZE, getEntityDim(player), player);
+            if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent))
+                return;
+            HandlerUtil.processCheck(checkEvent, null, deny -> {
+                MessageSender.sendFlagMsg(deny);
                 ci.cancel();
-            }
+            });
         }
     }
 
     /**
-     * TODO: Flag KEEP_INVENTORY
-     *
+     * TODO: add keep-inventory flag enum
+     * As seen below this is already implemented. It just need to be tested and 
      * @param ci
      */
     @Inject(method = "dropInventory", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onDropInventory(CallbackInfo ci) {
-        PlayerEntity target = (PlayerEntity) (Object) this;
-        if (isServerSide(target)) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(target));
-            // FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkTargetEvent(target.getBlockPos(), , dimCache.getDimensionalRegion());
-            //if (flagCheckEvent.isDenied()) {
-            //    sendFlagDeniedMsg(flagCheckEvent);
-            //    ci.cancel();
-            //}
+        PlayerEntity player = (PlayerEntity) (Object) this;
+        /*
+        if (isServerSide(player)) {
+            FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), KEEP_INVENTORY, getEntityDim(player), player);
+            if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent))
+                return;
+            HandlerUtil.processCheck(checkEvent, null, deny -> {
+                MessageSender.sendFlagMsg(deny);
+                ci.cancel();
+            });
         }
+        */
     }
 
     /**
@@ -92,45 +100,59 @@ public abstract class PlayerMixin {
      */
     @Inject(method = "addExperience", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onGainExperience(int experience, CallbackInfo ci) {
-        PlayerEntity target = (PlayerEntity) (Object) this;
-        if (isServerSide(target)) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(target));
-            FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(target, target.getBlockPos(), XP_FREEZE, dimCache.getDimensionalRegion());
-            if (flagCheckEvent.isDenied()) {
-                sendFlagDeniedMsg(flagCheckEvent);
+        PlayerEntity player = (PlayerEntity) (Object) this;
+        if (isServerSide(player)) {
+            FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), XP_FREEZE, getEntityDim(player), player);
+            if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent))
+                return;
+            HandlerUtil.processCheck(checkEvent, null, deny -> {
+                MessageSender.sendFlagMsg(deny);
                 ci.cancel();
-            }
+            });
         }
     }
 
     /**
-     * no-hunger
-     *
+     * TODO: add no-hunger flag enum
+     * As seen below this is already implemented. It just need to be tested and 
      * @param exhaustion
      * @param ci
      */
     @Inject(method = "addExhaustion", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onGainHunger(float exhaustion, CallbackInfo ci) {
-
+        PlayerEntity player = (PlayerEntity) (Object) this;
+        if (isServerSide(player)) {
+            /*
+            FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), NO_HUNGER, getEntityDim(player), player);
+            if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent))
+                return;
+            HandlerUtil.processCheck(checkEvent, null, deny -> {
+                MessageSender.sendFlagMsg(deny);
+                ci.cancel();
+            });          
+             */
+        }
     }
 
 
     @Inject(method = "applyDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;applyArmorToDamage(Lnet/minecraft/entity/damage/DamageSource;F)F"), cancellable = true, allow = 1)
     public void onHurt(DamageSource source, float amount, CallbackInfo ci) {
-        PlayerEntity target = (PlayerEntity) (Object) this;
-        if (isServerSide(target)) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(target));
-            if (source.getAttacker() instanceof PlayerEntity attacker) {
-                FlagCheckEvent flagCheckEvent = checkTargetEvent(target.getBlockPos(), NO_PVP, dimCache.getDimensionalRegion());
-                if (flagCheckEvent.isDenied()) {
-                    sendFlagDeniedMsg(flagCheckEvent, attacker);
-                    ci.cancel();
-                }
-            }
-            FlagCheckEvent flagCheckEvent = checkTargetEvent(target.getBlockPos(), INVINCIBLE, dimCache.getDimensionalRegion());
-            if (flagCheckEvent.isDenied()) {
+        PlayerEntity player = (PlayerEntity) (Object) this;
+        if (isServerSide(player)) {
+            FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), NO_PVP, getEntityDim(player), player);
+            if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent))
+                return;
+            HandlerUtil.processCheck(checkEvent, null, deny -> {
+                MessageSender.sendFlagMsg(deny);
                 ci.cancel();
-            }
+            });
+
+            checkEvent = new FlagCheckEvent(player.getBlockPos(), INVINCIBLE, getEntityDim(player), player);
+            if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent))
+                return;
+            HandlerUtil.processCheck(checkEvent, null, deny -> {
+                ci.cancel();
+            });
         }
     }
 
@@ -147,57 +169,67 @@ public abstract class PlayerMixin {
     public void onAttackEntity(Entity target, CallbackInfo ci) {
         if (isServerSide(target)) {
             PlayerEntity player = (PlayerEntity) (Object) this;
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
-            // player attacking other player
             if (target instanceof PlayerEntity) {
-                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, target.getBlockPos(), MELEE_PLAYERS, dimCache.getDimensionalRegion());
-                handleAndSendMsg(flagCheckEvent);
-                if (flagCheckEvent.isDenied()) {
+                FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), MELEE_PLAYERS, getEntityDim(player), player);
+                if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent))
+                    return;
+                HandlerUtil.processCheck(checkEvent, null, deny -> {
+                    MessageSender.sendFlagMsg(deny);
                     ci.cancel();
+                });
+            } else {
+                if (isAnimal(target)) {
+                    FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), MELEE_ANIMALS, getEntityDim(player), player);
+                    if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent))
+                        return;
+                    HandlerUtil.processCheck(checkEvent, null, deny -> {
+                        MessageSender.sendFlagMsg(deny);
+                        ci.cancel();
+                    });
                 }
-            }
-            // player attacking other entities
-            if (isAnimal(target)) {
-                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, target.getBlockPos(), MELEE_ANIMALS, dimCache.getDimensionalRegion());
-                handleAndSendMsg(flagCheckEvent);
-                if (flagCheckEvent.isDenied()) {
-                    ci.cancel();
+                if (isMonster(target)) {
+                    FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), MELEE_MONSTERS, getEntityDim(player), player);
+                    if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent))
+                        return;
+                    HandlerUtil.processCheck(checkEvent, null, deny -> {
+                        MessageSender.sendFlagMsg(deny);
+                        ci.cancel();
+                    });
                 }
-            }
-            if (isMonster(target)) {
-                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, target.getBlockPos(), MELEE_MONSTERS, dimCache.getDimensionalRegion());
-                handleAndSendMsg(flagCheckEvent);
-                if (flagCheckEvent.isDenied()) {
-                    ci.cancel();
+                if (target instanceof VillagerEntity) {
+                    FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), MELEE_VILLAGERS, getEntityDim(player), player);
+                    if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent))
+                        return;
+                    HandlerUtil.processCheck(checkEvent, null, deny -> {
+                        MessageSender.sendFlagMsg(deny);
+                        ci.cancel();
+                    });
                 }
-            }
-            if (target instanceof VillagerEntity) {
-                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, target.getBlockPos(), MELEE_VILLAGERS, dimCache.getDimensionalRegion());
-                handleAndSendMsg(flagCheckEvent);
-                if (flagCheckEvent.isDenied()) {
-                    ci.cancel();
+                if (target instanceof WanderingTraderEntity) {
+                    FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), MELEE_WANDERING_TRADER, getEntityDim(player), player);
+                    if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent))
+                        return;
+                    HandlerUtil.processCheck(checkEvent, null, deny -> {
+                        MessageSender.sendFlagMsg(deny);
+                        ci.cancel();
+                    });
                 }
-            }
-            if (target instanceof WanderingTraderEntity) {
-                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, target.getBlockPos(), MELEE_WANDERING_TRADER, dimCache.getDimensionalRegion());
-                handleAndSendMsg(flagCheckEvent);
-                if (flagCheckEvent.isDenied()) {
-                    ci.cancel();
-                }
-            }
 
-            // check every other entity if it is in the list of entities to protect
-            // this is for BlockEntities which are not covered by the block breaking flag
-            // FIXME: Tags are not yet considered
-            Set<String> entityTags = FlagConfig.getCoveredBlockEntityTags();
-            Set<String> entities = FlagConfig.getCoveredBlockEntities();
-            boolean isBlockEntityCovered = entities.stream()
-                    .anyMatch(entity -> EntityType.getId(target.getType()).equals(new Identifier(entity)));
-            if (isBlockEntityCovered) {
-                FlagCheckEvent.PlayerFlagEvent flagCheck = checkPlayerEvent(player, target.getBlockPos(), BREAK_BLOCKS, dimCache.getDimensionalRegion());
-                handleAndSendMsg(flagCheck);
-                if (flagCheck.isDenied()) {
-                    ci.cancel();
+                // check every other entity if it is in the list of entities to protect
+                // this is for BlockEntities which are not covered by the block breaking flag
+                // FIXME: Tags are not yet considered
+                Set<String> entityTags = FlagConfig.getCoveredBlockEntityTags();
+                Set<String> entities = FlagConfig.getCoveredBlockEntities();
+                boolean isBlockEntityCovered = entities.stream()
+                        .anyMatch(entity -> EntityType.getId(target.getType()).equals(new Identifier(entity)));
+                if (isBlockEntityCovered) {
+                    FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), BREAK_BLOCKS, getEntityDim(player), player);
+                    if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent))
+                        return;
+                    HandlerUtil.processCheck(checkEvent, null, deny -> {
+                        MessageSender.sendFlagMsg(deny);
+                        ci.cancel();
+                    });
                 }
             }
         }
@@ -207,15 +239,15 @@ public abstract class PlayerMixin {
     private void onUseElytraTick(CallbackInfo ci) {
         PlayerEntity player = (PlayerEntity) (Object) this;
         if (isServerSide(player)) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
             if (player.isFallFlying()) {
-                FlagCheckEvent.PlayerFlagEvent flagCheckEvent = checkPlayerEvent(player, player.getBlockPos(), NO_FLIGHT, dimCache.getDimensionalRegion());
-                if (flagCheckEvent.isDenied()) {
-                    handleAndSendMsg(flagCheckEvent);
+                FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), NO_FLIGHT, getEntityDim(player), player);
+                if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent))
+                    return;
+                HandlerUtil.processCheck(checkEvent, null, deny -> {
+                    MessageSender.sendFlagMsg(deny);
                     player.stopFallFlying();
-                }
+                });
             }
-
         }
     }
 }
