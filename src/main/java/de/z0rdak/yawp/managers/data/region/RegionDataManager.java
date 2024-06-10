@@ -12,6 +12,7 @@ import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
+import de.z0rdak.yawp.handler.flags.HandlerUtil;
 import net.minecraft.datafixer.DataFixTypes;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -34,6 +35,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.values;
+import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 import static de.z0rdak.yawp.util.constants.RegionNBT.GLOBAL;
 
@@ -196,13 +198,9 @@ public class RegionDataManager extends PersistentState {
     /**
      * An event which is called after a player has been moved to a different world.
      * Event handler which creates a new DimensionRegionCache when a dimension is created the first time, by a player loading the dimension.
-     *
-     * @param playerEntity
-     * @param origin
-     * @param destination
      */
     public static void onPlayerChangeWorldAddDimKey(PlayerEntity playerEntity, ServerWorld origin, ServerWorld destination) {
-        if (!destination.isClient) {
+        if (isServerSide(destination)) {
             if (!regionDataCache.dimCacheMap.containsKey(destination.getRegistryKey())) {
                 DimensionRegionCache cache = RegionDataManager.get().newCacheFor(destination.getRegistryKey());
                 YetAnotherWorldProtector.LOGGER.info("Init region data for dimension '" + cache.dimensionKey().getValue() + "'..");
@@ -213,12 +211,9 @@ public class RegionDataManager extends PersistentState {
 
     /**
      * Event handler which is used to initialize the dimension cache with first dimension entry when a player logs in.
-     *
-     * @param entity
-     * @param serverWorld
      */
     public static void onPlayerLoadAddDimKey(Entity entity, ServerWorld serverWorld) {
-        if (!serverWorld.isClient && entity instanceof PlayerEntity) {
+        if (isServerSide(serverWorld) && entity instanceof PlayerEntity) {
             RegistryKey<World> dim = serverWorld.getRegistryKey();
             if (!regionDataCache.dimCacheMap.containsKey(dim)) {
                 DimensionRegionCache cache = regionDataCache.newCacheFor(dim);
