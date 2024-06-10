@@ -1,10 +1,14 @@
 package de.z0rdak.yawp.mixin;
 
+import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.region.RegionEvents;
+import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
-import de.z0rdak.yawp.handler.flags.FlagCheckEvent;
+import de.z0rdak.yawp.handler.flags.HandlerUtil;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
+import de.z0rdak.yawp.util.MessageSender;
 import de.z0rdak.yawp.util.MobGriefingHelper;
 import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.ItemEntity;
@@ -15,6 +19,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.ActionResult;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -38,18 +43,22 @@ public abstract class LivingEntityMixin {
         LivingEntity target = (LivingEntity) (Object) this;
         if (isServerSide(target)) {
             if (target instanceof PlayerEntity) {
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(target));
-                FlagCheckEvent flagCheckEvent = checkTargetEvent(target.getBlockPos(), KNOCKBACK_PLAYERS, dimCache.getDimensionalRegion());
-                if (flagCheckEvent.isDenied()) {
-                    ci.cancel();
+                FlagCheckEvent checkEvent = new FlagCheckEvent(target.getBlockPos(), KNOCKBACK_PLAYERS, getEntityDim(target), null);
+                if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent)) {
+                    return;
                 }
-                flagCheckEvent = checkTargetEvent(target.getBlockPos(), INVINCIBLE, dimCache.getDimensionalRegion());
-                if (flagCheckEvent.isDenied()) {
+                HandlerUtil.processCheck(checkEvent, null, deny -> {
                     ci.cancel();
-                }
+                });
 
+                checkEvent = new FlagCheckEvent(target.getBlockPos(), INVINCIBLE, getEntityDim(target), null);
+                if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent)) {
+                    return;
+                }
+                HandlerUtil.processCheck(checkEvent, null, deny -> {
+                    ci.cancel();
+                });
             }
-
         }
     }
 
@@ -58,17 +67,22 @@ public abstract class LivingEntityMixin {
     public void onDrop(DamageSource source, CallbackInfo ci) {
         LivingEntity target = (LivingEntity) (Object) this;
         if (isServerSide(target)) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(target));
-            FlagCheckEvent flagCheckEvent = checkTargetEvent(target.getBlockPos(), DROP_LOOT_ALL, dimCache.getDimensionalRegion());
-            if (flagCheckEvent.isDenied()) {
-                ci.cancel();
+            FlagCheckEvent checkEvent = new FlagCheckEvent(target.getBlockPos(), DROP_LOOT_ALL, getEntityDim(target), null);
+            if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent)) {
+                return;
             }
-
+            HandlerUtil.processCheck(checkEvent, null, deny -> {
+                ci.cancel();
+            });
             if (source.getSource() instanceof PlayerEntity player) {
-                FlagCheckEvent.PlayerFlagEvent playerFlagCheckEvent = checkPlayerEvent(player, target.getBlockPos(), DROP_LOOT_PLAYER, dimCache.getDimensionalRegion());
-                if (playerFlagCheckEvent.isDenied()) {
-                    ci.cancel();
+                checkEvent = new FlagCheckEvent(target.getBlockPos(), DROP_LOOT_PLAYER, getEntityDim(target), player);
+                if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent)) {
+                    return;
                 }
+                HandlerUtil.processCheck(checkEvent, null, deny -> {
+                    MessageSender.sendFlagMsg(deny);
+                    ci.cancel();
+                });
             }
         }
     }
@@ -76,37 +90,50 @@ public abstract class LivingEntityMixin {
     @Inject(method = "handleFallDamage", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
         LivingEntity self = (LivingEntity) (Object) this;
-        if (!self.getWorld().isClient) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(self));
-            FlagCheckEvent flagCheck = checkTargetEvent(self.getBlockPos(), FALL_DAMAGE, dimCache.getDimensionalRegion());
-            if (flagCheck.isDenied()) {
-                cir.setReturnValue(false);
+        if (isServerSide(self)) {
+            FlagCheckEvent checkEvent = new FlagCheckEvent(self.getBlockPos(), FALL_DAMAGE, getEntityDim(self), null);
+            if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent)) {
                 return;
             }
+            HandlerUtil.processCheck(checkEvent, null, deny -> {
+                cir.setReturnValue(false);
+            });
             if (isMonster(self)) {
-                flagCheck = checkTargetEvent(self.getBlockPos(), FALL_DAMAGE_MONSTERS, dimCache.getDimensionalRegion());
-                if (flagCheck.isDenied()) {
-                    cir.setReturnValue(false);
+                checkEvent = new FlagCheckEvent(self.getBlockPos(), FALL_DAMAGE_MONSTERS, getEntityDim(self), null);
+                if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent)) {
+                    return;
                 }
-
+                HandlerUtil.processCheck(checkEvent, null, deny -> {
+                    cir.setReturnValue(false);
+                });
             }
             if (isAnimal(self)) {
-                flagCheck = checkTargetEvent(self.getBlockPos(), FALL_DAMAGE_ANIMALS, dimCache.getDimensionalRegion());
-                if (flagCheck.isDenied()) {
-                    cir.setReturnValue(false);
+                checkEvent = new FlagCheckEvent(self.getBlockPos(), FALL_DAMAGE_ANIMALS, getEntityDim(self), null);
+                if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent)) {
+                    return;
                 }
+                HandlerUtil.processCheck(checkEvent, null, deny -> {
+                    cir.setReturnValue(false);
+                });
             }
             if (isVillager(self)) {
-                flagCheck = checkTargetEvent(self.getBlockPos(), FALL_DAMAGE_VILLAGERS, dimCache.getDimensionalRegion());
-                if (flagCheck.isDenied()) {
-                    cir.setReturnValue(false);
+                checkEvent = new FlagCheckEvent(self.getBlockPos(), FALL_DAMAGE_VILLAGERS, getEntityDim(self), null);
+                if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent)) {
+                    return;
                 }
+                HandlerUtil.processCheck(checkEvent, null, deny -> {
+                    cir.setReturnValue(false);
+                });
             }
             if (isPlayer(self)) {
-                FlagCheckEvent.PlayerFlagEvent playerFlagCheck = checkPlayerEvent((PlayerEntity) self, self.getBlockPos(), FALL_DAMAGE_PLAYERS, dimCache.getDimensionalRegion());
-                if (playerFlagCheck.isDenied()) {
-                    cir.setReturnValue(false);
+                checkEvent = new FlagCheckEvent(self.getBlockPos(), FALL_DAMAGE_VILLAGERS, getEntityDim(self), (PlayerEntity) self);
+                if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent)) {
+                    return;
                 }
+                HandlerUtil.processCheck(checkEvent, null, deny -> {
+                    MessageSender.sendFlagMsg(deny);
+                    cir.setReturnValue(false);
+                });
             }
         }
     }
@@ -116,32 +143,39 @@ public abstract class LivingEntityMixin {
         LivingEntity self = (LivingEntity) (Object) this;
         DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(self));
         DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-        FlagCheckEvent flagCheckEvent = checkTargetEvent(self.getBlockPos(), RegionFlag.XP_DROP_ALL, dimRegion);
-        if (flagCheckEvent.isDenied()) {
-            ExperienceOrbEntity.spawn((ServerWorld) self.getWorld(), self.getPos(), 0);
-            ci.cancel();
-            return;
-        }
-        if (this.attackingPlayer != null) {
-            FlagCheckEvent.PlayerFlagEvent playerFlagCheckEvent = checkPlayerEvent(this.attackingPlayer, self.getBlockPos(), RegionFlag.XP_DROP_PLAYER, dimCache.getDimensionalRegion());
-            if (playerFlagCheckEvent.isDenied()) {
-                sendFlagDeniedMsg(playerFlagCheckEvent);
-                ExperienceOrbEntity.spawn((ServerWorld) self.getWorld(), self.getPos(), 0);
-                ci.cancel();
 
-            }
+        FlagCheckEvent checkEvent = new FlagCheckEvent(self.getBlockPos(), XP_DROP_ALL, getEntityDim(self), null);
+        if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent))
+            return;
+        HandlerUtil.processCheck(checkEvent, null, deny -> {
+            ci.cancel();
+        });
+        if (this.attackingPlayer != null) {
+            checkEvent = new FlagCheckEvent(self.getBlockPos(), XP_DROP_PLAYER, getEntityDim(self), this.attackingPlayer);
+            if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent))
+                return;
+            HandlerUtil.processCheck(checkEvent, null, deny -> {
+                MessageSender.sendFlagMsg(deny);
+                ci.cancel();
+            });
         }
         if (isMonster(self)) {
-            flagCheckEvent = checkTargetEvent(self.getBlockPos(), RegionFlag.XP_DROP_MONSTER, dimRegion);
+            checkEvent = new FlagCheckEvent(self.getBlockPos(), XP_DROP_MONSTER, getEntityDim(self), null);
+            if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent))
+                return;
+            HandlerUtil.processCheck(checkEvent, null, deny -> {
+                MessageSender.sendFlagMsg(deny);
+                ci.cancel();
+            });
         } else {
-            flagCheckEvent = checkTargetEvent(self.getBlockPos(), RegionFlag.XP_DROP_OTHER, dimRegion);
+            checkEvent = new FlagCheckEvent(self.getBlockPos(), XP_DROP_OTHER, getEntityDim(self), null);
+            if (RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent))
+                return;
+            HandlerUtil.processCheck(checkEvent, null, deny -> {
+                MessageSender.sendFlagMsg(deny);
+                ci.cancel();
+            });
         }
-        if (flagCheckEvent.isDenied()) {
-            ExperienceOrbEntity.spawn((ServerWorld) self.getWorld(), self.getPos(), 0);
-            ci.cancel();
-        }
-
-
     }
 
     @Inject(method = "onKilledBy(Lnet/minecraft/entity/LivingEntity;)V", at = @At(value = "HEAD"), cancellable = true, allow = 1)
