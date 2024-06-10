@@ -9,11 +9,9 @@ import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import de.z0rdak.yawp.util.MessageSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.mob.*;
@@ -30,16 +28,18 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.config.server.CommandPermissionConfig.hasRegionPermission;
-import static de.z0rdak.yawp.util.MessageSender.sendDimFlagNotification;
-import static de.z0rdak.yawp.util.MessageSender.sendFlagNotification;
 
 public final class HandlerUtil {
 
     private HandlerUtil() {
     }
 
-    public static RegistryKey<World> getEntityDim(Entity entity) {
+    public static RegistryKey<World> getDimKey(Entity entity) {
         return entity.getWorld().getRegistryKey();
+    }
+
+    public static RegistryKey<World> getDimKey(World world) {
+        return world.getRegistryKey();
     }
 
     public static boolean isAnimal(Entity entity) {
@@ -51,7 +51,7 @@ public final class HandlerUtil {
     }
 
     public static boolean isServerSide(World world) {
-        return !world.isClient;
+        return isServerSide(world);
     }
 
     public static boolean isVillager(Entity entity) {
