@@ -33,6 +33,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -69,45 +71,32 @@ public abstract class ExplosionMixin {
 
     @Unique
     private static void filterExplosionTargets(Explosion explosion, World world, List<Entity> affectedEntities) {
-        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.getRegistryKey());
-        if (dimCache != null) {
-            Predicate<FlagCheckEvent> isProtected = (fce) -> {
-                if (post(fce)) {
-                    return true;
-                }
-                return processCheck(fce, null, null) == FlagState.DENIED;
-            };
-            
-            Set<BlockPos> protectedBlocks = explosion.getAffectedBlocks().stream()
-                    .filter(blockPos -> isProtected.test(new FlagCheckEvent(blockPos, EXPLOSION_BLOCK, getDimKey(world), null)))
-                    .collect(Collectors.toSet());
-            Set<Entity> protectedEntities = affectedEntities.stream()
-                    .filter(entity -> isProtected.test(new FlagCheckEvent(entity.getBlockPos(), EXPLOSION_ENTITY, getDimKey(world), null)))
-                    .collect(Collectors.toSet());
-            explosion.getAffectedBlocks().removeAll(protectedBlocks);
-            affectedEntities.removeAll(protectedEntities);
-
-            if (explosion.getCausingEntity() != null) {
-                boolean explosionTriggeredByCreeper = (explosion.getCausingEntity() instanceof CreeperEntity);
-                if (explosionTriggeredByCreeper) {
-                    protectedBlocks = explosion.getAffectedBlocks().stream()
-                            .filter(blockPos -> isProtected.test(new FlagCheckEvent(blockPos, EXPLOSION_CREEPER_BLOCK, getDimKey(world), null)))
-                            .collect(Collectors.toSet());
-                    protectedEntities = affectedEntities.stream()
-                            .filter(entity ->  isProtected.test(new FlagCheckEvent(entity.getBlockPos(), EXPLOSION_CREEPER_ENTITY, getDimKey(world), null)))
-                            .collect(Collectors.toSet());
-                } else {
-                    protectedBlocks = explosion.getAffectedBlocks().stream()
-                            .filter(blockPos -> isProtected.test(new FlagCheckEvent(blockPos, EXPLOSION_OTHER_BLOCKS, getDimKey(world), null)))
-                            .collect(Collectors.toSet());
-                    protectedEntities = affectedEntities.stream()
-                            .filter(entity ->  isProtected.test(new FlagCheckEvent(entity.getBlockPos(), EXPLOSION_OTHER_ENTITY, getDimKey(world), null)))
-                            .collect(Collectors.toSet());
-                }
-                explosion.getAffectedBlocks().removeAll(protectedBlocks);
-                affectedEntities.removeAll(protectedEntities);
+        Predicate<FlagCheckEvent> isProtected = (fce) -> {
+            if (post(fce)) {
+                return true;
             }
-        }
+            return processCheck(fce, null, null) == FlagState.DENIED;
+        };
+        BiFunction<List<BlockPos>, RegionFlag, Set<BlockPos>> filterBlocks = (in, flag) -> in.stream()
+                .filter(blockPos -> isProtected.test(new FlagCheckEvent(blockPos, flag, getDimKey(world), null)))
+                .collect(Collectors.toSet());
+        BiFunction<List<Entity>, RegionFlag, Set<Entity>> filterEntities = (in, flag) -> in.stream()
+                .filter(entity -> isProtected.test(new FlagCheckEvent(entity.getBlockPos(), flag, getDimKey(world), null)))
+                .collect(Collectors.toSet());
+        
+        explosion.getAffectedBlocks().removeAll(filterBlocks.apply(explosion.getAffectedBlocks(), EXPLOSION_BLOCK));
+        affectedEntities.removeAll(filterEntities.apply(affectedEntities, EXPLOSION_ENTITY));
+
+        if (explosion.getCausingEntity() != null) {
+            boolean explosionTriggeredByCreeper = (explosion.getCausingEntity() instanceof CreeperEntity);
+            if (explosionTriggeredByCreeper) {
+                explosion.getAffectedBlocks().removeAll(filterBlocks.apply(explosion.getAffectedBlocks(), EXPLOSION_CREEPER_BLOCK));
+                affectedEntities.removeAll(filterEntities.apply(affectedEntities, EXPLOSION_CREEPER_ENTITY));
+            } else {
+                explosion.getAffectedBlocks().removeAll(filterBlocks.apply(explosion.getAffectedBlocks(), EXPLOSION_OTHER_BLOCKS));
+                affectedEntities.removeAll(filterEntities.apply(affectedEntities, EXPLOSION_OTHER_ENTITY));
+            }
+        }    
     }
 
     @Shadow
