@@ -1,9 +1,12 @@
-package de.z0rdak.yawp.mixin;
+package de.z0rdak.yawp.mixin.flag;
 
+import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.enchantment.ProtectionEnchantment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -17,10 +20,12 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
+import org.apache.logging.log4j.core.filter.DenyAllFilter;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -28,9 +33,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.checkTargetEvent;
+import static de.z0rdak.yawp.api.events.region.RegionEvents.post;
+import static de.z0rdak.yawp.core.flag.RegionFlag.*;
+import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
 import static net.minecraft.world.explosion.Explosion.getExposure;
 
 @Mixin(Explosion.class)
@@ -59,18 +67,23 @@ public abstract class ExplosionMixin {
     @Final
     private Map<PlayerEntity, Vec3d> affectedPlayers;
 
+    @Unique
     private static void filterExplosionTargets(Explosion explosion, World world, List<Entity> affectedEntities) {
         DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(world.getRegistryKey());
         if (dimCache != null) {
-            DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-
+            Predicate<FlagCheckEvent> isProtected = (fce) -> {
+                if (post(fce)) {
+                    return true;
+                }
+                return processCheck(fce, null, null) == FlagState.DENIED;
+            };
+            
             Set<BlockPos> protectedBlocks = explosion.getAffectedBlocks().stream()
-                    .filter(blockPos -> checkTargetEvent(blockPos, RegionFlag.EXPLOSION_BLOCK, dimRegion).isDenied())
+                    .filter(blockPos -> isProtected.test(new FlagCheckEvent(blockPos, EXPLOSION_BLOCK, getDimKey(world), null)))
                     .collect(Collectors.toSet());
             Set<Entity> protectedEntities = affectedEntities.stream()
-                    .filter(entity -> checkTargetEvent(entity.getBlockPos(), RegionFlag.EXPLOSION_ENTITY, dimRegion).isDenied())
+                    .filter(entity -> isProtected.test(new FlagCheckEvent(entity.getBlockPos(), EXPLOSION_ENTITY, getDimKey(world), null)))
                     .collect(Collectors.toSet());
-
             explosion.getAffectedBlocks().removeAll(protectedBlocks);
             affectedEntities.removeAll(protectedEntities);
 
@@ -78,17 +91,17 @@ public abstract class ExplosionMixin {
                 boolean explosionTriggeredByCreeper = (explosion.getCausingEntity() instanceof CreeperEntity);
                 if (explosionTriggeredByCreeper) {
                     protectedBlocks = explosion.getAffectedBlocks().stream()
-                            .filter(blockPos -> checkTargetEvent(blockPos, RegionFlag.EXPLOSION_CREEPER_BLOCK, dimRegion).isDenied())
+                            .filter(blockPos -> isProtected.test(new FlagCheckEvent(blockPos, EXPLOSION_CREEPER_BLOCK, getDimKey(world), null)))
                             .collect(Collectors.toSet());
                     protectedEntities = affectedEntities.stream()
-                            .filter(entity -> checkTargetEvent(entity.getBlockPos(), RegionFlag.EXPLOSION_CREEPER_ENTITY, dimRegion).isDenied())
+                            .filter(entity ->  isProtected.test(new FlagCheckEvent(entity.getBlockPos(), EXPLOSION_CREEPER_ENTITY, getDimKey(world), null)))
                             .collect(Collectors.toSet());
                 } else {
                     protectedBlocks = explosion.getAffectedBlocks().stream()
-                            .filter(blockPos -> checkTargetEvent(blockPos, RegionFlag.EXPLOSION_OTHER_BLOCKS, dimRegion).isDenied())
+                            .filter(blockPos -> isProtected.test(new FlagCheckEvent(blockPos, EXPLOSION_OTHER_BLOCKS, getDimKey(world), null)))
                             .collect(Collectors.toSet());
                     protectedEntities = affectedEntities.stream()
-                            .filter(entity -> checkTargetEvent(entity.getBlockPos(), RegionFlag.EXPLOSION_OTHER_ENTITY, dimRegion).isDenied())
+                            .filter(entity ->  isProtected.test(new FlagCheckEvent(entity.getBlockPos(), EXPLOSION_OTHER_ENTITY, getDimKey(world), null)))
                             .collect(Collectors.toSet());
                 }
                 explosion.getAffectedBlocks().removeAll(protectedBlocks);
@@ -113,7 +126,7 @@ public abstract class ExplosionMixin {
         int u = MathHelper.floor(this.z + (double) q + 1.0);
         List<Entity> affectedEntities = this.world.getOtherEntities(this.entity, new Box(k, r, t, l, s, u));
 
-        if (!this.world.isClient) {
+        if (isServerSide(world)) {
             // flag check
             filterExplosionTargets(explosion, this.world, affectedEntities);
 
