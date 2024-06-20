@@ -33,7 +33,7 @@ public final class DimensionalRegion extends AbstractRegion {
     }
 
     public DimensionalRegion(String dimensionKey) {
-        this(RegistryKey.of(RegistryKeys.WORLD, new Identifier(dimensionKey)));
+        this(RegistryKey.of(RegistryKeys.WORLD, Identifier.of(dimensionKey)));
     }
 
     /**

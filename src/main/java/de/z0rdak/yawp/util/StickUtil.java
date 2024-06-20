@@ -54,7 +54,7 @@ public final class StickUtil {
             NbtCompound compoundNBT = new MarkerStick(dim).serializeNBT();
             itemTag.put(STICK, compoundNBT);
             // TODO: get custom data first, then replace the stick tag
-            stick.set(DataComponentTypes.CUSTOM_DATA, ).setNbt(itemTag);
+//            stick.set(DataComponentTypes.CUSTOM_DATA, ).setNbt(itemTag);
         }
     }
 

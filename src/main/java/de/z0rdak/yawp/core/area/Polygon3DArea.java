@@ -90,8 +90,8 @@ public class Polygon3DArea extends AbstractArea {
         this.deserializeNBT(nbt);
         NbtList pointList = nbt.getList(AreaNBT.BLOCKS, NbtElement.COMPOUND_TYPE);
         for (int i = 0; i < pointList.size(); i++) {
-            BlockPos pos = NbtHelper.toBlockPos(pointList.getCompound(i));
-            this.positions.add(pos);
+//FIXME            BlockPos pos = NbtHelper.toBlockPos(pointList.getCompound(i));
+//FIXME            this.positions.add(pos);
         }
     }
 

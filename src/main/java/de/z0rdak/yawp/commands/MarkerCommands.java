@@ -160,7 +160,7 @@ public final class MarkerCommands {
             // is valid stick
             if (!mainHandItem.equals(ItemStack.EMPTY)
                     && StickUtil.hasNonNullTag(mainHandItem)
-                    && mainHandItem.getNbt().contains(STICK)) {
+                    && mainHandItem.isOf(Items.STICK)) {
                 StickType stickType = getStickType(mainHandItem);
                 if (Objects.requireNonNull(stickType) == StickType.MARKER) {
                     mainHandItem = StickUtil.initMarkerNbt(mainHandItem, StickType.MARKER, player.getWorld().getRegistryKey());

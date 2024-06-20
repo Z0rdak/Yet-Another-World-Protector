@@ -9,6 +9,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -43,14 +44,14 @@ public class MarkerStickHandler {
                     }
                     if (player.isCrawling()) {
                         marker.setTeleportPos(target);
-                        involvedItem.getNbt().put(STICK, marker.serializeNBT());
+//FIXME                        involvedItem.getNbt().put(STICK, marker.serializeNBT());
                         return;
                     }
                     // add block to NBT list
                     marker.addMarkedBlock(target);
                     // check whether marked blocks form a valid marked area
                     marker.checkValidArea();
-                    involvedItem.getNbt().put(STICK, marker.serializeNBT());
+//FIXME                    involvedItem.getNbt().put(STICK, marker.serializeNBT());
                     setStickName(involvedItem, StickType.MARKER);
                 }
             }
@@ -62,7 +63,7 @@ public class MarkerStickHandler {
             // is some valid mod stick
             if (!involvedItem.equals(ItemStack.EMPTY)
                     && hasNonNullTag(involvedItem)
-                    && involvedItem.getNbt().contains(STICK)) {
+                    && involvedItem.isOf(Items.STICK)) {
                 boolean targetIsAir;
                 if (target.getType() == HitResult.Type.BLOCK) { // should always be block
                     BlockPos blockpos = target.getBlockPos();
@@ -74,15 +75,15 @@ public class MarkerStickHandler {
 
                 if (player.isCrawling() && targetIsAir) {
                     StickType stickType = getStickType(involvedItem);
-                    if (Objects.requireNonNull(stickType) == StickType.MARKER) {
-                        NbtCompound nbt = involvedItem.getNbt();
-                        MarkerStick marker = new MarkerStick(nbt.getCompound(STICK));
-                        // change area nbt, reset marked blocks, set valid to false
-                        marker.cycleMode();
-                        // update stick name
-                        involvedItem.getNbt().put(STICK, marker.serializeNBT());
-                        StickUtil.setStickName(involvedItem, StickType.MARKER);
-                    }
+//FIXME                    if (Objects.requireNonNull(stickType) == StickType.MARKER) {
+//FIXME                        NbtCompound nbt = involvedItem.getNbt();
+//FIXME                        MarkerStick marker = new MarkerStick(nbt.getCompound(STICK));
+//FIXME                        // change area nbt, reset marked blocks, set valid to false
+//FIXME                        marker.cycleMode();
+//FIXME                        // update stick name
+//FIXME                        involvedItem.getNbt().put(STICK, marker.serializeNBT());
+//FIXME                        StickUtil.setStickName(involvedItem, StickType.MARKER);
+//FIXME                    }
                 }
             }
         }

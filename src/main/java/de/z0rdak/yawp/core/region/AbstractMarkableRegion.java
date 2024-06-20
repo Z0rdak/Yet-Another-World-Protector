@@ -5,6 +5,7 @@ import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
+import de.z0rdak.yawp.util.NbtCompatHelper;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
@@ -94,7 +95,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     @Override
     public void deserializeNBT(NbtCompound nbt) {
         super.deserializeNBT(nbt);
-        this.tpTarget = NbtHelper.toBlockPos(nbt, TP_POS).orElseThrow();
+        this.tpTarget = NbtCompatHelper.toBlockPos(nbt, TP_POS).orElseThrow();
         this.priority = nbt.getInt(PRIORITY);
         this.isMuted = nbt.getBoolean(MUTED);
         AreaType areaType = AreaType.of(nbt.getString(AREA_TYPE));

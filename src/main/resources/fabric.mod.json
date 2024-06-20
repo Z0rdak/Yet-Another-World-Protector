@@ -24,10 +24,10 @@
     "yawp.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.15.3",
-    "fabric-api": ">=0.92.0",
+    "fabricloader": ">=0.15.11",
+    "fabric-api": ">=0.100.0",
     "forgeconfigapiport": "*",
     "fabric": "*",
-    "minecraft": "1.20.6"
+    "minecraft": "1.21"
   }
 }

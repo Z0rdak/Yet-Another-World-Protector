@@ -11,7 +11,7 @@ import net.minecraft.world.World;
 
 public class GlobalRegion extends AbstractRegion {
 
-    public static final Identifier GLOBAL = new Identifier("yawp", "global");
+    public static final Identifier GLOBAL = Identifier.of("yawp", "global");
     public static final RegistryKey<World> GLOBAL_DIMENSION = RegistryKey.of(RegistryKeys.WORLD, GLOBAL);
 
     protected GlobalRegion(NbtCompound nbt) {

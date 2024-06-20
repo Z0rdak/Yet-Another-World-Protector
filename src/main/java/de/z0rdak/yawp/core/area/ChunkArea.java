@@ -8,6 +8,8 @@ import net.minecraft.util.math.ChunkPos;
 import java.util.Collections;
 import java.util.List;
 
+import de.z0rdak.yawp.util.NbtCompatHelper;
+
 import static de.z0rdak.yawp.util.constants.AreaNBT.POS;
 
 public class ChunkArea extends AbstractArea {
@@ -38,7 +40,7 @@ public class ChunkArea extends AbstractArea {
     @Override
     public void deserializeNBT(NbtCompound nbt) {
         super.deserializeNBT(nbt);
-        this.chunk = new ChunkPos(NbtHelper.toBlockPos(nbt, POS).orElseThrow());
+        this.chunk = new ChunkPos(NbtCompatHelper.toBlockPos(nbt, POS).orElseThrow());
     }
 
     @Override

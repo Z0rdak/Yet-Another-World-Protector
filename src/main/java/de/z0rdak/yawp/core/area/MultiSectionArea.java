@@ -49,8 +49,8 @@ public class MultiSectionArea extends AbstractArea {
         this.sections.clear();
         NbtList posList = nbt.getList(AreaNBT.BLOCKS, NbtElement.COMPOUND_TYPE);
         for (int i = 0; i < posList.size(); i++) {
-            BlockPos pos = NbtHelper.toBlockPos(posList.getCompound(i));
-            this.sections.add(ChunkSectionPos.from(pos));
+//FIXME            BlockPos pos = NbtHelper.toBlockPos(posList.getCompound(i));
+//FIXME            this.sections.add(ChunkSectionPos.from(pos));
         }
     }
 

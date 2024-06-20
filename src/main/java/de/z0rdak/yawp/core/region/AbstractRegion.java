@@ -385,7 +385,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
     @Override
     public void deserializeNBT(NbtCompound nbt) {
         this.name = nbt.getString(NAME);
-        this.dimension = RegistryKey.of(RegistryKeys.WORLD, new Identifier(nbt.getString(DIM)));
+        this.dimension = RegistryKey.of(RegistryKeys.WORLD, Identifier.of(nbt.getString(DIM)));
         this.isActive = nbt.getBoolean(ACTIVE);
         this.regionType = RegionType.of(nbt.getString(REGION_TYPE));
         this.flags = new FlagContainer(nbt.getCompound(FLAGS));
