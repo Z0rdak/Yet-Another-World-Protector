@@ -106,7 +106,7 @@ public class RegionDataManager extends PersistentState {
             if (serverInstance == null) {
                 serverInstance = minecraftServer;
             }
-            if (!serverWorld.isClient && serverWorld.getRegistryKey().getValue().equals(new Identifier("minecraft:overworld"))) {
+            if (!serverWorld.isClient && serverWorld.getRegistryKey().getValue().equals(Identifier.of("minecraft:overworld"))) {
                 PersistentStateManager storage = serverWorld.getPersistentStateManager();
                 Type<RegionDataManager> rdmt = new Type<>(RegionDataManager::new, RegionDataManager::load, DataFixTypes.SAVED_DATA_MAP_DATA);
                 RegionDataManager data = storage.getOrCreate(rdmt, DATA_NAME);
@@ -127,7 +127,7 @@ public class RegionDataManager extends PersistentState {
         // deserialize all region without parent and child references
         for (String dimKey : dimensionRegions.getKeys()) {
             rdm.dimensionDataNames.add(dimKey);
-            RegistryKey<World> dimension = RegistryKey.of(RegistryKeys.WORLD, new Identifier(dimKey));
+            RegistryKey<World> dimension = RegistryKey.of(RegistryKeys.WORLD, Identifier.of(dimKey));
             if (dimensionRegions.contains(dimKey, NbtElement.COMPOUND_TYPE)) {
                 NbtCompound dimCacheNbt = dimensionRegions.getCompound(dimKey);
                 if (dimCacheNbt.contains(REGIONS, NbtElement.COMPOUND_TYPE)) {
@@ -144,7 +144,7 @@ public class RegionDataManager extends PersistentState {
 
         // set parent and child references
         for (String dimKey : dimensionRegions.getKeys()) {
-            RegistryKey<World> dimension = RegistryKey.of(RegistryKeys.WORLD, new Identifier(dimKey));
+            RegistryKey<World> dimension = RegistryKey.of(RegistryKeys.WORLD, Identifier.of(dimKey));
             DimensionRegionCache dimCache = rdm.dimCacheMap.get(dimension);
             if (dimCache.getRegions().size() > 0) {
                 YetAnotherWorldProtector.LOGGER.info(Text.translatableWithFallback("data.nbt.dimensions.load.dim.restore", "Restoring region hierarchy for regions in dimension %s", dimKey).getString());

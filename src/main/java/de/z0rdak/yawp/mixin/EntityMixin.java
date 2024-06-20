@@ -12,6 +12,8 @@ import net.minecraft.entity.passive.MerchantEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.vehicle.AbstractMinecartEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.TeleportTarget;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -68,11 +70,11 @@ public abstract class EntityMixin {
         }
     }
 
-    @Inject(method = "moveToWorld", at = @At(value = "HEAD"), cancellable = true, allow = 1)
-    public void onChangeDimension(ServerWorld destination, CallbackInfoReturnable<Entity> cir) {
+    @Inject(method = "teleportTo", at = @At(value = "HEAD"), cancellable = true, allow = 1)
+    public void onChangeDimension(TeleportTarget teleportTarget, CallbackInfoReturnable<Entity> cir) {
         Entity self = (Entity) (Object) this;
         if (!self.getWorld().isClient) {
-            RegionDataManager.onPlayerChangeWorldAddDimKey(null, (ServerWorld) self.getWorld(), destination);
+            RegionDataManager.onPlayerChangeWorldAddDimKey(null, (ServerWorld) self.getWorld(), teleportTarget.world());
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(self));
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
             // Note: does not seem to trigger for players, which is fine

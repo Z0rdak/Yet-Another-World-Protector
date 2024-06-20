@@ -55,7 +55,7 @@ public abstract class LivingEntityMixin {
 
     // FIXME: Separate flags for dropLoot -> mobs, etc AND dropInventory ->
     @Inject(method = "drop", at = @At(value = "HEAD"), cancellable = true, allow = 1)
-    public void onDrop(DamageSource source, CallbackInfo ci) {
+    public void onDrop(ServerWorld world, DamageSource source, CallbackInfo ci) {
         LivingEntity target = (LivingEntity) (Object) this;
         if (isServerSide(target)) {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(target));

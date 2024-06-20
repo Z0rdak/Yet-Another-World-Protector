@@ -8,6 +8,8 @@ import net.minecraft.util.math.Vec3i;
 import java.util.Collections;
 import java.util.List;
 
+import de.z0rdak.yawp.util.NbtCompatHelper;
+
 public abstract class CenteredArea extends AbstractArea {
 
     protected BlockPos center;
@@ -45,7 +47,7 @@ public abstract class CenteredArea extends AbstractArea {
     @Override
     public void deserializeNBT(NbtCompound nbt) {
         super.deserializeNBT(nbt);
-        this.center = NbtHelper.toBlockPos(nbt, "center").orElseThrow();
+        this.center = NbtCompatHelper.toBlockPos(nbt, "center").orElseThrow();
     }
 
     @Override

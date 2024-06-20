@@ -10,6 +10,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.TeleportTarget;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -35,11 +37,11 @@ public abstract class ServerPlayerMixin {
         }
     }
 
-    @Inject(method = "moveToWorld", at = @At(value = "HEAD"), allow = 1, cancellable = true)
-    private void onChangeDimension(ServerWorld destination, CallbackInfoReturnable<Entity> cir) {
+    @Inject(method = "teleportTo", at = @At(value = "HEAD"), allow = 1, cancellable = true)
+    private void onChangeDimension(TeleportTarget teleportTarget, CallbackInfoReturnable<Entity> cir) {
         PlayerEntity player = (PlayerEntity) (Object) this;
         if (isServerSide(player)) {
-            RegionDataManager.onPlayerChangeWorldAddDimKey(player, (ServerWorld) player.getWorld(), destination);
+            RegionDataManager.onPlayerChangeWorldAddDimKey(player, (ServerWorld) player.getWorld(), teleportTarget.world());
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
             FlagCheckEvent.PlayerFlagEvent flagCheck = checkPlayerEvent(player, player.getBlockPos(), RegionFlag.USE_PORTAL_PLAYERS, dimCache.getDimensionalRegion());

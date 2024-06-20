@@ -192,7 +192,7 @@ public abstract class PlayerMixin {
             Set<String> entityTags = FlagConfig.getBreakFlagEntityTags();
             Set<String> entities = FlagConfig.getBreakFlagEntities();
             boolean isBlockEntityCovered = entities.stream()
-                    .anyMatch(entity -> EntityType.getId(target.getType()).equals(new Identifier(entity)));
+                    .anyMatch(entity -> EntityType.getId(target.getType()).equals(Identifier.of(entity)));
             if (isBlockEntityCovered) {
                 FlagCheckEvent.PlayerFlagEvent flagCheck = checkPlayerEvent(player, target.getBlockPos(), BREAK_BLOCKS, dimCache.getDimensionalRegion());
                 handleAndSendMsg(flagCheck);

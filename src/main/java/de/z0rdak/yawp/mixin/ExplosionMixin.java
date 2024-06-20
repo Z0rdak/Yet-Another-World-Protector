@@ -4,7 +4,7 @@ import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import net.minecraft.enchantment.ProtectionEnchantment;
+//FIXME import net.minecraft.enchantment.ProtectionEnchantment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.TntEntity;
@@ -138,7 +138,7 @@ public abstract class ExplosionMixin {
                             entity.damage(this.damageSource, (float) ((int) ((ac * ac + ac) / 2.0 * 7.0 * (double) q + 1.0)));
                             double ad = ac;
                             if (entity instanceof LivingEntity) {
-                                ad = ProtectionEnchantment.transformExplosionKnockback((LivingEntity) entity, ac);
+//FIXME                                ad = ProtectionEnchantment.transformExplosionKnockback((LivingEntity) entity, ac);
                             }
 
                             entity.setVelocity(entity.getVelocity().add(x * ad, y * ad, z * ad));

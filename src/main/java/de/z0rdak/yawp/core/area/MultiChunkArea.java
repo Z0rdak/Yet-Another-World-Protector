@@ -45,10 +45,10 @@ public class MultiChunkArea extends AbstractArea {
         super.deserializeNBT(nbt);
         this.chunks.clear();
         NbtList posList = nbt.getList(AreaNBT.BLOCKS, NbtElement.COMPOUND_TYPE);
-        for (int i = 0; i < posList.size(); i++) {
-            BlockPos pos = NbtHelper.toBlockPos(posList.getCompound(i));
-            this.chunks.add(new ChunkPos(pos));
-        }
+//FIXME        for (int i = 0; i < posList.size(); i++) {
+//FIXME            BlockPos pos = NbtHelper.toBlockPos(posList.getCompound(i));
+//FIXME            this.chunks.add(new ChunkPos(pos));
+//FIXME        }
     }
 
     @Override

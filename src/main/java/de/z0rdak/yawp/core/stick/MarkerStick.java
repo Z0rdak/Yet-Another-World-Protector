@@ -2,10 +2,12 @@ package de.z0rdak.yawp.core.stick;
 
 import de.z0rdak.yawp.core.INbtSerializable;
 import de.z0rdak.yawp.core.area.AreaType;
+import de.z0rdak.yawp.util.NbtCompatHelper;
 import de.z0rdak.yawp.util.StickType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtIntArray;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
@@ -145,11 +147,11 @@ public class MarkerStick extends AbstractStick implements INbtSerializable<NbtCo
         this.areaType = AreaType.of(nbt.getString(AREA_TYPE));
         boolean isTpSet = nbt.getBoolean(IS_TP_SET);
         if (isTpSet) {
-            this.teleportPos = NbtHelper.toBlockPos(nbt, TP_POS).orElseThrow();
+            this.teleportPos = NbtCompatHelper.toBlockPos(nbt, TP_POS).orElseThrow();
         }
-        this.dimension = RegistryKey.of(RegistryKeys.WORLD, new Identifier(nbt.getString(DIM)));
+        this.dimension = RegistryKey.of(RegistryKeys.WORLD, Identifier.of(nbt.getString(DIM)));
         NbtList markedBlocksNBT = nbt.getList(MARKED_BLOCKS, NbtElement.COMPOUND_TYPE);
         this.markedBlocks = new ArrayList<>();
-        markedBlocksNBT.forEach(block -> this.markedBlocks.add(NbtHelper.toBlockPos((NbtCompound) block)));
+        markedBlocksNBT.forEach(block -> this.markedBlocks.add(NbtCompatHelper.toBlockPos((NbtIntArray) block).orElseThrow()));
     }
 }
