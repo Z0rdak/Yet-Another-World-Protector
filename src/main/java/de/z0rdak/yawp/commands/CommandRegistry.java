@@ -28,7 +28,7 @@ public final class CommandRegistry {
 
     public static void registerCommands(CommandDispatcher<ServerCommandSource> commandDispatcher, CommandRegistryAccess cra, CommandManager.RegistrationEnvironment re) {
         dispatcher = commandDispatcher;
-        if (re.dedicated) {
+        if (re.dedicated || re.integrated) {
             if (isConfigInitialized) {
                 CommandRegistry.register(CommandPermissionConfig.BASE_CMD);
             }
