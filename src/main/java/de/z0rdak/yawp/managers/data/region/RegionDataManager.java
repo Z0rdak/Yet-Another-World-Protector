@@ -116,7 +116,7 @@ public class RegionDataManager extends PersistentState {
             if (serverInstance == null) {
                 serverInstance = minecraftServer;
             }
-            if (!serverWorld.isClient && serverWorld.getRegistryKey().getValue().equals(new Identifier("minecraft:overworld"))) {
+            if (isServerSide(serverWorld) && serverWorld.getRegistryKey().getValue().equals(new Identifier("minecraft:overworld"))) {
                 PersistentStateManager storage = serverWorld.getPersistentStateManager();
                 RegionDataManager data = storage.getOrCreate(RegionDataManager::load, RegionDataManager::new, DATA_NAME);
                 storage.set(DATA_NAME, data);
