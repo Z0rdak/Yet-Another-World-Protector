@@ -43,7 +43,7 @@ dependencies {
 	implementation 'com.electronwill.night-config:toml:3.6.7'
 
 	// all required ids for this version are found here: https://www.curseforge.com/minecraft/mc-mods/forge-config-api-port-fabric/files/3671141
-	modImplementation "curse.maven:forge-config-api-port-fabric-547434:5303707" // 1.20.6
+	modImplementation "curse.maven:forge-config-api-port-fabric-547434:5427493" // 1.21
 
 	// Uncomment the following line to enable the deprecated Fabric API modules. 
 	// These are included in the Fabric API production distribution and allow you to update your mod to the latest modules at a later more convenient time.
