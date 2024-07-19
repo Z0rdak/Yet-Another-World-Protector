@@ -51,24 +51,6 @@ public abstract class ExplosionMixin {
     @Final
     private World world;
     @Shadow
-    @Final
-    private float power;
-    @Shadow
-    @Final
-    private double x;
-    @Shadow
-    @Final
-    private double y;
-    @Shadow
-    @Final
-    private double z;
-    @Shadow
-    @Final
-    @Nullable
-    private Entity entity;
-    @Shadow
-    @Final
-    private Map<PlayerEntity, Vec3d> affectedPlayers;
 
     @Unique
     private static void filterExplosionTargets(Explosion explosion, World world, List<Entity> affectedEntities) {
