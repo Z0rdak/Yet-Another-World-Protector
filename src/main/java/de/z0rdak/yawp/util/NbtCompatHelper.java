@@ -20,7 +20,7 @@ public class NbtCompatHelper {
 	}
 	
 	public static Optional<BlockPos> toBlockPos(NbtCompound nbt, String key) {
-        Optional <BlockPos> blockPos = NbtHelper.toBlockPos(nbt, TP_POS);
+        Optional <BlockPos> blockPos = NbtHelper.toBlockPos(nbt, key);
         if (blockPos.isEmpty()) {
         	blockPos = toBlockPosFromCompound(nbt, key);
         }
