@@ -2,6 +2,8 @@
 [Fabric] First iteration of 1.21 port. Thanks ptefar for the initial work.
 ## Changed
 * Disabled the RegionMarker and related commands until ifs fully ported.
+## Fixed
+* [Fabric] explosion-* flag mixin is now working as intended
 # [0.0.2.9-beta4] - 2024-05-13
 ## Fixed
 * [Fabric] Fix sweet berries and glow berries not considered by the place-blocks flag
