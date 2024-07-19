@@ -71,7 +71,7 @@ public abstract class ExplosionMixin {
         }
     }
 
-    @Inject(method = "collectBlocksAndDamageEntities", locals = LocalCapture.CAPTURE_FAILSOFT, at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;"), allow = 1)
+    @Inject(method = "collectBlocksAndDamageEntities", locals = LocalCapture.CAPTURE_FAILSOFT, at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Vec3d;<init>(DDD)V", ordinal = 1), allow = 1)
     public void onExplosion(CallbackInfo ci, Set<BlockPos> set, int i, float q, int k, int l, int r, int s, int t, int u, List<Entity> list) {
         /* List<Entity> list is a local variable - the affectedEntities - which, 
         is captured and provided as argument here through the LocalCapture feature 
