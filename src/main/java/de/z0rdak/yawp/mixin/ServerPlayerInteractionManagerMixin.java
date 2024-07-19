@@ -27,14 +27,14 @@ public class ServerPlayerInteractionManagerMixin {
     @Inject(method = "interactBlock", at = @At("HEAD"), cancellable = true, allow = 1)
     public void useItemOn(ServerPlayerEntity player, World world, ItemStack involvedItemStack, Hand hand, BlockHitResult blockHitResult, CallbackInfoReturnable<ActionResult> cir) {
         if (!world.isClient) {
-            // TODO: Maybe check if player is allowed to mark block
             BlockPos blockpos = blockHitResult.getBlockPos();
             if (isVanillaStick(involvedItemStack)) {
-                StickType stickType = getStickType(involvedItemStack);
-                if (Objects.requireNonNull(stickType) == StickType.MARKER) {
-                    MarkerStickHandler.onMarkBlock(player, involvedItemStack, blockpos);
-                    cir.setReturnValue(ActionResult.SUCCESS);
-                }
+                // TODO: Alpha1 - RegionMarker disabled
+                // StickType stickType = getStickType(involvedItemStack);
+                // if (Objects.requireNonNull(stickType) == StickType.MARKER) {
+                //     MarkerStickHandler.onMarkBlock(player, involvedItemStack, blockpos);
+                //     cir.setReturnValue(ActionResult.SUCCESS);
+                // }
             }
         }
 

@@ -45,7 +45,8 @@ public class CommandRegistry {
                 .then(CommandUtil.literal(CommandConstants.HELP)
                         .executes(ctx -> promptHelp(ctx.getSource())))
                 .then(DimensionCommands.build())
-                .then(MarkerCommands.build())
+                // TODO: Alpha1 - RegionMarker disabled
+                // .then(MarkerCommands.build())
                 .then(RegionCommands.build());
     }
 

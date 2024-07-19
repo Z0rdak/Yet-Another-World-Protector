@@ -25,12 +25,13 @@ public abstract class AnvilScreenHandlerMixin {
             boolean isInputAndOutputStick = ItemStack.areItemsEqual(outputItem, Items.STICK.getDefaultStack())
                     && ItemStack.areItemsEqual(inputItem, Items.STICK.getDefaultStack());
             if (isInputAndOutputStick && ingredientInput.isEmpty()) {
-                StickType type = StickType.of(outputItem.getName().getString());
-                if (type != StickType.UNKNOWN) {
-                    MarkerStickHandler.onCreateStick(player, inputItem, outputItem, type);
-                    player.getInventory().markDirty();
-                    ci.cancel();
-                }
+                // TODO: Alpha1 - RegionMarker disabled
+                // StickType type = StickType.of(outputItem.getName().getString());
+                // if (type != StickType.UNKNOWN) {
+                //     MarkerStickHandler.onCreateStick(player, inputItem, outputItem, type);
+                //     player.getInventory().markDirty();
+                //     ci.cancel();
+                // }
             }
         }
     }

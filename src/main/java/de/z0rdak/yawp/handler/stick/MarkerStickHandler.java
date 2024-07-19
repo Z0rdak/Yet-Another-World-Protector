@@ -44,14 +44,15 @@ public class MarkerStickHandler {
                     }
                     if (player.isCrawling()) {
                         marker.setTeleportPos(target);
-//FIXME                        involvedItem.getNbt().put(STICK, marker.serializeNBT());
+                        
+                     //   involvedItem.getNbt().put(STICK, marker.serializeNBT());
                         return;
                     }
                     // add block to NBT list
                     marker.addMarkedBlock(target);
                     // check whether marked blocks form a valid marked area
                     marker.checkValidArea();
-//FIXME                    involvedItem.getNbt().put(STICK, marker.serializeNBT());
+               //     involvedItem.getNbt().put(STICK, marker.serializeNBT());
                     setStickName(involvedItem, StickType.MARKER);
                 }
             }
@@ -74,16 +75,18 @@ public class MarkerStickHandler {
                 }
 
                 if (player.isCrawling() && targetIsAir) {
+                    /* // TODO: Alpha1 - RegionMarker disabled
                     StickType stickType = getStickType(involvedItem);
-//FIXME                    if (Objects.requireNonNull(stickType) == StickType.MARKER) {
-//FIXME                        NbtCompound nbt = involvedItem.getNbt();
-//FIXME                        MarkerStick marker = new MarkerStick(nbt.getCompound(STICK));
-//FIXME                        // change area nbt, reset marked blocks, set valid to false
-//FIXME                        marker.cycleMode();
-//FIXME                        // update stick name
-//FIXME                        involvedItem.getNbt().put(STICK, marker.serializeNBT());
-//FIXME                        StickUtil.setStickName(involvedItem, StickType.MARKER);
-//FIXME                    }
+                    if (Objects.requireNonNull(stickType) == StickType.MARKER) {
+                        NbtCompound nbt = involvedItem.getNbt();
+                        MarkerStick marker = new MarkerStick(nbt.getCompound(STICK));
+                        // change area nbt, reset marked blocks, set valid to false
+                        marker.cycleMode();
+                        // update stick name
+                        involvedItem.getNbt().put(STICK, marker.serializeNBT());
+                        StickUtil.setStickName(involvedItem, StickType.MARKER);
+                    }                    
+                     */
                 }
             }
         }
