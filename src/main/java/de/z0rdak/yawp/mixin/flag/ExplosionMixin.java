@@ -29,6 +29,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.List;
 import java.util.Map;
@@ -102,59 +103,15 @@ public abstract class ExplosionMixin {
     @Shadow
     public abstract DamageSource getDamageSource();
 
-    @Inject(method = "collectBlocksAndDamageEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getOtherEntities(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/Box;)Ljava/util/List;"), cancellable = true, allow = 1)
-    public void onExplosion(CallbackInfo ci) {
+    @Inject(method = "collectBlocksAndDamageEntities", locals = LocalCapture.CAPTURE_FAILSOFT, at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Vec3d;<init>(DDD)V", ordinal = 1), allow = 1)
+    public void onExplosion(CallbackInfo ci, Set<BlockPos> set, int i, float q, int k, int l, int r, int s, int t, int u, List<Entity> list) {
+        /* List<Entity> list is a local variable - the affectedEntities - which, 
+        is captured and provided as argument here through the LocalCapture feature 
+        */
         Explosion explosion = (Explosion) (Object) this;
-        // get needed info by copying from vanilla code
-        float q = this.power * 2.0F;
-        int k = MathHelper.floor(this.x - (double) q - 1.0);
-        int l = MathHelper.floor(this.x + (double) q + 1.0);
-        int r = MathHelper.floor(this.y - (double) q - 1.0);
-        int s = MathHelper.floor(this.y + (double) q + 1.0);
-        int t = MathHelper.floor(this.z - (double) q - 1.0);
-        int u = MathHelper.floor(this.z + (double) q + 1.0);
-        List<Entity> affectedEntities = this.world.getOtherEntities(this.entity, new Box(k, r, t, l, s, u));
-
         if (isServerSide(world)) {
             // flag check
-            filterExplosionTargets(explosion, this.world, affectedEntities);
-
-            // vanilla code continues
-            Vec3d vec3d = new Vec3d(this.x, this.y, this.z);
-
-            for (int v = 0; v < affectedEntities.size(); ++v) {
-                Entity entity = affectedEntities.get(v);
-                if (!entity.isImmuneToExplosion()) {
-                    double w = Math.sqrt(entity.squaredDistanceTo(vec3d)) / (double) q;
-                    if (w <= 1.0) {
-                        double x = entity.getX() - this.x;
-                        double y = (entity instanceof TntEntity ? entity.getY() : entity.getEyeY()) - this.y;
-                        double z = entity.getZ() - this.z;
-                        double aa = Math.sqrt(x * x + y * y + z * z);
-                        if (aa != 0.0) {
-                            x /= aa;
-                            y /= aa;
-                            z /= aa;
-                            double ab = getExposure(vec3d, entity);
-                            double ac = (1.0 - w) * ab;
-                            entity.damage(this.getDamageSource(), (float) ((int) ((ac * ac + ac) / 2.0 * 7.0 * (double) q + 1.0)));
-                            double ad = ac;
-                            if (entity instanceof LivingEntity) {
-                                ad = ProtectionEnchantment.transformExplosionKnockback((LivingEntity) entity, ac);
-                            }
-
-                            entity.setVelocity(entity.getVelocity().add(x * ad, y * ad, z * ad));
-                            if (entity instanceof PlayerEntity playerEntity) {
-                                if (!playerEntity.isSpectator() && (!playerEntity.isCreative() || !playerEntity.getAbilities().flying)) {
-                                    this.affectedPlayers.put(playerEntity, new Vec3d(x * ac, y * ac, z * ac));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            // cancel further processing of injected method, because we copied it anyway
-            ci.cancel();
+            filterExplosionTargets(explosion, this.world, list);
         }
     }
 }
