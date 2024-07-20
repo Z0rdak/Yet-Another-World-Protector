@@ -1,39 +1,47 @@
-package de.z0rdak.yawp.mixin;
+package de.z0rdak.yawp.mixin.flag.player;
 
+import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.core.flag.IFlag;
-import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.core.region.DimensionalRegion;
-import de.z0rdak.yawp.handler.flags.FlagCheckEvent;
-import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.TeleportTarget;
+
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.ENTER_DIM;
+import static de.z0rdak.yawp.api.events.region.RegionEvents.post;
+import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
+import static de.z0rdak.yawp.util.MessageSender.sendFlagMsg;
 
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerMixin {
 
+    
+    
     @Inject(method = "dropSelectedItem", at = @At(value = "TAIL"), allow = 1, cancellable = true)
     private void onDropItem(boolean entireStack, CallbackInfoReturnable<Boolean> cir) {
         ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
         if (isServerSide(player)) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
-            FlagCheckEvent.PlayerFlagEvent flagCheck = checkPlayerEvent(player, player.getBlockPos(), RegionFlag.ITEM_DROP, dimCache.getDimensionalRegion());
-            if (flagCheck.isDenied()) {
-                sendFlagDeniedMsg(flagCheck);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), ITEM_DROP, getDimKey(player), player);
+            if (post(checkEvent)) 
+                return;
+            processCheck(checkEvent, null, deny -> {
+                sendFlagMsg(deny);
                 cir.setReturnValue(false);
-            }
+            });
         }
     }
+
+    @Shadow
+    protected abstract TeleportTarget getTeleportTarget(ServerWorld destination);
 
     @Inject(method = "moveToWorld", at = @At(value = "HEAD"), allow = 1, cancellable = true)
     private void onChangeDimension(ServerWorld destination, CallbackInfoReturnable<Entity> cir) {
@@ -53,6 +61,8 @@ public abstract class ServerPlayerMixin {
                 double tpPosScale = DimensionType.getTeleportationScale(player.level.dimensionType(), targetServerLevel.dimensionType());
                 BlockPos targetPos = worldborder.clampToBounds(player.getX() * tpPosScale, player.getY(), player.getZ() * tpPosScale);
              */
+            TeleportTarget teleportTarget = this.getTeleportTarget(destination);
+
             FlagCheckEvent.PlayerFlagEvent playerFlagCheckEvent = new FlagCheckEvent.PlayerFlagEvent(player, dimRegion, null, ENTER_DIM);
             playerFlagCheckEvent.setDeniedLocal(false);
             if (dimRegion.isActive()) {
@@ -76,16 +86,18 @@ public abstract class ServerPlayerMixin {
         }
     }
 
-    @Inject(method = "teleport", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;getServerWorld()Lnet/minecraft/server/world/ServerWorld;"), allow = 1, cancellable = true)
+    @Inject(method = "teleport(Lnet/minecraft/server/world/ServerWorld;DDDFF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;getServerWorld()Lnet/minecraft/server/world/ServerWorld;"), allow = 1, cancellable = true)
     private void onTeleportToDimension(ServerWorld destination, double x, double y, double z, float yaw, float pitch, CallbackInfo ci) {
         PlayerEntity player = (PlayerEntity) (Object) this;
         if (isServerSide(player)) {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
-            FlagCheckEvent.PlayerFlagEvent flagCheck = checkPlayerEvent(player, player.getBlockPos(), RegionFlag.USE_PORTAL_PLAYERS, dimCache.getDimensionalRegion());
-            if (flagCheck.isDenied()) {
-                sendFlagDeniedMsg(flagCheck);
-                ci.cancel();
+            FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), USE_PORTAL_PLAYERS, player.getWorld().getRegistryKey(), player);
+            if (post(checkEvent)) {
+                return;
             }
+            processCheck(checkEvent, null, deny -> {
+                sendFlagMsg(deny);
+                ci.cancel();
+            });
         }
     }
 }
