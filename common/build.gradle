@@ -1,3 +1,19 @@
+/*
+VanillaGradle likes to push breaking changes without updating their version
+If this happens in the future, try update your gradle version on the project
+If a gradle update doesn't fix the issue, you can pin the VanillaGradle version to a specific version that was working before.
+You can find the versions here https://repo.spongepowered.org/#browse/browse:maven-snapshots:org%2Fspongepowered%2Fvanillagradle
+and you can pin them with the following code:
+
+buildscript {
+    dependencies.add 'classpath', 'org.spongepowered:vanillagradle:0.2.1-20240507.024226-82'
+}
+
+plugins {
+    id 'org.spongepowered.gradle.vanilla' version '0.2.1-20240507.024226-82'
+}
+*/
+
 plugins {
     id 'idea'
     id 'java'
