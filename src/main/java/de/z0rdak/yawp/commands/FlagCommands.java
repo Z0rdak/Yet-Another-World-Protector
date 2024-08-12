@@ -185,7 +185,7 @@ public final class FlagCommands {
         flag.setState(flagState);
         MutableText undoLink = buildRegionActionUndoLink(ctx.getInput(), oldState.name(), flagState.name());
         MutableText msg = Text.translatableWithFallback("cli.flag.state.success.text", "Set flag state of %s to: '%s'",
-                        buildFlagInfoLink(region, flag), flag.isActive())
+                        buildFlagInfoLink(region, flag), flag.getState().name)
                 .append(" ")
                 .append(undoLink);
         sendCmdFeedback(ctx.getSource(), msg);
