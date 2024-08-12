@@ -26,6 +26,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.BlockEvent;
 
 import javax.annotation.Nullable;
@@ -73,18 +74,25 @@ public final class HandlerUtil {
         return entity instanceof AnimalEntity || entity instanceof WaterMobEntity;
     }
 
+    public static boolean isServerSide(World level) {
+        return !level.isClientSide();
+    }
+
     public static boolean isServerSide(EntityEvent event) {
         return isServerSide(event.getEntity());
     }
 
     public static boolean isServerSide(BlockEvent event) {
-        return !event.getWorld().isClientSide();
+        return isServerSide(event.getWorld());
     }
 
     public static boolean isServerSide(Entity entity) {
-        return !entity.getCommandSenderWorld().isClientSide;
+        return isServerSide(entity.getCommandSenderWorld());
     }
-
+    
+    public static boolean notServerSideOrPlayerNull(PlayerEvent event) {
+        return !isServerSide(event) || event.getEntity() == null;
+    }
     public static boolean isVillager(Entity entity) {
         return entity instanceof AbstractVillagerEntity;
     }
@@ -99,6 +107,14 @@ public final class HandlerUtil {
                 || entity instanceof FlyingEntity
                 || entity instanceof EnderDragonEntity
                 || entity instanceof ShulkerEntity;
+    }
+
+    public static void syncPlayerInventory(World world, PlayerEntity player) { 
+        // TODO:
+    }
+    
+    public static void updateBlockState(World world, BlockPos pos) {
+        world.updateNeighborsAt(pos, world.getBlockState(pos).getBlock());
     }
 
     /**
