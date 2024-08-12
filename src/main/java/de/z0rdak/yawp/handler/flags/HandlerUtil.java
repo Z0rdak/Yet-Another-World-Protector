@@ -24,8 +24,10 @@ import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
 
 import javax.annotation.Nullable;
@@ -74,18 +76,25 @@ public final class HandlerUtil {
         return entity instanceof Animal || entity instanceof WaterAnimal;
     }
 
+    public static boolean isServerSide(LevelAccessor level) {
+        return !level.isClientSide();
+    }
+
     public static boolean isServerSide(EntityEvent event) {
         return isServerSide(event.getEntity());
     }
 
     public static boolean isServerSide(BlockEvent event) {
-        return !event.getLevel().isClientSide();
+        return isServerSide(event.getLevel());
     }
 
     public static boolean isServerSide(Entity entity) {
-        return !entity.getCommandSenderWorld().isClientSide;
+        return isServerSide(entity.getCommandSenderWorld());
     }
-
+    
+    public static boolean notServerSideOrPlayerNull(PlayerEvent event) {
+        return !isServerSide(event) || event.getEntity() == null;
+    }
     public static boolean isVillager(Entity entity) {
         return entity instanceof AbstractVillager;
     }
@@ -100,6 +109,14 @@ public final class HandlerUtil {
                 || entity instanceof FlyingMob
                 || entity instanceof EnderDragon
                 || entity instanceof Shulker;
+    }
+
+    public static void syncPlayerInventory(Level world, Player player) { 
+        // TODO:
+    }
+    
+    public static void updateBlockState(Level world, BlockPos pos) {
+        world.updateNeighborsAt(pos, world.getBlockState(pos).getBlock());
     }
 
     /**
