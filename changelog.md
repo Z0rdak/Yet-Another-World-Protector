@@ -1,3 +1,12 @@
+# [0.0.4.0-beta2] - 2024-08-13
+
+## Fixed
+
+* Fix RegionMarker not working properly
+* Fix NPE when checking for player related flags which caused (beside others) issues with Minecolonies
+* Fix NPE when checking for mob-griefing through a projectile from an already dead entity (e.g. fireball from a ghast)
+* Fix display of wrong flag state in CLI
+
 # [0.0.4.0-beta1] - 2024-05-25
 
 **Warning/Disclaimer:** This update introduces **breaking changes**. Please make sure to back up your world before
