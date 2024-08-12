@@ -240,11 +240,7 @@ public class DimensionCommands {
             player = null;
         }
         if (MinecraftForge.EVENT_BUS.post(new RegionEvent.CreateRegionEvent(region, player))) {
-            return 0;
-        }
-        if (parent.getRegionType() != RegionType.DIMENSION && parent.getRegionType() != RegionType.LOCAL) {
-            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.error", "Error creating region %s", buildRegionInfoLink(parent)));
-            return -1;
+            return 1;
         }
         RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
         dimCache.addRegion(parent, region);
@@ -254,27 +250,21 @@ public class DimensionCommands {
         return 0;
     }
 
-    private static int createCuboidRegion(CommandContext<CommandSourceStack> ctx, String regionName, DimensionRegionCache dimCache, BlockPos pos1, BlockPos pos2, @Nullable IProtectedRegion parent) {
+    private static int createCuboidRegion(CommandContext<CommandSourceStack> ctx, String regionName, DimensionRegionCache dimCache, BlockPos pos1, BlockPos pos2, @Nullable IProtectedRegion parentRegion) {
         CuboidRegion region = new CuboidRegion(regionName, new CuboidArea(pos1, pos2), null, dimCache.dimensionKey());
-        if (parent == null) {
-            return createRegion(ctx, regionName, dimCache, region, dimCache.getDimensionalRegion());
-        }
+        IProtectedRegion parent = parentRegion == null ? dimCache.getDimensionalRegion() : parentRegion;
         return createRegion(ctx, regionName, dimCache, region, parent);
     }
 
-    private static int createSphereRegion(CommandContext<CommandSourceStack> ctx, String regionName, DimensionRegionCache dimCache, BlockPos centerPos, BlockPos radiusPos, @Nullable IProtectedRegion parent) {
+    private static int createSphereRegion(CommandContext<CommandSourceStack> ctx, String regionName, DimensionRegionCache dimCache, BlockPos centerPos, BlockPos radiusPos, @Nullable IProtectedRegion parentRegion) {
         SphereRegion region = new SphereRegion(regionName, new SphereArea(centerPos, radiusPos), null, dimCache.dimensionKey());
-        if (parent == null) {
-            return createRegion(ctx, regionName, dimCache, region, dimCache.getDimensionalRegion());
-        }
+        IProtectedRegion parent = parentRegion == null ? dimCache.getDimensionalRegion() : parentRegion;
         return createRegion(ctx, regionName, dimCache, region, parent);
     }
 
-    private static int createSphereRegion(CommandContext<CommandSourceStack> ctx, String regionName, DimensionRegionCache dimCache, BlockPos centerPos, int radius, @Nullable IProtectedRegion parent) {
+    private static int createSphereRegion(CommandContext<CommandSourceStack> ctx, String regionName, DimensionRegionCache dimCache, BlockPos centerPos, int radius, @Nullable IProtectedRegion parentRegion) {
         SphereRegion region = new SphereRegion(regionName, new SphereArea(centerPos, radius), null, dimCache.dimensionKey());
-        if (parent == null) {
-            return createRegion(ctx, regionName, dimCache, region, dimCache.getDimensionalRegion());
-        }
+        IProtectedRegion parent = parentRegion == null ? dimCache.getDimensionalRegion() : parentRegion;
         return createRegion(ctx, regionName, dimCache, region, parent);
     }
 
