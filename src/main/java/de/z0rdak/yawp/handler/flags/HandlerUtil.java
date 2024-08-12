@@ -30,7 +30,9 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.api.events.region.RegionEvents.post;
+import static de.z0rdak.yawp.api.events.region.RegionEvents.post;
 import static de.z0rdak.yawp.config.server.CommandPermissionConfig.hasRegionPermission;
+import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
 import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
 
 public final class HandlerUtil {
@@ -73,6 +75,7 @@ public final class HandlerUtil {
                 || entity instanceof EnderDragonEntity
                 || entity instanceof ShulkerEntity;
     }
+
 
     /**
      * Processes the given flag check event and executes the given consumers if the flag is allowed or denied. <br>
@@ -128,6 +131,14 @@ public final class HandlerUtil {
                 cir.setReturnValue(false);
             });
         }
+    }
+
+    public static void syncPlayerInventory(World world, PlayerEntity player) { 
+        // TODO:
+    }
+    
+    public static void updateBlockState(World world, BlockPos pos) {
+        world.updateNeighbors(pos, world.getBlockState(pos).getBlock());
     }
 
     /**
