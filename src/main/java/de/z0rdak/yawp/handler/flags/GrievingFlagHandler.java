@@ -201,26 +201,27 @@ public class GrievingFlagHandler {
 
     @SubscribeEvent
     public static void onMobGriefing(EntityMobGriefingEvent event) {
-        if (!event.getEntity().level().isClientSide) {
-            if (isServerSide(event.getEntity())) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(event.getEntity().blockPosition(), RegionFlag.MOB_GRIEFING, getEntityDim(event.getEntity()), null);
+        if (event.getEntity() == null) {
+            return;
+        }
+        if (isServerSide(event.getEntity())) {
+            FlagCheckEvent checkEvent = new FlagCheckEvent(event.getEntity().blockPosition(), RegionFlag.MOB_GRIEFING, getEntityDim(event.getEntity()), null);
+            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                return;
+            }
+            FlagState flagState = processCheck(checkEvent, null, denyResult -> {
+                event.setResult(Event.Result.DENY);
+            });
+            if (flagState == FlagState.DENIED)
+                return;
+            if (event.getEntity() instanceof EnderMan) {
+                checkEvent = new FlagCheckEvent(event.getEntity().blockPosition(), RegionFlag.ENDERMAN_GRIEFING, getEntityDim(event.getEntity()), null);
                 if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                     return;
                 }
-                FlagState flagState = processCheck(checkEvent, null, denyResult -> {
+                processCheck(checkEvent, null, denyResult -> {
                     event.setResult(Event.Result.DENY);
                 });
-                if (flagState == FlagState.DENIED)
-                    return;
-                if (event.getEntity() instanceof EnderMan) {
-                    checkEvent = new FlagCheckEvent(event.getEntity().blockPosition(), RegionFlag.ENDERMAN_GRIEFING, getEntityDim(event.getEntity()), null);
-                    if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
-                        return;
-                    }
-                    processCheck(checkEvent, null, denyResult -> {
-                        event.setResult(Event.Result.DENY);
-                    });
-                }
             }
         }
     }
