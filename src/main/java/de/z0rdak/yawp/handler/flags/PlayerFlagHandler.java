@@ -53,6 +53,7 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.ForgeRegistry;
 
 import java.util.HashMap;
 import java.util.List;
@@ -395,15 +396,19 @@ public final class PlayerFlagHandler {
         if (isServerSide(event)) {
             if (event.getTarget() == null || event.getEntity() == null) return;
             Entity target = event.getTarget();
-            PlayerEntity player = event.getPlayer();
-            // FIXME: Tags not considered yet
+            PlayerEntity player = event.getPlayer();            
             Set<String> entityTags = FlagConfig.getCoveredBlockEntityTags();
+            boolean isCoveredByTag = entityTags.stream().anyMatch(entityTag -> {
+                ResourceLocation tagRl = new ResourceLocation(entityTag);
+                return target.getTags().contains(tagRl.getPath());
+            });
             Set<String> entities = FlagConfig.getCoveredBlockEntities();
             boolean isBlockEntityCovered = entities.stream().anyMatch(entity -> {
-                ResourceLocation entityResourceLocation = new ResourceLocation(entity);
-                return target.getType().getRegistryName() != null && target.getType().getRegistryName().equals(entityResourceLocation);
+                ResourceLocation entityRl = new ResourceLocation(entity);
+                ResourceLocation targetRl = ForgeRegistries.ENTITIES.getKey(target.getType());
+                return targetRl != null && targetRl.equals(entityRl);
             });
-            if (isBlockEntityCovered) {
+            if (isBlockEntityCovered || isCoveredByTag) {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(event.getTarget().blockPosition(), BREAK_BLOCKS, getEntityDim(player), player);
                 if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                     return;
@@ -435,7 +440,8 @@ public final class PlayerFlagHandler {
                     event.setCanceled(true);
                 });
             } else {
-                if (explosion.getExploder() instanceof PlayerEntity player) {
+                if (explosion.getExploder() instanceof PlayerEntity) {
+                    PlayerEntity player = (PlayerEntity) explosion.getExploder(); 
                     FlagCheckEvent checkEvent = new FlagCheckEvent(explosionPos, IGNITE_EXPLOSIVES, dim, player);
                     if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                         return;
@@ -620,14 +626,20 @@ public final class PlayerFlagHandler {
         }
         if (!hasEmptyHands) {
             if (isBlock) {
+                ItemStack itemInHand = player.getItemInHand(event.getHand());
+                ResourceLocation itemRl = ForgeRegistries.ITEMS.getKey(itemInHand.getItem());
                 Set<String> entities = FlagConfig.getCoveredBlockEntities();
+                Set<String> entityTags = FlagConfig.getCoveredBlockEntityTags();
+                boolean isCoveredByTag = entityTags.stream().anyMatch(tag -> {
+                    ResourceLocation tagRl = new ResourceLocation(tag);
+                    // TODO: Fixme
+                    return itemInHand.getTags().anyMatch(itemTagKey -> itemTagKey.location().equals(tagRl));
+                });                
                 boolean isBlockCovered = entities.stream().anyMatch(entity -> {
-                    ResourceLocation entityResourceLocation = new ResourceLocation(entity);
-                    ItemStack itemInHand = player.getItemInHand(event.getHand());
-                    ResourceLocation resourcelocation = ForgeRegistries.ITEMS.getKey(itemInHand.getItem());
-                    return resourcelocation != null && resourcelocation.equals(entityResourceLocation);
-                });
-                if (isBlockCovered) {
+                    ResourceLocation entityRl = new ResourceLocation(entity);              
+                    return itemRl != null && itemRl.equals(entityRl);
+                });                
+                if (isBlockCovered || isCoveredByTag) {
                     FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPos(), PLACE_BLOCKS, dim, player);
                     if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                         return;
@@ -635,8 +647,8 @@ public final class PlayerFlagHandler {
                     processCheck(checkEvent, null, onDeny -> {
                         event.setCanceled(true);
                         MessageSender.sendFlagMsg(onDeny);
+                        player.inventory.setChanged();
                     });
-                    // TODO: Sync inventory?
                 }
             }
             FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPos(), USE_ITEMS, dim, player);
@@ -646,6 +658,7 @@ public final class PlayerFlagHandler {
             processCheck(checkEvent, null, onDeny -> {
                 event.setCanceled(true);
                 MessageSender.sendFlagMsg(onDeny);
+                player.inventory.setChanged();
             });
         }
 
