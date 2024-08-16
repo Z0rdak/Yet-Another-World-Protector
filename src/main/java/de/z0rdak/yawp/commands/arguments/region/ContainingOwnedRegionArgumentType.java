@@ -120,19 +120,18 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
                             return Suggestions.empty();
                         }
                         IMarkableArea markedArea = StickUtil.getMarkedArea(player.getMainHandItem());
-                        LocalRegions.RegionOverlappingInfo overlappingWithPermission = LocalRegions.getOverlappingWithPermission(markedArea, player);
-                        if (overlappingWithPermission.containingRegions.isEmpty()) {
+                        LocalRegions.RegionOverlappingInfo overlapping = LocalRegions.getOverlappingWithPermission(markedArea, player);
+                        if (!overlapping.hasContaining()) {
                             sendCmdFeedback(src, new TranslationTextComponent("cli.arg.area.owned.no-containment"));
                             return Suggestions.empty();
                         }
-                        List<String> ownedRegions = overlappingWithPermission.containingRegions.stream()
-                                .map(IProtectedRegion::getName)
-                                .collect(Collectors.toList());
-                        return ISuggestionProvider.suggest(ownedRegions, builder);
+                        Set<String> containingRegionName = overlapping.containingRegions.stream().map(IProtectedRegion::getName).collect(Collectors.toSet());
+                        return ISuggestionProvider.suggest(containingRegionName, builder);
                     }
                 }
                 return Suggestions.empty();
             } catch (CommandSyntaxException e) {
+                YetAnotherWorldProtector.LOGGER.error(e);
                 return Suggestions.empty();
             }
         } else {
