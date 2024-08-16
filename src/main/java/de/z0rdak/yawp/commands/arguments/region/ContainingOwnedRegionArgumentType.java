@@ -120,19 +120,18 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
                             return Suggestions.empty();
                         }
                         IMarkableArea markedArea = StickUtil.getMarkedArea(player.getMainHandStack());
-                        LocalRegions.RegionOverlappingInfo overlappingWithPermission = LocalRegions.getOverlappingWithPermission(markedArea, player);
-                        if (overlappingWithPermission.containingRegions.isEmpty()) {
-                            sendCmdFeedback(src, Text.translatableWithFallback("cli.arg.area.owned.no-containment", "There is no suitable Local Region as parent for the marked area (no ownership or containment)"));
+                        LocalRegions.RegionOverlappingInfo overlapping = LocalRegions.getOverlappingWithPermission(markedArea, player);
+                        if (!overlapping.hasContaining()) {
+                            sendCmdFeedback(src, Text.translatableWithFallback("cli.arg.area.owned.no-containment", "No suitable Local Region as parent for the marked area. Attempting to set Dimensional Region as parent."));
                             return Suggestions.empty();
                         }
-                        List<String> ownedRegions = overlappingWithPermission.containingRegions.stream()
-                                .map(IProtectedRegion::getName)
-                                .collect(Collectors.toList());
-                        return CommandSource.suggestMatching(ownedRegions, builder);
+                        Set<String> containingRegionName = overlapping.containingRegions.stream().map(IProtectedRegion::getName).collect(Collectors.toSet());
+                        return CommandSource.suggestMatching(containingRegionName, builder);
                     }
                 }
                 return Suggestions.empty();
             } catch (CommandSyntaxException e) {
+                YetAnotherWorldProtector.LOGGER.error(e);
                 return Suggestions.empty();
             }
         } else {
@@ -187,7 +186,7 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
                     overlapping = LocalRegions.getOverlappingRegions(markedArea, src.getWorld().getRegistryKey());
                 }
                 if (!overlapping.hasContaining()) {
-                    sendCmdFeedback(src, Text.translatableWithFallback("cli.arg.area.owned.no-containment", "There is no suitable Local Region as parent for the marked area (no ownership or containment)"));
+                    sendCmdFeedback(src, Text.translatableWithFallback("cli.arg.area.owned.no-containment", "No suitable Local Region as parent for the marked area. Attempting to set Dimensional Region as parent."));
                     return Suggestions.empty();
                 }
                 Set<String> containingRegionName = overlapping.containingRegions.stream().map(IProtectedRegion::getName).collect(Collectors.toSet());
