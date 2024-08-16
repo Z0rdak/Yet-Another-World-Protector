@@ -5,7 +5,7 @@ plugins {
 
 
 
-version = project.mod_version
+version = "${project.mod_version}-fabric"
 group = project.maven_group
 
 base {
