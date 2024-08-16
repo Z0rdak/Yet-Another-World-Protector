@@ -381,7 +381,7 @@
   "cli.msg.info.region.teams.cleared": "Cleared %s teams of group '%s' for %s",
   "cli.msg.dim.info.region.create.fail.multiple-containment": "There are multiple containing regions as valid parents, please specify one of them.",
   "cli.arg.region.owned.empty": "There is no suitable Local Region as parent",
-  "cli.arg.area.owned.no-containment": "There is no suitable Local Region as parent for the marked area (no ownership or containment)",
+  "cli.arg.area.owned.no-containment": "No suitable Local Region as parent for the marked area. Attempting to set Dimensional Region as parent.",
   "cli.arg.region.owned.empty.using-dim": "There is no suitable Local Region as parent for %s (no ownership or containment). Using %s as parent.",
   "cli.arg.region.owned.invalid": "Supplied region is not owned or suitable as parent for %s"
 }
