@@ -40,6 +40,7 @@ import java.util.stream.Stream;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
+import static net.minecraft.ChatFormatting.RED;
 
 public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
 
@@ -119,19 +120,18 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
                             return Suggestions.empty();
                         }
                         IMarkableArea markedArea = StickUtil.getMarkedArea(player.getMainHandItem());
-                        LocalRegions.RegionOverlappingInfo overlappingWithPermission = LocalRegions.getOverlappingWithPermission(markedArea, player);
-                        if (overlappingWithPermission.containingRegions.isEmpty()) {
+                        LocalRegions.RegionOverlappingInfo overlapping = LocalRegions.getOverlappingWithPermission(markedArea, player);
+                        if (!overlapping.hasContaining()) {
                             sendCmdFeedback(src, new TranslatableComponent("cli.arg.area.owned.no-containment"));
                             return Suggestions.empty();
                         }
-                        List<String> ownedRegions = overlappingWithPermission.containingRegions.stream()
-                                .map(IProtectedRegion::getName)
-                                .collect(Collectors.toList());
-                        return SharedSuggestionProvider.suggest(ownedRegions, builder);
+                        Set<String> containingRegionName = overlapping.containingRegions.stream().map(IProtectedRegion::getName).collect(Collectors.toSet());
+                        return SharedSuggestionProvider.suggest(containingRegionName, builder);
                     }
                 }
                 return Suggestions.empty();
             } catch (CommandSyntaxException e) {
+                YetAnotherWorldProtector.LOGGER.error(e);
                 return Suggestions.empty();
             }
         } else {
