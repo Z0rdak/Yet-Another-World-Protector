@@ -28,6 +28,6 @@
     "fabric-api": ">=0.100.0",
     "forgeconfigapiport": "*",
     "fabric": "*",
-    "minecraft": "1.21"
+    "minecraft": ["1.21","1.21.1"]
   }
 }
