@@ -1,3 +1,5 @@
+# [0.0.2.10-alpha2] - 2024-08-16
+[Fabric] Update version info to make YAWP compatible with 1.21.1. Thanks again ptefar!
 # [0.0.2.10-alpha1] - 2024-07-19
 [Fabric] First iteration of 1.21 port. Thanks ptefar for the initial work.
 ## Changed
