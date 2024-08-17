@@ -27,6 +27,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.BlockPosArgument;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
@@ -41,6 +42,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static de.z0rdak.yawp.commands.CommandConstants.*;
+import static de.z0rdak.yawp.commands.MarkerCommands.fromMarkedBlocks;
 import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
 
 public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
@@ -80,6 +82,35 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
         }
         boolean hasPermissionForParent = CommandPermissionConfig.hasConfigPermission(context.getSource(), CommandSourceType.of(context.getSource()));
         boolean containsChild = parent.getArea().containsOther(markedArea);
+        if (hasPermissionForParent && containsChild) {
+            return parent;
+        } else {
+            if (!hasPermissionForParent) {
+                sendCmdFeedback(context.getSource(), new TranslationTextComponent("cli.arg.region.owned.invalid.permission", containingRegionName, containedRegionName));
+            }
+            if (!containsChild) {
+                sendCmdFeedback(context.getSource(), new TranslationTextComponent("cli.arg.region.owned.invalid.containment", containingRegionName, containedRegionName));
+            }
+            throw ERROR_INVALID_PARENT.create(containingRegionName);
+        }
+    }
+
+    public static IMarkableRegion getRegionWithMarker(CommandContext<CommandSource> context, String argName) throws CommandSyntaxException {
+        String containingRegionName = context.getArgument(argName, String.class);
+        String containedRegionName = context.getArgument(NAME.toString(), String.class);
+        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(context.getSource().getLevel().dimension());
+        IMarkableRegion parent = dimCache.getRegion(containingRegionName);
+
+        ServerPlayerEntity player = context.getSource().getPlayerOrException();
+        IMarkableRegion markedRegion = fromMarkedBlocks(context, player, containedRegionName);
+        if (markedRegion == null) {
+            throw new IllegalArgumentException("Could not get marked blocks from command");
+        }
+        if (parent == null) {
+            throw ERROR_INVALID_VALUE.create(containingRegionName);
+        }
+        boolean hasPermissionForParent = CommandPermissionConfig.hasConfigPermission(context.getSource(), CommandSourceType.of(context.getSource()));
+        boolean containsChild = parent.getArea().containsOther(markedRegion.getArea());
         if (hasPermissionForParent && containsChild) {
             return parent;
         } else {
