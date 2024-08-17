@@ -383,5 +383,7 @@
   "cli.arg.region.owned.empty": "There is no suitable Local Region as parent",
   "cli.arg.area.owned.no-containment": "No suitable Local Region as parent for the marked area. Attempting to set Dimensional Region as parent.",
   "cli.arg.region.owned.empty.using-dim": "There is no suitable Local Region as parent for %s (no ownership or containment). Using %s as parent.",
-  "cli.arg.region.owned.invalid": "Supplied region is not owned or suitable as parent for %s"
+  "cli.arg.region.owned.invalid": "Region %s is not suitable as parent",
+  "cli.arg.region.owned.invalid.permission": "Region %s is not suitable as parent for %s (no permission for parent)",
+  "cli.arg.region.owned.invalid.containment": "Region %s is not suitable as parent for %s (does not fully contain child region)"
 }
