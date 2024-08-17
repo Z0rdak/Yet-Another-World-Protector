@@ -97,6 +97,11 @@ public class ArgumentUtil {
         return ContainingOwnedRegionArgumentType.getRegion(ctx, PARENT.toString());
     }
 
+    public static IMarkableRegion getContainingOwnedRegionArgumentWithMarker(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return ContainingOwnedRegionArgumentType.getRegionWithMarker(ctx, PARENT.toString());
+    }
+
+
     public static ServerPlayer getPlayerArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         return EntityArgument.getPlayer(ctx, CommandConstants.PLAYER.toString());
     }
