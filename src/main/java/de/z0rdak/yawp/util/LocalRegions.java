@@ -20,10 +20,13 @@ import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.NotImplementedException;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static de.z0rdak.yawp.config.server.CommandPermissionConfig.*;
 
 public final class LocalRegions {
 
@@ -226,22 +229,20 @@ public final class LocalRegions {
 
     public static RegionOverlappingInfo getOverlappingWithPermission(IMarkableArea area, PlayerEntity player) {
         RegionOverlappingInfo overlappingRegions = getOverlappingRegions(area, player.getCommandSenderWorld().dimension());
-        List<IMarkableRegion> intersecting = overlappingRegions.intersectingRegions.stream()
-                .filter(r -> CommandPermissionConfig.hasRegionPermission(r, player, CommandUtil.OWNER))
-                .collect(Collectors.toList());
-        List<IMarkableRegion> contained = overlappingRegions.containingRegions.stream()
-                .filter(r -> CommandPermissionConfig.hasRegionPermission(r, player, CommandUtil.OWNER))
-                .collect(Collectors.toList());
-        return new RegionOverlappingInfo(null, intersecting, contained);
+        return getOverlappingWithPermission(null, player, overlappingRegions);
     }
 
     public static RegionOverlappingInfo getOverlappingWithPermission(IMarkableRegion region, PlayerEntity player) {
         RegionOverlappingInfo overlappingRegions = getOverlappingRegions(region);
+        return getOverlappingWithPermission(region, player, overlappingRegions);
+    }
+
+    private static @NotNull RegionOverlappingInfo getOverlappingWithPermission(IMarkableRegion region, Player player, RegionOverlappingInfo overlappingRegions) {
         List<IMarkableRegion> intersecting = overlappingRegions.intersectingRegions.stream()
-                .filter(r -> CommandPermissionConfig.hasRegionPermission(r, player, CommandUtil.OWNER))
+                .filter(r -> hasRegionPermission(r, player, CommandUtil.OWNER) || hasConfigPermission(player))
                 .collect(Collectors.toList());
         List<IMarkableRegion> contained = overlappingRegions.containingRegions.stream()
-                .filter(r -> CommandPermissionConfig.hasRegionPermission(r, player, CommandUtil.OWNER))
+                .filter(r -> hasRegionPermission(r, player, CommandUtil.OWNER) || hasConfigPermission(player))
                 .collect(Collectors.toList());
         return new RegionOverlappingInfo(region, intersecting, contained);
     }
