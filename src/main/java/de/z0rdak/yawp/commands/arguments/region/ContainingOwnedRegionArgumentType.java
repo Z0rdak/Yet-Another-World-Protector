@@ -10,6 +10,8 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.commands.CommandSourceType;
+import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
@@ -65,24 +67,29 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
 
     public static IMarkableRegion getRegion(CommandContext<CommandSource> context, String argName) throws CommandSyntaxException {
         String containingRegionName = context.getArgument(argName, String.class);
-        PlayerEntity player;
-        LocalRegions.RegionOverlappingInfo overlapping;
+        String containedRegionName = context.getArgument(NAME.toString(), String.class);
         DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(context.getSource().getLevel().dimension());
-        IMarkableRegion region = dimCache.getRegion(containingRegionName);
-        if (region == null) {
+        IMarkableRegion parent = dimCache.getRegion(containingRegionName);
+
+        IMarkableArea markedArea = getMarkableArea(context);
+        if (markedArea == null) {
+            throw new IllegalArgumentException("Could not get marked blocks from command");
+        }
+        if (parent == null) {
             throw ERROR_INVALID_VALUE.create(containingRegionName);
         }
-        try {
-            player = context.getSource().getPlayerOrException();
-            overlapping = LocalRegions.getOverlappingWithPermission(region, player);
-        } catch (CommandSyntaxException e) {
-            overlapping = LocalRegions.getOverlappingRegions(region);
-        }
-        if (overlapping.containingRegions.contains(region)) {
-            return region;
+        boolean hasPermissionForParent = CommandPermissionConfig.hasConfigPermission(context.getSource(), CommandSourceType.of(context.getSource()));
+        boolean containsChild = parent.getArea().containsOther(markedArea);
+        if (hasPermissionForParent && containsChild) {
+            return parent;
         } else {
-            sendCmdFeedback(context.getSource(), new TranslationTextComponent("cli.arg.region.owned.invalid", containingRegionName));
-            throw ERROR_INVALID_VALUE.create(containingRegionName);
+            if (!hasPermissionForParent) {
+                sendCmdFeedback(context.getSource(), new TranslationTextComponent("cli.arg.region.owned.invalid.permission", containingRegionName, containedRegionName));
+            }
+            if (!containsChild) {
+                sendCmdFeedback(context.getSource(), new TranslationTextComponent("cli.arg.region.owned.invalid.containment", containingRegionName, containedRegionName));
+            }
+            throw ERROR_INVALID_PARENT.create(containingRegionName);
         }
     }
 
