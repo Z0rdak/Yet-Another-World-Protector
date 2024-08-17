@@ -1,4 +1,10 @@
-# [0.0.4.0-beta2] - 2024-08-13
+# [0.0.4.0-beta2] - 2024-08-18
+
+## Changed
+
+* Bump forge version to 47.3.0
+* The error message for creating a region now specifies whether the parent region is unsuitable due to permission issues
+  or because it doesn't contain the child region.
 
 ## Fixed
 
