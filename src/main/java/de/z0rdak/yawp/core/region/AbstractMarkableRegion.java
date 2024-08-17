@@ -50,14 +50,16 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
 
     @Override
     protected boolean setParent(IProtectedRegion parent) {
-        if (this.parent == null && parent.getRegionType() == RegionType.DIMENSION) {
-            return super.setParent(parent);
-        }
-        if (this.parent.getRegionType() == RegionType.LOCAL && parent.getRegionType() == RegionType.DIMENSION) {
-            return super.setParent(parent);
-        }
-        if (this.parent.getRegionType() == RegionType.DIMENSION && parent.getRegionType() == RegionType.LOCAL) {
-            return super.setParent(parent);
+        if (this.parent == null) {
+            boolean isParentLocalOrDim = parent.getRegionType() == RegionType.DIMENSION || parent.getRegionType() == RegionType.LOCAL;
+            return isParentLocalOrDim ? super.setParent(parent) : false;
+        } else {
+            if (this.parent.getRegionType() == RegionType.LOCAL && parent.getRegionType() == RegionType.DIMENSION) {
+                return super.setParent(parent);
+            }
+            if (this.parent.getRegionType() == RegionType.DIMENSION && parent.getRegionType() == RegionType.LOCAL) {
+                return super.setParent(parent);
+            }
         }
         return false;
     }
