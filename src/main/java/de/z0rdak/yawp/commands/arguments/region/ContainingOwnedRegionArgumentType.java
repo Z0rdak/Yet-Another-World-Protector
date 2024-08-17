@@ -30,8 +30,8 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TranslationTextComponent;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
@@ -48,8 +48,12 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
             .collect(Collectors.toSet());
     private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(new TranslationTextComponent("cli.arg.region.parse.invalid"));
     private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
-            flag -> new TranslationTextComponent("cli.arg.region.invalid", flag)
+            regionName -> new TranslationTextComponent("cli.arg.region.invalid", regionName)
     );
+    private static final DynamicCommandExceptionType ERROR_INVALID_PARENT = new DynamicCommandExceptionType(
+            regionName -> new TranslationTextComponent("cli.arg.region.owned.invalid", regionName)
+    );
+
 
     /**
      * Using this as an actual argument does not work on a server-side only mod,
@@ -139,6 +143,38 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
         }
     }
 
+    private static <S> @Nullable IMarkableArea getMarkableArea(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
+        IMarkableArea markedArea = null;
+        AreaType areaType = null;
+        if (ctx.getInput().contains(AreaType.CUBOID.areaType)) {
+            areaType = AreaType.CUBOID;
+        }
+        if (ctx.getInput().contains(AreaType.SPHERE.areaType)) {
+            areaType = AreaType.SPHERE;
+        }
+        switch (areaType) {
+            case CUBOID:
+                BlockPos p1 = BlockPosArgument.getLoadedBlockPos(ctx, POS1.toString());
+                BlockPos p2 = BlockPosArgument.getLoadedBlockPos(ctx, POS2.toString());
+                markedArea = new CuboidArea(p1, p2);
+                break;
+            case SPHERE:
+                try {
+                    BlockPos centerPos = BlockPosArgument.getLoadedBlockPos(ctx, CENTER_POS.toString());
+                    BlockPos radiusPos = BlockPosArgument.getLoadedBlockPos(ctx, RADIUS_POS.toString());
+                    markedArea = new SphereArea(centerPos, radiusPos);
+                } catch (CommandSyntaxException cse) {
+                    BlockPos centerPos = BlockPosArgument.getLoadedBlockPos(ctx, CENTER_POS.toString());
+                    int radius = IntegerArgumentType.getInteger(ctx, RADIUS.toString());
+                    markedArea = new SphereArea(centerPos, radius);
+                }
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + areaType);
+        }
+        return markedArea;
+    }
+
     /**
      * Suggests regions with permission, which are also fully containing the area provided by the create local command
      */
@@ -147,34 +183,7 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
             CommandContext<CommandSource> ctx = (CommandContext<CommandSource>) context;
             CommandSource src = (CommandSource) context.getSource();
             try {
-                IMarkableArea markedArea = null;
-                AreaType areaType = null;
-                if (ctx.getInput().contains(AreaType.CUBOID.areaType)) {
-                    areaType = AreaType.CUBOID;
-                }
-                if (ctx.getInput().contains(AreaType.SPHERE.areaType)) {
-                    areaType = AreaType.SPHERE;
-                }
-                switch (areaType) {
-                    case CUBOID:
-                        BlockPos p1 = BlockPosArgument.getOrLoadBlockPos(ctx, POS1.toString());
-                        BlockPos p2 = BlockPosArgument.getOrLoadBlockPos(ctx, POS2.toString());
-                        markedArea = new CuboidArea(p1, p2);
-                        break;
-                    case SPHERE:
-                        try {
-                            BlockPos centerPos = BlockPosArgument.getOrLoadBlockPos(ctx, CENTER_POS.toString());
-                            BlockPos radiusPos = BlockPosArgument.getOrLoadBlockPos(ctx, RADIUS_POS.toString());
-                            markedArea = new SphereArea(centerPos, radiusPos);
-                        } catch (CommandSyntaxException cse) {
-                            BlockPos centerPos = BlockPosArgument.getOrLoadBlockPos(ctx, CENTER_POS.toString());
-                            int radius = IntegerArgumentType.getInteger(context, RADIUS.toString());
-                            markedArea = new SphereArea(centerPos, radius);
-                        }
-                        break;
-                    default:
-                        throw new IllegalStateException("Unexpected value: " + areaType);
-                }
+                IMarkableArea markedArea = getMarkableArea(ctx);
                 if (markedArea == null) {
                     throw new IllegalArgumentException("Could not get marked blocks from command");
                 }
