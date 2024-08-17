@@ -12,6 +12,7 @@ import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
+import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -56,12 +57,10 @@ public final class MarkerCommands {
                                 .executes(ctx -> createMarkedRegion(ctx, getRegionNameArgument(ctx), null))
                                 .then(CommandManager.argument(PARENT.toString(), StringArgumentType.word())
                                         .suggests((ctx, builder) -> ContainingOwnedRegionArgumentType.owningRegions().listSuggestionsWithMarker(ctx, builder))
-                                        .executes(ctx -> createMarkedRegion(ctx, getRegionNameArgument(ctx), getContainingOwnedRegionArgument(ctx))))))
-                ;
+                                        .executes(ctx -> createMarkedRegion(ctx, getRegionNameArgument(ctx), getContainingOwnedRegionArgumentWithMarker(ctx))))));
     }
 
-    public static IMarkableRegion fromMarkedBlocks(CommandContext<ServerCommandSource> ctx, String regionName) throws CommandSyntaxException {
-        PlayerEntity player = ctx.getSource().getPlayerOrThrow();
+    public static IMarkableRegion fromMarkedBlocks(CommandContext<ServerCommandSource> ctx, PlayerEntity player, String regionName) throws CommandSyntaxException {
         ItemStack maybeStick = player.getMainHandStack();
         if (StickUtil.isVanillaStick(maybeStick)) {
             StickType stickType = StickUtil.getStickType(maybeStick);
@@ -88,27 +87,12 @@ public final class MarkerCommands {
         }
     }
 
-    private static int createMarkedRegion(CommandContext<ServerCommandSource> ctx, String regionName, IMarkableRegion parentRegion) {
-        try {
-            PlayerEntity player = ctx.getSource().getPlayerOrThrow();
-            if (parentRegion == null) {
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.getWorld().getRegistryKey());
-                return createRegion(ctx, regionName, dimCache.getDimensionalRegion());
-            } else {
-                return createRegion(ctx, regionName, parentRegion);
-            }
-        } catch (CommandSyntaxException e) {
-            YetAnotherWorldProtector.LOGGER.error(e);
-            return -3;
-        }
-    }
-
-    private static int createRegion(CommandContext<ServerCommandSource> ctx, String regionName, IProtectedRegion parentRegion) {
+    private static int createMarkedRegion(CommandContext<ServerCommandSource> ctx, String regionName, IProtectedRegion parentRegion) {
         try {
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(ctx.getSource().getWorld().getRegistryKey());
             int res = RegionDataManager.get().isValidRegionName(dimCache.getDimensionalRegion().getDim(), regionName);
             if (res == -1) {
-                sendCmdFeedback(ctx.getSource(), Text.translatableWithFallback("cli.msg.dim.info.region.create.name.invalid", regionName));
+                sendCmdFeedback(ctx.getSource(), Text.translatableWithFallback("cli.msg.dim.info.region.create.name.invalid", "Invalid region name supplied: '%s'", regionName));
                 return res;
             }
             if (res == 1) {
@@ -116,40 +100,38 @@ public final class MarkerCommands {
                 return res;
             }
             PlayerEntity player = ctx.getSource().getPlayerOrThrow();
-            IMarkableRegion region = fromMarkedBlocks(ctx, regionName);
-            if (region == null) {
+            IMarkableRegion newRegion = fromMarkedBlocks(ctx, player, regionName);
+            if (newRegion == null) {
                 sendCmdFeedback(ctx.getSource(), Text.translatableWithFallback("cli.msg.dim.info.region.create.stick.area.invalid", "Marked area is not valid").formatted(RED));
                 return -1;
             }
-            LocalRegions.RegionOverlappingInfo overlapping = LocalRegions.getOverlappingWithPermission(region, player);
-            if (!overlapping.hasContaining()) {
-                sendCmdFeedback(ctx.getSource(), Text.translatableWithFallback("cli.arg.region.owned.invalid", parentRegion.getName()));
-                return 1;
-            }
-            RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
-            if (RegionEvents.CREATE_REGION.invoker().createRegion(new RegionEvent.CreateRegionEvent(region, player))) {
-                return 1;
-            }
-            boolean hasConfigPermission = CommandPermissionConfig.hasConfigPermission(player);
-            boolean hasRegionPermission = CommandPermissionConfig.hasRegionPermission(parentRegion, player, CommandUtil.OWNER);
-            if (hasConfigPermission || hasRegionPermission) {
-                dimCache.addRegion(dimCache.getDimensionalRegion(), region);
-                parentRegion.addChild(region);
-                LocalRegions.ensureHigherRegionPriorityFor(region, RegionConfig.getDefaultPriority());
-                RegionDataManager.save();
-                sendCmdFeedback(ctx.getSource(), Text.translatableWithFallback("cli.msg.dim.info.region.create.success", "Successfully created region %s (with parent %s)", buildRegionInfoLink(region), buildRegionInfoLink(parentRegion)));
-                return 0;
-            } else {
-                sendCmdFeedback(ctx.getSource(), Text.translatableWithFallback("cli.msg.dim.info.region.create.local.deny", "You don't have the permission to create a region in the region %s!", buildRegionInfoLink(parentRegion)));
-                return 1;
-            }
+            IProtectedRegion parent = parentRegion == null ? dimCache.getDimensionalRegion() : parentRegion;
+            return createRegion(ctx, player, dimCache, newRegion, parent);            
         } catch (CommandSyntaxException e) {
             YetAnotherWorldProtector.LOGGER.error(e);
-            sendCmdFeedback(ctx.getSource(), Text.translatableWithFallback("cli.msg.dim.info.region.create.stick.no-player", "This command can only be executed as a player!").formatted(RED));
+            sendCmdFeedback(ctx.getSource(), Text.translatableWithFallback("cli.msg.dim.info.region.create.stick.no-player", "This command can only be executed as a player!").withStyle(RED));
             return -1;
         }
     }
 
+    private static int createRegion(CommandContext<ServerCommandSource> ctx, PlayerEntity player, DimensionRegionCache dimCache, IMarkableRegion region, IProtectedRegion parentRegion) {
+        if (RegionEvents.CREATE_REGION.invoker().createRegion(new RegionEvent.CreateRegionEvent(region, player))) {
+            return 1;
+        }
+        boolean hasConfigPermission = CommandPermissionConfig.hasConfigPermission(player);
+        boolean hasRegionPermission = CommandPermissionConfig.hasRegionPermission(parentRegion, player, CommandUtil.OWNER);
+        if (hasConfigPermission || hasRegionPermission) {
+            RegionDataManager.addFlags(RegionConfig.getDefaultFlags(), region);
+            dimCache.addRegion(parentRegion, region);
+            LocalRegions.ensureHigherRegionPriorityFor(region, RegionConfig.getDefaultPriority());
+            RegionDataManager.save();
+            sendCmdFeedback(ctx.getSource(), Text.translatableWithFallback("cli.msg.dim.info.region.create.success", "Successfully created region %s (with parent %s)", buildRegionInfoLink(region), buildRegionInfoLink(parentRegion)));
+            return 0;
+        } else {
+            sendCmdFeedback(ctx.getSource(), Text.translatableWithFallback("cli.msg.dim.info.region.create.local.deny", "You don't have the permission to create a region in the region %s!", buildRegionInfoLink(parentRegion)));
+            return 1;
+        }
+    }
 
     private static int resetStick(CommandContext<ServerCommandSource> ctx) {
         try {
