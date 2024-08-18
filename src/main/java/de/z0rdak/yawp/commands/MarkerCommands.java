@@ -109,7 +109,7 @@ public final class MarkerCommands {
             return createRegion(ctx, player, dimCache, newRegion, parent);            
         } catch (CommandSyntaxException e) {
             YetAnotherWorldProtector.LOGGER.error(e);
-            sendCmdFeedback(ctx.getSource(), Text.translatableWithFallback("cli.msg.dim.info.region.create.stick.no-player", "This command can only be executed as a player!").withStyle(RED));
+            sendCmdFeedback(ctx.getSource(), Text.translatableWithFallback("cli.msg.dim.info.region.create.stick.no-player", "This command can only be executed as a player!").formatted(RED));
             return -1;
         }
     }
