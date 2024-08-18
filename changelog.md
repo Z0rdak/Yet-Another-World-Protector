@@ -2,7 +2,6 @@
 
 ## Changed
 
-* Bump forge version to 47.3.0
 * The error message for creating a region now specifies whether the parent region is unsuitable due to permission issues or because it doesn't contain the child region.
 
 ## Fixed
