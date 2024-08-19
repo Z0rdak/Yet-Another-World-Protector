@@ -23,6 +23,7 @@ import net.minecraft.entity.passive.WaterMobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityEvent;
@@ -74,7 +75,7 @@ public final class HandlerUtil {
         return entity instanceof AnimalEntity || entity instanceof WaterMobEntity;
     }
 
-    public static boolean isServerSide(World level) {
+    public static boolean isServerSide(IWorld level) {
         return !level.isClientSide();
     }
 

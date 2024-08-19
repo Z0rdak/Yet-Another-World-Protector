@@ -12,7 +12,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.IWaterLoggable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.item.TNTEntity;
 import net.minecraft.entity.item.minecart.ContainerMinecartEntity;
 import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.merchant.villager.WanderingTraderEntity;
@@ -20,11 +19,13 @@ import net.minecraft.entity.monster.MonsterEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.fluid.Fluid;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ITag;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tileentity.EnderChestTileEntity;
 import net.minecraft.tileentity.LecternTileEntity;
 import net.minecraft.tileentity.LockableTileEntity;
@@ -53,7 +54,6 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.ForgeRegistry;
 
 import java.util.HashMap;
 import java.util.List;
@@ -64,8 +64,6 @@ import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
 import static net.minecraftforge.common.ToolType.*;
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
-
-// TODO: Note: Was fixing player NPE, need to check ignite flag again
 
 /**
  * Contains flag handler for events directly related/cause to/by players.
@@ -117,7 +115,6 @@ public final class PlayerFlagHandler {
 
     /**
      * Prevents various entities from been attacked from a player. <br>
-     * TODO: Flag for all entities
      */
     @SubscribeEvent
     public static void onAttackEntity(AttackEntityEvent event) {
@@ -429,8 +426,7 @@ public final class PlayerFlagHandler {
             Explosion explosion = event.getExplosion();
             BlockPos explosionPos = new BlockPos((int) explosion.getPosition().x, (int) explosion.getPosition().y, (int) explosion.getPosition().z);
             RegistryKey<World> dim = event.getWorld().dimension();
-            // TODO: Check
-            if (explosion.getExploder() == null) {
+            if (explosion.getSourceMob() == null) {
                 // source entity is null, but we still want to cancel the ignition
                 FlagCheckEvent checkEvent = new FlagCheckEvent(explosionPos, IGNITE_EXPLOSIVES, dim, null);
                 if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
@@ -440,8 +436,8 @@ public final class PlayerFlagHandler {
                     event.setCanceled(true);
                 });
             } else {
-                if (explosion.getExploder() instanceof PlayerEntity) {
-                    PlayerEntity player = (PlayerEntity) explosion.getExploder(); 
+                if (explosion.getSourceMob() instanceof PlayerEntity) {
+                    PlayerEntity player = (PlayerEntity) explosion.getSourceMob(); 
                     FlagCheckEvent checkEvent = new FlagCheckEvent(explosionPos, IGNITE_EXPLOSIVES, dim, player);
                     if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                         return;
@@ -451,7 +447,7 @@ public final class PlayerFlagHandler {
                         MessageSender.sendFlagMsg(onDeny);
                     });
                 }
-                if (explosion.getExploder() instanceof MonsterEntity) {
+                if (explosion.getSourceMob() instanceof MonsterEntity) {
                     FlagCheckEvent checkEvent = new FlagCheckEvent(explosionPos, MOB_GRIEFING, dim, null);
                     if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
                         return;
@@ -631,9 +627,8 @@ public final class PlayerFlagHandler {
                 Set<String> entities = FlagConfig.getCoveredBlockEntities();
                 Set<String> entityTags = FlagConfig.getCoveredBlockEntityTags();
                 boolean isCoveredByTag = entityTags.stream().anyMatch(tag -> {
-                    ResourceLocation tagRl = new ResourceLocation(tag);
-                    // TODO: Fixme
-                    return itemInHand.getTags().anyMatch(itemTagKey -> itemTagKey.location().equals(tagRl));
+                    ITag.INamedTag<Item> iTag = ItemTags.bind(tag);
+                    return itemInHand.getItem().is(iTag);
                 });                
                 boolean isBlockCovered = entities.stream().anyMatch(entity -> {
                     ResourceLocation entityRl = new ResourceLocation(entity);              
@@ -772,8 +767,7 @@ public final class PlayerFlagHandler {
 
     /**
      * Prevents players from using activator blocks like pressure plates
-     * TODO: This is very jank implementation. Needs to be tested with multiple players.
-     * TODO: Move check to activator block itself
+     * TODO: This is very jank implementation. Needs to be tested with multiple players. Move check to activator block itself
      */
     @SubscribeEvent
     public static void onSteppedOnActivator(BlockEvent.NeighborNotifyEvent event) {
@@ -865,7 +859,6 @@ public final class PlayerFlagHandler {
     }
 
     /**
-     * TODO: Flag for team chat
      * Note: message received from server but not distributed to all clients
      */
     @SubscribeEvent

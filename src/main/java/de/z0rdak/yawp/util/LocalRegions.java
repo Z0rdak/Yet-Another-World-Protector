@@ -1,7 +1,6 @@
 package de.z0rdak.yawp.util;
 
 import de.z0rdak.yawp.commands.CommandUtil;
-import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.area.SphereArea;
@@ -20,13 +19,14 @@ import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.NotImplementedException;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static de.z0rdak.yawp.config.server.CommandPermissionConfig.*;
+import static de.z0rdak.yawp.config.server.CommandPermissionConfig.hasConfigPermission;
+import static de.z0rdak.yawp.config.server.CommandPermissionConfig.hasRegionPermission;
 
 public final class LocalRegions {
 
@@ -237,7 +237,7 @@ public final class LocalRegions {
         return getOverlappingWithPermission(region, player, overlappingRegions);
     }
 
-    private static @NotNull RegionOverlappingInfo getOverlappingWithPermission(IMarkableRegion region, Player player, RegionOverlappingInfo overlappingRegions) {
+    private static @Nonnull RegionOverlappingInfo getOverlappingWithPermission(IMarkableRegion region, PlayerEntity player, RegionOverlappingInfo overlappingRegions) {
         List<IMarkableRegion> intersecting = overlappingRegions.intersectingRegions.stream()
                 .filter(r -> hasRegionPermission(r, player, CommandUtil.OWNER) || hasConfigPermission(player))
                 .collect(Collectors.toList());
