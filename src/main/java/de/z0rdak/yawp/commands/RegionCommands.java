@@ -47,8 +47,8 @@ import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
 
 public class RegionCommands {
 
-    public final static int MIN_BUILD_LIMIT = 0;
-    public final static int MAX_BUILD_LIMIT = 255;
+    public final static int MIN_BUILD_LIMIT = -64;
+    public final static int MAX_BUILD_LIMIT = 320;
 
     private RegionCommands() {
     }
