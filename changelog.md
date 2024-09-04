@@ -1,3 +1,9 @@
+# [0.0.4.0-beta3] - 2024-09-04
+
+## Fixed
+
+* [Forge, 1.18.2] Fix wrong version in mods.toml causing crash on startup (Sorry!)
+
 # [0.0.4.0-beta2] - 2024-08-18
 
 ## Changed
