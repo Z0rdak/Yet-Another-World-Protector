@@ -22,12 +22,16 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static de.z0rdak.yawp.api.events.region.RegionEvents.post;
 import static de.z0rdak.yawp.config.server.CommandPermissionConfig.hasRegionPermission;
+import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
 
 public final class HandlerUtil {
 
@@ -94,6 +98,36 @@ public final class HandlerUtil {
                 onDeny.accept(result);
         }
         return result.getFlagState();
+    }
+
+    public static void checkMobGrief(Entity entity, CallbackInfo ci) {
+        checkMobGrief(entity.getWorld(), entity.getBlockPos(), ci);
+    }
+
+    public static void checkMobGrief(Entity entity, CallbackInfoReturnable<Boolean> cir) {
+        checkMobGrief(entity.getWorld(), entity.getBlockPos(), cir);
+    }
+
+    public static void checkMobGrief(World world, BlockPos pos, CallbackInfo ci) {
+        if (isServerSide(world)) {
+            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, MOB_GRIEFING, world.getRegistryKey(), null);
+            if (post(checkEvent))
+                return;
+            processCheck(checkEvent, null, deny -> {
+                ci.cancel();
+            });
+        }
+    }
+
+    public static void checkMobGrief(World world, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+        if (isServerSide(world)) {
+            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, MOB_GRIEFING, world.getRegistryKey(), null);
+            if (post(checkEvent))
+                return;
+            processCheck(checkEvent, null, deny -> {
+                cir.setReturnValue(false);
+            });
+        }
     }
 
     /**

@@ -1,11 +1,11 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
+import de.z0rdak.yawp.handler.flags.HandlerUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import de.z0rdak.yawp.util.MobGriefingHelper;
 import net.minecraft.block.TurtleEggBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -20,8 +20,6 @@ public abstract class TurtleEggBlockMixin {
         if (entity instanceof PlayerEntity || entity instanceof BatEntity || ! (entity instanceof LivingEntity)) {
             return;
         }
-        if (MobGriefingHelper.preventGrief(world, entity)) {
-            cir.setReturnValue(false);
-        }
+        HandlerUtil.checkMobGrief(entity, cir);
     }
 }
