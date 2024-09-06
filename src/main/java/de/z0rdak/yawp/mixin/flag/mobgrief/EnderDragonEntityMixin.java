@@ -1,14 +1,11 @@
-package de.z0rdak.yawp.mixin.flag.world;
+package de.z0rdak.yawp.mixin.flag.mobgrief;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.core.flag.FlagState;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
-import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -40,7 +37,6 @@ public abstract class EnderDragonEntityMixin {
             return;
         }
         FlagState flagStateGriefing = processCheck(checkEvent, null, null);
-
 
         if (flagStateGriefing != FlagState.DENIED && flagStateDragonPort != FlagState.DENIED) {
             bl2 = self.getWorld().removeBlock(blockPos, false) || bl2;
