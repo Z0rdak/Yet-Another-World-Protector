@@ -49,7 +49,7 @@
     "flag.player.breeding.AnimalMixin",
     "flag.player.breeding.FrogMixin",
     "flag.player.breeding.SnifferMixin",
-    "flag.world.EnderDragonEntityMixin",
+    "flag.mobgrief.EnderDragonEntityMixin",
     "flag.world.EnderManEntityMixin",
     "flag.world.FireBlockMixin",
     "flag.world.LeavesBlockMixin",
