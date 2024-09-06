@@ -1,25 +1,20 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
-import de.z0rdak.yawp.api.events.region.RegionEvents;
-import de.z0rdak.yawp.handler.flags.HandlerUtil;
-import de.z0rdak.yawp.util.MessageSender;
-import net.minecraft.util.ActionResult;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import de.z0rdak.yawp.util.MobGriefingHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CropBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import static de.z0rdak.yawp.api.events.region.RegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
-import static de.z0rdak.yawp.core.flag.RegionFlag.USE_BONEMEAL;
+import static de.z0rdak.yawp.handler.flags.HandlerUtil.processCheck;
 
 @Mixin(CropBlock.class)
 public class CropBlockMixin {
