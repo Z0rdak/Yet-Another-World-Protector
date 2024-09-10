@@ -8,10 +8,7 @@ import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.MessageSender;
 import net.fabricmc.fabric.api.entity.event.v1.EntityElytraEvents;
 import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
-import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
-import net.fabricmc.fabric.api.event.player.UseBlockCallback;
-import net.fabricmc.fabric.api.event.player.UseEntityCallback;
-import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.fabricmc.fabric.api.event.player.*;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.EnderChestBlockEntity;
@@ -22,7 +19,10 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.vehicle.StorageMinecartEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.Items;
+import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
+import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
@@ -31,7 +31,10 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
+import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.Nullable;
 
 import static de.z0rdak.yawp.api.events.region.RegionEvents.post;
@@ -49,12 +52,15 @@ public final class PlayerFlagHandler {
     public static void registerEventHandler() {
         EntitySleepEvents.ALLOW_SLEEPING.register(PlayerFlagHandler::onAllowSleeping);
         EntitySleepEvents.ALLOW_SETTING_SPAWN.register(PlayerFlagHandler::onSettingSpawn);
-        PlayerBlockBreakEvents.BEFORE.register(PlayerFlagHandler::onBreakBlock);
         EntityElytraEvents.ALLOW.register(PlayerFlagHandler::onElytraFlight);
+
         UseItemCallback.EVENT.register(PlayerFlagHandler::onUseItem);
         UseBlockCallback.EVENT.register(PlayerFlagHandler::onUseBlock);
-        UseBlockCallback.EVENT.register(PlayerFlagHandler::onAccessContainer);
         UseEntityCallback.EVENT.register(PlayerFlagHandler::onUseEntity);
+        
+        
+        // PlayerBlockBreakEvents.BEFORE.register(PlayerFlagHandler::onBreakBlock);
+        AttackBlockCallback.EVENT.register(PlayerFlagHandler::onBeginBreakBlock);
     }
 
     private static TypedActionResult<ItemStack> onUseItem(PlayerEntity player, World world, Hand hand) {
@@ -189,36 +195,20 @@ public final class PlayerFlagHandler {
         return ActionResult.PASS;
     }
 
-    private static boolean hasEmptyHands(PlayerEntity player) {
-        return player.getStackInHand(Hand.MAIN_HAND).getItem().equals(Items.AIR)
-                && player.getStackInHand(Hand.OFF_HAND).getItem().equals(Items.AIR);
+    private static ActionResult onUseEntitySpecific(PlayerEntity player, World world, Hand hand, Entity entity, EntityHitResult entityHitResult) {
+        throw new NotImplementedException();
     }
 
-
-    private static boolean onElytraFlight(LivingEntity livingEntity) {
-        if (isServerSide(livingEntity.getWorld())) {
-            if (livingEntity instanceof PlayerEntity player) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), BREAK_BLOCKS, getDimKey(player), player);
-                if (post(checkEvent)) {
-                    return true;
-                }
-                FlagState flagState = processCheck(checkEvent, null, MessageSender::sendFlagMsg);
-                return flagState == FlagState.DENIED;
-            }
-        }
-        return true;
-    }
-
-    private static boolean onBreakBlock(World world, PlayerEntity player, BlockPos blockPos, BlockState blockState, BlockEntity blockEntity) {
+    private static ActionResult onBeginBreakBlock(PlayerEntity player, World world, Hand hand, BlockPos blockPos, Direction direction) {
         if (isServerSide(world)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, BREAK_BLOCKS, getDimKey(player), player);
             if (post(checkEvent)) {
-                return true;
+                return ActionResult.PASS;
             }
             FlagState flagState = processCheck(checkEvent, null, MessageSender::sendFlagMsg);
-            return flagState == FlagState.DENIED;
+            return flagState == FlagState.DENIED ? ActionResult.FAIL : ActionResult.PASS;
         }
-        return true;
+        return ActionResult.PASS;
     }
 
     private static boolean onSettingSpawn(PlayerEntity player, BlockPos blockPos) {
@@ -245,5 +235,24 @@ public final class PlayerFlagHandler {
             }
         }
         return null;
+    }
+
+    private static boolean onElytraFlight(LivingEntity livingEntity) {
+        if (isServerSide(livingEntity.getWorld())) {
+            if (livingEntity instanceof PlayerEntity player) {
+                FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), USE_ELYTRA, getDimKey(player), player);
+                if (post(checkEvent)) {
+                    return true;
+                }
+                FlagState flagState = processCheck(checkEvent, null, MessageSender::sendFlagMsg);
+                return flagState == FlagState.DENIED;
+            }
+        }
+        return true;
+    }
+    
+    private static boolean hasEmptyHands(PlayerEntity player) {
+        return player.getStackInHand(Hand.MAIN_HAND).getItem().equals(Items.AIR)
+                && player.getStackInHand(Hand.OFF_HAND).getItem().equals(Items.AIR);
     }
 }
