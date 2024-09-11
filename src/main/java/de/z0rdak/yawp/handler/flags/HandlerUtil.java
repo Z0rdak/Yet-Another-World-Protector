@@ -51,11 +51,11 @@ public final class HandlerUtil {
     }
 
     public static boolean isServerSide(Entity entity) {
-        return !entity.getWorld().isClient;
+        return isServerSide(entity.getWorld());
     }
 
     public static boolean isServerSide(World world) {
-        return isServerSide(world);
+        return !world.isClient;
     }
 
     public static boolean isVillager(Entity entity) {
