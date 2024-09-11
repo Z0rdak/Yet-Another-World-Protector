@@ -23,7 +23,7 @@ import static de.z0rdak.yawp.handler.flags.HandlerUtil.processCheck;
 public abstract class EnderDragonEntityMixin {
     
     @Inject(method = "destroyBlocks", locals = LocalCapture.CAPTURE_FAILSOFT, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;removeBlock(Lnet/minecraft/util/math/BlockPos;Z)Z"), allow = 1)
-    public void onDragonDestroyBlocks(Box box, CallbackInfoReturnable<Boolean> cir, int i, int j, int k, int l, int m, int n, boolean bl, boolean bl2, BlockPos blockPos, BlockState blockState) {
+    public void onDragonDestroyBlocks(Box box, CallbackInfoReturnable<Boolean> cir, int i, int j, int k, int l, int m, int n, boolean bl, boolean bl2, int o, int p, int q, BlockPos blockPos) {
         EnderDragonEntity self = (EnderDragonEntity) (Object) this;
      
         FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, DRAGON_BLOCK_PROT, getDimKey(self), null);
