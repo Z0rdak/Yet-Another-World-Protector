@@ -18,7 +18,7 @@ import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
 public abstract class WitherEntityMixin {
 
     @Inject(method = "mobTick", locals = LocalCapture.CAPTURE_FAILSOFT, at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/boss/WitherEntity;canDestroy(Lnet/minecraft/block/BlockState;)Z"), cancellable = true, allow = 1)
-    public void onWitherDestroyBlocks(CallbackInfo ci, int j1, int i2, int j2, boolean flag, int l2, int l, int i1, BlockPos blockPos, BlockState blockState) {
+    public void onWitherDestroyBlocks(CallbackInfo ci, int j1, int i2, int j2, boolean flag, int l2, int l, int i1, int l1, int i, int j, BlockPos blockPos, BlockState blockState) {
         WitherEntity self = (WitherEntity) (Object) this;
         if (isServerSide(self)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, WITHER_BLOCK_PROT, getDimKey(self), null);
