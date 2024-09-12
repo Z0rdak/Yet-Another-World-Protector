@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
 import de.z0rdak.yawp.handler.flags.HandlerUtil;
+import net.minecraft.entity.projectile.SmallFireballEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -14,6 +15,9 @@ import net.minecraft.world.World;
 public abstract class ProjectileEntityMixin {
     @Inject(method = "canModifyAt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getGameRules()Lnet/minecraft/world/GameRules;"), cancellable = true)
     public void onCanModifyAt(World world, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-        HandlerUtil.checkMobGrief(world, pos, cir);
+        ProjectileEntity self = (ProjectileEntity) (Object) this;
+        if (self.getOwner() != null) {
+            HandlerUtil.checkMobGrief(self, cir);
+        }
     }
 }

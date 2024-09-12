@@ -8,6 +8,7 @@ import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -33,6 +34,8 @@ public abstract class ExplosionMixin {
     @Shadow
     @Final
     private World world;
+
+    @Shadow @Final private @Nullable Entity entity;
 
     @Unique
     private static void filterExplosionTargets(Explosion explosion, World world, List<Entity> affectedEntities) {
@@ -71,8 +74,10 @@ public abstract class ExplosionMixin {
         */
         Explosion explosion = (Explosion) (Object) this;
         if (isServerSide(world)) {
-            // flag check
-            filterExplosionTargets(explosion, this.world, list);
+            if (this.entity != null) {
+                // flag check
+                filterExplosionTargets(explosion, this.world, list);
+            }
         }
     }
 }
