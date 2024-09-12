@@ -76,7 +76,10 @@ public final class HandlerUtil {
                 || entity instanceof ShulkerEntity;
     }
 
-
+    public static boolean notServerSideOrPlayerNull(Entity entity) {
+        return entity == null || !isServerSide(entity);
+    }
+    
     /**
      * Processes the given flag check event and executes the given consumers if the flag is allowed or denied. <br>
      * The flag check event is evaluated and posted to the event bus. <br>
