@@ -7,6 +7,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.TeleportTarget;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,8 +25,6 @@ import static de.z0rdak.yawp.util.MessageSender.sendFlagMsg;
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerMixin {
 
-    
-    
     @Inject(method = "dropSelectedItem", at = @At(value = "TAIL"), allow = 1, cancellable = true)
     private void onDropItem(boolean entireStack, CallbackInfoReturnable<Boolean> cir) {
         ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
@@ -40,49 +39,30 @@ public abstract class ServerPlayerMixin {
         }
     }
 
-    @Shadow
-    protected abstract TeleportTarget getTeleportTarget(ServerWorld destination);
-
+    /**
+     * TODO: Fix ENTER_DIM for local regions
+     */
     @Inject(method = "moveToWorld", at = @At(value = "HEAD"), allow = 1, cancellable = true)
     private void onChangeDimension(ServerWorld destination, CallbackInfoReturnable<Entity> cir) {
         PlayerEntity player = (PlayerEntity) (Object) this;
-        if (isServerSide(player)) {
+        if (isServerSide(player)) {            
             RegionDataManager.onPlayerChangeWorldAddDimKey(player, (ServerWorld) player.getWorld(), destination);
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getEntityDim(player));
-            DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-            FlagCheckEvent.PlayerFlagEvent flagCheck = checkPlayerEvent(player, player.getBlockPos(), RegionFlag.USE_PORTAL_PLAYERS, dimCache.getDimensionalRegion());
-            if (flagCheck.isDenied()) {
-                sendFlagDeniedMsg(flagCheck);
+            
+            FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), USE_PORTAL_PLAYERS, getDimKey(player), player);
+            if (post(checkEvent)) 
+                return;
+            processCheck(checkEvent, null, deny -> {
+                sendFlagMsg(deny);
                 cir.setReturnValue(null);
-            }
-            /*
-                FIXME: Get target position correctly - until then flag only works for dimension
-                WorldBorder worldborder = targetServerLevel.getWorldBorder();
-                double tpPosScale = DimensionType.getTeleportationScale(player.level.dimensionType(), targetServerLevel.dimensionType());
-                BlockPos targetPos = worldborder.clampToBounds(player.getX() * tpPosScale, player.getY(), player.getZ() * tpPosScale);
-             */
-            TeleportTarget teleportTarget = this.getTeleportTarget(destination);
+            });
 
-            FlagCheckEvent.PlayerFlagEvent playerFlagCheckEvent = new FlagCheckEvent.PlayerFlagEvent(player, dimRegion, null, ENTER_DIM);
-            playerFlagCheckEvent.setDeniedLocal(false);
-            if (dimRegion.isActive()) {
-                if (dimRegion.containsFlag(ENTER_DIM) && !dimRegion.permits(player)) {
-                    IFlag flag = dimRegion.getFlag(ENTER_DIM.name);
-                    // TODO: Check state with allowed
-                    playerFlagCheckEvent.setDeniedInDim(flag.isActive());
-                } else {
-                    playerFlagCheckEvent.setDeniedInDim(false);
-                }
-            } else {
-                playerFlagCheckEvent.setDeniedInDim(false);
-            }
-            playerFlagCheckEvent.setDenied(playerFlagCheckEvent.isDeniedInDim());
-            if (playerFlagCheckEvent.isDenied()) {
-                sendFlagDeniedMsg(playerFlagCheckEvent);
+            checkEvent = new FlagCheckEvent(player.getBlockPos(), ENTER_DIM, getDimKey(destination), player);
+            if (post(checkEvent))
+                return;
+            processCheck(checkEvent, null, deny -> {
+                sendFlagMsg(deny);
                 cir.setReturnValue(null);
-            }
-
-
+            });
         }
     }
 
