@@ -2,6 +2,7 @@ package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.config.server.FlagConfig;
+import de.z0rdak.yawp.util.MessageSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.damage.DamageSource;
@@ -26,13 +27,6 @@ import static de.z0rdak.yawp.util.MessageSender.sendFlagMsg;
 @Mixin(PlayerEntity.class)
 public abstract class PlayerMixin {
 
-    /**
-     * ITEM_DROP
-     *
-     * @param stack
-     * @param retainOwnership
-     * @param cir
-     */
     @Inject(method = "dropItem(Lnet/minecraft/item/ItemStack;Z)Lnet/minecraft/entity/ItemEntity;", at = @At(value = "TAIL"), allow = 1, cancellable = true)
     private void onDropItem(ItemStack stack, boolean retainOwnership, CallbackInfoReturnable<ItemStack> cir) {
         PlayerEntity player = (PlayerEntity) (Object) this;
@@ -47,12 +41,6 @@ public abstract class PlayerMixin {
         }
     }
 
-    /**
-     * LEVEL_FREEZE
-     *
-     * @param levels
-     * @param ci
-     */
     @Inject(method = "addExperienceLevels", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onGainLevels(int levels, CallbackInfo ci) {
         PlayerEntity player = (PlayerEntity) (Object) this;
@@ -164,6 +152,7 @@ public abstract class PlayerMixin {
     public void onAttackEntity(Entity target, CallbackInfo ci) {
         if (isServerSide(target)) {
             PlayerEntity player = (PlayerEntity) (Object) this;
+            if (target == null) return;
             if (target instanceof PlayerEntity) {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), MELEE_PLAYERS, getDimKey(player), player);
                 if (post(checkEvent))
@@ -212,18 +201,24 @@ public abstract class PlayerMixin {
 
                 // check every other entity if it is in the list of entities to protect
                 // this is for BlockEntities which are not covered by the block breaking flag
-                // FIXME: Tags are not yet considered
                 Set<String> entityTags = FlagConfig.getCoveredBlockEntityTags();
+                boolean isCoveredByTag = entityTags.stream().anyMatch(entityTag -> {
+                    Identifier tagRl = new Identifier(entityTag);
+                    return target.getCommandTags().contains(tagRl.getPath());
+                });
                 Set<String> entities = FlagConfig.getCoveredBlockEntities();
-                boolean isBlockEntityCovered = entities.stream()
-                        .anyMatch(entity -> EntityType.getId(target.getType()).equals(new Identifier(entity)));
-                if (isBlockEntityCovered) {
-                    FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), BREAK_BLOCKS, getDimKey(player), player);
+                boolean isBlockEntityCovered = entities.stream().anyMatch(entity -> {
+                    Identifier entityRl = new Identifier(entity);
+                    Identifier targetRl = EntityType.getId(target.getType());
+                    return targetRl != null && targetRl.equals(entityRl);
+                });
+                if (isBlockEntityCovered || isCoveredByTag) {
+                    FlagCheckEvent checkEvent = new FlagCheckEvent(target.getBlockPos(), BREAK_BLOCKS, getDimKey(player), player);
                     if (post(checkEvent))
                         return;
-                    processCheck(checkEvent, null, deny -> {
-                        sendFlagMsg(deny);
+                    processCheck(checkEvent, null, onDeny -> {
                         ci.cancel();
+                        sendFlagMsg(onDeny);
                     });
                 }
             }
