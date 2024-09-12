@@ -383,5 +383,7 @@
   "help.tooltip.wiki.link.hover": "https://github.com/Z0rdak/Yet-Another-World-Protector/wiki",
   "help.tooltip.wiki.link.text": "Wiki im Standard-Browser öffnen",
   "cli.msg.info.region.state.alert.all.false.link.hover": "Disables alert for all local regions of %s",
-  "cli.msg.info.region.state.alert.all.true.link.hover": "Activates alert for all local regions of %s"
+  "cli.msg.info.region.state.alert.all.true.link.hover": "Activates alert for all local regions of %s",
+  "cli.arg.region.owned.invalid.permission": "Region %s is not suitable as parent for %s (no permission for parent)",
+  "cli.arg.region.owned.invalid.containment": "Region %s is not suitable as parent for %s (does not fully contain child region)"
 }
