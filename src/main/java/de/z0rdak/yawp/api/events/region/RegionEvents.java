@@ -25,46 +25,46 @@ public final class RegionEvents {
     public static final Event<CreateRegion> CREATE_REGION = EventFactory.createArrayBacked(CreateRegion.class, callbacks -> (createRegionEvent) -> {
         for (CreateRegion callback : callbacks) {
             if (!callback.createRegion(createRegionEvent)) {
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     });
 
     public static final Event<RemoveRegion> DELETE_REGION = EventFactory.createArrayBacked(RemoveRegion.class, callbacks -> (removeRegionEvent) -> {
         for (RemoveRegion callback : callbacks) {
             if (!callback.deleteRegion(removeRegionEvent)) {
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     });
 
     public static final Event<RenameRegion> RENAME_REGION = EventFactory.createArrayBacked(RenameRegion.class, callbacks -> (renameRegionEvent) -> {
         for (RenameRegion callback : callbacks) {
             if (!callback.renameRegion(renameRegionEvent)) {
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     });
 
     public static final Event<UpdateArea> UPDATE_AREA = EventFactory.createArrayBacked(UpdateArea.class, callbacks -> (updateAreaEvent) -> {
         for (UpdateArea callback : callbacks) {
             if (!callback.updateArea(updateAreaEvent)) {
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     });
 
     public static final Event<CheckFlag> CHECK_FLAG = EventFactory.createArrayBacked(CheckFlag.class, callbacks -> (flagCheckEvent) -> {
         for (CheckFlag callback : callbacks) {
             if (!callback.checkFlag(flagCheckEvent)) {
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     });
 
     public static final Event<FlagResult> FLAG_RESULT = EventFactory.createArrayBacked(FlagResult.class, callbacks -> (flagCheckResult) -> {
