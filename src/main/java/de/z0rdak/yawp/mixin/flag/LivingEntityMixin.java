@@ -1,7 +1,8 @@
 package de.z0rdak.yawp.mixin.flag;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
-import de.z0rdak.yawp.util.MobGriefingHelper;
+import de.z0rdak.yawp.handler.flags.HandlerUtil;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.boss.WitherEntity;
@@ -9,6 +10,8 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -16,6 +19,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import static de.z0rdak.yawp.api.events.region.RegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
@@ -165,20 +169,26 @@ public abstract class LivingEntityMixin {
         }
     }
 
-    // FIXME: This changes the behaviour of vanilla
-    @Inject(method = "onKilledBy(Lnet/minecraft/entity/LivingEntity;)V", at = @At(value = "HEAD"), cancellable = true, allow = 1)
-    public void onKilledBy(@Nullable LivingEntity adversary, CallbackInfo ci) {
+    /**
+     * If a corresponding flag is set, this injection prevents the placing of a wither rose as a block and drops it as ItemEntity
+     * as vanilla would do it when the gamerule doMobgrief is set to false
+     */
+    @Inject(method = "onKilledBy(Lnet/minecraft/entity/LivingEntity;)V", locals = LocalCapture.CAPTURE_FAILSOFT, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"), cancellable = true, allow = 1)
+    public void onCreateWitherRose(@Nullable LivingEntity adversary, CallbackInfo ci, boolean bl, BlockPos pos, BlockState blockState) {
         LivingEntity self = (LivingEntity) (Object) this;
-        if (isServerSide(self.getWorld())) {
-            return;
-        }
-        if (adversary instanceof WitherEntity) {
-            if (MobGriefingHelper.preventGrief(self)) {
-                ItemEntity itemEntity = new ItemEntity(self.getWorld(), self.getX(), self.getY(), self.getZ(), new ItemStack(Items.WITHER_ROSE));
-                self.getWorld().spawnEntity(itemEntity);
-                ci.cancel();
-            }
+        World world = self.getWorld();
+        if (isServerSide(world)) {
+            if (adversary instanceof WitherEntity) {
+                FlagCheckEvent checkEvent = new FlagCheckEvent(pos, MOB_GRIEFING, world.getRegistryKey(), null);
+                if (post(checkEvent))
+                    return;
+                processCheck(checkEvent, null, deny -> {
+                    // prevent the rose to be placed as block, but spawn it as item-entity as vanilla does it
+                    ci.cancel();
+                    ItemEntity itemEntity = new ItemEntity(world, self.getX(), self.getY(), self.getZ(), new ItemStack(Items.WITHER_ROSE));
+                    world.spawnEntity(itemEntity);
+                });
+            }            
         }
     }
-
 }
