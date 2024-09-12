@@ -1,41 +1,35 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.core.region.DimensionalRegion;
-import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
-import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import net.minecraft.entity.ai.brain.task.FarmerVillagerTask;
-import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.checkTargetEvent;
+import static de.z0rdak.yawp.api.events.region.RegionEvents.post;
+import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
+import static de.z0rdak.yawp.handler.flags.HandlerUtil.processCheck;
 
 @Mixin(FarmerVillagerTask.class)
 public class FarmerVillagerTaskMixin {
-    @Shadow
-    private List<BlockPos> targetPositions;
 
-    @Inject(method = "shouldRun(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/entity/passive/VillagerEntity;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/ai/brain/task/FarmerVillagerTask;chooseRandomTarget(Lnet/minecraft/server/world/ServerWorld;)Lnet/minecraft/util/math/BlockPos;"), cancellable = false, allow = 1)
-    void onShouldRun(ServerWorld serverWorld, VillagerEntity villagerEntity, CallbackInfoReturnable<Boolean> cir) {
-        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(serverWorld.getRegistryKey());
-        if (dimCache != null) {
-            DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-            Set<BlockPos> protectedBlocks = 
-                    this.targetPositions.stream()
-                    .filter(blockPos -> checkTargetEvent(blockPos, RegionFlag.MOB_GRIEFING, dimRegion).isDenied())
-                    .collect(Collectors.toSet());
-            this.targetPositions.removeAll(protectedBlocks);
-        }
+    /**
+     * Check if the provided BlockPos is a suitable target for the farmer villager to harvest.
+     * Tells the farmer villager ai that the given block is not suitable for farming, preventing the mob griefing in the progress
+     * (considering the flag state)
+     * This way of handling the position in this particular case is way better than forge does with its mobgriefing event.
+     */
+    @Inject(method = "isSuitableTarget", at = @At(value = "HEAD"), cancellable = true, allow = 1)
+    void isBlockSuitableTarget(BlockPos pos, ServerWorld world, CallbackInfoReturnable<Boolean> cir) {
+        FlagCheckEvent checkEvent = new FlagCheckEvent(pos, MOB_GRIEFING, world.getRegistryKey(), null);
+        if (post(checkEvent))
+            return;
+        processCheck(checkEvent, null, deny -> {
+            cir.setReturnValue(false);
+        });
     }
 }
