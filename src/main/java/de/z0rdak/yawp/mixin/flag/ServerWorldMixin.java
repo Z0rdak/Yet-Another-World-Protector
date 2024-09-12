@@ -1,17 +1,25 @@
 package de.z0rdak.yawp.mixin.flag;
 
+import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LightningEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.profiler.Profiler;
+import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.World.ExplosionSourceType;
+import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.explosion.Explosion;
 import net.minecraft.world.explosion.ExplosionBehavior;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import static de.z0rdak.yawp.api.events.region.RegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
@@ -115,6 +123,23 @@ public class ServerWorldMixin {
                     cir.setReturnValue(null);
                 });
             }
+        }
+    }
+
+    /**
+     * Injection for lightning protection flag. It prevents lightning strikes which are not hitting entities and would potentially cause fire.
+     */
+    @Inject(method = "tickChunk", locals = LocalCapture.CAPTURE_FAILSOFT, at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LightningEntity;setCosmetic(Z)V"), cancellable = true, allow = 1)
+    public void onSpawnLightning(WorldChunk chunk, int randomTickSpeed, CallbackInfo ci, ChunkPos chunkPos, boolean bl, int i, int j, Profiler profiler, BlockPos blockPos, LocalDifficulty localDifficulty, boolean b, LightningEntity lightningEntity) {
+        if (isServerSide(chunk.getWorld())) {            
+            FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, LIGHTNING_PROT, getDimKey(chunk.getWorld()), null);
+            if (post(checkEvent)) {
+                return;
+            }
+            processCheck(checkEvent, null, deny -> {
+                lightningEntity.remove(Entity.RemovalReason.DISCARDED);
+                YetAnotherWorldProtector.LOGGER.info("Discarded 'minecraft:lightning_bolt' due to flag in region {}. You can ignore the warning printed by the vanilla code.", deny.getResponsible().getName());
+            });
         }
     }
 }
