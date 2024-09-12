@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Objects;
 
+import static de.z0rdak.yawp.handler.flags.HandlerUtil.isServerSide;
 import static de.z0rdak.yawp.util.StickUtil.getStickType;
 import static de.z0rdak.yawp.util.StickUtil.isVanillaStick;
 
@@ -27,7 +28,6 @@ public class ServerPlayerInteractionManagerMixin {
     @Inject(method = "interactBlock", at = @At("HEAD"), cancellable = true, allow = 1)
     public void useItemOn(ServerPlayerEntity player, World world, ItemStack involvedItemStack, Hand hand, BlockHitResult blockHitResult, CallbackInfoReturnable<ActionResult> cir) {
         if (isServerSide(world)) {
-            // TODO: Maybe check if player is allowed to mark block
             BlockPos blockpos = blockHitResult.getBlockPos();
             if (isVanillaStick(involvedItemStack)) {
                 StickType stickType = getStickType(involvedItemStack);
