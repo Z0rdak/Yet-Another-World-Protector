@@ -106,6 +106,10 @@ public final class HandlerUtil {
         return result.getFlagState();
     }
 
+    public static FlagState processCheck(FlagCheckEvent checkEvent, @Nullable Consumer<FlagCheckResult> onDeny) {
+        return processCheck(checkEvent, null, onDeny);
+    }
+
     public static void checkMobGrief(Entity entity, CallbackInfo ci) {
         checkMobGrief(entity.getWorld(), entity.getBlockPos(), ci);
     }
@@ -155,7 +159,7 @@ public final class HandlerUtil {
         RegionFlag regionFlag = checkEvent.getRegionFlag();
         IProtectedRegion targetRegion = getResponsible(checkEvent.getTarget(), checkEvent.getDimension());
         if (targetRegion == null) {
-            return new FlagCheckResult(checkEvent, FlagState.UNDEFINED, null, null);
+            return FlagCheckResult.Undefined(checkEvent);
         }
         FlagCorrelation responsibleFlag = getResponsibleFlag(targetRegion, regionFlag, null);
         FlagState playerRelatedState = getFlagState(responsibleFlag.getRegion(), regionFlag, checkEvent.getPlayer());

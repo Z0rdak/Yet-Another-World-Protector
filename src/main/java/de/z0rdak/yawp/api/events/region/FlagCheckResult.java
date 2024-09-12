@@ -28,6 +28,10 @@ public final class FlagCheckResult {
         this.flag = flag;
     }
 
+    public static FlagCheckResult Undefined(FlagCheckEvent flagCheck) {
+        return new FlagCheckResult(flagCheck, FlagState.UNDEFINED, null, null);
+    }
+
     @Nullable
     public IProtectedRegion getResponsible() {
         return this.responsibleRegion;
