@@ -3,25 +3,11 @@ package de.z0rdak.yawp.mixin.flag;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.core.region.DimensionalRegion;
-import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
-import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.enchantment.ProtectionEnchantment;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.TntEntity;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.mob.CreeperEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
-import org.apache.logging.log4j.core.filter.DenyAllFilter;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -32,17 +18,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.api.events.region.RegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
-import static net.minecraft.world.explosion.Explosion.getExposure;
 
 @Mixin(Explosion.class)
 public abstract class ExplosionMixin {
@@ -50,7 +33,6 @@ public abstract class ExplosionMixin {
     @Shadow
     @Final
     private World world;
-    @Shadow
 
     @Unique
     private static void filterExplosionTargets(Explosion explosion, World world, List<Entity> affectedEntities) {
@@ -66,7 +48,7 @@ public abstract class ExplosionMixin {
         BiFunction<List<Entity>, RegionFlag, Set<Entity>> filterEntities = (in, flag) -> in.stream()
                 .filter(entity -> isProtected.test(new FlagCheckEvent(entity.getBlockPos(), flag, getDimKey(world), null)))
                 .collect(Collectors.toSet());
-        
+
         explosion.getAffectedBlocks().removeAll(filterBlocks.apply(explosion.getAffectedBlocks(), EXPLOSION_BLOCK));
         affectedEntities.removeAll(filterEntities.apply(affectedEntities, EXPLOSION_ENTITY));
 
@@ -79,11 +61,8 @@ public abstract class ExplosionMixin {
                 explosion.getAffectedBlocks().removeAll(filterBlocks.apply(explosion.getAffectedBlocks(), EXPLOSION_OTHER_BLOCKS));
                 affectedEntities.removeAll(filterEntities.apply(affectedEntities, EXPLOSION_OTHER_ENTITY));
             }
-        }    
+        }
     }
-
-    @Shadow
-    public abstract DamageSource getDamageSource();
 
     @Inject(method = "collectBlocksAndDamageEntities", locals = LocalCapture.CAPTURE_FAILSOFT, at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Vec3d;<init>(DDD)V", ordinal = 1), allow = 1)
     public void onExplosion(CallbackInfo ci, Set<BlockPos> set, int i, float q, int k, int l, int r, int s, int t, int u, List<Entity> list) {
