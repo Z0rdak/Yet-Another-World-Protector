@@ -18,7 +18,7 @@ public final class RegionEvents {
     public static boolean post(FlagCheckEvent checkEvent){
         return RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent);
     }
-    
+
     private RegionEvents() {
     }
 
@@ -58,6 +58,9 @@ public final class RegionEvents {
         return false;
     });
 
+    /**
+     * This event is only called at the server-side.
+     */
     public static final Event<CheckFlag> CHECK_FLAG = EventFactory.createArrayBacked(CheckFlag.class, callbacks -> (flagCheckEvent) -> {
         for (CheckFlag callback : callbacks) {
             if (!callback.checkFlag(flagCheckEvent)) {
@@ -67,6 +70,9 @@ public final class RegionEvents {
         return false;
     });
 
+    /**
+     * This event is only called at the server-side.
+     */
     public static final Event<FlagResult> FLAG_RESULT = EventFactory.createArrayBacked(FlagResult.class, callbacks -> (flagCheckResult) -> {
         for (FlagResult callback : callbacks) {
            flagCheckResult.setFlagState(callback.getResult(flagCheckResult).getFlagState());
