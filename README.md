@@ -26,11 +26,10 @@ please visit the Wiki or ask at the discord server.
 # Links
 
 ***
-
 | [Discord](https://discord.gg/d7hArKCUtm) | [Paypal](https://www.paypal.com/donate/?hosted_button_id=XV65M85SPMD3Y) | [Patreon](https://www.patreon.com/z0rdak) | [Github](https://github.com/Z0rdak/Yet-Another-World-Protector) | [Wiki](https://github.com/Z0rdak/Yet-Another-World-Protector/wiki) | [Issues](https://github.com/Z0rdak/Yet-Another-World-Protector/issues) | [Curseforge](https://www.curseforge.com/minecraft/mc-mods/yawp) | [Modrinth](https://modrinth.com/mod/yawp) |
 |:----------------------------------------:|:-----------------------------------------------------------------------:|:-----------------------------------------:|:---------------------------------------------------------------:|:------------------------------------------------------------------:|:----------------------------------------------------------------------:|:---------------------------------------------------------------:|:-----------------------------------------:|
-
 ***
+
 
 # [Wiki](https://github.com/Z0rdak/Yet-Another-World-Protector/wiki) & [Discord](https://discord.gg/d7hArKCUtm)
 
