@@ -10,6 +10,8 @@ import org.spongepowered.asm.mixin.Mixin;
 
 import javax.annotation.Nullable;
 
+import static de.z0rdak.yawp.handler.flags.HandlerUtil.isServerSide;
+
 @Mixin(ItemEntity.class)
 public abstract class MixinItemEntity extends Entity {
 
@@ -20,7 +22,7 @@ public abstract class MixinItemEntity extends Entity {
     @Nullable
     @Override
     public Entity changeDimension(ServerWorld server) {
-        if (!server.isClientSide) {
+        if (isServerSide(server)) {
             if (!ForgeHooks.onTravelToDimension(this, server.dimension())) {
                 return null;
             }

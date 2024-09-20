@@ -11,6 +11,8 @@ import org.spongepowered.asm.mixin.Mixin;
 
 import javax.annotation.Nullable;
 
+import static de.z0rdak.yawp.handler.flags.HandlerUtil.isServerSide;
+
 @Mixin(MonsterEntity.class)
 public abstract class MixinMonsterEntity extends CreatureEntity {
 
@@ -21,7 +23,7 @@ public abstract class MixinMonsterEntity extends CreatureEntity {
     @Nullable
     @Override
     public Entity changeDimension(ServerWorld server) {
-        if (!server.isClientSide) {
+        if (isServerSide(server)) {
             if (!ForgeHooks.onTravelToDimension(this, server.dimension())) {
                 return null;
             }

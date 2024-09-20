@@ -12,6 +12,8 @@ import org.spongepowered.asm.mixin.Mixin;
 
 import javax.annotation.Nullable;
 
+import static de.z0rdak.yawp.handler.flags.HandlerUtil.isServerSide;
+
 @Mixin(ShulkerEntity.class)
 public abstract class MixinShulkerEntity  extends GolemEntity implements IMob {
 
@@ -22,7 +24,7 @@ public abstract class MixinShulkerEntity  extends GolemEntity implements IMob {
     @Nullable
     @Override
     public Entity changeDimension(ServerWorld server) {
-        if (!server.isClientSide) {
+        if (isServerSide(server)) {
             if (!ForgeHooks.onTravelToDimension(this, server.dimension())) {
                 return null;
             }
