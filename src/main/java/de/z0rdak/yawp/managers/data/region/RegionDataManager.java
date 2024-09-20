@@ -229,7 +229,7 @@ public class RegionDataManager extends WorldSavedData {
         // restore parent/child hierarchy
         dimCacheMap.forEach((dimKey, cache) -> {
             if (!cache.getRegions().isEmpty()) {
-                YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("Restoring region hierarchy for regions in dimension '" + dimKey + "'").getString());
+                YetAnotherWorldProtector.LOGGER.info(new TranslationTextComponent("Restoring region hierarchy for regions in dimension '" + dimKey.location() + "'").getString());
                 ArrayList<IMarkableRegion> regions = new ArrayList<>(cache.getRegionsInDimension().values());
                 regions.forEach(region -> {
                     // set child reference
