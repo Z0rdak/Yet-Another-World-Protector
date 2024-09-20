@@ -167,12 +167,20 @@ public enum RegionFlag {
         return regionFlag.categories.contains(FlagCategory.PLAYER);
     }
 
+    public static boolean hasCategory(RegionFlag regionFlag, FlagCategory category) {
+        return regionFlag.categories.contains(category);
+    }
+
+    public static boolean matchesCategory(RegionFlag regionFlag, Set<String> categories) {
+        Set<String> flagCategories = regionFlag.categories.stream().map(c -> c.name).collect(Collectors.toSet());
+        return categories.stream().anyMatch(flagCategories::contains);
+    }
 
     public static RegionFlag fromId(String flagIdentifier) throws IllegalArgumentException {
         List<RegionFlag> singleFlag = Arrays.stream(values())
                 .filter(flag -> flag.name.equals(flagIdentifier))
                 .collect(Collectors.toList());
-        if (singleFlag.size() == 0) {
+        if (singleFlag.isEmpty()) {
             throw new IllegalArgumentException("Invalid region flag identifier supplied");
         }
         return singleFlag.get(0);
