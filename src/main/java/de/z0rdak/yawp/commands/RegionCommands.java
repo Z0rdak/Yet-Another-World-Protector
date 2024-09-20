@@ -266,11 +266,11 @@ public class RegionCommands {
     }
 
     // TODO: Test removing child does not set priority correct with overlapping regions
-    public static int removeChildren(CommandContext<ServerCommandSource> ctx, DimensionRegionCache dimCache, IProtectedRegion parent, IProtectedRegion child) {
+    public static int removeChildren(CommandContext<ServerCommandSource> ctx, DimensionRegionCache dimCache, IProtectedRegion parent, IMarkableRegion child) {
         if (parent.hasChild(child)) {
             parent.removeChild(child);
             dimCache.getDimensionalRegion().addChild(child);
-            LocalRegions.ensureLowerRegionPriorityFor((CuboidRegion) child, RegionConfig.getDefaultPriority());
+            LocalRegions.ensureLowerRegionPriorityFor(child, RegionConfig.getDefaultPriority());
             RegionDataManager.save();
             MutableText parentLink = buildRegionInfoLink(parent);
             MutableText notLongerChildLink = buildRegionInfoLink(child);
@@ -327,8 +327,7 @@ public class RegionCommands {
                 return 1;
             }
         }
-        CuboidRegion cuboidRegion = (CuboidRegion) region;
-        boolean existRegionWithSamePriority = LocalRegions.hasAnyRegionWithSamePriority(cuboidRegion, priority);
+        boolean existRegionWithSamePriority = LocalRegions.hasAnyRegionWithSamePriority(region, priority);
         if (existRegionWithSamePriority) {
             MutableText updatePriorityFailMsg = Text.translatableWithFallback("cli.msg.info.region.state.priority.set.fail.same", "Unable to set priority for region %s. There is already another region with priority %s.", buildRegionInfoLink(region), priority);
             sendCmdFeedback(ctx.getSource(), updatePriorityFailMsg);

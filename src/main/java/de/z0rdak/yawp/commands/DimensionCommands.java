@@ -124,6 +124,7 @@ public class DimensionCommands {
                                                                                         BlockPosArgumentType.getLoadedBlockPos(ctx, POS1.toString()),
                                                                                         BlockPosArgumentType.getLoadedBlockPos(ctx, POS2.toString()), getContainingOwnedRegionArgument(ctx))))))
                                                 )
+                                                /* Note: Disabled for now because in conflicts with the 2nd option where only the radius is provided.
                                                 .then(CommandManager.literal(AreaType.SPHERE.areaType)
                                                         .then(CommandManager.argument(CENTER_POS.toString(), BlockPosArgumentType.blockPos())
                                                                 .then(CommandManager.argument(RADIUS_POS.toString(), BlockPosArgumentType.blockPos())
@@ -136,6 +137,7 @@ public class DimensionCommands {
                                                                                         BlockPosArgumentType.getLoadedBlockPos(ctx, CENTER_POS.toString()),
                                                                                         BlockPosArgumentType.getLoadedBlockPos(ctx, RADIUS_POS.toString()), getContainingOwnedRegionArgument(ctx))))))
                                                 )
+                                                */
                                                 .then(CommandManager.literal(AreaType.SPHERE.areaType)
                                                         .then(CommandManager.argument(CENTER_POS.toString(), BlockPosArgumentType.blockPos())
                                                                 .then(CommandManager.argument(RADIUS.toString(), IntegerArgumentType.integer(0))

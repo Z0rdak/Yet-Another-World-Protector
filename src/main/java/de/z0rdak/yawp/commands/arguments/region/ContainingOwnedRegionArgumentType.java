@@ -1,6 +1,5 @@
 package de.z0rdak.yawp.commands.arguments.region;
 
-import com.mojang.brigadier.Command;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -11,7 +10,6 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import de.z0rdak.yawp.commands.CommandConstants;
 import de.z0rdak.yawp.commands.CommandSourceType;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.core.area.AreaType;
@@ -34,11 +32,9 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
@@ -217,7 +213,7 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
         }
     }
 
-    private static <S> @Nullable IMarkableArea getMarkableArea(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+    private static @Nullable IMarkableArea getMarkableArea(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         IMarkableArea markedArea = null;
         AreaType areaType = null;
         if (ctx.getInput().contains(AreaType.CUBOID.areaType)) {
@@ -235,12 +231,13 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
             case SPHERE:
                 try {
                     BlockPos centerPos = BlockPosArgumentType.getLoadedBlockPos(ctx, CENTER_POS.toString());
-                    BlockPos radiusPos = BlockPosArgumentType.getLoadedBlockPos(ctx, RADIUS_POS.toString());
-                    markedArea = new SphereArea(centerPos, radiusPos);
-                } catch (CommandSyntaxException cse) {
-                    BlockPos centerPos = BlockPosArgumentType.getLoadedBlockPos(ctx, CENTER_POS.toString());
                     int radius = IntegerArgumentType.getInteger(ctx, RADIUS.toString());
                     markedArea = new SphereArea(centerPos, radius);
+                 
+                } catch (CommandSyntaxException cse) {
+                    BlockPos centerPos = BlockPosArgumentType.getLoadedBlockPos(ctx, CENTER_POS.toString());
+                    BlockPos radiusPos = BlockPosArgumentType.getLoadedBlockPos(ctx, RADIUS_POS.toString());
+                    markedArea = new SphereArea(centerPos, radiusPos);
                 }
                 break;
             default:
