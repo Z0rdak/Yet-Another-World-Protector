@@ -130,7 +130,7 @@ public final class FlagCommands {
             IFlag flag = region.getFlag(regionFlag.getName());
             return setFlagMuteState(ctx, region, flag, !flag.getFlagMsg().isMuted());
         } else {
-            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.flag.not-present", "Region '%s' does not contain flag '%s'",
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.flag.not-present", "Region %s does not contain flag '%s'",
                     buildRegionInfoLink(region), regionFlag.getName()));
             return 1;
         }
@@ -174,8 +174,9 @@ public final class FlagCommands {
             }
             return setFlagState(ctx, region, regionFlag, flag.getState());
         } else {
-            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.flag.not-present", "Region '%s' does not contain flag '%s'",
-                    buildRegionInfoLink(region), regionFlag.getName()));
+            MutableComponent hint = Component.translatableWithFallback("cli.msg.info.region.flag.add-hint", "Add flag by clicking: %s", buildAddFlagLink(region));
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.flag.not-present", "Region %s does not contain flag '%s'. %s",
+                    buildRegionInfoLink(region), regionFlag.getName(), hint));
             return 1;
         }
     }
@@ -183,7 +184,7 @@ public final class FlagCommands {
     private static int setFlagState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag flag, FlagState flagState) {
         FlagState oldState = flag.getState();
         flag.setState(flagState);
-        MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), oldState.name(), flagState.name());
+        MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), flagState.name, oldState.name);
         MutableComponent msg = Component.translatableWithFallback("cli.flag.state.success.text", "Set flag state of %s to: '%s'",
                         buildFlagInfoLink(region, flag), flag.getState().name)
                 .append(" ")
@@ -199,7 +200,7 @@ public final class FlagCommands {
             IFlag flag = region.getFlag(regionFlag.getName());
             return setOverride(ctx, region, flag, !flag.doesOverride());
         } else {
-            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.flag.not-present", "Region '%s' does not contain flag '%s'",
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.flag.not-present", "Region %s does not contain flag '%s'",
                     buildRegionInfoLink(region), regionFlag.getName()));
             return 1;
         }

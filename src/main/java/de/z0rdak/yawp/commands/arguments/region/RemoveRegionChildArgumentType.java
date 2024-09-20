@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static de.z0rdak.yawp.util.ChatComponentBuilder.buildRegionInfoLink;
 import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
 
 public class RemoveRegionChildArgumentType implements ArgumentType<String> {
@@ -66,11 +67,6 @@ public class RemoveRegionChildArgumentType implements ArgumentType<String> {
 
     /**
      * Lists the child regions for the region argument for removal.
-     *
-     * @param context
-     * @param builder
-     * @param <S>
-     * @return
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -83,7 +79,7 @@ public class RemoveRegionChildArgumentType implements ArgumentType<String> {
                     .map(IProtectedRegion::getName)
                     .collect(Collectors.toList());
             if (childNames.isEmpty()) {
-                sendCmdFeedback(src, Component.literal("Region '" + region.getName() + "' has no children."));
+                sendCmdFeedback(src, Component.translatableWithFallback("cli.arg.region.add.child.no-children", "Region %s has no child regions.", buildRegionInfoLink(region)));
                 return Suggestions.empty();
             }
             return SharedSuggestionProvider.suggest(childNames, builder);

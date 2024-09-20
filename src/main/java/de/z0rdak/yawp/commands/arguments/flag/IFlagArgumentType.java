@@ -18,6 +18,7 @@ import de.z0rdak.yawp.core.region.RegionType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,6 +29,8 @@ import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.ADD;
 import static de.z0rdak.yawp.commands.CommandConstants.REMOVE;
+import static de.z0rdak.yawp.util.ChatComponentBuilder.buildAddFlagLink;
+import static de.z0rdak.yawp.util.ChatComponentBuilder.buildRegionInfoLink;
 import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
 
 public class IFlagArgumentType implements ArgumentType<String> {
@@ -154,11 +157,12 @@ public class IFlagArgumentType implements ArgumentType<String> {
                 FlagEditType flagEditType = getEditType(context);
                 List<String> flagToSuggest = getSuggestionFlags(flagEditType, region);
                 if ((flagEditType == FlagEditType.REMOVE || flagEditType == FlagEditType.INFO) && flagToSuggest.isEmpty()) {
-                    sendCmdFeedback(src, Component.literal("No flags defined in region '" + region.getName() + "'!"));
+                    MutableComponent hint = Component.translatableWithFallback("cli.msg.info.region.flag.add-hint", "Add flags by clicking: %s", buildAddFlagLink(region));
+                    sendCmdFeedback(src, Component.translatableWithFallback("cli.msg.info.region.flag.no-flags", "No flags defined in region %s! %s", buildRegionInfoLink(region), hint));
                     return Suggestions.empty();
                 }
                 if (flagEditType == FlagEditType.ADD && flagToSuggest.isEmpty()) {
-                    sendCmdFeedback(src, Component.literal("Region '" + region.getName() + "' already contains all flags!"));
+                    sendCmdFeedback(src, Component.translatableWithFallback("cli.msg.info.region.flag.all-flags", "Region %s already contains all flags!", buildRegionInfoLink(region)));
                     return Suggestions.empty();
                 }
                 return SharedSuggestionProvider.suggest(flagToSuggest, builder);
