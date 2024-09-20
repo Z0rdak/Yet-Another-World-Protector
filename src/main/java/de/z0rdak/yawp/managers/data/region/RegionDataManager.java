@@ -167,14 +167,14 @@ public class RegionDataManager extends PersistentState {
                     globalRegion.addChild(dimCache.getDimensionalRegion());
                     rdm.dimCacheMap.put(dimension, dimCache);
                     rdm.dimensionDataNames.add(dimKey);
-                    YetAnotherWorldProtector.LOGGER.info(Text.translatableWithFallback("data.nbt.dimensions.loaded.dim.amount", "Loaded %s region(s) for dimension %s", dimCache.getRegions().size(), dimCache.getDimensionalRegion().getName()).getString());
+                    YetAnotherWorldProtector.LOGGER.info(Text.translatableWithFallback("data.nbt.dimensions.loaded.dim.amount", "Loaded %s region(s) for dimension '%s'", dimCache.getRegions().size(), dimCache.getDimensionalRegion().getName()).getString());
                 }
             }
         }
         // restore parent/child hierarchy
         rdm.dimCacheMap.forEach((dimKey, cache) -> {
             if (!cache.getRegions().isEmpty()) {
-                YetAnotherWorldProtector.LOGGER.info(Text.translatable("Restoring region hierarchy for regions in dimension '" + dimKey + "'").getString());
+                YetAnotherWorldProtector.LOGGER.info(Text.translatable("Restoring region hierarchy for regions in dimension '" + dimKey.getValue().toString() + "'").getString());
                 ArrayList<IMarkableRegion> regions = new ArrayList<>(cache.getRegionsInDimension().values());
                 regions.forEach(region -> {
                     // set child reference
