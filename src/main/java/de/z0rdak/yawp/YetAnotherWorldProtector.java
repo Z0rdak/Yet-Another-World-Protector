@@ -18,7 +18,7 @@ import org.apache.logging.log4j.Logger;
 public class YetAnotherWorldProtector implements ModInitializer {
 
     public static final String MODID = "yawp";
-    public static final Logger LOGGER = LogManager.getLogger("YAWP");
+    public static final Logger LOGGER = LogManager.getLogger(MODID.toUpperCase());
 
     @Override
     public void onInitialize() {

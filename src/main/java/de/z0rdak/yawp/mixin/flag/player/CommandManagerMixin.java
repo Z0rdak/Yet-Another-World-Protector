@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static de.z0rdak.yawp.api.events.region.RegionEvents.post;
+import static de.z0rdak.yawp.core.flag.RegionFlag.EXECUTE_COMMAND;
 import static de.z0rdak.yawp.core.flag.RegionFlag.USE_BONEMEAL;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.getDimKey;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.processCheck;
@@ -32,7 +33,7 @@ public abstract class CommandManagerMixin {
         if (cmdSource.isExecutedByPlayer()) {
             ServerPlayerEntity player = cmdSource.getPlayer();
             if (player != null) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), USE_BONEMEAL, getDimKey(player), player);
+                FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), EXECUTE_COMMAND, getDimKey(player), player);
                 if (post(checkEvent)) {
                     return;
                 }
