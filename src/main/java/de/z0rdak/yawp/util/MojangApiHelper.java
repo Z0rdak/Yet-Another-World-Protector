@@ -7,6 +7,7 @@ import com.mojang.brigadier.context.CommandContext;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.management.PlayerProfileCache;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -53,7 +54,7 @@ public class MojangApiHelper {
 
     @Nullable
     private static GameProfile deserializeGameProfile(CloseableHttpResponse response) throws IOException {
-        if (response.getStatusLine().getStatusCode() == 200) {
+        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
             Reader reader = new InputStreamReader(response.getEntity().getContent(), UTF_8);
             MojangProfileResponse profileResponse = new Gson().fromJson(reader, MojangProfileResponse.class);
             String uuidStr = profileResponse.id.replaceAll(
@@ -70,9 +71,9 @@ public class MojangApiHelper {
             HttpGet httpGet = new HttpGet(uri);
             try {
                 CloseableHttpResponse response = httpclient.execute(httpGet);
-                if (response.getStatusLine().getStatusCode() == 204) {
+                if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
                     // if status code is 204, then the player does not exist
-                    YetAnotherWorldProtector.LOGGER.error("Could not retrieve game profile for player " + username);
+                    YetAnotherWorldProtector.LOGGER.error("Could not retrieve game profile for player {}", username);
                     return null;
                 }
                 GameProfile gameProfile = deserializeGameProfile(response);

@@ -915,14 +915,17 @@ public class ChatComponentBuilder {
                 break;
             }
             case DIMENSION: {
-                IFormattableTextComponent removeLink = new StringTextComponent("");
-                IFormattableTextComponent childIndicator = buildTextWithHoverAndBracketsMsg(new StringTextComponent("*"), new TranslationTextComponent("cli.msg.info.dim.region.child.hover"), GOLD);
+                IFormattableTextComponent removeLink;
+                IFormattableTextComponent regionInfoLinkWithIndicator;
+                IFormattableTextComponent childCompInfo = new TranslationTextComponent("cli.msg.info.dim.region.child.hover");
+                IFormattableTextComponent childIndicator = buildTextWithHoverAndBracketsMsg(new StringTextComponent("*"), childCompInfo, GOLD);
                 if (parent.hasChild(region)) {
-                    removeLink = new TranslationTextComponent("%s %s%s", buildDimSuggestRegionRemovalLink((IMarkableRegion) region), buildRegionInfoLink(region), childIndicator);
+                    regionInfoLinkWithIndicator = new TranslationTextComponent("%s%s", buildRegionInfoLink(region), childIndicator);
                 } else {
-                    removeLink = new TranslationTextComponent("%s %s", buildDimSuggestRegionRemovalLink((IMarkableRegion) region), buildRegionInfoLink(region));
+                    regionInfoLinkWithIndicator = new TranslationTextComponent("%s", buildRegionInfoLink(region));
                 }
-                regionRemoveLink = new TranslationTextComponent("%s @ %s", removeLink, buildRegionInfoAndTpLink((IMarkableRegion) region));
+                removeLink = buildDimSuggestRegionRemovalLink((IMarkableRegion) region);
+                regionRemoveLink = new TranslationTextComponent("%s %s", removeLink, buildRegionInfoAndTpLink((IMarkableRegion) region, regionInfoLinkWithIndicator));
                 break;
             }
             case LOCAL: {
@@ -1252,6 +1255,12 @@ public class ChatComponentBuilder {
                 buildRegionTeleportLink(region, null));
     }
 
+    public static IFormattableTextComponent buildRegionInfoAndTpLink(IMarkableRegion region, IFormattableTextComponent regionInfoLinkWithIndicator) {
+        return new TranslationTextComponent("%s @ %s",
+                regionInfoLinkWithIndicator,
+                buildRegionTeleportLink(region, null));
+    }
+
     public static IFormattableTextComponent buildRegionTeleportLink(IMarkableRegion region, PlayerEntity player) {
         String regionTpCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), AREA.toString(), TELEPORT.toString());
         if (player != null) {
@@ -1263,7 +1272,7 @@ public class ChatComponentBuilder {
     }
 
     public static IFormattableTextComponent buildRegionSetTpLink(IMarkableRegion region) {
-        String setTpPosCmd = buildCommandStr(LOCAL.toString(), region.getDim().location().toString(), region.getName(), AREA.toString(), TELEPORT.toString(), SET.toString(), "");
+        String setTpPosCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), AREA.toString(), TELEPORT.toString(), SET.toString(), "");
         IFormattableTextComponent linkText = new TranslationTextComponent("cli.msg.info.region.area.tp.set.link.text");
         IFormattableTextComponent hoverText = new TranslationTextComponent("cli.msg.info.region.area.tp.set.link.hover", region.getName());
         return buildExecuteCmdComponent(linkText, hoverText, setTpPosCmd, SUGGEST_COMMAND, LINK_COLOR);
