@@ -3,10 +3,6 @@ package de.z0rdak.yawp.api.events.region;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 import net.minecraftforge.eventbus.api.Event;
 
 import javax.annotation.Nullable;
@@ -32,6 +28,10 @@ public class FlagCheckResult extends Event {
         this.responsibleRegion = responsibleRegion;
         this.result = state;
         this.flag = flag;
+    }
+
+    public static FlagCheckResult Undefined(FlagCheckEvent flagCheck) {
+        return new FlagCheckResult(flagCheck, FlagState.UNDEFINED, null, null);
     }
 
     @Nullable

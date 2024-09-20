@@ -2,6 +2,7 @@ package de.z0rdak.yawp.api.events.region;
 
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
@@ -99,6 +100,7 @@ public abstract class RegionEvent extends Event {
         /**
          * The area set here is not validated again. Be sure you validate the area before setting it. <br></br>
          * Otherwise, you may cause inconsistencies and break your whole region definition.
+         *
          * @param markedArea The new area of the region - be sure to validate it before
          */
         public void setMarkedArea(IMarkableArea markedArea) {
