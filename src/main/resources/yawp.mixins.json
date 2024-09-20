@@ -8,6 +8,7 @@
     "FireBlockMixin",
     "FrostWalkerEnchantmentMixin",
     "LeavesBlockMixin",
+    "LightningEntityMixin",
     "MixinAbstractMinecartEntity",
     "MixinAgeableEntity",
     "MixinFlyingEntity",
