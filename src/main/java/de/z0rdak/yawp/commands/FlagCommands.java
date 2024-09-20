@@ -174,8 +174,9 @@ public final class FlagCommands {
             }
             return setFlagState(ctx, region, regionFlag, flag.getState());
         } else {
+            MutableComponent hint = new TranslatableComponent("cli.msg.info.region.flag.add-hint", buildAddFlagLink(region));
             sendCmdFeedback(ctx.getSource(), new TranslatableComponent("cli.msg.info.region.flag.not-present",
-                    buildRegionInfoLink(region), regionFlag.getName()));
+                    buildRegionInfoLink(region), regionFlag.getName(), hint));
             return 1;
         }
     }
@@ -183,7 +184,7 @@ public final class FlagCommands {
     private static int setFlagState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag flag, FlagState flagState) {
         FlagState oldState = flag.getState();
         flag.setState(flagState);
-        MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), oldState.name(), flagState.name());
+        MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), flagState.name, oldState.name);
         MutableComponent msg = new TranslatableComponent("cli.flag.state.success.text",
                 buildFlagInfoLink(region, flag), flag.getState().name)
                 .append(" ")

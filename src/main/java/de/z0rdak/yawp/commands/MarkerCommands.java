@@ -11,7 +11,6 @@ import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
@@ -22,16 +21,15 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.common.MinecraftForge;
 
 import java.util.Collections;
 import java.util.Objects;
 
+import static de.z0rdak.yawp.api.events.region.RegionEvents.post;
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.DimensionCommands.getRandomExample;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
@@ -116,7 +114,7 @@ public final class MarkerCommands {
     }
 
     private static int createRegion(CommandContext<CommandSourceStack> ctx, Player player, DimensionRegionCache dimCache, IMarkableRegion region, IProtectedRegion parentRegion) {
-        if (MinecraftForge.EVENT_BUS.post(new RegionEvent.CreateRegionEvent(region, player))) {
+        if (post(new RegionEvent.CreateRegionEvent(region, player))) {
             return 1;
         }
         boolean hasConfigPermission = CommandPermissionConfig.hasConfigPermission(player);

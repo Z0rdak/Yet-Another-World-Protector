@@ -14,7 +14,6 @@ import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
 import java.util.Collection;
@@ -24,6 +23,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static de.z0rdak.yawp.util.ChatComponentBuilder.buildRegionInfoLink;
 import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
 
 public class RemoveRegionChildArgumentType implements ArgumentType<String> {
@@ -67,11 +67,6 @@ public class RemoveRegionChildArgumentType implements ArgumentType<String> {
 
     /**
      * Lists the child regions for the region argument for removal.
-     *
-     * @param context
-     * @param builder
-     * @param <S>
-     * @return
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -84,7 +79,7 @@ public class RemoveRegionChildArgumentType implements ArgumentType<String> {
                     .map(IProtectedRegion::getName)
                     .collect(Collectors.toList());
             if (childNames.isEmpty()) {
-                sendCmdFeedback(src, new TextComponent("Region '" + region.getName() + "' has no children."));
+                sendCmdFeedback(src, new TranslatableComponent("cli.arg.region.add.child.no-children", buildRegionInfoLink(region)));
                 return Suggestions.empty();
             }
             return SharedSuggestionProvider.suggest(childNames, builder);

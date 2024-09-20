@@ -10,7 +10,6 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import de.z0rdak.yawp.commands.CommandConstants;
 import de.z0rdak.yawp.commands.CommandSourceType;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.core.area.AreaType;
@@ -29,16 +28,12 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
@@ -48,7 +43,6 @@ import java.util.stream.Stream;
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.MarkerCommands.fromMarkedBlocks;
 import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
-import static net.minecraft.ChatFormatting.RED;
 
 public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
 
@@ -218,7 +212,7 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
         }
     }
 
-    private static <S> @Nullable IMarkableArea getMarkableArea(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+    private static IMarkableArea getMarkableArea(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         IMarkableArea markedArea = null;
         AreaType areaType = null;
         if (ctx.getInput().contains(AreaType.CUBOID.areaType)) {
@@ -229,19 +223,20 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
         }
         switch (areaType) {
             case CUBOID:
-                BlockPos p1 = BlockPosArgument.getSpawnablePos(ctx, POS1.toString());
-                BlockPos p2 = BlockPosArgument.getSpawnablePos(ctx, POS2.toString());
+                BlockPos p1 = BlockPosArgument.getLoadedBlockPos(ctx, POS1.toString());
+                BlockPos p2 = BlockPosArgument.getLoadedBlockPos(ctx, POS2.toString());
                 markedArea = new CuboidArea(p1, p2);
                 break;
             case SPHERE:
                 try {
-                    BlockPos centerPos = BlockPosArgument.getSpawnablePos(ctx, CENTER_POS.toString());
-                    BlockPos radiusPos = BlockPosArgument.getSpawnablePos(ctx, RADIUS_POS.toString());
-                    markedArea = new SphereArea(centerPos, radiusPos);
-                } catch (CommandSyntaxException cse) {
-                    BlockPos centerPos = BlockPosArgument.getSpawnablePos(ctx, CENTER_POS.toString());
+                    BlockPos centerPos = BlockPosArgument.getLoadedBlockPos(ctx, CENTER_POS.toString());
                     int radius = IntegerArgumentType.getInteger(ctx, RADIUS.toString());
                     markedArea = new SphereArea(centerPos, radius);
+
+                } catch (CommandSyntaxException cse) {
+                    BlockPos centerPos = BlockPosArgument.getLoadedBlockPos(ctx, CENTER_POS.toString());
+                    BlockPos radiusPos = BlockPosArgument.getLoadedBlockPos(ctx, RADIUS_POS.toString());
+                    markedArea = new SphereArea(centerPos, radiusPos);
                 }
                 break;
             default:
