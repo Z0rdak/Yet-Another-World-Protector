@@ -65,17 +65,30 @@ public final class HandlerUtil {
         return result.getFlagState();
     }
 
+    public static FlagState processCheck(FlagCheckEvent checkEvent, Consumer<FlagCheckResult> onDeny) {
+        return processCheck(checkEvent, null, onDeny);
+    }
+
     private HandlerUtil(){}
 
-    public static RegistryKey<World> getEntityDim(Entity entity){
-        return entity.getCommandSenderWorld().dimension();
+    public static RegistryKey<World> getDimKey(Entity entity) {
+        return getDimKey(entity.getCommandSenderWorld());
     }
+
+    public static RegistryKey<World> getDimKey(World world) {
+        return world.dimension();
+    }
+    
 
     public static boolean isAnimal(Entity entity){
         return entity instanceof AnimalEntity || entity instanceof WaterMobEntity;
     }
 
     public static boolean isServerSide(IWorld level) {
+        return !level.isClientSide();
+    }
+
+    public static boolean isServerSide(World level) {
         return !level.isClientSide();
     }
 
@@ -128,7 +141,7 @@ public final class HandlerUtil {
         RegionFlag regionFlag = checkEvent.getRegionFlag();
         IProtectedRegion targetRegion = getResponsible(checkEvent.getTarget(), checkEvent.getDimension());
         if (targetRegion == null) {
-            return new FlagCheckResult(checkEvent, FlagState.UNDEFINED, null, null);
+            return FlagCheckResult.Undefined(checkEvent);
         }
         FlagCorrelation responsibleFlag = getResponsibleFlag(targetRegion, regionFlag, null);
         FlagState playerRelatedState = getFlagState(responsibleFlag.getRegion(), regionFlag, checkEvent.getPlayer());
@@ -138,7 +151,6 @@ public final class HandlerUtil {
     /**
      * Gets the responsible region for the given position and dimension. <br>
      * The responsible region is the region with the highest priority among all involved regions at the given location and dimension. <br>
-     * If no Local Region is defined at the given position, the dimensional region is responsible and returned. <br>
      *
      * @param pos the position to get the responsible region for
      * @param dim the dimension to get the responsible region for

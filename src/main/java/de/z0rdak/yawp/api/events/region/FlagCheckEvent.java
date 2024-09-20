@@ -9,6 +9,7 @@ import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 
 import javax.annotation.Nullable;
+import java.util.UUID;
 
 /**
  * Event that is fired before a flag is checked.
@@ -36,11 +37,26 @@ public class FlagCheckEvent extends Event {
      */
     private final RegionFlag regionFlag;
 
+    /**
+     * Internal Identifier to relate a flag check to its result.
+     */
+    private final String id;
+
+
     public FlagCheckEvent(BlockPos target, RegionFlag regionFlag, RegistryKey<World> dimension, @Nullable PlayerEntity player) {
         this.player = player;
         this.target = target;
         this.dimension = dimension;
         this.regionFlag = regionFlag;
+        this.id = UUID.randomUUID().toString();
+    }
+
+    public FlagCheckEvent(BlockPos target, RegionFlag regionFlag, RegistryKey<World> dimension) {
+        this(target, regionFlag, dimension, null);
+    }
+
+    public String getId() {
+        return id;
     }
 
     public BlockPos getTarget() {

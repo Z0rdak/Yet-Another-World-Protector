@@ -72,7 +72,7 @@ public abstract class RegionEvent extends Event {
          * Otherwise, you may cause inconsistencies and break your whole region definition.
          *
          * @param newName The new name of the region - be sure to validate it before
-         * @see de.z0rdak.yawp.managers.data.region.RegionDataManager#isValidRegionName(RegistryKey, String)
+         * @see de.z0rdak.yawp.managers.data.region.RegionDataManager#isValidRegionName(RegistryKey, String) 
          */
         public void setNewName(String newName) {
             this.newName = newName;
@@ -100,6 +100,7 @@ public abstract class RegionEvent extends Event {
         /**
          * The area set here is not validated again. Be sure you validate the area before setting it. <br></br>
          * Otherwise, you may cause inconsistencies and break your whole region definition.
+         *
          * @param markedArea The new area of the region - be sure to validate it before
          */
         public void setMarkedArea(IMarkableArea markedArea) {
