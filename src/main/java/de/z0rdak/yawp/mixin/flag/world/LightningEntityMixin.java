@@ -44,7 +44,7 @@ public abstract class LightningEntityMixin {
     public void onSpawnFireFromLightning(int spreadAttempts, CallbackInfo ci, BlockPos blockPos) {
         LightningEntity lightningEntity = (LightningEntity) (Object) this;
         if (isServerSide(lightningEntity)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(lightningEntity.getBlockPos(), LIGHTNING_PROT, getDimKey(lightningEntity), null);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, LIGHTNING_PROT, getDimKey(lightningEntity), null);
             if (post(checkEvent)) {
                 return;
             }

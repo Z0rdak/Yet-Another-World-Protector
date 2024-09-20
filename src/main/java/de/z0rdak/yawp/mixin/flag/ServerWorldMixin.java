@@ -129,7 +129,7 @@ public class ServerWorldMixin {
     /**
      * Injection for lightning protection flag. It prevents lightning strikes which are not hitting entities and would potentially cause fire.
      */
-    @Inject(method = "tickChunk", locals = LocalCapture.CAPTURE_FAILSOFT, at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LightningEntity;setCosmetic(Z)V"), cancellable = true, allow = 1)
+    @Inject(method = "tickChunk", locals = LocalCapture.CAPTURE_FAILSOFT, at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LightningEntity;setCosmetic(Z)V"), cancellable = false, allow = 1)
     public void onSpawnLightning(WorldChunk chunk, int randomTickSpeed, CallbackInfo ci, ChunkPos chunkPos, boolean bl, int i, int j, Profiler profiler, BlockPos blockPos, LocalDifficulty localDifficulty, boolean b, LightningEntity lightningEntity) {
         if (isServerSide(chunk.getWorld())) {            
             FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, LIGHTNING_PROT, getDimKey(chunk.getWorld()), null);
