@@ -1,4 +1,5 @@
 IVEN#2107 for the mod logo.
 Reincarnaciya for the russian translation.
-ptefar#7680 aka. petersv5 for the helping with flag parity for the fabric port.
+ptefar#7680 aka. petersv5 for the helping with flag parity for the fabric porting.
 DerHammer#8038 for the first API implementation.
+dirtTW aka. yichifauzi for the first Traditional Chinese localization.
