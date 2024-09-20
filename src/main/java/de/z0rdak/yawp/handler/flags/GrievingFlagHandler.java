@@ -4,7 +4,6 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.util.MessageSender;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
@@ -31,9 +30,10 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static de.z0rdak.yawp.api.events.region.RegionEvents.post;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
+import static de.z0rdak.yawp.util.MessageSender.sendFlagMsg;
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
-
 @Mod.EventBusSubscriber(modid = YetAnotherWorldProtector.MODID, bus = FORGE)
 public class GrievingFlagHandler {
 
@@ -44,15 +44,15 @@ public class GrievingFlagHandler {
     public static void onFarmLandTrampled(BlockEvent.FarmlandTrampleEvent event) {
         if (isServerSide(event.getEntity())) {
             Entity trampler = event.getEntity();
-            ResourceKey<Level> dim = getEntityDim(trampler);
+            ResourceKey<Level> dim = getDimKey(trampler);
             Player player = trampler instanceof Player ? (Player) trampler : null;
             FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPos(), RegionFlag.TRAMPLE_FARMLAND, dim, player);
-            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+            if (post(checkEvent)) {
                 return;
             }
-            FlagState flagState = processCheck(checkEvent, null, denyResult -> {
+            FlagState flagState = processCheck(checkEvent, denyResult -> {
                 event.setCanceled(true);
-                MessageSender.sendFlagMsg(denyResult);
+                sendFlagMsg(denyResult);
             });
             if (flagState == FlagState.DENIED)
                 return;
@@ -62,16 +62,16 @@ public class GrievingFlagHandler {
                 if (MinecraftForge.EVENT_BUS.post(playerTrampleFlagCheck)) {
                     return;
                 }
-                processCheck(playerTrampleFlagCheck, null, denyResult -> {
+                processCheck(playerTrampleFlagCheck, denyResult -> {
                     event.setCanceled(true);
-                    MessageSender.sendFlagMsg(denyResult);
+                    sendFlagMsg(denyResult);
                 });
             } else {
-                FlagCheckEvent entityTrampleFlagCheck = new FlagCheckEvent(event.getPos(), RegionFlag.TRAMPLE_FARMLAND_OTHER, dim, null);
+                FlagCheckEvent entityTrampleFlagCheck = new FlagCheckEvent(event.getPos(), RegionFlag.TRAMPLE_FARMLAND_OTHER, dim);
                 if (MinecraftForge.EVENT_BUS.post(entityTrampleFlagCheck)) {
                     return;
                 }
-                processCheck(entityTrampleFlagCheck, null, denyResult -> {
+                processCheck(entityTrampleFlagCheck, denyResult -> {
                     event.setCanceled(true);
                 });
             }
@@ -86,25 +86,25 @@ public class GrievingFlagHandler {
             BlockPos target = event.getPos();
             FlagCheckEvent checkEvent = null;
             if (destroyer instanceof EnderDragon) {
-                checkEvent = new FlagCheckEvent(target, RegionFlag.DRAGON_BLOCK_PROT, getEntityDim(destroyer), null);
-                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                checkEvent = new FlagCheckEvent(target, RegionFlag.DRAGON_BLOCK_PROT, getDimKey(destroyer));
+                if (post(checkEvent)) {
                     return;
                 }
             }
             if (destroyer instanceof WitherBoss) {
-                checkEvent = new FlagCheckEvent(target, RegionFlag.WITHER_BLOCK_PROT, getEntityDim(destroyer), null);
-                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                checkEvent = new FlagCheckEvent(target, RegionFlag.WITHER_BLOCK_PROT, getDimKey(destroyer));
+                if (post(checkEvent)) {
                     return;
                 }
             }
             if (destroyer instanceof Zombie) {
-                checkEvent = new FlagCheckEvent(target, RegionFlag.ZOMBIE_DOOR_PROT, getEntityDim(destroyer), null);
-                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                checkEvent = new FlagCheckEvent(target, RegionFlag.ZOMBIE_DOOR_PROT, getDimKey(destroyer));
+                if (post(checkEvent)) {
                     return;
                 }
             }
             if (checkEvent != null) {
-                processCheck(checkEvent, null, denyResult -> {
+                processCheck(checkEvent, denyResult -> {
                     event.setCanceled(true);
                 });
             }
@@ -120,23 +120,23 @@ public class GrievingFlagHandler {
             LivingEntity lootEntity = event.getEntity();
             Player player = isPlayer(lootEntity) ? (Player) lootEntity : null;
             FlagCheckEvent checkEvent = new FlagCheckEvent(lootEntity.blockPosition(), RegionFlag.DROP_LOOT_ALL, event.getEntity().level().dimension(), player);
-            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+            if (post(checkEvent)) {
                 return;
             }
-            FlagState flagState = processCheck(checkEvent, null, denyResult -> {
+            FlagState flagState = processCheck(checkEvent, denyResult -> {
                 event.setCanceled(true);
-                MessageSender.sendFlagMsg(denyResult);
+                sendFlagMsg(denyResult);
             });
             if (flagState == FlagState.DENIED)
                 return;
             if (player != null) {
-                FlagCheckEvent playerCheckEvent = new FlagCheckEvent(lootEntity.blockPosition(), RegionFlag.DROP_LOOT_PLAYER, player.level().dimension(), player);
-                if (MinecraftForge.EVENT_BUS.post(playerCheckEvent)) {
+                checkEvent = new FlagCheckEvent(lootEntity.blockPosition(), RegionFlag.DROP_LOOT_PLAYER, player.level().dimension(), player);
+                if (post(checkEvent)) {
                     return;
                 }
-                processCheck(playerCheckEvent, null, denyResult -> {
+                processCheck(checkEvent, denyResult -> {
                     event.setCanceled(true);
-                    MessageSender.sendFlagMsg(denyResult);
+                    sendFlagMsg(denyResult);
                 });
             }
         }
@@ -147,15 +147,15 @@ public class GrievingFlagHandler {
         if (isServerSide(event)) {
             Player player = event.getAttackingPlayer();
             Entity xpDroppingEntity = event.getEntity();
-            ResourceKey<Level> dim = getEntityDim(xpDroppingEntity);
+            ResourceKey<Level> dim = getDimKey(xpDroppingEntity);
             BlockPos pos = xpDroppingEntity.blockPosition();
             if (player != null) {
                 // prevent all xp drop
-                FlagCheckEvent checkEvent = new FlagCheckEvent(pos, RegionFlag.XP_DROP_ALL, dim, null);
-                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                FlagCheckEvent checkEvent = new FlagCheckEvent(pos, RegionFlag.XP_DROP_ALL, dim);
+                if (post(checkEvent)) {
                     return;
                 }
-                FlagState flagState = processCheck(checkEvent, null, denyResult -> {
+                FlagState flagState = processCheck(checkEvent, denyResult -> {
                     event.setCanceled(true);
                 });
                 if (flagState == FlagState.DENIED)
@@ -163,36 +163,36 @@ public class GrievingFlagHandler {
 
                 // prevent non-member/owner players from dropping xp by killing mobs
                 checkEvent = new FlagCheckEvent(pos, RegionFlag.XP_DROP_PLAYER, dim, player);
-                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                if (post(checkEvent)) {
                     return;
                 }
-                flagState = processCheck(checkEvent, null, denyResult -> {
+                flagState = processCheck(checkEvent, denyResult -> {
                     event.setCanceled(true);
-                    MessageSender.sendFlagMsg(denyResult);
+                    sendFlagMsg(denyResult);
                 });
                 if (flagState == FlagState.DENIED)
                     return;
 
                 // prevent monster xp drop
                 if (isMonster(xpDroppingEntity)) {
-                    checkEvent = new FlagCheckEvent(pos, RegionFlag.XP_DROP_MONSTER, dim, null);
-                    if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    checkEvent = new FlagCheckEvent(pos, RegionFlag.XP_DROP_MONSTER, dim);
+                    if (post(checkEvent)) {
                         return;
                     }
-                    flagState = processCheck(checkEvent, null, denyResult -> {
+                    flagState = processCheck(checkEvent, denyResult -> {
                         event.setCanceled(true);
-                        MessageSender.sendFlagMsg(denyResult);
+                        sendFlagMsg(denyResult);
                     });
                     if (flagState == FlagState.DENIED) {
                     }
                 } else {
-                    checkEvent = new FlagCheckEvent(pos, RegionFlag.XP_DROP_OTHER, dim, null);
-                    if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                    checkEvent = new FlagCheckEvent(pos, RegionFlag.XP_DROP_OTHER, dim);
+                    if (post(checkEvent)) {
                         return;
                     }
-                    processCheck(checkEvent, null, denyResult -> {
+                    processCheck(checkEvent, denyResult -> {
                         event.setCanceled(true);
-                        MessageSender.sendFlagMsg(denyResult);
+                        sendFlagMsg(denyResult);
                     });
                 }
             }
@@ -205,50 +205,30 @@ public class GrievingFlagHandler {
             return;
         }
         if (isServerSide(event.getEntity())) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(event.getEntity().blockPosition(), RegionFlag.MOB_GRIEFING, getEntityDim(event.getEntity()), null);
-            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+            FlagCheckEvent checkEvent = new FlagCheckEvent(event.getEntity().blockPosition(), RegionFlag.MOB_GRIEFING, getDimKey(event.getEntity()));
+            if (post(checkEvent)) {
                 return;
             }
-            FlagState flagState = processCheck(checkEvent, null, denyResult -> {
+            FlagState flagState = processCheck(checkEvent, denyResult -> {
                 event.setResult(Event.Result.DENY);
             });
             if (flagState == FlagState.DENIED)
                 return;
             if (event.getEntity() instanceof EnderMan) {
-                checkEvent = new FlagCheckEvent(event.getEntity().blockPosition(), RegionFlag.ENDERMAN_GRIEFING, getEntityDim(event.getEntity()), null);
-                if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+                checkEvent = new FlagCheckEvent(event.getEntity().blockPosition(), RegionFlag.ENDERMAN_GRIEFING, getDimKey(event.getEntity()));
+                if (post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, null, denyResult -> {
+                processCheck(checkEvent, denyResult -> {
                     event.setResult(Event.Result.DENY);
                 });
             }
         }
     }
 
-    // idea: differentiate between player and other entities (armor stand/mobs)
-    /*
-    TODO: Disabled this to enable compatibility with PLACE_BLOCKS again because they use the same event
-    @SubscribeEvent
-    public static void onFreezeWaterWithBoots(BlockEvent.EntityPlaceEvent event) {
-        if (!event.getWorld().isClientSide()) {
-            if (event.getEntity() != null) {
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(event.getEntity().level.dimension());
-                FlagCheckEvent flagCheckEvent = HandlerUtil.checkTargetEvent(event.getPos(), NO_WALKER_FREEZE, dimCache.getDimensionalRegion());
-                if (flagCheckEvent.isDenied()) {
-                    event.setCanceled(true);
-                }
-            }
-        }
-    }
-    */
-
-    /**
-     * TODO: Inverted flags would need to re-add allowed blocks/entities to the event list
-     */
     @SubscribeEvent
     public static void onExplosion(ExplosionEvent.Detonate event) {
-        if (!event.getLevel().isClientSide) {
+        if (isServerSide(event.getLevel())) {
             ResourceKey<Level> dim = event.getLevel().dimension();
 
             Set<BlockPos> protectedBlocks = event.getAffectedBlocks().stream()
@@ -297,8 +277,8 @@ public class GrievingFlagHandler {
         return entity -> {
             // TODO: Introduce a subtype for FlagCheckEvent which holds multiple blocks? This way only one event is fired
             // TODO: Make the event cancellable and have a mutable blockpos list
-            FlagCheckEvent checkEvent = new FlagCheckEvent(entity.blockPosition(), flag, dim, null);
-            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+            FlagCheckEvent checkEvent = new FlagCheckEvent(entity.blockPosition(), flag, dim);
+            if (post(checkEvent)) {
                 return true;
             }
             // TODO: Same for check result, here we only need one result for all blocks
@@ -311,8 +291,8 @@ public class GrievingFlagHandler {
         return pos -> {
             // TODO: Introduce a subtype for FlagCheckEvent which holds multiple blocks? This way only one event is fired
             // TODO: Make the event cancellable and have a mutable blockpos list
-            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, flag, dim, null);
-            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, flag, dim);
+            if (post(checkEvent)) {
                 return true;
             }
             // TODO: Same for check result, here we only need one result for all blocks

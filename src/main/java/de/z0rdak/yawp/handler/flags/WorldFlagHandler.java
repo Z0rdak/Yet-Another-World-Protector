@@ -23,10 +23,10 @@ import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nullable;
 
+import static de.z0rdak.yawp.api.events.region.RegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
-
 /**
  * Contains event handler for flags not directly related to player actions.
  * E.g.
@@ -38,7 +38,6 @@ public class WorldFlagHandler {
     }
 
     /**
-     * TODO: How to prevent lightning strikes which are not hitting entities?
      * Prevents all lightning strikes to hurt entities and removes the lightning entity itself
      *
      * @param event information about the lightning striking an entity
@@ -48,10 +47,10 @@ public class WorldFlagHandler {
         if (isServerSide(event)) {
             Entity poorEntity = event.getEntity();
             FlagCheckEvent checkEvent = new FlagCheckEvent(poorEntity.blockPosition(), LIGHTNING_PROT, event.getEntity().level().dimension(), null);
-            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+            if (post(checkEvent)) {
                 return;
             }
-            HandlerUtil.processCheck(checkEvent, null, denyResult -> {
+            HandlerUtil.processCheck(checkEvent, denyResult -> {
                 event.setCanceled(true);
                 event.getLightning().remove(Entity.RemovalReason.DISCARDED);
             });
@@ -70,7 +69,7 @@ public class WorldFlagHandler {
         Level world = (Level) event.getLevel();
         if (isServerSide(event)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPos(), SPAWN_PORTAL, world.dimension(), null);
-            if (MinecraftForge.EVENT_BUS.post(checkEvent)) {
+            if (post(checkEvent)) {
                 return;
             }
             HandlerUtil.processCheck(checkEvent, null, deny -> event.setCanceled(true));
@@ -91,29 +90,29 @@ public class WorldFlagHandler {
             ResourceKey<Level> dimension = event.getEntity().level().dimension();
             BlockPos target = entity.blockPosition();
             Player player = entity instanceof Player ? (Player) entity : null;
-            FlagCheckEvent checkGeneralEvent = new FlagCheckEvent(target, USE_PORTAL, dimension, player);
-            if (MinecraftForge.EVENT_BUS.post(checkGeneralEvent)) {
+            FlagCheckEvent checkEvent = new FlagCheckEvent(target, USE_PORTAL, dimension, player);
+            if (post(checkEvent)) {
                 return;
             }
-            HandlerUtil.processCheck(checkGeneralEvent, null, denyResult -> {
+            HandlerUtil.processCheck(checkEvent, denyResult -> {
                 event.setCanceled(true);
             });
 
             if (entity instanceof Player) {
-                FlagCheckEvent checkPlayerEvent = new FlagCheckEvent(target, USE_PORTAL_PLAYERS, dimension, player);
-                if (MinecraftForge.EVENT_BUS.post(checkPlayerEvent)) {
+                checkEvent = new FlagCheckEvent(target, USE_PORTAL_PLAYERS, dimension, player);
+                if (post(checkEvent)) {
                     return;
                 }
-                HandlerUtil.processCheck(checkPlayerEvent, null, denyResult -> {
+                HandlerUtil.processCheck(checkEvent, denyResult -> {
                     event.setCanceled(true);
                 });
             } else {
-                FlagCheckEvent nonPlayerCheckEvent = getNonPlayerCheckEventFor(entity, target, dimension);
-                if (nonPlayerCheckEvent != null) {
-                    if (MinecraftForge.EVENT_BUS.post(nonPlayerCheckEvent)) {
+                checkEvent = getNonPlayerCheckEventFor(entity, target, dimension);
+                if (checkEvent != null) {
+                    if (post(checkEvent)) {
                         return;
                     }
-                    HandlerUtil.processCheck(nonPlayerCheckEvent, null, denyResult -> {
+                    HandlerUtil.processCheck(checkEvent, denyResult -> {
                         event.setCanceled(true);
                     });
                 }
@@ -163,7 +162,7 @@ public class WorldFlagHandler {
                     if (MinecraftForge.EVENT_BUS.post(checkGeneralEvent)) {
                         return;
                     }
-                    HandlerUtil.processCheck(checkGeneralEvent, null, denyResult -> {
+                    HandlerUtil.processCheck(checkGeneralEvent, denyResult -> {
                         event.setCanceled(true);
                         MessageSender.sendFlagMsg(denyResult);
                     });
