@@ -6,6 +6,8 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static de.z0rdak.yawp.config.ConfigRegistry.CONFIG_LOGGER;
+
 public class FlagConfig {
 
     public static final ForgeConfigSpec CONFIG_SPEC;
@@ -63,7 +65,7 @@ public class FlagConfig {
         if (entity instanceof String str) {
             boolean isNotEmptyAndContainsColon = !str.isEmpty() && !str.isBlank() && str.contains(":");
             if (!isNotEmptyAndContainsColon) {
-                YetAnotherWorldProtector.LOGGER.warn("Invalid block tile resource key supplied for 'break_flag_entities': " + entity);
+                CONFIG_LOGGER.warn("Invalid block tile resource key supplied for 'break_flag_entities': {}", entity);
             }
             return isNotEmptyAndContainsColon;
         }
@@ -74,7 +76,7 @@ public class FlagConfig {
         if (entity instanceof String str) {
             boolean isNotEmptyAndContainsColon = !str.isEmpty() && !str.isBlank() && str.contains(":");
             if (!isNotEmptyAndContainsColon) {
-                YetAnotherWorldProtector.LOGGER.warn("Invalid block tile resource key supplied for 'break_flag_entity_tags': " + entity);
+                CONFIG_LOGGER.warn("Invalid block tile resource key supplied for 'break_flag_entity_tags': {}", entity);
             }
             return isNotEmptyAndContainsColon;
         }

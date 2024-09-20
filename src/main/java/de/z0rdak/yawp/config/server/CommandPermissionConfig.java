@@ -18,6 +18,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandSourceType.*;
+import static de.z0rdak.yawp.config.ConfigRegistry.CONFIG_LOGGER;
 
 public class CommandPermissionConfig {
 
@@ -177,7 +178,7 @@ public class CommandPermissionConfig {
                 }
                 return true;
             } catch (IllegalArgumentException e) {
-                YetAnotherWorldProtector.LOGGER.warn("Invalid UUID '" + uuid + "' in config");
+                CONFIG_LOGGER.warn("Invalid UUID '{}' in config", uuid);
                 return false;
             }
         }

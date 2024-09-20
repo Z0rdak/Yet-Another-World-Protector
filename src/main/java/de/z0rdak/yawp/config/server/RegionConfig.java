@@ -10,6 +10,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static de.z0rdak.yawp.config.ConfigRegistry.CONFIG_LOGGER;
+
 public class RegionConfig {
 
     public static final ForgeConfigSpec CONFIG_SPEC;
@@ -79,11 +81,11 @@ public class RegionConfig {
         if (flag instanceof String) {
             boolean contains = RegionFlag.contains((String) flag);
             if (!contains) {
-                YetAnotherWorldProtector.LOGGER.warn("Invalid default flag supplied for 'dim_default_flags': " + flag);
+                CONFIG_LOGGER.warn("Invalid default flag supplied for 'dim_default_flags': {}", flag);
             }
             return contains;
         }
-        YetAnotherWorldProtector.LOGGER.warn("Invalid default flag supplied for 'dim_default_flags': " + flag);
+        CONFIG_LOGGER.warn("Invalid default flag supplied for 'dim_default_flags': {}", flag);
         return false;
     }
 
@@ -91,11 +93,11 @@ public class RegionConfig {
         if (flag instanceof String) {
             boolean contains = RegionFlag.contains((String) flag);
             if (!contains) {
-                YetAnotherWorldProtector.LOGGER.warn("Invalid default flag supplied for 'default_flags': " + flag);
+                CONFIG_LOGGER.warn("Invalid default flag supplied for 'default_flags': {}", flag);
             }
             return contains;
         }
-        YetAnotherWorldProtector.LOGGER.warn("Invalid default flag supplied for 'default_flags': " + flag);
+        CONFIG_LOGGER.warn("Invalid default flag supplied for 'default_flags': {}", flag);
         return false;
     }
 }
