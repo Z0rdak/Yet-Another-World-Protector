@@ -12,8 +12,6 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.util.CommandUtil;
-import de.z0rdak.yawp.util.ChatComponentBuilder;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
@@ -25,6 +23,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static de.z0rdak.yawp.util.ChatComponentBuilder.buildRegionInfoLink;
 import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
 
 public class RemoveRegionChildArgumentType implements ArgumentType<String> {
@@ -69,10 +68,6 @@ public class RemoveRegionChildArgumentType implements ArgumentType<String> {
     /**
      * Lists the child regions for the region argument for removal.
      *
-     * @param context
-     * @param builder
-     * @param <S>
-     * @return
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -85,7 +80,7 @@ public class RemoveRegionChildArgumentType implements ArgumentType<String> {
                     .map(IProtectedRegion::getName)
                     .collect(Collectors.toList());
             if (childNames.isEmpty()) {
-                sendCmdFeedback(src, Text.literal("Region '" + region.getName() + "' has no children."));
+                sendCmdFeedback(src, Text.translatableWithFallback("cli.arg.region.add.child.no-children","Region %s has no child regions.", buildRegionInfoLink(region)));
                 return Suggestions.empty();
             }
             return CommandSource.suggestMatching(childNames, builder);

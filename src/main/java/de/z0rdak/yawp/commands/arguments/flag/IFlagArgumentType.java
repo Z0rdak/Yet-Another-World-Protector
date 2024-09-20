@@ -17,6 +17,7 @@ import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 
 import java.util.ArrayList;
@@ -28,6 +29,8 @@ import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.ADD;
 import static de.z0rdak.yawp.commands.CommandConstants.REMOVE;
+import static de.z0rdak.yawp.util.ChatComponentBuilder.buildAddFlagLink;
+import static de.z0rdak.yawp.util.ChatComponentBuilder.buildRegionInfoLink;
 import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
 
 public class IFlagArgumentType implements ArgumentType<String> {
@@ -154,11 +157,12 @@ public class IFlagArgumentType implements ArgumentType<String> {
                 FlagEditType flagEditType = getEditType(ctx);
                 List<String> flagToSuggest = getSuggestionFlags(flagEditType, region);
                 if ((flagEditType == FlagEditType.REMOVE || flagEditType == FlagEditType.INFO) && flagToSuggest.isEmpty()) {
-                    sendCmdFeedback(src, Text.literal("No flags defined in region '" + region.getName() + "'!"));
+                    MutableText hint = Text.translatableWithFallback("cli.msg.info.region.flag.add-hint", "Add flag by clicking: %s", buildAddFlagLink(region));
+                    sendCmdFeedback(src, Text.translatableWithFallback("cli.msg.info.region.flag.no-flags", "No flags defined in region %s! %s", buildRegionInfoLink(region), hint));
                     return Suggestions.empty();
                 }
                 if (flagEditType == FlagEditType.ADD && flagToSuggest.isEmpty()) {
-                    sendCmdFeedback(src, Text.literal("Region '" + region.getName() + "' already contains all flags!"));
+                    sendCmdFeedback(src, Text.translatableWithFallback("cli.msg.info.region.flag.all-flags","Region %s already contains all flags!", buildRegionInfoLink(region)));
                     return Suggestions.empty();
                 }
                 return CommandSource.suggestMatching(flagToSuggest, builder);
