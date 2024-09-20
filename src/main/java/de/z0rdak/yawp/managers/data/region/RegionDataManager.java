@@ -161,14 +161,14 @@ public class RegionDataManager extends SavedData {
                     globalRegion.addChild(dimCache.getDimensionalRegion());
                     rdm.dimCacheMap.put(dimension, dimCache);
                     rdm.dimensionDataNames.add(dimKey);
-                    YetAnotherWorldProtector.LOGGER.info(Component.translatableWithFallback("data.nbt.dimensions.loaded.dim.amount", "Loaded %s region(s) for dimension %s", dimCache.getRegions().size(), dimCache.getDimensionalRegion().getName()).getString());
+                    YetAnotherWorldProtector.LOGGER.info(Component.translatableWithFallback("data.nbt.dimensions.loaded.dim.amount", "Loaded %s region(s) for dimension '%s'", dimCache.getRegions().size(), dimCache.getDimensionalRegion().getName()).getString());
                 }
             }
         }
         // restore parent/child hierarchy
         rdm.dimCacheMap.forEach((dimKey, cache) -> {
             if (!cache.getRegions().isEmpty()) {
-                YetAnotherWorldProtector.LOGGER.info(Component.translatable("Restoring region hierarchy for regions in dimension '" + dimKey + "'").getString());
+                YetAnotherWorldProtector.LOGGER.info(Component.translatable("Restoring region hierarchy for regions in dimension '" + dimKey.location() + "'").getString());
                 ArrayList<IMarkableRegion> regions = new ArrayList<>(cache.getRegionsInDimension().values());
                 regions.forEach(region -> {
                     // set child reference
@@ -201,7 +201,7 @@ public class RegionDataManager extends SavedData {
             if (!regionDataCache.dimCacheMap.containsKey(dim)) {
                 DimensionRegionCache cache = regionDataCache.newCacheFor(dim);
                 YetAnotherWorldProtector.LOGGER.info("Player joining to server in dimension without region data. This should only happen the first time a player is joining.");
-                YetAnotherWorldProtector.LOGGER.info("Init region data for dimension '" + cache.dimensionKey().location() + "'..");
+                YetAnotherWorldProtector.LOGGER.info("Init region data for dimension '{}' ...", cache.dimensionKey().location());
                 save();
             }
         }
@@ -218,7 +218,7 @@ public class RegionDataManager extends SavedData {
             if (event.getEntity() instanceof Player) {
                 if (!regionDataCache.dimCacheMap.containsKey(event.getDimension())) {
                     DimensionRegionCache cache = regionDataCache.newCacheFor(event.getDimension());
-                    YetAnotherWorldProtector.LOGGER.info("Init region data for dimension '" + cache.dimensionKey().location() + "'..");
+                    YetAnotherWorldProtector.LOGGER.info("Init region data for dimension '{}'..", cache.dimensionKey().location());
                     save();
                 }
             }
