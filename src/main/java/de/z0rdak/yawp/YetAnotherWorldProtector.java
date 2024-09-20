@@ -15,7 +15,7 @@ import org.apache.logging.log4j.Logger;
 public class YetAnotherWorldProtector
 {
     public static final String MODID = "yawp";
-    public static final Logger LOGGER = LogManager.getLogger("YAWP");
+    public static final Logger LOGGER = LogManager.getLogger(MODID.toUpperCase());
 
 
     public YetAnotherWorldProtector() {
