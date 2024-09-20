@@ -1,3 +1,30 @@
+# [0.0.4.1-beta1] - 2024-09-20
+
+## Added
+
+* Add Traditional Chinese localization. Thank you very much @dirttw!
+* Debug logging for flag checks and most player related flags.
+* Add config for logging. You are able to log only certain flags or flag categories.
+* [Fabric] Add `place-fluid` and `scoop-fluid` flag, bringing flag consistency with forge version of the mod.
+
+## Changed
+
+* The `lightning` flag now also prevents lightning strikes not hitting entities, prevents creation of fire blocks and
+  de-oxidation of copper blocks. These additional features may be split in separate flags down the road.
+* The `access-container` flag now considers all entities implementing the vanilla inventory (like Minecarts with
+  chests).
+* The mod file now includes the license, readme, credits and this changelog.
+
+## Fixed
+
+* Fix bug which prevented removing from child regions with sphere area type
+* Fix undo link for flag state setting
+* Fix incorrect MAX and MIN defaults for expand command to be correct for the corresponding minecraft version.
+* Fix some smaller CLI issues and typos
+* [Fabric] Fix `exe-command` flag not working
+* [Fabric] Fix `place-block` flag preventing interacting with entities/blocks.
+* [Fabric] Fix inventory desync when using `place-blocks` flag.
+
 # [0.0.4.0-beta2] - 2024-08-18
 
 ## Changed
