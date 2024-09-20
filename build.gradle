@@ -19,6 +19,9 @@ archivesBaseName = mod_id
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
+compileJava.options.encoding = "UTF-8"
+compileTestJava.options.encoding = "UTF-8"
+
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
     mappings channel: mappings_channel, version: minecraft_version
@@ -149,6 +152,10 @@ jar {
                 "MixinConfigs": "${mod_id}.mixins.json"
         ])
     }
+    from("changelog.md") {}
+    from("LICENSE.txt") {}
+    from("CREDITS.txt") {}
+    from("README.md") {}
 }
 
 // Example configuration to allow publishing using the maven-publish task. This is the preferred method to reobfuscate your jar file

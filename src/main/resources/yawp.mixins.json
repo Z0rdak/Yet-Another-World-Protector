@@ -5,9 +5,10 @@
   "package": "de.z0rdak.yawp.mixin",
   "refmap": "${mod_id}.refmap.json",
   "mixins": [
-    "FrostWalkerEnchantmentMixin",
     "FireBlockMixin",
+    "FrostWalkerEnchantmentMixin",
     "LeavesBlockMixin",
+    "LightningEntityMixin",
     "PlayerEntityMixin",
     "ServerWorldMixin",
     "TntBlockMixin"

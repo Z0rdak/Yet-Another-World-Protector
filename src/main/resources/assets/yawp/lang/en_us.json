@@ -208,7 +208,10 @@
   "cli.msg.info.region.flag.responsible.link.text": "%s responsible flag(s)",
   "cli.msg.info.region.flag.number.hover": "%s flag(s) defined in %s",
   "cli.msg.info.region.flag.responsible.number.hover": "%s responsible flag(s) applicable for %s",
-  "cli.msg.info.region.flag.not-present": "Region ' %s' does not contain flag '%s'",
+  "cli.msg.info.region.flag.not-present": "Region %s does not contain flag '%s'. %",
+  "cli.msg.info.region.flag.no-flags": "No flags defined in region %s! %s",
+  "cli.msg.info.region.flag.all-flags": "Region %s already contains all flags!",
+  "cli.msg.info.region.flag.add-hint": "Add flag by clicking: %s",
   "cli.msg.info.region.flag.remove.link.hover": "Remove flag '%s' from region %s",
   "cli.msg.info.region.global.link.hover": "Show global region info",
   "cli.msg.info.region.group": "Groups",
@@ -311,7 +314,7 @@
   "data.nbt.dimensions.load.dim.restore": "Restoring region hierarchy for regions in dimension %s",
   "data.nbt.dimensions.load.failure": "Loading regions failed!",
   "data.nbt.dimensions.load.success": "Loaded %s region(s) for %s dimension(s)",
-  "data.nbt.dimensions.loaded.dim.amount": "Loaded %s region(s) for dimension %s",
+  "data.nbt.dimensions.loaded.dim.amount": "Loaded %s region(s) for dimension '%s'",
   "data.nbt.dimensions.save": "Save for RegionDataManager called. Attempting to save region data...",
   "data.nbt.dimensions.save.amount": "Saving %s region(s) for %s dimensions",
   "data.nbt.dimensions.save.dim.amount": "Saving %s region(s) for dimension %s",
@@ -385,5 +388,7 @@
   "cli.arg.region.owned.empty.using-dim": "There is no suitable Local Region as parent for %s (no ownership or containment). Using %s as parent.",
   "cli.arg.region.owned.invalid": "Region %s is not suitable as parent",
   "cli.arg.region.owned.invalid.permission": "Region %s is not suitable as parent for %s (no permission for parent)",
-  "cli.arg.region.owned.invalid.containment": "Region %s is not suitable as parent for %s (does not fully contain child region)"
+  "cli.arg.region.owned.invalid.containment": "Region %s is not suitable as parent for %s (does not fully contain child region)",
+  "cli.arg.region.add.child.no-valid": "There are no valid child regions for region %s.",
+  "cli.arg.region.add.child.no-children": "Region %s has no child regions."
 }
