@@ -8,6 +8,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.UUID;
+
 /**
  * Event that is fired before a flag is checked.
  * Can be used to cancel the flag check.
@@ -34,11 +36,25 @@ public final class FlagCheckEvent {
      */
     private final RegionFlag regionFlag;
 
+    /**
+     * Internal Identifier to relate a flag check to its result.
+     */
+    private final String id;
+
     public FlagCheckEvent(BlockPos target, RegionFlag regionFlag, RegistryKey<World> dimension, @Nullable PlayerEntity player) {
         this.player = player;
         this.target = target;
         this.dimension = dimension;
         this.regionFlag = regionFlag;
+        this.id = UUID.randomUUID().toString();
+    }
+
+    public FlagCheckEvent(BlockPos target, RegionFlag regionFlag,  RegistryKey<World> dimension) {
+        this(target, regionFlag, dimension, null);
+    }
+    
+    public String getId() {
+        return id;
     }
 
     public BlockPos getTarget() {
