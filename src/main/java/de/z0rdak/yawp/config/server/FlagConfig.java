@@ -6,6 +6,8 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static de.z0rdak.yawp.config.ConfigRegistry.CONFIG_LOGGER;
+
 public class FlagConfig {
 
     public static final ForgeConfigSpec CONFIG_SPEC;
@@ -58,16 +60,24 @@ public class FlagConfig {
     }
 
     private static boolean isValidEntityEntry(Object entity) {
-        return true;
+        if (entity instanceof String str) {
+            boolean isNotEmptyAndContainsColon = !str.isEmpty() && !str.isBlank() && str.contains(":");
+            if (!isNotEmptyAndContainsColon) {
+                CONFIG_LOGGER.warn("Invalid block tile resource key supplied for 'break_flag_entities': {}", entity);
+            }
+            return isNotEmptyAndContainsColon;
+        }
+        return false;
     }
 
-    /**
-     * TODO: Implementation for validation of tags
-     *
-     * @param tags
-     * @return
-     */
-    private static boolean isValidTagEntry(Object tags) {
-        return true;
+    private static boolean isValidTagEntry(Object entity) {
+        if (entity instanceof String str) {
+            boolean isNotEmptyAndContainsColon = !str.isEmpty() && !str.isBlank() && str.contains(":");
+            if (!isNotEmptyAndContainsColon) {
+                CONFIG_LOGGER.warn("Invalid block tile resource key supplied for 'break_flag_entity_tags': {}", entity);
+            }
+            return isNotEmptyAndContainsColon;
+        }
+        return false;
     }
 }
