@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "yawp",
-  "version": "0.0.4.0-beta2",
+  "version": "0.0.4.1-beta1",
   "name": "Yet Another World Protector",
   "description": "Yet Another World Protector (YAWP) is a server-side mod to protect your creations. It was inspired by the forge mod WorldProtector and the WorldGuard plugin.",
   "authors": [
