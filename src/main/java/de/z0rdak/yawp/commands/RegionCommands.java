@@ -17,7 +17,6 @@ import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.area.SphereArea;
-import de.z0rdak.yawp.core.region.CuboidRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
@@ -35,10 +34,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.common.MinecraftForge;
 
 import java.util.Collections;
 
+import static de.z0rdak.yawp.api.events.region.RegionEvents.post;
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
@@ -101,15 +100,15 @@ public class RegionCommands {
                                                 .then(Commands.literal(AreaType.CUBOID.areaType)
                                                         .then(Commands.argument(POS1.toString(), BlockPosArgument.blockPos())
                                                                 .then(Commands.argument(POS2.toString(), BlockPosArgument.blockPos())
-                                                                        .executes(ctx -> setCuboidArea(ctx, getRegionArgument(ctx), BlockPosArgument.getOrLoadBlockPos(ctx, POS1.toString()), BlockPosArgument.getOrLoadBlockPos(ctx, POS2.toString()))))))
+                                                                        .executes(ctx -> setCuboidArea(ctx, getRegionArgument(ctx), BlockPosArgument.getLoadedBlockPos(ctx, POS1.toString()), BlockPosArgument.getLoadedBlockPos(ctx, POS2.toString()))))))
                                                 .then(Commands.literal(AreaType.SPHERE.areaType)
                                                         .then(Commands.argument(CENTER_POS.toString(), BlockPosArgument.blockPos())
                                                                 .then(Commands.argument(RADIUS_POS.toString(), BlockPosArgument.blockPos())
-                                                                        .executes(ctx -> setSphereArea(ctx, getRegionArgument(ctx), BlockPosArgument.getOrLoadBlockPos(ctx, CENTER_POS.toString()), BlockPosArgument.getOrLoadBlockPos(ctx, RADIUS_POS.toString()))))))
+                                                                        .executes(ctx -> setSphereArea(ctx, getRegionArgument(ctx), BlockPosArgument.getLoadedBlockPos(ctx, CENTER_POS.toString()), BlockPosArgument.getLoadedBlockPos(ctx, RADIUS_POS.toString()))))))
                                                 .then(Commands.literal(AreaType.SPHERE.areaType)
                                                         .then(Commands.argument(CENTER_POS.toString(), BlockPosArgument.blockPos())
                                                                 .then(Commands.argument(RADIUS.toString(), IntegerArgumentType.integer(0))
-                                                                        .executes(ctx -> setSphereArea(ctx, getRegionArgument(ctx), BlockPosArgument.getOrLoadBlockPos(ctx, CENTER_POS.toString()), IntegerArgumentType.getInteger(ctx, RADIUS.toString()))))))
+                                                                        .executes(ctx -> setSphereArea(ctx, getRegionArgument(ctx), BlockPosArgument.getLoadedBlockPos(ctx, CENTER_POS.toString()), IntegerArgumentType.getInteger(ctx, RADIUS.toString()))))))
                                         )
                                         .then(literal(EXPAND)
                                                 .then(Commands.literal(AreaType.CUBOID.areaType)
@@ -125,7 +124,7 @@ public class RegionCommands {
                                         .then(literal(TELEPORT)
                                                 .then(Commands.literal(SET.toString())
                                                         .then(Commands.argument(TARGET.toString(), BlockPosArgument.blockPos())
-                                                                .executes(ctx -> setTeleportPos(ctx, getRegionArgument(ctx), BlockPosArgument.getOrLoadBlockPos(ctx, TARGET.toString())))))
+                                                                .executes(ctx -> setTeleportPos(ctx, getRegionArgument(ctx), BlockPosArgument.getLoadedBlockPos(ctx, TARGET.toString())))))
                                         )
                                         .then(literal(TELEPORT)
                                                 .executes(ctx -> teleport(ctx, getRegionArgument(ctx)))
@@ -177,7 +176,7 @@ public class RegionCommands {
             } catch (CommandSyntaxException e) {
                 player = null;
             }
-            if (MinecraftForge.EVENT_BUS.post(new RegionEvent.UpdateArea(region, area, player))) {
+            if (post(new RegionEvent.UpdateArea(region, area, player))) {
                 return 0;
             }
 
@@ -251,7 +250,7 @@ public class RegionCommands {
             } catch (CommandSyntaxException e) {
                 player = null;
             }
-            if (MinecraftForge.EVENT_BUS.post(new RegionEvent.RenameRegion(region, region.getName(), regionName, player))) {
+            if (post(new RegionEvent.RenameRegion(region, region.getName(), regionName, player))) {
                 return 0;
             }
             String oldName = region.getName();
@@ -266,11 +265,11 @@ public class RegionCommands {
     }
 
     // TODO: Test removing child does not set priority correct with overlapping regions
-    public static int removeChildren(CommandContext<CommandSource> src, DimensionRegionCache dimCache, IProtectedRegion parent, IProtectedRegion child) {
+    public static int removeChildren(CommandContext<CommandSource> src, DimensionRegionCache dimCache, IProtectedRegion parent, IMarkableRegion child) {
         if (parent.hasChild(child)) {
             parent.removeChild(child);
             dimCache.getDimensionalRegion().addChild(child);
-            LocalRegions.ensureLowerRegionPriorityFor((CuboidRegion) child, RegionConfig.getDefaultPriority());
+            LocalRegions.ensureLowerRegionPriorityFor(child, RegionConfig.getDefaultPriority());
             RegionDataManager.save();
             IFormattableTextComponent parentLink = buildRegionInfoLink(parent);
             IFormattableTextComponent notLongerChildLink = buildRegionInfoLink(child);
@@ -327,8 +326,7 @@ public class RegionCommands {
                 return 1;
             }
         }
-        CuboidRegion cuboidRegion = (CuboidRegion) region;
-        boolean existRegionWithSamePriority = LocalRegions.hasAnyRegionWithSamePriority(cuboidRegion, priority);
+        boolean existRegionWithSamePriority = LocalRegions.hasAnyRegionWithSamePriority(region, priority);
         if (existRegionWithSamePriority) {
             IFormattableTextComponent updatePriorityFailMsg = new TranslationTextComponent("cli.msg.info.region.state.priority.set.fail.same", buildRegionInfoLink(region), priority);
             sendCmdFeedback(src.getSource(), updatePriorityFailMsg);

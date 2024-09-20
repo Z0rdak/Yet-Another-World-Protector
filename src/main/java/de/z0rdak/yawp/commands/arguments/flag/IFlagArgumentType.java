@@ -17,6 +17,7 @@ import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
@@ -29,6 +30,8 @@ import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.commands.CommandConstants.ADD;
 import static de.z0rdak.yawp.commands.CommandConstants.REMOVE;
+import static de.z0rdak.yawp.util.ChatComponentBuilder.buildAddFlagLink;
+import static de.z0rdak.yawp.util.ChatComponentBuilder.buildRegionInfoLink;
 import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
 
 public class IFlagArgumentType implements ArgumentType<String> {
@@ -154,11 +157,12 @@ public class IFlagArgumentType implements ArgumentType<String> {
                 FlagEditType flagEditType = getEditType(context);
                 List<String> flagToSuggest = getSuggestionFlags(flagEditType, region);
                 if ((flagEditType == FlagEditType.REMOVE || flagEditType == FlagEditType.INFO) && flagToSuggest.isEmpty()) {
-                    sendCmdFeedback(src, new StringTextComponent("No flags defined in region '" + region.getName() + "'!"));
+                    IFormattableTextComponent hint = new TranslationTextComponent("cli.msg.info.region.flag.add-hint", buildAddFlagLink(region));
+                    sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.flag.no-flags", buildRegionInfoLink(region), hint));
                     return Suggestions.empty();
                 }
                 if (flagEditType == FlagEditType.ADD && flagToSuggest.isEmpty()) {
-                    sendCmdFeedback(src, new StringTextComponent("Region '" + region.getName() + "' already contains all flags!"));
+                    sendCmdFeedback(src, new TranslationTextComponent("cli.msg.info.region.flag.all-flags", buildRegionInfoLink(region)));
                     return Suggestions.empty();
                 }
                 return ISuggestionProvider.suggest(flagToSuggest, builder);

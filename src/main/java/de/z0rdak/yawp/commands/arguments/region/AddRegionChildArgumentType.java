@@ -15,7 +15,6 @@ import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 import java.util.Collection;
@@ -25,6 +24,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static de.z0rdak.yawp.util.ChatComponentBuilder.buildRegionInfoLink;
 import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
 
 public class AddRegionChildArgumentType implements ArgumentType<String> {
@@ -65,10 +65,6 @@ public class AddRegionChildArgumentType implements ArgumentType<String> {
     /**
      * Lists possible regions which can be added as children. <br>
      * These are most likely only regions which have the dimensional region as their parent and are fully contained in the area of the parent region.
-     * @param context
-     * @param builder
-     * @return
-     * @param <S>
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -87,7 +83,7 @@ public class AddRegionChildArgumentType implements ArgumentType<String> {
                     .map(IMarkableRegion::getName)
                     .collect(Collectors.toList());
             if (potentialChildrenNames.isEmpty()) {
-                sendCmdFeedback(src, new StringTextComponent("There are no valid child regions for region '" + region.getName() + "'."));
+                sendCmdFeedback(src, new TranslationTextComponent("cli.arg.region.add.child.no-valid", buildRegionInfoLink(region)));
                 return Suggestions.empty();
             }
             return ISuggestionProvider.suggest(potentialChildrenNames, builder);

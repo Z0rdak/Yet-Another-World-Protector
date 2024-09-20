@@ -25,11 +25,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.common.MinecraftForge;
 
 import java.util.Collections;
 import java.util.Objects;
 
+import static de.z0rdak.yawp.api.events.region.RegionEvents.post;
 import static de.z0rdak.yawp.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.DimensionCommands.getRandomExample;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
@@ -114,7 +114,7 @@ public final class MarkerCommands {
     }
 
     private static int createRegion(CommandContext<CommandSource> ctx, PlayerEntity player, DimensionRegionCache dimCache, IMarkableRegion region, IProtectedRegion parentRegion) {
-        if (MinecraftForge.EVENT_BUS.post(new RegionEvent.CreateRegionEvent(region, player))) {
+        if (post(new RegionEvent.CreateRegionEvent(region, player))) {
             return 1;
         }
         boolean hasConfigPermission = CommandPermissionConfig.hasConfigPermission(player);

@@ -33,7 +33,6 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TranslationTextComponent;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -181,7 +180,7 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
         }
     }
 
-    private static <S> @Nullable IMarkableArea getMarkableArea(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
+    private static IMarkableArea getMarkableArea(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
         IMarkableArea markedArea = null;
         AreaType areaType = null;
         if (ctx.getInput().contains(AreaType.CUBOID.areaType)) {
@@ -199,12 +198,13 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
             case SPHERE:
                 try {
                     BlockPos centerPos = BlockPosArgument.getLoadedBlockPos(ctx, CENTER_POS.toString());
-                    BlockPos radiusPos = BlockPosArgument.getLoadedBlockPos(ctx, RADIUS_POS.toString());
-                    markedArea = new SphereArea(centerPos, radiusPos);
-                } catch (CommandSyntaxException cse) {
-                    BlockPos centerPos = BlockPosArgument.getLoadedBlockPos(ctx, CENTER_POS.toString());
                     int radius = IntegerArgumentType.getInteger(ctx, RADIUS.toString());
                     markedArea = new SphereArea(centerPos, radius);
+
+                } catch (CommandSyntaxException cse) {
+                    BlockPos centerPos = BlockPosArgument.getLoadedBlockPos(ctx, CENTER_POS.toString());
+                    BlockPos radiusPos = BlockPosArgument.getLoadedBlockPos(ctx, RADIUS_POS.toString());
+                    markedArea = new SphereArea(centerPos, radiusPos);
                 }
                 break;
             default:
