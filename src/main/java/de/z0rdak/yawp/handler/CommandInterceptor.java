@@ -54,7 +54,6 @@ public class CommandInterceptor {
         List<ParsedCommandNode<ServerCommandSource>> cmdNodes = cmdContext.getNodes();
         List<String> nodeNames = cmdContext.getNodes().stream().map(node -> node.getNode().getName()).collect(Collectors.toList());
         try {
-
             CommandSourceType cmdSrcType = CommandSourceType.of(src);
             if (!hasModBaseCmd(nodeNames)) {
                 return ALLOW_CMD;
@@ -62,48 +61,49 @@ public class CommandInterceptor {
             if (nodeNames.size() > 2) {
                 YetAnotherWorldProtector.LOGGER.debug("Executed command: '" + parseResults.getReader().getString() + "' by '" + cmdContext.getSource().getName() + "'.");
                 String subCmd = nodeNames.get(1);
-                int cancelExecutionResultCode = 0;
+                int cancelExecutionResultCode = ALLOW_CMD;
                 switch (subCmd) {
                     case "local":
                         if (!nodeNames.contains(CommandConstants.LOCAL.toString())) {
-                            cancelExecutionResultCode = 9;
+                            cancelExecutionResultCode = CANCEL_CMD;
                             break;
                         }
                         cancelExecutionResultCode = handleRegionCmdExecution(cmdContext, nodeNames, cmdSrcType);
                         break;
                     case "dim":
                         if (!nodeNames.contains(DIM.toString())) {
-                            cancelExecutionResultCode = 9;
+                            cancelExecutionResultCode = CANCEL_CMD;
                             break;
                         }
                         cancelExecutionResultCode = handleDimCommandExecution(cmdContext, cmdSrcType);
                         break;
                     case "global":
                         if (!nodeNames.contains(GLOBAL.toString())) {
-                            cancelExecutionResultCode = 9;
+                            cancelExecutionResultCode = CANCEL_CMD;
                             break;
                         }
                         cancelExecutionResultCode = verifyGlobalCommandPermission(cmdContext, cmdSrcType);
                         break;
                     case "flag":
                         if (!nodeNames.contains(FLAG.toString())) {
-                            cancelExecutionResultCode = 9;
+                            cancelExecutionResultCode = CANCEL_CMD;
                             break;
                         }
                         cancelExecutionResultCode = verifyFlagCommandPermission(cmdContext, nodeNames, cmdSrcType);
                         break;
                     case "marker":
                         if (!nodeNames.contains(MARKER.toString())) {
-                            cancelExecutionResultCode = 9;
+                            cancelExecutionResultCode = CANCEL_CMD;
                             break;
                         }
                         cancelExecutionResultCode = verifyMarkerCommandPermission(cmdContext, nodeNames, cmdSrcType);
                         break;
                 }
-            }
-        } catch (IllegalArgumentException e) {
+                return cancelExecutionResultCode;
+            }    
+        } catch (RuntimeException e) {
             YetAnotherWorldProtector.LOGGER.error(e);
-            return ALLOW_CMD;
+            return CANCEL_CMD;
         }
         return ALLOW_CMD;
     }
