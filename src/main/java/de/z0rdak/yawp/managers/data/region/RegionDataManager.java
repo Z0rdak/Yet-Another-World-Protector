@@ -22,7 +22,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
@@ -169,7 +168,7 @@ public class RegionDataManager extends SavedData {
         // restore parent/child hierarchy
         rdm.dimCacheMap.forEach((dimKey, cache) -> {
             if (!cache.getRegions().isEmpty()) {
-                YetAnotherWorldProtector.LOGGER.info(new TranslatableComponent("Restoring region hierarchy for regions in dimension '" + dimKey + "'").getString());
+                YetAnotherWorldProtector.LOGGER.info(new TranslatableComponent("Restoring region hierarchy for regions in dimension '" + dimKey.location() + "'").getString());
                 ArrayList<IMarkableRegion> regions = new ArrayList<>(cache.getRegionsInDimension().values());
                 regions.forEach(region -> {
                     // set child reference
@@ -224,7 +223,7 @@ public class RegionDataManager extends SavedData {
             if (event.getEntity() instanceof Player) {
                 if (!regionDataCache.dimCacheMap.containsKey(event.getDimension())) {
                     DimensionRegionCache cache = regionDataCache.newCacheFor(event.getDimension());
-                    YetAnotherWorldProtector.LOGGER.info("Init region data for dimension '" + cache.dimensionKey().location() + "'..");
+                    YetAnotherWorldProtector.LOGGER.info("Init region data for dimension '{}'..", cache.dimensionKey().location());
                     save();
                 }
             }
@@ -243,7 +242,7 @@ public class RegionDataManager extends SavedData {
             if (!regionDataCache.dimCacheMap.containsKey(dim)) {
                 DimensionRegionCache cache = regionDataCache.newCacheFor(dim);
                 YetAnotherWorldProtector.LOGGER.info("Player joining to server in dimension without region data. This should only happen the first time a player is joining.");
-                YetAnotherWorldProtector.LOGGER.info("Init region data for dimension '" + cache.dimensionKey().location() + "'..");
+                YetAnotherWorldProtector.LOGGER.info("Init region data for dimension '{}'..", cache.dimensionKey().location());
                 save();
             }
         }
