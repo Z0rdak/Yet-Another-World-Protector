@@ -208,7 +208,10 @@
   "cli.msg.info.region.flag.responsible.link.text": "%s 個負責旗標",
   "cli.msg.info.region.flag.number.hover": "在 %s 中定義了 %s 個旗標",
   "cli.msg.info.region.flag.responsible.number.hover": "適用於 %s 的 %s 個負責旗標",
-  "cli.msg.info.region.flag.not-present": "區域 '%s' 不包含旗標 '%s'",
+  "cli.msg.info.region.flag.not-present": "區域 %s 不包含旗標「%s」",
+  "cli.msg.info.region.flag.no-flags": "區域 %s 中沒有定義任何旗標！ %s",
+  "cli.msg.info.region.flag.all-flags": "區域 %s 已包含所有旗標！",
+  "cli.msg.info.region.flag.add-hint": "點選以下項目以新增旗標：%s",
   "cli.msg.info.region.flag.remove.link.hover": "從區域 %s 中移除旗標 '%s'",
   "cli.msg.info.region.global.link.hover": "顯示全域區域資訊",
   "cli.msg.info.region.group": "群組",
@@ -311,7 +314,7 @@
   "data.nbt.dimensions.load.dim.restore": "正在還原維度 %s 中區域的層級結構",
   "data.nbt.dimensions.load.failure": "載入區域失敗！",
   "data.nbt.dimensions.load.success": "已為 %s 個維度載入 %s 個區域",
-  "data.nbt.dimensions.loaded.dim.amount": "已為維度 %s 載入 %s 個區域",
+  "data.nbt.dimensions.loaded.dim.amount": "已載入維度「%s」的 %s 個區域",
   "data.nbt.dimensions.save": "已呼叫 RegionDataManager 的儲存。嘗試儲存區域資料⋯⋯",
   "data.nbt.dimensions.save.amount": "正在為 %s 個維度儲存 %s 個區域",
   "data.nbt.dimensions.save.dim.amount": "正在為維度 %s 儲存 %s 個區域",
@@ -385,5 +388,7 @@
   "cli.arg.region.owned.empty.using-dim": "%s 沒有合適的本地區域作為父區域（沒有所有權或包含）。使用 %s 作為父區域。",
   "cli.arg.region.owned.invalid": "區域 %s 不適合作為父區域",
   "cli.arg.region.owned.invalid.permission": "區域 %s 不適合作為 %s 的父區域（沒有父區域的權限）",
-  "cli.arg.region.owned.invalid.containment": "區域 %s 不適合作為 %s 的父區域（未完全包含子區域）"
+  "cli.arg.region.owned.invalid.containment": "區域 %s 不適合作為 %s 的父區域（未完全包含子區域）",
+  "cli.arg.region.add.child.no-valid": "區域 %s 沒有有效的子區域。",
+  "cli.arg.region.add.child.no-children": "區域 %s 沒有子區域。"
 }
