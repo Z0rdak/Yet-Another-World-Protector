@@ -23,15 +23,7 @@ import static de.z0rdak.yawp.core.flag.FlagMessage.REGION_TEMPLATE;
 public class MessageSender {
 
     public static void sendCmdFeedback(ServerCommandSource src, MutableText text) {
-        try {
-            if (src.getEntity() == null) {
-                src.sendFeedback(() -> text, true);
-            } else {
-                sendMessage(src.getPlayerOrThrow(), text);
-            }
-        } catch (CommandSyntaxException e) {
-            YetAnotherWorldProtector.LOGGER.error(e);
-        }
+        src.sendMessage(text);
     }
 
     public static void sendCmdFeedback(ServerCommandSource src, String langKey) {
