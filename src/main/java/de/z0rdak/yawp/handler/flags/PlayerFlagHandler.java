@@ -1,9 +1,7 @@
 package de.z0rdak.yawp.handler.flags;
 
-import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.config.server.FlagConfig;
-import de.z0rdak.yawp.config.server.LoggingConfig;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.util.MessageSender;
 import net.fabricmc.fabric.api.entity.event.v1.EntityElytraEvents;
@@ -12,7 +10,6 @@ import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
-import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.EnderChestBlockEntity;
 import net.minecraft.block.entity.LecternBlockEntity;
@@ -20,7 +17,6 @@ import net.minecraft.block.entity.LockableContainerBlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.vehicle.StorageMinecartEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
@@ -32,8 +28,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
@@ -47,6 +41,8 @@ import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
  */
 public final class PlayerFlagHandler {
 
+    public static final boolean ALLOW = true;
+
     private PlayerFlagHandler() {
     }
 
@@ -58,7 +54,7 @@ public final class PlayerFlagHandler {
         UseItemCallback.EVENT.register(PlayerFlagHandler::onUseItem);
         UseBlockCallback.EVENT.register(PlayerFlagHandler::onUseBlock);
         UseEntityCallback.EVENT.register(PlayerFlagHandler::onUseEntity);
-        
+
         AttackBlockCallback.EVENT.register(PlayerFlagHandler::onAttackBlock);
     }
 
@@ -76,7 +72,7 @@ public final class PlayerFlagHandler {
         /* Vanilla code - END */
         if (isServerSide(world)) {
             //FLAG_LOGGER.info("[onUseItem] Player={} ({}), at=[{}], Hand={}, Item={}", player.getName().getString(), player.getUuidAsString(), player.getBlockPos().toShortString(), hand, player.getStackInHand(hand));
-            
+
             FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), USE_ITEMS, getDimKey(player), player);
             if (post(checkEvent)) {
                 return TypedActionResult.pass(stackInHand);
@@ -117,7 +113,6 @@ public final class PlayerFlagHandler {
             boolean isContainer = targetEntity instanceof LecternBlockEntity || isLockableTileEntity;
 
             //FLAG_LOGGER.info("[onUseBlock] Player={} ({}), Target=[{}], PLaceOn=[{}], BlockEntity={}, Hand={}, Item={} (isBlock={})", player.getName().getString(), player.getUuidAsString(), targetPos.toShortString(), placeBlockTarget.toShortString(), isBlockEntity, useOnContext.getHand(), player.getStackInHand(useOnContext.getHand()), isBlock);
-            
             // allow player to place blocks when shift clicking usable bock
             if ((isSneakingWithEmptyHands || !player.isSneaking())) {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(targetPos, USE_BLOCKS, getDimKey(player), player);
@@ -153,9 +148,12 @@ public final class PlayerFlagHandler {
             }
 
             if (!hasEmptyHand) {
-                boolean targetsContainerWhileNotSneaking = (isContainer || isEnderChest) && !player.isSneaking();
-                if (targetsContainerWhileNotSneaking) { // should be allowed to access container in this case
-                    FLAG_LOGGER.info("### targetsContainerWhileNotSneaking ###");
+                boolean targetsContainer = (isContainer || isEnderChest);
+                if (targetsContainer && !player.isSneaking()) {
+                    // TODO: should be allowed to access container in this case
+                }
+                if (targetsContainer && player.isSneaking()) {
+                    // TODO: Same handling like placing a block anywhere else
                 }
 
                 Identifier itemRl = Registries.ITEM.getId(stackInHand.getItem());
@@ -281,12 +279,12 @@ public final class PlayerFlagHandler {
         if (isServerSide(player)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, SET_SPAWN, getDimKey(player), player);
             if (post(checkEvent)) {
-                return true;
+                return ALLOW;
             }
             FlagState flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
-            return flagState == FlagState.DENIED;
+            return flagState != FlagState.DENIED;
         }
-        return true;
+        return ALLOW;
     }
 
     private static PlayerEntity.SleepFailureReason onAllowSleeping(PlayerEntity player, BlockPos blockPos) {
@@ -296,7 +294,7 @@ public final class PlayerFlagHandler {
                 return null;
             }
             FlagState flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
-            if (flagState != FlagState.DENIED) {
+            if (flagState == FlagState.DENIED) {
                 return PlayerEntity.SleepFailureReason.NOT_POSSIBLE_HERE;
             }
         }
@@ -308,13 +306,13 @@ public final class PlayerFlagHandler {
             if (livingEntity instanceof PlayerEntity player) {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), USE_ELYTRA, getDimKey(player), player);
                 if (post(checkEvent)) {
-                    return true;
+                    return ALLOW;
                 }
                 FlagState flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
-                return flagState == FlagState.DENIED;
+                return flagState != FlagState.DENIED;
             }
         }
-        return true;
+        return ALLOW;
     }
 
     private static boolean hasEmptyHands(PlayerEntity player) {
