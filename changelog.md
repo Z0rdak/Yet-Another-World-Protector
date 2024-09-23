@@ -1,3 +1,11 @@
+# [0.0.4.1-beta2] - 2024-09-23
+
+## Fixed
+
+* [Fabric] Fix `use-elytra` flag not working
+* [Fabric] Fix `set-spawn` flag not working
+* [Fabric] Fix `sleep` flag not working
+
 # [0.0.4.1-beta1] - 2024-09-20
 
 ## Added
