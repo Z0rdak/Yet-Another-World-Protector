@@ -13,9 +13,10 @@ import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
-import net.minecraft.command.CommandSource;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
+import de.z0rdak.yawp.util.ChatLinkBuilder;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.Component;
 
 import java.util.Collection;
 import java.util.List;
@@ -24,17 +25,16 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
-import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
+import static de.z0rdak.yawp.util.text.MessageSender.sendCmdFeedback;
 
 public class AddRegionChildArgumentType implements ArgumentType<String> {
 
     public static final Pattern VALID_NAME_PATTERN = Pattern.compile("^[A-Za-z]+[A-Za-z\\d\\-]+[A-Za-z\\d]+$");
     private static final Collection<String> EXAMPLES = Stream.of(new String[]{"spawn", "arena4pvp", "shop", "nether-hub"})
             .collect(Collectors.toSet());
-    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(Text.translatableWithFallback("cli.arg.region.parse.invalid", "Unable to parse region name!"));
+    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(Component.translatableWithFallback("cli.arg.region.parse.invalid", "Unable to parse region name!"));
     private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
-            flag -> Text.translatableWithFallback("cli.arg.region.invalid", "Region '%s' does not exist", flag)
+            flag -> Component.translatableWithFallback("cli.arg.region.invalid", "Region '%s' does not exist", flag)
     );
 
     /**
@@ -70,16 +70,15 @@ public class AddRegionChildArgumentType implements ArgumentType<String> {
     /**
      * Lists possible regions which can be added as children. <br>
      * These are most likely only regions which have the dimensional region as their parent and are fully contained in the area of the parent region.
-     *
      */
     @SuppressWarnings("unchecked")
     @Override
     // TODO: Extend suggestions for any region and check if their parents are dim or local regions
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        if (context.getSource() instanceof ServerCommandSource src) {
-            DimensionRegionCache dimCache = ArgumentUtil.getDimCacheArgument((CommandContext<ServerCommandSource>) context);
+        if (context.getSource() instanceof CommandSourceStack src) {
+            DimensionRegionCache dimCache = ArgumentUtil.getDimCacheArgument((CommandContext<CommandSourceStack>) context);
             DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
-            IMarkableRegion region = ArgumentUtil.getRegionArgument((CommandContext<ServerCommandSource>) context);
+            IMarkableRegion region = ArgumentUtil.getRegionArgument((CommandContext<CommandSourceStack>) context);
             List<String> potentialChildrenNames = dimRegion.getChildren().values()
                     .stream()
                     .map(r -> (IMarkableRegion) r)
@@ -88,10 +87,10 @@ public class AddRegionChildArgumentType implements ArgumentType<String> {
                     .map(IMarkableRegion::getName)
                     .collect(Collectors.toList());
             if (potentialChildrenNames.isEmpty()) {
-                sendCmdFeedback(src, Text.translatableWithFallback("cli.arg.region.add.child.no-valid","There are no valid child regions for region %s.", buildRegionInfoLink(region)));
+                sendCmdFeedback(src, Component.translatableWithFallback("cli.arg.region.add.child.no-valid", "There are no valid child regions for region %s.", ChatLinkBuilder.buildRegionInfoLink(region)));
                 return Suggestions.empty();
             }
-            return CommandSource.suggestMatching(potentialChildrenNames, builder);
+            return SharedSuggestionProvider.suggest(potentialChildrenNames, builder);
         } else {
             return Suggestions.empty();
         }

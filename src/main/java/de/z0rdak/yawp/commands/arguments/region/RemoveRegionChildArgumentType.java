@@ -12,9 +12,9 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import net.minecraft.command.CommandSource;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.Component;
 
 import java.util.Collection;
 import java.util.List;
@@ -23,17 +23,17 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static de.z0rdak.yawp.util.ChatComponentBuilder.buildRegionInfoLink;
-import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
+import static de.z0rdak.yawp.util.ChatLinkBuilder.buildRegionInfoLink;
+import static de.z0rdak.yawp.util.text.MessageSender.sendCmdFeedback;
 
 public class RemoveRegionChildArgumentType implements ArgumentType<String> {
 
     public static final Pattern VALID_NAME_PATTERN = Pattern.compile("^[A-Za-z]+[A-Za-z\\d\\-]+[A-Za-z\\d]+$");
     private static final Collection<String> EXAMPLES = Stream.of(new String[]{"spawn", "arena4pvp", "shop", "nether-hub"})
             .collect(Collectors.toSet());
-    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(Text.translatableWithFallback("cli.arg.region.parse.invalid", "Unable to parse region name!"));
+    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(Component.translatableWithFallback("cli.arg.region.parse.invalid", "Unable to parse region name!"));
     private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
-            flag -> Text.translatableWithFallback("cli.arg.region.invalid", "Region '%s' does not exist", flag)
+            flag -> Component.translatableWithFallback("cli.arg.region.invalid", "Region '%s' does not exist", flag)
     );
 
     /**
@@ -67,23 +67,22 @@ public class RemoveRegionChildArgumentType implements ArgumentType<String> {
 
     /**
      * Lists the child regions for the region argument for removal.
-     *
      */
     @SuppressWarnings("unchecked")
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        if (context.getSource() instanceof ServerCommandSource src) {
-            IMarkableRegion region = ArgumentUtil.getRegionArgument((CommandContext<ServerCommandSource>) context);
+        if (context.getSource() instanceof CommandSourceStack src) {
+            IMarkableRegion region = ArgumentUtil.getRegionArgument((CommandContext<CommandSourceStack>) context);
             List<String> childNames = region.getChildren()
                     .values()
                     .stream()
                     .map(IProtectedRegion::getName)
                     .collect(Collectors.toList());
             if (childNames.isEmpty()) {
-                sendCmdFeedback(src, Text.translatableWithFallback("cli.arg.region.add.child.no-children","Region %s has no child regions.", buildRegionInfoLink(region)));
+                sendCmdFeedback(src, Component.translatableWithFallback("cli.arg.region.add.child.no-children", "Region %s has no child regions.", buildRegionInfoLink(region)));
                 return Suggestions.empty();
             }
-            return CommandSource.suggestMatching(childNames, builder);
+            return SharedSuggestionProvider.suggest(childNames, builder);
         } else {
             return Suggestions.empty();
         }

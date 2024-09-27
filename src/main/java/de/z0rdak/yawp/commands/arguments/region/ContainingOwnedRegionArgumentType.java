@@ -23,15 +23,15 @@ import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
 import de.z0rdak.yawp.util.StickUtil;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.BlockPosArgumentType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -41,21 +41,21 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static de.z0rdak.yawp.commands.CommandConstants.*;
+import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.MarkerCommands.fromMarkedBlocks;
-import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
+import static de.z0rdak.yawp.util.text.MessageSender.sendCmdFeedback;
 
 public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
 
     public static final Pattern VALID_NAME_PATTERN = Pattern.compile("^[A-Za-z]+[A-Za-z\\d\\-]+[A-Za-z\\d]+$");
     private static final Collection<String> EXAMPLES = Stream.of(new String[]{"spawn", "arena4pvp", "shop", "nether-hub"})
             .collect(Collectors.toSet());
-    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(Text.translatableWithFallback("cli.arg.region.parse.invalid", "Unable to parse region name!"));
+    private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(Component.translatableWithFallback("cli.arg.region.parse.invalid", "Unable to parse region name!"));
     private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
-            regionName -> Text.translatableWithFallback("cli.arg.region.invalid", "Region '%s' does not exist", regionName)
+            regionName -> Component.translatableWithFallback("cli.arg.region.invalid", "Region '%s' does not exist", regionName)
     );
     private static final DynamicCommandExceptionType ERROR_INVALID_PARENT = new DynamicCommandExceptionType(
-            regionName -> Text.translatableWithFallback("cli.arg.region.owned.invalid", "Region '%s' is not suitable as parent", regionName)
+            regionName -> Component.translatableWithFallback("cli.arg.region.owned.invalid", "Region '%s' is not suitable as parent", regionName)
     );
 
 
@@ -67,13 +67,13 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
         return new ContainingOwnedRegionArgumentType();
     }
 
-    public static IMarkableRegion getRegion(CommandContext<ServerCommandSource> context, String argName) throws CommandSyntaxException {
+    public static IMarkableRegion getRegion(CommandContext<CommandSourceStack> context, String argName) throws CommandSyntaxException {
         String containingRegionName = context.getArgument(argName, String.class);
         String containedRegionName = context.getArgument(NAME.toString(), String.class);
-        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(context.getSource().getWorld().getRegistryKey());
+        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(context.getSource().getLevel().dimension());
         IMarkableRegion parent = dimCache.getRegion(containingRegionName);
 
-        IMarkableArea markedArea = getMarkableArea(context);
+        IMarkableArea markedArea = markableArea(context);
         if (markedArea == null) {
             throw new IllegalArgumentException("Could not get marked blocks from command");
         }
@@ -86,22 +86,22 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
             return parent;
         } else {
             if (!hasPermissionForParent) {
-                sendCmdFeedback(context.getSource(), Text.translatableWithFallback("cli.arg.region.owned.invalid.permission", "Region %s is not suitable as parent for %s (no permission for parent)", containingRegionName, containedRegionName));    
+                sendCmdFeedback(context.getSource(), Component.translatableWithFallback("cli.arg.region.owned.invalid.permission", "Region %s is not suitable as parent for %s (no permission for parent)", containingRegionName, containedRegionName));
             }
             if (!containsChild) {
-                sendCmdFeedback(context.getSource(), Text.translatableWithFallback("cli.arg.region.owned.invalid.containment", "Region %s is not suitable as parent for %s (does not fully contain child region)", containingRegionName, containedRegionName));
+                sendCmdFeedback(context.getSource(), Component.translatableWithFallback("cli.arg.region.owned.invalid.containment", "Region %s is not suitable as parent for %s (does not fully contain child region)", containingRegionName, containedRegionName));
             }
             throw ERROR_INVALID_PARENT.create(containingRegionName);
         }
     }
 
-    public static IMarkableRegion getRegionWithMarker(CommandContext<ServerCommandSource> context, String argName) throws CommandSyntaxException {
+    public static IMarkableRegion getRegionWithMarker(CommandContext<CommandSourceStack> context, String argName) throws CommandSyntaxException {
         String containingRegionName = context.getArgument(argName, String.class);
         String containedRegionName = context.getArgument(NAME.toString(), String.class);
-        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(context.getSource().getWorld().getRegistryKey());
+        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(context.getSource().getLevel().dimension());
         IMarkableRegion parent = dimCache.getRegion(containingRegionName);
 
-        ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
+        ServerPlayer player = context.getSource().getPlayerOrException();
         IMarkableRegion markedRegion = fromMarkedBlocks(context, player, containedRegionName);
         if (markedRegion == null) {
             throw new IllegalArgumentException("Could not get marked blocks from command");
@@ -115,13 +115,46 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
             return parent;
         } else {
             if (!hasPermissionForParent) {
-                sendCmdFeedback(context.getSource(), Text.translatableWithFallback("cli.arg.region.owned.invalid.permission", "Region %s is not suitable as parent for %s (no permission for parent)", containingRegionName, containedRegionName));
+                sendCmdFeedback(context.getSource(), Component.translatableWithFallback("cli.arg.region.owned.invalid.permission", "Region %s is not suitable as parent for %s (no permission for parent)", containingRegionName, containedRegionName));
             }
             if (!containsChild) {
-                sendCmdFeedback(context.getSource(), Text.translatableWithFallback("cli.arg.region.owned.invalid.containment", "Region %s is not suitable as parent for %s (does not fully contain child region)", containingRegionName, containedRegionName));
+                sendCmdFeedback(context.getSource(), Component.translatableWithFallback("cli.arg.region.owned.invalid.containment", "Region %s is not suitable as parent for %s (does not fully contain child region)", containingRegionName, containedRegionName));
             }
             throw ERROR_INVALID_PARENT.create(containingRegionName);
         }
+    }
+
+    private static @Nullable IMarkableArea markableArea(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        IMarkableArea markedArea = null;
+        AreaType areaType = null;
+        if (ctx.getInput().contains(AreaType.CUBOID.areaType)) {
+            areaType = AreaType.CUBOID;
+        }
+        if (ctx.getInput().contains(AreaType.SPHERE.areaType)) {
+            areaType = AreaType.SPHERE;
+        }
+        switch (areaType) {
+            case CUBOID:
+                BlockPos p1 = BlockPosArgument.getLoadedBlockPos(ctx, POS1.toString());
+                BlockPos p2 = BlockPosArgument.getLoadedBlockPos(ctx, POS2.toString());
+                markedArea = new CuboidArea(p1, p2);
+                break;
+            case SPHERE:
+                try {
+                    BlockPos centerPos = BlockPosArgument.getLoadedBlockPos(ctx, CENTER_POS.toString());
+                    int radius = IntegerArgumentType.getInteger(ctx, RADIUS.toString());
+                    markedArea = new SphereArea(centerPos, radius);
+
+                } catch (CommandSyntaxException cse) {
+                    BlockPos centerPos = BlockPosArgument.getLoadedBlockPos(ctx, CENTER_POS.toString());
+                    BlockPos radiusPos = BlockPosArgument.getLoadedBlockPos(ctx, RADIUS_POS.toString());
+                    markedArea = new SphereArea(centerPos, radiusPos);
+                }
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + areaType);
+        }
+        return markedArea;
     }
 
     @Override
@@ -149,25 +182,25 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
      * Suggests regions with permission, which are also fully containing the area provided by the marked blocks of the region marker
      */
     public <S> CompletableFuture<Suggestions> listSuggestionsWithMarker(CommandContext<S> context, SuggestionsBuilder builder) {
-        if (context.getSource() instanceof ServerCommandSource src) {
+        if (context.getSource() instanceof CommandSourceStack src) {
             try {
-                PlayerEntity player = src.getPlayerOrThrow();
-                ItemStack maybeStick = player.getMainHandStack();
+                Player player = src.getPlayerOrException();
+                ItemStack maybeStick = player.getMainHandItem();
                 if (StickUtil.isVanillaStick(maybeStick) && StickUtil.isMarker(maybeStick)) {
-                    NbtCompound stickNBT = StickUtil.getStickNBT(maybeStick);
+                    CompoundTag stickNBT = StickUtil.getStickNBT(maybeStick);
                     if (stickNBT != null) {
                         MarkerStick marker = new MarkerStick(stickNBT);
                         if (!marker.isValidArea()) {
                             return Suggestions.empty();
                         }
-                        IMarkableArea markedArea = StickUtil.getMarkedArea(player.getMainHandStack());
+                        IMarkableArea markedArea = StickUtil.getMarkedArea(player.getMainHandItem());
                         LocalRegions.RegionOverlappingInfo overlapping = LocalRegions.getOverlappingWithPermission(markedArea, player);
                         if (!overlapping.hasContaining()) {
-                            sendCmdFeedback(src, Text.translatableWithFallback("cli.arg.area.owned.no-containment", "No suitable Local Region as parent for the marked area. Attempting to set Dimensional Region as parent."));
+                            sendCmdFeedback(src, Component.translatableWithFallback("cli.arg.area.owned.no-containment", "No suitable Local Region as parent for the marked area. Attempting to set Dimensional Region as parent."));
                             return Suggestions.empty();
                         }
                         Set<String> containingRegionName = overlapping.containingRegions.stream().map(IProtectedRegion::getName).collect(Collectors.toSet());
-                        return CommandSource.suggestMatching(containingRegionName, builder);
+                        return SharedSuggestionProvider.suggest(containingRegionName, builder);
                     }
                 }
                 return Suggestions.empty();
@@ -184,66 +217,33 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
      * Suggests regions with permission, which are also fully containing the area provided by the create local command
      */
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        if (context.getSource() instanceof ServerCommandSource src) {
-            CommandContext<ServerCommandSource> ctx = (CommandContext<ServerCommandSource>) context;
+        if (context.getSource() instanceof CommandSourceStack src) {
+            CommandContext<CommandSourceStack> ctx = (CommandContext<CommandSourceStack>) context;
             try {
-                IMarkableArea markedArea = getMarkableArea(ctx);
+                IMarkableArea markedArea = markableArea(ctx);
                 if (markedArea == null) {
                     throw new IllegalArgumentException("Could not get marked blocks from command");
                 }
-                PlayerEntity player;
+                Player player;
                 LocalRegions.RegionOverlappingInfo overlapping;
                 try {
-                    player = src.getPlayerOrThrow();
+                    player = src.getPlayerOrException();
                     overlapping = LocalRegions.getOverlappingWithPermission(markedArea, player);
                 } catch (CommandSyntaxException e) {
-                    overlapping = LocalRegions.getOverlappingRegions(markedArea, src.getWorld().getRegistryKey());
+                    overlapping = LocalRegions.getOverlappingRegions(markedArea, src.getLevel().dimension());
                 }
                 if (!overlapping.hasContaining()) {
-                    sendCmdFeedback(src, Text.translatableWithFallback("cli.arg.area.owned.no-containment", "No suitable Local Region as parent for the marked area. Attempting to set Dimensional Region as parent."));
+                    sendCmdFeedback(src, Component.translatableWithFallback("cli.arg.area.owned.no-containment", "No suitable Local Region as parent for the marked area. Attempting to set Dimensional Region as parent."));
                     return Suggestions.empty();
                 }
                 Set<String> containingRegionName = overlapping.containingRegions.stream().map(IProtectedRegion::getName).collect(Collectors.toSet());
-                return CommandSource.suggestMatching(containingRegionName, builder);
+                return SharedSuggestionProvider.suggest(containingRegionName, builder);
             } catch (CommandSyntaxException e) {
                 return Suggestions.empty();
             }
         } else {
             return Suggestions.empty();
         }
-    }
-
-    private static @Nullable IMarkableArea getMarkableArea(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        IMarkableArea markedArea = null;
-        AreaType areaType = null;
-        if (ctx.getInput().contains(AreaType.CUBOID.areaType)) {
-            areaType = AreaType.CUBOID;
-        }
-        if (ctx.getInput().contains(AreaType.SPHERE.areaType)) {
-            areaType = AreaType.SPHERE;
-        }
-        switch (areaType) {
-            case CUBOID:
-                BlockPos p1 = BlockPosArgumentType.getLoadedBlockPos(ctx, POS1.toString());
-                BlockPos p2 = BlockPosArgumentType.getLoadedBlockPos(ctx, POS2.toString());
-                markedArea = new CuboidArea(p1, p2);
-                break;
-            case SPHERE:
-                try {
-                    BlockPos centerPos = BlockPosArgumentType.getLoadedBlockPos(ctx, CENTER_POS.toString());
-                    int radius = IntegerArgumentType.getInteger(ctx, RADIUS.toString());
-                    markedArea = new SphereArea(centerPos, radius);
-                 
-                } catch (CommandSyntaxException cse) {
-                    BlockPos centerPos = BlockPosArgumentType.getLoadedBlockPos(ctx, CENTER_POS.toString());
-                    BlockPos radiusPos = BlockPosArgumentType.getLoadedBlockPos(ctx, RADIUS_POS.toString());
-                    markedArea = new SphereArea(centerPos, radiusPos);
-                }
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + areaType);
-        }
-        return markedArea;
     }
 
     @Override

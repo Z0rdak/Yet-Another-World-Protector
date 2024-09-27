@@ -1,10 +1,10 @@
 package de.z0rdak.yawp.commands;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.vehicle.CommandBlockMinecartEntity;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.MinecartCommandBlock;
 
 public enum CommandSourceType {
     PLAYER("player"),
@@ -19,14 +19,14 @@ public enum CommandSourceType {
         this.source = source;
     }
 
-    public static CommandSourceType of(ServerCommandSource cmdSrc) throws IllegalArgumentException {
+    public static CommandSourceType of(CommandSourceStack cmdSrc) throws IllegalArgumentException {
         if (cmdSrc == null) {
             throw new IllegalArgumentException("Command source can't be null!");
         }
         try {
-            Entity cmdSrcEntity = cmdSrc.getEntityOrThrow();
-            if (!(cmdSrcEntity instanceof PlayerEntity)) {
-                if (cmdSrcEntity instanceof CommandBlockMinecartEntity) {
+            Entity cmdSrcEntity = cmdSrc.getEntityOrException();
+            if (!(cmdSrcEntity instanceof Player)) {
+                if (cmdSrcEntity instanceof MinecartCommandBlock) {
                     return COMMAND_BLOCK;
                 }
                 return NON_PLAYER;
@@ -36,7 +36,7 @@ public enum CommandSourceType {
         } catch (CommandSyntaxException e) {
             // for server and command blocks this is
             // just an exclusion procedure because it is not possible to access the direct source
-            if (cmdSrc.getName().equals("Server")) {
+            if (cmdSrc.getTextName().equals("Server")) {
                 return SERVER;
             }
             return COMMAND_BLOCK;
