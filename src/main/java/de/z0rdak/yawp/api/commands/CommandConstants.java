@@ -1,4 +1,4 @@
-package de.z0rdak.yawp.commands;
+package de.z0rdak.yawp.api.commands;
 
 public enum CommandConstants {
     ACTIVATE("activate"),
