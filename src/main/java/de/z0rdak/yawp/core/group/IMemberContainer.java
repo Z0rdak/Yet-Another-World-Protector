@@ -1,14 +1,16 @@
 package de.z0rdak.yawp.core.group;
 
 import de.z0rdak.yawp.core.INbtSerializable;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.UUID;
 
 /**
  * Abstraction for a set of members
  */
-public interface IMemberContainer extends INbtSerializable<NbtCompound> {
+public interface IMemberContainer extends INbtSerializable<CompoundTag> {
+
+    String getGroupName();
 
     boolean hasPlayer(UUID playerUUID);
 

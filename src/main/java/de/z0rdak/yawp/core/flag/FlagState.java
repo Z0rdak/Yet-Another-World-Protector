@@ -3,6 +3,7 @@ package de.z0rdak.yawp.core.flag;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public enum FlagState {
     /**
@@ -68,6 +69,10 @@ public enum FlagState {
     public static List<String> ValidFlagStates() {
         // exclude UNDEFINED
         return Arrays.stream(FlagState.values()).filter(state -> state != UNDEFINED).map(fs -> fs.name).collect(Collectors.toList());
+    }
+
+    public static boolean validLoggingStates(String flagState) {
+        return Stream.of(ALLOWED, DENIED).anyMatch(state -> state.name.equalsIgnoreCase(flagState));
     }
 
     public static FlagState invert(FlagState state) {

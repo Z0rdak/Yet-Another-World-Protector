@@ -5,81 +5,82 @@ import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.util.StickType;
 import de.z0rdak.yawp.util.StickUtil;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 
 import java.util.Objects;
 
+import static de.z0rdak.yawp.handler.flags.HandlerUtil.isServerSide;
 import static de.z0rdak.yawp.util.StickUtil.*;
 
 public class MarkerStickHandler {
 
-    public static void onCreateStick(PlayerEntity player, ItemStack input, ItemStack output, StickType type) {
+    public static void onCreateStick(Player player, ItemStack input, ItemStack output, StickType type) {
         // split stack and only create one stick, also refund xp
         input.setCount(output.getCount() - 1);
-        player.giveItemStack(input);
-        player.addExperienceLevels(1);
-        StickUtil.initMarkerNbt(output, type, player.getWorld().getRegistryKey());
+        player.addItem(input);
+        player.giveExperienceLevels(1);
+        StickUtil.initMarkerNbt(output, type, player.level().dimension());
     }
 
-    public static void onMarkBlock(PlayerEntity player, ItemStack involvedItem, BlockPos target) {
-        if (!player.getWorld().isClient) {
+    public static void onMarkBlock(Player player, ItemStack involvedItem, BlockPos target) {
+        if (isServerSide(player.level())) {
             // TODO: Maybe check if player is allowed to mark block
             if (!involvedItem.equals(ItemStack.EMPTY) && isVanillaStick(involvedItem)) {
                 StickType stickType = getStickType(involvedItem);
                 if (Objects.requireNonNull(stickType) == StickType.MARKER) {
-                    MarkerStick marker = new MarkerStick(involvedItem.getNbt().getCompound(STICK));
+                    MarkerStick marker = new MarkerStick(involvedItem.getTag().getCompound(STICK));
                     AreaType areaType = marker.getAreaType();
                     if (areaType == null) {
                         YetAnotherWorldProtector.LOGGER.warn("Unknown area type on marking - should really not happening");
                         return;
                     }
-                    if (player.isCrawling()) {
+                    if (player.isShiftKeyDown()) {
                         marker.setTeleportPos(target);
-                        involvedItem.getNbt().put(STICK, marker.serializeNBT());
+                        involvedItem.getTag().put(STICK, marker.serializeNBT());
                         return;
                     }
                     // add block to NBT list
                     marker.addMarkedBlock(target);
                     // check whether marked blocks form a valid marked area
                     marker.checkValidArea();
-                    involvedItem.getNbt().put(STICK, marker.serializeNBT());
+                    involvedItem.getTag().put(STICK, marker.serializeNBT());
                     setStickName(involvedItem, StickType.MARKER);
                 }
             }
         }
     }
 
-    public static void onCycleMode(PlayerEntity player, ItemStack involvedItem, BlockHitResult target) {
-        if (!player.getWorld().isClient) {
+    public static void onCycleMode(Player player, ItemStack involvedItem, BlockHitResult target) {
+        if (isServerSide(player.level())) {
             // is some valid mod stick
             if (!involvedItem.equals(ItemStack.EMPTY)
                     && hasNonNullTag(involvedItem)
-                    && involvedItem.getNbt().contains(STICK)) {
+                    && involvedItem.getTag().contains(STICK)) {
                 boolean targetIsAir;
                 if (target.getType() == HitResult.Type.BLOCK) { // should always be block
                     BlockPos blockpos = target.getBlockPos();
-                    BlockState blockstate = player.getWorld().getBlockState(blockpos);
+                    BlockState blockstate = player.level().getBlockState(blockpos);
                     targetIsAir = blockstate.getBlock().equals(Blocks.AIR);
                 } else {
                     targetIsAir = target.getType() == HitResult.Type.MISS;
                 }
 
-                if (player.isCrawling() && targetIsAir) {
+                if (player.isShiftKeyDown() && targetIsAir) {
                     StickType stickType = getStickType(involvedItem);
                     if (Objects.requireNonNull(stickType) == StickType.MARKER) {
-                        NbtCompound nbt = involvedItem.getNbt();
+                        CompoundTag nbt = involvedItem.getTag();
                         MarkerStick marker = new MarkerStick(nbt.getCompound(STICK));
                         // change area nbt, reset marked blocks, set valid to false
                         marker.cycleMode();
                         // update stick name
-                        involvedItem.getNbt().put(STICK, marker.serializeNBT());
+                        involvedItem.getTag().put(STICK, marker.serializeNBT());
                         StickUtil.setStickName(involvedItem, StickType.MARKER);
                     }
                 }

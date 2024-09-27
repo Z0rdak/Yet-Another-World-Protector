@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.core.area;
 
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ public class PrismArea extends AbstractArea {
 
     public List<BlockPos> blockNodes;
 
-    public PrismArea(NbtCompound nbt) {
+    public PrismArea(CompoundTag nbt) {
         super(nbt);
         this.deserializeNBT(nbt);
     }
@@ -22,7 +22,7 @@ public class PrismArea extends AbstractArea {
         this.blockNodes = new ArrayList<>();
     }
 
-    public PrismArea(List<BlockPos> blockNodes){
+    public PrismArea(List<BlockPos> blockNodes) {
         this();
         this.blockNodes = blockNodes;
     }
@@ -33,19 +33,19 @@ public class PrismArea extends AbstractArea {
     }
 
     @Override
-    public NbtCompound serializeNBT() {
-        NbtCompound nbt = super.serializeNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = super.serializeNBT();
         throw new NotImplementedException("Missing serializeNBT implementation in PrismArea");
     }
 
     @Override
-    public void deserializeNBT(NbtCompound nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
         throw new NotImplementedException("Missing deserializeNBT implementation in PrismArea");
     }
 
     @Override
-    public List<BlockPos> getMarkedBlocks() {
+    public List<BlockPos> markedBlocks() {
         return this.blockNodes;
     }
 

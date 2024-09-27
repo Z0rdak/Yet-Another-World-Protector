@@ -12,13 +12,13 @@ import org.jetbrains.annotations.Nullable;
  * This region is not necessarily the region responsible for the flag check event.
  * It could be a parent region which overrides the flag state of the child region.
  */
-public class FlagCorrelation {
+public final class FlagCorrelation {
 
     public final IProtectedRegion region;
     @Nullable
     public final IFlag flag;
 
-    public FlagCorrelation(IProtectedRegion region, IFlag flag) {
+    public FlagCorrelation(IProtectedRegion region, @Nullable IFlag flag) {
         this.region = region;
         this.flag = flag;
     }

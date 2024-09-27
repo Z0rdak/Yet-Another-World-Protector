@@ -24,7 +24,7 @@ public enum RegionType {
 
     public final String type;
 
-    RegionType(String type){
+    RegionType(String type) {
         this.type = type;
     }
 

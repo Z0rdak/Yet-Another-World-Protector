@@ -2,15 +2,14 @@ package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.config.server.FlagConfig;
-import de.z0rdak.yawp.util.MessageSender;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.passive.VillagerEntity;
-import net.minecraft.entity.passive.WanderingTraderEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.WanderingTrader;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -22,16 +21,16 @@ import java.util.Set;
 import static de.z0rdak.yawp.api.events.region.RegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
-import static de.z0rdak.yawp.util.MessageSender.sendFlagMsg;
+import static de.z0rdak.yawp.util.text.MessageSender.sendFlagMsg;
 
-@Mixin(PlayerEntity.class)
+@Mixin(Player.class)
 public abstract class PlayerMixin {
 
-    @Inject(method = "dropItem(Lnet/minecraft/item/ItemStack;Z)Lnet/minecraft/entity/ItemEntity;", at = @At(value = "TAIL"), allow = 1, cancellable = true)
+    @Inject(method = "drop(Lnet/minecraft/world/item/ItemStack;Z)Lnet/minecraft/world/entity/item/ItemEntity;", at = @At(value = "TAIL"), allow = 1, cancellable = true)
     private void onDropItem(ItemStack stack, boolean retainOwnership, CallbackInfoReturnable<ItemStack> cir) {
-        PlayerEntity player = (PlayerEntity) (Object) this;
+        Player player = (Player) (Object) this;
         if (isServerSide(player)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), ITEM_DROP, getDimKey(player), player);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), ITEM_DROP, getDimKey(player), player);
             if (post(checkEvent))
                 return;
             processCheck(checkEvent, null, deny -> {
@@ -41,11 +40,11 @@ public abstract class PlayerMixin {
         }
     }
 
-    @Inject(method = "addExperienceLevels", at = @At(value = "HEAD"), cancellable = true, allow = 1)
+    @Inject(method = "giveExperienceLevels", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onGainLevels(int levels, CallbackInfo ci) {
-        PlayerEntity player = (PlayerEntity) (Object) this;
+        Player player = (Player) (Object) this;
         if (isServerSide(player)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), LEVEL_FREEZE, getDimKey(player), player);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), LEVEL_FREEZE, getDimKey(player), player);
             if (post(checkEvent))
                 return;
             processCheck(checkEvent, null, deny -> {
@@ -57,15 +56,14 @@ public abstract class PlayerMixin {
 
     /**
      * TODO: add keep-inventory flag enum
-     * As seen below this is already implemented. It just need to be tested and 
-     * @param ci
+     * As seen below this is already implemented. It just need to be tested
      */
-    @Inject(method = "dropInventory", at = @At(value = "HEAD"), cancellable = true, allow = 1)
+    @Inject(method = "dropEquipment", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onDropInventory(CallbackInfo ci) {
-        PlayerEntity player = (PlayerEntity) (Object) this;
+        Player player = (Player) (Object) this;
         /*
         if (isServerSide(player)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), KEEP_INVENTORY, getEntityDim(player), player);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), KEEP_INVENTORY, getEntityDim(player), player);
             if (post(checkEvent))
                 return;
             processCheck(checkEvent, null, deny -> {
@@ -76,17 +74,11 @@ public abstract class PlayerMixin {
         */
     }
 
-    /**
-     * XP_FREEZE
-     *
-     * @param experience
-     * @param ci
-     */
-    @Inject(method = "addExperience", at = @At(value = "HEAD"), cancellable = true, allow = 1)
+    @Inject(method = "giveExperiencePoints", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onGainExperience(int experience, CallbackInfo ci) {
-        PlayerEntity player = (PlayerEntity) (Object) this;
+        Player player = (Player) (Object) this;
         if (isServerSide(player)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), XP_FREEZE, getDimKey(player), player);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), XP_FREEZE, getDimKey(player), player);
             if (post(checkEvent))
                 return;
             processCheck(checkEvent, null, deny -> {
@@ -98,16 +90,14 @@ public abstract class PlayerMixin {
 
     /**
      * TODO: add no-hunger flag enum
-     * As seen below this is already implemented. It just need to be tested and 
-     * @param exhaustion
-     * @param ci
+     * As seen below this is already implemented. It just need to be tested
      */
-    @Inject(method = "addExhaustion", at = @At(value = "HEAD"), cancellable = true, allow = 1)
+    @Inject(method = "causeFoodExhaustion", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onGainHunger(float exhaustion, CallbackInfo ci) {
-        PlayerEntity player = (PlayerEntity) (Object) this;
+        Player player = (Player) (Object) this;
         if (isServerSide(player)) {
             /*
-            FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), NO_HUNGER, getEntityDim(player), player);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), NO_HUNGER, getEntityDim(player), player);
             if (post(checkEvent))
                 return;
             processCheck(checkEvent, null, deny -> {
@@ -119,18 +109,18 @@ public abstract class PlayerMixin {
     }
 
 
-    @Inject(method = "applyDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;applyArmorToDamage(Lnet/minecraft/entity/damage/DamageSource;F)F"), cancellable = true, allow = 1)
+    @Inject(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getDamageAfterArmorAbsorb(Lnet/minecraft/world/damagesource/DamageSource;F)F"), cancellable = true, allow = 1)
     public void onHurt(DamageSource source, float amount, CallbackInfo ci) {
-        PlayerEntity player = (PlayerEntity) (Object) this;
+        Player player = (Player) (Object) this;
         if (isServerSide(player)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), NO_PVP, getDimKey(player), player);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), NO_PVP, getDimKey(player), player);
             if (post(checkEvent))
                 return;
             processCheck(checkEvent, null, deny -> {
                 sendFlagMsg(deny);
                 ci.cancel();
             });
-            checkEvent = new FlagCheckEvent(player.getBlockPos(), INVINCIBLE, getDimKey(player), player);
+            checkEvent = new FlagCheckEvent(player.blockPosition(), INVINCIBLE, getDimKey(player), player);
             if (post(checkEvent))
                 return;
             processCheck(checkEvent, null, deny -> {
@@ -139,9 +129,9 @@ public abstract class PlayerMixin {
         }
     }
 
-    @Inject(method = "applyDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;setAbsorptionAmount(F)V"), cancellable = true, allow = 1)
+    @Inject(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;setAbsorptionAmount(F)V"), cancellable = true, allow = 1)
     public void onReceiveDamage(DamageSource source, float amount, CallbackInfo ci) {
-        PlayerEntity player = (PlayerEntity) (Object) this;
+        Player player = (Player) (Object) this;
         if (isServerSide(player)) {
             // TODO: meele-player flag
         }
@@ -151,10 +141,10 @@ public abstract class PlayerMixin {
     @Inject(method = "attack", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onAttackEntity(Entity target, CallbackInfo ci) {
         if (isServerSide(target)) {
-            PlayerEntity player = (PlayerEntity) (Object) this;
+            Player player = (Player) (Object) this;
             if (target == null) return;
-            if (target instanceof PlayerEntity) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), MELEE_PLAYERS, getDimKey(player), player);
+            if (target instanceof Player) {
+                FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), MELEE_PLAYERS, getDimKey(player), player);
                 if (post(checkEvent))
                     return;
                 processCheck(checkEvent, null, deny -> {
@@ -163,7 +153,7 @@ public abstract class PlayerMixin {
                 });
             } else {
                 if (isAnimal(target)) {
-                    FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), MELEE_ANIMALS, getDimKey(player), player);
+                    FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), MELEE_ANIMALS, getDimKey(player), player);
                     if (post(checkEvent))
                         return;
                     processCheck(checkEvent, null, deny -> {
@@ -172,7 +162,7 @@ public abstract class PlayerMixin {
                     });
                 }
                 if (isMonster(target)) {
-                    FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), MELEE_MONSTERS, getDimKey(player), player);
+                    FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), MELEE_MONSTERS, getDimKey(player), player);
                     if (post(checkEvent))
                         return;
                     processCheck(checkEvent, null, deny -> {
@@ -180,8 +170,8 @@ public abstract class PlayerMixin {
                         ci.cancel();
                     });
                 }
-                if (target instanceof VillagerEntity) {
-                    FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), MELEE_VILLAGERS, getDimKey(player), player);
+                if (target instanceof Villager) {
+                    FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), MELEE_VILLAGERS, getDimKey(player), player);
                     if (post(checkEvent))
                         return;
                     processCheck(checkEvent, null, deny -> {
@@ -189,8 +179,8 @@ public abstract class PlayerMixin {
                         ci.cancel();
                     });
                 }
-                if (target instanceof WanderingTraderEntity) {
-                    FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), MELEE_WANDERING_TRADER, getDimKey(player), player);
+                if (target instanceof WanderingTrader) {
+                    FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), MELEE_WANDERING_TRADER, getDimKey(player), player);
                     if (post(checkEvent))
                         return;
                     processCheck(checkEvent, null, deny -> {
@@ -203,17 +193,17 @@ public abstract class PlayerMixin {
                 // this is for BlockEntities which are not covered by the block breaking flag
                 Set<String> entityTags = FlagConfig.getCoveredBlockEntityTags();
                 boolean isCoveredByTag = entityTags.stream().anyMatch(entityTag -> {
-                    Identifier tagRl = new Identifier(entityTag);
-                    return target.getCommandTags().contains(tagRl.getPath());
+                    ResourceLocation tagRl = new ResourceLocation(entityTag);
+                    return target.getTags().contains(tagRl.getPath());
                 });
                 Set<String> entities = FlagConfig.getCoveredBlockEntities();
                 boolean isBlockEntityCovered = entities.stream().anyMatch(entity -> {
-                    Identifier entityRl = new Identifier(entity);
-                    Identifier targetRl = EntityType.getId(target.getType());
+                    ResourceLocation entityRl = new ResourceLocation(entity);
+                    ResourceLocation targetRl = EntityType.getKey(target.getType());
                     return targetRl != null && targetRl.equals(entityRl);
                 });
                 if (isBlockEntityCovered || isCoveredByTag) {
-                    FlagCheckEvent checkEvent = new FlagCheckEvent(target.getBlockPos(), BREAK_BLOCKS, getDimKey(player), player);
+                    FlagCheckEvent checkEvent = new FlagCheckEvent(target.blockPosition(), BREAK_BLOCKS, getDimKey(player), player);
                     if (post(checkEvent))
                         return;
                     processCheck(checkEvent, null, onDeny -> {
@@ -227,10 +217,10 @@ public abstract class PlayerMixin {
 
     @Inject(method = "tick", at = @At(value = "TAIL"), allow = 1)
     private void onUseElytraTick(CallbackInfo ci) {
-        PlayerEntity player = (PlayerEntity) (Object) this;
+        Player player = (Player) (Object) this;
         if (isServerSide(player)) {
             if (player.isFallFlying()) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(player.getBlockPos(), NO_FLIGHT, getDimKey(player), player);
+                FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), NO_FLIGHT, getDimKey(player), player);
                 if (post(checkEvent))
                     return;
                 processCheck(checkEvent, null, deny -> {

@@ -1,11 +1,10 @@
 package de.z0rdak.yawp.api.events.region;
 
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import net.fabricmc.fabric.api.event.Event;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -13,7 +12,6 @@ import java.util.UUID;
 /**
  * Event that is fired before a flag is checked.
  * Can be used to cancel the flag check.
- *
  */
 public final class FlagCheckEvent {
 
@@ -24,12 +22,12 @@ public final class FlagCheckEvent {
     /**
      * The dimension in which the flag check is performed, can be used to get the corresponding Dimensional Region.
      */
-    private final RegistryKey<World> dimension;
+    private final ResourceKey<Level> dimension;
     /**
      * The player that triggered the flag check, may be null when no player was involved. This depends on the checked flag.
      */
     @Nullable
-    private final PlayerEntity player;
+    private final Player player;
 
     /**
      * The flag that is checked.
@@ -41,7 +39,7 @@ public final class FlagCheckEvent {
      */
     private final String id;
 
-    public FlagCheckEvent(BlockPos target, RegionFlag regionFlag, RegistryKey<World> dimension, @Nullable PlayerEntity player) {
+    public FlagCheckEvent(BlockPos target, RegionFlag regionFlag, ResourceKey<Level> dimension, @Nullable Player player) {
         this.player = player;
         this.target = target;
         this.dimension = dimension;
@@ -49,10 +47,10 @@ public final class FlagCheckEvent {
         this.id = UUID.randomUUID().toString();
     }
 
-    public FlagCheckEvent(BlockPos target, RegionFlag regionFlag,  RegistryKey<World> dimension) {
+    public FlagCheckEvent(BlockPos target, RegionFlag regionFlag, ResourceKey<Level> dimension) {
         this(target, regionFlag, dimension, null);
     }
-    
+
     public String getId() {
         return id;
     }
@@ -65,12 +63,12 @@ public final class FlagCheckEvent {
         return regionFlag;
     }
 
-    public RegistryKey<World> getDimension() {
+    public ResourceKey<Level> getDimension() {
         return dimension;
     }
 
     @Nullable
-    public PlayerEntity getPlayer() {
+    public Player getPlayer() {
         return player;
     }
 }

@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.core.flag;
 
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
@@ -33,7 +33,7 @@ public abstract class AbstractFlag implements IFlag {
         this.msg = new FlagMessage(msg);
     }
 
-    public AbstractFlag(NbtCompound nbt) {
+    public AbstractFlag(CompoundTag nbt) {
         this.deserializeNBT(nbt);
     }
 
@@ -83,8 +83,8 @@ public abstract class AbstractFlag implements IFlag {
     }
 
     @Override
-    public NbtCompound serializeNBT() {
-        NbtCompound nbt = new NbtCompound();
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = new CompoundTag();
         nbt.putString(FLAG_NAME, this.name);
         nbt.putString(FLAG_STATE, this.state.name);
         nbt.putBoolean(OVERRIDE, this.doesOverride);
@@ -94,7 +94,7 @@ public abstract class AbstractFlag implements IFlag {
     }
 
     @Override
-    public void deserializeNBT(NbtCompound nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         this.name = nbt.getString(FLAG_NAME);
         // Note: this is here for compatibility for the jump from 0.0.3.0-beta1 to 0.0.4.0-beta1
         // The state was not saved in the nbt before, there was a boolean flag instead

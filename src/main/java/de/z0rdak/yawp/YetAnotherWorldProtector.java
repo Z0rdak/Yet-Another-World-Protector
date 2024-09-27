@@ -22,7 +22,7 @@ public class YetAnotherWorldProtector implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        
+
         // callback to register commands
         CommandRegistrationCallback.EVENT.register(CommandRegistry::registerCommands);
 

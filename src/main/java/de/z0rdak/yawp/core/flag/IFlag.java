@@ -1,9 +1,9 @@
 package de.z0rdak.yawp.core.flag;
 
 import de.z0rdak.yawp.core.INbtSerializable;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 
-public interface IFlag extends INbtSerializable<NbtCompound>, Comparable<IFlag> {
+public interface IFlag extends INbtSerializable<CompoundTag>, Comparable<IFlag> {
 
     /**
      * Get the unique identifier for the flag. <br>
@@ -17,6 +17,7 @@ public interface IFlag extends INbtSerializable<NbtCompound>, Comparable<IFlag> 
 
     /**
      * Returns the flag type of the flag.     *
+     *
      * @return the flag type enum value of the flag.
      * @see FlagType
      */
@@ -32,6 +33,7 @@ public interface IFlag extends INbtSerializable<NbtCompound>, Comparable<IFlag> 
     /**
      * Set the override state of the flag. <br>
      * When true, it overrides the same flag in child regions.
+     *
      * @param doesOverride overrides the same flag in child regions if set to true
      */
     void setOverride(boolean doesOverride);

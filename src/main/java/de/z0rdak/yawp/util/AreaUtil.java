@@ -1,8 +1,8 @@
 package de.z0rdak.yawp.util;
 
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -10,7 +10,8 @@ import java.util.StringJoiner;
 
 public final class AreaUtil {
 
-    private AreaUtil(){}
+    private AreaUtil() {
+    }
 
     public static double distance(BlockPos a, BlockPos b) {
         return Math.sqrt(Math.pow(b.getX() - a.getX(), 2)
@@ -47,21 +48,21 @@ public final class AreaUtil {
     }
 
     public static Set<BlockPos> blocksBetweenOnAxis(BlockPos p1, BlockPos p2, Direction.Axis axis) {
-        Box blockLine = new Box(p1, p2);
+        BoundingBox blockLine = BoundingBox.fromCorners(p1, p2);
         Set<BlockPos> blocks = new HashSet<>();
         switch (axis) {
             case X:
-                for (int x = (int) blockLine.minX; x <= blockLine.maxX; x++) {
+                for (int x = blockLine.minX(); x <= blockLine.maxX(); x++) {
                     blocks.add(new BlockPos(x, p1.getY(), p1.getZ()));
                 }
                 break;
             case Y:
-                for (int y = (int) blockLine.minY; y <= blockLine.maxY; y++) {
+                for (int y = blockLine.minY(); y <= blockLine.maxY(); y++) {
                     blocks.add(new BlockPos(p1.getX(), y, p1.getZ()));
                 }
                 break;
             case Z:
-                for (int z = (int) blockLine.minZ; z <= blockLine.maxZ; z++) {
+                for (int z = blockLine.minZ(); z <= blockLine.maxZ(); z++) {
                     blocks.add(new BlockPos(p1.getX(), p1.getY(), z));
                 }
                 break;
@@ -69,15 +70,28 @@ public final class AreaUtil {
         return blocks;
     }
 
-    public static Set<BlockPos> blocksBetween(Box cube) {
+    public static Set<BlockPos> blocksBetween(BoundingBox cube) {
         Set<BlockPos> blocks = new HashSet<>();
-        for (int x = (int) cube.minX; x <= cube.maxX; x++) {
-            for (int y = (int) cube.minY; y <= cube.maxY; y++) {
-                for (int z = (int) cube.minZ; z <= cube.maxZ; z++) {
+        for (int x = cube.minX(); x <= cube.maxX(); x++) {
+            for (int y = cube.minY(); y <= cube.maxY(); y++) {
+                for (int z = cube.minZ(); z <= cube.maxZ(); z++) {
                     blocks.add(new BlockPos(x, y, z));
                 }
             }
         }
         return blocks;
+    }
+
+    public static int blocksOnAxis(BoundingBox box, Direction.Axis axis) {
+        switch (axis) {
+            case X:
+                return box.getXSpan();
+            case Y:
+                return box.getYSpan();
+            case Z:
+                return box.getZSpan();
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 }

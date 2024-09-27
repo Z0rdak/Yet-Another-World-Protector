@@ -3,11 +3,11 @@ package de.z0rdak.yawp.mixin.flag;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.mob.CreeperEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.explosion.Explosion;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -30,15 +30,17 @@ import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
 
 @Mixin(Explosion.class)
 public abstract class ExplosionMixin {
-
-    @Shadow
+    
+    @Unique
     @Final
-    private World world;
-
-    @Shadow @Final private @Nullable Entity entity;
+    private Level world;
+    
+    @Unique
+    @Final
+    private @Nullable Entity entity;
 
     @Unique
-    private static void filterExplosionTargets(Explosion explosion, World world, List<Entity> affectedEntities) {
+    private static void filterExplosionTargets(Explosion explosion, Level world, List<Entity> affectedEntities) {
         Predicate<FlagCheckEvent> isProtected = (fce) -> {
             if (post(fce)) {
                 return true;
@@ -49,25 +51,25 @@ public abstract class ExplosionMixin {
                 .filter(blockPos -> isProtected.test(new FlagCheckEvent(blockPos, flag, getDimKey(world), null)))
                 .collect(Collectors.toSet());
         BiFunction<List<Entity>, RegionFlag, Set<Entity>> filterEntities = (in, flag) -> in.stream()
-                .filter(entity -> isProtected.test(new FlagCheckEvent(entity.getBlockPos(), flag, getDimKey(world), null)))
+                .filter(entity -> isProtected.test(new FlagCheckEvent(entity.blockPosition(), flag, getDimKey(world), null)))
                 .collect(Collectors.toSet());
 
-        explosion.getAffectedBlocks().removeAll(filterBlocks.apply(explosion.getAffectedBlocks(), EXPLOSION_BLOCK));
+        explosion.getToBlow().removeAll(filterBlocks.apply(explosion.getToBlow(), EXPLOSION_BLOCK));
         affectedEntities.removeAll(filterEntities.apply(affectedEntities, EXPLOSION_ENTITY));
 
-        if (explosion.getCausingEntity() != null) {
-            boolean explosionTriggeredByCreeper = (explosion.getCausingEntity() instanceof CreeperEntity);
+        if (explosion.getIndirectSourceEntity() != null) {
+            boolean explosionTriggeredByCreeper = (explosion.getIndirectSourceEntity() instanceof Creeper);
             if (explosionTriggeredByCreeper) {
-                explosion.getAffectedBlocks().removeAll(filterBlocks.apply(explosion.getAffectedBlocks(), EXPLOSION_CREEPER_BLOCK));
+                explosion.getToBlow().removeAll(filterBlocks.apply(explosion.getToBlow(), EXPLOSION_CREEPER_BLOCK));
                 affectedEntities.removeAll(filterEntities.apply(affectedEntities, EXPLOSION_CREEPER_ENTITY));
             } else {
-                explosion.getAffectedBlocks().removeAll(filterBlocks.apply(explosion.getAffectedBlocks(), EXPLOSION_OTHER_BLOCKS));
+                explosion.getToBlow().removeAll(filterBlocks.apply(explosion.getToBlow(), EXPLOSION_OTHER_BLOCKS));
                 affectedEntities.removeAll(filterEntities.apply(affectedEntities, EXPLOSION_OTHER_ENTITY));
             }
         }
     }
 
-    @Inject(method = "collectBlocksAndDamageEntities", locals = LocalCapture.CAPTURE_FAILSOFT, at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Vec3d;<init>(DDD)V", ordinal = 1), allow = 1)
+    @Inject(method = "explode", locals = LocalCapture.CAPTURE_FAILSOFT, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/Vec3;<init>(DDD)V", ordinal = 1), allow = 1)
     public void onExplosion(CallbackInfo ci, Set<BlockPos> set, int i, float q, int k, int l, int r, int s, int t, int u, List<Entity> list) {
         /* List<Entity> list is a local variable - the affectedEntities - which, 
         is captured and provided as argument here through the LocalCapture feature 

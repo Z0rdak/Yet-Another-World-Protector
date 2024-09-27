@@ -4,8 +4,8 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.api.events.region.RegionEvents;
 import de.z0rdak.yawp.commands.CommandRegistry;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
-import de.z0rdak.yawp.config.server.LoggingConfig;
 import de.z0rdak.yawp.config.server.FlagConfig;
+import de.z0rdak.yawp.config.server.LoggingConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import fuzs.forgeconfigapiport.api.config.v2.ForgeConfigRegistry;
 import fuzs.forgeconfigapiport.api.config.v2.ModConfigEvents;
@@ -18,11 +18,12 @@ import static de.z0rdak.yawp.YetAnotherWorldProtector.MODID;
 
 public final class ConfigRegistry {
 
-    private ConfigRegistry(){}
+    public static final Logger CONFIG_LOGGER = LogManager.getLogger(YetAnotherWorldProtector.MODID.toUpperCase() + "-Config");
 
-    public static final Logger CONFIG_LOGGER = LogManager.getLogger(YetAnotherWorldProtector.MODID.toUpperCase()+"-Config");
+    private ConfigRegistry() {
+    }
 
-    public static void register(){
+    public static void register() {
         ModConfigEvents.loading(MODID).register(ConfigRegistry::onModLoading);
         ModConfigEvents.reloading(MODID).register(ConfigRegistry::onModReloading);
 
@@ -92,7 +93,7 @@ public final class ConfigRegistry {
                     CONFIG_LOGGER.info("Logging flags: [{}]", String.join(",", LoggingConfig.getFlagsToLog()));
                     CONFIG_LOGGER.info("Logging empty flag results: {}", LoggingConfig.shouldLogEmptyResults());
                     // CONFIG_LOGGER.info("Logging detailed player flag checks: {}", LoggingConfig.shouldLogDetailedPlayerFlags());
-                    
+
                     if (LoggingConfig.shouldLogFlagChecks()) {
                         RegionEvents.CHECK_FLAG.register(LoggingConfig::logCheck);
                     }

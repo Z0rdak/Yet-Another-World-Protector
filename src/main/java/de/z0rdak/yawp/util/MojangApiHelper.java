@@ -2,14 +2,11 @@ package de.z0rdak.yawp.util;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
-import com.mojang.authlib.Agent;
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.GameProfileRepository;
-import com.mojang.authlib.ProfileLookupCallback;
 import com.mojang.brigadier.context.CommandContext;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.util.UserCache;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.players.GameProfileCache;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -22,7 +19,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -98,21 +94,19 @@ public class MojangApiHelper {
         }
     }
 
-    public static Optional<GameProfile> lookupGameProfileInCache(CommandContext<ServerCommandSource> ctx, String playerName) {
-        UserCache cache = ctx.getSource().getServer().getUserCache();
+    public static Optional<GameProfile> lookupGameProfileInCache(CommandContext<CommandSourceStack> ctx, String playerName) {
+        GameProfileCache profileCache = ctx.getSource().getServer().getProfileCache();
         // Uses Mojang's API to retrieve info from player repo. It invokes
         // YggdrasilGameProfileRepository.findProfilesByNames through the PlayerProfileCache
         // which itself makes an HTTP request to Mojang's API
-        if (cache == null) return Optional.empty();
-        return cache.findByName(playerName);
+        return profileCache.get(playerName);
     }
 
-    public static Optional<GameProfile> lookupGameProfileInCache(CommandContext<ServerCommandSource> ctx, UUID uuid) {
-        UserCache cache = ctx.getSource().getServer().getUserCache();
+    public static Optional<GameProfile> lookupGameProfileInCache(CommandContext<CommandSourceStack> ctx, UUID uuid) {
+        GameProfileCache profileCache = ctx.getSource().getServer().getProfileCache();
         // This in contrast to the name search does not make an HTTP request
         // It just looks up the profile in the cache
-        if (cache == null) return Optional.empty();
-        return cache.getByUuid(uuid);
+        return profileCache.get(uuid);
     }
 
     private static class MojangProfileResponse {

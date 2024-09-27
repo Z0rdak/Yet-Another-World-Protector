@@ -1,8 +1,8 @@
 package de.z0rdak.yawp.core.area;
 
 import de.z0rdak.yawp.core.INbtSerializable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.List;
 import java.util.Set;
@@ -12,13 +12,13 @@ import java.util.Set;
  * The most basic area would be a simple AxisAlignedBB.
  * This type of mark-able area is already implemented in the class CuboidArea.
  */
-public interface IMarkableArea extends INbtSerializable<NbtCompound> {
+public interface IMarkableArea extends INbtSerializable<CompoundTag> {
 
     boolean contains(BlockPos pos);
 
     AreaType getAreaType();
 
-    List<BlockPos> getMarkedBlocks();
+    List<BlockPos> markedBlocks();
 
     Set<BlockPos> getHull();
 

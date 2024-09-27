@@ -1,23 +1,19 @@
 package de.z0rdak.yawp.config.server;
 
-import com.mojang.brigadier.Command;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.CommandSourceType;
 import de.z0rdak.yawp.commands.CommandUtil;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import net.minecraft.command.CommandSource;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.OperatorEntry;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static de.z0rdak.yawp.commands.CommandSourceType.*;
 import static de.z0rdak.yawp.config.ConfigRegistry.CONFIG_LOGGER;
 
 public class CommandPermissionConfig {
@@ -78,10 +74,6 @@ public class CommandPermissionConfig {
         return tokens.stream().anyMatch(t -> t.length() != size);
     }
 
-    public static boolean AllowInfoCmds() {
-        return ALLOW_READ_ONLY_CMDS.get();
-    }
-
     public static Set<String> UUIDsWithPermission() {
         return PLAYERS_WITH_PERMISSION.get()
                 .stream()
@@ -90,42 +82,8 @@ public class CommandPermissionConfig {
                 .collect(Collectors.toSet());
     }
 
-    public static boolean hasPermission(ServerCommandSource source) {
-        try {
-            return hasPlayerPermission(source.getPlayerOrThrow());
-        } catch (CommandSyntaxException e) {
-            boolean isServerConsole = source.getName().equals("Server");
-            if (isServerConsole) {
-                return true;
-            } else {
-                return COMMAND_BLOCK_EXECUTION.get();
-            }
-        }
-    }
-
-    public static boolean hasPlayerPermission(PlayerEntity player) {
-        return hasUUIDConfigEntry(player) || hasNeededOpLevel(player) ||
-                player.hasPermissionLevel(REQUIRED_OP_LEVEL.get());
-    }
-
-    public static boolean hasUUIDConfigEntry(PlayerEntity player) {
-        Set<String> playersInConfig = UUIDsWithPermission();
-        return playersInConfig.contains(player.getUuidAsString());
-    }
-
-
     public static void initServerInstance(MinecraftServer server) {
         serverInstance = server;
-    }
-
-    public static boolean hasNeededOpLevel(PlayerEntity player) {
-        OperatorEntry opPlayerEntry = serverInstance.getPlayerManager()
-                .getOpList()
-                .get(player.getGameProfile());
-        if (opPlayerEntry != null) {
-            return opPlayerEntry.getPermissionLevel() >= REQUIRED_OP_LEVEL.get();
-        }
-        return false;
     }
 
     public static boolean isReadOnlyAllowed() {
@@ -156,12 +114,12 @@ public class CommandPermissionConfig {
         return COMMAND_BLOCK_EXECUTION.get();
     }
 
-    public static boolean hasConfigPermission(PlayerEntity player) {
-        return hasUUIDConfigEntry(player) || hasNeededOpLevel(player) || player.hasPermissionLevel(REQUIRED_OP_LEVEL.get());
+    public static int getRequiredOpLevel() {
+        return REQUIRED_OP_LEVEL.get();
     }
 
-    public static boolean hasConfigPermAndOpByPassFlags(PlayerEntity player) {
-        return hasConfigPermission(player) && OP_BYPASS_FLAGS.get();
+    public static boolean byPassFlagAllowed() {
+        return OP_BYPASS_FLAGS.get();
     }
 
     public static boolean validateUuid(Object uuid) {
@@ -185,44 +143,69 @@ public class CommandPermissionConfig {
         return false;
     }
 
-    public static boolean hasRegionPermission(IProtectedRegion region, PlayerEntity player) {
-        return hasRegionPermission(region, player, CommandUtil.OWNER);
+    public static boolean hasRequiredOpLevel(Player player) {
+        return player.hasPermissions(getRequiredOpLevel());
     }
 
-    public static boolean hasRegionPermission(IProtectedRegion region, PlayerEntity player, String permissionGroup) {
+    public static boolean hasConfigPermission(Player player) {
+        return hasUUIDConfigEntry(player) || hasRequiredOpLevel(player);
+    }
+
+    public static boolean hasUUIDConfigEntry(Player player) {
+        return UUIDsWithPermission().contains(player.getStringUUID());
+    }
+
+    public static boolean hasConfigPermAndOpByPassFlags(Player player) {
+        return hasConfigPermission(player) && byPassFlagAllowed();
+    }
+
+    public static boolean hasOwnerPermission(IProtectedRegion region, Player player) {
+        return hasGroupPermission(region, player, CommandUtil.OWNER);
+    }
+
+    public static boolean hasAnyPermission(IProtectedRegion region, Player player, List<String> groups) {
+        return groups.stream()
+                .map(group -> hasGroupPermission(region, player, group))
+                .reduce(false, (b1, b2) -> b1 || b2);
+    }
+
+    public static boolean hasGroupPermission(IProtectedRegion region, Player player, String permissionGroup) {
         return isHierarchyOwnershipEnabled()
                 ? hasRegionHierarchyPermission(region, player, permissionGroup)
-                : region.isInGroup(player, permissionGroup);
+                : isInGroup(region, player, permissionGroup);
     }
 
-    private static boolean hasRegionHierarchyPermission(IProtectedRegion region, PlayerEntity player, String permissionGroup) {
+    public static boolean isInGroup(IProtectedRegion region, Player player, String group) {
+        return region.isInGroup(player, group);
+    }
+
+    private static boolean hasRegionHierarchyPermission(IProtectedRegion region, Player player, String permissionGroup) {
         return hasRegionHierarchyPermission(region, player, permissionGroup, false);
     }
 
-    private static boolean hasRegionHierarchyPermission(IProtectedRegion region, PlayerEntity player, String permissionGroup, boolean hasPermission) {
+    private static boolean hasRegionHierarchyPermission(IProtectedRegion region, Player player, String permissionGroup, boolean hasPermission) {
         if (region.getParent().equals(region)) {
-            return hasPermission || region.isInGroup(player, permissionGroup);
+            return hasPermission || isInGroup(region, player, permissionGroup);
         }
-        hasPermission = hasPermission || region.isInGroup(player, permissionGroup);
+        hasPermission = hasPermission || isInGroup(region, player, permissionGroup);
         return hasRegionHierarchyPermission(region.getParent(), player, permissionGroup, hasPermission);
     }
 
-    public static boolean hasConfigPermission(ServerCommandSource src, CommandSourceType cmdSrcType) throws CommandSyntaxException {
+    public static boolean hasConfigPermission(CommandSourceStack src, CommandSourceType cmdSrcType) throws CommandSyntaxException {
         switch (cmdSrcType) {
             case PLAYER: {
-                ServerPlayerEntity player = src.getPlayerOrThrow();
+                ServerPlayer player = src.getPlayerOrException();
                 return hasConfigPermission(player);
             }
-            case SERVER:
-                return true;
             case COMMAND_BLOCK:
                 return isCommandBlockExecutionAllowed();
-            default:
-                return false;
+            case SERVER:
+                return true;
         }
+        return false;
     }
 
-    public static boolean hasCmdPermission(ServerCommandSource src) {
+    public static boolean hasCmdPermission(CommandSourceStack src) {
         CommandSourceType cmdSrcType = CommandSourceType.of(src);
         try {
             return hasConfigPermission(src, cmdSrcType);
@@ -231,7 +214,7 @@ public class CommandPermissionConfig {
         }
     }
 
-    public static boolean isAllowedForNonOp(ServerCommandSource src) {
+    public static boolean isAllowedForNonOp(CommandSourceStack src) {
         CommandSourceType cmdSrcType = CommandSourceType.of(src);
         try {
             return hasConfigPermission(src, cmdSrcType) || CommandPermissionConfig.isCmdEnabledForNonOp();

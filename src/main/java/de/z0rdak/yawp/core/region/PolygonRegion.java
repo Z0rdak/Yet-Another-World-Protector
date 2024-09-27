@@ -2,29 +2,29 @@ package de.z0rdak.yawp.core.region;
 
 import de.z0rdak.yawp.core.area.Polygon3DArea;
 import de.z0rdak.yawp.util.constants.RegionNBT;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 public final class PolygonRegion extends AbstractMarkableRegion {
 
-    public PolygonRegion(NbtCompound nbt) {
+    public PolygonRegion(CompoundTag nbt) {
         super(nbt);
         this.deserializeNBT(nbt);
     }
 
-    public PolygonRegion(String name, Polygon3DArea area, PlayerEntity owner, RegistryKey<World> dimension) {
+    public PolygonRegion(String name, Polygon3DArea area, Player owner, ResourceKey<Level> dimension) {
         super(name, area, owner, dimension);
     }
 
-    public PolygonRegion(String name, Polygon3DArea area, BlockPos tpTarget, PlayerEntity owner, RegistryKey<World> dimension) {
+    public PolygonRegion(String name, Polygon3DArea area, BlockPos tpTarget, Player owner, ResourceKey<Level> dimension) {
         super(name, area, tpTarget, owner, dimension);
     }
 
     @Override
-    public void deserializeNBT(NbtCompound nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
         this.area = new Polygon3DArea(nbt.getCompound(RegionNBT.AREA));
     }

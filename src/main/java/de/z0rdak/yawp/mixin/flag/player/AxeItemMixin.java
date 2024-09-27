@@ -1,45 +1,46 @@
 package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.AxeItem;
-import net.minecraft.item.ItemUsageContext;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.item.context.UseOnContext;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static de.z0rdak.yawp.api.events.region.RegionEvents.post;
-import static de.z0rdak.yawp.core.flag.RegionFlag.*;
+import static de.z0rdak.yawp.core.flag.RegionFlag.AXE_STRIP;
+import static de.z0rdak.yawp.core.flag.RegionFlag.TOOL_SECONDARY_USE;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
-import static de.z0rdak.yawp.util.MessageSender.sendFlagMsg;
+import static de.z0rdak.yawp.util.text.MessageSender.sendFlagMsg;
 
 @Mixin(AxeItem.class)
 public abstract class AxeItemMixin {
 
-    @Inject(method = "useOnBlock", at = @At(value = "HEAD"), cancellable = true, allow = 1)
-    public void onUseAxeOnBlock(ItemUsageContext context, CallbackInfoReturnable<ActionResult> cir) {
-        BlockPos pos = context.getBlockPos();
-        PlayerEntity player = context.getPlayer();
-        if (isServerSide(context.getWorld()) && player != null) { 
-            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, TOOL_SECONDARY_USE, getDimKey(context.getWorld()), player);
+    @Inject(method = "useOn", at = @At(value = "HEAD"), cancellable = true, allow = 1)
+    public void onUseAxeOnBlock(UseOnContext context, CallbackInfoReturnable<InteractionResult> cir) {
+        BlockPos pos = context.getClickedPos();
+        Player player = context.getPlayer();
+        if (isServerSide(context.getLevel()) && player != null) {
+            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, TOOL_SECONDARY_USE, getDimKey(context.getLevel()), player);
             if (post(checkEvent)) {
                 return;
             }
             processCheck(checkEvent, null, deny -> {
                 sendFlagMsg(deny);
-                cir.setReturnValue(ActionResult.PASS);
+                cir.setReturnValue(InteractionResult.PASS);
             });
-            
-            checkEvent = new FlagCheckEvent(pos, AXE_STRIP, getDimKey(context.getWorld()), player);
+
+            checkEvent = new FlagCheckEvent(pos, AXE_STRIP, getDimKey(context.getLevel()), player);
             if (post(checkEvent)) {
                 return;
             }
             processCheck(checkEvent, null, deny -> {
                 sendFlagMsg(deny);
-                cir.setReturnValue(ActionResult.PASS);
+                cir.setReturnValue(InteractionResult.PASS);
             });
         }
     }

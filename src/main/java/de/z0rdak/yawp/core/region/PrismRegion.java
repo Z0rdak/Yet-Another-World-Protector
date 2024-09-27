@@ -2,29 +2,29 @@ package de.z0rdak.yawp.core.region;
 
 import de.z0rdak.yawp.core.area.PrismArea;
 import de.z0rdak.yawp.util.constants.RegionNBT;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 public final class PrismRegion extends AbstractMarkableRegion {
 
-    public PrismRegion(NbtCompound nbt){
+    public PrismRegion(CompoundTag nbt) {
         super(nbt);
         this.deserializeNBT(nbt);
     }
 
-    public PrismRegion(String name, PrismArea area, PlayerEntity owner, RegistryKey<World> dimension) {
+    public PrismRegion(String name, PrismArea area, Player owner, ResourceKey<Level> dimension) {
         super(name, area, owner, dimension);
     }
 
-    public PrismRegion(String name, PrismArea area, BlockPos tpTarget, PlayerEntity owner, RegistryKey<World> dimension) {
+    public PrismRegion(String name, PrismArea area, BlockPos tpTarget, Player owner, ResourceKey<Level> dimension) {
         super(name, area, tpTarget, owner, dimension);
     }
 
     @Override
-    public void deserializeNBT(NbtCompound nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
         this.area = new PrismArea(nbt.getCompound(RegionNBT.AREA));
     }

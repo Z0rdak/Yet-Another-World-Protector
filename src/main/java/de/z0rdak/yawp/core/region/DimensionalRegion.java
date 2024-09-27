@@ -1,11 +1,9 @@
 package de.z0rdak.yawp.core.region;
 
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.World;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 
 /**
  * The DimensionalRegion represents the only direct implementation of an Abstract region.
@@ -13,13 +11,8 @@ import net.minecraft.world.World;
  */
 public final class DimensionalRegion extends AbstractRegion {
 
-    public DimensionalRegion(RegistryKey<World> dimensionKey) {
-        super(dimensionKey.getValue().toString(), dimensionKey, RegionType.DIMENSION);
-        this.dimension = dimensionKey;
-    }
-
-    public DimensionalRegion(RegistryKey<World> dimensionKey, IProtectedRegion parent) {
-        super(dimensionKey.getValue().toString(), dimensionKey, RegionType.DIMENSION);
+    public DimensionalRegion(ResourceKey<Level> dimensionKey, IProtectedRegion parent) {
+        super(dimensionKey.location().toString(), dimensionKey, RegionType.DIMENSION);
         this.dimension = dimensionKey;
         if (!(parent instanceof GlobalRegion)) {
             throw new IllegalArgumentException("Illegal parent region for dimensional region");
@@ -27,19 +20,14 @@ public final class DimensionalRegion extends AbstractRegion {
         this.setParent(parent);
     }
 
-    public DimensionalRegion(NbtCompound nbt) {
+    public DimensionalRegion(CompoundTag nbt) {
         super(nbt);
         this.parent = RegionDataManager.get().getGlobalRegion();
         this.deserializeNBT(nbt);
     }
 
-    public DimensionalRegion(String dimensionKey) {
-        this(RegistryKey.of(RegistryKeys.WORLD, new Identifier(dimensionKey)));
-        this.parent = RegionDataManager.get().getGlobalRegion();
-    }
-
     @Override
-    public boolean setParent(IProtectedRegion parent) {
+    protected boolean setParent(IProtectedRegion parent) {
         if (parent.getRegionType() == RegionType.GLOBAL) {
             return super.setParent(parent);
         }
@@ -67,17 +55,17 @@ public final class DimensionalRegion extends AbstractRegion {
     }
 
     @Override
-    public NbtCompound serializeNBT() {
+    public CompoundTag serializeNBT() {
         return super.serializeNBT();
     }
 
     @Override
-    public void deserializeNBT(NbtCompound nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
     }
 
     @Override
     public String getName() {
-        return this.dimension.getValue().toString();
+        return this.dimension.location().toString();
     }
 }

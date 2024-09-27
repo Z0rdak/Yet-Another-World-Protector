@@ -1,10 +1,9 @@
 package de.z0rdak.yawp.core.area;
 
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -13,11 +12,11 @@ public abstract class CenteredArea extends AbstractArea {
 
     protected BlockPos center;
 
-    public CenteredArea(AreaType areaType){
+    public CenteredArea(AreaType areaType) {
         super(areaType);
     }
 
-    public CenteredArea(NbtCompound nbt) {
+    public CenteredArea(CompoundTag nbt) {
         super(nbt);
         this.deserializeNBT(nbt);
     }
@@ -41,20 +40,20 @@ public abstract class CenteredArea extends AbstractArea {
     }
 
     @Override
-    public NbtCompound serializeNBT() {
-        NbtCompound nbt = super.serializeNBT();
-        nbt.put("center", NbtHelper.fromBlockPos(this.center));
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = super.serializeNBT();
+        nbt.put("center", NbtUtils.writeBlockPos(this.center));
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(NbtCompound nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-        this.center = NbtHelper.toBlockPos(nbt.getCompound("center"));
+        this.center = NbtUtils.readBlockPos(nbt.getCompound("center"));
     }
 
     @Override
-    public List<BlockPos> getMarkedBlocks() {
+    public List<BlockPos> markedBlocks() {
         return Collections.singletonList(this.center);
     }
 }

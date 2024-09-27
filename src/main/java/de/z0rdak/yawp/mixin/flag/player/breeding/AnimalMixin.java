@@ -1,8 +1,10 @@
 package de.z0rdak.yawp.mixin.flag.player.breeding;
 
+
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.frog.Frog;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -13,22 +15,22 @@ import static de.z0rdak.yawp.core.flag.RegionFlag.ANIMAL_BREEDING;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.isServerSide;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.processCheck;
 
-@Mixin(AnimalEntity.class)
+@Mixin(Animal.class)
 public abstract class AnimalMixin {
 
-    @Inject(method = "breed(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/entity/passive/AnimalEntity;)V", at = @At("HEAD"), cancellable = true, allow = 1)
-    public void spawnChildFromBreeding(ServerWorld world, AnimalEntity parentB, CallbackInfo ci) {
-        if (isServerSide(world)) {            
-        AnimalEntity parentA = (AnimalEntity) (Object) this;        
-            FlagCheckEvent checkEvent = new FlagCheckEvent(parentA.getBlockPos(), ANIMAL_BREEDING, world.getRegistryKey(), null);
+    @Inject(method = "spawnChildFromBreeding", at = @At("HEAD"), cancellable = true, allow = 1)
+    public void spawnChildFromBreeding(ServerLevel world, Animal parentB, CallbackInfo ci) {
+        if (isServerSide(world)) {
+            Animal parentA = (Animal) (Object) this;
+            FlagCheckEvent checkEvent = new FlagCheckEvent(parentA.blockPosition(), ANIMAL_BREEDING, world.dimension(), null);
             if (post(checkEvent)) {
                 return;
             }
             processCheck(checkEvent, null, deny -> {
-                parentA.setBreedingAge(6000);
-                parentB.setBreedingAge(6000);
-                parentA.resetLoveTicks();
-                parentB.resetLoveTicks();
+                parentA.setAge(6000);
+                parentB.setAge(6000);
+                parentA.resetLove();
+                parentB.resetLove();
                 ci.cancel();
             });
         }

@@ -2,14 +2,15 @@ package de.z0rdak.yawp.mixin.stick;
 
 import de.z0rdak.yawp.handler.stick.MarkerStickHandler;
 import de.z0rdak.yawp.util.StickType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.network.ServerPlayerInteractionManager;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerPlayerGameMode;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -21,19 +22,19 @@ import static de.z0rdak.yawp.handler.flags.HandlerUtil.isServerSide;
 import static de.z0rdak.yawp.util.StickUtil.getStickType;
 import static de.z0rdak.yawp.util.StickUtil.isVanillaStick;
 
-@Mixin(ServerPlayerInteractionManager.class)
+@Mixin(ServerPlayerGameMode.class)
 public class ServerPlayerInteractionManagerMixin {
 
     // FIXME: Could go in fabric event mixin: UseBlockCallback.EVENT.register(PlayerFlagHandler::onUseBlock);
-    @Inject(method = "interactBlock", at = @At("HEAD"), cancellable = true, allow = 1)
-    public void useItemOn(ServerPlayerEntity player, World world, ItemStack involvedItemStack, Hand hand, BlockHitResult blockHitResult, CallbackInfoReturnable<ActionResult> cir) {
-        if (isServerSide(world)) {
+    @Inject(method = "useItemOn", at = @At("HEAD"), cancellable = true, allow = 1)
+    public void useItemOn(ServerPlayer serverPlayer, Level level, ItemStack itemStack, InteractionHand interactionHand, BlockHitResult blockHitResult, CallbackInfoReturnable<InteractionResult> cir) {
+        if (isServerSide(level)) {
             BlockPos blockpos = blockHitResult.getBlockPos();
-            if (isVanillaStick(involvedItemStack)) {
-                StickType stickType = getStickType(involvedItemStack);
+            if (isVanillaStick(itemStack)) {
+                StickType stickType = getStickType(itemStack);
                 if (Objects.requireNonNull(stickType) == StickType.MARKER) {
-                    MarkerStickHandler.onMarkBlock(player, involvedItemStack, blockpos);
-                    cir.setReturnValue(ActionResult.SUCCESS);
+                    MarkerStickHandler.onMarkBlock(serverPlayer, itemStack, blockpos);
+                    cir.setReturnValue(InteractionResult.SUCCESS);
                 }
             }
         }

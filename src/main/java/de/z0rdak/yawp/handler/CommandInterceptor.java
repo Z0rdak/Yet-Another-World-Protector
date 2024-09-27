@@ -6,7 +6,7 @@ import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import de.z0rdak.yawp.commands.CommandConstants;
+import de.z0rdak.yawp.api.commands.CommandConstants;
 import de.z0rdak.yawp.commands.CommandSourceType;
 import de.z0rdak.yawp.commands.CommandUtil;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
@@ -15,17 +15,14 @@ import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.managers.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import de.z0rdak.yawp.util.ChatComponentBuilder;
-import de.z0rdak.yawp.util.MessageSender;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -33,13 +30,10 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static de.z0rdak.yawp.commands.CommandConstants.*;
+import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.config.server.CommandPermissionConfig.*;
-import static de.z0rdak.yawp.core.region.RegionType.DIMENSION;
-import static de.z0rdak.yawp.core.region.RegionType.LOCAL;
-import static de.z0rdak.yawp.util.ChatComponentBuilder.buildRegionInfoLink;
-import static de.z0rdak.yawp.util.MessageSender.sendCmdFeedback;
-import static net.minecraft.util.Formatting.RED;
+import static de.z0rdak.yawp.util.ChatLinkBuilder.buildRegionInfoLink;
+import static de.z0rdak.yawp.util.text.MessageSender.sendCmdFeedback;
 
 public class CommandInterceptor {
     private final static int CANCEL_CMD = 1;
@@ -48,18 +42,20 @@ public class CommandInterceptor {
     /**
      * Handler for managing different command permissions.
      */
-    public static int handleModCommands(ParseResults<ServerCommandSource> parseResults, String command) {
-        CommandContextBuilder<ServerCommandSource> cmdContext = parseResults.getContext();
-        ServerCommandSource src = cmdContext.getSource();
-        List<ParsedCommandNode<ServerCommandSource>> cmdNodes = cmdContext.getNodes();
-        List<String> nodeNames = cmdContext.getNodes().stream().map(node -> node.getNode().getName()).collect(Collectors.toList());
+    public static int handleModCommands(ParseResults<CommandSourceStack> parseResults, String command) {
+        CommandContextBuilder<CommandSourceStack> cmdContext = parseResults.getContext();
+        CommandSourceStack src = cmdContext.getSource();
+        List<ParsedCommandNode<CommandSourceStack>> cmdNodes = cmdContext.getNodes();
+        List<String> nodeNames = cmdNodes.stream()
+                .map(node -> node.getNode().getName())
+                .collect(Collectors.toList());
         try {
             CommandSourceType cmdSrcType = CommandSourceType.of(src);
             if (!hasModBaseCmd(nodeNames)) {
                 return ALLOW_CMD;
             }
             if (nodeNames.size() > 2) {
-                YetAnotherWorldProtector.LOGGER.debug("Executed command: '" + parseResults.getReader().getString() + "' by '" + cmdContext.getSource().getName() + "'.");
+                YetAnotherWorldProtector.LOGGER.debug("Executed command: '{}' by '{}'.", command, cmdContext.getSource().getTextName());
                 String subCmd = nodeNames.get(1);
                 int cancelExecutionResultCode = ALLOW_CMD;
                 switch (subCmd) {
@@ -100,7 +96,7 @@ public class CommandInterceptor {
                         break;
                 }
                 return cancelExecutionResultCode;
-            }    
+            }
         } catch (RuntimeException e) {
             YetAnotherWorldProtector.LOGGER.error(e);
             return CANCEL_CMD;
@@ -112,7 +108,7 @@ public class CommandInterceptor {
      * Verifies the permission for the given marker command. <br>
      * Syntax: /wp marker reset|give|create [...] <br>
      */
-    private static int verifyMarkerCommandPermission(CommandContextBuilder<ServerCommandSource> cmdContext, List<String> nodeNames, CommandSourceType cmdSrcType) {
+    private static int verifyMarkerCommandPermission(CommandContextBuilder<CommandSourceStack> cmdContext, List<String> nodeNames, CommandSourceType cmdSrcType) {
         try {
             boolean isMarkerSubCmd = checkSubCmdAtIndex(nodeNames, 2, RESET, GIVE, CREATE);
             if (!isMarkerSubCmd) {
@@ -123,24 +119,24 @@ public class CommandInterceptor {
                 // 0   1      2       3      4
                 // wp marker create <name> >parent>
                 boolean isParentArgProvided = nodeNames.size() >= 5 && nodeNames.get(4) != null;
-                PlayerEntity player = cmdContext.getSource().getPlayerOrThrow();
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.getWorld().getRegistryKey());
+                Player player = cmdContext.getSource().getPlayerOrException();
+                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.level().dimension());
                 boolean hasPermission = hasConfigPermission(cmdContext.getSource(), cmdSrcType);
                 boolean hasRegionPermission = false;
                 if (isCreateCmd) {
                     if (isParentArgProvided) {
-                        ParsedArgument<ServerCommandSource, ?> commandSourceParsedArgument = cmdContext.getArguments().get(nodeNames.get(4));
+                        ParsedArgument<CommandSourceStack, ?> commandSourceParsedArgument = cmdContext.getArguments().get(nodeNames.get(4));
                         if (commandSourceParsedArgument.getResult() instanceof String parentName) {
                             IMarkableRegion parent = dimCache.getRegion(parentName);
                             if (parent != null) {
-                                hasRegionPermission = hasRegionPermission(parent, player, CommandUtil.OWNER);
+                                hasRegionPermission = hasGroupPermission(parent, player, CommandUtil.OWNER);
                             }
                         }
                     } else { // assuming dimensional regions as parent
-                        hasRegionPermission = hasRegionPermission(dimCache.getDimensionalRegion(), player, CommandUtil.OWNER);
+                        hasRegionPermission = hasGroupPermission(dimCache.getDimensionalRegion(), player, CommandUtil.OWNER);
                     }
                 } else {
-                    hasRegionPermission = hasRegionPermission(dimCache.getDimensionalRegion(), player, CommandUtil.OWNER);
+                    hasRegionPermission = hasGroupPermission(dimCache.getDimensionalRegion(), player, CommandUtil.OWNER);
                 }
                 hasPermission = hasPermission || hasRegionPermission;
                 handlePermission(cmdContext.getSource(), hasPermission);
@@ -162,8 +158,8 @@ public class CommandInterceptor {
      * Syntax for Global Regions:       /wp flag global &lt;flag&gt; enable|msg ... <br>
      * Note: Implementation can still be improved through generalization or fusing the flag command with the sub-flag command. <br>
      */
-    private static int verifyFlagCommandPermission(CommandContextBuilder<ServerCommandSource> cmdContext, List<String> nodeNames, CommandSourceType cmdSrcType) {
-        ServerCommandSource src = cmdContext.getSource();
+    private static int verifyFlagCommandPermission(CommandContextBuilder<CommandSourceStack> cmdContext, List<String> nodeNames, CommandSourceType cmdSrcType) {
+        CommandSourceStack src = cmdContext.getSource();
         try {
             boolean isRegionTypeCmd = checkSubCmdAtIndex(nodeNames, 2, CommandConstants.LOCAL, DIM, GLOBAL);
             if (!isRegionTypeCmd) {
@@ -234,8 +230,8 @@ public class CommandInterceptor {
      * Verifies the permission for the given flag command. <br>
      * Syntax: /wp global info|clear|add|remove|list|state.
      */
-    private static int verifyGlobalCommandPermission(CommandContextBuilder<ServerCommandSource> cmdContext, CommandSourceType cmdSrcType) {
-        ServerCommandSource src = cmdContext.getSource();
+    private static int verifyGlobalCommandPermission(CommandContextBuilder<CommandSourceStack> cmdContext, CommandSourceType cmdSrcType) {
+        CommandSourceStack src = cmdContext.getSource();
         GlobalRegion region = RegionDataManager.get().getGlobalRegion();
         try {
             Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
@@ -256,8 +252,8 @@ public class CommandInterceptor {
         }
     }
 
-    public static int handleRegionCmdExecution(CommandContextBuilder<ServerCommandSource> cmdContext, List<String> nodeNames, CommandSourceType cmdSrcType) {
-        ServerCommandSource src = cmdContext.getSource();
+    public static int handleRegionCmdExecution(CommandContextBuilder<CommandSourceStack> cmdContext, List<String> nodeNames, CommandSourceType cmdSrcType) {
+        CommandSourceStack src = cmdContext.getSource();
         IProtectedRegion region = checkValidLocalRegion(cmdContext);
         if (region == null) {
             return CANCEL_CMD;
@@ -314,8 +310,8 @@ public class CommandInterceptor {
         }
     }
 
-    public static int handleDimCommandExecution(CommandContextBuilder<ServerCommandSource> cmdContext, CommandSourceType cmdSrcType) {
-        ServerCommandSource src = cmdContext.getSource();
+    public static int handleDimCommandExecution(CommandContextBuilder<CommandSourceStack> cmdContext, CommandSourceType cmdSrcType) {
+        CommandSourceStack src = cmdContext.getSource();
         DimensionRegionCache dimCache = checkValidDimRegion(cmdContext);
         if (dimCache == null) {
             return CANCEL_CMD;
@@ -345,13 +341,13 @@ public class CommandInterceptor {
     }
 
     @Nullable
-    private static DimensionRegionCache checkValidDimRegion(CommandContextBuilder<ServerCommandSource> cmdContext) {
-        ParsedArgument<ServerCommandSource, ?> dimParsedArgument = cmdContext.getArguments().get(DIM.toString());
-        if (dimParsedArgument != null && dimParsedArgument.getResult() instanceof Identifier dimResLoc) {
-            RegistryKey<World> dim = RegistryKey.of(RegistryKeys.WORLD, dimResLoc);
+    private static DimensionRegionCache checkValidDimRegion(CommandContextBuilder<CommandSourceStack> cmdContext) {
+        ParsedArgument<CommandSourceStack, ?> dimParsedArgument = cmdContext.getArguments().get(DIM.toString());
+        if (dimParsedArgument != null && dimParsedArgument.getResult() instanceof ResourceLocation dimResLoc) {
+            ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, dimResLoc);
             DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
             if (dimCache == null) {
-                sendCmdFeedback(cmdContext.getSource(), Text.literal("Dimension not found in region data").formatted(RED));
+                sendCmdFeedback(cmdContext.getSource(), Component.literal("Dimension not found in region data").withStyle(ChatFormatting.RED));
                 return null;
             }
             return dimCache;
@@ -360,20 +356,20 @@ public class CommandInterceptor {
     }
 
     @Nullable
-    private static IProtectedRegion checkValidLocalRegion(CommandContextBuilder<ServerCommandSource> cmdContext) {
-        ParsedArgument<ServerCommandSource, ?> regionArg = cmdContext.getArguments().get(CommandConstants.LOCAL.toString());
+    private static IProtectedRegion checkValidLocalRegion(CommandContextBuilder<CommandSourceStack> cmdContext) {
+        ParsedArgument<CommandSourceStack, ?> regionArg = cmdContext.getArguments().get(CommandConstants.LOCAL.toString());
         if (regionArg != null && regionArg.getResult() instanceof String regionName) {
-            ParsedArgument<ServerCommandSource, ?> dimParsedArgument = cmdContext.getArguments().get(DIM.toString());
-            if (dimParsedArgument != null && dimParsedArgument.getResult() instanceof Identifier dimResLoc) {
-                RegistryKey<World> dim = RegistryKey.of(RegistryKeys.WORLD, dimResLoc);
+            ParsedArgument<CommandSourceStack, ?> dimParsedArgument = cmdContext.getArguments().get(DIM.toString());
+            if (dimParsedArgument != null && dimParsedArgument.getResult() instanceof ResourceLocation dimResLoc) {
+                ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, dimResLoc);
                 DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
                 if (!dimCache.contains(regionName)) {
-                    sendCmdFeedback(cmdContext.getSource(), Text.literal("No region with name '" + regionName + "' defined in dim '" + dimCache.getDimensionalRegion().getName() + "'"));
+                    sendCmdFeedback(cmdContext.getSource(), Component.literal("No region with name '" + regionName + "' defined in dim '" + dimCache.getDimensionalRegion().getName() + "'"));
                     return null;
                 }
                 IMarkableRegion region = dimCache.getRegion(regionName);
                 if (region == null) {
-                    sendCmdFeedback(cmdContext.getSource(), Text.literal("No region with name '" + regionName + "' defined in dim '" + dimCache.getDimensionalRegion().getName() + "'"));
+                    sendCmdFeedback(cmdContext.getSource(), Component.literal("No region with name '" + regionName + "' defined in dim '" + dimCache.getDimensionalRegion().getName() + "'"));
                     return null;
                 }
                 return region;
@@ -388,27 +384,27 @@ public class CommandInterceptor {
         return nodeNames.size() >= index + 1 && nodeNames.get(index) != null && subCmdList.stream().anyMatch(nodeNames.get(index)::equals);
     }
 
-    private static void handlePermission(ServerCommandSource src, IProtectedRegion region, boolean hasPermission) {
+    private static void handlePermission(CommandSourceStack src, IProtectedRegion region, boolean hasPermission) {
         if (!hasPermission) {
-            YetAnotherWorldProtector.LOGGER.info("'" + src.getName() + "' is not allowed to manage region '" + region.getName() + "'");
-            sendCmdFeedback(src, Text.translatableWithFallback("cli.msg.info.region.modify.deny", "[%s] You don't have the permission to execute this command!", buildRegionInfoLink(region)));
+            YetAnotherWorldProtector.LOGGER.info("'{}' is not allowed to manage region '{}'", src.getTextName(), region.getName());
+            sendCmdFeedback(src, Component.translatableWithFallback("cli.msg.info.region.modify.deny", "[%s] You don't have the permission to execute this command!", buildRegionInfoLink(region)));
         }
     }
 
-    private static void handlePermission(ServerCommandSource src, boolean hasPermission) {
+    private static void handlePermission(CommandSourceStack src, boolean hasPermission) {
         if (!hasPermission) {
-            YetAnotherWorldProtector.LOGGER.info("'" + src.getName() + "' is not allowed to execute this command");
-            sendCmdFeedback(src, Text.translatableWithFallback("cli.msg.info.cmd.deny", "You don't have permission to execute this command!"));
+            YetAnotherWorldProtector.LOGGER.info("'{}' is not allowed to execute this command", src.getTextName());
+            sendCmdFeedback(src, Component.translatableWithFallback("cli.msg.info.cmd.deny", "You don't have permission to execute this command!"));
         }
     }
 
     @SuppressWarnings("SameParameterValue")
-    private static boolean hasCmdPermission(CommandContextBuilder<ServerCommandSource> ctx, CommandSourceType cmdSrcType, String permissionGroup, IProtectedRegion region) throws CommandSyntaxException {
+    private static boolean hasCmdPermission(CommandContextBuilder<CommandSourceStack> ctx, CommandSourceType cmdSrcType, String permissionGroup, IProtectedRegion region) throws CommandSyntaxException {
         switch (cmdSrcType) {
             case PLAYER: {
-                PlayerEntity player = ctx.getSource().getPlayerOrThrow();
+                Player player = ctx.getSource().getPlayerOrException();
                 boolean hasConfigPermission = CommandPermissionConfig.hasConfigPermission(player);
-                boolean hasRegionPermission = hasRegionPermission(region, player, permissionGroup);
+                boolean hasRegionPermission = hasGroupPermission(region, player, permissionGroup);
                 return (hasRegionPermission || hasConfigPermission);
             }
             case SERVER:
@@ -421,13 +417,13 @@ public class CommandInterceptor {
     }
 
     @SuppressWarnings("SameParameterValue")
-    private static boolean hasCmdPermission(CommandContextBuilder<ServerCommandSource> ctx, CommandSourceType cmdSrcType, String permissionGroup, IProtectedRegion region, Function<List<String>, Boolean> subCmdPermission) throws CommandSyntaxException {
+    private static boolean hasCmdPermission(CommandContextBuilder<CommandSourceStack> ctx, CommandSourceType cmdSrcType, String permissionGroup, IProtectedRegion region, Function<List<String>, Boolean> subCmdPermission) throws CommandSyntaxException {
         switch (cmdSrcType) {
             case PLAYER: {
                 List<String> nodeNames = ctx.getNodes().stream().map(node -> node.getNode().getName()).collect(Collectors.toList());
-                PlayerEntity player = ctx.getSource().getPlayerOrThrow();
+                Player player = ctx.getSource().getPlayerOrException();
                 boolean hasConfigPermission = CommandPermissionConfig.hasConfigPermission(player);
-                boolean hasRegionPermission = hasRegionPermission(region, player, permissionGroup);
+                boolean hasRegionPermission = hasGroupPermission(region, player, permissionGroup);
                 boolean hasSubCmdPermission = subCmdPermission.apply(nodeNames);
                 return (hasRegionPermission || hasConfigPermission) || hasSubCmdPermission;
             }

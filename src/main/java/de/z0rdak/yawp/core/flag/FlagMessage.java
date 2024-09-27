@@ -3,12 +3,11 @@ package de.z0rdak.yawp.core.flag;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
 import de.z0rdak.yawp.core.INbtSerializable;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.util.constants.RegionNBT;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -18,7 +17,7 @@ import static de.z0rdak.yawp.util.ChatComponentBuilder.shortBlockPos;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.tinyBlockPos;
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
-public class FlagMessage implements INbtSerializable<NbtCompound> {
+public class FlagMessage implements INbtSerializable<CompoundTag> {
 
     public static final String FLAG_TEMPLATE = "{flag}";
     public static final String POS_TEMPLATE = "{pos}";
@@ -57,7 +56,7 @@ public class FlagMessage implements INbtSerializable<NbtCompound> {
         this.muted = muted;
     }
 
-    public FlagMessage(NbtCompound msgNbt) {
+    public FlagMessage(CompoundTag msgNbt) {
         this.deserializeNBT(msgNbt);
     }
 
@@ -70,14 +69,14 @@ public class FlagMessage implements INbtSerializable<NbtCompound> {
      * @param player the player to get the substitutes for
      * @return a map with default substitutes for the given flag and region
      */
-    public static Map<String, String> defaultSubstitutes(RegionFlag flag, IProtectedRegion region, BlockPos pos, @Nullable PlayerEntity player) {
+    public static Map<String, String> defaultSubstitutes(RegionFlag flag, IProtectedRegion region, BlockPos pos, @Nullable Player player) {
         Map<String, String> substituteMap = new HashMap<>();
         substituteMap.put(FLAG_TEMPLATE, flag.name);
         substituteMap.put(POS_TEMPLATE, shortBlockPos(pos));
         substituteMap.put(REGION_TEMPLATE, region.getName());
-        substituteMap.put(DIM_TEMPLATE, region.getDim().getValue().toString());
+        substituteMap.put(DIM_TEMPLATE, region.getDim().location().toString());
         if (player != null && flag.categories.contains(PLAYER)) {
-            substituteMap.put(PLAYER_TEMPLATE, player.getEntityName());
+            substituteMap.put(PLAYER_TEMPLATE, player.getScoreboardName());
         }
         return substituteMap;
     }
@@ -95,9 +94,9 @@ public class FlagMessage implements INbtSerializable<NbtCompound> {
         substituteMap.put(FLAG_TEMPLATE, result.getFlagCheck().getRegionFlag().name);
         substituteMap.put(POS_TEMPLATE, tinyBlockPos(result.getFlagCheck().getTarget()));
         substituteMap.put(REGION_TEMPLATE, result.getResponsible().getName());
-        substituteMap.put(DIM_TEMPLATE, result.getResponsible().getDim().getValue().toString());
+        substituteMap.put(DIM_TEMPLATE, result.getResponsible().getDim().location().toString());
         if (result.getFlagCheck().getPlayer() != null && RegionFlag.hasPlayerCategory(result.getFlagCheck().getRegionFlag())) {
-            substituteMap.put(PLAYER_TEMPLATE, result.getFlagCheck().getPlayer().getEntityName());
+            substituteMap.put(PLAYER_TEMPLATE, result.getFlagCheck().getPlayer().getScoreboardName());
         }
         return substituteMap;
     }
@@ -106,18 +105,18 @@ public class FlagMessage implements INbtSerializable<NbtCompound> {
      * Builds a flag message from the given flag check result and substitutes. <br>
      * The flag message is built from the flag message template of the flag in the result. <br>
      * The matches in the flag message template are replaced with the substitutes. <br>
-     * The flag message is then returned as a {@link MutableText}. <br>
+     * The flag message is then returned as a {@link MutableComponent}. <br>
      *
      * @param result      the flag check result to build the message for
      * @param substitutes the substitutes to replace the matches in the flag message template with
      * @return the flag message for the given flag check result and substitutes
      */
-    public static MutableText buildFrom(FlagCheckResult result, Map<String, String> substitutes) {
+    public static MutableComponent buildFrom(FlagCheckResult result, Map<String, String> substitutes) {
         String flagMsgTemplate = result.getFlag().getFlagMsg().isDefault()
                 ? getI18nFlagMsgTemplate(result)
-                : result.getFlag().getFlagMsg().getMsg();
+                : result.getFlag().getFlagMsg().msg();
         String flagMsg = replaceMatches(flagMsgTemplate, substitutes);
-        return Text.literal(flagMsg);
+        return Component.literal(flagMsg);
     }
 
     /**
@@ -132,7 +131,7 @@ public class FlagMessage implements INbtSerializable<NbtCompound> {
         String langKeyForFlagMsg = "flag.msg.deny." + result.getFlag().getName();
         String fallBackLangKey = "flag.msg.deny." + result.getResponsible().getRegionType().type + ".default";
         String flagMsgLangKey = regionFlag.categories.contains(FlagCategory.PLAYER) ? langKeyForFlagMsg : fallBackLangKey;
-        return Text.translatableWithFallback(flagMsgLangKey, flagMsgLangKey).getString();
+        return Component.translatableWithFallback(flagMsgLangKey, flagMsgLangKey).getString();
     }
 
     /**
@@ -169,7 +168,7 @@ public class FlagMessage implements INbtSerializable<NbtCompound> {
         return this.msg.equals(CONFIG_MSG);
     }
 
-    public String getMsg() {
+    public String msg() {
         return msg;
     }
 
@@ -183,8 +182,8 @@ public class FlagMessage implements INbtSerializable<NbtCompound> {
     }
 
     @Override
-    public NbtCompound serializeNBT() {
-        NbtCompound nbt = new NbtCompound();
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = new CompoundTag();
         nbt.putString(MSG, this.msg);
         nbt.putBoolean(DEFAULT, this.isDefault);
         nbt.putBoolean(MUTED, this.muted);
@@ -192,7 +191,7 @@ public class FlagMessage implements INbtSerializable<NbtCompound> {
     }
 
     @Override
-    public void deserializeNBT(NbtCompound nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         this.msg = nbt.getString(MSG);
         this.muted = nbt.getBoolean(MUTED);
         this.isDefault = nbt.getBoolean(DEFAULT);

@@ -3,7 +3,7 @@ package de.z0rdak.yawp.handler.flags;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
 import de.z0rdak.yawp.api.events.region.RegionEvents;
-import de.z0rdak.yawp.commands.CommandUtil;
+import de.z0rdak.yawp.api.permission.Permission;
 import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.core.flag.FlagContainer;
 import de.z0rdak.yawp.core.flag.FlagState;
@@ -12,15 +12,19 @@ import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.boss.dragon.EnderDragonEntity;
-import net.minecraft.entity.mob.*;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.MerchantEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.FlyingMob;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.monster.Shulker;
+import net.minecraft.world.entity.monster.Slime;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.trading.Merchant;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -30,9 +34,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.api.events.region.RegionEvents.post;
-import static de.z0rdak.yawp.api.events.region.RegionEvents.post;
-import static de.z0rdak.yawp.config.server.CommandPermissionConfig.hasRegionPermission;
-import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
 import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
 
 public final class HandlerUtil {
@@ -40,46 +41,46 @@ public final class HandlerUtil {
     private HandlerUtil() {
     }
 
-    public static RegistryKey<World> getDimKey(Entity entity) {
-        return entity.getWorld().getRegistryKey();
+    public static ResourceKey<Level> getDimKey(Entity entity) {
+        return entity.level().dimension();
     }
 
-    public static RegistryKey<World> getDimKey(World world) {
-        return world.getRegistryKey();
+    public static ResourceKey<Level> getDimKey(Level world) {
+        return world.dimension();
     }
 
     public static boolean isAnimal(Entity entity) {
-        return entity instanceof AnimalEntity || entity instanceof WaterCreatureEntity;
+        return entity instanceof Animal || entity instanceof WaterAnimal;
     }
 
     public static boolean isServerSide(Entity entity) {
-        return isServerSide(entity.getWorld());
+        return isServerSide(entity.level());
     }
 
-    public static boolean isServerSide(World world) {
-        return !world.isClient;
+    public static boolean isServerSide(Level world) {
+        return !world.isClientSide;
     }
 
     public static boolean isVillager(Entity entity) {
-        return entity instanceof MerchantEntity;
+        return entity instanceof Merchant;
     }
 
     public static boolean isPlayer(Entity entity) {
-        return entity instanceof PlayerEntity;
+        return entity instanceof Player;
     }
 
     public static boolean isMonster(Entity entity) {
-        return entity instanceof HostileEntity
-                || entity instanceof SlimeEntity
-                || entity instanceof FlyingEntity
-                || entity instanceof EnderDragonEntity
-                || entity instanceof ShulkerEntity;
+        return entity instanceof Enemy
+                || entity instanceof Slime
+                || entity instanceof FlyingMob
+                || entity instanceof EnderDragon
+                || entity instanceof Shulker;
     }
 
     public static boolean notServerSideOrPlayerNull(Entity entity) {
         return entity == null || !isServerSide(entity);
     }
-    
+
     /**
      * Processes the given flag check event and executes the given consumers if the flag is allowed or denied. <br>
      * The flag check event is evaluated and posted to the event bus. <br>
@@ -111,16 +112,16 @@ public final class HandlerUtil {
     }
 
     public static void checkMobGrief(Entity entity, CallbackInfo ci) {
-        checkMobGrief(entity.getWorld(), entity.getBlockPos(), ci);
+        checkMobGrief(entity.level(), entity.getOnPos(), ci);
     }
 
     public static void checkMobGrief(Entity entity, CallbackInfoReturnable<Boolean> cir) {
-        checkMobGrief(entity.getWorld(), entity.getBlockPos(), cir);
+        checkMobGrief(entity.level(), entity.getOnPos(), cir);
     }
 
-    public static void checkMobGrief(World world, BlockPos pos, CallbackInfo ci) {
+    public static void checkMobGrief(Level world, BlockPos pos, CallbackInfo ci) {
         if (isServerSide(world)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, MOB_GRIEFING, world.getRegistryKey(), null);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, MOB_GRIEFING, world.dimension(), null);
             if (post(checkEvent))
                 return;
             processCheck(checkEvent, null, deny -> {
@@ -129,9 +130,9 @@ public final class HandlerUtil {
         }
     }
 
-    public static void checkMobGrief(World world, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+    public static void checkMobGrief(Level world, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         if (isServerSide(world)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, MOB_GRIEFING, world.getRegistryKey(), null);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, MOB_GRIEFING, world.dimension(), null);
             if (post(checkEvent))
                 return;
             processCheck(checkEvent, null, deny -> {
@@ -140,12 +141,12 @@ public final class HandlerUtil {
         }
     }
 
-    public static void syncPlayerInventory(World world, PlayerEntity player) { 
+    public static void syncPlayerInventory(Level world, Player player) {
         // TODO:
     }
-    
-    public static void updateBlockState(World world, BlockPos pos) {
-        world.updateNeighbors(pos, world.getBlockState(pos).getBlock());
+
+    public static void updateBlockState(Level world, BlockPos pos) {
+        world.updateNeighborsAt(pos, world.getBlockState(pos).getBlock());
     }
 
     /**
@@ -175,7 +176,7 @@ public final class HandlerUtil {
      * @return the responsible region for the given position and dimension
      */
     @Nullable
-    private static IProtectedRegion getResponsible(BlockPos pos, RegistryKey<World> dim) {
+    private static IProtectedRegion getResponsible(BlockPos pos, ResourceKey<Level> dim) {
         IMarkableRegion region = getInvolvedRegionFor(pos, dim);
         if (region == null) {
             IProtectedRegion dimRegion = RegionDataManager.get().cacheFor(dim).getDimensionalRegion();
@@ -197,7 +198,7 @@ public final class HandlerUtil {
      * @param dim      the dimension to check for involved regions
      * @return all active regions which contain the given location and dimension
      */
-    private static List<IMarkableRegion> getInvolvedRegionsFor(BlockPos position, RegistryKey<World> dim) {
+    private static List<IMarkableRegion> getInvolvedRegionsFor(BlockPos position, ResourceKey<Level> dim) {
         return RegionDataManager.get().getRegionsFor(dim).stream()
                 .filter(IMarkableRegion::isActive)
                 .filter(region -> region.contains(position))
@@ -213,7 +214,7 @@ public final class HandlerUtil {
      * @return the region with the highest priority among all involved regions which contain the given location
      */
     @Nullable
-    private static IMarkableRegion getInvolvedRegionFor(BlockPos position, RegistryKey<World> dim) {
+    private static IMarkableRegion getInvolvedRegionFor(BlockPos position, ResourceKey<Level> dim) {
         List<IMarkableRegion> regionsForPos = getInvolvedRegionsFor(position, dim);
         if (regionsForPos.isEmpty()) {
             return null;
@@ -233,11 +234,11 @@ public final class HandlerUtil {
      * @param player the player to check the flag state against
      * @return the flag state for the given region and flag
      */
-    private static FlagState getFlagState(IProtectedRegion region, RegionFlag flag, @Nullable PlayerEntity player) {
+    private static FlagState getFlagState(IProtectedRegion region, RegionFlag flag, @Nullable Player player) {
         if (player == null) {
             return region.getFlagContainer().flagState(flag.name);
         } else {
-            boolean hasPermission = hasRegionPermission(region, player, CommandUtil.OWNER) || hasRegionPermission(region, player, CommandUtil.MEMBER);
+            boolean hasPermission = CommandPermissionConfig.hasAnyPermission(region, player, Permission.getGroups(region, player));
             boolean isPermitted = hasPermission || CommandPermissionConfig.hasConfigPermAndOpByPassFlags(player);
             if (isPermitted) {
                 return FlagState.ALLOWED;

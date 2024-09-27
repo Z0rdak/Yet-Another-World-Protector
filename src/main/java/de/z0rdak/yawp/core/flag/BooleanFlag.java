@@ -1,13 +1,13 @@
 package de.z0rdak.yawp.core.flag;
 
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 
 /**
  * A simple boolean state flag.
  */
 public class BooleanFlag extends AbstractFlag {
 
-    public BooleanFlag(NbtCompound nbt) {
+    public BooleanFlag(CompoundTag nbt) {
         super(nbt);
         this.deserializeNBT(nbt);
     }
@@ -16,18 +16,23 @@ public class BooleanFlag extends AbstractFlag {
         super(flag.name, flag.type, override, state);
     }
 
+    public BooleanFlag(RegionFlag flag, FlagState state, FlagMessage msg, boolean override) {
+        this(flag, state, override);
+        this.msg = msg;
+    }
+
     public BooleanFlag(RegionFlag flag) {
         super(flag.name, flag.type, false, FlagState.DENIED);
     }
 
     @Override
-    public NbtCompound serializeNBT() {
-        NbtCompound nbt = super.serializeNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = super.serializeNBT();
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(NbtCompound nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
     }
 }

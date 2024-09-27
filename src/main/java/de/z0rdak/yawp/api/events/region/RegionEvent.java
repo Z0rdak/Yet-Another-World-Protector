@@ -2,16 +2,16 @@ package de.z0rdak.yawp.api.events.region;
 
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class RegionEvent {
 
     private final IMarkableRegion region;
     @Nullable
-    private final PlayerEntity player;
+    private final Player player;
 
-    private RegionEvent(IMarkableRegion region, @Nullable PlayerEntity player) {
+    private RegionEvent(IMarkableRegion region, @Nullable Player player) {
         this.region = region;
         this.player = player;
     }
@@ -21,7 +21,7 @@ public abstract class RegionEvent {
     }
 
     @Nullable
-    public PlayerEntity getPlayer() {
+    public Player getPlayer() {
         return player;
     }
 
@@ -32,7 +32,7 @@ public abstract class RegionEvent {
      */
     public final static class CreateRegionEvent extends RegionEvent {
 
-        public CreateRegionEvent(IMarkableRegion region, PlayerEntity player) {
+        public CreateRegionEvent(IMarkableRegion region, Player player) {
             super(region, player);
         }
 
@@ -47,7 +47,7 @@ public abstract class RegionEvent {
         private final String oldName;
         private String newName;
 
-        public RenameRegion(IMarkableRegion region, String oldName, String newName, PlayerEntity player) {
+        public RenameRegion(IMarkableRegion region, String oldName, String newName, Player player) {
             super(region, player);
             this.newName = newName;
             this.oldName = oldName;
@@ -81,12 +81,12 @@ public abstract class RegionEvent {
 
         private IMarkableArea markedArea;
 
-        public UpdateArea(IMarkableRegion region, IMarkableArea area, PlayerEntity player) {
+        public UpdateArea(IMarkableRegion region, IMarkableArea area, Player player) {
             super(region, player);
             this.markedArea = area;
         }
 
-        public IMarkableArea getMarkedArea() {
+        public IMarkableArea markedArea() {
             return markedArea;
         }
 
@@ -108,7 +108,7 @@ public abstract class RegionEvent {
      */
     public final static class RemoveRegionEvent extends RegionEvent {
 
-        public RemoveRegionEvent(IMarkableRegion region, PlayerEntity player) {
+        public RemoveRegionEvent(IMarkableRegion region, Player player) {
             super(region, player);
         }
     }

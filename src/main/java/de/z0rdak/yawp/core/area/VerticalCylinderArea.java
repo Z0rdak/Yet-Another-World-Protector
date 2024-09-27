@@ -2,9 +2,9 @@ package de.z0rdak.yawp.core.area;
 
 import de.z0rdak.yawp.util.AreaUtil;
 import de.z0rdak.yawp.util.constants.AreaNBT;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.nbt.CompoundTag;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.Set;
@@ -31,12 +31,12 @@ public class VerticalCylinderArea extends CenteredArea {
 
     public VerticalCylinderArea(BlockPos centerBottomPos, int radius, int distance) {
         super(centerBottomPos, AreaType.CYLINDER);
-        this.centerTopPos = centerBottomPos.add(0, distance, 0);
+        this.centerTopPos = centerBottomPos.offset(0, distance, 0);
         this.radius = radius;
         this.distance = distance;
     }
 
-    public VerticalCylinderArea(NbtCompound nbt) {
+    public VerticalCylinderArea(CompoundTag nbt) {
         super(nbt);
         this.deserializeNBT(nbt);
     }
@@ -56,7 +56,7 @@ public class VerticalCylinderArea extends CenteredArea {
         boolean b1 = multiply(pos.subtract(center), dist).compareTo(BlockPos.ZERO) >= 0;
         boolean b2 = multiply(pos.subtract(centerTopPos), dist).compareTo(BlockPos.ZERO) <= 0;
         boolean isBetweenPlanes = b1 && b2;
-        BlockPos crossProduct = pos.subtract(center).crossProduct(dist);
+        BlockPos crossProduct = pos.subtract(center).cross(dist);
         double distance = length(crossProduct) / distanceManhattan(centerTopPos, center);
         boolean isInsideSurface = distance <= radius;
         return isBetweenPlanes && isInsideSurface;
@@ -80,15 +80,15 @@ public class VerticalCylinderArea extends CenteredArea {
     }
 
     @Override
-    public NbtCompound serializeNBT() {
-        NbtCompound nbt = super.serializeNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = super.serializeNBT();
         nbt.putInt(AreaNBT.RADIUS, this.radius);
         nbt.putInt(AreaNBT.HEIGHT, this.distance);
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(NbtCompound nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
         this.distance = nbt.getInt(AreaNBT.RADIUS);
         this.radius = nbt.getInt(AreaNBT.HEIGHT);

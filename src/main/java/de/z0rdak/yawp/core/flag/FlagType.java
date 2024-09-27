@@ -31,7 +31,7 @@ public enum FlagType {
         }
     }
 
-    public static Set<String> getFlagTypes(){
+    public static Set<String> getFlagTypes() {
         return Arrays.stream(FlagType.values())
                 .map(type -> type.flagType)
                 .collect(Collectors.toSet());

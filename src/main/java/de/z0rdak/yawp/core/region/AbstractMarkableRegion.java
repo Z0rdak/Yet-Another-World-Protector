@@ -4,16 +4,12 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.IMarkableArea;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
-import java.util.HashMap;
-import java.util.Objects;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 import static de.z0rdak.yawp.util.constants.RegionNBT.*;
 
@@ -28,7 +24,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     protected AreaType areaType;
     protected BlockPos tpTarget;
 
-    public AbstractMarkableRegion(String name, IMarkableArea area, PlayerEntity owner, RegistryKey<World> dimension, AbstractRegion parent) {
+    public AbstractMarkableRegion(String name, IMarkableArea area, Player owner, ResourceKey<Level> dimension, AbstractRegion parent) {
         super(name, dimension, RegionType.LOCAL, owner);
         this.area = area;
         this.areaType = area.getAreaType();
@@ -38,16 +34,16 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         }
     }
 
-    public AbstractMarkableRegion(String name, IMarkableArea area, PlayerEntity owner, RegistryKey<World> dimension) {
+    public AbstractMarkableRegion(String name, IMarkableArea area, Player owner, ResourceKey<Level> dimension) {
         this(name, area, owner, dimension, null);
     }
 
-    public AbstractMarkableRegion(String name, IMarkableArea area, BlockPos tpTarget, PlayerEntity owner, RegistryKey<World> dimension) {
+    public AbstractMarkableRegion(String name, IMarkableArea area, BlockPos tpTarget, Player owner, ResourceKey<Level> dimension) {
         this(name, area, owner, dimension, null);
         this.tpTarget = tpTarget;
     }
 
-    public AbstractMarkableRegion(NbtCompound nbt){
+    public AbstractMarkableRegion(CompoundTag nbt) {
         super(nbt);
         this.deserializeNBT(nbt);
     }
@@ -56,7 +52,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     protected boolean setParent(IProtectedRegion parent) {
         if (this.parent == null) {
             boolean isParentLocalOrDim = parent.getRegionType() == RegionType.DIMENSION || parent.getRegionType() == RegionType.LOCAL;
-            return isParentLocalOrDim ? super.setParent(parent) : false;
+            return isParentLocalOrDim && super.setParent(parent);
         } else {
             if (this.parent.getRegionType() == RegionType.LOCAL && parent.getRegionType() == RegionType.DIMENSION) {
                 return super.setParent(parent);
@@ -85,9 +81,9 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     }
 
     @Override
-    public NbtCompound serializeNBT() {
-        NbtCompound nbt = super.serializeNBT();
-        nbt.put(TP_POS, NbtHelper.fromBlockPos(this.tpTarget));
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = super.serializeNBT();
+        nbt.put(TP_POS, NbtUtils.writeBlockPos(this.tpTarget));
         nbt.putInt(PRIORITY, priority);
         nbt.putBoolean(MUTED, this.isMuted());
         nbt.putString(AREA_TYPE, this.areaType.areaType);
@@ -96,15 +92,15 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     }
 
     @Override
-    public void deserializeNBT(NbtCompound nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-        this.tpTarget = NbtHelper.toBlockPos(nbt.getCompound(TP_POS));
+        this.tpTarget = NbtUtils.readBlockPos(nbt.getCompound(TP_POS));
         this.priority = nbt.getInt(PRIORITY);
         this.setIsMuted(nbt.getBoolean(MUTED));
         AreaType areaType = AreaType.of(nbt.getString(AREA_TYPE));
         if (areaType == null) {
-            YetAnotherWorldProtector.LOGGER.error("Error loading region data for: '" + this.getName() + "' in dim '" + this.dimension.getValue() + "'");
-            throw new IllegalArgumentException("Error loading region data for: '" + this.getName() + "' in dim '" + this.dimension.getValue() + "'");
+            YetAnotherWorldProtector.LOGGER.error("Error loading region data for: '{}' in dim '{}'", this.getName(), this.dimension.location());
+            throw new IllegalArgumentException("Error loading region data for: '" + this.getName() + "' in dim '" + this.dimension.location() + "'");
         }
         this.areaType = areaType;
     }
@@ -112,6 +108,11 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     @Override
     public IMarkableArea getArea() {
         return area;
+    }
+
+    @Override
+    public void setArea(IMarkableArea area) {
+        this.area = area;
     }
 
     @Override
@@ -124,6 +125,11 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         return priority;
     }
 
+    @Override
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
     public AreaType getAreaType() {
         return areaType;
     }
@@ -131,16 +137,6 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     @Override
     public BlockPos getTpTarget() {
         return tpTarget;
-    }
-
-    @Override
-    public void setPriority(int priority) {
-        this.priority = priority;
-    }
-
-    @Override
-    public void setArea(IMarkableArea area) {
-        this.area = area;
     }
 
     @Override

@@ -2,35 +2,38 @@ package de.z0rdak.yawp.mixin.stick;
 
 import de.z0rdak.yawp.handler.stick.MarkerStickHandler;
 import de.z0rdak.yawp.util.StickType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.screen.AnvilScreenHandler;
-import net.minecraft.screen.ScreenHandler;
+import net.minecraft.client.gui.screens.inventory.AnvilScreen;
+import net.minecraft.world.inventory.AnvilMenu;
+import net.minecraft.world.item.ItemStack;
+
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Items;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import static de.z0rdak.yawp.handler.flags.HandlerUtil.isServerSide;
+
 // Note: this mixin is currently disabled (not added to yawp.mixins.json)
 // TODO: Remove with WorldEdit integration feature
-@Mixin(AnvilScreenHandler.class)
+@Mixin(AnvilMenu.class)
 public abstract class AnvilScreenHandlerMixin {
 
-    @Inject(method = "onTakeOutput", at = @At("HEAD"), cancellable = true, allow = 1)
-    private void onTakeOutput(PlayerEntity player, ItemStack outputItem, CallbackInfo ci) {
-        if (!player.getWorld().isClient) {
+    @Inject(method = "onTake", at = @At("HEAD"), cancellable = true, allow = 1)
+    private void onTakeOutput(Player player, ItemStack outputItem, CallbackInfo ci) {
+        if (isServerSide(player.level())) {
             // Retrieve the input and output items from the anvil menu
-            ItemStack inputItem = ((ScreenHandler) (Object) this).getSlot(0).getStack();
-            ItemStack ingredientInput = ((ScreenHandler) (Object) this).getSlot(1).getStack();
+            ItemStack inputItem = ((AnvilMenu) (Object) this).getSlot(0).getItem();
+            ItemStack ingredientInput = ((AnvilMenu) (Object) this).getSlot(1).getItem();
 
-            boolean isInputAndOutputStick = ItemStack.areItemsEqual(outputItem, Items.STICK.getDefaultStack())
-                    && ItemStack.areItemsEqual(inputItem, Items.STICK.getDefaultStack());
+            boolean isInputAndOutputStick = ItemStack.isSameItem(outputItem, Items.STICK.getDefaultInstance()) 
+                    && ItemStack.isSameItem(inputItem, Items.STICK.getDefaultInstance());
             if (isInputAndOutputStick && ingredientInput.isEmpty()) {
-                StickType type = StickType.of(outputItem.getName().getString());
+                StickType type = StickType.of(outputItem.getDisplayName().getString());
                 if (type != StickType.UNKNOWN) {
                     MarkerStickHandler.onCreateStick(player, inputItem, outputItem, type);
-                    player.getInventory().markDirty();
+                    player.getInventory().setChanged();
                     ci.cancel();
                 }
             }

@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.core.flag;
 
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -17,27 +17,27 @@ public class ListFlag extends AbstractFlag {
         resourceKey = new HashSet<>(0);
     }
 
-    public ListFlag(NbtCompound nbt) {
+    public ListFlag(CompoundTag nbt) {
         super(nbt);
         this.deserializeNBT(nbt);
     }
 
-    public boolean containsKey(String key){
+    public boolean containsKey(String key) {
         return this.resourceKey.contains(key);
     }
 
-    public boolean allows(String key){
+    public boolean allows(String key) {
         return this.containsKey(key) && doesOverride();
     }
 
     @Override
-    public NbtCompound serializeNBT() {
-        NbtCompound nbt = super.serializeNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = super.serializeNBT();
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
-    public void deserializeNBT(NbtCompound nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
         throw new UnsupportedOperationException("Not implemented yet");
     }

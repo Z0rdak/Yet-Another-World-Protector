@@ -1,90 +1,35 @@
 package de.z0rdak.yawp.util;
 
+import de.z0rdak.yawp.api.permission.Permission;
 import de.z0rdak.yawp.commands.CommandUtil;
-import de.z0rdak.yawp.config.server.CommandPermissionConfig;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.area.SphereArea;
-import de.z0rdak.yawp.core.flag.FlagContainer;
-import de.z0rdak.yawp.core.flag.FlagState;
-import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.CuboidRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
-import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.SphereRegion;
 import de.z0rdak.yawp.core.stick.MarkerStick;
-import de.z0rdak.yawp.handler.flags.FlagCorrelation;
 import de.z0rdak.yawp.managers.data.region.RegionDataManager;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import org.apache.commons.lang3.NotImplementedException;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
-import static de.z0rdak.yawp.config.server.CommandPermissionConfig.*;
+import static de.z0rdak.yawp.config.server.CommandPermissionConfig.hasAnyPermission;
 
 public final class LocalRegions {
 
     private LocalRegions() {
     }
 
-    /**
-     * Gets flags of region sorted by active state and name
-     */
-    public static List<IFlag> getSortedFlags(IProtectedRegion region) {
-        List<IFlag> activeFlags = region.getFlags().stream()
-                .filter(IFlag::isActive)
-                .sorted()
-                .collect(Collectors.toList());
-        List<IFlag> inActiveFlags = region.getFlags().stream()
-                .filter(f -> !f.isActive())
-                .sorted()
-                .collect(Collectors.toList());
-        List<IFlag> flags = new ArrayList<>(activeFlags);
-        flags.addAll(inActiveFlags);
-        return flags;
-    }
-
-    public static Map<FlagState, List<IFlag>> sortFlagsByState(IProtectedRegion region) {
-        List<IFlag> denied = getFlagsWithState(region.getFlagContainer(), FlagState.DENIED);
-        List<IFlag> allowed = getFlagsWithState(region.getFlagContainer(), FlagState.ALLOWED);
-        List<IFlag> disabled = getFlagsWithState(region.getFlagContainer(), FlagState.DISABLED);
-        HashMap<FlagState, List<IFlag>> flagStateListMap = new HashMap<>();
-        flagStateListMap.put(FlagState.DENIED, denied);
-        flagStateListMap.put(FlagState.ALLOWED, allowed);
-        flagStateListMap.put(FlagState.DISABLED, disabled);
-        return flagStateListMap;
-    }
-
-    public static Map<FlagState, List<FlagCorrelation>> sortFlagsByState(Map<String, FlagCorrelation> flagMap) {
-        List<FlagCorrelation> denied = getCorrelationByState(flagMap, FlagState.DENIED);
-        List<FlagCorrelation> allowed = getCorrelationByState(flagMap, FlagState.ALLOWED);
-        List<FlagCorrelation> disabled = getCorrelationByState(flagMap, FlagState.DISABLED);
-        HashMap<FlagState, List<FlagCorrelation>> flagStateListMap = new HashMap<>();
-        flagStateListMap.put(FlagState.DENIED, denied);
-        flagStateListMap.put(FlagState.ALLOWED, allowed);
-        flagStateListMap.put(FlagState.DISABLED, disabled);
-        return flagStateListMap;
-    }
-
-    private static List<FlagCorrelation> getCorrelationByState(Map<String, FlagCorrelation> flagMap, FlagState state) {
-        return flagMap.values().stream()
-                .filter(correlation -> correlation.getFlag().getState() == state)
-                .collect(Collectors.toList());
-    }
-
-    public static List<IFlag> getFlagsWithState(FlagContainer flags, FlagState state) {
-        return flags.values().stream()
-                .filter(flag -> flag.getState() == state)
-                .collect(Collectors.toList());
-    }
-
-    public static IMarkableRegion regionFrom(PlayerEntity player, MarkerStick marker, String regionName) {
+    public static IMarkableRegion regionFrom(Player player, MarkerStick marker, String regionName) {
         return regionFrom(player, marker, regionName, marker.getDimension());
     }
 
@@ -100,7 +45,7 @@ public final class LocalRegions {
         }
     }
 
-    public static IMarkableRegion regionFrom(PlayerEntity player, MarkerStick marker, String regionName, RegistryKey<World> dim) {
+    public static IMarkableRegion regionFrom(Player player, MarkerStick marker, String regionName, ResourceKey<Level> dim) {
         switch (marker.getAreaType()) {
             case CUBOID:
                 return cuboidRegionFrom(marker, regionName, player, dim);
@@ -111,7 +56,7 @@ public final class LocalRegions {
         }
     }
 
-    private static SphereRegion sphericalRegionFrom(MarkerStick marker, String regionName, PlayerEntity player, RegistryKey<World> dim) {
+    private static SphereRegion sphericalRegionFrom(MarkerStick marker, String regionName, Player player, ResourceKey<Level> dim) {
         List<BlockPos> blocks = marker.getMarkedBlocks();
         SphereArea sphereArea = new SphereArea(blocks.get(0), blocks.get(1));
         if (marker.getTeleportPos() != null) {
@@ -120,7 +65,7 @@ public final class LocalRegions {
         return new SphereRegion(regionName, sphereArea, player, dim);
     }
 
-    private static CuboidRegion cuboidRegionFrom(MarkerStick marker, String regionName, PlayerEntity player, RegistryKey<World> dim) {
+    private static CuboidRegion cuboidRegionFrom(MarkerStick marker, String regionName, Player player, ResourceKey<Level> dim) {
         List<BlockPos> blocks = marker.getMarkedBlocks();
         CuboidArea cuboidArea = new CuboidArea(blocks.get(0), blocks.get(1));
         if (marker.getTeleportPos() != null) {
@@ -129,7 +74,7 @@ public final class LocalRegions {
         return new CuboidRegion(regionName, cuboidArea, player, dim);
     }
 
-    public static IMarkableRegion regionFromArea(IMarkableArea area, BlockPos tpTarget, String regionName, RegistryKey<World> dim) {
+    public static IMarkableRegion regionFromArea(IMarkableArea area, BlockPos tpTarget, String regionName, ResourceKey<Level> dim) {
         switch (area.getAreaType()) {
             case CUBOID:
                 return new CuboidRegion(regionName, (CuboidArea) area, tpTarget, null, dim);
@@ -205,7 +150,7 @@ public final class LocalRegions {
         return new RegionOverlappingInfo(region, intersectingRegions, containingRegions);
     }
 
-    public static RegionOverlappingInfo getOverlappingRegions(IMarkableArea area, RegistryKey<World> dim) {
+    public static RegionOverlappingInfo getOverlappingRegions(IMarkableArea area, ResourceKey<Level> dim) {
         Collection<IMarkableRegion> regionsInDim = RegionDataManager.get().getRegionsFor(dim);
         List<IMarkableRegion> intersectingRegions = regionsInDim.stream()
                 .filter(r -> r.getArea().intersects(area))
@@ -216,7 +161,7 @@ public final class LocalRegions {
         return new RegionOverlappingInfo(null, intersectingRegions, containingRegions);
     }
 
-    public static RegionOverlappingInfo getOverlappingOwned(IMarkableRegion region, PlayerEntity player) {
+    public static RegionOverlappingInfo getOverlappingOwned(IMarkableRegion region, Player player) {
         RegionOverlappingInfo overlappingRegions = getOverlappingRegions(region);
         List<IMarkableRegion> intersecting = overlappingRegions.intersectingRegions.stream()
                 .filter(r -> r.isInGroup(player, CommandUtil.OWNER))
@@ -227,22 +172,22 @@ public final class LocalRegions {
         return new RegionOverlappingInfo(region, intersecting, contained);
     }
 
-    public static RegionOverlappingInfo getOverlappingWithPermission(IMarkableArea area, PlayerEntity player) {
-        RegionOverlappingInfo overlappingRegions = getOverlappingRegions(area, player.getWorld().getRegistryKey());
+    public static RegionOverlappingInfo getOverlappingWithPermission(IMarkableArea area, Player player) {
+        RegionOverlappingInfo overlappingRegions = getOverlappingRegions(area, player.level().dimension());
         return getOverlappingWithPermission(null, player, overlappingRegions);
     }
 
-    public static RegionOverlappingInfo getOverlappingWithPermission(IMarkableRegion region, PlayerEntity player) {
+    public static RegionOverlappingInfo getOverlappingWithPermission(IMarkableRegion region, Player player) {
         RegionOverlappingInfo overlappingRegions = getOverlappingRegions(region);
         return getOverlappingWithPermission(region, player, overlappingRegions);
     }
 
-    private static @NotNull RegionOverlappingInfo getOverlappingWithPermission(IMarkableRegion region, PlayerEntity player, RegionOverlappingInfo overlappingRegions) {
+    private static @NotNull RegionOverlappingInfo getOverlappingWithPermission(IMarkableRegion region, Player player, RegionOverlappingInfo overlappingRegions) {
         List<IMarkableRegion> intersecting = overlappingRegions.intersectingRegions.stream()
-                .filter(r -> hasRegionPermission(r, player, CommandUtil.OWNER) || hasConfigPermission(player))
+                .filter(r -> hasAnyPermission(r, player, Permission.getGroups(r, player)))
                 .collect(Collectors.toList());
         List<IMarkableRegion> contained = overlappingRegions.containingRegions.stream()
-                .filter(r -> hasRegionPermission(r, player, CommandUtil.OWNER) || hasConfigPermission(player))
+                .filter(r -> hasAnyPermission(r, player, Permission.getGroups(r, player)))
                 .collect(Collectors.toList());
         return new RegionOverlappingInfo(region, intersecting, contained);
     }

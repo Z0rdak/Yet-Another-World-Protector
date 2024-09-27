@@ -15,13 +15,6 @@ import net.fabricmc.fabric.api.event.EventFactory;
  */
 public final class RegionEvents {
 
-    public static boolean post(FlagCheckEvent checkEvent){
-        return RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent);
-    }
-
-    private RegionEvents() {
-    }
-
     public static final Event<CreateRegion> CREATE_REGION = EventFactory.createArrayBacked(CreateRegion.class, callbacks -> (createRegionEvent) -> {
         for (CreateRegion callback : callbacks) {
             if (!callback.createRegion(createRegionEvent)) {
@@ -30,7 +23,6 @@ public final class RegionEvents {
         }
         return false;
     });
-
     public static final Event<RemoveRegion> DELETE_REGION = EventFactory.createArrayBacked(RemoveRegion.class, callbacks -> (removeRegionEvent) -> {
         for (RemoveRegion callback : callbacks) {
             if (!callback.deleteRegion(removeRegionEvent)) {
@@ -39,7 +31,6 @@ public final class RegionEvents {
         }
         return false;
     });
-
     public static final Event<RenameRegion> RENAME_REGION = EventFactory.createArrayBacked(RenameRegion.class, callbacks -> (renameRegionEvent) -> {
         for (RenameRegion callback : callbacks) {
             if (!callback.renameRegion(renameRegionEvent)) {
@@ -48,7 +39,6 @@ public final class RegionEvents {
         }
         return false;
     });
-
     public static final Event<UpdateArea> UPDATE_AREA = EventFactory.createArrayBacked(UpdateArea.class, callbacks -> (updateAreaEvent) -> {
         for (UpdateArea callback : callbacks) {
             if (!callback.updateArea(updateAreaEvent)) {
@@ -57,7 +47,6 @@ public final class RegionEvents {
         }
         return false;
     });
-
     /**
      * This event is only called at the server-side.
      */
@@ -69,16 +58,22 @@ public final class RegionEvents {
         }
         return false;
     });
-
     /**
      * This event is only called at the server-side.
      */
     public static final Event<FlagResult> FLAG_RESULT = EventFactory.createArrayBacked(FlagResult.class, callbacks -> (flagCheckResult) -> {
         for (FlagResult callback : callbacks) {
-           flagCheckResult.setFlagState(callback.getResult(flagCheckResult).getFlagState());
+            flagCheckResult.setFlagState(callback.getResult(flagCheckResult).getFlagState());
         }
         return flagCheckResult;
     });
+
+    private RegionEvents() {
+    }
+
+    public static boolean post(FlagCheckEvent checkEvent) {
+        return RegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent);
+    }
 
     @FunctionalInterface
     public interface CreateRegion {
@@ -109,10 +104,6 @@ public final class RegionEvents {
     public interface CheckFlag {
         boolean checkFlag(FlagCheckEvent flagCheckEvent);
     }
-
-
-
-
 
 
 }

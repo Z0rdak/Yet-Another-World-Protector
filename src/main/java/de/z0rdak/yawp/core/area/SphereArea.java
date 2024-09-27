@@ -2,9 +2,9 @@ package de.z0rdak.yawp.core.area;
 
 import de.z0rdak.yawp.util.AreaUtil;
 import de.z0rdak.yawp.util.constants.AreaNBT;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.math.Box;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.Set;
@@ -17,7 +17,7 @@ public class SphereArea extends CenteredArea {
 
     private int radius;
 
-    public SphereArea(NbtCompound nbt) {
+    public SphereArea(CompoundTag nbt) {
         super(nbt);
         this.deserializeNBT(nbt);
     }
@@ -28,7 +28,7 @@ public class SphereArea extends CenteredArea {
     }
 
     public SphereArea(BlockPos middlePos, int radius) {
-        this(middlePos, new BlockPos(middlePos).add(0, radius, 0));
+        this(middlePos, new BlockPos(middlePos).offset(0, radius, 0));
     }
 
     public static SphereArea expand(SphereArea area, int expansion) {
@@ -46,7 +46,9 @@ public class SphereArea extends CenteredArea {
 
     @Override
     public Set<BlockPos> getHull() {
-        Box cube = new Box(new BlockPos(this.center).add(-this.radius, -this.radius, -this.radius), new BlockPos(this.center).add(this.radius, this.radius, this.radius));
+        BlockPos p1 = this.center.offset(-this.radius, -this.radius, -this.radius);
+        BlockPos p2 = new BlockPos(this.center).offset(this.radius, this.radius, this.radius);
+        BoundingBox cube = BoundingBox.fromCorners(p1, p2);
         Set<BlockPos> cubeBlocks = AreaUtil.blocksBetween(cube);
         return cubeBlocks.stream().filter(pos -> distanceManhattan(this.center, pos) == this.radius).collect(Collectors.toSet());
     }
@@ -74,9 +76,9 @@ public class SphereArea extends CenteredArea {
             return true;
         }
         // Compute the closest point on the cuboid to the sphere
-        int closestX = (int) Math.max(other.getArea().minX, Math.min(this.center.getX(), other.getArea().maxX));
-        int closestY = (int) Math.max(other.getArea().minY, Math.min(this.center.getY(), other.getArea().maxY));
-        int closestZ = (int) Math.max(other.getArea().minZ, Math.min(this.center.getZ(), other.getArea().maxZ));
+        int closestX = Math.max(other.getArea().minX(), Math.min(this.center.getX(), other.getArea().maxX()));
+        int closestY = Math.max(other.getArea().minY(), Math.min(this.center.getY(), other.getArea().maxY()));
+        int closestZ = Math.max(other.getArea().minZ(), Math.min(this.center.getZ(), other.getArea().maxZ()));
         // Calculate the distance between the sphere center and the closest point
         return distanceManhattan(this.center, new BlockPos(closestX, closestY, closestZ)) <= this.radius;
     }
@@ -110,14 +112,14 @@ public class SphereArea extends CenteredArea {
     }
 
     @Override
-    public NbtCompound serializeNBT() {
-        NbtCompound nbt = super.serializeNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = super.serializeNBT();
         nbt.putInt(AreaNBT.RADIUS, this.radius);
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(NbtCompound nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
         this.radius = nbt.getInt(AreaNBT.RADIUS);
     }

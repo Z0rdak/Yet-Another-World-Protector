@@ -1,9 +1,10 @@
 package de.z0rdak.yawp.core.flag;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,7 +18,7 @@ import static de.z0rdak.yawp.util.constants.RegionNBT.FLAG_TYPE;
 public class FlagContainer extends HashMap<String, IFlag> implements IFlagContainer {
 
 
-    public FlagContainer(NbtCompound nbt) {
+    public FlagContainer(CompoundTag nbt) {
         this();
         this.deserializeNBT(nbt);
     }
@@ -27,8 +28,8 @@ public class FlagContainer extends HashMap<String, IFlag> implements IFlagContai
     }
 
     @Override
-    public NbtCompound serializeNBT() {
-        NbtCompound nbt = new NbtCompound();
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = new CompoundTag();
         this.forEach((flagName, iFlag) -> {
             if (RegionFlag.contains(flagName)) {
                 nbt.put(flagName, iFlag.serializeNBT());
@@ -38,10 +39,10 @@ public class FlagContainer extends HashMap<String, IFlag> implements IFlagContai
     }
 
     @Override
-    public void deserializeNBT(NbtCompound nbt) {
-        Set<String> flagKeys = nbt.getKeys();
-        flagKeys.forEach( key -> {
-            NbtCompound flagNbt = nbt.getCompound(key);
+    public void deserializeNBT(CompoundTag nbt) {
+        Set<String> flagKeys = nbt.getAllKeys();
+        flagKeys.forEach(key -> {
+            CompoundTag flagNbt = nbt.getCompound(key);
             FlagType flagType = FlagType.of(flagNbt.getString(FLAG_TYPE));
             if (flagType != null) {
                 switch (flagType) {
@@ -85,6 +86,10 @@ public class FlagContainer extends HashMap<String, IFlag> implements IFlagContai
             }
         });
         return activeFlags;
+    }
+
+    public List<IFlag> getFlags(FlagState state) {
+        return this.values().stream().filter(flag -> flag.getState() == state).toList();
     }
 
     public boolean contains(String flag) {

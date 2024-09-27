@@ -1,12 +1,10 @@
 package de.z0rdak.yawp.core.region;
 
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.World;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 
 import java.util.Collections;
 import java.util.Map;
@@ -15,15 +13,16 @@ import java.util.stream.Collectors;
 
 public class GlobalRegion extends AbstractRegion {
 
-    public static final Identifier GLOBAL = new Identifier("yawp", "global");
-    public static final RegistryKey<World> GLOBAL_DIMENSION = RegistryKey.of(RegistryKeys.WORLD, GLOBAL);
+    public static final ResourceLocation GLOBAL = new ResourceLocation("yawp", "global");
+    public static final ResourceKey<Level> GLOBAL_DIMENSION = ResourceKey.create(Registries.DIMENSION, GLOBAL);
 
-    public GlobalRegion(NbtCompound nbt) {
+    public GlobalRegion(CompoundTag nbt) {
         super(nbt);
     }
 
     public GlobalRegion() {
         this(GLOBAL.toString(), RegionType.GLOBAL);
+        this.setParent(this);
     }
 
     protected GlobalRegion(String name, RegionType type) {
@@ -49,7 +48,7 @@ public class GlobalRegion extends AbstractRegion {
     }
 
     @Override
-    public boolean setParent(IProtectedRegion parent) {
+    protected boolean setParent(IProtectedRegion parent) {
         if (parent.getRegionType() == RegionType.GLOBAL) {
             return super.setParent(parent);
         }
@@ -65,13 +64,13 @@ public class GlobalRegion extends AbstractRegion {
     }
 
     @Override
-    public NbtCompound serializeNBT() {
-        NbtCompound nbt = super.serializeNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = super.serializeNBT();
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(NbtCompound nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
     }
 }

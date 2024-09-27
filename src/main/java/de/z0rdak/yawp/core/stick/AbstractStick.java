@@ -2,11 +2,11 @@ package de.z0rdak.yawp.core.stick;
 
 import de.z0rdak.yawp.core.INbtSerializable;
 import de.z0rdak.yawp.util.StickType;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 
 import static de.z0rdak.yawp.util.StickUtil.STICK_TYPE;
 
-public abstract class AbstractStick implements INbtSerializable<NbtCompound> {
+public abstract class AbstractStick implements INbtSerializable<CompoundTag> {
 
     private StickType stickType;
 
@@ -15,14 +15,14 @@ public abstract class AbstractStick implements INbtSerializable<NbtCompound> {
     }
 
     @Override
-    public NbtCompound serializeNBT() {
-        NbtCompound nbt = new NbtCompound();
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = new CompoundTag();
         nbt.putString(STICK_TYPE, this.stickType.stickName);
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(NbtCompound nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         this.stickType = StickType.of(nbt.getString(STICK_TYPE));
     }
 

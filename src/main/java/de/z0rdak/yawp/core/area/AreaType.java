@@ -10,11 +10,7 @@ public enum AreaType {
     CYLINDER("Cylinder", 3),
     SPHERE("Sphere", 2),
     POLYGON_3D("Polygon", 3, 20),
-    PRISM("Prism", 3, 10),
-    CHUNK("Chunk", 1, 1),
-    MULTI_CHUNK("MultiChunk", 1, 100),
-    MULTI_SECTION("MultiSection", 1, 100),
-    SECTION("Section", 1, 1);
+    PRISM("Prism", 3, 10);
 
     public final String areaType;
     public final int neededBlocks;
@@ -26,7 +22,7 @@ public enum AreaType {
         this.maxBlocks = maxBlocks;
     }
 
-    AreaType(String name){
+    AreaType(String name) {
         this.areaType = name;
         this.neededBlocks = 0;
         this.maxBlocks = 0;

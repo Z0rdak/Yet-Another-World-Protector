@@ -2,11 +2,11 @@ package de.z0rdak.yawp.core.area;
 
 import de.z0rdak.yawp.util.AreaUtil;
 import de.z0rdak.yawp.util.constants.AreaNBT;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.ArrayList;
@@ -25,33 +25,24 @@ import static de.z0rdak.yawp.util.AreaUtil.distanceManhattan;
  */
 public class CuboidArea extends AbstractArea {
 
-    private Box area;
+    private BoundingBox area;
     private BlockPos p1;
     private BlockPos p2;
 
-    public CuboidArea(Box area) {
+    public CuboidArea(BoundingBox area) {
         super(AreaType.CUBOID);
         this.area = area;
     }
 
     public CuboidArea(BlockPos p1, BlockPos p2) {
-        this(new Box(p1, p2));
+        this(BoundingBox.fromCorners(p1, p2));
         this.p1 = AreaUtil.getLowerPos(p1, p2);
         this.p2 = AreaUtil.getHigherPos(p1, p2);
     }
 
-    public CuboidArea(NbtCompound nbt) {
+    public CuboidArea(CompoundTag nbt) {
         super(nbt);
         this.deserializeNBT(nbt);
-    }
-
-    @Override
-    public boolean contains(BlockPos pos) {
-        // INFO: this.area.contains(x,y,z); does not work, because the max checks are exclusive by default.
-        // TODO: Maybe replace with net.minecraft.util.math.MutableBoundingBox::intersectsWith which has inclusive checks
-        return pos.getX() >= area.minX && pos.getX() <= area.maxX
-                && pos.getY() >= this.area.minY && pos.getY() <= this.area.maxY
-                && pos.getZ() >= this.area.minZ && pos.getZ() <= this.area.maxZ;
     }
 
     public static CuboidArea expand(CuboidArea area, int min, int max) {
@@ -59,12 +50,6 @@ public class CuboidArea extends AbstractArea {
         BlockPos p2 = area.getAreaP2();
         return new CuboidArea(new BlockPos(p1.getX(), min, p1.getZ()),
                 new BlockPos(p2.getX(), max, p2.getZ()));
-    }
-
-    public boolean contains(CuboidArea inner) {
-        return this.area.minX <= inner.area.minX && this.area.maxX >= inner.area.maxX
-                && this.area.minY <= inner.area.minY && this.area.maxY >= inner.area.maxY
-                && this.area.minZ <= inner.area.minZ && this.area.maxZ >= inner.area.maxZ;
     }
 
     private static boolean isInFacePlane(BlockPos point, BlockPos corner1, BlockPos corner2, BlockPos corner3, BlockPos corner4) {
@@ -98,6 +83,21 @@ public class CuboidArea extends AbstractArea {
         return blocksInFace;
     }
 
+    @Override
+    public boolean contains(BlockPos pos) {
+        // INFO: this.area.contains(x,y,z); does not work, because the max checks are exclusive by default.
+        // TODO: Maybe replace with net.minecraft.util.math.MutableBoundingBox::intersectsWith which has inclusive checks
+        return pos.getX() >= area.minX() && pos.getX() <= area.maxX()
+                && pos.getY() >= this.area.minY() && pos.getY() <= this.area.maxY()
+                && pos.getZ() >= this.area.minZ() && pos.getZ() <= this.area.maxZ();
+    }
+
+    public boolean contains(CuboidArea inner) {
+        return this.area.minX() <= inner.area.minX() && this.area.maxX() >= inner.area.maxX()
+                && this.area.minY() <= inner.area.minY() && this.area.maxY() >= inner.area.maxY()
+                && this.area.minZ() <= inner.area.minZ() && this.area.maxZ() >= inner.area.maxZ();
+    }
+
     public boolean contains(SphereArea inner) {
         int sphereRadius = inner.getRadius();
         BlockPos center = inner.center;
@@ -107,7 +107,7 @@ public class CuboidArea extends AbstractArea {
         }
 
         // Bounding sphere check
-        int maxDistanceToCorner = getMaxDistanceToCorners(center);
+        int maxDistanceToCorner = maxDistanceToCorners(center);
         if (maxDistanceToCorner > sphereRadius) {
             return false; // Maximum distance to cuboid corner is greater than sphere's radius
         }
@@ -131,7 +131,7 @@ public class CuboidArea extends AbstractArea {
         return true; // All points within or on the sphere are contained in the cuboid
     }
 
-    private int getMaxDistanceToCorners(BlockPos center) {
+    private int maxDistanceToCorners(BlockPos center) {
         List<BlockPos> corners = getVertices();
         int maxDistance = Integer.MIN_VALUE;
         for (BlockPos corner : corners) {
@@ -157,14 +157,14 @@ public class CuboidArea extends AbstractArea {
      * @return [p1, p2, p3, p4, p5, p6, p7, p8] as list of BlockPos
      */
     public List<BlockPos> getVertices() {
-        BlockPos p1 = new BlockPos((int) this.area.minX, (int) this.area.minY, (int) this.area.minZ);
-        BlockPos p2 = new BlockPos((int) this.area.maxX, (int) this.area.minY, (int) this.area.minZ);
-        BlockPos p3 = new BlockPos((int) this.area.minX, (int) this.area.minY, (int) this.area.maxZ);
-        BlockPos p4 = new BlockPos((int) this.area.maxX, (int) this.area.minY, (int) this.area.maxZ);
-        BlockPos p5 = new BlockPos((int) this.area.minX, (int) this.area.maxY, (int) this.area.minZ);
-        BlockPos p6 = new BlockPos((int) this.area.maxX, (int) this.area.maxY, (int) this.area.minZ);
-        BlockPos p7 = new BlockPos((int) this.area.minX, (int) this.area.maxY, (int) this.area.maxZ);
-        BlockPos p8 = new BlockPos((int) this.area.maxX, (int) this.area.maxY, (int) this.area.maxZ);
+        BlockPos p1 = new BlockPos(this.area.minX(), this.area.minY(), this.area.minZ());
+        BlockPos p2 = new BlockPos(this.area.maxX(), this.area.minY(), this.area.minZ());
+        BlockPos p3 = new BlockPos(this.area.minX(), this.area.minY(), this.area.maxZ());
+        BlockPos p4 = new BlockPos(this.area.maxX(), this.area.minY(), this.area.maxZ());
+        BlockPos p5 = new BlockPos(this.area.minX(), this.area.maxY(), this.area.minZ());
+        BlockPos p6 = new BlockPos(this.area.maxX(), this.area.maxY(), this.area.minZ());
+        BlockPos p7 = new BlockPos(this.area.minX(), this.area.maxY(), this.area.maxZ());
+        BlockPos p8 = new BlockPos(this.area.maxX(), this.area.maxY(), this.area.maxZ());
         return Arrays.asList(p1, p2, p3, p4, p5, p6, p7, p8);
     }
 
@@ -197,20 +197,20 @@ public class CuboidArea extends AbstractArea {
         return other.intersects(this);
     }
 
-    public Box getArea() {
+    public BoundingBox getArea() {
         return area;
     }
 
     public int getXsize() {
-        return (int) Math.max(this.area.getXLength(), 1);
+        return Math.max(this.area.getXSpan(), 1);
     }
 
     public int getZsize() {
-        return (int) Math.max(this.area.getZLength(), 1);
+        return Math.max(this.area.getZSpan(), 1);
     }
 
     public int getYsize() {
-        return (int) Math.max(this.area.getYLength(), 1);
+        return Math.max(this.area.getYSpan(), 1);
     }
 
     public BlockPos getAreaP1() {
@@ -222,31 +222,30 @@ public class CuboidArea extends AbstractArea {
     }
 
     @Override
-    public NbtCompound serializeNBT() {
-        NbtCompound nbt = super.serializeNBT();
-        nbt.put(AreaNBT.P1, NbtHelper.fromBlockPos(this.p1));
-        nbt.put(AreaNBT.P2, NbtHelper.fromBlockPos(this.p2));
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = super.serializeNBT();
+        nbt.put(AreaNBT.P1, NbtUtils.writeBlockPos(this.p1));
+        nbt.put(AreaNBT.P2, NbtUtils.writeBlockPos(this.p2));
         return nbt;
     }
 
     @Override
-    public void deserializeNBT(NbtCompound nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-        this.p1 = NbtHelper.toBlockPos(nbt.getCompound(AreaNBT.P1));
-        this.p2 = NbtHelper.toBlockPos(nbt.getCompound(AreaNBT.P2));
-        this.area = new Box(p1, p2);
+        this.p1 = NbtUtils.readBlockPos(nbt.getCompound(AreaNBT.P1));
+        this.p2 = NbtUtils.readBlockPos(nbt.getCompound(AreaNBT.P2));
+        this.area = BoundingBox.fromCorners(p1, p2);
     }
 
     @Override
     public String toString() {
-        String strBuilder = getAreaType().areaType + " " + AreaUtil.blockPosStr(this.p1) + " <-> " + AreaUtil.blockPosStr(this.p2) +
+        return getAreaType().areaType + " " + AreaUtil.blockPosStr(this.p1) + " <-> " + AreaUtil.blockPosStr(this.p2) +
                 "\n" + "Size: " + "X=" + this.getXsize() + ", Y=" + this.getYsize() + ", Z=" + this.getZsize() +
                 "\n" + "Blocks: " + AreaUtil.blockPosStr(this.p1) + ", " + AreaUtil.blockPosStr(this.p2);
-        return strBuilder;
     }
 
     @Override
-    public List<BlockPos> getMarkedBlocks() {
+    public List<BlockPos> markedBlocks() {
         return Arrays.asList(this.p1, this.p2);
     }
 
