@@ -2,9 +2,16 @@ package de.z0rdak.yawp.mixin.flag;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.region.FlagCheckResult;
+import de.z0rdak.yawp.core.flag.FlagState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.LightningEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.mob.SlimeEntity;
+import net.minecraft.entity.passive.IronGolemEntity;
+import net.minecraft.entity.passive.SnowGolemEntity;
+import net.minecraft.entity.passive.WanderingTraderEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -21,6 +28,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
+import java.util.function.Consumer;
+
 import static de.z0rdak.yawp.api.events.region.RegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
@@ -31,69 +40,57 @@ public class ServerWorldMixin {
     @Inject(method = "addEntity", at = @At("HEAD"), cancellable = true, allow = 1)
     public void onSpawnEntity(Entity entity, CallbackInfoReturnable<Boolean> cir) {
         if (isServerSide(entity.getEntityWorld())) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(entity.getBlockPos(), SPAWNING_ALL, getDimKey(entity), null);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(entity.getBlockPos(), SPAWNING_ALL, getDimKey(entity));
             if (post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, null, deny -> {
-                cir.setReturnValue(false);
-            });
-
-            checkEvent = new FlagCheckEvent(entity.getBlockPos(), SPAWNING_MONSTER, getDimKey(entity), null);
-            if (post(checkEvent)) {
+            FlagState flagState = processCheck(checkEvent, deny -> cir.setReturnValue(false));
+            if (flagState == FlagState.DENIED)
                 return;
-            }
-            processCheck(checkEvent, null, deny -> {
-                cir.setReturnValue(false);
-            });
             
-            checkEvent = new FlagCheckEvent(entity.getBlockPos(), SPAWNING_ANIMAL, getDimKey(entity), null);
-            if (post(checkEvent)) {
-                return;
+            if (isMonster(entity)) {
+                checkEvent = new FlagCheckEvent(entity.getBlockPos(), SPAWNING_MONSTER, getDimKey(entity));
+                if (post(checkEvent)) {
+                    return;
+                }
             }
-            processCheck(checkEvent, null, deny -> {
-                cir.setReturnValue(false);
-            });
-            
-            checkEvent = new FlagCheckEvent(entity.getBlockPos(), SPAWNING_VILLAGER, getDimKey(entity), null);
-            if (post(checkEvent)) {
-                return;
+            if (isAnimal(entity)) {
+                checkEvent = new FlagCheckEvent(entity.getBlockPos(), SPAWNING_ANIMAL, getDimKey(entity));
+                if (post(checkEvent)) {
+                    return;
+                }
             }
-            processCheck(checkEvent, null, deny -> {
-                cir.setReturnValue(false);
-            });
-            
-            checkEvent = new FlagCheckEvent(entity.getBlockPos(), SPAWNING_TRADER, getDimKey(entity), null);
-            if (post(checkEvent)) {
-                return;
+            if (isVillager(entity)) {
+                checkEvent = new FlagCheckEvent(entity.getBlockPos(), SPAWNING_VILLAGER, getDimKey(entity));
+                if (post(checkEvent)) {
+                    return;
+                }
             }
-            processCheck(checkEvent, null, deny -> {
-                cir.setReturnValue(false);
-            });
-            
-            checkEvent = new FlagCheckEvent(entity.getBlockPos(), SPAWNING_GOLEM, getDimKey(entity), null);
-            if (post(checkEvent)) {
-                return;
+            if (entity instanceof WanderingTraderEntity) {
+                checkEvent = new FlagCheckEvent(entity.getBlockPos(), SPAWNING_TRADER, getDimKey(entity));
+                if (post(checkEvent)) {
+                    return;
+                }
             }
-            processCheck(checkEvent, null, deny -> {
-                cir.setReturnValue(false);
-            });
-            
-            checkEvent = new FlagCheckEvent(entity.getBlockPos(), SPAWNING_SLIME, getDimKey(entity), null);
-            if (post(checkEvent)) {
-                return;
+            if (entity instanceof SnowGolemEntity || entity instanceof IronGolemEntity) {
+                checkEvent = new FlagCheckEvent(entity.getBlockPos(), SPAWNING_GOLEM, getDimKey(entity));
+                if (post(checkEvent)) {
+                    return;
+                }
             }
-            processCheck(checkEvent, null, deny -> {
-                cir.setReturnValue(false);
-            });
-            
-            checkEvent = new FlagCheckEvent(entity.getBlockPos(), SPAWNING_XP, getDimKey(entity), null);
-            if (post(checkEvent)) {
-                return;
+            if (entity instanceof SlimeEntity) {
+                checkEvent = new FlagCheckEvent(entity.getBlockPos(), SPAWNING_SLIME, getDimKey(entity));
+                if (post(checkEvent)) {
+                    return;
+                }
             }
-            processCheck(checkEvent, null, deny -> {
-                cir.setReturnValue(false);
-            });
+            if (entity instanceof ExperienceOrbEntity) {
+                checkEvent = new FlagCheckEvent(entity.getBlockPos(), SPAWNING_XP, getDimKey(entity));
+                if (post(checkEvent)) {
+                    return;
+                }                
+            }
+            processCheck(checkEvent, deny -> cir.setReturnValue(false));            
         }
     }
 

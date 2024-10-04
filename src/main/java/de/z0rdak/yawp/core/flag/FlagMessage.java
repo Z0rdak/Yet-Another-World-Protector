@@ -116,6 +116,7 @@ public class FlagMessage implements INbtSerializable<NbtCompound> {
         String flagMsgTemplate = result.getFlag().getFlagMsg().isDefault()
                 ? getI18nFlagMsgTemplate(result)
                 : result.getFlag().getFlagMsg().getMsg();
+        flagMsgTemplate = flagMsgTemplate.replaceAll("&", "§");
         String flagMsg = replaceMatches(flagMsgTemplate, substitutes);
         return Text.literal(flagMsg);
     }

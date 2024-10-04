@@ -1,3 +1,20 @@
+# [0.0.4.1-beta3] - 2024-10-04
+
+## Added
+
+* Add option to only log certain FlagStates for FlagCheckResults (Allowed and/or Denied)
+
+## Changed
+
+* Formatting of flag messages can now be done by using `&` and `§` as prefix. E.g.:
+  * `"You are &cnot&r allowed to break blocks here, &9{player}&r!"` or
+  * `"You are §cnot§r allowed to break blocks here, §9{player}§r!"`
+
+## Fixed
+
+* [Fabric] Fix 'spawning-*' flags preventing all entities from spawning
+* Fix wrong FlagCheckResult state being logged
+
 # [0.0.4.1-beta2] - 2024-09-23
 
 ## Fixed
