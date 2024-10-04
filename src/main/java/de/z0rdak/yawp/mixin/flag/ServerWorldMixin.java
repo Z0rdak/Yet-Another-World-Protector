@@ -103,7 +103,7 @@ public class ServerWorldMixin {
         ServerWorld world = (ServerWorld) (Object) this;
         if (isServerSide(world)) {         
             if (explosionSourceType == ExplosionSourceType.TNT || explosionSourceType == ExplosionSourceType.BLOCK) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(new BlockPos((int) x, (int) y, (int) z), IGNITE_EXPLOSIVES, getDimKey(entity), null);
+                FlagCheckEvent checkEvent = new FlagCheckEvent(new BlockPos((int) x, (int) y, (int) z), IGNITE_EXPLOSIVES, getDimKey(world), null);
                 if (post(checkEvent)) {
                     return;
                 }
@@ -112,7 +112,7 @@ public class ServerWorldMixin {
                 });
             }
             if (explosionSourceType == ExplosionSourceType.MOB) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(new BlockPos((int) x, (int) y, (int) z), MOB_GRIEFING, getDimKey(entity), null);
+                FlagCheckEvent checkEvent = new FlagCheckEvent(new BlockPos((int) x, (int) y, (int) z), MOB_GRIEFING, getDimKey(world), null);
                 if (post(checkEvent)) {
                     return;
                 }

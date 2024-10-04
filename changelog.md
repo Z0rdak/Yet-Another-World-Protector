@@ -1,3 +1,9 @@
+# [0.0.4.1-beta4] - 2024-10-04
+
+## Fixed
+
+* Fix NPE caused by null entity in mixin for ServerLevel::explode
+
 # [0.0.4.1-beta3] - 2024-10-04
 
 ## Added
