@@ -1,3 +1,13 @@
+# [0.0.4.1-beta5] - 2024-10-09
+
+## Fix error `This position is not loaded` when trying to create a region or changing region area.
+
+# [0.0.4.1-beta4] - 2024-10-04
+
+## Fixed
+
+* [Fabric] Fix NPE caused by null entity in mixin for ServerLevel::explode
+
 # [0.0.4.1-beta3] - 2024-10-04
 
 ## Added
