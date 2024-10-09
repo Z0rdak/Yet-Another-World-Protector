@@ -115,6 +115,7 @@ public class FlagMessage implements INBTSerializable<CompoundTag> {
         String flagMsgTemplate = result.getFlag().getFlagMsg().isDefault()
                 ? getI18nFlagMsgTemplate(result)
                 : result.getFlag().getFlagMsg().getMsg();
+        flagMsgTemplate = flagMsgTemplate.replaceAll("&", "§");
         String flagMsg = replaceMatches(flagMsgTemplate, substitutes);
         return Component.literal(flagMsg);
     }

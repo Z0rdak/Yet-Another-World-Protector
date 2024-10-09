@@ -1,7 +1,5 @@
 package de.z0rdak.yawp.util;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
 import de.z0rdak.yawp.core.flag.FlagMessage;
 import de.z0rdak.yawp.core.flag.FlagState;
@@ -18,15 +16,7 @@ import static de.z0rdak.yawp.core.flag.FlagMessage.REGION_TEMPLATE;
 
 public class MessageSender {
     public static void sendCmdFeedback(CommandSourceStack src, MutableComponent text) {
-        try {
-            if (src.getEntity() == null) {
-                src.sendSuccess(() -> text, true);
-            } else {
-                sendMessage(src.getPlayerOrException(), text);
-            }
-        } catch (CommandSyntaxException e) {
-            YetAnotherWorldProtector.LOGGER.error(e);
-        }
+        src.sendSystemMessage(text);
     }
 
     public static void sendCmdFeedback(CommandSourceStack src, String langKey) {
@@ -72,6 +62,8 @@ public class MessageSender {
         // If not muted and the event is a player event, send the message
         if (!isFlagMuted && player instanceof Player) {
             Map<String, String> msgSubstitutes = FlagMessage.defaultSubstitutesFor(result);
+
+
             msgSubstitutes.put(REGION_TEMPLATE, responsibleRegion.getName());
             MutableComponent flagMsg = FlagMessage.buildFrom(result, msgSubstitutes);
             sendNotification(player, flagMsg);
