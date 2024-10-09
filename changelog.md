@@ -1,3 +1,38 @@
+# [0.0.4.1-beta5] - 2024-10-09
+
+## Fix error `This position is not loaded` when trying to create a region or changing region area.
+
+# [0.0.4.1-beta4] - 2024-10-04
+
+## Fixed
+
+* [Fabric] Fix NPE caused by null entity in mixin for ServerLevel::explode
+
+# [0.0.4.1-beta3] - 2024-10-04
+
+## Added
+
+* Add option to only log certain FlagStates for FlagCheckResults (Allowed and/or Denied)
+
+## Changed
+
+* Formatting of flag messages can now be done by using `&` and `§` as prefix. E.g.:
+  * `"You are &cnot&r allowed to break blocks here, &9{player}&r!"` or
+  * `"You are §cnot§r allowed to break blocks here, §9{player}§r!"`
+
+## Fixed
+
+* [Fabric] Fix 'spawning-*' flags preventing all entities from spawning
+* Fix wrong FlagCheckResult state being logged
+
+# [0.0.4.1-beta2] - 2024-09-23
+
+## Fixed
+
+* [Fabric] Fix `use-elytra` flag not working
+* [Fabric] Fix `set-spawn` flag not working
+* [Fabric] Fix `sleep` flag not working
+
 # [0.0.4.1-beta1] - 2024-09-20
 
 ## Added

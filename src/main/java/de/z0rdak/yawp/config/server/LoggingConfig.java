@@ -4,6 +4,7 @@ import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
 import de.z0rdak.yawp.core.flag.FlagCategory;
+import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.RegionType;
@@ -29,6 +30,7 @@ public class LoggingConfig {
     private static final ForgeConfigSpec.ConfigValue<Boolean> FLAG_RESULT_LOG;
     private static final ForgeConfigSpec.ConfigValue<Boolean> LOG_EMPTY_RESULTS;
     // private static final ForgeConfigSpec.ConfigValue<Boolean> DETAILED_PLAYER_FLAG_LOG;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> LOG_RESULT_VALUES;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> LOG_FLAG_CATEGORIES;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> LOG_FLAGS;
 
@@ -45,6 +47,9 @@ public class LoggingConfig {
 
         LOG_EMPTY_RESULTS = BUILDER.comment("Enable logging of empty (without responsible region) flag check results.")
                 .define("log_empty_results", false);
+
+        LOG_RESULT_VALUES = BUILDER.comment("List of flags result states which shall be logged. By default only denied results will be logged.\n Valid FlagStates are: allowed and denied")
+                .defineListAllowEmpty(List.of("log_result_values"), () -> Collections.singletonList(FlagState.DENIED.name), LoggingConfig::isValidFlagState);
 
         LOG_FLAG_CATEGORIES = BUILDER.comment("List of flag categories which shall be logged.\nValid categories are: player, block, entity, item, environment, protection and * (for all).")
                 .defineListAllowEmpty(Collections.singletonList("log_flag_categories"), () -> Collections.singletonList(FlagCategory.PLAYER.name), LoggingConfig::isValidCategory);
@@ -73,6 +78,13 @@ public class LoggingConfig {
                 .collect(Collectors.toSet());
     }
 
+    public static Set<String> getResultValuesToLog() {
+        return LOG_RESULT_VALUES.get().stream()
+                .filter(Objects::nonNull)
+                .map(String::toString)
+                .collect(Collectors.toSet());
+    }
+
     private static boolean isValidCategory(Object entity) {
         if (entity instanceof String) {
             try {
@@ -80,7 +92,7 @@ public class LoggingConfig {
                 FlagCategory category = FlagCategory.from(str);
                 return category != null || str.equalsIgnoreCase("*");
             } catch (IllegalArgumentException e) {
-                FLAG_LOGGER.warn("Invalid flag category supplied for 'log_flag_categories': {}", entity);
+                CONFIG_LOGGER.warn("Invalid flag category supplied for 'log_flag_categories': {}", entity);
                 return false;
             }
         }
@@ -99,6 +111,18 @@ public class LoggingConfig {
         return false;
     }
 
+    public static boolean isValidFlagState(Object flagState) {
+        if (flagState instanceof String) {
+            boolean contains = FlagState.validLoggingStates((String) flagState);
+            if (!contains) {
+                CONFIG_LOGGER.warn("Invalid FlagState supplied for 'log_result_values': {}", flagState);
+            }
+            return contains;
+        }
+        CONFIG_LOGGER.warn("Invalid FlagState supplied for 'log_result_values': {}", flagState);
+        return false;
+    }
+
     public static boolean shouldLogFlagChecks() {
         return FLAG_CHECK_LOG.get();
     }
@@ -112,15 +136,14 @@ public class LoggingConfig {
     }
 
     /*
-     public static boolean shouldLogDetailedPlayerFlags() {
+    public static boolean shouldLogDetailedPlayerFlags() {
         return DETAILED_PLAYER_FLAG_LOG.get();
     }
     */
 
     public static boolean logCheck(FlagCheckEvent check) {
-        boolean flagMatchesLogCategory = RegionFlag.matchesCategory(check.getRegionFlag(), getFlagCategories());
-        boolean flagIsInConfig = LoggingConfig.getFlagsToLog().contains(check.getRegionFlag().name);
-        if (flagMatchesLogCategory || flagIsInConfig) {
+        boolean matchesFlagOrCategory = (flagMatchesCategory(check) || matchesFlag(check));
+        if (matchesFlagOrCategory) {
             FLAG_LOGGER.info("[Check] {}, at {}, in '{}', Player={}, Id={}",
                     check.getRegionFlag().name,
                     AreaUtil.blockPosStr(check.getTarget()),
@@ -133,9 +156,8 @@ public class LoggingConfig {
 
     public static FlagCheckResult logResult(FlagCheckResult result) {
         FlagCheckEvent check = result.getFlagCheck();
-        boolean flagMatchesLogCategory = RegionFlag.matchesCategory(check.getRegionFlag(), getFlagCategories());
-        boolean flagIsInConfig = LoggingConfig.getFlagsToLog().contains(check.getRegionFlag().name);
-        if (flagMatchesLogCategory || flagIsInConfig) {
+        boolean matchesFlagOrCategory = (flagMatchesCategory(check) || matchesFlag(check));
+        if (matchesFlagOrCategory && matchesResult(result)) {
             if (result.getResponsible() == null || result.getFlag() == null) {
                 // semantically equals to result.getFlagState() == FlagState.UNDEFINED
                 if (shouldLogEmptyResults()) {
@@ -146,14 +168,14 @@ public class LoggingConfig {
                     IFlag flag = result.getFlag();
                     FLAG_LOGGER.info("[Result] {} ({}), Region='{}', Id={}",
                             flag.getName(),
-                            flag.getState().name,
+                            result.getFlagState().name,
                             result.getResponsible().getName(),
                             result.getFlagCheck().getId());
                 } else {
                     IFlag flag = result.getFlag();
                     FLAG_LOGGER.info("[Result] {} ({}), Region='{}', in '{}', Id={}",
                             flag.getName(),
-                            flag.getState().name,
+                            result.getFlagState().name,
                             result.getResponsible().getName(),
                             result.getResponsible().getDim().location().toString(),
                             result.getFlagCheck().getId());
@@ -161,5 +183,17 @@ public class LoggingConfig {
             }
         }
         return result;
+    }
+
+    public static boolean matchesResult(FlagCheckResult result) {
+        return LoggingConfig.getResultValuesToLog().contains(result.getFlagState().name);
+    }
+
+    public static boolean flagMatchesCategory(FlagCheckEvent check) {
+        return RegionFlag.matchesCategory(check.getRegionFlag(), getFlagCategories());
+    }
+
+    public static boolean matchesFlag(FlagCheckEvent check) {
+        return LoggingConfig.getFlagsToLog().contains(check.getRegionFlag().name);
     }
 }
