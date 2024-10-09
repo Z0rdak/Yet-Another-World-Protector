@@ -14,7 +14,16 @@ subprojects {
         
     jar {
         from(rootProject.file("LICENSE")) {
-            rename { "${it}_${mod_name}" }
+            rename { "${it}" }
+        }
+        from(rootProject.file("CREDITS")) {
+            rename { "${it}" }
+        }
+        from(rootProject.file("README.md")) {
+            rename { "${it}" }
+        }
+        from(rootProject.file("changelog.md")) {
+            rename { "${it}" }
         }
         manifest {
             attributes([
@@ -32,9 +41,33 @@ subprojects {
         }
     }
 
+    javadocJar {
+        from(rootProject.file("LICENSE")) {
+            rename { "${it}" }
+        }
+        from(rootProject.file("CREDITS")) {
+            rename { "${it}" }
+        }
+        from(rootProject.file("README.md")) {
+            rename { "${it}" }
+        }
+        from(rootProject.file("changelog.md")) {
+            rename { "${it}" }
+        }
+    }
+
     sourcesJar {
         from(rootProject.file("LICENSE")) {
-            rename { "${it}_${mod_name}" }
+            rename { "${it}" }
+        }
+        from(rootProject.file("CREDITS")) {
+            rename { "${it}" }
+        }
+        from(rootProject.file("README.md")) {
+            rename { "${it}" }
+        }
+        from(rootProject.file("changelog.md")) {
+            rename { "${it}" }
         }
     }
 
@@ -48,10 +81,13 @@ subprojects {
             name = 'BlameJared Maven (JEI / CraftTweaker / Bookshelf)'
             url = 'https://maven.blamejared.com'
         }
+        maven {
+            name = "Fuzs Mod Resources"
+            url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
+        }
     }
 
     tasks.withType(JavaCompile).configureEach {
-    
         it.options.encoding = 'UTF-8'
         it.options.getRelease().set(17)
     }
@@ -71,7 +107,8 @@ subprojects {
                 "mod_author": mod_author,
                 "mod_id": mod_id,
                 "license": license,
-                "description": project.description
+                "description": project.description,
+                "resource_pack_desc":resource_pack_desc
         ]
 
         filesMatching(['pack.mcmeta', 'fabric.mod.json', 'META-INF/mods.toml', '*.mixins.json']) {
