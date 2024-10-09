@@ -1,0 +1,107 @@
+package de.z0rdak.yawp;
+
+import de.z0rdak.yawp.commands.CommandRegistry;
+import de.z0rdak.yawp.config.ConfigRegistry;
+import de.z0rdak.yawp.constants.Constants;
+import de.z0rdak.yawp.data.region.RegionDataManager;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.fml.IExtensionPoint;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.network.NetworkConstants;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+@Mod(Constants.MOD_ID)
+public class YetAnotherWorldProtector implements YAWPModInitializer {
+
+    public static final Logger LOGGER = LogManager.getLogger(Constants.MOD_ID.toUpperCase());
+
+    public YetAnotherWorldProtector() {
+        YAWPCommon.init();
+
+        registerConfig();
+        initServerInstance();
+        loadRegionData();
+        addDimKeyOnPlayerLogin();
+        addDimKeyOnDimensionChange();
+        registerCommands();
+
+        //Make sure the mod being absent on the other network side does not cause the client to display the server as incompatible
+        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (s, b) -> true));
+    }
+
+    @Override
+    public void registerCommands() {
+        MinecraftForge.EVENT_BUS.addListener(this::registerCommandsForge);
+    }
+
+    private void registerCommandsForge(RegisterCommandsEvent event) {
+        CommandRegistry.registerCommands(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection());
+    }
+
+    @Override
+    public void initServerInstance() {
+        MinecraftForge.EVENT_BUS.addListener(this::initServerInstanceForge);
+    }
+
+    public void initServerInstanceForge(ServerStartingEvent event) {
+        RegionDataManager.initServerInstance(event.getServer());
+    }
+
+    @Override
+    public void loadRegionData() {
+        MinecraftForge.EVENT_BUS.addListener(this::loadRegionDataForge);
+    }
+
+    private void loadRegionDataForge(ServerStartingEvent event) {
+        MinecraftServer server = event.getServer();
+        ResourceLocation levelRl = new ResourceLocation("minecraft:overworld");
+        server.getAllLevels().forEach(level -> {
+            if (level.dimension().location().equals(levelRl)) {
+                RegionDataManager.loadRegionDataForWorld(server, level);
+            }
+        });
+    }
+
+    @Override
+    public void addDimKeyOnPlayerLogin() {
+        MinecraftForge.EVENT_BUS.addListener(this::addDimKeyOnPlayerLoginForge);
+    }
+
+    private void addDimKeyOnPlayerLoginForge(PlayerEvent.PlayerLoggedInEvent event) {
+        RegionDataManager.addDimKeyOnPlayerLogin(event.getEntity(), event.getEntity().level());
+    }
+
+    @Override
+    public void addDimKeyOnDimensionChange() {
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true, this::addDimKeyOnDimensionChangeForge);
+    }
+
+    private void addDimKeyOnDimensionChangeForge(EntityTravelToDimensionEvent event) {
+        if (event.getEntity() instanceof Player && event.getEntity().getServer() != null) {
+            ServerLevel level = event.getEntity().getServer().getLevel(event.getDimension());
+            RegionDataManager.addDimKeyOnDimensionChange((Player) event.getEntity(), event.getEntity().level(), level);
+        }
+    }
+
+    @Override
+    public void registerConfig() {
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerConfigForge);
+    }
+
+    public void registerConfigForge(FMLCommonSetupEvent event) {
+        ConfigRegistry.register();
+    }
+}

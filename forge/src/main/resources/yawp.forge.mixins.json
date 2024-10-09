@@ -1,0 +1,23 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "de.z0rdak.yawp.mixin",
+  "refmap": "${mod_id}.refmap.json",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "FireBlockMixin",
+    "FrostWalkerEnchantmentMixin",
+    "LeavesBlockMixin",
+    "LightningEntityMixin",
+    "PlayerEntityMixin",
+    "ServerWorldMixin",
+    "TntBlockMixin"
+  ],
+  "client": [
+  ],
+  "server": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

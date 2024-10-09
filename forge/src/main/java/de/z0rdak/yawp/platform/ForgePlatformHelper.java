@@ -1,6 +1,6 @@
-package com.example.examplemod.platform;
+package de.z0rdak.yawp.platform;
 
-import com.example.examplemod.platform.services.IPlatformHelper;
+import de.z0rdak.yawp.platform.services.IPlatformHelper;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLLoader;
 
