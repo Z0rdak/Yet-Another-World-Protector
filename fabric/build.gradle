@@ -5,7 +5,7 @@ plugins {
     id 'fabric-loom'
 }
 base {
-    archivesName = "${mod_name}-fabric-${minecraft_version}"
+    archivesName = "${mod_id}-${minecraft_version}-fabric"
 }
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
@@ -14,6 +14,10 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
     implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
     implementation project(":common")
+    // all required ids for this version are found here: https://www.curseforge.com/minecraft/mc-mods/forge-config-api-port-fabric/files/3671141
+    // 1.20.1
+    // modImplementation "curse.maven:forge-config-api-port-fabric-547434:4583000"
+    modImplementation "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:8.0.0"
 }
 
 loom {
