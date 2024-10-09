@@ -21,7 +21,7 @@ plugins {
     id 'org.spongepowered.gradle.vanilla'
 }
 base {
-    archivesName = "${mod_name}-common-${minecraft_version}"
+    archivesName = "${mod_id}-${minecraft_version}-common"
 }
 minecraft {
     version(minecraft_version)
@@ -33,6 +33,7 @@ minecraft {
 dependencies {
      compileOnly group:'org.spongepowered', name:'mixin', version:'0.8.5'
      implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
+  
 }
 
 publishing {
