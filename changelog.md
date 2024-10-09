@@ -1,6 +1,8 @@
 # [0.0.4.1-beta5] - 2024-10-09
 
-## Fix error `This position is not loaded` when trying to create a region or changing region area.
+## Fixed
+
+- Fix error `This position is not loaded` when trying to create a region or changing region area.
 
 # [0.0.4.1-beta4] - 2024-10-04
 
