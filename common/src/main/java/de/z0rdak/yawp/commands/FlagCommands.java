@@ -6,6 +6,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import de.z0rdak.yawp.api.commands.CommandConstants;
+import de.z0rdak.yawp.api.events.flag.FlagEvent;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.commands.arguments.flag.IFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
@@ -14,6 +15,8 @@ import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.data.region.RegionDataManager;
+import de.z0rdak.yawp.platform.Services;
+import de.z0rdak.yawp.util.text.Messages;
 import de.z0rdak.yawp.util.text.messages.multiline.MultiLineMessage;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -126,11 +129,10 @@ public final class FlagCommands {
 
     private static int setFlagMuteState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag flag, boolean setMuted) {
         flag.getFlagMsg().mute(setMuted);
+        MutableComponent infoMsg = Component.translatableWithFallback("cli.flag.msg.mute.success.text", "Set mute state of %s to: '%s'",
+                buildFlagInfoLink(region, flag), flag.getFlagMsg().isMuted());
         MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!setMuted), String.valueOf(setMuted));
-        MutableComponent msg = Component.translatableWithFallback("cli.flag.msg.mute.success.text", "Set mute state of %s to: '%s'",
-                        buildFlagInfoLink(region, flag), flag.getFlagMsg().isMuted())
-                .append(" ")
-                .append(undoLink);
+        MutableComponent msg = Messages.substitutable("%s %s", infoMsg, undoLink);
         sendCmdFeedback(ctx.getSource(), msg);
         RegionDataManager.save();
         return 0;
@@ -139,13 +141,16 @@ public final class FlagCommands {
 
     private static int setRegionFlagMsg(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag flag, String flagMsgStr) {
         String oldFlagMsg = flag.getFlagMsg().msg();
+
+        FlagEvent.UpdateFlagMessageEvent editMsgEvent = new FlagEvent.UpdateFlagMessageEvent(ctx.getSource(), region, flag, flagMsgStr);
+        Services.EVENT.post(editMsgEvent);
+        
         FlagMessage flagMsg = new FlagMessage(flagMsgStr, flag.getFlagMsg().isMuted());
         flag.setFlagMsg(flagMsg);
+        MutableComponent infoMsg = Component.translatableWithFallback("cli.flag.msg.msg.success.text", "Set message of %s to: '%s'",
+                buildFlagInfoLink(region, flag), flagMsgStr);
         MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), flagMsgStr, oldFlagMsg);
-        MutableComponent msg = Component.translatableWithFallback("cli.flag.msg.msg.success.text", "Set message of %s to: '%s'",
-                        buildFlagInfoLink(region, flag), flagMsgStr)
-                .append(" ")
-                .append(undoLink);
+        MutableComponent msg = Messages.substitutable("%s %s", infoMsg, undoLink);
         sendCmdFeedback(ctx.getSource(), msg);
         RegionDataManager.save();
         return 0;
@@ -173,10 +178,9 @@ public final class FlagCommands {
         FlagState oldState = flag.getState();
         flag.setState(flagState);
         MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), flagState.name, oldState.name);
-        MutableComponent msg = Component.translatableWithFallback("cli.flag.state.success.text", "Set flag state of %s to: '%s'",
-                        buildFlagInfoLink(region, flag), flag.getState().name)
-                .append(" ")
-                .append(undoLink);
+        MutableComponent infoMsg = Component.translatableWithFallback("cli.flag.state.success.text", "Set flag state of %s to: '%s'",
+                buildFlagInfoLink(region, flag), flag.getState().name);
+        MutableComponent msg = Messages.substitutable("%s %s", infoMsg, undoLink);
         sendCmdFeedback(ctx.getSource(), msg);
         RegionDataManager.save();
         return 0;
@@ -197,11 +201,10 @@ public final class FlagCommands {
 
     public static int setOverride(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag flag, boolean override) {
         flag.setOverride(override);
+        MutableComponent infoMsg = Component.translatableWithFallback("cli.flag.override.success.text", "Set flag override for %s to %s",
+                buildFlagInfoLink(region, flag), flag.doesOverride());
         MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!override), String.valueOf(override));
-        MutableComponent msg = Component.translatableWithFallback("cli.flag.override.success.text", "Set flag override for %s to %s",
-                        buildFlagInfoLink(region, flag), flag.doesOverride())
-                .append(" ")
-                .append(undoLink);
+        MutableComponent msg = Messages.substitutable("%s %s", infoMsg, undoLink);
         sendCmdFeedback(ctx.getSource(), msg);
         RegionDataManager.save();
         return 0;
