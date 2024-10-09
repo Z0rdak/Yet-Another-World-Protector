@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.util;
 
+import de.z0rdak.yawp.constants.serialization.ItemNbtKeys;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.stick.AbstractStick;
 import de.z0rdak.yawp.core.stick.MarkerStick;
@@ -21,15 +22,6 @@ import static net.minecraft.ChatFormatting.*;
 
 public final class StickUtil {
 
-    public static final String MARKED_BLOCKS = "blocks";
-    public static final String VALID_AREA = "valid";
-    public static final String AREA_TYPE = "type";
-    public static final String DIM = "dim";
-    public static final String TP_POS = "tp_pos";
-    public static final String IS_TP_SET = "is_tp_set";
-    public static final String STICK_TYPE = "stick_type";
-    public static final String STICK_ID = "stick-id";
-    public static final String STICK = "stick";
     private static final String MARKED_BLOCK_INDICATOR = "X";
     private static final String UNMARKED_BLOCK_INDICATOR = "#";
     private static final String TP_POS_INDICATOR = "TP";
@@ -61,7 +53,7 @@ public final class StickUtil {
         if (itemTag != null) {
             if (Objects.requireNonNull(type) == StickType.MARKER) {
                 CompoundTag compoundNBT = new MarkerStick(dim).serializeNBT();
-                itemTag.put(STICK, compoundNBT);
+                itemTag.put(ItemNbtKeys.STICK, compoundNBT);
                 stick.setTag(itemTag);
             }
         }
@@ -82,9 +74,9 @@ public final class StickUtil {
 
     public static AbstractStick getStick(ItemStack stick) throws StickException {
         if (stick.getTag() != null && stick.hasTag()) {
-            if (stick.getTag().contains(STICK)) {
-                CompoundTag stickNbt = stick.getTag().getCompound(STICK);
-                StickType type = StickType.of(stickNbt.getString(STICK_TYPE));
+            if (stick.getTag().contains(ItemNbtKeys.STICK)) {
+                CompoundTag stickNbt = stick.getTag().getCompound(ItemNbtKeys.STICK);
+                StickType type = StickType.of(stickNbt.getString(ItemNbtKeys.STICK_TYPE));
                 switch (type) {
                     case MARKER:
                         return new MarkerStick(stickNbt);
@@ -99,10 +91,10 @@ public final class StickUtil {
 
     public static StickType getStickType(ItemStack stick) {
         if (stick.getTag() != null && stick.hasTag()) {
-            if (stick.getTag().contains(STICK)) {
-                CompoundTag stickNbt = stick.getTag().getCompound(STICK);
-                if (stickNbt.contains(STICK_TYPE)) {
-                    return StickType.of(stickNbt.getString(STICK_TYPE));
+            if (stick.getTag().contains(ItemNbtKeys.STICK)) {
+                CompoundTag stickNbt = stick.getTag().getCompound(ItemNbtKeys.STICK);
+                if (stickNbt.contains(ItemNbtKeys.STICK_TYPE)) {
+                    return StickType.of(stickNbt.getString(ItemNbtKeys.STICK_TYPE));
                 }
             }
         }
@@ -111,8 +103,8 @@ public final class StickUtil {
 
     public static CompoundTag getStickNBT(ItemStack stick) {
         if (stick.getTag() != null && stick.hasTag()
-                && stick.getTag().contains(STICK)) {
-            return stick.getTag().getCompound(STICK);
+                && stick.getTag().contains(ItemNbtKeys.STICK)) {
+            return stick.getTag().getCompound(ItemNbtKeys.STICK);
         } else {
             return null;
         }

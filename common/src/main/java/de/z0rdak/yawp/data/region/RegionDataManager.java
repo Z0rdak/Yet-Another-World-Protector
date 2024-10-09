@@ -31,8 +31,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.api.commands.CommandConstants.values;
+import static de.z0rdak.yawp.constants.serialization.RegionNbtKeys.*;
 import static de.z0rdak.yawp.handler.flags.HandlerUtil.isServerSide;
-import static de.z0rdak.yawp.constants.RegionNBT.*;
 
 public class RegionDataManager extends SavedData {
 

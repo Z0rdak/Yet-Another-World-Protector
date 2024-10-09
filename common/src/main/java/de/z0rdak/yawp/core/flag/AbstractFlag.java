@@ -2,7 +2,7 @@ package de.z0rdak.yawp.core.flag;
 
 import net.minecraft.nbt.CompoundTag;
 
-import static de.z0rdak.yawp.constants.RegionNBT.*;
+import static de.z0rdak.yawp.constants.serialization.RegionNbtKeys.*;
 
 public abstract class AbstractFlag implements IFlag {
 

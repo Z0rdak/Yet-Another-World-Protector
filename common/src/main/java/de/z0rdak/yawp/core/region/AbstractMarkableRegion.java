@@ -11,7 +11,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
-import static de.z0rdak.yawp.constants.RegionNBT.*;
+import static de.z0rdak.yawp.constants.serialization.RegionNbtKeys.*;
 
 /**
  * The AbstractMarkableRegion represents an abstract implementation for a markable region.

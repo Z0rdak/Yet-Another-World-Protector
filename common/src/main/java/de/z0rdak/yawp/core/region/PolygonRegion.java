@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.core.region;
 
+import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import de.z0rdak.yawp.core.area.Polygon3DArea;
-import de.z0rdak.yawp.constants.RegionNBT;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
@@ -26,6 +26,6 @@ public final class PolygonRegion extends AbstractMarkableRegion {
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-        this.area = new Polygon3DArea(nbt.getCompound(RegionNBT.AREA));
+        this.area = new Polygon3DArea(nbt.getCompound(RegionNbtKeys.AREA));
     }
 }

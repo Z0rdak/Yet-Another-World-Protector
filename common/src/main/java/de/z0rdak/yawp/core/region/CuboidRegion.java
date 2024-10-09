@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.core.region;
 
+import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import de.z0rdak.yawp.core.area.CuboidArea;
-import de.z0rdak.yawp.constants.RegionNBT;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
@@ -34,6 +34,6 @@ public final class CuboidRegion extends AbstractMarkableRegion {
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-        this.area = new CuboidArea(nbt.getCompound(RegionNBT.AREA));
+        this.area = new CuboidArea(nbt.getCompound(RegionNbtKeys.AREA));
     }
 }

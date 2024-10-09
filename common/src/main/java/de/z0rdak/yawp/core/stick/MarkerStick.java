@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.core.stick;
 
+import de.z0rdak.yawp.constants.serialization.ItemNbtKeys;
 import de.z0rdak.yawp.core.INbtSerializable;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.util.StickType;
@@ -16,8 +17,6 @@ import net.minecraft.world.level.Level;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import static de.z0rdak.yawp.util.StickUtil.*;
 
 public class MarkerStick extends AbstractStick implements INbtSerializable<CompoundTag> {
 
@@ -104,31 +103,31 @@ public class MarkerStick extends AbstractStick implements INbtSerializable<Compo
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag nbt = super.serializeNBT();
-        nbt.putString(STICK_ID, UUID.randomUUID().toString());
-        nbt.putBoolean(VALID_AREA, this.isValidArea);
-        nbt.putString(AREA_TYPE, this.areaType.areaType);
-        nbt.putString(DIM, this.dimension.location().toString());
-        nbt.putBoolean(IS_TP_SET, this.teleportPos != null);
+        nbt.putString(ItemNbtKeys.STICK_ID, UUID.randomUUID().toString());
+        nbt.putBoolean(ItemNbtKeys.VALID_AREA, this.isValidArea);
+        nbt.putString(ItemNbtKeys.AREA_TYPE, this.areaType.areaType);
+        nbt.putString(ItemNbtKeys.DIM, this.dimension.location().toString());
+        nbt.putBoolean(ItemNbtKeys.IS_TP_SET, this.teleportPos != null);
         if (this.teleportPos != null) {
-            nbt.put(TP_POS, NbtUtils.writeBlockPos(this.teleportPos));
+            nbt.put(ItemNbtKeys.TP_POS, NbtUtils.writeBlockPos(this.teleportPos));
         }
         ListTag blocks = new ListTag();
         this.markedBlocks.forEach(block -> blocks.add(NbtUtils.writeBlockPos(block)));
-        nbt.put(MARKED_BLOCKS, blocks);
+        nbt.put(ItemNbtKeys.MARKED_BLOCKS, blocks);
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-        this.isValidArea = nbt.getBoolean(VALID_AREA);
-        this.areaType = AreaType.of(nbt.getString(AREA_TYPE));
-        boolean isTpSet = nbt.getBoolean(IS_TP_SET);
+        this.isValidArea = nbt.getBoolean(ItemNbtKeys.VALID_AREA);
+        this.areaType = AreaType.of(nbt.getString(ItemNbtKeys.AREA_TYPE));
+        boolean isTpSet = nbt.getBoolean(ItemNbtKeys.IS_TP_SET);
         if (isTpSet) {
-            this.teleportPos = NbtUtils.readBlockPos(nbt.getCompound(TP_POS));
+            this.teleportPos = NbtUtils.readBlockPos(nbt.getCompound(ItemNbtKeys.TP_POS));
         }
-        this.dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(nbt.getString(DIM)));
-        ListTag markedBlocksNBT = nbt.getList(MARKED_BLOCKS, Tag.TAG_COMPOUND);
+        this.dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(nbt.getString(ItemNbtKeys.DIM)));
+        ListTag markedBlocksNBT = nbt.getList(ItemNbtKeys.MARKED_BLOCKS, Tag.TAG_COMPOUND);
         this.markedBlocks = new ArrayList<>(this.areaType.maxBlocks);
         markedBlocksNBT.forEach(block -> this.markedBlocks.add(NbtUtils.readBlockPos((CompoundTag) block)));
     }

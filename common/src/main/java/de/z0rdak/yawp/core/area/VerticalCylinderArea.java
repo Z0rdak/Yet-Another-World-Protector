@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.core.area;
 
+import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import de.z0rdak.yawp.util.AreaUtil;
-import de.z0rdak.yawp.constants.AreaNBT;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
@@ -82,16 +82,16 @@ public class VerticalCylinderArea extends CenteredArea {
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag nbt = super.serializeNBT();
-        nbt.putInt(AreaNBT.RADIUS, this.radius);
-        nbt.putInt(AreaNBT.HEIGHT, this.distance);
+        nbt.putInt(RegionNbtKeys.RADIUS, this.radius);
+        nbt.putInt(RegionNbtKeys.HEIGHT, this.distance);
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-        this.distance = nbt.getInt(AreaNBT.RADIUS);
-        this.radius = nbt.getInt(AreaNBT.HEIGHT);
+        this.distance = nbt.getInt(RegionNbtKeys.RADIUS);
+        this.radius = nbt.getInt(RegionNbtKeys.HEIGHT);
     }
 
 

@@ -42,14 +42,13 @@ import java.util.Collections;
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.CommandUtil.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
+import static de.z0rdak.yawp.constants.Constants.MAX_BUILD_LIMIT;
+import static de.z0rdak.yawp.constants.Constants.MIN_BUILD_LIMIT;
 import static de.z0rdak.yawp.util.ChatLinkBuilder.*;
 import static de.z0rdak.yawp.util.text.MessageSender.sendCmdFeedback;
 
 
 public class RegionCommands {
-
-    public final static int MIN_BUILD_LIMIT = -64;
-    public final static int MAX_BUILD_LIMIT = 320;
 
     private RegionCommands() {
     }

@@ -4,7 +4,7 @@ import de.z0rdak.yawp.core.INbtSerializable;
 import de.z0rdak.yawp.util.StickType;
 import net.minecraft.nbt.CompoundTag;
 
-import static de.z0rdak.yawp.util.StickUtil.STICK_TYPE;
+import static de.z0rdak.yawp.constants.serialization.ItemNbtKeys.STICK_TYPE;
 
 public abstract class AbstractStick implements INbtSerializable<CompoundTag> {
 

@@ -12,10 +12,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+import static de.z0rdak.yawp.constants.serialization.RegionNbtKeys.*;
 import static de.z0rdak.yawp.core.flag.FlagCategory.PLAYER;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.shortBlockPos;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.tinyBlockPos;
-import static de.z0rdak.yawp.constants.RegionNBT.*;
 
 public class FlagMessage implements INbtSerializable<CompoundTag> {
 

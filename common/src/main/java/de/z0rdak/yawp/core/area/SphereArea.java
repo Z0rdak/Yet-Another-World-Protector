@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.core.area;
 
+import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import de.z0rdak.yawp.util.AreaUtil;
-import de.z0rdak.yawp.constants.AreaNBT;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -114,14 +114,14 @@ public class SphereArea extends CenteredArea {
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag nbt = super.serializeNBT();
-        nbt.putInt(AreaNBT.RADIUS, this.radius);
+        nbt.putInt(RegionNbtKeys.RADIUS, this.radius);
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-        this.radius = nbt.getInt(AreaNBT.RADIUS);
+        this.radius = nbt.getInt(RegionNbtKeys.RADIUS);
     }
 
     @Override

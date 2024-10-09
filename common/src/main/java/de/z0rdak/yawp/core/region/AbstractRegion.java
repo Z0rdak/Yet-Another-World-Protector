@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static de.z0rdak.yawp.constants.RegionNBT.*;
+import static de.z0rdak.yawp.constants.serialization.RegionNbtKeys.*;
 
 /**
  * An abstract region represents the basic implementation of a IProtectedRegion.

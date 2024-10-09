@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.core.area;
 
-import de.z0rdak.yawp.constants.AreaNBT;
+import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -80,7 +80,7 @@ public class Polygon3DArea extends AbstractArea {
             CompoundTag pointNbt = NbtUtils.writeBlockPos(point);
             pointList.add(pointNbt);
         });
-        nbt.put(AreaNBT.BLOCKS, pointList);
+        nbt.put(RegionNbtKeys.BLOCKS, pointList);
         return nbt;
     }
 
@@ -88,7 +88,7 @@ public class Polygon3DArea extends AbstractArea {
     public void deserializeNBT(CompoundTag nbt) {
         this.positions.clear();
         this.deserializeNBT(nbt);
-        ListTag pointList = nbt.getList(AreaNBT.BLOCKS, Tag.TAG_COMPOUND);
+        ListTag pointList = nbt.getList(RegionNbtKeys.BLOCKS, Tag.TAG_COMPOUND);
         for (int i = 0; i < pointList.size(); i++) {
             BlockPos pos = NbtUtils.readBlockPos(pointList.getCompound(i));
             this.positions.add(pos);

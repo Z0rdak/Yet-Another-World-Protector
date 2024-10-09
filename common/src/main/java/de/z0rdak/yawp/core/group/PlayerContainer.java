@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.core.group;
 
-import de.z0rdak.yawp.constants.RegionNBT;
+import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -96,17 +96,17 @@ public class PlayerContainer implements IMemberContainer {
         ListTag playerList = new ListTag();
         players.forEach((uuid, name) -> {
             CompoundTag playerNBT = new CompoundTag();
-            playerNBT.putUUID(RegionNBT.UUID, uuid);
-            playerNBT.putString(RegionNBT.NAME, name);
+            playerNBT.putUUID(RegionNbtKeys.UUID, uuid);
+            playerNBT.putString(RegionNbtKeys.NAME, name);
             playerList.add(playerNBT);
         });
-        nbt.put(RegionNBT.PLAYERS, playerList);
+        nbt.put(RegionNbtKeys.PLAYERS, playerList);
         // serialize team data
         ListTag teamList = new ListTag();
         teamList.addAll(teams.stream()
                 .map(StringTag::valueOf)
                 .collect(Collectors.toSet()));
-        nbt.put(RegionNBT.TEAMS, teamList);
+        nbt.put(RegionNbtKeys.TEAMS, teamList);
         return nbt;
     }
 
@@ -114,14 +114,14 @@ public class PlayerContainer implements IMemberContainer {
     public void deserializeNBT(CompoundTag nbt) {
         // deserialize players data
         this.players.clear();
-        ListTag playerLists = nbt.getList(RegionNBT.PLAYERS, Tag.TAG_COMPOUND);
+        ListTag playerLists = nbt.getList(RegionNbtKeys.PLAYERS, Tag.TAG_COMPOUND);
         for (int i = 0; i < playerLists.size(); i++) {
             CompoundTag playerMapping = playerLists.getCompound(i);
-            players.put(playerMapping.getUUID(RegionNBT.UUID), playerMapping.getString(RegionNBT.NAME));
+            players.put(playerMapping.getUUID(RegionNbtKeys.UUID), playerMapping.getString(RegionNbtKeys.NAME));
         }
         // deserialize teams data
         this.teams.clear();
-        ListTag teamList = nbt.getList(RegionNBT.TEAMS, Tag.TAG_STRING);
+        ListTag teamList = nbt.getList(RegionNbtKeys.TEAMS, Tag.TAG_STRING);
         for (int i = 0; i < teamList.size(); i++) {
             teams.add(teamList.getString(i));
         }

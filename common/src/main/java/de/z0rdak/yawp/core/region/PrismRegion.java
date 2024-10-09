@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.core.region;
 
+import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import de.z0rdak.yawp.core.area.PrismArea;
-import de.z0rdak.yawp.constants.RegionNBT;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
@@ -26,6 +26,6 @@ public final class PrismRegion extends AbstractMarkableRegion {
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-        this.area = new PrismArea(nbt.getCompound(RegionNBT.AREA));
+        this.area = new PrismArea(nbt.getCompound(RegionNbtKeys.AREA));
     }
 }

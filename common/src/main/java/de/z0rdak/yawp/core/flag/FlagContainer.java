@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static de.z0rdak.yawp.constants.RegionNBT.FLAG_TYPE;
+import static de.z0rdak.yawp.constants.serialization.RegionNbtKeys.FLAG_TYPE;
 
 /**
  * Represents a simple map holding the flag values to the corresponding flag names for a region and providing methods handling the flags. <br>

@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.handler.stick;
 
 import de.z0rdak.yawp.constants.Constants;
+import de.z0rdak.yawp.constants.serialization.ItemNbtKeys;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.util.StickType;
@@ -35,7 +36,7 @@ public class MarkerStickHandler {
             if (!involvedItem.equals(ItemStack.EMPTY) && isVanillaStick(involvedItem)) {
                 StickType stickType = getStickType(involvedItem);
                 if (Objects.requireNonNull(stickType) == StickType.MARKER) {
-                    MarkerStick marker = new MarkerStick(involvedItem.getTag().getCompound(STICK));
+                    MarkerStick marker = new MarkerStick(involvedItem.getTag().getCompound(ItemNbtKeys.STICK));
                     AreaType areaType = marker.getAreaType();
                     if (areaType == null) {
                         Constants.LOGGER.warn("Unknown area type on marking - should really not happening");
@@ -43,14 +44,14 @@ public class MarkerStickHandler {
                     }
                     if (player.isShiftKeyDown()) {
                         marker.setTeleportPos(target);
-                        involvedItem.getTag().put(STICK, marker.serializeNBT());
+                        involvedItem.getTag().put(ItemNbtKeys.STICK, marker.serializeNBT());
                         return;
                     }
                     // add block to NBT list
                     marker.addMarkedBlock(target);
                     // check whether marked blocks form a valid marked area
                     marker.checkValidArea();
-                    involvedItem.getTag().put(STICK, marker.serializeNBT());
+                    involvedItem.getTag().put(ItemNbtKeys.STICK, marker.serializeNBT());
                     setStickName(involvedItem, StickType.MARKER);
                 }
             }
@@ -62,7 +63,7 @@ public class MarkerStickHandler {
             // is some valid mod stick
             if (!involvedItem.equals(ItemStack.EMPTY)
                     && hasNonNullTag(involvedItem)
-                    && involvedItem.getTag().contains(STICK)) {
+                    && involvedItem.getTag().contains(ItemNbtKeys.STICK)) {
                 boolean targetIsAir;
                 if (target.getType() == HitResult.Type.BLOCK) { // should always be block
                     BlockPos blockpos = target.getBlockPos();
@@ -76,11 +77,11 @@ public class MarkerStickHandler {
                     StickType stickType = getStickType(involvedItem);
                     if (Objects.requireNonNull(stickType) == StickType.MARKER) {
                         CompoundTag nbt = involvedItem.getTag();
-                        MarkerStick marker = new MarkerStick(nbt.getCompound(STICK));
+                        MarkerStick marker = new MarkerStick(nbt.getCompound(ItemNbtKeys.STICK));
                         // change area nbt, reset marked blocks, set valid to false
                         marker.cycleMode();
                         // update stick name
-                        involvedItem.getTag().put(STICK, marker.serializeNBT());
+                        involvedItem.getTag().put(ItemNbtKeys.STICK, marker.serializeNBT());
                         StickUtil.setStickName(involvedItem, StickType.MARKER);
                     }
                 }
