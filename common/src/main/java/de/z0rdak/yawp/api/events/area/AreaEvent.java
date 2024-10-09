@@ -6,7 +6,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Will eventually contain an even for entering and leaving the area
+ * Will eventually contain an event for entering and leaving the area
  */
 public abstract class AreaEvent {
 
@@ -15,11 +15,10 @@ public abstract class AreaEvent {
     @Nullable
     private final Player player;
 
-    private AreaEvent(IMarkableRegion region, IMarkableArea area, @Nullable Player player) {
+    private AreaEvent(final IMarkableRegion region, final IMarkableArea area, final @Nullable Player player) {
         this.area = area;
         this.player = player;
         this.region = region;
-      
     }
     
     public IMarkableRegion getRegion() {

@@ -1,16 +1,16 @@
 package de.z0rdak.yawp.api.events.flag;
 
 import de.z0rdak.yawp.core.flag.IFlag;
-import de.z0rdak.yawp.core.region.IMarkableRegion;
+import de.z0rdak.yawp.core.region.IProtectedRegion;
 import net.minecraft.commands.CommandSourceStack;
 
 public abstract class FlagEvent {
 
-    private final IMarkableRegion region;
+    private final IProtectedRegion region;
     private final IFlag flag;
     private final CommandSourceStack src;
 
-    private FlagEvent(CommandSourceStack src, IMarkableRegion region, IFlag flag) {
+    private FlagEvent(final CommandSourceStack src, final IProtectedRegion region, final IFlag flag) {
         this.src = src;
         this.region = region;
         this.flag = flag;
@@ -24,31 +24,39 @@ public abstract class FlagEvent {
         return flag;
     }
 
-    public IMarkableRegion getRegion() {
+    public IProtectedRegion getRegion() {
         return region;
     }
-    
-    public class AddFlagEvent extends FlagEvent {
 
-        private AddFlagEvent(CommandSourceStack src, IMarkableRegion region, IFlag flag) {
+    public static class AddFlagEvent extends FlagEvent {
+
+        public AddFlagEvent(final CommandSourceStack src, final IProtectedRegion region, final IFlag flag) {
             super(src, region, flag);
         }
     }
 
-    public class RemoveFlagEvent extends FlagEvent {
+    public static class RemoveFlagEvent extends FlagEvent {
 
-        private RemoveFlagEvent(CommandSourceStack src, IMarkableRegion region, IFlag flag) {
+        public RemoveFlagEvent(final CommandSourceStack src, final IProtectedRegion region, final IFlag flag) {
             super(src, region, flag);
         }
     }
-    
-    public class UpdateFlagMessageEvent extends FlagEvent {
 
-        private String currentMsg;
+    public static class UpdateFlagMessageEvent extends FlagEvent {
+
         private String newMsg;
-        
-        private UpdateFlagMessageEvent(CommandSourceStack src, IMarkableRegion region, IFlag flag) {
+
+        public UpdateFlagMessageEvent(final CommandSourceStack src, final IProtectedRegion region, final IFlag flag, String newMsg) {
             super(src, region, flag);
+            this.newMsg = newMsg;
+        }
+
+        public String getNewMsg() {
+            return this.newMsg;
+        }
+
+        public void setNewMsg(String newMsg) {
+            this.newMsg = newMsg;
         }
     }
 }
