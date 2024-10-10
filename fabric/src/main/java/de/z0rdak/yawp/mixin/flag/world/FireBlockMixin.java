@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static de.z0rdak.yawp.api.events.region.FabricRegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.FIRE_TICK;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
+import static de.z0rdak.yawp.handler.HandlerUtil.*;
 
 @Mixin(BaseFireBlock.class)
 public abstract class FireBlockMixin {

@@ -1,4 +1,4 @@
-package de.z0rdak.yawp.handler.stick;
+package de.z0rdak.yawp.handler;
 
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.constants.serialization.ItemNbtKeys;
@@ -17,7 +17,7 @@ import net.minecraft.world.phys.HitResult;
 
 import java.util.Objects;
 
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.isServerSide;
+import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
 import static de.z0rdak.yawp.util.StickUtil.*;
 
 public class MarkerStickHandler {

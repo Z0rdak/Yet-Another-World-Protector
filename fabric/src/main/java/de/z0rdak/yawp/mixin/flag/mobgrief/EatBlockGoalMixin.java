@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static de.z0rdak.yawp.api.events.region.FabricRegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.processCheck;
+import static de.z0rdak.yawp.handler.HandlerUtil.processCheck;
 
 @Mixin(EatBlockGoal.class)
 public class EatBlockGoalMixin {

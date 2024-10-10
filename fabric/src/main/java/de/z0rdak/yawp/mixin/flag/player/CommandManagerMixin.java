@@ -13,8 +13,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static de.z0rdak.yawp.api.events.region.FabricRegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.EXECUTE_COMMAND;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.getDimKey;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.processCheck;
+import static de.z0rdak.yawp.handler.HandlerUtil.getDimKey;
+import static de.z0rdak.yawp.handler.HandlerUtil.processCheck;
 import static de.z0rdak.yawp.util.text.MessageSender.sendFlagMsg;
 
 @Mixin(Commands.class)

@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
-import de.z0rdak.yawp.handler.flags.HandlerUtil;
+import de.z0rdak.yawp.handler.HandlerUtil;
 import net.minecraft.world.entity.animal.Fox;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;

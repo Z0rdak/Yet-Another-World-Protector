@@ -11,8 +11,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static de.z0rdak.yawp.api.events.region.FabricRegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.ANIMAL_BREEDING;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.isServerSide;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.processCheck;
+import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
+import static de.z0rdak.yawp.handler.HandlerUtil.processCheck;
 
 @Mixin(Sniffer.class)
 public abstract class SnifferMixin {

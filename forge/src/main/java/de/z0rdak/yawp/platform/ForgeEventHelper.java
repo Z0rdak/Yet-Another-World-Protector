@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.platform;
 
+import de.z0rdak.yawp.api.events.flag.FlagEvent;
 import de.z0rdak.yawp.api.events.region.*;
 import de.z0rdak.yawp.platform.services.IEventHelper;
 import net.minecraftforge.common.MinecraftForge;
@@ -38,5 +39,11 @@ public class ForgeEventHelper implements IEventHelper {
             return MinecraftForge.EVENT_BUS.post(updateArea);
         }
         return false;
+    }
+
+    @Override
+    public void post(FlagEvent editMsgEvent) {
+        
+        MinecraftForge.EVENT_BUS.post()
     }
 }

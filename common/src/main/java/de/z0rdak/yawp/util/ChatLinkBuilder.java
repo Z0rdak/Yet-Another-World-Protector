@@ -2,8 +2,8 @@ package de.z0rdak.yawp.util;
 
 import de.z0rdak.yawp.api.commands.CommandConstants;
 import de.z0rdak.yawp.api.commands.Commands;
-import de.z0rdak.yawp.commands.RegionCommands;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
+import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.flag.FlagMessage;
 import de.z0rdak.yawp.core.flag.IFlag;
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.api.commands.Commands.*;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.getFlagMapRecursive;
+import static de.z0rdak.yawp.handler.HandlerUtil.getFlagMapRecursive;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
 import static de.z0rdak.yawp.util.text.Messages.*;
 import static net.minecraft.ChatFormatting.*;
@@ -69,7 +69,7 @@ public class ChatLinkBuilder {
                 // [<=max=>]
                 MutableComponent maxExpandLinkText = Component.translatableWithFallback("cli.msg.info.region.area.area.expand-max.link.text", "<=max=>");
                 MutableComponent maxExpandLinkHover = Component.translatableWithFallback("cli.msg.info.region.area.area.expand-max.link.hover", "Expand area to build limit");
-                String maxExpandCmd = appendSubCommand(expandCmd, String.valueOf(RegionCommands.MIN_BUILD_LIMIT), String.valueOf(RegionCommands.MAX_BUILD_LIMIT));
+                String maxExpandCmd = appendSubCommand(expandCmd, String.valueOf(Constants.MIN_BUILD_LIMIT), String.valueOf(Constants.MAX_BUILD_LIMIT));
                 MutableComponent maxExpandLink = buildExecuteCmdComponent(maxExpandLinkText, maxExpandLinkHover, maxExpandCmd, RUN_COMMAND, LINK_COLOR);
                 return Messages.substitutable("%s %s", expandLink, maxExpandLink);
             }

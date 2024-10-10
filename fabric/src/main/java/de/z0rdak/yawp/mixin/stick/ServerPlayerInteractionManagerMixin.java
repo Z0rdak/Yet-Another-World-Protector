@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.mixin.stick;
 
-import de.z0rdak.yawp.handler.stick.MarkerStickHandler;
+import de.z0rdak.yawp.handler.MarkerStickHandler;
 import de.z0rdak.yawp.util.StickType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Objects;
 
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.isServerSide;
+import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
 import static de.z0rdak.yawp.util.StickUtil.getStickType;
 import static de.z0rdak.yawp.util.StickUtil.isVanillaStick;
 

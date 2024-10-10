@@ -19,7 +19,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.getResponsibleFlag;
+import static de.z0rdak.yawp.handler.HandlerUtil.getResponsibleFlag;
 
 public final class RegionManager implements IRegionManager {
 

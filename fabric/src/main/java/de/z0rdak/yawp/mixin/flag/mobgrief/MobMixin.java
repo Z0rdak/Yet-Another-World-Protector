@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
-import de.z0rdak.yawp.handler.flags.HandlerUtil;
+import de.z0rdak.yawp.handler.HandlerUtil;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.isServerSide;
+import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
 
 @Mixin(Mob.class)
 public abstract class MobMixin {

@@ -12,8 +12,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.USE_ELYTRA;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.isServerSide;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.processCheck;
+import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
+import static de.z0rdak.yawp.handler.HandlerUtil.processCheck;
 
 @Mixin({Player.class})
 public abstract class PlayerEntityMixin extends LivingEntity {

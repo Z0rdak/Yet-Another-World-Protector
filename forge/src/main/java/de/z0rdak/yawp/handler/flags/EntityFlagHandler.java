@@ -5,6 +5,7 @@ import de.z0rdak.yawp.api.events.region.FlagCheckResult;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.RegionFlag;
+import de.z0rdak.yawp.handler.HandlerUtil;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
@@ -28,7 +29,7 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.util.function.Consumer;
 
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
+import static de.z0rdak.yawp.handler.HandlerUtil.*;
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 
 @Mod.EventBusSubscriber(modid = Constants.MOD_ID, bus = FORGE)

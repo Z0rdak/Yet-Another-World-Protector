@@ -20,8 +20,8 @@ import de.z0rdak.yawp.core.group.GroupType;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
-import de.z0rdak.yawp.handler.flags.HandlerUtil;
 import de.z0rdak.yawp.data.region.RegionDataManager;
+import de.z0rdak.yawp.handler.HandlerUtil;
 import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.util.ChatLinkBuilder;
 import de.z0rdak.yawp.util.MojangApiHelper;
@@ -64,7 +64,7 @@ import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.processCheck;
+import static de.z0rdak.yawp.handler.HandlerUtil.processCheck;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
 import static de.z0rdak.yawp.util.text.MessageSender.sendCmdFeedback;
 import static de.z0rdak.yawp.util.text.MessageSender.sendError;

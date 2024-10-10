@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
-import de.z0rdak.yawp.handler.flags.HandlerUtil;
+import de.z0rdak.yawp.handler.HandlerUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;

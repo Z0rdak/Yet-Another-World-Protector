@@ -18,7 +18,7 @@ import static de.z0rdak.yawp.api.commands.CommandConstants.FLAG;
 import static de.z0rdak.yawp.api.commands.CommandConstants.REMOVE;
 import static de.z0rdak.yawp.api.commands.Commands.buildCommandStr;
 import static de.z0rdak.yawp.api.commands.Commands.buildListFlagsCommand;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.getFlagMapRecursive;
+import static de.z0rdak.yawp.handler.HandlerUtil.getFlagMapRecursive;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.buildExecuteCmdComponent;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.buildHeader;
 import static de.z0rdak.yawp.util.text.Messages.REMOVE_CMD_COLOR;

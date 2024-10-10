@@ -39,7 +39,7 @@ import java.util.Set;
 import static de.z0rdak.yawp.api.events.region.FabricRegionEvents.post;
 import static de.z0rdak.yawp.config.server.LoggingConfig.FLAG_LOGGER;
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
+import static de.z0rdak.yawp.handler.HandlerUtil.*;
 
 /**
  * Contains flag handler for events directly related/cause to/by players.

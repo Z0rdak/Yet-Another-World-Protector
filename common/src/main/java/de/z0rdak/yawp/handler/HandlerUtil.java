@@ -1,4 +1,4 @@
-package de.z0rdak.yawp.handler.flags;
+package de.z0rdak.yawp.handler;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;

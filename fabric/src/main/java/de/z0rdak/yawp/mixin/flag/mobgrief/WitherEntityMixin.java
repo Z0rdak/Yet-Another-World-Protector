@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import static de.z0rdak.yawp.api.events.region.FabricRegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
 import static de.z0rdak.yawp.core.flag.RegionFlag.WITHER_BLOCK_PROT;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
+import static de.z0rdak.yawp.handler.HandlerUtil.*;
 
 @Mixin(WitherBoss.class)
 public abstract class WitherEntityMixin {

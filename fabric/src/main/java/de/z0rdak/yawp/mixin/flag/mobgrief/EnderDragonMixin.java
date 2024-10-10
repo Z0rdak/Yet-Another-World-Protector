@@ -14,8 +14,8 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import static de.z0rdak.yawp.api.events.region.FabricRegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.DRAGON_BLOCK_PROT;
 import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.getDimKey;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.processCheck;
+import static de.z0rdak.yawp.handler.HandlerUtil.getDimKey;
+import static de.z0rdak.yawp.handler.HandlerUtil.processCheck;
 
 
 @Mixin(EnderDragon.class)

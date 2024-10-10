@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import static de.z0rdak.yawp.api.events.region.FabricRegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.USE_ENDERPEARL_FROM_REGION;
 import static de.z0rdak.yawp.core.flag.RegionFlag.USE_ENDERPEARL_TO_REGION;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
+import static de.z0rdak.yawp.handler.HandlerUtil.*;
 import static de.z0rdak.yawp.util.text.MessageSender.sendFlagMsg;
 
 @Mixin(ThrownEnderpearl.class)

@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.platform;
 
+import de.z0rdak.yawp.api.events.flag.FlagEvent;
 import de.z0rdak.yawp.api.events.region.FabricRegionEvents;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
@@ -33,6 +34,11 @@ public class FabricEventHelper implements IEventHelper {
             return FabricRegionEvents.UPDATE_AREA.invoker().updateArea((RegionEvent.UpdateArea) event);
         }
         return false;
+    }
+
+    @Override
+    public void post(FlagEvent editMsgEvent) {
+
     }
 
 }

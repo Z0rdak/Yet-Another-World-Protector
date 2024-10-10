@@ -29,7 +29,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import static de.z0rdak.yawp.api.events.region.FabricRegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.*;
+import static de.z0rdak.yawp.handler.HandlerUtil.*;
 
 @Mixin(ServerLevel.class)
 public class ServerWorldMixin {

@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.handler.flags;
 
+import de.z0rdak.yawp.handler.HandlerUtil;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;

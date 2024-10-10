@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.mixin.stick;
 
-import de.z0rdak.yawp.handler.stick.MarkerStickHandler;
+import de.z0rdak.yawp.handler.MarkerStickHandler;
 import de.z0rdak.yawp.util.StickType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AnvilMenu;
@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.isServerSide;
+import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
 
 // Note: this mixin is currently disabled (not added to yawp.mixins.json)
 // TODO: Remove with WorldEdit integration feature

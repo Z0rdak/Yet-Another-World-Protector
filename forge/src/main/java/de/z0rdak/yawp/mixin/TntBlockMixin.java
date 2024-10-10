@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.mixin;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
-import de.z0rdak.yawp.handler.flags.HandlerUtil;
+import de.z0rdak.yawp.handler.HandlerUtil;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.IGNITE_EXPLOSIVES;
-import static de.z0rdak.yawp.handler.flags.HandlerUtil.isServerSide;
+import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
 import static de.z0rdak.yawp.util.text.MessageSender.sendFlagMsg;
 
 @Mixin(TntBlock.class)
