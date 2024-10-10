@@ -116,38 +116,38 @@ public class DimensionCommands {
                                                         .then(CommandManager.argument(POS1.toString(), BlockPosArgumentType.blockPos())
                                                                 .then(CommandManager.argument(POS2.toString(), BlockPosArgumentType.blockPos())
                                                                         .executes(ctx -> createCuboidRegion(ctx, getRegionNameArgument(ctx), getDimCacheArgument(ctx),
-                                                                                BlockPosArgumentType.getLoadedBlockPos(ctx, POS1.toString()),
-                                                                                BlockPosArgumentType.getLoadedBlockPos(ctx, POS2.toString()), null))
+                                                                                BlockPosArgumentType.getValidBlockPos(ctx, POS1.toString()),
+                                                                                BlockPosArgumentType.getValidBlockPos(ctx, POS2.toString()), null))
                                                                         .then(CommandManager.argument(CommandConstants.PARENT.toString(), StringArgumentType.word())
                                                                                 .suggests((ctx, builder) -> ContainingOwnedRegionArgumentType.owningRegions().listSuggestions(ctx, builder))
                                                                                 .executes(ctx -> createCuboidRegion(ctx, getRegionNameArgument(ctx), getDimCacheArgument(ctx),
-                                                                                        BlockPosArgumentType.getLoadedBlockPos(ctx, POS1.toString()),
-                                                                                        BlockPosArgumentType.getLoadedBlockPos(ctx, POS2.toString()), getContainingOwnedRegionArgument(ctx))))))
+                                                                                        BlockPosArgumentType.getValidBlockPos(ctx, POS1.toString()),
+                                                                                        BlockPosArgumentType.getValidBlockPos(ctx, POS2.toString()), getContainingOwnedRegionArgument(ctx))))))
                                                 )
                                                 /* Note: Disabled for now because in conflicts with the 2nd option where only the radius is provided.
                                                 .then(CommandManager.literal(AreaType.SPHERE.areaType)
                                                         .then(CommandManager.argument(CENTER_POS.toString(), BlockPosArgumentType.blockPos())
                                                                 .then(CommandManager.argument(RADIUS_POS.toString(), BlockPosArgumentType.blockPos())
                                                                         .executes(ctx -> createSphereRegion(ctx, getRegionNameArgument(ctx), getDimCacheArgument(ctx),
-                                                                                BlockPosArgumentType.getLoadedBlockPos(ctx, CENTER_POS.toString()),
-                                                                                BlockPosArgumentType.getLoadedBlockPos(ctx, RADIUS_POS.toString()), null))
+                                                                                BlockPosArgumentType.getValidBlockPos(ctx, CENTER_POS.toString()),
+                                                                                BlockPosArgumentType.getValidBlockPos(ctx, RADIUS_POS.toString()), null))
                                                                         .then(CommandManager.argument(CommandConstants.PARENT.toString(), StringArgumentType.word())
                                                                                 .suggests((ctx, builder) -> ContainingOwnedRegionArgumentType.owningRegions().listSuggestions(ctx, builder))
                                                                                 .executes(ctx -> createSphereRegion(ctx, getRegionNameArgument(ctx), getDimCacheArgument(ctx),
-                                                                                        BlockPosArgumentType.getLoadedBlockPos(ctx, CENTER_POS.toString()),
-                                                                                        BlockPosArgumentType.getLoadedBlockPos(ctx, RADIUS_POS.toString()), getContainingOwnedRegionArgument(ctx))))))
+                                                                                        BlockPosArgumentType.getValidBlockPos(ctx, CENTER_POS.toString()),
+                                                                                        BlockPosArgumentType.getValidBlockPos(ctx, RADIUS_POS.toString()), getContainingOwnedRegionArgument(ctx))))))
                                                 )
                                                 */
                                                 .then(CommandManager.literal(AreaType.SPHERE.areaType)
                                                         .then(CommandManager.argument(CENTER_POS.toString(), BlockPosArgumentType.blockPos())
                                                                 .then(CommandManager.argument(RADIUS.toString(), IntegerArgumentType.integer(0))
                                                                         .executes(ctx -> createSphereRegion(ctx, getRegionNameArgument(ctx), getDimCacheArgument(ctx),
-                                                                                BlockPosArgumentType.getLoadedBlockPos(ctx, CENTER_POS.toString()),
+                                                                                BlockPosArgumentType.getValidBlockPos(ctx, CENTER_POS.toString()),
                                                                                 IntegerArgumentType.getInteger(ctx, RADIUS.toString()), null))
                                                                         .then(CommandManager.argument(CommandConstants.PARENT.toString(), StringArgumentType.word())
                                                                                 .suggests((ctx, builder) -> ContainingOwnedRegionArgumentType.owningRegions().listSuggestions(ctx, builder))
                                                                                 .executes(ctx -> createSphereRegion(ctx, getRegionNameArgument(ctx), getDimCacheArgument(ctx),
-                                                                                        BlockPosArgumentType.getLoadedBlockPos(ctx, CENTER_POS.toString()),
+                                                                                        BlockPosArgumentType.getValidBlockPos(ctx, CENTER_POS.toString()),
                                                                                         IntegerArgumentType.getInteger(ctx, RADIUS.toString()), getContainingOwnedRegionArgument(ctx))))))
                                                 )
                                         )

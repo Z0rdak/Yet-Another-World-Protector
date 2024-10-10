@@ -224,19 +224,19 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
         }
         switch (areaType) {
             case CUBOID:
-                BlockPos p1 = BlockPosArgumentType.getLoadedBlockPos(ctx, POS1.toString());
-                BlockPos p2 = BlockPosArgumentType.getLoadedBlockPos(ctx, POS2.toString());
+                BlockPos p1 = BlockPosArgumentType.getValidBlockPos(ctx, POS1.toString());
+                BlockPos p2 = BlockPosArgumentType.getValidBlockPos(ctx, POS2.toString());
                 markedArea = new CuboidArea(p1, p2);
                 break;
             case SPHERE:
                 try {
-                    BlockPos centerPos = BlockPosArgumentType.getLoadedBlockPos(ctx, CENTER_POS.toString());
+                    BlockPos centerPos = BlockPosArgumentType.getValidBlockPos(ctx, CENTER_POS.toString());
                     int radius = IntegerArgumentType.getInteger(ctx, RADIUS.toString());
                     markedArea = new SphereArea(centerPos, radius);
                  
                 } catch (CommandSyntaxException cse) {
-                    BlockPos centerPos = BlockPosArgumentType.getLoadedBlockPos(ctx, CENTER_POS.toString());
-                    BlockPos radiusPos = BlockPosArgumentType.getLoadedBlockPos(ctx, RADIUS_POS.toString());
+                    BlockPos centerPos = BlockPosArgumentType.getValidBlockPos(ctx, CENTER_POS.toString());
+                    BlockPos radiusPos = BlockPosArgumentType.getValidBlockPos(ctx, RADIUS_POS.toString());
                     markedArea = new SphereArea(centerPos, radiusPos);
                 }
                 break;
