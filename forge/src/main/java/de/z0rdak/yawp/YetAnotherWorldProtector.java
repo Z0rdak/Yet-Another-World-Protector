@@ -20,13 +20,9 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.network.NetworkConstants;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 @Mod(Constants.MOD_ID)
 public class YetAnotherWorldProtector implements YAWPModInitializer {
-
-    public static final Logger LOGGER = LogManager.getLogger(Constants.MOD_ID.toUpperCase());
 
     public YetAnotherWorldProtector() {
         YAWPCommon.init();
