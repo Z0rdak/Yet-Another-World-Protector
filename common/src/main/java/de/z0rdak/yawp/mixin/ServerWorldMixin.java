@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.mixin;
 
-import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -31,6 +31,23 @@ import static de.z0rdak.yawp.handler.HandlerUtil.*;
 public class ServerWorldMixin {
 
     /**
+     * Injection for lightning protection flag. It prevents lightning strikes which are not hitting entities and would potentially cause fire.
+     */
+    @Inject(method = "tickChunk", locals = LocalCapture.CAPTURE_FAILSOFT, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LightningBolt;setVisualOnly(Z)V"), cancellable = false, allow = 1)
+    public void onSpawnLightning(LevelChunk chunk, int randomTickSpeed, CallbackInfo ci, ChunkPos chunkPos, boolean bl, int i, int j, ProfilerFiller profiler, BlockPos blockPos, DifficultyInstance localDifficulty, boolean b, LightningBolt lightningEntity) {
+        if (isServerSide(chunk.getLevel())) {
+            FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, LIGHTNING_PROT, getDimKey(chunk.getLevel()));
+            if (Services.EVENT.post(checkEvent)) {
+                return;
+            }
+            processCheck(checkEvent, deny -> {
+                lightningEntity.remove(Entity.RemovalReason.DISCARDED);
+                Constants.LOGGER.info("Discarded 'minecraft:lightning_bolt' due to flag in region {}. You can ignore the warning printed by the vanilla code.", deny.getResponsible().getName());
+            });
+        }
+    }
+
+    /**
      * Returning a null explosion will cause this event to be canceled.
      * An arrow on fire or fire charge shot by an e.g. dispenser will cause the type of the explosion to be ExplosionSourceType.TNT
      */
@@ -38,42 +55,20 @@ public class ServerWorldMixin {
     public void onIgniteExplosive(@Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionDamageCalculator behavior, double x, double y, double z, float power, boolean createFire, Level.ExplosionInteraction explosionMode, CallbackInfoReturnable<Explosion> cir) {
         ServerLevel world = (ServerLevel) (Object) this;
         if (isServerSide(world)) {
-            if (explosionMode == Level.ExplosionInteraction.TNT ||
-                    explosionMode == Level.ExplosionInteraction.BLOCK) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(new BlockPos((int) x, (int) y, (int) z), IGNITE_EXPLOSIVES, world.dimension(), null);
+            if (explosionMode == Level.ExplosionInteraction.TNT || explosionMode == Level.ExplosionInteraction.BLOCK) {
+                FlagCheckEvent checkEvent = new FlagCheckEvent(new BlockPos((int) x, (int) y, (int) z), IGNITE_EXPLOSIVES, world.dimension());
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, denyResult -> {
-                    cir.setReturnValue(null);
-                });
+                processCheck(checkEvent, denyResult -> cir.setReturnValue(null));
             }
             if (explosionMode == Level.ExplosionInteraction.MOB) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(new BlockPos((int) x, (int) y, (int) z), MOB_GRIEFING, world.dimension(), null);
+                FlagCheckEvent checkEvent = new FlagCheckEvent(new BlockPos((int) x, (int) y, (int) z), MOB_GRIEFING, world.dimension());
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, denyResult -> {
-                    cir.setReturnValue(null);
-                });
+                processCheck(checkEvent, denyResult -> cir.setReturnValue(null));
             }
-        }
-    }
-
-    /**
-     * Injection for lightning protection flag. It prevents lightning strikes which are not hitting entities and would potentially cause fire.
-     */
-    @Inject(method = "tickChunk", locals = LocalCapture.CAPTURE_FAILSOFT, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LightningBolt;setVisualOnly(Z)V"), cancellable = false, allow = 1)
-    public void onSpawnLightning(LevelChunk chunk, int randomTickSpeed, CallbackInfo ci, ChunkPos chunkPos, boolean bl, int i, int j, ProfilerFiller profiler, BlockPos blockPos, DifficultyInstance localDifficulty, boolean b, LightningBolt lightningEntity) {
-        if (isServerSide(chunk.getLevel())) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, LIGHTNING_PROT, getDimKey(chunk.getLevel()), null);
-            if (Services.EVENT.post(checkEvent)) {
-                return;
-            }
-            processCheck(checkEvent, null, deny -> {
-                lightningEntity.remove(Entity.RemovalReason.DISCARDED);
-                YetAnotherWorldProtector.LOGGER.info("Discarded 'minecraft:lightning_bolt' due to flag in region {}. You can ignore the warning printed by the vanilla code.", deny.getResponsible().getName());
-            });
         }
     }
 }

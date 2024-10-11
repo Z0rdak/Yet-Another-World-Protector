@@ -7,7 +7,6 @@
   "mixins": [
     "FireBlockMixin",
     "PlayerEntityMixin",
-    "ServerWorldMixin",
     "TntBlockMixin"
   ],
   "client": [
