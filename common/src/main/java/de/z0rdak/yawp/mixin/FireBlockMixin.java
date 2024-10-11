@@ -22,7 +22,7 @@ public abstract class FireBlockMixin {
     @Inject(method = "tick", at = @At(value = "HEAD"), cancellable = true)
     private void onFireTick(BlockState state, ServerLevel world, BlockPos pos, RandomSource rand, CallbackInfo info) {
         if (isServerSide(world)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, FIRE_TICK, world.dimension(), null);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, FIRE_TICK, world.dimension());
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
