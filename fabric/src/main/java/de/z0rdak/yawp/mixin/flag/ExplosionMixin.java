@@ -3,6 +3,7 @@ package de.z0rdak.yawp.mixin.flag;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.RegionFlag;
+import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.Creeper;
@@ -23,9 +24,9 @@ import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static de.z0rdak.yawp.api.events.region.FabricRegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
-import static de.z0rdak.yawp.handler.HandlerUtil.*;
+import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
+import static de.z0rdak.yawp.handler.HandlerUtil.processCheck;
 
 @Mixin(Explosion.class)
 public abstract class ExplosionMixin {
@@ -41,16 +42,16 @@ public abstract class ExplosionMixin {
     @Unique
     private static void filterExplosionTargets(Explosion explosion, Level world, List<Entity> affectedEntities) {
         Predicate<FlagCheckEvent> isProtected = (fce) -> {
-            if (post(fce)) {
+            if (Services.EVENT.post(fce)) {
                 return true;
             }
-            return processCheck(fce, null, null) == FlagState.DENIED;
+            return processCheck(fce) == FlagState.DENIED;
         };
         BiFunction<List<BlockPos>, RegionFlag, Set<BlockPos>> filterBlocks = (in, flag) -> in.stream()
-                .filter(blockPos -> isProtected.test(new FlagCheckEvent(blockPos, flag, getDimKey(world), null)))
+                .filter(blockPos -> isProtected.test(new FlagCheckEvent(blockPos, flag, world.dimension())))
                 .collect(Collectors.toSet());
         BiFunction<List<Entity>, RegionFlag, Set<Entity>> filterEntities = (in, flag) -> in.stream()
-                .filter(entity -> isProtected.test(new FlagCheckEvent(entity.blockPosition(), flag, getDimKey(world), null)))
+                .filter(entity -> isProtected.test(new FlagCheckEvent(entity.blockPosition(), flag, world.dimension())))
                 .collect(Collectors.toSet());
 
         explosion.getToBlow().removeAll(filterBlocks.apply(explosion.getToBlow(), EXPLOSION_BLOCK));

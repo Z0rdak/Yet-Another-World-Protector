@@ -2,6 +2,7 @@ package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.data.region.RegionDataManager;
+import de.z0rdak.yawp.platform.Services;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -12,7 +13,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static de.z0rdak.yawp.api.events.region.FabricRegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 import static de.z0rdak.yawp.util.text.MessageSender.sendFlagMsg;
@@ -26,9 +26,9 @@ public abstract class ServerPlayerMixin {
         ServerPlayer player = (ServerPlayer) (Object) this;
         if (isServerSide(player)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), ITEM_DROP, getDimKey(player), player);
-            if (post(checkEvent))
+            if (Services.EVENT.post(checkEvent))
                 return;
-            processCheck(checkEvent, null, deny -> {
+            processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
                 cir.setReturnValue(false);
             });
@@ -45,17 +45,17 @@ public abstract class ServerPlayerMixin {
             RegionDataManager.addDimKeyOnDimensionChange(player, player.level(), destination);
 
             FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), USE_PORTAL_PLAYERS, getDimKey(player), player);
-            if (post(checkEvent))
+            if (Services.EVENT.post(checkEvent))
                 return;
-            processCheck(checkEvent, null, deny -> {
+            processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
                 cir.setReturnValue(null);
             });
 
             checkEvent = new FlagCheckEvent(player.blockPosition(), ENTER_DIM, getDimKey(destination), player);
-            if (post(checkEvent))
+            if (Services.EVENT.post(checkEvent))
                 return;
-            processCheck(checkEvent, null, deny -> {
+            processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
                 cir.setReturnValue(null);
             });
@@ -68,10 +68,10 @@ public abstract class ServerPlayerMixin {
         Player player = (Player) (Object) this;
         if (isServerSide(player)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), USE_PORTAL_PLAYERS, player.level().dimension(), player);
-            if (post(checkEvent)) {
+            if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, null, deny -> {
+            processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
                 ci.cancel();
             });

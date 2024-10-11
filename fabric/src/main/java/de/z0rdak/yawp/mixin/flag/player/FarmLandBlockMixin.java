@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -13,7 +14,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static de.z0rdak.yawp.api.events.region.FabricRegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 import static de.z0rdak.yawp.util.text.MessageSender.sendFlagMsg;
@@ -31,10 +31,10 @@ public abstract class FarmLandBlockMixin extends Block {
     private void onTrampleFarmland(Level world, BlockState state, BlockPos pos, Entity trampler, float fallDistance, CallbackInfo ci) {
         if (isServerSide(world)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(pos, TRAMPLE_FARMLAND, getDimKey(world), null);
-            if (post(checkEvent)) {
+            if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, null, deny -> {
+            processCheck(checkEvent, deny -> {
                 if (deny.getFlagCheck().getPlayer() != null) {
                     sendFlagMsg(deny);
                 }
@@ -44,28 +44,28 @@ public abstract class FarmLandBlockMixin extends Block {
 
             if (trampler instanceof Player player) {
                 checkEvent = new FlagCheckEvent(pos, TRAMPLE_FARMLAND_PLAYER, getDimKey(world), player);
-                if (post(checkEvent)) {
+                if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, null, deny -> {
+                processCheck(checkEvent, deny -> {
                     sendFlagMsg(deny);
                     super.fallOn(world, state, pos, trampler, fallDistance);
                     ci.cancel();
                 });
             } else {
                 checkEvent = new FlagCheckEvent(pos, TRAMPLE_FARMLAND_OTHER, getDimKey(world), null);
-                if (post(checkEvent)) {
+                if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, null, deny -> {
+                processCheck(checkEvent, deny -> {
                     super.fallOn(world, state, pos, trampler, fallDistance);
                     ci.cancel();
                 });
                 checkEvent = new FlagCheckEvent(pos, MOB_GRIEFING, getDimKey(world), null);
-                if (post(checkEvent)) {
+                if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, null, deny -> {
+                processCheck(checkEvent, deny -> {
                     super.fallOn(world, state, pos, trampler, fallDistance);
                     ci.cancel();
                 });

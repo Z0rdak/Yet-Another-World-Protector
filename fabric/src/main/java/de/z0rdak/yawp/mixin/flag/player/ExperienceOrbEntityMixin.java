@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.platform.Services;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
@@ -8,7 +9,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static de.z0rdak.yawp.api.events.region.FabricRegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.XP_PICKUP;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 import static de.z0rdak.yawp.util.text.MessageSender.sendFlagMsg;
@@ -22,10 +22,10 @@ public abstract class ExperienceOrbEntityMixin {
         ExperienceOrb xpOrb = (ExperienceOrb) (Object) this;
         if (isServerSide(xpOrb.level())) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(xpOrb.blockPosition(), XP_PICKUP, getDimKey(player), player);
-            if (post(checkEvent)) {
+            if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, null, deny -> {
+            processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
                 ci.cancel();
             });

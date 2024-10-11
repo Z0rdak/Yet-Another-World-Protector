@@ -2,6 +2,7 @@ package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.config.server.FlagConfig;
+import de.z0rdak.yawp.platform.Services;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -18,7 +19,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Set;
 
-import static de.z0rdak.yawp.api.events.region.FabricRegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 import static de.z0rdak.yawp.util.text.MessageSender.sendFlagMsg;
@@ -31,9 +31,9 @@ public abstract class PlayerMixin {
         Player player = (Player) (Object) this;
         if (isServerSide(player)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), ITEM_DROP, getDimKey(player), player);
-            if (post(checkEvent))
+            if (Services.EVENT.post(checkEvent))
                 return;
-            processCheck(checkEvent, null, deny -> {
+            processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
                 cir.setReturnValue(null);
             });
@@ -45,9 +45,9 @@ public abstract class PlayerMixin {
         Player player = (Player) (Object) this;
         if (isServerSide(player)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), LEVEL_FREEZE, getDimKey(player), player);
-            if (post(checkEvent))
+            if (Services.EVENT.post(checkEvent))
                 return;
-            processCheck(checkEvent, null, deny -> {
+            processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
                 ci.cancel();
             });
@@ -64,9 +64,9 @@ public abstract class PlayerMixin {
         /*
         if (isServerSide(player)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), KEEP_INVENTORY, getEntityDim(player), player);
-            if (post(checkEvent))
+            if (Services.EVENT.post(checkEvent))
                 return;
-            processCheck(checkEvent, null, deny -> {
+            processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
                 ci.cancel();
             });
@@ -79,9 +79,9 @@ public abstract class PlayerMixin {
         Player player = (Player) (Object) this;
         if (isServerSide(player)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), XP_FREEZE, getDimKey(player), player);
-            if (post(checkEvent))
+            if (Services.EVENT.post(checkEvent))
                 return;
-            processCheck(checkEvent, null, deny -> {
+            processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
                 ci.cancel();
             });
@@ -98,9 +98,9 @@ public abstract class PlayerMixin {
         if (isServerSide(player)) {
             /*
             FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), NO_HUNGER, getEntityDim(player), player);
-            if (post(checkEvent))
+            if (Services.EVENT.post(checkEvent))
                 return;
-            processCheck(checkEvent, null, deny -> {
+            processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
                 ci.cancel();
             });          
@@ -114,16 +114,16 @@ public abstract class PlayerMixin {
         Player player = (Player) (Object) this;
         if (isServerSide(player)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), NO_PVP, getDimKey(player), player);
-            if (post(checkEvent))
+            if (Services.EVENT.post(checkEvent))
                 return;
-            processCheck(checkEvent, null, deny -> {
+            processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
                 ci.cancel();
             });
             checkEvent = new FlagCheckEvent(player.blockPosition(), INVINCIBLE, getDimKey(player), player);
-            if (post(checkEvent))
+            if (Services.EVENT.post(checkEvent))
                 return;
-            processCheck(checkEvent, null, deny -> {
+            processCheck(checkEvent, deny -> {
                 ci.cancel();
             });
         }
@@ -145,45 +145,45 @@ public abstract class PlayerMixin {
             if (target == null) return;
             if (target instanceof Player) {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), MELEE_PLAYERS, getDimKey(player), player);
-                if (post(checkEvent))
+                if (Services.EVENT.post(checkEvent))
                     return;
-                processCheck(checkEvent, null, deny -> {
+                processCheck(checkEvent, deny -> {
                     sendFlagMsg(deny);
                     ci.cancel();
                 });
             } else {
                 if (isAnimal(target)) {
                     FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), MELEE_ANIMALS, getDimKey(player), player);
-                    if (post(checkEvent))
+                    if (Services.EVENT.post(checkEvent))
                         return;
-                    processCheck(checkEvent, null, deny -> {
+                    processCheck(checkEvent, deny -> {
                         sendFlagMsg(deny);
                         ci.cancel();
                     });
                 }
                 if (isMonster(target)) {
                     FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), MELEE_MONSTERS, getDimKey(player), player);
-                    if (post(checkEvent))
+                    if (Services.EVENT.post(checkEvent))
                         return;
-                    processCheck(checkEvent, null, deny -> {
+                    processCheck(checkEvent, deny -> {
                         sendFlagMsg(deny);
                         ci.cancel();
                     });
                 }
                 if (target instanceof Villager) {
                     FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), MELEE_VILLAGERS, getDimKey(player), player);
-                    if (post(checkEvent))
+                    if (Services.EVENT.post(checkEvent))
                         return;
-                    processCheck(checkEvent, null, deny -> {
+                    processCheck(checkEvent, deny -> {
                         sendFlagMsg(deny);
                         ci.cancel();
                     });
                 }
                 if (target instanceof WanderingTrader) {
                     FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), MELEE_WANDERING_TRADER, getDimKey(player), player);
-                    if (post(checkEvent))
+                    if (Services.EVENT.post(checkEvent))
                         return;
-                    processCheck(checkEvent, null, deny -> {
+                    processCheck(checkEvent, deny -> {
                         sendFlagMsg(deny);
                         ci.cancel();
                     });
@@ -204,7 +204,7 @@ public abstract class PlayerMixin {
                 });
                 if (isBlockEntityCovered || isCoveredByTag) {
                     FlagCheckEvent checkEvent = new FlagCheckEvent(target.blockPosition(), BREAK_BLOCKS, getDimKey(player), player);
-                    if (post(checkEvent))
+                    if (Services.EVENT.post(checkEvent))
                         return;
                     processCheck(checkEvent, null, onDeny -> {
                         ci.cancel();
@@ -221,9 +221,9 @@ public abstract class PlayerMixin {
         if (isServerSide(player)) {
             if (player.isFallFlying()) {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), NO_FLIGHT, getDimKey(player), player);
-                if (post(checkEvent))
+                if (Services.EVENT.post(checkEvent))
                     return;
-                processCheck(checkEvent, null, deny -> {
+                processCheck(checkEvent, deny -> {
                     sendFlagMsg(deny);
                     player.stopFallFlying();
                 });

@@ -2,6 +2,7 @@ package de.z0rdak.yawp.mixin.flag.mobgrief;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.core.flag.FlagState;
+import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.monster.Silverfish;
@@ -18,7 +19,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import static de.z0rdak.yawp.api.events.region.FabricRegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
 import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
 import static de.z0rdak.yawp.handler.HandlerUtil.processCheck;
@@ -44,9 +44,9 @@ public abstract class SilverfishWakeUpFriendsGoalMixin {
                         BlockState blockState = level.getBlockState(blockPos2);
                         Block block = blockState.getBlock();
                         if (block instanceof InfestedBlock) {
-                            FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos2, MOB_GRIEFING, level.dimension(), null);
-                            boolean isCanceled = post(checkEvent);
-                            FlagState flagState = processCheck(checkEvent, null, null);
+                            FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos2, MOB_GRIEFING, level.dimension());
+                            boolean isCanceled = Services.EVENT.post(checkEvent);
+                            FlagState flagState = processCheck(checkEvent);
                             boolean isDenied = flagState == FlagState.DENIED;
                             if (isCanceled) {
                                 isDenied = false;

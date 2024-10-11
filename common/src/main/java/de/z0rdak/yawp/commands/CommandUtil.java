@@ -829,8 +829,8 @@ public class CommandUtil {
     }
 
     private static boolean isProtectedByRegion(ServerLevel level, RegionFlag flag, Entity e) {
-        FlagCheckEvent checkEvent = new FlagCheckEvent(e.blockPosition(), flag, level.dimension(), null);
-        FlagState flagState = processCheck(checkEvent, null, null);
+        FlagCheckEvent checkEvent = new FlagCheckEvent(e.blockPosition(), flag, level.dimension());
+        FlagState flagState = processCheck(checkEvent);
         return flagState == FlagState.ALLOWED;
     }
 }

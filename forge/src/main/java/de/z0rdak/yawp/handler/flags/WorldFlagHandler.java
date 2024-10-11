@@ -44,7 +44,7 @@ public class WorldFlagHandler {
     public static void onLightningStrikeOccur(EntityStruckByLightningEvent event) {
         if (ForgeHandlerUtil.isServerSide(event)) {
             Entity poorEntity = event.getEntity();
-            FlagCheckEvent checkEvent = new FlagCheckEvent(poorEntity.blockPosition(), LIGHTNING_PROT, event.getEntity().level().dimension(), null);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(poorEntity.blockPosition(), LIGHTNING_PROT, event.getEntity().level().dimension());
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
@@ -66,11 +66,11 @@ public class WorldFlagHandler {
     public static void onNetherPortalSpawn(BlockEvent.PortalSpawnEvent event) {
         Level world = (Level) event.getLevel();
         if (isServerSide(world)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPos(), SPAWN_PORTAL, world.dimension(), null);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPos(), SPAWN_PORTAL, world.dimension());
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, null, deny -> event.setCanceled(true));
+            processCheck(checkEvent, deny -> event.setCanceled(true));
         }
     }
 

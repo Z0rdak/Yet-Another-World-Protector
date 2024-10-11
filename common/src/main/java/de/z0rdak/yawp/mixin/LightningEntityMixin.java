@@ -47,7 +47,7 @@ public abstract class LightningEntityMixin {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, null, deny -> {
+            processCheck(checkEvent, deny -> {
                 ci.cancel();
             });
         }

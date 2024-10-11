@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.mixin.flag;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
@@ -21,7 +22,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import static de.z0rdak.yawp.api.events.region.FabricRegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 import static de.z0rdak.yawp.util.text.MessageSender.sendFlagMsg;
@@ -38,18 +38,18 @@ public abstract class LivingEntityMixin {
         LivingEntity target = (LivingEntity) (Object) this;
         if (isServerSide(target)) {
             if (target instanceof Player) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(target.blockPosition(), KNOCKBACK_PLAYERS, getDimKey(target), null);
-                if (post(checkEvent)) {
+                FlagCheckEvent checkEvent = new FlagCheckEvent(target.blockPosition(), KNOCKBACK_PLAYERS, getDimKey(target));
+                if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, null, deny -> {
+                processCheck(checkEvent, deny -> {
                     ci.cancel();
                 });
-                checkEvent = new FlagCheckEvent(target.blockPosition(), INVINCIBLE, getDimKey(target), null);
-                if (post(checkEvent)) {
+                checkEvent = new FlagCheckEvent(target.blockPosition(), INVINCIBLE, getDimKey(target));
+                if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, null, deny -> {
+                processCheck(checkEvent, deny -> {
                     ci.cancel();
                 });
             }
@@ -61,19 +61,19 @@ public abstract class LivingEntityMixin {
     public void onDrop(DamageSource source, CallbackInfo ci) {
         LivingEntity target = (LivingEntity) (Object) this;
         if (isServerSide(target)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(target.blockPosition(), DROP_LOOT_ALL, getDimKey(target), null);
-            if (post(checkEvent)) {
+            FlagCheckEvent checkEvent = new FlagCheckEvent(target.blockPosition(), DROP_LOOT_ALL, getDimKey(target));
+            if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, null, deny -> {
+            processCheck(checkEvent, deny -> {
                 ci.cancel();
             });
             if (source.getEntity() instanceof Player player) {
                 checkEvent = new FlagCheckEvent(target.blockPosition(), DROP_LOOT_PLAYER, getDimKey(target), player);
-                if (post(checkEvent)) {
+                if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, null, deny -> {
+                processCheck(checkEvent, deny -> {
                     sendFlagMsg(deny);
                     ci.cancel();
                 });
@@ -86,7 +86,7 @@ public abstract class LivingEntityMixin {
         LivingEntity self = (LivingEntity) (Object) this;
         if (isServerSide(self)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), FALL_DAMAGE, getDimKey(self));
-            if (post(checkEvent)) {
+            if (Services.EVENT.post(checkEvent)) {
                 return;
             }
             processCheck(checkEvent, deny -> {
@@ -94,7 +94,7 @@ public abstract class LivingEntityMixin {
             });
             if (isMonster(self)) {
                 checkEvent = new FlagCheckEvent(self.blockPosition(), FALL_DAMAGE_MONSTERS, getDimKey(self));
-                if (post(checkEvent)) {
+                if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
                 processCheck(checkEvent, deny -> {
@@ -102,29 +102,29 @@ public abstract class LivingEntityMixin {
                 });
             }
             if (isAnimal(self)) {
-                checkEvent = new FlagCheckEvent(self.blockPosition(), FALL_DAMAGE_ANIMALS, getDimKey(self), null);
-                if (post(checkEvent)) {
+                checkEvent = new FlagCheckEvent(self.blockPosition(), FALL_DAMAGE_ANIMALS, getDimKey(self));
+                if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, null, deny -> {
+                processCheck(checkEvent, deny -> {
                     cir.setReturnValue(false);
                 });
             }
             if (isVillager(self)) {
-                checkEvent = new FlagCheckEvent(self.blockPosition(), FALL_DAMAGE_VILLAGERS, getDimKey(self), null);
-                if (post(checkEvent)) {
+                checkEvent = new FlagCheckEvent(self.blockPosition(), FALL_DAMAGE_VILLAGERS, getDimKey(self));
+                if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, null, deny -> {
+                processCheck(checkEvent, deny -> {
                     cir.setReturnValue(false);
                 });
             }
             if (isPlayer(self)) {
                 checkEvent = new FlagCheckEvent(self.blockPosition(), FALL_DAMAGE_VILLAGERS, getDimKey(self), (Player) self);
-                if (post(checkEvent)) {
+                if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, null, deny -> {
+                processCheck(checkEvent, deny -> {
                     sendFlagMsg(deny);
                     cir.setReturnValue(false);
                 });
@@ -136,34 +136,34 @@ public abstract class LivingEntityMixin {
             target = "Lnet/minecraft/world/entity/ExperienceOrb;award(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/phys/Vec3;I)V"), cancellable = true, allow = 1)
     public void onXpDrop(CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
-        FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), XP_DROP_ALL, getDimKey(self), null);
-        if (post(checkEvent))
+        FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), XP_DROP_ALL, getDimKey(self));
+        if (Services.EVENT.post(checkEvent))
             return;
-        processCheck(checkEvent, null, deny -> {
+        processCheck(checkEvent, deny -> {
             ci.cancel();
         });
         if (this.attackingPlayer != null) {
             checkEvent = new FlagCheckEvent(self.blockPosition(), XP_DROP_PLAYER, getDimKey(self), this.attackingPlayer);
-            if (post(checkEvent))
+            if (Services.EVENT.post(checkEvent))
                 return;
-            processCheck(checkEvent, null, deny -> {
+            processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
                 ci.cancel();
             });
         }
         if (isMonster(self)) {
-            checkEvent = new FlagCheckEvent(self.blockPosition(), XP_DROP_MONSTER, getDimKey(self), null);
-            if (post(checkEvent))
+            checkEvent = new FlagCheckEvent(self.blockPosition(), XP_DROP_MONSTER, getDimKey(self));
+            if (Services.EVENT.post(checkEvent))
                 return;
-            processCheck(checkEvent, null, deny -> {
+            processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
                 ci.cancel();
             });
         } else {
-            checkEvent = new FlagCheckEvent(self.blockPosition(), XP_DROP_OTHER, getDimKey(self), null);
-            if (post(checkEvent))
+            checkEvent = new FlagCheckEvent(self.blockPosition(), XP_DROP_OTHER, getDimKey(self));
+            if (Services.EVENT.post(checkEvent))
                 return;
-            processCheck(checkEvent, null, deny -> {
+            processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
                 ci.cancel();
             });
@@ -183,9 +183,9 @@ public abstract class LivingEntityMixin {
             ServerLevel serverLevel = (ServerLevel) self.level();
             if (adversary instanceof WitherBoss) {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(pos, MOB_GRIEFING, serverLevel.dimension(), null);
-                if (post(checkEvent))
+                if (Services.EVENT.post(checkEvent))
                     return;
-                processCheck(checkEvent, null, deny -> {
+                processCheck(checkEvent, deny -> {
                     // prevent the rose to be placed as block, but spawn it as item-entity as vanilla does it
                     ci.cancel();
                     ItemEntity itemEntity = new ItemEntity(serverLevel, self.getX(), self.getY(), self.getZ(), new ItemStack(Items.WITHER_ROSE));

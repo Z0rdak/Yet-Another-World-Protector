@@ -2,6 +2,7 @@ package de.z0rdak.yawp.mixin.flag.mobgrief;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.core.flag.FlagState;
+import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.phys.AABB;
@@ -11,7 +12,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import static de.z0rdak.yawp.api.events.region.FabricRegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.DRAGON_BLOCK_PROT;
 import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
 import static de.z0rdak.yawp.handler.HandlerUtil.getDimKey;
@@ -26,16 +26,16 @@ public abstract class EnderDragonMixin {
         EnderDragon self = (EnderDragon) (Object) this;
 
         FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, DRAGON_BLOCK_PROT, getDimKey(self));
-        if (post(checkEvent)) {
+        if (Services.EVENT.post(checkEvent)) {
             return;
         }
-        FlagState flagStateDragonProt = processCheck(checkEvent, null);
+        FlagState flagStateDragonProt = processCheck(checkEvent);
 
         checkEvent = new FlagCheckEvent(blockPos, MOB_GRIEFING, getDimKey(self));
-        if (post(checkEvent)) {
+        if (Services.EVENT.post(checkEvent)) {
             return;
         }
-        FlagState flagStateGriefing = processCheck(checkEvent, null);
+        FlagState flagStateGriefing = processCheck(checkEvent);
 
         if (flagStateGriefing != FlagState.DENIED && flagStateDragonProt != FlagState.DENIED) {
             bl2 = self.level().removeBlock(blockPos, false) || bl2;

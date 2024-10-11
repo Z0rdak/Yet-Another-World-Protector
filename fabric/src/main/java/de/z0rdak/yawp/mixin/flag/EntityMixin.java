@@ -2,6 +2,7 @@ package de.z0rdak.yawp.mixin.flag;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.data.region.RegionDataManager;
+import de.z0rdak.yawp.platform.Services;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LightningBolt;
@@ -15,7 +16,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static de.z0rdak.yawp.api.events.region.FabricRegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 import static de.z0rdak.yawp.util.text.MessageSender.sendFlagMsg;
@@ -29,10 +29,10 @@ public abstract class EntityMixin {
         if (isServerSide(rider)) {
             if (rider instanceof Player player) {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(vehicle.blockPosition(), ANIMAL_MOUNTING, getDimKey(vehicle), player);
-                if (post(checkEvent)) {
+                if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, null, deny -> {
+                processCheck(checkEvent, deny -> {
                     sendFlagMsg(deny);
                     cir.setReturnValue(false);
                 });
@@ -45,10 +45,10 @@ public abstract class EntityMixin {
         Entity poorSoul = (Entity) (Object) this;
         if (isServerSide(poorSoul)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(poorSoul.blockPosition(), LIGHTNING_PROT, getDimKey(poorSoul), null);
-            if (post(checkEvent)) {
+            if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, null, deny -> {
+            processCheck(checkEvent, deny -> {
                 ci.cancel();
             });
         }
@@ -60,10 +60,10 @@ public abstract class EntityMixin {
         if (isServerSide(rider)) {
             if (rider instanceof Player player) {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), ANIMAL_UNMOUNTING, getDimKey(player), player);
-                if (post(checkEvent)) {
+                if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, null, deny -> {
+                processCheck(checkEvent, deny -> {
                     sendFlagMsg(deny);
                     ci.cancel();
                 });
@@ -80,65 +80,65 @@ public abstract class EntityMixin {
         Entity self = (Entity) (Object) this;
         if (isServerSide(self.level())) {
             RegionDataManager.addDimKeyOnDimensionChange(null, self.level(), destination);
-            FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL, getDimKey(self), null);
-            if (post(checkEvent)) {
+            FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL, getDimKey(self));
+            if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, null, deny -> {
+            processCheck(checkEvent, deny -> {
                 cir.setReturnValue(null);
             });
             if (self instanceof Player player) {
                 checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_PLAYERS, getDimKey(self), player);
-                if (post(checkEvent)) {
+                if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, null, deny -> {
+                processCheck(checkEvent, deny -> {
                     sendFlagMsg(deny);
                     cir.setReturnValue(null);
                 });
             }
             if (self instanceof ItemEntity) {
-                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_ITEMS, getDimKey(self), null);
-                if (post(checkEvent)) {
+                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_ITEMS, getDimKey(self));
+                if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, null, deny -> {
+                processCheck(checkEvent, deny -> {
                     cir.setReturnValue(null);
                 });
             }
             if (isAnimal(self)) {
-                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_ANIMALS, getDimKey(self), null);
-                if (post(checkEvent)) {
+                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_ANIMALS, getDimKey(self));
+                if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, null, deny -> {
+                processCheck(checkEvent, deny -> {
                     cir.setReturnValue(null);
                 });
             }
             if (isMonster(self)) {
-                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_MONSTERS, getDimKey(self), null);
-                if (post(checkEvent)) {
+                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_MONSTERS, getDimKey(self));
+                if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, null, deny -> {
+                processCheck(checkEvent, deny -> {
                     cir.setReturnValue(null);
                 });
             }
             if (self instanceof Merchant) {
-                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_VILLAGERS, getDimKey(self), null);
-                if (post(checkEvent)) {
+                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_VILLAGERS, getDimKey(self));
+                if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, null, deny -> {
+                processCheck(checkEvent, deny -> {
                     cir.setReturnValue(null);
                 });
             }
             if (self instanceof AbstractMinecart) {
-                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_MINECARTS, getDimKey(self), null);
-                if (post(checkEvent)) {
+                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_MINECARTS, getDimKey(self));
+                if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, null, deny -> {
+                processCheck(checkEvent, deny -> {
                     cir.setReturnValue(null);
                 });
             }

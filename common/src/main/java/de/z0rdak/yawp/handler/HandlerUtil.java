@@ -93,7 +93,6 @@ public final class HandlerUtil {
     public static FlagState processCheck(FlagCheckEvent checkEvent, @Nullable Consumer<FlagCheckResult> onAllow, @Nullable Consumer<FlagCheckResult> onDeny) {
         FlagCheckResult result = evaluate(checkEvent);
         result = Services.EVENT.post(result);
-        //result = RegionEvents.FLAG_RESULT.invoker().getResult(result);
         if (result.getFlagState() == FlagState.ALLOWED
                 || result.getFlagState() == FlagState.UNDEFINED
                 || result.getFlagState() == FlagState.DISABLED) {
@@ -111,6 +110,10 @@ public final class HandlerUtil {
         return processCheck(checkEvent, null, onDeny);
     }
 
+    public static FlagState processCheck(FlagCheckEvent checkEvent) {
+        return processCheck(checkEvent, null, null);
+    }
+
     public static void checkMobGrief(Entity entity, CallbackInfo ci) {
         checkMobGrief(entity.level(), entity.getOnPos(), ci);
     }
@@ -121,23 +124,19 @@ public final class HandlerUtil {
 
     public static void checkMobGrief(Level world, BlockPos pos, CallbackInfo ci) {
         if (isServerSide(world)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, MOB_GRIEFING, world.dimension(), null);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, MOB_GRIEFING, world.dimension());
             if (Services.EVENT.post(checkEvent))
                 return;
-            processCheck(checkEvent, null, deny -> {
-                ci.cancel();
-            });
+            processCheck(checkEvent, deny -> ci.cancel());
         }
     }
 
     public static void checkMobGrief(Level world, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         if (isServerSide(world)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, MOB_GRIEFING, world.dimension(), null);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, MOB_GRIEFING, world.dimension());
             if (Services.EVENT.post(checkEvent))
                 return;
-            processCheck(checkEvent, null, deny -> {
-                cir.setReturnValue(false);
-            });
+            processCheck(checkEvent, deny -> cir.setReturnValue(false));
         }
     }
 
