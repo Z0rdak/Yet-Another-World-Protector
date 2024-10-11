@@ -3,6 +3,7 @@ package de.z0rdak.yawp.handler.flags;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.core.flag.FlagState;
+import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.util.text.MessageSender;
 import net.fabricmc.fabric.api.entity.event.v1.EntityElytraEvents;
 import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
@@ -36,7 +37,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
-import static de.z0rdak.yawp.api.events.region.FabricRegionEvents.post;
 import static de.z0rdak.yawp.config.server.LoggingConfig.FLAG_LOGGER;
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
@@ -79,7 +79,7 @@ public final class PlayerFlagHandler {
             //FLAG_LOGGER.info("[onUseItem] Player={} ({}), at=[{}], Hand={}, Item={}", player.getName().getString(), player.getUuidAsString(), player.getBlockPos().toShortString(), hand, player.getStackInHand(hand));
 
             FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), USE_ITEMS, getDimKey(player), player);
-            if (post(checkEvent)) {
+            if (Services.EVENT.post(checkEvent)) {
                 return InteractionResultHolder.pass(stackInHand);
             }
             FlagState flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
@@ -122,7 +122,7 @@ public final class PlayerFlagHandler {
             // allow player to place blocks when shift clicking usable bock
             if ((isSneakingWithEmptyHands || !player.isShiftKeyDown())) {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(targetPos, USE_BLOCKS, getDimKey(player), player);
-                if (post(checkEvent))
+                if (Services.EVENT.post(checkEvent))
                     return InteractionResult.PASS;
                 FlagState flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
                 if (flagState == FlagState.DENIED)
@@ -133,7 +133,7 @@ public final class PlayerFlagHandler {
                     // check allows player to place blocks when shift clicking container
                     if (player.isShiftKeyDown() && hasEmptyHand || !player.isShiftKeyDown()) {
                         checkEvent = new FlagCheckEvent(targetPos, ENDER_CHEST_ACCESS, getDimKey(player), player);
-                        if (post(checkEvent))
+                        if (Services.EVENT.post(checkEvent))
                             return InteractionResult.PASS;
                         flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
                         if (flagState == FlagState.DENIED)
@@ -144,7 +144,7 @@ public final class PlayerFlagHandler {
                     // check allows player to place blocks when shift clicking container
                     if (player.isShiftKeyDown() && hasEmptyHand || !player.isShiftKeyDown()) {
                         checkEvent = new FlagCheckEvent(targetPos, CONTAINER_ACCESS, getDimKey(player), player);
-                        if (post(checkEvent))
+                        if (Services.EVENT.post(checkEvent))
                             return InteractionResult.PASS;
                         flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
                         if (flagState == FlagState.DENIED)
@@ -172,7 +172,7 @@ public final class PlayerFlagHandler {
                 });
                 if (isBlockCovered || isCoveredByTag) {
                     FlagCheckEvent checkEvent = new FlagCheckEvent(placeBlockTarget, PLACE_BLOCKS, getDimKey(player), player);
-                    if (post(checkEvent)) {
+                    if (Services.EVENT.post(checkEvent)) {
                         return InteractionResult.PASS;
                     }
                     FlagState flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
@@ -186,7 +186,7 @@ public final class PlayerFlagHandler {
                 UseAnim useAction = stackInHand.getUseAnimation();
                 if (isBlock || (isBerry && useAction == UseAnim.EAT)) {
                     FlagCheckEvent checkEvent = new FlagCheckEvent(placeBlockTarget, PLACE_BLOCKS, getDimKey(player), player);
-                    if (post(checkEvent))
+                    if (Services.EVENT.post(checkEvent))
                         return InteractionResult.PASS;
                     FlagState flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
                     if (flagState == FlagState.DENIED)
@@ -194,7 +194,7 @@ public final class PlayerFlagHandler {
                 }
 
                 FlagCheckEvent checkEvent = new FlagCheckEvent(targetPos, USE_ITEMS, getDimKey(player), player);
-                if (post(checkEvent))
+                if (Services.EVENT.post(checkEvent))
                     return InteractionResult.PASS;
                 FlagState flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
                 if (flagState == FlagState.DENIED)
@@ -237,7 +237,7 @@ public final class PlayerFlagHandler {
             //FLAG_LOGGER.info("[onUseEntity] Player={} ({}), Target={} ({}), at=[{}], Hand={}, Item={}", player.getName().getString(), player.getUuidAsString(), entity.getName().getString(), entity.getScoreboardName(), entity.getBlockPos().toShortString(), hand, player.getStackInHand(hand));
 
             FlagCheckEvent checkEvent = new FlagCheckEvent(entity.blockPosition(), USE_ENTITIES, getDimKey(player), player);
-            if (post(checkEvent))
+            if (Services.EVENT.post(checkEvent))
                 return InteractionResult.PASS;
             FlagState flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
             if (flagState == FlagState.DENIED)
@@ -245,7 +245,7 @@ public final class PlayerFlagHandler {
 
             if (!hasEmptyHand(player, hand)) {
                 checkEvent = new FlagCheckEvent(entity.blockPosition(), USE_ITEMS, getDimKey(player), player);
-                if (post(checkEvent))
+                if (Services.EVENT.post(checkEvent))
                     return InteractionResult.PASS;
                 flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
                 if (flagState == FlagState.DENIED)
@@ -253,7 +253,7 @@ public final class PlayerFlagHandler {
             }
             if (entity instanceof ContainerEntity || entity instanceof HasCustomInventoryScreen) {
                 checkEvent = new FlagCheckEvent(player.blockPosition(), CONTAINER_ACCESS, getDimKey(player), player);
-                if (post(checkEvent))
+                if (Services.EVENT.post(checkEvent))
                     return InteractionResult.PASS;
                 flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
                 if (flagState == FlagState.DENIED)
@@ -270,7 +270,7 @@ public final class PlayerFlagHandler {
     private static InteractionResult onAttackBlock(Player player, Level world, InteractionHand hand, BlockPos blockPos, Direction direction) {
         if (isServerSide(world)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, BREAK_BLOCKS, getDimKey(player), player);
-            if (post(checkEvent)) {
+            if (Services.EVENT.post(checkEvent)) {
                 return InteractionResult.PASS;
             }
             FlagState flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
@@ -282,7 +282,7 @@ public final class PlayerFlagHandler {
     private static boolean onSettingSpawn(Player player, BlockPos blockPos) {
         if (isServerSide(player)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, SET_SPAWN, getDimKey(player), player);
-            if (post(checkEvent)) {
+            if (Services.EVENT.post(checkEvent)) {
                 return ALLOW;
             }
             FlagState flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
@@ -294,7 +294,7 @@ public final class PlayerFlagHandler {
     private static Player.BedSleepingProblem onAllowSleeping(Player player, BlockPos blockPos) {
         if (isServerSide(player)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, SLEEP, getDimKey(player), player);
-            if (post(checkEvent)) {
+            if (Services.EVENT.post(checkEvent)) {
                 return null;
             }
             FlagState flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
@@ -309,7 +309,7 @@ public final class PlayerFlagHandler {
         if (isServerSide(livingEntity.level())) {
             if (livingEntity instanceof Player player) {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), USE_ELYTRA, getDimKey(player), player);
-                if (post(checkEvent)) {
+                if (Services.EVENT.post(checkEvent)) {
                     return ALLOW;
                 }
                 FlagState flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
