@@ -51,7 +51,7 @@ public final class PlayerFlagHandler {
     private PlayerFlagHandler() {
     }
 
-    public static void registerEventHandler() {
+    public static void register() {
         EntitySleepEvents.ALLOW_SLEEPING.register(PlayerFlagHandler::onAllowSleeping);
         EntitySleepEvents.ALLOW_SETTING_SPAWN.register(PlayerFlagHandler::onSettingSpawn);
         EntityElytraEvents.ALLOW.register(PlayerFlagHandler::onElytraFlight);
