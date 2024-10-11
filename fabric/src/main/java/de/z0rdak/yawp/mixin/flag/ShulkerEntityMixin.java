@@ -20,7 +20,7 @@ public abstract class ShulkerEntityMixin {
             FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), SHULKER_TELEPORT_FROM_REGION, getDimKey(self), null);
             if (post(checkEvent))
                 return;
-            processCheck(checkEvent, null, deny -> cir.setReturnValue(false));
+            processCheck(checkEvent, deny -> cir.setReturnValue(false));
         }
     }
 }

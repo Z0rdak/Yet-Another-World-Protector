@@ -1,4 +1,4 @@
-package de.z0rdak.yawp.mixin.flag.world;
+package de.z0rdak.yawp.mixin.flag;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import net.minecraft.world.entity.monster.EnderMan;

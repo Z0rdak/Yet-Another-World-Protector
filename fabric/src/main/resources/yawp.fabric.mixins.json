@@ -6,6 +6,7 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "flag.AbstractFireBlockMixin",
+    "flag.EnderManEntityMixin",
     "flag.EntityMixin",
     "flag.ExplosionMixin",
     "flag.LivingEntityMixin",
@@ -51,8 +52,6 @@
     "flag.player.breeding.AnimalMixin",
     "flag.player.breeding.FrogMixin",
     "flag.player.breeding.SnifferMixin",
-    "flag.world.EnderManEntityMixin",
-    "flag.world.FireBlockMixin",
     "stick.ServerPlayerInteractionManagerMixin"
   ],
   "client": [
