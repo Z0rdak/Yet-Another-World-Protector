@@ -1,6 +1,7 @@
-package de.z0rdak.yawp.mixin.flag.world;
+package de.z0rdak.yawp.mixin;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.level.Level;
@@ -10,7 +11,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import static de.z0rdak.yawp.api.events.region.FabricRegionEvents.post;
 import static de.z0rdak.yawp.core.flag.RegionFlag.LIGHTNING_PROT;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 
@@ -25,11 +25,11 @@ public abstract class LightningEntityMixin {
     @Inject(method = "clearCopperOnLightningStrike", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;setBlockAndUpdate(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)Z"), cancellable = true, allow = 1)
     private static void cleanOxidationOnHitBlock(Level world, BlockPos pos, CallbackInfo ci) {
         if (isServerSide(world)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, LIGHTNING_PROT, getDimKey(world), null);
-            if (post(checkEvent)) {
+            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, LIGHTNING_PROT, getDimKey(world));
+            if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, null, deny -> {
+            processCheck(checkEvent, deny -> {
                 ci.cancel();
             });
         }
@@ -44,7 +44,7 @@ public abstract class LightningEntityMixin {
         LightningBolt lightningEntity = (LightningBolt) (Object) this;
         if (isServerSide(lightningEntity)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, LIGHTNING_PROT, getDimKey(lightningEntity), null);
-            if (post(checkEvent)) {
+            if (Services.EVENT.post(checkEvent)) {
                 return;
             }
             processCheck(checkEvent, null, deny -> {
