@@ -127,11 +127,9 @@ public class FlagMessage implements INbtSerializable<CompoundTag> {
      * @return the default flag message template for the given flag
      */
     private static String getI18nFlagMsgTemplate(FlagCheckResult result) {
-        RegionFlag regionFlag = RegionFlag.fromId(result.getFlag().getName());
-        String langKeyForFlagMsg = "flag.msg.deny." + result.getFlag().getName();
+        String flagMsgLangKey = "flag.msg.deny." + result.getFlag().getName();
         String fallBackLangKey = "flag.msg.deny." + result.getResponsible().getRegionType().type + ".default";
-        String flagMsgLangKey = regionFlag.categories.contains(FlagCategory.PLAYER) ? langKeyForFlagMsg : fallBackLangKey;
-        return Component.translatableWithFallback(flagMsgLangKey, flagMsgLangKey).getString();
+        return Component.translatableWithFallback(flagMsgLangKey, fallBackLangKey).getString();
     }
 
     /**
