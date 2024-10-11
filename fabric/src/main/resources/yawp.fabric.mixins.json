@@ -8,7 +8,6 @@
     "flag.AbstractFireBlockMixin",
     "flag.EntityMixin",
     "flag.ExplosionMixin",
-    "flag.FrostWalkerEnchantmentMixin",
     "flag.LivingEntityMixin",
     "flag.ServerWorldMixin",
     "flag.ShulkerEntityMixin",
@@ -54,7 +53,6 @@
     "flag.player.breeding.SnifferMixin",
     "flag.world.EnderManEntityMixin",
     "flag.world.FireBlockMixin",
-    "flag.world.LeavesBlockMixin",
     "flag.world.LightningEntityMixin",
     "stick.ServerPlayerInteractionManagerMixin"
   ],

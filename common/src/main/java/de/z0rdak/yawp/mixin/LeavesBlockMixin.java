@@ -20,14 +20,14 @@ import static de.z0rdak.yawp.handler.HandlerUtil.processCheck;
 public class LeavesBlockMixin {
 
     @Inject(method = "randomTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/LeavesBlock;dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)V"), cancellable = true)
-    private void spread(BlockState state, ServerLevel world, BlockPos pos, RandomSource rnd, CallbackInfo info) {
-        if (isServerSide(world)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, LEAF_DECAY, world.dimension(), null);
+    private void spread(BlockState state, ServerLevel level, BlockPos pos, RandomSource rnd, CallbackInfo ci) {
+        if (isServerSide(level)) {
+            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, LEAF_DECAY, level.dimension());
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
             processCheck(checkEvent, denyResult -> {
-                info.cancel();
+                ci.cancel();
             });
         }
     }
