@@ -7,11 +7,10 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import de.z0rdak.yawp.api.commands.CommandConstants;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagEvent;
 import de.z0rdak.yawp.api.permission.Permissions;
 import de.z0rdak.yawp.commands.arguments.flag.IFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
-import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
@@ -21,10 +20,10 @@ import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.data.region.RegionDataManager;
-import de.z0rdak.yawp.handler.HandlerUtil;
 import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.util.ChatLinkBuilder;
 import de.z0rdak.yawp.util.MojangApiHelper;
+import de.z0rdak.yawp.util.text.Messages;
 import de.z0rdak.yawp.util.text.messages.multiline.MultiLineMessage;
 import de.z0rdak.yawp.util.text.messages.multiline.RegionInfoMessage;
 import de.z0rdak.yawp.util.text.messages.multiline.RegionStateMessage;
@@ -36,35 +35,20 @@ import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.TeamArgument;
 import net.minecraft.commands.arguments.UuidArgument;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.ExperienceOrb;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.animal.IronGolem;
-import net.minecraft.world.entity.animal.SnowGolem;
-import net.minecraft.world.entity.monster.Slime;
-import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.scores.Team;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
-import static de.z0rdak.yawp.handler.HandlerUtil.processCheck;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
 import static de.z0rdak.yawp.util.text.MessageSender.sendCmdFeedback;
 import static de.z0rdak.yawp.util.text.MessageSender.sendError;
@@ -334,7 +318,7 @@ public class CommandUtil {
         MutableComponent undoLink = ChatLinkBuilder.buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!activate), String.valueOf(activate));
         MutableComponent msg = Component.translatableWithFallback("cli.msg.info.region.state.enable.set.value", "Region state of %s is now: %s",
                 ChatLinkBuilder.buildRegionInfoLink(region), region.isActive() ? "active" : "inactive");
-        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("%s %s", "%s %s", "%s %s", msg, undoLink));
+        sendCmdFeedback(ctx.getSource(), Messages.substitutable("%s %s", msg, undoLink));
         return 0;
     }
 
@@ -344,7 +328,7 @@ public class CommandUtil {
         MutableComponent undoLink = ChatLinkBuilder.buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!showAlert), String.valueOf(showAlert));
         MutableComponent msg = Component.translatableWithFallback("cli.msg.info.state.alert.set.value", "Flag messages of %s are now: %s",
                 ChatLinkBuilder.buildRegionInfoLink(region), region.isMuted() ? "muted" : "active");
-        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("%s %s", "%s %s", "%s %s", msg, undoLink));
+        sendCmdFeedback(ctx.getSource(), Messages.substitutable("%s %s", msg, undoLink));
         return 0;
     }
 
@@ -364,7 +348,7 @@ public class CommandUtil {
             RegionDataManager.save();
             MutableComponent msg = Component.translatableWithFallback("cli.msg.info.region.group.team.removed", "Removed team '%s' (group '%s') from %s", teamInfo, group,
                     ChatLinkBuilder.buildRegionInfoLink(region));
-            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("%s %s", "%s %s", "%s %s", msg, undoLink));
+            sendCmdFeedback(ctx.getSource(), Messages.substitutable("%s %s", msg, undoLink));
             return 0;
         }
         MutableComponent msg = Component.translatableWithFallback("cli.msg.info.region.group.team.not-present", "Team '%s' (group '%s') is not present in %s", teamInfo, group,
@@ -428,7 +412,7 @@ public class CommandUtil {
             region.removePlayer(playerUuid, group);
             MutableComponent msg = Component.translatableWithFallback("cli.msg.info.region.group.player.removed", "Removed player '%s' (group '%s') from %s", playerInfo, group,
                     ChatLinkBuilder.buildRegionInfoLink(region));
-            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("%s %s", "%s %s", msg, undoLink));
+            sendCmdFeedback(ctx.getSource(), Messages.substitutable("%s %s", msg, undoLink));
             RegionDataManager.save();
             return 0;
         }
@@ -528,7 +512,7 @@ public class CommandUtil {
             region.addPlayer(uuid, name, group);
             RegionDataManager.save();
             MutableComponent msg = Component.translatableWithFallback("cli.msg.info.region.group.player.added", "Added player '%s' as '%s' to %s", name, group, regionInfoLink);
-            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("%s %s", "%s %s", msg, undoLink));
+            sendCmdFeedback(ctx.getSource(), Messages.substitutable("%s %s", msg, undoLink));
             return 0;
         }
         MutableComponent msg = Component.translatableWithFallback("cli.msg.info.region.group.player.present", "Player '%s' (group '%s') already present in %s", name, group, regionInfoLink);
@@ -549,7 +533,7 @@ public class CommandUtil {
             MutableComponent undoLink = ChatLinkBuilder.buildRegionActionUndoLink(ctx.getInput(), ADD, REMOVE);
             MutableComponent msg = Component.translatableWithFallback("cli.msg.info.region.group.team.added", "Added team '%s' as '%s' to region %s",
                     teamHoverInfo, group, regionInfoLink);
-            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("%s %s", "%s %s", msg, undoLink));
+            sendCmdFeedback(ctx.getSource(), Messages.substitutable("%s %s", msg, undoLink));
             return 0;
         }
         MutableComponent msg = Component.translatableWithFallback("cli.msg.info.region.group.team.present", "Team '%s' (group '%s') already present in %s",
@@ -570,7 +554,7 @@ public class CommandUtil {
             MutableComponent msg = Component.translatableWithFallback("cli.msg.flag.removed", "Removed flag '%s' from %s", flag.name,
                     ChatLinkBuilder.buildRegionInfoLink(region));
             MutableComponent undoLink = ChatLinkBuilder.buildRegionActionUndoLink(ctx.getInput(), REMOVE, ADD);
-            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("%s %s", "%s %s", msg, undoLink));
+            sendCmdFeedback(ctx.getSource(), Messages.substitutable("%s %s", msg, undoLink));
             return 0;
         } else {
             MutableComponent msg = Component.translatableWithFallback("cli.msg.flag.not-present", "Flag '%s' is not present in %s", flag.name,
@@ -729,7 +713,7 @@ public class CommandUtil {
             MutableComponent msg = Component.translatableWithFallback("cli.msg.flag.added", "Added flag '%s' to %s",
                     flagLink, ChatLinkBuilder.buildRegionInfoLink(region));
             MutableComponent undoLink = ChatLinkBuilder.buildRegionActionUndoLink(ctx.getInput(), ADD, REMOVE);
-            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("%s %s", "%s %s", msg, undoLink));
+            sendCmdFeedback(ctx.getSource(), Messages.substitutable("%s %s", msg, undoLink));
             return 0;
         } else {
             MutableComponent msg = Component.translatableWithFallback("cli.msg.flag.present", "Flag '%s' is already present in %s", flag.name,
@@ -741,96 +725,5 @@ public class CommandUtil {
 
     public static int addRegionFlag(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, RegionFlag flag) {
         return addRegionFlag(ctx, region, flag, FlagState.DENIED, false);
-    }
-
-    public static void removeInvolvedEntities(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, RegionFlag flag) {
-        ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, region.getDim().location());
-        MinecraftServer server = ctx.getSource().getServer();
-        Predicate<? super Entity> entityFilter = getEntityFilterForFlag(flag);
-        switch (region.getRegionType()) {
-            case GLOBAL: {
-                server.getAllLevels().forEach(world -> {
-                    List<Entity> entitiesToRemove = getEntitiesToRemove(world, entityFilter, flag);
-                    entitiesToRemove.forEach(e -> e.setRemoved(Entity.RemovalReason.DISCARDED));
-                });
-            }
-            break;
-            case DIMENSION: {
-                ServerLevel regionWorld = server.getLevel(dimKey);
-                if (regionWorld != null) {
-                    List<Entity> entitiesToRemove = getEntitiesToRemove(regionWorld, entityFilter, flag);
-                    entitiesToRemove.forEach(e -> e.setRemoved(Entity.RemovalReason.DISCARDED));
-                }
-            }
-            break;
-            case LOCAL: {
-                ServerLevel regionWorld = server.getLevel(dimKey);
-                if (regionWorld != null) {
-                    List<Entity> entitiesToRemove = getEntitiesToRemove(regionWorld, (IMarkableRegion) region, entityFilter);
-                    entitiesToRemove.forEach(e -> e.setRemoved(Entity.RemovalReason.DISCARDED));
-                }
-            }
-            break;
-        }
-    }
-
-    private static boolean hasEnabledPersistenceFlag(Entity e) {
-        if (e instanceof Mob mob) {
-            return mob.isPersistenceRequired();
-        }
-        return false;
-    }
-
-    private static boolean isNotPersistent(Entity e) {
-        return !hasEnabledPersistenceFlag(e) && !e.hasCustomName();
-    }
-
-    private static Predicate<? super Entity> getEntityFilterForFlag(RegionFlag flag) {
-        switch (flag) {
-            case SPAWNING_ALL:
-                return e -> !(e instanceof Player);
-            case SPAWNING_MONSTER:
-                return HandlerUtil::isMonster;
-            case SPAWNING_ANIMAL:
-                return HandlerUtil::isAnimal;
-            case SPAWNING_GOLEM:
-                return e -> e instanceof SnowGolem || e instanceof IronGolem;
-            case SPAWNING_TRADER:
-                return e -> e instanceof WanderingTrader;
-            case SPAWNING_SLIME:
-                return e -> e instanceof Slime;
-            case SPAWNING_VILLAGER:
-                return HandlerUtil::isVillager;
-            case SPAWNING_XP:
-                return e -> e instanceof ExperienceOrb;
-            default:
-                return e -> false;
-        }
-    }
-
-    /**
-     * Get all entities in the region which are not persistent and match the entityFilter
-     */
-    private static List<Entity> getEntitiesToRemove(ServerLevel level, IMarkableRegion region, Predicate<? super Entity> entityFilter) {
-        // TODO: could be optimized by getting the chunks around the area only to check
-        List<? extends Entity> entities = level.getEntities(EntityTypeTest.forClass(Entity.class), entityFilter);
-        return entities.stream()
-                .filter(e -> region.getArea().containsOther(new CuboidArea(e.blockPosition(), e.blockPosition())))
-                .filter(CommandUtil::isNotPersistent)
-                .collect(Collectors.toList());
-    }
-
-    private static List<Entity> getEntitiesToRemove(ServerLevel level, Predicate<? super Entity> entityFilter, RegionFlag flag) {
-        List<? extends Entity> entities = level.getEntities(EntityTypeTest.forClass(Entity.class), entityFilter);
-        return entities.stream()
-                .filter(e -> !isProtectedByRegion(level, flag, e)) // That's O(enemyCount * regionCount) complexity, not considering the recursion for the flag check
-                .filter(CommandUtil::isNotPersistent)
-                .collect(Collectors.toList());
-    }
-
-    private static boolean isProtectedByRegion(ServerLevel level, RegionFlag flag, Entity e) {
-        FlagCheckEvent checkEvent = new FlagCheckEvent(e.blockPosition(), flag, level.dimension());
-        FlagState flagState = processCheck(checkEvent);
-        return flagState == FlagState.ALLOWED;
     }
 }
