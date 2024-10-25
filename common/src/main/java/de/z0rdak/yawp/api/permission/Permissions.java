@@ -4,9 +4,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.commands.CommandSourceType;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.platform.Services;
-import de.z0rdak.yawp.platform.services.IPermissionHelper;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.Arrays;
@@ -26,7 +24,6 @@ public final class Permissions {
     }
     /**
      * Permission needs to be separately handled for
-     * - bypassing certain flags
      * - using commands
      * - modifying region properties
      */
