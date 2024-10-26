@@ -549,6 +549,9 @@ public class CommandUtil {
 
     public static int removeRegionFlag(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, RegionFlag flag) {
         if (region.containsFlag(flag)) {
+            IFlag iFlag = region.getFlag(flag.name);
+            FlagEvent.RemoveFlagEvent removeFlagEvent = new FlagEvent.RemoveFlagEvent(ctx.getSource(), region, iFlag);
+            Services.EVENT.post(removeFlagEvent);
             region.removeFlag(flag.name);
             RegionDataManager.save();
             MutableComponent msg = Component.translatableWithFallback("cli.msg.flag.removed", "Removed flag '%s' from %s", flag.name,
@@ -704,9 +707,9 @@ public class CommandUtil {
                 default:
                     throw new IllegalArgumentException("Unexpected value = " + flag.getClass().getName());
             }
-            if (flag.name.contains("spawning") && Services.FLAG_CONFIG.removeEntitiesEnabled()) {
-                removeInvolvedEntities(ctx, region, flag);
-            }
+
+            FlagEvent.AddFlagEvent addFlagEvent = new FlagEvent.AddFlagEvent(ctx.getSource(), region, iFlag);
+            Services.EVENT.post(addFlagEvent);
             region.addFlag(iFlag);
             RegionDataManager.save();
             MutableComponent flagLink = ChatLinkBuilder.buildFlagInfoLink(region, iFlag);
