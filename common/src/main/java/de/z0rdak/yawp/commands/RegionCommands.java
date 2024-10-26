@@ -177,9 +177,9 @@ public class RegionCommands {
             } catch (CommandSyntaxException e) {
                 player = null;
             }
-            if (Services.EVENT.post(new RegionEvent.UpdateArea(region, area, player))) {
-                return 1;
-            }
+            RegionEvent.UpdateArea updateArea = new RegionEvent.UpdateArea(region, area, player);
+            updateArea = Services.EVENT.post(updateArea);
+            area = updateArea.markedArea();
             // Note: this check can be remove once the area types are all implemented, it's just here to catch any errors
             switch (newAreaType) {
                 case CUBOID:
