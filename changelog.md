@@ -1,3 +1,52 @@
+# [0.0.5.0-beta1] - not published
+
+This update for 1.20.1 + is firstly build using the multi-loader project setup. With it the file name format changed
+
+- from `yawp-<mc-version>-<yawp-version>-<modloader>.jar`
+- to `yawp-<mc-version>--<modloader>-<yawp-version>.jar`
+
+To make this multi-loader project setup possible it was necessary to restructure huge parts of the mod. But it brings
+some great advantages for the future:
+
+- Code Reusability: Core features and logic are now unified across mod loaders Forge and Fabric (and 1.21+ NeoForged),
+  reducing duplication of effort
+- Unified Development: Streamlined development process with a single codebase, simplifying version control and updates
+  for both platforms
+- Faster Development: Platform-agnostic features are implemented once, speeding up development across mod loaders
+- Shared Resources: Assets, configs, and data files are now shared across mod loader platforms, reducing project size
+  and redundancy
+
+## Added
+
+* New iteration of the programming API. This includes new events, an API to query regions, change them and save them.
+* Added new flag events:
+  * `AddFlagEvent`, fired when a flag is added to a region. This is just a info event, its values can't be changed, and
+    it can not be canceled.
+  * `RemoveFlagEvent`, fired when a flag is removed from a region. This is just a info event, its values can't be
+    changed, and it can not be canceled.
+  * `UpdateFlagMessageEvent`, fired when the flag message for a flag is changed. This can be used to edit the message to
+    implement e.g. a profanity filter.
+* Add and exposed first iteration of a Permission API
+* Exposed command constants in api package
+* Expose API to build YAWP console commands
+* Add Builders to create Local Region, Area and Flag instances.
+* Add API to get Global and query/manage Dimensional Regions
+* Add Dimensional Region API to query and manage Local Regions of a dimension
+* Add new mod logo
+
+## Changed
+
+* Switch whole project to use the official mojang mapping instead of yarn mappings
+* Update some flag lang keys to highlight the flag name in blue color
+* Overhaul building of text components for the CLI by adding a whole abstraction layer.
+* Separated building of text components from building CLI links, removing many code duplicates.
+* Add builder to easily create multiline and pagination text components. This might be further polished and extracted
+  into the API. Currently, this is located in `de.z0rdak.yawp.util.text`.
+
+## Removed
+
+* Remove old mod logo
+
 # [0.0.4.1-beta5] - 2024-10-09
 
 ## Fixed
