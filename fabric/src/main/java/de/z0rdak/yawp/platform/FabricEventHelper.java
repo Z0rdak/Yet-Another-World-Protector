@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.platform;
 
+import de.z0rdak.yawp.api.events.flag.FabricFlagEvents;
 import de.z0rdak.yawp.api.events.flag.FlagEvent;
 import de.z0rdak.yawp.api.events.region.FabricRegionEvents;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
@@ -11,7 +12,7 @@ public class FabricEventHelper implements IEventHelper {
 
     @Override
     public boolean post(FlagCheckEvent event) {
-        return FabricRegionEvents.post(event);
+        return FabricRegionEvents.CHECK_FLAG.invoker().checkFlag(event);
     }
 
     @Override
@@ -37,8 +38,26 @@ public class FabricEventHelper implements IEventHelper {
     }
 
     @Override
-    public void post(FlagEvent editMsgEvent) {
+    public RegionEvent.UpdateArea post(RegionEvent.UpdateArea event) {
+        return null;
+    }
 
+    @Override
+    public void post(FlagEvent event) {
+        if (event instanceof FlagEvent.RemoveFlagEvent) {
+            FabricFlagEvents.REMOVE_FLAG.invoker().removeFlag((FlagEvent.RemoveFlagEvent) event);
+        }
+        if (event instanceof FlagEvent.AddFlagEvent) {
+            FabricFlagEvents.ADD_FLAG.invoker().addFlag((FlagEvent.AddFlagEvent) event);
+        }
+        if (event instanceof FlagEvent.UpdateFlagMessageEvent) {
+            FabricFlagEvents.UPDATE_FLAG_MSG.invoker().updateFlagMsg((FlagEvent.UpdateFlagMessageEvent) event);
+        }
+    }
+
+    @Override
+    public FlagEvent.UpdateFlagMessageEvent post(FlagEvent.UpdateFlagMessageEvent event) {
+        return FabricFlagEvents.UPDATE_FLAG_MSG.invoker().updateFlagMsg(event);
     }
 
 }

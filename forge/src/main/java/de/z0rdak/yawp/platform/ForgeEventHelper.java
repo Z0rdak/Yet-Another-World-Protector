@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.platform;
 
 import de.z0rdak.yawp.api.events.flag.FlagEvent;
+import de.z0rdak.yawp.api.events.flag.ForgeFlagEvent;
 import de.z0rdak.yawp.api.events.region.*;
 import de.z0rdak.yawp.platform.services.IEventHelper;
 import net.minecraftforge.common.MinecraftForge;
@@ -42,8 +43,33 @@ public class ForgeEventHelper implements IEventHelper {
     }
 
     @Override
-    public void post(FlagEvent editMsgEvent) {
-        
-        MinecraftForge.EVENT_BUS.post()
+    public RegionEvent.UpdateArea post(RegionEvent.UpdateArea event) {
+        ForgeRegionEvent.UpdateArea forgeEvent = ForgeRegionEvent.UpdateArea.asEvent(event);
+        MinecraftForge.EVENT_BUS.post(forgeEvent);
+        return ForgeRegionEvent.UpdateArea.asNonEvent(forgeEvent);
+    }
+
+
+    @Override
+    public void post(FlagEvent event) {
+        if (event instanceof FlagEvent.AddFlagEvent) {
+            ForgeFlagEvent.AddFlagEvent addFlagEvent = new ForgeFlagEvent.AddFlagEvent((FlagEvent.AddFlagEvent) event);
+            MinecraftForge.EVENT_BUS.post(addFlagEvent);
+        }
+        if (event instanceof FlagEvent.RemoveFlagEvent) {
+            ForgeFlagEvent.RemoveFlagEvent removeFlagEvent = new ForgeFlagEvent.RemoveFlagEvent((FlagEvent.RemoveFlagEvent) event);
+            MinecraftForge.EVENT_BUS.post(removeFlagEvent);
+        }
+        if (event instanceof FlagEvent.UpdateFlagMessageEvent) {
+            ForgeFlagEvent.UpdateFlagMessageEvent updateFlagMessageEvent = new ForgeFlagEvent.UpdateFlagMessageEvent((FlagEvent.UpdateFlagMessageEvent) event);
+            MinecraftForge.EVENT_BUS.post(updateFlagMessageEvent);
+        }
+    }
+
+    @Override
+    public FlagEvent.UpdateFlagMessageEvent post(FlagEvent.UpdateFlagMessageEvent event) {
+        ForgeFlagEvent.UpdateFlagMessageEvent forgeEvent = ForgeFlagEvent.UpdateFlagMessageEvent.asEvent(event);
+        MinecraftForge.EVENT_BUS.post(forgeEvent);
+        return ForgeFlagEvent.UpdateFlagMessageEvent.asNonEvent(forgeEvent);
     }
 }

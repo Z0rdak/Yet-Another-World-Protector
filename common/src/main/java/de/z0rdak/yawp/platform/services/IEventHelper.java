@@ -11,5 +11,8 @@ public interface IEventHelper {
     FlagCheckResult post(FlagCheckResult event);
     boolean post(RegionEvent event);
 
+    RegionEvent.UpdateArea post(RegionEvent.UpdateArea event);
     void post(FlagEvent event);
+
+    FlagEvent.UpdateFlagMessageEvent post(FlagEvent.UpdateFlagMessageEvent event);
 }
