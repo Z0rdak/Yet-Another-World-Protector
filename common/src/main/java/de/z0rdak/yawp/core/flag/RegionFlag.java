@@ -52,6 +52,7 @@ public enum RegionFlag {
     MOB_GRIEFING("mob-griefing", FlagType.BOOLEAN_FLAG, Collections.singletonList(FlagCategory.ENVIRONMENT)),
     NO_FLIGHT("no-flight", FlagType.BOOLEAN_FLAG, Collections.singletonList(FlagCategory.PLAYER)),
     NO_PVP("no-pvp", FlagType.BOOLEAN_FLAG, Arrays.asList(FlagCategory.PLAYER, FlagCategory.ENTITY)),
+    NO_SIGN_EDIT("no-sign-edit", FlagType.BOOLEAN_FLAG, Arrays.asList(FlagCategory.PLAYER, FlagCategory.BLOCK)),
     PLACE_BLOCKS("place-blocks", FlagType.BOOLEAN_FLAG, Arrays.asList(FlagCategory.PLAYER, FlagCategory.BLOCK)),
     PLACE_FLUIDS("place-fluids", FlagType.BOOLEAN_FLAG, Arrays.asList(FlagCategory.PLAYER, FlagCategory.BLOCK)),
     SCOOP_FLUIDS("scoop-fluids", FlagType.BOOLEAN_FLAG, Arrays.asList(FlagCategory.PLAYER, FlagCategory.BLOCK)),
