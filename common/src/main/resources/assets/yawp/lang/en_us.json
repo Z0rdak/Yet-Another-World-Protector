@@ -356,6 +356,7 @@
   "flag.msg.deny.melee-wtrader": "The §9{flag}§r flag denies this action here!",
   "flag.msg.deny.no-flight": "The §9{flag}§r flag denies this action here!",
   "flag.msg.deny.no-pvp": "The §9{flag}§r flag denies this action here!",
+  "flag.msg.deny.no-sign-edit": "THe §9{flag}§r flag denies this action here!",
   "flag.msg.deny.place-blocks": "The §9{flag}§r flag denies this action here!",
   "flag.msg.deny.place-fluids": "The §9{flag}§r flag denies this action here!",
   "flag.msg.deny.scoop-fluids": "The §9{flag}§r flag denies this action here!",

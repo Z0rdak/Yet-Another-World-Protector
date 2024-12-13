@@ -9,7 +9,8 @@
     "FrostWalkerEnchantmentMixin",
     "LeavesBlockMixin",
     "LightningEntityMixin",
-    "ServerWorldMixin"
+    "ServerWorldMixin",
+    "SignBlockMixin"
   ],
   "client": [
   ],
