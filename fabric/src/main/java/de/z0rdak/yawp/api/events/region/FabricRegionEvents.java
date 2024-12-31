@@ -39,6 +39,7 @@ public final class FabricRegionEvents {
         }
         return false;
     });
+
     public static final Event<UpdateArea> UPDATE_AREA = EventFactory.createArrayBacked(UpdateArea.class, callbacks -> (updateAreaEvent) -> {
         for (UpdateArea callback : callbacks) {
             if (!callback.updateArea(updateAreaEvent)) {
@@ -71,10 +72,6 @@ public final class FabricRegionEvents {
     private FabricRegionEvents() {
     }
 
-    public static boolean post(FlagCheckEvent checkEvent) {
-        return FabricRegionEvents.CHECK_FLAG.invoker().checkFlag(checkEvent);
-    }
-
     @FunctionalInterface
     public interface CreateRegion {
         boolean createRegion(RegionEvent.Create createRegionEvent);
@@ -104,6 +101,4 @@ public final class FabricRegionEvents {
     public interface CheckFlag {
         boolean checkFlag(FlagCheckEvent flagCheckEvent);
     }
-
-
 }
