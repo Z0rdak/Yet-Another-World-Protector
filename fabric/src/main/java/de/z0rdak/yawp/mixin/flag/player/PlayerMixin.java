@@ -113,14 +113,16 @@ public abstract class PlayerMixin {
     public void onHurt(DamageSource source, float amount, CallbackInfo ci) {
         Player player = (Player) (Object) this;
         if (isServerSide(player)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), NO_PVP, getDimKey(player), player);
-            if (Services.EVENT.post(checkEvent))
-                return;
-            processCheck(checkEvent, deny -> {
-                sendFlagMsg(deny);
-                ci.cancel();
-            });
-            checkEvent = new FlagCheckEvent(player.blockPosition(), INVINCIBLE, getDimKey(player), player);
+            if (source.getEntity() instanceof Player) {
+                FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), NO_PVP, getDimKey(player), player);
+                if (Services.EVENT.post(checkEvent))
+                    return;
+                processCheck(checkEvent, deny -> {
+                    sendFlagMsg(deny);
+                    ci.cancel();
+                });
+            }
+            FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), INVINCIBLE, getDimKey(player), player);
             if (Services.EVENT.post(checkEvent))
                 return;
             processCheck(checkEvent, deny -> {
