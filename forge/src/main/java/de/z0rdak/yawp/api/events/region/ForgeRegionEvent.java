@@ -115,6 +115,14 @@ public abstract class ForgeRegionEvent extends Event {
             return new RegionEvent.UpdateArea(event.getRegion(), event.getMarkedArea(), event.getPlayer());
         }
 
+        public static UpdateArea asEvent(RegionEvent.UpdateArea updateAreaEvent) {
+            return new UpdateArea(updateAreaEvent);
+        }
+
+        public static RegionEvent.UpdateArea asNonEvent(UpdateArea forgeAreaUpdate) {
+            return new RegionEvent.UpdateArea(forgeAreaUpdate.getRegion(), forgeAreaUpdate.getMarkedArea(), forgeAreaUpdate.getPlayer());
+        }
+
         public IMarkableArea getMarkedArea() {
             return markedArea;
         }
