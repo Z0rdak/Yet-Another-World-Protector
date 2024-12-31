@@ -120,7 +120,7 @@ public abstract class LivingEntityMixin {
                 });
             }
             if (isPlayer(self)) {
-                checkEvent = new FlagCheckEvent(self.blockPosition(), FALL_DAMAGE_VILLAGERS, getDimKey(self), (Player) self);
+                checkEvent = new FlagCheckEvent(self.blockPosition(), FALL_DAMAGE_PLAYERS, getDimKey(self), (Player) self);
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
