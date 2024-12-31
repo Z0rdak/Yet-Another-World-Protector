@@ -235,7 +235,7 @@ public class GrievingFlagHandler {
                     .filter(explosionBlockPosFilterPredicate(dim, RegionFlag.EXPLOSION_BLOCK))
                     .collect(Collectors.toSet());
             Set<Entity> protectedEntities = event.getAffectedEntities().stream()
-                    .filter(explosionEntityPosFilterPredicate(dim, RegionFlag.EXPLOSION_BLOCK))
+                    .filter(explosionEntityPosFilterPredicate(dim, RegionFlag.EXPLOSION_ENTITY))
                     .collect(Collectors.toSet());
             preventDestructionFor(event, protectedBlocks, protectedEntities);
 
