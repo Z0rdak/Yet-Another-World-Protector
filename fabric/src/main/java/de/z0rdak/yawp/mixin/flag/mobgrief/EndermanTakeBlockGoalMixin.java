@@ -28,6 +28,7 @@ public abstract class EndermanTakeBlockGoalMixin {
         if (this.enderman.getCarriedBlock() == null) {
             cir.setReturnValue(false);
         }
+        // TODO: Hook into tick method to get the position of the block, not the entity
         FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), ENDERMAN_GRIEFING, getDimKey(self));
         if (Services.EVENT.post(checkEvent)) {
             return;
