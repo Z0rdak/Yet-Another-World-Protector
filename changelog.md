@@ -1,9 +1,9 @@
-# [0.0.5.0-beta1] - not published
+# [0.5.0-beta1] - 2024-12-31
 
 This update for 1.20.1 + is firstly build using the multi-loader project setup. With it the file name format changed
 
 - from `yawp-<mc-version>-<yawp-version>-<modloader>.jar`
-- to `yawp-<mc-version>--<modloader>-<yawp-version>.jar`
+- to `yawp-<mc-version>-<modloader>-<yawp-version>.jar`
 
 To make this multi-loader project setup possible it was necessary to restructure huge parts of the mod. But it brings
 some great advantages for the future:
@@ -20,9 +20,9 @@ some great advantages for the future:
 
 * New iteration of the programming API. This includes new events, an API to query regions, change them and save them.
 * Added new flag events:
-  * `AddFlagEvent`, fired when a flag is added to a region. This is just a info event, its values can't be changed, and
+  * `AddFlagEvent`, fired when a flag is added to a region. This is just an info event, its values can't be changed, and
     it can not be canceled.
-  * `RemoveFlagEvent`, fired when a flag is removed from a region. This is just a info event, its values can't be
+  * `RemoveFlagEvent`, fired when a flag is removed from a region. This is just an info event, its values can't be
     changed, and it can not be canceled.
   * `UpdateFlagMessageEvent`, fired when the flag message for a flag is changed. This can be used to edit the message to
     implement e.g. a profanity filter.
@@ -42,6 +42,7 @@ some great advantages for the future:
 * Separated building of text components from building CLI links, removing many code duplicates.
 * Add builder to easily create multiline and pagination text components. This might be further polished and extracted
   into the API. Currently, this is located in `de.z0rdak.yawp.util.text`.
+* Ditched forge suggestion for versioning schema. It's now back to https://keepachangelog.com/en/1.0.0/
 
 ## Removed
 
