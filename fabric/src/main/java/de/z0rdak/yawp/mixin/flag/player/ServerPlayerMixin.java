@@ -6,7 +6,9 @@ import de.z0rdak.yawp.platform.Services;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -21,8 +23,8 @@ import static de.z0rdak.yawp.util.text.MessageSender.sendFlagMsg;
 public abstract class ServerPlayerMixin {
 
     // This is preferred to forge ItemTossEvent, because the forge event does delete the stack
-    @Inject(method = "drop(Z)Z", at = @At(value = "TAIL"), allow = 1, cancellable = true)
-    private void onDropItem(boolean entireStack, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;", at = @At(value = "HEAD"), allow = 1, cancellable = true)
+    private void onDropItem(ItemStack stack, boolean b1, boolean b2, CallbackInfoReturnable<ItemEntity> cir) {
         ServerPlayer player = (ServerPlayer) (Object) this;
         if (isServerSide(player)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), ITEM_DROP, getDimKey(player), player);
@@ -30,14 +32,13 @@ public abstract class ServerPlayerMixin {
                 return;
             processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
-                cir.setReturnValue(false);
+                player.addItem(stack);
+                player.getInventory().setChanged();
+                cir.setReturnValue(null);
             });
         }
     }
 
-    /**
-     * TODO: Fix ENTER_DIM for local regions
-     */
     @Inject(method = "changeDimension", at = @At(value = "HEAD"), allow = 1, cancellable = true)
     private void onChangeDimension(ServerLevel destination, CallbackInfoReturnable<Entity> cir) {
         Player player = (Player) (Object) this;

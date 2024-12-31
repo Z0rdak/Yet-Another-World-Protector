@@ -26,8 +26,9 @@ import static de.z0rdak.yawp.util.text.MessageSender.sendFlagMsg;
 @Mixin(Player.class)
 public abstract class PlayerMixin {
 
-    @Inject(method = "drop(Lnet/minecraft/world/item/ItemStack;Z)Lnet/minecraft/world/entity/item/ItemEntity;", at = @At(value = "TAIL"), allow = 1, cancellable = true)
-    private void onDropItem(ItemStack stack, boolean retainOwnership, CallbackInfoReturnable<ItemStack> cir) {
+    // TODO: This does not seem to be triggered
+    @Inject(method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;", at = @At(value = "HEAD"), allow = 1, cancellable = true)
+    private void onDropItem(ItemStack stack, boolean b1, boolean retainOwnership, CallbackInfoReturnable<ItemStack> cir) {
         Player player = (Player) (Object) this;
         if (isServerSide(player)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), ITEM_DROP, getDimKey(player), player);
@@ -35,6 +36,7 @@ public abstract class PlayerMixin {
                 return;
             processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
+                player.addItem(stack);
                 cir.setReturnValue(null);
             });
         }
