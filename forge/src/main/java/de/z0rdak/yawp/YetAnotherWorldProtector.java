@@ -46,7 +46,7 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
     }
 
     @SubscribeEvent
-    private static void onAddFlag(ForgeFlagEvent.AddFlagEvent event) {
+    public static void onAddFlag(ForgeFlagEvent.AddFlagEvent event) {
         if (event.getFlag().getName().contains("spawning") && Services.FLAG_CONFIG.removeEntitiesEnabled()) {
             removeInvolvedEntities(event.getSrc(), event.getRegion(), RegionFlag.fromId(event.getFlag().getName()));
         }
