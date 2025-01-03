@@ -85,6 +85,16 @@ subprojects {
             name = "Fuzs Mod Resources"
             url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
         }
+        maven {
+            url = "https://jitpack.io"
+            content {
+                includeGroup("com.github.BlueMap-Minecraft")
+            }
+        }
+    }
+
+    dependencies {
+        implementation group: 'com.github.BlueMap-Minecraft', name: 'BlueMapAPI', version: 'v2.6.2'
     }
 
     tasks.withType(JavaCompile).configureEach {

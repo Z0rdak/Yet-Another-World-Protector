@@ -15,6 +15,8 @@ public class WebMapRegistry {
     }
 
     public void initialize() {
+        List.of(new BlueMapIntegration())
+                .forEach(ext -> ext.initialize(this));
     }
 
     void register(WebMapIntegration extension) {
