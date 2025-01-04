@@ -42,6 +42,16 @@ repositories {
         name = 'BlameJared'
         url = 'https://maven.blamejared.com'
     }
+    maven {
+        url = "https://www.cursemaven.com"
+        content {
+            includeGroup 'curse.maven'
+        }
+    }
+    maven {
+        name = "Fuzs Mod Resources"
+        url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
+    }
 }
 
 // Declare capabilities on the outgoing configurations.
@@ -59,15 +69,34 @@ repositories {
 }
 
 sourcesJar {
-    from(rootProject.file('LICENSE')) {
-        rename { "${it}_${mod_name}" }
+    from(rootProject.file("LICENSE")) {
+        rename { "${it}" }
+    }
+    from(rootProject.file("CREDITS")) {
+        rename { "${it}" }
+    }
+    from(rootProject.file("README.md")) {
+        rename { "${it}" }
+    }
+    from(rootProject.file("changelog.md")) {
+        rename { "${it}" }
     }
 }
 
 jar {
-    from(rootProject.file('LICENSE')) {
-        rename { "${it}_${mod_name}" }
+    from(rootProject.file("LICENSE")) {
+        rename { "${it}" }
     }
+    from(rootProject.file("CREDITS")) {
+        rename { "${it}" }
+    }
+    from(rootProject.file("README.md")) {
+        rename { "${it}" }
+    }
+    from(rootProject.file("changelog.md")) {
+        rename { "${it}" }
+    }
+    
 
     manifest {
         attributes([
@@ -80,6 +109,12 @@ jar {
                 'Built-On-Minecraft'    : minecraft_version
         ])
     }
+}
+
+dependencies {
+    implementation 'com.electronwill.night-config:toml:3.8.1'
+    implementation 'com.electronwill.night-config:json:3.8.1'
+    implementation 'com.electronwill.night-config:core:3.8.1'
 }
 
 processResources {
@@ -97,10 +132,13 @@ processResources {
             'description'                  : project.description,
             'neoforge_version'             : neoforge_version,
             'neoforge_loader_version_range': neoforge_loader_version_range,
-            "forge_version": forge_version,
-            "forge_loader_version_range": forge_loader_version_range,
+            "forge_version"                : forge_version,
+            "forge_loader_version_range"   : forge_loader_version_range,
             'credits'                      : credits,
-            'java_version'                 : java_version
+            'java_version'                 : java_version,
+            'mc_username'                  : mc_username,
+            'mc_uuid'                      : mc_uuid,
+            'resource_pack_desc'           : resource_pack_desc
     ]
 
     filesMatching(['pack.mcmeta', 'fabric.mod.json', 'META-INF/mods.toml', 'META-INF/neoforge.mods.toml', '*.mixins.json']) {

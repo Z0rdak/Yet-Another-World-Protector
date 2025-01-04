@@ -21,6 +21,15 @@ dependencies {
     // fabric and neoforge both bundle mixinextras, so it is safe to use it in common
     compileOnly group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
     annotationProcessor group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
+   
+    implementation 'com.electronwill.night-config:toml:3.8.1'
+    implementation 'com.electronwill.night-config:json:3.8.1'
+    implementation 'com.electronwill.night-config:core:3.8.1'
+
+    // NeoForge's config system
+    api "fuzs.forgeconfigapiport:forgeconfigapiport-common-neoforgeapi:21.4.1"
+    // Forge's config system
+    // api "fuzs.forgeconfigapiport:forgeconfigapiport-common-forgeapi:21.4.1"
 }
 
 configurations {

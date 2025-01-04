@@ -77,6 +77,8 @@ dependencies {
 
     // Forge's hack fix
     implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
+        
+    api(fg.deobf("fuzs.forgeconfigapiport:forgeconfigapiport-forge:21.4.1"))
 }
 
 publishing {
