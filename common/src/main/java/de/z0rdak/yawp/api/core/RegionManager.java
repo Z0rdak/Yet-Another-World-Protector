@@ -86,7 +86,7 @@ public final class RegionManager implements IRegionManager {
 
     @Override
     public ResourceKey<Level> getDimApiKey(String dimKey) {
-        return ResourceKey.create(Registries.DIMENSION, new ResourceLocation(dimKey));
+        return ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(dimKey));
     }
 
     @Override

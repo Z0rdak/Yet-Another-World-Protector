@@ -49,7 +49,7 @@ public abstract class CenteredArea extends AbstractArea {
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-        this.center = NbtUtils.readBlockPos(nbt.getCompound("center"));
+        this.center = NbtUtils.readBlockPos(nbt, "center").orElseThrow();
     }
 
     @Override

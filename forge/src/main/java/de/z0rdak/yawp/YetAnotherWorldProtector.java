@@ -23,7 +23,6 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.network.NetworkConstants;
 
 import static de.z0rdak.yawp.handler.YawpEventHandler.removeInvolvedEntities;
 
@@ -40,8 +39,9 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
         addDimKeyOnDimensionChange();
         registerCommands();
 
+        ModLoadingContext modLoadingContext = new ModLoadingContext();
         //Make sure the mod being absent on the other network side does not cause the client to display the server as incompatible
-        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (s, b) -> true));
+        modLoadingContext.registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (s, b) -> true));
         MinecraftForge.EVENT_BUS.register(YetAnotherWorldProtector.class);
     }
 
@@ -77,7 +77,7 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
 
     private void loadRegionDataForge(ServerStartingEvent event) {
         MinecraftServer server = event.getServer();
-        ResourceLocation levelRl = new ResourceLocation("minecraft:overworld");
+        ResourceLocation levelRl = ResourceLocation.parse("minecraft:overworld");
         server.getAllLevels().forEach(level -> {
             if (level.dimension().location().equals(levelRl)) {
                 RegionDataManager.loadRegionDataForWorld(server, level);

@@ -231,8 +231,8 @@ public class CuboidArea extends AbstractArea {
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-        this.p1 = NbtUtils.readBlockPos(nbt.getCompound(RegionNbtKeys.P1));
-        this.p2 = NbtUtils.readBlockPos(nbt.getCompound(RegionNbtKeys.P2));
+        this.p1 = NbtUtils.readBlockPos(nbt, RegionNbtKeys.P1).orElseThrow();
+        this.p2 = NbtUtils.readBlockPos(nbt, RegionNbtKeys.P2).orElseThrow();
         this.area = BoundingBox.fromCorners(p1, p2);
     }
 

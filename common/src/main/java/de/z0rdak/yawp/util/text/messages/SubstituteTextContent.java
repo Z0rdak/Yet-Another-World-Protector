@@ -2,8 +2,14 @@ package de.z0rdak.yawp.util.text.messages;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.*;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,12 +25,56 @@ public class SubstituteTextContent implements ComponentContents {
     private static final FormattedText LITERAL_PERCENT_SIGN = FormattedText.of("%");
     private static final FormattedText NULL_ARGUMENT = FormattedText.of("null");
     private static final Pattern ARG_FORMAT = Pattern.compile("%(?:(\\d+)\\$)?([A-Za-z%]|$)");
+    public static final SubstituteTextContent.Type<SubstituteTextContent> TYPE;
+    public static final MapCodec<SubstituteTextContent> CODEC;
+    
     private final String pattern;
     @Nullable
     private final Object[] args;
     @Nullable
     private List<FormattedText> substitutes = ImmutableList.of();
+    public static final Object[] NO_ARGS = new Object[0];
+    private static final Codec<Object> PRIMITIVE_ARG_CODEC;
+    private static final Codec<Object> ARG_CODEC;
 
+    static {
+        PRIMITIVE_ARG_CODEC = ExtraCodecs.JAVA.validate(SubstituteTextContent::filterAllowedArguments);
+        ARG_CODEC = Codec.either(PRIMITIVE_ARG_CODEC, ComponentSerialization.CODEC).xmap((p_304564_) -> p_304564_.map((p_304446_) -> p_304446_, (p_304596_) -> Objects.requireNonNullElse(p_304596_.tryCollapseToString(), p_304596_)), (p_304615_) -> {
+            Either var10000;
+            if (p_304615_ instanceof Component component) {
+                var10000 = Either.right(component);
+            } else {
+                var10000 = Either.left(p_304615_);
+            }
+
+            return var10000;
+        });
+        CODEC = RecordCodecBuilder.mapCodec((stcInstance) -> stcInstance.group(
+                Codec.STRING.fieldOf("pattern").forGetter((stc) -> stc.pattern),
+                ARG_CODEC.listOf().optionalFieldOf("with").forGetter((stc) -> adjustArgs(stc.args))
+        ).apply(stcInstance, SubstituteTextContent::create));
+        TYPE = new SubstituteTextContent.Type<>(CODEC, "substitutable");
+    }
+
+    private static Optional<List<Object>> adjustArgs(Object[] args) {
+        return args.length == 0 ? Optional.empty() : Optional.of(Arrays.asList(args));
+    }
+
+    private static Object[] adjustArgs(Optional<List<Object>> args) {
+        return args.map((arg) -> arg.isEmpty() ? NO_ARGS : arg.toArray()).orElse(NO_ARGS);
+    }
+
+    private static SubstituteTextContent create(String pattern, Optional<List<Object>> args) {
+        return new SubstituteTextContent(pattern, adjustArgs(args));
+    }
+
+    private static DataResult<Object> filterAllowedArguments(@Nullable Object input) {
+        return !isAllowedPrimitiveArgument(input) ? DataResult.error(() -> "This value needs to be parsed as component") : DataResult.success(input);
+    }
+
+    public static boolean isAllowedPrimitiveArgument(@Nullable Object input) {
+        return input instanceof Number || input instanceof Boolean || input instanceof String;
+    }
     public SubstituteTextContent(String pattern, Object[] args) {
         this.pattern = pattern;
         this.args = args;
@@ -126,6 +176,11 @@ public class SubstituteTextContent implements ComponentContents {
             objects[i] = object instanceof Component ? ComponentUtils.updateForEntity(source, (Component) object, sender, depth) : object;
         }
         return MutableComponent.create(new SubstituteTextContent(this.pattern, objects));
+    }
+
+    @Override
+    public Type<?> type() {
+        return TYPE;
     }
 
     /*

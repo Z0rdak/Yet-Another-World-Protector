@@ -16,7 +16,6 @@ import de.z0rdak.yawp.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.util.LocalRegions;
-import de.z0rdak.yawp.util.StickType;
 import de.z0rdak.yawp.util.StickUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -28,14 +27,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 import java.util.Collections;
-import java.util.Objects;
 
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.DimensionCommands.getRandomExample;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.ChatLinkBuilder.buildRegionInfoLink;
-import static de.z0rdak.yawp.constants.serialization.ItemNbtKeys.STICK;
-import static de.z0rdak.yawp.util.StickUtil.getStickType;
 import static de.z0rdak.yawp.util.text.MessageSender.sendCmdFeedback;
 import static net.minecraft.ChatFormatting.RED;
 
@@ -61,25 +57,20 @@ public final class MarkerCommands {
 
     public static IMarkableRegion fromMarkedBlocks(CommandContext<CommandSourceStack> ctx, Player player, String regionName) throws CommandSyntaxException {
         ItemStack maybeStick = player.getMainHandItem();
-        if (StickUtil.isVanillaStick(maybeStick)) {
-            StickType stickType = StickUtil.getStickType(maybeStick);
-            if (stickType == StickType.MARKER) {
-                CompoundTag stickNBT = StickUtil.getStickNBT(maybeStick);
-                if (stickNBT != null) {
-                    MarkerStick marker = new MarkerStick(stickNBT);
-                    if (!marker.isValidArea()) {
-                        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.area.invalid", "Marked area is not valid").withStyle(RED));
-                        return null;
-                    }
-                    return LocalRegions.regionFrom(player, marker, regionName);
-                } else {
-                    sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.invalid", "Invalid RegionMarker data, sorry. Get a new one and try again."));
+        if (StickUtil.isMarker(maybeStick)) {
+            CompoundTag stickNBT = StickUtil.getStickNBT(maybeStick);
+            if (stickNBT != null) {
+                MarkerStick marker = new MarkerStick(stickNBT);
+                if (!marker.isValidArea()) {
+                    sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.area.invalid", "Marked area is not valid").withStyle(RED));
                     return null;
                 }
+                return LocalRegions.regionFrom(player, marker, regionName);
             } else {
-                sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.missing", "Put a valid(*) RegionMarker in your main hand to create a region!").withStyle(RED));
+                sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.invalid", "Invalid RegionMarker data, sorry. Get a new one and try again."));
                 return null;
             }
+            
         } else {
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.missing", "Put a valid(*) RegionMarker in your main hand to create a region!").withStyle(RED));
             return null;
@@ -139,20 +130,10 @@ public final class MarkerCommands {
         try {
             Player player = ctx.getSource().getPlayerOrException();
             ItemStack mainHandItem = player.getMainHandItem();
-            // is valid stick
-            if (!mainHandItem.equals(ItemStack.EMPTY)
-                    && StickUtil.hasNonNullTag(mainHandItem)
-                    && mainHandItem.getTag().contains(STICK)) {
-                StickType stickType = getStickType(mainHandItem);
-                if (Objects.requireNonNull(stickType) == StickType.MARKER) {
-                    mainHandItem = StickUtil.initMarkerNbt(mainHandItem, StickType.MARKER, player.level().dimension());
-                    // Note: When different area types are available: Get stick, reset it, and save it back.
-                    sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.reset", "RegionMarker successfully reset!"));
-                    return 0;
-                } else {
-                    sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.missing", "Put a valid(*) RegionMarker in your main hand to create a region!").withStyle(RED));
-                    return 1;
-                }
+            if (!mainHandItem.equals(ItemStack.EMPTY) && StickUtil.isMarker(mainHandItem)) {
+                StickUtil.initMarkerNbt(mainHandItem, player.level().dimension());
+                sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.reset", "RegionMarker successfully reset!"));
+                return 0;
             } else {
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.missing", "Put a valid(*) RegionMarker in your main hand to create a region!").withStyle(RED));
                 return 1;
@@ -166,8 +147,9 @@ public final class MarkerCommands {
     public static int giveMarkerStick(CommandContext<CommandSourceStack> ctx) {
         try {
             Player targetPlayer = ctx.getSource().getPlayerOrException();
-            ItemStack markerStick = StickUtil.initMarkerNbt(Items.STICK.getDefaultInstance(), StickType.MARKER, targetPlayer.level().dimension());
-            targetPlayer.addItem(markerStick);
+            ItemStack marker = Items.STICK.getDefaultInstance();
+            StickUtil.initMarkerNbt(marker, targetPlayer.level().dimension());
+            targetPlayer.addItem(marker);
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.success", "RegionMarker added to your inventory!"));
         } catch (CommandSyntaxException e) {
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.no-player", "This command can only be executed as a player!").withStyle(RED));

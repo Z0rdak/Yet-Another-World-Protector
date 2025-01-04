@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.config.server;
 
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,17 +14,17 @@ import static de.z0rdak.yawp.constants.Constants.MOD_ID;
 
 public class RegionConfig {
 
-    public static final ForgeConfigSpec CONFIG_SPEC;
+    public static final ModConfigSpec CONFIG_SPEC;
     public static final String CONFIG_NAME = MOD_ID + "-region-defaults.toml";
-    public static final ForgeConfigSpec.ConfigValue<Integer> CLI_PAGINATION_ENTRY_SIZE;
-    public static final ForgeConfigSpec.ConfigValue<Integer> CLI_REGION_DEFAULT_PRIORITY_INC;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> REGION_DEFAULT_FLAGS;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> DIM_REGION_DISABLE_ON_CREATION;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> DIM_REGION_DEFAULT_FLAGS;
-    public static final ForgeConfigSpec.ConfigValue<Integer> DEFAULT_REGION_PRIORITY;
+    public static final ModConfigSpec.ConfigValue<Integer> CLI_PAGINATION_ENTRY_SIZE;
+    public static final ModConfigSpec.ConfigValue<Integer> CLI_REGION_DEFAULT_PRIORITY_INC;
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> REGION_DEFAULT_FLAGS;
+    public static final ModConfigSpec.ConfigValue<Boolean> DIM_REGION_DISABLE_ON_CREATION;
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> DIM_REGION_DEFAULT_FLAGS;
+    public static final ModConfigSpec.ConfigValue<Integer> DEFAULT_REGION_PRIORITY;
 
     static {
-        final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+        final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
         BUILDER.push("YetAnotherWorldProtector region configuration").build();
 

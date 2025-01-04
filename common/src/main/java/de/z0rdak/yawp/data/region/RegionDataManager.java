@@ -10,6 +10,7 @@ import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.platform.Services;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -18,13 +19,13 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import org.apache.commons.lang3.NotImplementedException;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -84,7 +85,8 @@ public class RegionDataManager extends SavedData {
                 ServerLevel overworld = serverInstance.overworld();
                 if (!overworld.isClientSide) {
                     DimensionDataStorage storage = overworld.getDataStorage();
-                    regionDataCache = storage.computeIfAbsent(RegionDataManager::load, RegionDataManager::new, DATA_NAME);
+                    Factory<RegionDataManager> rdmt = new Factory<>(RegionDataManager::new, RegionDataManager::load, DataFixTypes.SAVED_DATA_MAP_DATA);
+                    regionDataCache = storage.get(rdmt, DATA_NAME);
                 }
             }
         }
@@ -111,9 +113,10 @@ public class RegionDataManager extends SavedData {
             if (serverInstance == null) {
                 serverInstance = minecraftServer;
             }
-            if (isServerSide(serverWorld) && serverWorld.dimension().location().equals(new ResourceLocation("minecraft:overworld"))) {
+            if (isServerSide(serverWorld) && serverWorld.dimension().location().equals(ResourceLocation.parse("minecraft:overworld"))) {
                 DimensionDataStorage storage = serverWorld.getDataStorage();
-                RegionDataManager data = storage.computeIfAbsent(RegionDataManager::load, RegionDataManager::new, DATA_NAME);
+                Factory<RegionDataManager> rdmt = new Factory<>(RegionDataManager::new, RegionDataManager::load, DataFixTypes.SAVED_DATA_MAP_DATA);
+                RegionDataManager data = storage.get(rdmt, DATA_NAME);
                 storage.set(DATA_NAME, data);
                 regionDataCache = data;
                 Constants.LOGGER.info(Component.translatableWithFallback("data.nbt.dimensions.load.success", "Loaded %s region(s) for %s dimension(s)", data.getTotalRegionAmount(), data.getDimensionAmount()).getString());
@@ -128,7 +131,7 @@ public class RegionDataManager extends SavedData {
      *
      * @param nbt compound region data read from disk to be deserialized for the region cache.
      */
-    public static RegionDataManager load(CompoundTag nbt) {
+    public static RegionDataManager load(CompoundTag nbt, HolderLookup.Provider registries) {
         RegionDataManager rdm = new RegionDataManager();
         rdm.dimCacheMap.clear();
         if (!nbt.contains(GLOBAL) || nbt.getCompound(GLOBAL).isEmpty()) {
@@ -151,7 +154,7 @@ public class RegionDataManager extends SavedData {
             // deserialize all region without parent and child references
             for (String dimKey : dimensionRegions.getAllKeys()) {
                 if (dimensionRegions.contains(dimKey, Tag.TAG_COMPOUND)) {
-                    ResourceKey<Level> dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(dimKey));
+                    ResourceKey<Level> dimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(dimKey));
                     CompoundTag dimCacheNbt = dimensionRegions.getCompound(dimKey);
                     if (dimCacheNbt.contains(REGIONS, Tag.TAG_COMPOUND)) {
                         Constants.LOGGER.info(Component.translatable("Loading " + dimCacheNbt.getCompound(REGIONS).size() + " region(s) for dimension '" + dimKey + "'").getString());
@@ -241,11 +244,11 @@ public class RegionDataManager extends SavedData {
      * @return the compound region nbt data to be saved to disk.
      */
     @Override
-    public CompoundTag save(@NotNull CompoundTag compound) {
+    public CompoundTag save(CompoundTag compound, HolderLookup.Provider var2) {
         compound.put(GLOBAL, globalRegion.serializeNBT());
         CompoundTag dimRegionNbtData = new CompoundTag();
         // Constants.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.save.amount", this.getTotalRegionAmount(), dimCacheMap.keySet().size()).getString());
-        Constants.LOGGER.info(Component.translatable("Saving " + this.getTotalRegionAmount() + " region(s) for " + dimCacheMap.keySet().size() + " dimensions").getString());
+        Constants.LOGGER.info(Component.translatable("Saving " + this.getTotalRegionAmount() + " region(s) for " + dimCacheMap.size() + " dimensions").getString());
         for (Map.Entry<ResourceKey<Level>, DimensionRegionCache> entry : dimCacheMap.entrySet()) {
             // Constants.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.save.dim.amount", this.getRegionAmount(entry.getKey()), entry.getKey().location().toString()).getString());
             Constants.LOGGER.info(Component.translatable("Saving " + this.getRegionAmount(entry.getKey()) + " region(s) for dimension '" + entry.getKey().location() + "'").getString());
@@ -294,7 +297,7 @@ public class RegionDataManager extends SavedData {
     }
 
     public int getDimensionAmount() {
-        return dimCacheMap.keySet().size();
+        return dimCacheMap.size();
     }
 
     @Nullable

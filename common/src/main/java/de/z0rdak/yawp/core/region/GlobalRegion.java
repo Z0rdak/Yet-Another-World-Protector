@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class GlobalRegion extends AbstractRegion {
 
-    public static final ResourceLocation GLOBAL = new ResourceLocation("yawp", "global");
+    public static final ResourceLocation GLOBAL = ResourceLocation.fromNamespaceAndPath("yawp", "global");
     public static final ResourceKey<Level> GLOBAL_DIMENSION = ResourceKey.create(Registries.DIMENSION, GLOBAL);
 
     public GlobalRegion(CompoundTag nbt) {

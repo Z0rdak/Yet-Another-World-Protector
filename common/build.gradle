@@ -1,51 +1,50 @@
-/*
-VanillaGradle likes to push breaking changes without updating their version
-If this happens in the future, try update your gradle version on the project
-If a gradle update doesn't fix the issue, you can pin the VanillaGradle version to a specific version that was working before.
-You can find the versions here https://repo.spongepowered.org/#browse/browse:maven-snapshots:org%2Fspongepowered%2Fvanillagradle
-and you can pin them with the following code:
-
-buildscript {
-    dependencies.add 'classpath', 'org.spongepowered:vanillagradle:0.2.1-20240507.024226-82'
-}
-
 plugins {
-    id 'org.spongepowered.gradle.vanilla' version '0.2.1-20240507.024226-82'
+    id 'multiloader-common'
+    id 'net.neoforged.moddev'
 }
-*/
 
-plugins {
-    id 'idea'
-    id 'java'
-    id 'maven-publish'
-    id 'org.spongepowered.gradle.vanilla'
-}
-base {
-    archivesName = "${mod_id}-${minecraft_version}-common"
-}
-minecraft {
-    version(minecraft_version)
-    if(file("src/main/resources/${mod_id}.accesswidener").exists()){
-        accessWideners(file("src/main/resources/${mod_id}.accesswidener"))
+neoForge {
+    neoFormVersion = neo_form_version
+    // Automatically enable AccessTransformers if the file exists
+    def at = file('src/main/resources/META-INF/accesstransformer.cfg')
+    if (at.exists()) {
+        accessTransformers.from(at.absolutePath)
+    }
+    parchment {
+        minecraftVersion = parchment_minecraft
+        mappingsVersion = parchment_version
     }
 }
 
 dependencies {
-     compileOnly group:'org.spongepowered', name:'mixin', version:'0.8.5'
-     implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
-  
+    compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.8.5'
+    // fabric and neoforge both bundle mixinextras, so it is safe to use it in common
+    compileOnly group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
+    annotationProcessor group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
+
+    implementation 'com.electronwill.night-config:toml:3.8.1'
+    implementation 'com.electronwill.night-config:json:3.8.1'
+    implementation 'com.electronwill.night-config:core:3.8.1'
+
+    // NeoForge's config system
+    api "fuzs.forgeconfigapiport:forgeconfigapiport-common-neoforgeapi:21.4.1"
+    // Forge's config system
+    // api "fuzs.forgeconfigapiport:forgeconfigapiport-common-forgeapi:21.4.1"
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifactId base.archivesName.get()
-            from components.java
-        }
+configurations {
+    commonJava {
+        canBeResolved = false
+        canBeConsumed = true
     }
-    repositories {
-        maven {
-            url "file://" + System.getenv("local_maven")
-        }
+    commonResources {
+        canBeResolved = false
+        canBeConsumed = true
     }
 }
+
+artifacts {
+    commonJava sourceSets.main.java.sourceDirectories.singleFile
+    commonResources sourceSets.main.resources.sourceDirectories.singleFile
+}
+

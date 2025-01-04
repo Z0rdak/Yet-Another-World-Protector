@@ -41,6 +41,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.scores.Team;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -431,7 +432,8 @@ public class CommandUtil {
         Optional<GameProfile> cachedProfile = MojangApiHelper.lookupGameProfileInCache(ctx, playerUuid);
         if (cachedProfile.isPresent()) {
             GameProfile profile = cachedProfile.get();
-            if (profile.isComplete()) {
+            var isComplete = profile.getId() != null && StringUtils.isNotBlank(profile.getName());
+            if (isComplete) {
                 MutableComponent cacheSuccess = Component.translatableWithFallback("cli.msg.info.player.lookup.cache.success", "Found entry for '%s' in the cache", playerUuid.toString());
                 sendCmdFeedback(ctx.getSource(), cacheSuccess);
                 return addPlayer(ctx, profile.getId(), profile.getName(), region, group);
@@ -468,7 +470,8 @@ public class CommandUtil {
         Optional<GameProfile> cachedProfile = MojangApiHelper.lookupGameProfileInCache(ctx, playerName);
         if (cachedProfile.isPresent()) {
             GameProfile profile = cachedProfile.get();
-            if (profile.isComplete()) {
+            var isComplete = profile.getId() != null && StringUtils.isNotBlank(profile.getName());
+            if (isComplete) {
                 MutableComponent cacheSuccess = Component.translatableWithFallback("cli.msg.info.player.lookup.cache.success", "Found entry for '%s' in the cache", playerName);
                 sendCmdFeedback(ctx.getSource(), cacheSuccess);
                 return addPlayer(ctx, profile.getId(), profile.getName(), region, group);

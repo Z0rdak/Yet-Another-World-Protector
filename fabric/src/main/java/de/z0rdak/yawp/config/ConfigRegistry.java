@@ -7,9 +7,9 @@ import de.z0rdak.yawp.config.server.LoggingConfig;
 import de.z0rdak.yawp.config.server.PermissionConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.platform.Services;
-import fuzs.forgeconfigapiport.api.config.v2.ForgeConfigRegistry;
-import fuzs.forgeconfigapiport.api.config.v2.ModConfigEvents;
-import net.minecraftforge.fml.config.ModConfig;
+import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeConfigRegistry;
+import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeModConfigEvents;
+import net.neoforged.fml.config.ModConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,15 +23,13 @@ public final class ConfigRegistry {
     }
 
     public static void register() {
-
-        ModConfigEvents.loading(MOD_ID).register(ConfigRegistry::onModLoading);
-        ModConfigEvents.reloading(MOD_ID).register(ConfigRegistry::onModReloading);
-
+        NeoForgeModConfigEvents.loading(MOD_ID).register(ConfigRegistry::onModLoading);
+        NeoForgeModConfigEvents.reloading(MOD_ID).register(ConfigRegistry::onModReloading);
         // registering configuration
-        ForgeConfigRegistry.INSTANCE.register(MOD_ID, ModConfig.Type.SERVER, PermissionConfig.CONFIG_SPEC, PermissionConfig.CONFIG_NAME);
-        ForgeConfigRegistry.INSTANCE.register(MOD_ID, ModConfig.Type.SERVER, FlagConfig.CONFIG_SPEC, FlagConfig.CONFIG_NAME);
-        ForgeConfigRegistry.INSTANCE.register(MOD_ID, ModConfig.Type.SERVER, RegionConfig.CONFIG_SPEC, RegionConfig.CONFIG_NAME);
-        ForgeConfigRegistry.INSTANCE.register(MOD_ID, ModConfig.Type.SERVER, LoggingConfig.CONFIG_SPEC, LoggingConfig.CONFIG_NAME);
+        NeoForgeConfigRegistry.INSTANCE.register(MOD_ID, ModConfig.Type.SERVER, PermissionConfig.CONFIG_SPEC, PermissionConfig.CONFIG_NAME);
+        NeoForgeConfigRegistry.INSTANCE.register(MOD_ID, ModConfig.Type.SERVER, FlagConfig.CONFIG_SPEC, FlagConfig.CONFIG_NAME);
+        NeoForgeConfigRegistry.INSTANCE.register(MOD_ID, ModConfig.Type.SERVER, RegionConfig.CONFIG_SPEC, RegionConfig.CONFIG_NAME);
+        NeoForgeConfigRegistry.INSTANCE.register(MOD_ID, ModConfig.Type.SERVER, LoggingConfig.CONFIG_SPEC, LoggingConfig.CONFIG_NAME);
     }
 
     private static void onModReloading(ModConfig modConfig) {

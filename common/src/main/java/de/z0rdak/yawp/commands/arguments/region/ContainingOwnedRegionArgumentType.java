@@ -186,7 +186,7 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
             try {
                 Player player = src.getPlayerOrException();
                 ItemStack maybeStick = player.getMainHandItem();
-                if (StickUtil.isVanillaStick(maybeStick) && StickUtil.isMarker(maybeStick)) {
+                if (StickUtil.isMarker(maybeStick)) {
                     CompoundTag stickNBT = StickUtil.getStickNBT(maybeStick);
                     if (stickNBT != null) {
                         MarkerStick marker = new MarkerStick(stickNBT);

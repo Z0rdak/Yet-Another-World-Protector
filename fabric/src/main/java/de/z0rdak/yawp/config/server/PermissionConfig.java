@@ -6,7 +6,7 @@ import de.z0rdak.yawp.platform.Services;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -16,23 +16,23 @@ import static de.z0rdak.yawp.constants.Constants.MOD_ID;
 
 public class PermissionConfig {
 
-    public static final ForgeConfigSpec CONFIG_SPEC;
+    public static final ModConfigSpec CONFIG_SPEC;
     public static final String CONFIG_NAME = MOD_ID + "-common.toml";
 
-    private static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_REGION_TP;
-    private static final ForgeConfigSpec.ConfigValue<Boolean> ALLOW_READ_ONLY_CMDS;
-    private static final ForgeConfigSpec.ConfigValue<Boolean> DISABLE_CMD_FOR_NON_OP;
-    private static final ForgeConfigSpec.ConfigValue<Boolean> OP_BYPASS_FLAGS;
-    private static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_HIERARCHY_OWNERSHIP;
-    private static final ForgeConfigSpec.ConfigValue<Integer> REQUIRED_OP_LEVEL;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> PLAYERS_WITH_PERMISSION;
-    private static final ForgeConfigSpec.ConfigValue<Boolean> COMMAND_BLOCK_EXECUTION;
-    private static final ForgeConfigSpec.ConfigValue<Integer> WP_COMMAND_ALTERNATIVE;
+    private static final ModConfigSpec.ConfigValue<Boolean> ENABLE_REGION_TP;
+    private static final ModConfigSpec.ConfigValue<Boolean> ALLOW_READ_ONLY_CMDS;
+    private static final ModConfigSpec.ConfigValue<Boolean> DISABLE_CMD_FOR_NON_OP;
+    private static final ModConfigSpec.ConfigValue<Boolean> OP_BYPASS_FLAGS;
+    private static final ModConfigSpec.ConfigValue<Boolean> ENABLE_HIERARCHY_OWNERSHIP;
+    private static final ModConfigSpec.ConfigValue<Integer> REQUIRED_OP_LEVEL;
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> PLAYERS_WITH_PERMISSION;
+    private static final ModConfigSpec.ConfigValue<Boolean> COMMAND_BLOCK_EXECUTION;
+    private static final ModConfigSpec.ConfigValue<Integer> WP_COMMAND_ALTERNATIVE;
     private static final String[] WP_CMDS = new String[]{"wp", "yawp"};
     public static String BASE_CMD = "wp";
 
     static {
-        final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+        final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
         BUILDER.push("YetAnotherWorldProtector mod server configuration").build();
 

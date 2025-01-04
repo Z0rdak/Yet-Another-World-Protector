@@ -77,7 +77,7 @@ public class Polygon3DArea extends AbstractArea {
         CompoundTag nbt = super.serializeNBT();
         ListTag pointList = new ListTag();
         this.positions.forEach((point) -> {
-            CompoundTag pointNbt = NbtUtils.writeBlockPos(point);
+            Tag pointNbt = NbtUtils.writeBlockPos(point);
             pointList.add(pointNbt);
         });
         nbt.put(RegionNbtKeys.BLOCKS, pointList);
@@ -90,8 +90,9 @@ public class Polygon3DArea extends AbstractArea {
         this.deserializeNBT(nbt);
         ListTag pointList = nbt.getList(RegionNbtKeys.BLOCKS, Tag.TAG_COMPOUND);
         for (int i = 0; i < pointList.size(); i++) {
-            BlockPos pos = NbtUtils.readBlockPos(pointList.getCompound(i));
-            this.positions.add(pos);
+            // FIXME-ALPHA
+            //BlockPos pos = NbtUtils.readBlockPos(pointList.getCompound(i));
+            //this.positions.add(pos);
         }
     }
 
