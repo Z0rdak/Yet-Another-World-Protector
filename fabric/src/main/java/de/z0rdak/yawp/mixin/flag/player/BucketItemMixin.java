@@ -5,7 +5,7 @@ import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
@@ -28,7 +28,7 @@ public abstract class BucketItemMixin {
 
     @Inject(method = "use", locals = LocalCapture.CAPTURE_FAILSOFT,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getBlockState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;", ordinal = 0), cancellable = true, allow = 1)
-    public void onFillBucket(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir, ItemStack itemStack, BlockHitResult blockHitResult, BlockPos blockPos, Direction direction, BlockPos blockPos2) {
+    public void onFillBucket(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir, ItemStack itemStack, BlockHitResult blockHitResult, BlockPos blockPos, Direction direction, BlockPos blockPos2) {
         if (isServerSide(world)) {
             if (user != null) {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, SCOOP_FLUIDS, getDimKey(world), user);
@@ -37,7 +37,7 @@ public abstract class BucketItemMixin {
                 }
                 processCheck(checkEvent, deny -> {
                     sendFlagMsg(deny);
-                    cir.setReturnValue(InteractionResultHolder.fail(itemStack));
+                    cir.setReturnValue(InteractionResult.FAIL);
                 });
             }
         }
@@ -45,7 +45,7 @@ public abstract class BucketItemMixin {
 
     @Inject(method = "use", locals = LocalCapture.CAPTURE_FAILSOFT,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/BucketItem;emptyContents(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/phys/BlockHitResult;)Z"), cancellable = true, allow = 1)
-    public void onEmptyBucket(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir, ItemStack itemStack, BlockHitResult blockHitResult, BlockPos blockPos, Direction direction, BlockPos blockPos2, BlockState blockState, BlockPos blockPos3) {
+    public void onEmptyBucket(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir, ItemStack itemStack, BlockHitResult blockHitResult, BlockPos blockPos, Direction direction, BlockPos blockPos2, BlockState blockState, BlockPos blockPos3) {
         if (isServerSide(world)) {
             if (user != null) {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos3, PLACE_FLUIDS, getDimKey(world), user);
@@ -54,7 +54,7 @@ public abstract class BucketItemMixin {
                 }
                 processCheck(checkEvent, deny -> {
                     sendFlagMsg(deny);
-                    cir.setReturnValue(InteractionResultHolder.fail(itemStack));
+                    cir.setReturnValue(InteractionResult.FAIL);
                 });
             }
         }
