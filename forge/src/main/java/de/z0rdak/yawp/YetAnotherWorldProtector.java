@@ -11,6 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.common.ForgeConfig;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
@@ -25,6 +26,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import static de.z0rdak.yawp.handler.YawpEventHandler.removeInvolvedEntities;
+import static net.minecraftforge.fml.IExtensionPoint.DisplayTest.IGNORESERVERONLY;
 
 @Mod(Constants.MOD_ID)
 public class YetAnotherWorldProtector implements YAWPModInitializer {
@@ -41,7 +43,7 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
 
         ModLoadingContext modLoadingContext = new ModLoadingContext();
         //Make sure the mod being absent on the other network side does not cause the client to display the server as incompatible
-        modLoadingContext.registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (s, b) -> true));
+        modLoadingContext.registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> IGNORESERVERONLY, (s, b) -> true));
         MinecraftForge.EVENT_BUS.register(YetAnotherWorldProtector.class);
     }
 

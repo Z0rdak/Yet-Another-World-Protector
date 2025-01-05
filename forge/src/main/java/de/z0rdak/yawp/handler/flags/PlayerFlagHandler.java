@@ -388,14 +388,15 @@ public final class PlayerFlagHandler {
             if (event.getTarget() == null || event.getEntity() == null) return;
             Entity target = event.getTarget();
             Player player = event.getEntity();
+            // TODO: This is done on forge, fabric and neoforge - write helper to reduce duplicate code
             Set<String> entityTags = Services.FLAG_CONFIG.getCoveredBlockEntityTags();
             boolean isCoveredByTag = entityTags.stream().anyMatch(entityTag -> {
-                ResourceLocation tagRl = new ResourceLocation(entityTag);
+                ResourceLocation tagRl = ResourceLocation.parse(entityTag);
                 return target.getTags().contains(tagRl.getPath());
             });
             Set<String> entities = Services.FLAG_CONFIG.getCoveredBlockEntities();
             boolean isBlockEntityCovered = entities.stream().anyMatch(entity -> {
-                ResourceLocation entityRl = new ResourceLocation(entity);
+                ResourceLocation entityRl = ResourceLocation.parse(entity);
                 ResourceLocation targetRl = ForgeRegistries.ENTITY_TYPES.getKey(target.getType());
                 return targetRl != null && targetRl.equals(entityRl);
             });
@@ -412,13 +413,12 @@ public final class PlayerFlagHandler {
         }
     }
 
-    // TODO: TEST
     @SubscribeEvent
     public static void onExplosionStarted(ExplosionEvent.Start event) {
         if (isServerSide(event.getLevel())) {
             if (event.getExplosion() == null) return;
             Explosion explosion = event.getExplosion();
-            BlockPos explosionPos = new BlockPos((int) explosion.getPosition().x, (int) explosion.getPosition().y, (int) explosion.getPosition().z);
+            BlockPos explosionPos = new BlockPos((int) explosion.center().x, (int) explosion.center().y, (int) explosion.center().z);
             ResourceKey<Level> dim = event.getLevel().dimension();
             if (explosion.getIndirectSourceEntity() == null) {
                 // source entity is null, but we still want to cancel the ignition
@@ -610,12 +610,14 @@ public final class PlayerFlagHandler {
             ResourceLocation itemRl = ForgeRegistries.ITEMS.getKey(itemInHand.getItem());
             Set<String> entities = Services.FLAG_CONFIG.getCoveredBlockEntities();
             Set<String> entityTags = Services.FLAG_CONFIG.getCoveredBlockEntityTags();
+            // TODO: This is done on forge, fabric and neoforge - write helper to reduce duplicate code
+            // TODO: Unify the way this is handled across all flags (flag flattening update)
             boolean isCoveredByTag = entityTags.stream().anyMatch(tag -> {
-                ResourceLocation tagRl = new ResourceLocation(tag);
+                ResourceLocation tagRl = ResourceLocation.parse(tag);
                 return itemInHand.getTags().anyMatch(itemTagKey -> itemTagKey.location().equals(tagRl));
             });
             boolean isBlockCovered = entities.stream().anyMatch(entity -> {
-                ResourceLocation entityRl = new ResourceLocation(entity);
+                ResourceLocation entityRl = ResourceLocation.parse(entity);
                 return itemRl != null && itemRl.equals(entityRl);
             });
 
