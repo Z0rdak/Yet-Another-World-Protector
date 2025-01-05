@@ -38,10 +38,6 @@ public final class StickUtil {
     private StickUtil() {
     }
 
-    public static void applyEnchantmentGlint(ItemStack item) {
-     
-    }
-
     /**
      * Set init (default) nbt value for sticks
      *
