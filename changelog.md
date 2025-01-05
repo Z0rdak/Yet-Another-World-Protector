@@ -43,6 +43,13 @@ some great advantages for the future:
 * Add builder to easily create multiline and pagination text components. This might be further polished and extracted
   into the API. Currently, this is located in `de.z0rdak.yawp.util.text`.
 * Ditched forge suggestion for versioning schema. It's now back to https://keepachangelog.com/en/1.0.0/
+* Change configs from server to common type. This means that config should no longer be synced to clients. As it should be. The clients will have the config by default, but it will be useless for them.
+
+## Fixed
+
+- Fix animal and monster check to exclude/include monster horses correctly
+- Fix `explosions-entities` and `explosions-blocks` not working correctly
+- Fix `fall-damage-players` not working correctly
 
 ## Removed
 
