@@ -2,6 +2,7 @@ package de.z0rdak.yawp.mixin.stick;
 
 import de.z0rdak.yawp.handler.MarkerStickHandler;
 import de.z0rdak.yawp.util.StickType;
+import de.z0rdak.yawp.util.StickUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
@@ -18,8 +19,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.Objects;
 
 import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
-import static de.z0rdak.yawp.util.StickUtil.getStickType;
-import static de.z0rdak.yawp.util.StickUtil.isVanillaStick;
 
 @Mixin(ServerPlayerGameMode.class)
 public class ServerPlayerInteractionManagerMixin {
@@ -29,12 +28,9 @@ public class ServerPlayerInteractionManagerMixin {
     public void useItemOn(ServerPlayer serverPlayer, Level level, ItemStack itemStack, InteractionHand interactionHand, BlockHitResult blockHitResult, CallbackInfoReturnable<InteractionResult> cir) {
         if (isServerSide(level)) {
             BlockPos blockpos = blockHitResult.getBlockPos();
-            if (isVanillaStick(itemStack)) {
-                StickType stickType = getStickType(itemStack);
-                if (Objects.requireNonNull(stickType) == StickType.MARKER) {
-                    MarkerStickHandler.onMarkBlock(serverPlayer, itemStack, blockpos);
-                    cir.setReturnValue(InteractionResult.SUCCESS);
-                }
+            if (StickUtil.isMarker(itemStack)) {
+                MarkerStickHandler.onMarkBlock(serverPlayer, itemStack, blockpos);
+                cir.setReturnValue(InteractionResult.SUCCESS);
             }
         }
 
