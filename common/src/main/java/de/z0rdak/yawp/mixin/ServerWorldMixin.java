@@ -4,7 +4,10 @@ import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
@@ -15,14 +18,13 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-
-import javax.annotation.Nullable;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
@@ -52,7 +54,16 @@ public class ServerWorldMixin {
      * An arrow on fire or fire charge shot by an e.g. dispenser will cause the type of the explosion to be ExplosionSourceType.TNT
      */
     @Inject(method = "explode", at = @At("HEAD"), cancellable = true, allow = 1)
-    public void onIgniteExplosive(@Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionDamageCalculator behavior, double x, double y, double z, float power, boolean createFire, Level.ExplosionInteraction explosionMode, CallbackInfoReturnable<Explosion> cir) {
+    public void onIgniteExplosive(
+            Entity entity, 
+            DamageSource ds, 
+            ExplosionDamageCalculator edc, 
+            double x, double y, double z, 
+            float power, boolean createFire, 
+            Level.ExplosionInteraction explosionMode, 
+            ParticleOptions small, ParticleOptions big, 
+            Holder<SoundEvent> soundEvent, 
+            CallbackInfo ci) {
         ServerLevel world = (ServerLevel) (Object) this;
         if (isServerSide(world)) {
             if (explosionMode == Level.ExplosionInteraction.TNT || explosionMode == Level.ExplosionInteraction.BLOCK) {
@@ -60,14 +71,14 @@ public class ServerWorldMixin {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, denyResult -> cir.setReturnValue(null));
+                processCheck(checkEvent, denyResult -> ci.cancel());
             }
             if (explosionMode == Level.ExplosionInteraction.MOB) {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(new BlockPos((int) x, (int) y, (int) z), MOB_GRIEFING, world.dimension());
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, denyResult -> cir.setReturnValue(null));
+                processCheck(checkEvent, denyResult -> ci.cancel());
             }
         }
     }

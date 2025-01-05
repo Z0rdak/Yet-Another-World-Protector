@@ -32,7 +32,6 @@ public class MarkerStickHandler {
 
     public static void onMarkBlock(Player player, ItemStack involvedItem, BlockPos target) {
         if (isServerSide(player.level())) {
-            // TODO: Maybe check if player is allowed to mark block
             if (!involvedItem.equals(ItemStack.EMPTY) && isMarker(involvedItem)) {
                 MarkerStick marker = new MarkerStick(StickUtil.getStickNBT(involvedItem));
                 AreaType areaType = marker.getAreaType();
