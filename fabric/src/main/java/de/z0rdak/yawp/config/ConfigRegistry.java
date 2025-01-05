@@ -26,10 +26,10 @@ public final class ConfigRegistry {
         NeoForgeModConfigEvents.loading(MOD_ID).register(ConfigRegistry::onModLoading);
         NeoForgeModConfigEvents.reloading(MOD_ID).register(ConfigRegistry::onModReloading);
         // registering configuration
-        NeoForgeConfigRegistry.INSTANCE.register(MOD_ID, ModConfig.Type.SERVER, PermissionConfig.CONFIG_SPEC, PermissionConfig.CONFIG_NAME);
-        NeoForgeConfigRegistry.INSTANCE.register(MOD_ID, ModConfig.Type.SERVER, FlagConfig.CONFIG_SPEC, FlagConfig.CONFIG_NAME);
-        NeoForgeConfigRegistry.INSTANCE.register(MOD_ID, ModConfig.Type.SERVER, RegionConfig.CONFIG_SPEC, RegionConfig.CONFIG_NAME);
-        NeoForgeConfigRegistry.INSTANCE.register(MOD_ID, ModConfig.Type.SERVER, LoggingConfig.CONFIG_SPEC, LoggingConfig.CONFIG_NAME);
+        NeoForgeConfigRegistry.INSTANCE.register(MOD_ID, ModConfig.Type.COMMON, PermissionConfig.CONFIG_SPEC, PermissionConfig.CONFIG_NAME);
+        NeoForgeConfigRegistry.INSTANCE.register(MOD_ID, ModConfig.Type.COMMON, FlagConfig.CONFIG_SPEC, FlagConfig.CONFIG_NAME);
+        NeoForgeConfigRegistry.INSTANCE.register(MOD_ID, ModConfig.Type.COMMON, RegionConfig.CONFIG_SPEC, RegionConfig.CONFIG_NAME);
+        NeoForgeConfigRegistry.INSTANCE.register(MOD_ID, ModConfig.Type.COMMON, LoggingConfig.CONFIG_SPEC, LoggingConfig.CONFIG_NAME);
     }
 
     private static void onModReloading(ModConfig modConfig) {
