@@ -24,16 +24,12 @@ public abstract class AnvilScreenHandlerMixin {
             // Retrieve the input and output items from the anvil menu
             ItemStack inputItem = ((AnvilMenu) (Object) this).getSlot(0).getItem();
             ItemStack ingredientInput = ((AnvilMenu) (Object) this).getSlot(1).getItem();
-
             boolean isInputAndOutputStick = ItemStack.isSameItem(outputItem, Items.STICK.getDefaultInstance())
                     && ItemStack.isSameItem(inputItem, Items.STICK.getDefaultInstance());
             if (isInputAndOutputStick && ingredientInput.isEmpty()) {
-                StickType type = StickType.of(outputItem.getDisplayName().getString());
-                if (type != StickType.UNKNOWN) {
-                    MarkerStickHandler.onCreateStick(player, inputItem, outputItem, type);
-                    player.getInventory().setChanged();
-                    ci.cancel();
-                }
+                MarkerStickHandler.onCreateStick(player, inputItem, outputItem);
+                player.getInventory().setChanged();
+                ci.cancel();
             }
         }
     }
