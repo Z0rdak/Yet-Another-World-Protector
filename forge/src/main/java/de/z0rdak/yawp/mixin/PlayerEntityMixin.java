@@ -16,7 +16,7 @@ import static de.z0rdak.yawp.handler.HandlerUtil.processCheck;
 public abstract class PlayerEntityMixin {
 
 
-    @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/EquipmentSlot;CHEST:Lnet/minecraft/world/entity/EquipmentSlot;"), method = "tryToStartFallFlying()Z", allow = 1, cancellable = true)
+    @Inject(method = "tryToStartFallFlying()Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;startFallFlying()V"), allow = 1, cancellable = true)
     void injectElytraCheck(CallbackInfoReturnable<Boolean> cir) {
         Player player = (Player) (Object) this;
         if (isServerSide(player.level())) {
