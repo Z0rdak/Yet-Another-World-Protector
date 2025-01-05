@@ -14,6 +14,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.FlyingMob;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.entity.animal.horse.SkeletonHorse;
+import net.minecraft.world.entity.animal.horse.ZombieHorse;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.Shulker;
@@ -46,7 +48,10 @@ public final class HandlerUtil {
     }
 
     public static boolean isAnimal(Entity entity) {
-        return entity instanceof Animal || entity instanceof WaterAnimal;
+        boolean isMonsterHorse = entity instanceof ZombieHorse || entity instanceof SkeletonHorse;
+        // Note: because monster horses are still horses and horses are animals? what the frick mojang
+        return entity instanceof Animal && !isMonsterHorse 
+                || entity instanceof WaterAnimal;
     }
 
     public static boolean isServerSide(Entity entity) {
@@ -73,7 +78,8 @@ public final class HandlerUtil {
                 || entity instanceof Slime
                 || entity instanceof FlyingMob
                 || entity instanceof EnderDragon
-                || entity instanceof Shulker;
+                || entity instanceof Shulker 
+                || entity instanceof ZombieHorse || entity instanceof SkeletonHorse;
     }
 
     public static boolean notServerSideOrPlayerNull(Entity entity) {
