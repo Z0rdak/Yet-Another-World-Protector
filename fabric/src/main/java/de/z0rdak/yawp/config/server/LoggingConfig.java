@@ -9,6 +9,7 @@ import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.util.AreaUtil;
+import net.minecraftforge.common.ForgeConfigSpec;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

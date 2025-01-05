@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.config.server;
 
+import net.minecraftforge.common.ForgeConfigSpec;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.*;

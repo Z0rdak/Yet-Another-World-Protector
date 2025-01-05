@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.config.server;
 
 import de.z0rdak.yawp.core.flag.RegionFlag;
+import net.minecraftforge.common.ForgeConfigSpec;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.ArrayList;

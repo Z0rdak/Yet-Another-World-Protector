@@ -9,6 +9,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
@@ -33,10 +34,31 @@ public class SubstituteTextContent implements ComponentContents {
     private final Object[] args;
     @Nullable
     private List<FormattedText> substitutes = ImmutableList.of();
+
+    private static Optional<List<Object>> adjustArgs(Object[] args) {
+        return args.length == 0 ? Optional.empty() : Optional.of(Arrays.asList(args));
+    }   
+    
     public static final Object[] NO_ARGS = new Object[0];
+
+    private static Object[] adjustArgs(Optional<List<Object>> args) {
+        return args.map((arg) -> arg.isEmpty() ? NO_ARGS : arg.toArray()).orElse(NO_ARGS);
+    }
+    
+    private static SubstituteTextContent create(String pattern, Optional<List<Object>> args) {
+        return new SubstituteTextContent(pattern, adjustArgs(args));
+    }
     private static final Codec<Object> PRIMITIVE_ARG_CODEC;
     private static final Codec<Object> ARG_CODEC;
 
+    private static DataResult<Object> filterAllowedArguments(@Nullable Object input) {
+        return !isAllowedPrimitiveArgument(input) ? DataResult.error(() -> "This value needs to be parsed as component") : DataResult.success(input);
+    }
+
+    public static boolean isAllowedPrimitiveArgument(@Nullable Object input) {
+        return input instanceof Number || input instanceof Boolean || input instanceof String;
+    }
+    
     static {
         PRIMITIVE_ARG_CODEC = ExtraCodecs.JAVA.validate(SubstituteTextContent::filterAllowedArguments);
         ARG_CODEC = Codec.either(PRIMITIVE_ARG_CODEC, ComponentSerialization.CODEC).xmap((p_304564_) -> p_304564_.map((p_304446_) -> p_304446_, (p_304596_) -> Objects.requireNonNullElse(p_304596_.tryCollapseToString(), p_304596_)), (p_304615_) -> {
@@ -54,26 +76,6 @@ public class SubstituteTextContent implements ComponentContents {
                 ARG_CODEC.listOf().optionalFieldOf("with").forGetter((stc) -> adjustArgs(stc.args))
         ).apply(stcInstance, SubstituteTextContent::create));
         TYPE = new SubstituteTextContent.Type<>(CODEC, "substitutable");
-    }
-
-    private static Optional<List<Object>> adjustArgs(Object[] args) {
-        return args.length == 0 ? Optional.empty() : Optional.of(Arrays.asList(args));
-    }
-
-    private static Object[] adjustArgs(Optional<List<Object>> args) {
-        return args.map((arg) -> arg.isEmpty() ? NO_ARGS : arg.toArray()).orElse(NO_ARGS);
-    }
-
-    private static SubstituteTextContent create(String pattern, Optional<List<Object>> args) {
-        return new SubstituteTextContent(pattern, adjustArgs(args));
-    }
-
-    private static DataResult<Object> filterAllowedArguments(@Nullable Object input) {
-        return !isAllowedPrimitiveArgument(input) ? DataResult.error(() -> "This value needs to be parsed as component") : DataResult.success(input);
-    }
-
-    public static boolean isAllowedPrimitiveArgument(@Nullable Object input) {
-        return input instanceof Number || input instanceof Boolean || input instanceof String;
     }
     public SubstituteTextContent(String pattern, Object[] args) {
         this.pattern = pattern;

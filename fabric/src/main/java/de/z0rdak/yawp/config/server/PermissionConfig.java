@@ -6,6 +6,7 @@ import de.z0rdak.yawp.platform.Services;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.common.ForgeConfigSpec;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.*;
