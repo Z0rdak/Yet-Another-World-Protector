@@ -3,6 +3,7 @@ package de.z0rdak.yawp.mixin;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,7 +41,7 @@ public abstract class LightningEntityMixin {
      * Prevent fire spreading when lightning hits blocks
      */
     @Inject(method = "spawnFire", locals = LocalCapture.CAPTURE_FAILSOFT, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/BaseFireBlock;getState(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;", ordinal = 0), cancellable = true, allow = 1)
-    public void onSpawnFireFromLightning(int spreadAttempts, CallbackInfo ci, BlockPos blockPos) {
+    public void onSpawnFireFromLightning(int extraIgnitions, CallbackInfo ci, ServerLevel world, BlockPos blockPos) {
         LightningBolt lightningEntity = (LightningBolt) (Object) this;
         if (isServerSide(lightningEntity)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, LIGHTNING_PROT, getDimKey(lightningEntity), null);
