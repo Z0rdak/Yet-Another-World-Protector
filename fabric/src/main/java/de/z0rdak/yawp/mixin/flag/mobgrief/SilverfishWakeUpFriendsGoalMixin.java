@@ -4,6 +4,7 @@ import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.monster.Silverfish;
 import net.minecraft.world.level.GameRules;
@@ -51,7 +52,7 @@ public abstract class SilverfishWakeUpFriendsGoalMixin {
                             if (isCanceled) {
                                 isDenied = false;
                             }
-                            if (!level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) || isDenied) {
+                            if (!((ServerLevel)level).getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) || isDenied) {
                                 level.destroyBlock(blockPos2, true, this.silverfish);
                             } else {
                                 level.setBlock(blockPos2, ((InfestedBlock) block).hostStateByInfested(level.getBlockState(blockPos2)), 3);

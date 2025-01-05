@@ -10,6 +10,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.trading.Merchant;
+import net.minecraft.world.level.portal.TeleportTransition;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -75,11 +76,11 @@ public abstract class EntityMixin {
      * Covers USE_PORTAL* flags
      * Note: does not seem to trigger for players, which is fine
      */
-    @Inject(method = "changeDimension", at = @At(value = "HEAD"), cancellable = true, allow = 1)
-    public void onChangeDimension(ServerLevel destination, CallbackInfoReturnable<Entity> cir) {
+    @Inject(method = "teleport", at = @At(value = "HEAD"), cancellable = true, allow = 1)
+    public void onChangeDimension(TeleportTransition teleportTransition, CallbackInfoReturnable<Entity> cir) {
         Entity self = (Entity) (Object) this;
         if (isServerSide(self.level())) {
-            RegionDataManager.addDimKeyOnDimensionChange(null, self.level(), destination);
+            RegionDataManager.addDimKeyOnDimensionChange(null, self.level(), teleportTransition.newLevel());
             FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL, getDimKey(self));
             if (Services.EVENT.post(checkEvent)) {
                 return;

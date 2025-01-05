@@ -4,6 +4,7 @@ import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -112,7 +113,7 @@ public abstract class PlayerMixin {
 
 
     @Inject(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getDamageAfterArmorAbsorb(Lnet/minecraft/world/damagesource/DamageSource;F)F"), cancellable = true, allow = 1)
-    public void onHurt(DamageSource source, float amount, CallbackInfo ci) {
+    public void onHurt(ServerLevel level, DamageSource source, float amount, CallbackInfo ci) {
         Player player = (Player) (Object) this;
         if (isServerSide(player)) {
             if (source.getEntity() instanceof Player) {
@@ -134,7 +135,7 @@ public abstract class PlayerMixin {
     }
 
     @Inject(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;setAbsorptionAmount(F)V"), cancellable = true, allow = 1)
-    public void onReceiveDamage(DamageSource source, float amount, CallbackInfo ci) {
+    public void onReceiveDamage(ServerLevel level, DamageSource damageSource, float amount, CallbackInfo ci) {
         Player player = (Player) (Object) this;
         if (isServerSide(player)) {
             // TODO: meele-player flag
@@ -197,12 +198,12 @@ public abstract class PlayerMixin {
                 // this is for BlockEntities which are not covered by the block breaking flag
                 Set<String> entityTags = FlagConfig.getCoveredBlockEntityTags();
                 boolean isCoveredByTag = entityTags.stream().anyMatch(entityTag -> {
-                    ResourceLocation tagRl = new ResourceLocation(entityTag);
+                    ResourceLocation tagRl = ResourceLocation.parse(entityTag);
                     return target.getTags().contains(tagRl.getPath());
                 });
                 Set<String> entities = FlagConfig.getCoveredBlockEntities();
                 boolean isBlockEntityCovered = entities.stream().anyMatch(entity -> {
-                    ResourceLocation entityRl = new ResourceLocation(entity);
+                    ResourceLocation entityRl = ResourceLocation.parse(entity);
                     ResourceLocation targetRl = EntityType.getKey(target.getType());
                     return targetRl != null && targetRl.equals(entityRl);
                 });
