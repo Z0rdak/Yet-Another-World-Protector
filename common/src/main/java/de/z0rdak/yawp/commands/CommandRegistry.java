@@ -22,7 +22,6 @@ import static de.z0rdak.yawp.util.text.MessageSender.sendCmdFeedback;
 public final class CommandRegistry {
 
     private static CommandDispatcher<CommandSourceStack> dispatcher;
-    private static boolean isConfigInitialized = false;
     private CommandRegistry() {
     }
 
@@ -41,8 +40,10 @@ public final class CommandRegistry {
     }
 
     public static void register(String modRootCmd) {
-        Constants.LOGGER.info("Registering YAWP commands with root '/{}'", modRootCmd);
-        dispatcher.register(buildCommands(modRootCmd));
+        if (dispatcher != null) {
+            Constants.LOGGER.info("Registering YAWP commands with root '/{}'", modRootCmd);
+            dispatcher.register(buildCommands(modRootCmd));
+        }        
     }
 
     private static LiteralArgumentBuilder<CommandSourceStack> buildCommands(String baseCmd) {
