@@ -8,15 +8,16 @@
         "${mod_author}"
     ],
     "contact": {
-        "homepage": "https://fabricmc.net/",
-        "sources": "https://github.com/FabricMC/fabric-example-mod"
+        "homepage": "https://www.curseforge.com/minecraft/mc-mods/yawp",
+        "sources": "https://github.com/Z0rdak/Yet-Another-World-Protector",
+        "issues": "https://github.com/Z0rdak/Yet-Another-World-Protector/issues"
     },
     "license": "${license}",
-    "icon": "${mod_id}.png",
+    "icon": "logo.png",
     "environment": "*",
     "entrypoints": {
         "main": [
-            "com.example.examplemod.ExampleMod"
+            "de.z0rdak.yawp.YetAnotherWorldProtector"
         ]
     },
     "mixins": [
@@ -27,10 +28,10 @@
         "fabricloader": ">=${fabric_loader_version}",
         "fabric-api": "*",
         "minecraft": "${minecraft_version}",
+        "forgeconfigapiport": "*",
         "java": ">=${java_version}"
     },
     "suggests": {
         "another-mod": "*"
     }
 }
-  

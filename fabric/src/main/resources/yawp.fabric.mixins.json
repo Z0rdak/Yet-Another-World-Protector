@@ -9,7 +9,6 @@
     "flag.AbstractFireBlockMixin",
     "flag.EnderManEntityMixin",
     "flag.EntityMixin",
-    "flag.ExplosionMixin",
     "flag.LivingEntityMixin",
     "flag.ServerWorldMixin",
     "flag.ShulkerEntityMixin",
