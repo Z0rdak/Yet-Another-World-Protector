@@ -9,9 +9,9 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.*;
-import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Entity;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -22,10 +22,15 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.mojang.serialization.Codec.STRING;
+
+@Deprecated(since = "Not used until YAWP is required on client-side", forRemoval = false)
 public class SubstituteTextContent implements ComponentContents {
-    private static final FormattedText LITERAL_PERCENT_SIGN = FormattedText.of("%");
-    private static final FormattedText NULL_ARGUMENT = FormattedText.of("null");
-    private static final Pattern ARG_FORMAT = Pattern.compile("%(?:(\\d+)\\$)?([A-Za-z%]|$)");
+    private static final FormattedText TEXT_PERCENT ;
+    private static final FormattedText TEXT_NULL;
+    private static final Pattern SUBSTITUTE_PATTERN;
+    private static final Codec<Object> PRIMITIVE_ARG_CODEC;
+    private static final Codec<Object> ARG_CODEC;
     public static final SubstituteTextContent.Type<SubstituteTextContent> TYPE;
     public static final MapCodec<SubstituteTextContent> CODEC;
     
@@ -48,11 +53,12 @@ public class SubstituteTextContent implements ComponentContents {
     private static SubstituteTextContent create(String pattern, Optional<List<Object>> args) {
         return new SubstituteTextContent(pattern, adjustArgs(args));
     }
-    private static final Codec<Object> PRIMITIVE_ARG_CODEC;
-    private static final Codec<Object> ARG_CODEC;
+
 
     private static DataResult<Object> filterAllowedArguments(@Nullable Object input) {
-        return !isAllowedPrimitiveArgument(input) ? DataResult.error(() -> "This value needs to be parsed as component") : DataResult.success(input);
+        return !isAllowedPrimitiveArgument(input) 
+                ? DataResult.error(() -> "This value needs to be parsed as component") 
+                : DataResult.success(input);
     }
 
     public static boolean isAllowedPrimitiveArgument(@Nullable Object input) {
@@ -61,22 +67,36 @@ public class SubstituteTextContent implements ComponentContents {
     
     static {
         PRIMITIVE_ARG_CODEC = ExtraCodecs.JAVA.validate(SubstituteTextContent::filterAllowedArguments);
-        ARG_CODEC = Codec.either(PRIMITIVE_ARG_CODEC, ComponentSerialization.CODEC).xmap((p_304564_) -> p_304564_.map((p_304446_) -> p_304446_, (p_304596_) -> Objects.requireNonNullElse(p_304596_.tryCollapseToString(), p_304596_)), (p_304615_) -> {
-            Either var10000;
-            if (p_304615_ instanceof Component component) {
-                var10000 = Either.right(component);
-            } else {
-                var10000 = Either.left(p_304615_);
-            }
-
-            return var10000;
-        });
-        CODEC = RecordCodecBuilder.mapCodec((stcInstance) -> stcInstance.group(
-                Codec.STRING.fieldOf("pattern").forGetter((stc) -> stc.pattern),
-                ARG_CODEC.listOf().optionalFieldOf("with").forGetter((stc) -> adjustArgs(stc.args))
-        ).apply(stcInstance, SubstituteTextContent::create));
+        ARG_CODEC = Codec
+                .either(PRIMITIVE_ARG_CODEC, ComponentSerialization.CODEC)
+                .xmap(objectOrComponent -> objectOrComponent.map(
+                        object -> object, 
+                    component -> Objects.requireNonNullElse(component.tryCollapseToString(), component)),
+                        SubstituteTextContent::getEither);
+        CODEC = RecordCodecBuilder
+                .mapCodec((stcInstance) -> stcInstance.group(
+                        STRING.fieldOf("pattern")
+                                .forGetter(stc -> stc.pattern), 
+                        ARG_CODEC.listOf()
+                                .optionalFieldOf("args")
+                                .forGetter(stc -> adjustArgs(stc.args)))
+                .apply(stcInstance, SubstituteTextContent::create));
         TYPE = new SubstituteTextContent.Type<>(CODEC, "substitutable");
+        TEXT_PERCENT = FormattedText.of("%");
+        TEXT_NULL = FormattedText.of("null");
+        SUBSTITUTE_PATTERN = Pattern.compile("%(?:(\\d+)\\$)?([A-Za-z%]|$)");
     }
+
+    private static @NotNull Either<Object, Component> getEither(Object either) {
+        Either<Object, Component> result;
+        if (either instanceof Component component) {
+            result = Either.right(component);
+        } else {
+            result = Either.left(either);
+        }
+        return result;
+    }
+
     public SubstituteTextContent(String pattern, Object[] args) {
         this.pattern = pattern;
         this.args = args;
@@ -93,7 +113,7 @@ public class SubstituteTextContent implements ComponentContents {
     }
 
     private void forEachPart(String substitute, Consumer<FormattedText> partsConsumer) {
-        Matcher matcher = ARG_FORMAT.matcher(substitute);
+        Matcher matcher = SUBSTITUTE_PATTERN.matcher(substitute);
         try {
             int i = 0;
             int j = 0;
@@ -111,7 +131,7 @@ public class SubstituteTextContent implements ComponentContents {
                 string = matcher.group(2);
                 String string2 = substitute.substring(k, l);
                 if ("%".equals(string) && "%%".equals(string2)) {
-                    partsConsumer.accept(LITERAL_PERCENT_SIGN);
+                    partsConsumer.accept(TEXT_PERCENT);
                 } else if ("s".equals(string)) {
                     String string3 = matcher.group(1);
                     int m = string3 != null ? Integer.parseInt(string3) - 1 : i++;
@@ -141,7 +161,7 @@ public class SubstituteTextContent implements ComponentContents {
         if (object instanceof Component) {
             return (Component) object;
         }
-        return object == null ? NULL_ARGUMENT : FormattedText.of(object.toString());
+        return object == null ? TEXT_NULL : FormattedText.of(object.toString());
     }
 
     @Override
@@ -181,7 +201,7 @@ public class SubstituteTextContent implements ComponentContents {
     }
 
     @Override
-    public Type<?> type() {
+    public SubstituteTextContent.Type<SubstituteTextContent> type() {
         return TYPE;
     }
 

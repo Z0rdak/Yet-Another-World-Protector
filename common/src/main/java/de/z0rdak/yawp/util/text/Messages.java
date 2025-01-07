@@ -1,8 +1,8 @@
 package de.z0rdak.yawp.util.text;
 
-import de.z0rdak.yawp.util.text.messages.SubstituteTextContent;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 
 import static net.minecraft.ChatFormatting.*;
 
@@ -17,6 +17,7 @@ public final class Messages {
     }
 
     public static MutableComponent substitutable(String pattern, Object... args) {
-        return MutableComponent.create(new SubstituteTextContent(pattern, args));
+        /* return MutableComponent.create(new SubstituteTextContent(pattern, args)); */
+        return MutableComponent.create(new TranslatableContents(pattern, null, args));
     }
 }
