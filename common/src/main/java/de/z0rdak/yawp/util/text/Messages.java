@@ -1,8 +1,10 @@
 package de.z0rdak.yawp.util.text;
 
-import de.z0rdak.yawp.util.text.messages.SubstituteTextContent;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
+
+import javax.naming.Name;
 
 import static net.minecraft.ChatFormatting.*;
 
@@ -16,7 +18,9 @@ public final class Messages {
     private Messages() {
     }
 
+    /* Note: Using SubstituteTextContent requires mod to be present on client side to enable deserialization :-( */
     public static MutableComponent substitutable(String pattern, Object... args) {
-        return MutableComponent.create(new SubstituteTextContent(pattern, args));
+        /* return MutableComponent.create(new SubstituteTextContent(pattern, args)); */
+        return MutableComponent.create(new TranslatableContents(pattern, null, args));
     }
 }

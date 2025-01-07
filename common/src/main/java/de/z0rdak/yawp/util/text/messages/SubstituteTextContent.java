@@ -15,6 +15,8 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/* Note: Inheritance requires mod to be present on client side */
+@Deprecated(since = "Not used until YAWP is required on client-side", forRemoval = false)
 public class SubstituteTextContent implements ComponentContents {
     private static final FormattedText LITERAL_PERCENT_SIGN = FormattedText.of("%");
     private static final FormattedText NULL_ARGUMENT = FormattedText.of("null");
