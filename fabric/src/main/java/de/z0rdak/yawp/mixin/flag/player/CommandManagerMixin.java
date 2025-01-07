@@ -10,7 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.EXECUTE_COMMAND;
 import static de.z0rdak.yawp.handler.HandlerUtil.getDimKey;
@@ -21,11 +21,11 @@ import static de.z0rdak.yawp.util.text.MessageSender.sendFlagMsg;
 public abstract class CommandManagerMixin {
 
     @Inject(method = "performCommand", at = @At(value = "HEAD"), cancellable = true)
-    public void execute(ParseResults<CommandSourceStack> parseResults, String command, CallbackInfoReturnable<Integer> cir) {
+    public void execute(ParseResults<CommandSourceStack> parseResults, String command, CallbackInfo ci) {
         // check mod command permissions
         int result = CommandInterceptor.handleModCommands(parseResults, command);
         if (result != 0) {
-            cir.setReturnValue(1);
+            ci.cancel();
         }
         // check exec-command flag
         CommandSourceStack cmdSource = parseResults.getContext().getSource();
@@ -38,7 +38,7 @@ public abstract class CommandManagerMixin {
                 }
                 processCheck(checkEvent, deny -> {
                     sendFlagMsg(deny);
-                    cir.setReturnValue(1);
+                    ci.cancel();
                 });
             }
         }
