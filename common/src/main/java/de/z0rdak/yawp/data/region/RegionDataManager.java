@@ -118,7 +118,7 @@ public class RegionDataManager extends SavedData {
             if (isServerSide(serverWorld) && serverWorld.dimension().location().equals( ResourceLocation.parse("minecraft:overworld"))) {
                 DimensionDataStorage storage = serverWorld.getDataStorage();
                 Factory<RegionDataManager> rdmt = new Factory<>(RegionDataManager::new, RegionDataManager::load, DataFixTypes.SAVED_DATA_MAP_DATA);
-                RegionDataManager data = storage.get(rdmt, DATA_NAME);
+                RegionDataManager data = storage.computeIfAbsent(rdmt, DATA_NAME);
                 storage.set(DATA_NAME, data);
                 regionDataCache = data;
                 Constants.LOGGER.info(Component.translatableWithFallback("data.nbt.dimensions.load.success", "Loaded %s region(s) for %s dimension(s)", data.getTotalRegionAmount(), data.getDimensionAmount()).getString());
