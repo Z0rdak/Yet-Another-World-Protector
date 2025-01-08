@@ -19,6 +19,7 @@ some great advantages for the future:
 ## Added
 
 * New iteration of the programming API. This includes new events, an API to query regions, change them and save them.
+* Add new flag `no-sign-edit`. Thanks to Magnus Jensen!
 * Added new flag events:
   * `AddFlagEvent`, fired when a flag is added to a region. This is just an info event, its values can't be changed, and
     it can not be canceled.
