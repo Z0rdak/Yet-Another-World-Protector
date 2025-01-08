@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.config;
 
+import de.z0rdak.yawp.YetAnotherWorldProtector;
 import de.z0rdak.yawp.commands.CommandRegistry;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.config.server.LoggingConfig;
@@ -27,10 +28,10 @@ public final class ConfigRegistry {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(ConfigRegistry::onConfigLoading);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(ConfigRegistry::onConfigReloading);
 
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, PermissionConfig.CONFIG_SPEC, PermissionConfig.CONFIG_NAME);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FlagConfig.CONFIG_SPEC, FlagConfig.CONFIG_NAME);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, RegionConfig.CONFIG_SPEC, RegionConfig.CONFIG_NAME);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, LoggingConfig.CONFIG_SPEC, LoggingConfig.CONFIG_NAME);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, PermissionConfig.CONFIG_SPEC, PermissionConfig.CONFIG_NAME);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, FlagConfig.CONFIG_SPEC, FlagConfig.CONFIG_NAME);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, RegionConfig.CONFIG_SPEC, RegionConfig.CONFIG_NAME);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, LoggingConfig.CONFIG_SPEC, LoggingConfig.CONFIG_NAME);
     }
 
     @SubscribeEvent
