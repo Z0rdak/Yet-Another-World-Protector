@@ -7,10 +7,7 @@ import de.z0rdak.yawp.util.NbtCompatHelper;
 import de.z0rdak.yawp.util.StickType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
@@ -128,11 +125,14 @@ public class MarkerStick extends AbstractStick implements INbtSerializable<Compo
             this.teleportPos = NbtUtils.readBlockPos(nbt, ItemNbtKeys.TP_POS).orElse(null);
         }
         this.dimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(nbt.getString(ItemNbtKeys.DIM)));
-        ListTag markedBlocksNBT = nbt.getList(ItemNbtKeys.MARKED_BLOCKS, Tag.TAG_COMPOUND);
-        this.markedBlocks = new ArrayList<>(this.areaType.maxBlocks);
-        for (int i = 0; i < markedBlocksNBT.size(); i++) {
-            CompoundTag compound = markedBlocksNBT.getCompound(i);
-            NbtCompatHelper.readBlockPosFromCompound(compound).ifPresent(pos -> this.markedBlocks.add(pos));
-        }
+        ListTag markedBlocksNBT = (ListTag) nbt.get(ItemNbtKeys.MARKED_BLOCKS);
+        if (markedBlocksNBT != null) {
+            this.markedBlocks = new ArrayList<>(this.areaType.maxBlocks);
+            for (int i = 0; i < markedBlocksNBT.size(); i++) {
+                int[] intArray = markedBlocksNBT.getIntArray(i);
+                IntArrayTag intArrayTag = new IntArrayTag(intArray);
+                NbtCompatHelper.toBlockPos(intArrayTag).ifPresent(pos -> this.markedBlocks.add(pos));
+            }
+        }      
     }
 }
