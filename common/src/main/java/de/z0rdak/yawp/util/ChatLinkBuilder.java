@@ -166,12 +166,11 @@ public class ChatLinkBuilder {
         return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
     }
 
-    // TODO: Suggest vs Link
     public static MutableComponent buildAddToGroupLink(IProtectedRegion region, String group, GroupType groupType) {
         MutableComponent linkText = Component.translatableWithFallback("cli.link.add", "+");
         String fallback = "Add " + groupType.name + " as '%s' to region %s";
         MutableComponent hoverText = Component.translatableWithFallback("cli.msg.info.region.group." + groupType.name + ".add.link.hover", fallback, group, region.getName());
-        String cmd = buildAddGroupMemberCommand(region, groupType, group, "");
+        String cmd = buildAddGroupMemberCommand(region, groupType, group, ""); // "" for blank (suggestion)
         return buildExecuteCmdComponent(linkText, hoverText, cmd, SUGGEST_COMMAND, LINK_COLOR);
     }
 
@@ -188,7 +187,7 @@ public class ChatLinkBuilder {
         PlayerContainer playerContainer = region.getGroup(group);
         MutableComponent playersAddLink = buildAddToGroupLink(region, group, GroupType.PLAYER);
         MutableComponent playerListLink = playerContainer.hasPlayers() ? buildPlayerListLink(region, playerContainer, group) : Component.translatableWithFallback("cli.msg.info.region.group.player.list.link.text", "%s player(s)", playerContainer.getPlayers().size());
-        return Messages.substitutable("%s: %s %s", "%s: %s %s", Component.translatableWithFallback("cli.msg.info.region.group.player", "Players"), playerListLink, playersAddLink);
+        return Messages.substitutable("%s: %s %s", Component.translatableWithFallback("cli.msg.info.region.group.player", "Players"), playerListLink, playersAddLink);
     }
 
     /**
