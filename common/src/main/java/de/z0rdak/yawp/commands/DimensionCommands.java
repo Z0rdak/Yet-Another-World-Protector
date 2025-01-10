@@ -41,7 +41,7 @@ import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.text.MessageSender.sendCmdFeedback;
 import static de.z0rdak.yawp.util.text.MessageSender.sendError;
 
-public class DimensionCommands {
+class DimensionCommands {
 
     private DimensionCommands() {
     }
@@ -51,12 +51,12 @@ public class DimensionCommands {
         return Arrays.asList(examples.split(","));
     }
 
-    public static String getRandomExample() {
+    static String getRandomExample() {
         List<String> regionNameSuggestions = getRegionNameSuggestions();
         return regionNameSuggestions.get(new Random().nextInt(regionNameSuggestions.size()));
     }
 
-    public static LiteralArgumentBuilder<CommandSourceStack> build() {
+    static LiteralArgumentBuilder<CommandSourceStack> build() {
         return literal(DIM)
                 /* /wp dimension <dim> list region */
                 .then(Commands.argument(DIM.toString(), DimensionArgument.dimension())

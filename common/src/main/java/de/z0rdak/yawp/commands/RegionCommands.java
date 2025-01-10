@@ -23,7 +23,6 @@ import de.z0rdak.yawp.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.util.LocalRegions;
-import de.z0rdak.yawp.util.text.messages.multiline.AreaInfoMessage;
 import de.z0rdak.yawp.util.text.messages.multiline.MultiLineMessage;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -50,12 +49,12 @@ import static de.z0rdak.yawp.util.ChatLinkBuilder.*;
 import static de.z0rdak.yawp.util.text.MessageSender.sendCmdFeedback;
 
 
-public class RegionCommands {
+class RegionCommands {
 
     private RegionCommands() {
     }
 
-    public static LiteralArgumentBuilder<CommandSourceStack> build() {
+    static LiteralArgumentBuilder<CommandSourceStack> build() {
         return literal(LOCAL)
                 .then(Commands.argument(DIM.toString(), DimensionArgument.dimension())
                         .then(Commands.argument(LOCAL.toString(), StringArgumentType.word())
@@ -272,7 +271,7 @@ public class RegionCommands {
     }
 
     // TODO: Test removing child does not set priority correct with overlapping regions
-    public static int removeChildren(CommandContext<CommandSourceStack> ctx, DimensionRegionCache dimCache, IProtectedRegion parent, IMarkableRegion child) {
+    private static int removeChildren(CommandContext<CommandSourceStack> ctx, DimensionRegionCache dimCache, IProtectedRegion parent, IMarkableRegion child) {
         if (parent.hasChild(child)) {
             parent.removeChild(child);
             dimCache.getDimensionalRegion().addChild(child);
@@ -291,7 +290,7 @@ public class RegionCommands {
         return -1;
     }
 
-    public static int addChildren(CommandContext<CommandSourceStack> ctx, IMarkableRegion parent, IMarkableRegion child) {
+    private static int addChildren(CommandContext<CommandSourceStack> ctx, IMarkableRegion parent, IMarkableRegion child) {
         boolean parentIsNotNullAndDimension = child.getParent() != null && child.getParent().getRegionType() == RegionType.DIMENSION;
         if (!parent.hasChild(child) && parentIsNotNullAndDimension) {
             child.getParent().removeChild(child);
@@ -309,7 +308,7 @@ public class RegionCommands {
         return -1;
     }
 
-    public static int setPriority(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, int priority, int factor) {
+    private static int setPriority(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, int priority, int factor) {
         long newValue = (long) region.getPriority() + ((long) priority * factor);
         if (Integer.MAX_VALUE - newValue > 0) {
             return setPriority(ctx, region, (int) newValue);
@@ -323,7 +322,7 @@ public class RegionCommands {
      * Attempt to set new priority for the given region. <br>
      * Fails if region priority is used by an overlapping region at same hierarchy level.
      */
-    public static int setPriority(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, int priority) {
+    private static int setPriority(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, int priority) {
         IProtectedRegion parent = region.getParent();
         if (parent instanceof IMarkableRegion) {
             int parentPriority = ((IMarkableRegion) parent).getPriority();
@@ -365,7 +364,7 @@ public class RegionCommands {
      * Actions: [set area] [set TP] [show area] [<=expand=>] [<=max=>]
      */
     private static int promptRegionAreaInfo(CommandContext<CommandSourceStack> ctx, IMarkableRegion region) {
-        MultiLineMessage.send(ctx.getSource(), new AreaInfoMessage(region));
+        MultiLineMessage.send(ctx.getSource(), MultiLineMessage.areaInfo(region));
         return 0;
     }
 
