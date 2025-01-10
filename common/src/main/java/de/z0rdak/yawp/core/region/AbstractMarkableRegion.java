@@ -85,7 +85,6 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         CompoundTag nbt = super.serializeNBT();
         nbt.put(TP_POS, NbtUtils.writeBlockPos(this.tpTarget));
         nbt.putInt(PRIORITY, priority);
-        nbt.putBoolean(MUTED, this.isMuted());
         nbt.putString(AREA_TYPE, this.areaType.areaType);
         nbt.put(AREA, this.area.serializeNBT());
         return nbt;
@@ -96,7 +95,6 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         super.deserializeNBT(nbt);
         this.tpTarget = NbtUtils.readBlockPos(nbt, TP_POS).orElseThrow();
         this.priority = nbt.getInt(PRIORITY);
-        this.setIsMuted(nbt.getBoolean(MUTED));
         AreaType areaType = AreaType.of(nbt.getString(AREA_TYPE));
         if (areaType == null) {
             Constants.LOGGER.error("Error loading region data for: '{}' in dim '{}'", this.getName(), this.dimension.location());
