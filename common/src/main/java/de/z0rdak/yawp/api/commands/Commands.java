@@ -146,7 +146,7 @@ public final class Commands {
     }
 
     public static String buildAddGroupMemberCommand(IProtectedRegion region, GroupType type, String groupName, String member) {
-        String addCmd = buildSubCmdStr(GROUP.toString(), type.name, groupName);
+        String addCmd = buildSubCmdStr(type.name, groupName, member);
         return buildAddCommand(region, addCmd);
     }
 
