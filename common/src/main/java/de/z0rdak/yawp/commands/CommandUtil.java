@@ -232,7 +232,7 @@ public class CommandUtil {
     }
 
     public static int promptRegionState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region) {
-        MultiLineMessage.send(ctx.getSource(), RegionStateMessage.of(region));
+        MultiLineMessage.send(ctx.getSource(), MultiLineMessage.regionState(region));
         return 0;
     }
 
@@ -246,7 +246,7 @@ public class CommandUtil {
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.region.info.group.invalid", "cli.msg.region.info.group.invalid", group).withStyle(RED));
             return -1;
         }
-        sendCmdFeedback(ctx.getSource(), buildGroupHeader(region, group));
+        sendCmdFeedback(ctx.getSource(), buildGroupListHeader(region, group));
         sendCmdFeedback(ctx.getSource(), ChatLinkBuilder.buildGroupPlayerListLink(region, group));
         sendCmdFeedback(ctx.getSource(), ChatLinkBuilder.buildGroupTeamListLink(region, group));
         return 0;

@@ -29,10 +29,6 @@ public class RegionInfoMessage implements MultiLineMessage<IProtectedRegion> {
         this.regionInfoLines = new ArrayList<>();
     }
 
-    public static RegionInfoMessage of(IProtectedRegion region) {
-        return new RegionInfoMessage(region);
-    }
-
     public static MutableComponent buildRegionOverviewHeader(IProtectedRegion region) {
         String nbtClipBoardText = NbtUtils.prettyPrint(region.serializeNBT(), true);
         switch (region.getRegionType()) {
@@ -88,14 +84,14 @@ public class RegionInfoMessage implements MultiLineMessage<IProtectedRegion> {
             }
             case LOCAL: {
                 // Parent: [parent] [x], [n children] [+]
-                MutableComponent parentClearLink = buildRegionRemoveChildLink(region.getParent(), region); // buildParentClearLink((IMarkableRegion) region);
+                MutableComponent parentRemoveThisChildLink = buildRegionRemoveChildLink(region.getParent(), region);
                 MutableComponent hierarchyLinks = Component.literal("");
                 if (region.getParent().getRegionType() == RegionType.DIMENSION) {
                     // don't show removal link, since it's not possible to remove the parent
                     hierarchyLinks = Messages.substitutable("%s, %s", buildRegionInfoLink(region.getParent()), listChildrenLink);
                 }
                 if (region.getParent().getRegionType() == RegionType.LOCAL) {
-                    hierarchyLinks = Messages.substitutable("%s, %s", buildRegionInfoLink(region.getParent()), parentClearLink, listChildrenLink);
+                    hierarchyLinks = Messages.substitutable("%s %s, %s", buildRegionInfoLink(region.getParent()), parentRemoveThisChildLink, listChildrenLink);
                 }
                 return buildInfoComponent("cli.msg.info.region.parent", "Parent", hierarchyLinks);
             }
