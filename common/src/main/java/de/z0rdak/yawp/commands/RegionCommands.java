@@ -35,7 +35,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Relative;
+import net.minecraft.world.entity.RelativeMovement;
 
 import java.util.Collections;
 import java.util.Set;
@@ -383,7 +383,7 @@ class RegionCommands {
             ServerPlayer player = ctx.getSource().getPlayerOrException();
             ServerLevel level = ctx.getSource().getServer().getLevel(region.getDim());
             if (level != null) {
-                player.teleportTo(level, region.getTpTarget().getX(), region.getTpTarget().getY(), region.getTpTarget().getZ(), Relative.ROTATION, player.getYRot(), player.getXRot(), true);
+                player.teleportTo(level, region.getTpTarget().getX(), region.getTpTarget().getY(), region.getTpTarget().getZ(), RelativeMovement.ROTATION, player.getYRot(), player.getXRot());
                 return 0;
             } else {
                 Constants.LOGGER.error("Error executing teleport command. Level is null.");
@@ -392,7 +392,7 @@ class RegionCommands {
         } catch (CommandSyntaxException e) {
             ServerLevel level = ctx.getSource().getServer().getLevel(region.getDim());
             if (level != null) {
-                playerToTeleport.teleportTo(level, region.getTpTarget().getX(), region.getTpTarget().getY(), region.getTpTarget().getZ(), Relative.ROTATION, playerToTeleport.getYRot(), playerToTeleport.getXRot(), true);
+                playerToTeleport.teleportTo(level, region.getTpTarget().getX(), region.getTpTarget().getY(), region.getTpTarget().getZ(), RelativeMovement.ROTATION, playerToTeleport.getYRot(), playerToTeleport.getXRot());
                 return 0;
             }
             Constants.LOGGER.warn("Error executing teleport command.");

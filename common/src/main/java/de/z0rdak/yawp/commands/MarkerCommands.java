@@ -8,6 +8,7 @@ import de.z0rdak.yawp.api.commands.CommandConstants;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
 import de.z0rdak.yawp.api.permission.Permissions;
 import de.z0rdak.yawp.commands.arguments.region.ContainingOwnedRegionArgumentType;
+import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
@@ -16,11 +17,11 @@ import de.z0rdak.yawp.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.util.LocalRegions;
-import de.z0rdak.yawp.util.StickType;
 import de.z0rdak.yawp.util.StickUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
@@ -28,13 +29,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 import java.util.Collections;
-import java.util.Objects;
 
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.DimensionCommands.getRandomExample;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.ChatLinkBuilder.buildRegionInfoLink;
-import static de.z0rdak.yawp.constants.serialization.ItemNbtKeys.STICK;
 import static de.z0rdak.yawp.util.text.MessageSender.sendCmdFeedback;
 import static net.minecraft.ChatFormatting.RED;
 
@@ -43,12 +42,19 @@ public final class MarkerCommands {
     private MarkerCommands() {
     }
 
-    public static LiteralArgumentBuilder<CommandSourceStack> build() {
+    static LiteralArgumentBuilder<CommandSourceStack> build() {
         return literal(MARKER)
                 .then(literal(GIVE)
                         .executes(MarkerCommands::giveMarkerStick))
                 .then(literal(RESET)
                         .executes(MarkerCommands::resetStick))
+                .then(literal(SELECT)
+                        .then(Commands.argument(DIM.toString(), DimensionArgument.dimension())
+                                .then(Commands.argument(LOCAL.toString(), StringArgumentType.word())
+                                        .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestions(ctx, builder))
+                                        .executes(ctx -> selectRegion(ctx, getRegionArgument(ctx), true)))))
+                .then(literal(DESELECT)
+                        .executes(ctx -> selectRegion(ctx, getRegionArgument(ctx), false)))
                 .then(literal(CREATE)
                         .then(Commands.argument(CommandConstants.NAME.toString(), StringArgumentType.word())
                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Collections.singletonList(getRandomExample()), builder))
@@ -58,6 +64,12 @@ public final class MarkerCommands {
                                         .executes(ctx -> createMarkedRegion(ctx, getRegionNameArgument(ctx), getContainingOwnedRegionArgumentWithMarker(ctx))))));
     }
 
+    private static int selectRegion(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, boolean select) {
+      
+        return 0;
+    }
+
+    // TODO: Move into Util
     public static IMarkableRegion fromMarkedBlocks(CommandContext<CommandSourceStack> ctx, Player player, String regionName) throws CommandSyntaxException {
         ItemStack maybeStick = player.getMainHandItem();
         if (StickUtil.isMarker(maybeStick)) {
@@ -147,7 +159,7 @@ public final class MarkerCommands {
         }
     }
 
-    public static int giveMarkerStick(CommandContext<CommandSourceStack> ctx) {
+    private static int giveMarkerStick(CommandContext<CommandSourceStack> ctx) {
         try {
             Player targetPlayer = ctx.getSource().getPlayerOrException();
             ItemStack marker = Items.STICK.getDefaultInstance();

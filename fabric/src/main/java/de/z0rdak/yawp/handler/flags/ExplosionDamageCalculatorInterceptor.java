@@ -33,7 +33,7 @@ public class ExplosionDamageCalculatorInterceptor extends ExplosionDamageCalcula
 			case Creeper c -> RegionFlag.EXPLOSION_CREEPER_BLOCK;
 			case null, default -> RegionFlag.EXPLOSION_BLOCK;
 		};
-		FlagCheckEvent checkEvent = new FlagCheckEvent(pos, flag, explosion.level().dimension());
+		FlagCheckEvent checkEvent = new FlagCheckEvent(pos, flag, explosion.getDirectSourceEntity().level().dimension());
 		FlagState flagState = HandlerUtil.processCheck(checkEvent);
 		return flagState == FlagState.DENIED 
 				? false : nextBehavior.shouldBlockExplode(explosion, blockGetter, pos, state, power);
@@ -45,7 +45,7 @@ public class ExplosionDamageCalculatorInterceptor extends ExplosionDamageCalcula
 			case Creeper c -> RegionFlag.EXPLOSION_CREEPER_ENTITY;
 			case null, default -> RegionFlag.EXPLOSION_ENTITY;
 		};
-		FlagCheckEvent checkEvent = new FlagCheckEvent(entity.blockPosition(), flag, explosion.level().dimension());
+		FlagCheckEvent checkEvent = new FlagCheckEvent(entity.blockPosition(), flag, entity.level().dimension());
 		FlagState flagState = HandlerUtil.processCheck(checkEvent);
 		return flagState == FlagState.DENIED
 				? false : nextBehavior.shouldDamageEntity(explosion, entity);
@@ -71,7 +71,7 @@ public class ExplosionDamageCalculatorInterceptor extends ExplosionDamageCalcula
 	}
 
 	@Override
-	public float getEntityDamageAmount(Explosion explosion, Entity entity, float amount) {
-		return nextBehavior.getEntityDamageAmount(explosion, entity, amount);
+	public float getEntityDamageAmount(Explosion explosion, Entity entity) {
+		return nextBehavior.getEntityDamageAmount(explosion, entity);
 	}
 }

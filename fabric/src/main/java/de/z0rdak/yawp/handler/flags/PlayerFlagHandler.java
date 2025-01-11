@@ -71,7 +71,7 @@ public final class PlayerFlagHandler {
         /* Vanilla code - START
         This is in place to ensure same behaviour of flags across fabric and forge - check this on each update! */
         ItemStack stackInHand = player.getItemInHand(hand);
-        if (player.isSpectator() || player.getCooldowns().isOnCooldown(stackInHand)) {
+        if (player.isSpectator() || player.getCooldowns().isOnCooldown(stackInHand.getItem())) {
             return InteractionResult.PASS;
         }
         /* Vanilla code - END */
@@ -182,8 +182,8 @@ public final class PlayerFlagHandler {
 
 
                 boolean isBerry = ItemStack.isSameItem(stackInHand, Items.GLOW_BERRIES.getDefaultInstance()) || ItemStack.isSameItem(stackInHand, Items.GLOW_BERRIES.getDefaultInstance());
-                ItemUseAnimation useAction = stackInHand.getUseAnimation();
-                if (isBlock || (isBerry && useAction == ItemUseAnimation.EAT)) {
+                UseAnim useAction = stackInHand.getUseAnimation();
+                if (isBlock || (isBerry && useAction == UseAnim.EAT)) {
                     FlagCheckEvent checkEvent = new FlagCheckEvent(placeBlockTarget, PLACE_BLOCKS, getDimKey(player), player);
                     if (Services.EVENT.post(checkEvent))
                         return InteractionResult.PASS;

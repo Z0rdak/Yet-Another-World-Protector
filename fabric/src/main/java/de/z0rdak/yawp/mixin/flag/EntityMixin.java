@@ -6,16 +6,19 @@ import de.z0rdak.yawp.platform.Services;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LightningBolt;
+import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.trading.Merchant;
-import net.minecraft.world.level.portal.TeleportTransition;
+import net.minecraft.world.level.portal.DimensionTransition;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.Set;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
@@ -76,11 +79,11 @@ public abstract class EntityMixin {
      * Covers USE_PORTAL* flags
      * Note: does not seem to trigger for players, which is fine
      */
-    @Inject(method = "teleport", at = @At(value = "HEAD"), cancellable = true, allow = 1)
-    public void onChangeDimension(TeleportTransition teleportTransition, CallbackInfoReturnable<Entity> cir) {
+    @Inject(method = "changeDimension", at = @At(value = "HEAD"), cancellable = true, allow = 1)
+    public void onChangeDimension(DimensionTransition transition, CallbackInfoReturnable<Boolean> cir) {
         Entity self = (Entity) (Object) this;
         if (isServerSide(self.level())) {
-            RegionDataManager.addDimKeyOnDimensionChange(null, self.level(), teleportTransition.newLevel());
+            RegionDataManager.addDimKeyOnDimensionChange(null, self.level(), transition.newLevel());
             FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL, getDimKey(self));
             if (Services.EVENT.post(checkEvent)) {
                 return;

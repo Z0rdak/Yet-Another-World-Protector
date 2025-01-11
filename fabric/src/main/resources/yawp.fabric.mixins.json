@@ -5,7 +5,7 @@
   "refmap": "${mod_id}.refmap.json",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "ServerExplosionMixin",
+    "ExplosionMixin",
     "flag.AbstractFireBlockMixin",
     "flag.EnderManEntityMixin",
     "flag.EntityMixin",
