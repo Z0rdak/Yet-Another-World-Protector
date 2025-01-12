@@ -43,8 +43,7 @@ public final class ConfigRegistry {
             switch (modConfig.getFileName()) {
                 case PermissionConfig.CONFIG_NAME: {
                     PermissionConfig.BASE_CMD = PermissionConfig.getBaseCmd();
-
-                    if (Services.PLATFORM.isModLoaded("journeymap")) {
+                    if (Services.PLATFORM.isJourneyMapLoaded()) {
                         PermissionConfig.BASE_CMD = PermissionConfig.getBaseCmdAlt();
                         CONFIG_LOGGER.info("Detected JourneyMap to be loaded beside YAWP.");
                     }

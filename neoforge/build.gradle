@@ -5,6 +5,8 @@ plugins {
 
 dependencies {
     api "fuzs.forgeconfigapiport:forgeconfigapiport-neoforge:21.4.1"
+
+    //implementation "curse.maven:worldedit-225608:6013137"
 }
 
 neoForge {

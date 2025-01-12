@@ -7,13 +7,14 @@ import de.z0rdak.yawp.config.server.PermissionConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.platform.Services;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.config.ModConfigEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.NeoForgeConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,14 +25,15 @@ public final class ConfigRegistry {
     private ConfigRegistry() {
     }
 
-    public static void register() {
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(ConfigRegistry::onConfigLoading);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(ConfigRegistry::onConfigReloading);
-
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, PermissionConfig.CONFIG_SPEC, PermissionConfig.CONFIG_NAME);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, FlagConfig.CONFIG_SPEC, FlagConfig.CONFIG_NAME);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, RegionConfig.CONFIG_SPEC, RegionConfig.CONFIG_NAME);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, LoggingConfig.CONFIG_SPEC, LoggingConfig.CONFIG_NAME);
+    public static void register(IEventBus modEventBus) {
+        modEventBus.addListener(ConfigRegistry::onConfigLoading);
+        modEventBus.addListener(ConfigRegistry::onConfigReloading);
+        ModLoadingContext modLoadingContext = ModLoadingContext.get();
+        ModContainer activeContainer = modLoadingContext.getActiveContainer();
+        activeContainer.registerConfig(ModConfig.Type.COMMON, PermissionConfig.CONFIG_SPEC, PermissionConfig.CONFIG_NAME);
+        activeContainer.registerConfig(ModConfig.Type.COMMON, FlagConfig.CONFIG_SPEC, FlagConfig.CONFIG_NAME);
+        activeContainer.registerConfig(ModConfig.Type.COMMON, RegionConfig.CONFIG_SPEC, RegionConfig.CONFIG_NAME);
+        activeContainer.registerConfig(ModConfig.Type.COMMON, LoggingConfig.CONFIG_SPEC, LoggingConfig.CONFIG_NAME);
     }
 
     @SubscribeEvent
@@ -90,10 +92,10 @@ public final class ConfigRegistry {
                     // CONFIG_LOGGER.info("Logging detailed player flag checks: {}", LoggingConfig.shouldLogDetailedPlayerFlags());
 
                     if (LoggingConfig.shouldLogFlagChecks()) {
-                        MinecraftForge.EVENT_BUS.addListener(LoggingConfig::logCheck);
+                        NeoForge.EVENT_BUS.addListener(LoggingConfig::logCheck);
                     }
                     if (LoggingConfig.shouldLogFlagCheckResults()) {
-                        MinecraftForge.EVENT_BUS.addListener(LoggingConfig::logResult);
+                        NeoForge.EVENT_BUS.addListener(LoggingConfig::logResult);
                     }
                 }
             }

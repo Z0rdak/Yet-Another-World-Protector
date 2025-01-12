@@ -1,16 +1,14 @@
 package de.z0rdak.yawp.platform;
 
 import de.z0rdak.yawp.platform.services.IPlatformHelper;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.loading.FMLLoader;
-import org.apache.commons.io.output.ThresholdingOutputStream;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.loading.FMLLoader;
 
-public class ForgePlatformHelper implements IPlatformHelper {
+public class NeoForgePlatformHelper implements IPlatformHelper {
 
     @Override
     public String getPlatformName() {
-
-        return "Forge";
+        return "NeoForge";
     }
 
     @Override
@@ -35,7 +33,6 @@ public class ForgePlatformHelper implements IPlatformHelper {
 
     @Override
     public boolean isDevelopmentEnvironment() {
-
         return !FMLLoader.isProduction();
     }
 }
