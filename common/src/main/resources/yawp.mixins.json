@@ -10,7 +10,9 @@
     "LeavesBlockMixin",
     "LightningEntityMixin",
     "ServerWorldMixin",
-    "SignBlockMixin"
+    "SignBlockMixin",
+    "stick.AnvilScreenHandlerMixin",
+    "stick.ServerPlayerInteractionManagerMixin"
   ],
   "client": [
   ],

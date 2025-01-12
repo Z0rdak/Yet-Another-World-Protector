@@ -13,7 +13,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
 
-// Note: this mixin is currently disabled (not added to yawp.mixins.json)
 // TODO: Remove with WorldEdit integration feature
 @Mixin(AnvilMenu.class)
 public abstract class AnvilScreenHandlerMixin {
@@ -21,15 +20,20 @@ public abstract class AnvilScreenHandlerMixin {
     @Inject(method = "onTake", at = @At("HEAD"), cancellable = true, allow = 1)
     private void onTakeOutput(Player player, ItemStack outputItem, CallbackInfo ci) {
         if (isServerSide(player.level())) {
-            // Retrieve the input and output items from the anvil menu
-            ItemStack inputItem = ((AnvilMenu) (Object) this).getSlot(0).getItem();
-            ItemStack ingredientInput = ((AnvilMenu) (Object) this).getSlot(1).getItem();
-            boolean isInputAndOutputStick = ItemStack.isSameItem(outputItem, Items.STICK.getDefaultInstance())
-                    && ItemStack.isSameItem(inputItem, Items.STICK.getDefaultInstance());
-            if (isInputAndOutputStick && ingredientInput.isEmpty()) {
-                MarkerStickHandler.onCreateStick(player, inputItem, outputItem);
-                player.getInventory().setChanged();
-                ci.cancel();
+            try {
+                AnvilMenu anvilMenu = (AnvilMenu) (Object) this;
+                ItemStack inputItem = anvilMenu.getSlot(0).getItem();
+                ItemStack ingredientInput = anvilMenu.getSlot(1).getItem();
+                ItemStack stick = Items.STICK.getDefaultInstance();
+                boolean isInputAndOutputStick = ItemStack.isSameItem(outputItem, stick)
+                        && ItemStack.isSameItem(inputItem, stick);
+                if (isInputAndOutputStick && ingredientInput.isEmpty()) {
+                    MarkerStickHandler.onCreateStick(player, inputItem, outputItem);
+                    player.getInventory().setChanged();
+                    ci.cancel();
+                }
+            } catch (ClassCastException cce) {
+                // Should not happen - if so we ignore it simply
             }
         }
     }
