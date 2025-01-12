@@ -51,8 +51,7 @@
     "flag.player.ThrownEnderPearlMixin",
     "flag.player.breeding.AnimalMixin",
     "flag.player.breeding.FrogMixin",
-    "flag.player.breeding.SnifferMixin",
-    "stick.ServerPlayerInteractionManagerMixin"
+    "flag.player.breeding.SnifferMixin"
   ],
   "client": [
   ],
