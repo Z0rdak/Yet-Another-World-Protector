@@ -23,7 +23,7 @@ public abstract class WitherEntityMixin {
 
     @Inject(method = "customServerAiStep", locals = LocalCapture.CAPTURE_FAILSOFT, at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/entity/boss/wither/WitherBoss;canDestroy(Lnet/minecraft/world/level/block/state/BlockState;)Z"), cancellable = true, allow = 1)
-    public void onWitherDestroyBlocks(ServerLevel level, CallbackInfo ci, boolean bl, int j, int k, Iterator var5, BlockPos blockPos, BlockState blockState) {
+    public void onWitherDestroyBlocks(CallbackInfo ci, boolean bl, int j, int k, Iterator var5, BlockPos blockPos, BlockState blockState) {
         WitherBoss self = (WitherBoss) (Object) this;
         if (isServerSide(self)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, WITHER_BLOCK_PROT, getDimKey(self));
@@ -34,7 +34,7 @@ public abstract class WitherEntityMixin {
     }
 
     @Inject(method = "customServerAiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(F)I", ordinal = 0), cancellable = true, allow = 1)
-    public void onWitherAttemptGriefing(ServerLevel level, CallbackInfo ci) {
+    public void onWitherAttemptGriefing(CallbackInfo ci) {
         WitherBoss self = (WitherBoss) (Object) this;
         if (isServerSide(self)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), MOB_GRIEFING, getDimKey(self));

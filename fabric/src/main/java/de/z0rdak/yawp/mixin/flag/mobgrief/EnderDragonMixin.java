@@ -22,8 +22,8 @@ import static de.z0rdak.yawp.handler.HandlerUtil.processCheck;
 @Mixin(EnderDragon.class)
 public abstract class EnderDragonMixin {
 
-    @Inject(method = "checkWalls", locals = LocalCapture.CAPTURE_FAILSOFT, at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;removeBlock(Lnet/minecraft/core/BlockPos;Z)Z"), allow = 1)
-    public void onDragonDestroyBlocks(ServerLevel level, AABB box, CallbackInfoReturnable<Boolean> cir, int i, int j, int k, int l, int m, int n, boolean bl, boolean bl2, int o, int p, int q, BlockPos blockPos) {
+    @Inject(method = "checkWalls", locals = LocalCapture.CAPTURE_FAILSOFT, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;removeBlock(Lnet/minecraft/core/BlockPos;Z)Z"), allow = 1)
+    public void onDragonDestroyBlocks(AABB box, CallbackInfoReturnable<Boolean> cir, int i, int j, int k, int l, int m, int n, boolean bl, boolean bl2, int o, int p, int q, BlockPos blockPos) {
         EnderDragon self = (EnderDragon) (Object) this;
         FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, DRAGON_BLOCK_PROT, getDimKey(self));
         if (Services.EVENT.post(checkEvent)) {

@@ -113,7 +113,7 @@ public abstract class PlayerMixin {
 
 
     @Inject(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getDamageAfterArmorAbsorb(Lnet/minecraft/world/damagesource/DamageSource;F)F"), cancellable = true, allow = 1)
-    public void onHurt(ServerLevel level, DamageSource source, float amount, CallbackInfo ci) {
+    public void onHurt(DamageSource source, float amount, CallbackInfo ci) {
         Player player = (Player) (Object) this;
         if (isServerSide(player)) {
             if (source.getEntity() instanceof Player) {
@@ -135,7 +135,7 @@ public abstract class PlayerMixin {
     }
 
     @Inject(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;setAbsorptionAmount(F)V"), cancellable = true, allow = 1)
-    public void onReceiveDamage(ServerLevel level, DamageSource damageSource, float amount, CallbackInfo ci) {
+    public void onReceiveDamage(DamageSource damageSource, float amount, CallbackInfo ci) {
         Player player = (Player) (Object) this;
         if (isServerSide(player)) {
             // TODO: meele-player flag

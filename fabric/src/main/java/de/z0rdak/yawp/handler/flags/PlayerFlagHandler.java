@@ -17,6 +17,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HasCustomInventoryScreen;
@@ -67,26 +68,26 @@ public final class PlayerFlagHandler {
      * This event is fired before the player triggers {@link Item#use(Level, Player, InteractionHand)}.
      * Note that this is NOT fired if the player is targeting a block {@link UseBlockCallback} or entity {@link UseEntityCallback}.
      */
-    private static InteractionResult onUseItem(Player player, Level world, InteractionHand hand) {
+    private static InteractionResultHolder<ItemStack> onUseItem(Player player, Level world, InteractionHand hand) {
         /* Vanilla code - START
         This is in place to ensure same behaviour of flags across fabric and forge - check this on each update! */
         ItemStack stackInHand = player.getItemInHand(hand);
         if (player.isSpectator() || player.getCooldowns().isOnCooldown(stackInHand.getItem())) {
-            return InteractionResult.PASS;
+            return InteractionResultHolder.pass(stackInHand);
         }
         /* Vanilla code - END */
         if (isServerSide(world)) {
             //FLAG_LOGGER.info("[onUseItem] Player={} ({}), at=[{}], Hand={}, Item={}", player.getName().getString(), player.getUuidAsString(), player.getBlockPos().toShortString(), hand, player.getStackInHand(hand));
             FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), USE_ITEMS, getDimKey(player), player);
             if (Services.EVENT.post(checkEvent)) {
-                return InteractionResult.PASS;
+                return InteractionResultHolder.pass(stackInHand);
             }
             FlagState flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
             if (flagState == FlagState.DENIED) {
-                return InteractionResult.FAIL;
+                return InteractionResultHolder.fail(stackInHand);
             }
         }
-        return InteractionResult.PASS;
+        return InteractionResultHolder.pass(stackInHand);
     }
 
 

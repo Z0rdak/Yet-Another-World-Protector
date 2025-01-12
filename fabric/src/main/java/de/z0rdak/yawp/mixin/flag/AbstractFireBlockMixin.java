@@ -18,7 +18,7 @@ import static de.z0rdak.yawp.handler.HandlerUtil.*;
 public abstract class AbstractFireBlockMixin {
 
     @Inject(method = "onPlace", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/level/portal/PortalShape;createPortalBlocks(Lnet/minecraft/world/level/LevelAccessor;)V"), cancellable = true)
+            target = "Lnet/minecraft/world/level/portal/PortalShape;createPortalBlocks()V"), cancellable = true)
     private void onSpawnPortal(BlockState state, Level world, BlockPos pos, BlockState oldState, boolean notify, CallbackInfo info) {
         if (isServerSide(world)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(pos, SPAWN_PORTAL, getDimKey(world));

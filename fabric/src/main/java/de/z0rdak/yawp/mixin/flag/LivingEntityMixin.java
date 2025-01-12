@@ -176,7 +176,7 @@ public abstract class LivingEntityMixin {
      */
     @Inject(method = "createWitherRose", locals = LocalCapture.CAPTURE_FAILSOFT,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)Z"), cancellable = true, allow = 1)
-    public void onCreateWitherRose(@Nullable LivingEntity adversary, CallbackInfo ci, ServerLevel level, boolean bl, BlockPos pos, BlockState blockState) {
+    public void onCreateWitherRose(@Nullable LivingEntity adversary, CallbackInfo ci, boolean bl, BlockPos pos, BlockState blockState) {
         LivingEntity self = (LivingEntity) (Object) this;
         Level world = self.level();
         if (isServerSide(world)) {
