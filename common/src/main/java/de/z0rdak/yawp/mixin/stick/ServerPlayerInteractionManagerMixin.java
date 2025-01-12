@@ -23,17 +23,14 @@ import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
 @Mixin(ServerPlayerGameMode.class)
 public class ServerPlayerInteractionManagerMixin {
 
-    // FIXME: Could go in fabric event mixin: UseBlockCallback.EVENT.register(PlayerFlagHandler::onUseBlock);
     @Inject(method = "useItemOn", at = @At("HEAD"), cancellable = true, allow = 1)
     public void useItemOn(ServerPlayer serverPlayer, Level level, ItemStack itemStack, InteractionHand interactionHand, BlockHitResult blockHitResult, CallbackInfoReturnable<InteractionResult> cir) {
         if (isServerSide(level)) {
-            BlockPos blockpos = blockHitResult.getBlockPos();
             if (StickUtil.isMarker(itemStack)) {
+                BlockPos blockpos = blockHitResult.getBlockPos();
                 MarkerStickHandler.onMarkBlock(serverPlayer, itemStack, blockpos);
                 cir.setReturnValue(InteractionResult.SUCCESS);
             }
         }
-
     }
-
 }
