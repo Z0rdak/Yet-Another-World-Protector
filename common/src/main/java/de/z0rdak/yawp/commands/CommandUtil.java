@@ -227,7 +227,7 @@ public class CommandUtil {
     }
 
     public static int promptRegionInfo(CommandContext<CommandSourceStack> ctx, IProtectedRegion region) {
-        MultiLineMessage.send(ctx.getSource(), RegionInfoMessage.of(region));
+        MultiLineMessage.send(ctx.getSource(), new RegionInfoMessage(region));
         return 0;
     }
 
