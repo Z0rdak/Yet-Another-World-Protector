@@ -16,7 +16,6 @@ import de.z0rdak.yawp.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.util.LocalRegions;
-import de.z0rdak.yawp.util.StickType;
 import de.z0rdak.yawp.util.StickUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -28,13 +27,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 import java.util.Collections;
-import java.util.Objects;
 
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.DimensionCommands.getRandomExample;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.ChatLinkBuilder.buildRegionInfoLink;
-import static de.z0rdak.yawp.constants.serialization.ItemNbtKeys.STICK;
 import static de.z0rdak.yawp.util.text.MessageSender.sendCmdFeedback;
 import static net.minecraft.ChatFormatting.RED;
 
@@ -43,7 +40,7 @@ public final class MarkerCommands {
     private MarkerCommands() {
     }
 
-    public static LiteralArgumentBuilder<CommandSourceStack> build() {
+    static LiteralArgumentBuilder<CommandSourceStack> build() {
         return literal(MARKER)
                 .then(literal(GIVE)
                         .executes(MarkerCommands::giveMarkerStick))
@@ -147,7 +144,7 @@ public final class MarkerCommands {
         }
     }
 
-    public static int giveMarkerStick(CommandContext<CommandSourceStack> ctx) {
+    private static int giveMarkerStick(CommandContext<CommandSourceStack> ctx) {
         try {
             Player targetPlayer = ctx.getSource().getPlayerOrException();
             ItemStack marker = Items.STICK.getDefaultInstance();
