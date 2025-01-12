@@ -42,7 +42,6 @@ public class FlowingFluidMixin {
 
         HandlerUtil.processCheck(checkEvent, deny -> {
             cir.setReturnValue(false);
-            MessageSender.sendFlagMsg(deny);
         });
 
         if (specificFluidCheckEvent == null) {
@@ -50,7 +49,6 @@ public class FlowingFluidMixin {
         }
         HandlerUtil.processCheck(specificFluidCheckEvent, deny -> {
             cir.setReturnValue(false);
-            MessageSender.sendFlagMsg(deny);
         });
     }
 
