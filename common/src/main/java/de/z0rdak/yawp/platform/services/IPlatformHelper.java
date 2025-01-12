@@ -18,6 +18,7 @@ public interface IPlatformHelper {
     boolean isModLoaded(String modId);
 
     boolean isWorldEditLoaded();
+    
     boolean isWorldEditCuiLoaded();
 
     boolean isJourneyMapLoaded();

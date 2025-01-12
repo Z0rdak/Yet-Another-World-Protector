@@ -52,6 +52,10 @@ repositories {
         name = "Fuzs Mod Resources"
         url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
     }
+    maven {
+        name = "EngineHub Resources"
+        url = "https://maven.enginehub.org/repo/"
+    }
 }
 
 // Declare capabilities on the outgoing configurations.
