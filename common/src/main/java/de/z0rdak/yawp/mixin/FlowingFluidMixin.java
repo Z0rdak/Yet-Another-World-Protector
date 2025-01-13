@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.mixin;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.handler.HandlerUtil;
 import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.util.text.MessageSender;
@@ -26,7 +27,11 @@ public class FlowingFluidMixin {
             // Should never happen, but skip check if it does
             return;
         }
+
         FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, FLUID_FLOW, level.dimension());
+        HandlerUtil.processCheck(checkEvent, deny -> {
+            cir.setReturnValue(false);
+        });
 
         FlagCheckEvent specificFluidCheckEvent = null;
         if (fluid instanceof WaterFluid) {
@@ -35,18 +40,10 @@ public class FlowingFluidMixin {
             specificFluidCheckEvent = new FlagCheckEvent(blockPos, LAVA_FLOW, level.dimension());
         }
 
-        // If both flags is allowed, then allow the flow
-        if (Services.EVENT.post(checkEvent) && specificFluidCheckEvent != null && Services.EVENT.post(specificFluidCheckEvent)) {
+        if (cir.isCancelled() || specificFluidCheckEvent == null) {
             return;
         }
 
-        HandlerUtil.processCheck(checkEvent, deny -> {
-            cir.setReturnValue(false);
-        });
-
-        if (specificFluidCheckEvent == null) {
-            return;
-        }
         HandlerUtil.processCheck(specificFluidCheckEvent, deny -> {
             cir.setReturnValue(false);
         });
