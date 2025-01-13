@@ -6,6 +6,7 @@ import de.z0rdak.yawp.config.ConfigRegistry;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.data.region.RegionDataManager;
+import de.z0rdak.yawp.platform.NeoForgeConfigHelper;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -49,7 +50,8 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
 
     @Override
     public void registerConfig() {
-        ConfigRegistry.register(yawpEventBus);
+        ((NeoForgeConfigHelper)Services.CONFIG_REGISTRY).setEventBus(yawpEventBus);
+        Services.CONFIG_REGISTRY.register();
     }
     
     @SubscribeEvent
