@@ -68,6 +68,6 @@ public class YetAnotherWorldProtector implements ModInitializer, YAWPModInitiali
 
     @Override
     public void registerConfig() {
-        Services.CONFIG_REGISTRY.register();
+        ConfigRegistry.register();
     }
 }

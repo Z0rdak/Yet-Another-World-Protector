@@ -71,10 +71,6 @@ public class ForgeFlagCheckEvent extends Event {
         this(target, regionFlag, dimension, null);
     }
 
-    public static FlagCheckEvent asNonEvent(ForgeFlagCheckEvent check) {
-        return new FlagCheckEvent(check.getTarget(), check.getRegionFlag(), check.getDimension(), check.getPlayer(), check.getId());
-    }
-
     public String getId() {
         return id;
     }
