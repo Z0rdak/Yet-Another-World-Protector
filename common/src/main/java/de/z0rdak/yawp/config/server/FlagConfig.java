@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.config.server;
 
 import de.z0rdak.yawp.constants.Constants;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -10,15 +10,15 @@ import static de.z0rdak.yawp.config.ConfigRegistry.CONFIG_LOGGER;
 
 public class FlagConfig {
 
-    public static final ForgeConfigSpec CONFIG_SPEC;
+    public static final ModConfigSpec CONFIG_SPEC;
     public static final String CONFIG_NAME = Constants.MOD_ID + "-flags.toml";
 
-    private static final ForgeConfigSpec.ConfigValue<Boolean> REMOVE_ENTITIES_FOR_SPAWNING_FLAGS;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> COVERED_BLOCK_ENTITIES;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> COVERED_BLOCK_ENTITY_TAGS;
+    private static final ModConfigSpec.ConfigValue<Boolean> REMOVE_ENTITIES_FOR_SPAWNING_FLAGS;
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> COVERED_BLOCK_ENTITIES;
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> COVERED_BLOCK_ENTITY_TAGS;
 
     static {
-        final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+        final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
         BUILDER.push("YetAnotherWorldProtector mod flag configuration").build();
 

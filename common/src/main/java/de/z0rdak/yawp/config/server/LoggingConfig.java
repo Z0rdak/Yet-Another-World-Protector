@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.config.server;
 
-import de.z0rdak.yawp.api.events.region.ForgeFlagCheckEvent;
-import de.z0rdak.yawp.api.events.region.ForgeFlagCheckResult;
+import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.region.FlagCheckResult;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.FlagCategory;
 import de.z0rdak.yawp.core.flag.FlagState;
@@ -9,7 +9,7 @@ import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.util.AreaUtil;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -20,21 +20,21 @@ import static de.z0rdak.yawp.config.ConfigRegistry.CONFIG_LOGGER;
 
 public class LoggingConfig {
 
-    public static final ForgeConfigSpec CONFIG_SPEC;
+    public static final ModConfigSpec CONFIG_SPEC;
     public static final String CONFIG_NAME = Constants.MOD_ID + "-logging.toml";
 
     public static final Logger FLAG_LOGGER = LogManager.getLogger(Constants.MOD_ID.toUpperCase() + "-Flags");
 
-    private static final ForgeConfigSpec.ConfigValue<Boolean> FLAG_CHECK_LOG;
-    private static final ForgeConfigSpec.ConfigValue<Boolean> FLAG_RESULT_LOG;
-    private static final ForgeConfigSpec.ConfigValue<Boolean> LOG_EMPTY_RESULTS;
-    // private static final ForgeConfigSpec.ConfigValue<Boolean> DETAILED_PLAYER_FLAG_LOG;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> LOG_RESULT_VALUES;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> LOG_FLAG_CATEGORIES;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> LOG_FLAGS;
+    private static final ModConfigSpec.ConfigValue<Boolean> FLAG_CHECK_LOG;
+    private static final ModConfigSpec.ConfigValue<Boolean> FLAG_RESULT_LOG;
+    private static final ModConfigSpec.ConfigValue<Boolean> LOG_EMPTY_RESULTS;
+    // private static final ModConfigSpec.ConfigValue<Boolean> DETAILED_PLAYER_FLAG_LOG;
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> LOG_RESULT_VALUES;
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> LOG_FLAG_CATEGORIES;
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> LOG_FLAGS;
 
     static {
-        final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+        final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
         BUILDER.push("YetAnotherWorldProtector logging configuration").build();
 
@@ -139,7 +139,7 @@ public class LoggingConfig {
     }
     */
 
-    public static boolean logCheck(ForgeFlagCheckEvent check) {
+    public static boolean logCheck(FlagCheckEvent check) {
         boolean matchesFlagOrCategory = (flagMatchesCategory(check) || matchesFlag(check));
         if (matchesFlagOrCategory) {
             FLAG_LOGGER.info("[Check] {}, at {}, in '{}', Player={}, Id={}",
@@ -152,8 +152,8 @@ public class LoggingConfig {
         return true;
     }
 
-    public static ForgeFlagCheckResult logResult(ForgeFlagCheckResult result) {
-        ForgeFlagCheckEvent check = result.getFlagCheck();
+    public static FlagCheckResult logResult(FlagCheckResult result) {
+        FlagCheckEvent check = result.getFlagCheck();
         boolean matchesFlagOrCategory = (flagMatchesCategory(check) || matchesFlag(check));
         if (matchesFlagOrCategory && matchesResult(result)) {
             if (result.getResponsible() == null || result.getFlag() == null) {
@@ -183,15 +183,15 @@ public class LoggingConfig {
         return result;
     }
 
-    public static boolean matchesResult(ForgeFlagCheckResult result) {
+    public static boolean matchesResult(FlagCheckResult result) {
         return LoggingConfig.getResultValuesToLog().contains(result.getFlagState().name);
     }
 
-    public static boolean flagMatchesCategory(ForgeFlagCheckEvent check) {
+    public static boolean flagMatchesCategory(FlagCheckEvent check) {
         return RegionFlag.matchesCategory(check.getRegionFlag(), getFlagCategories());
     }
 
-    public static boolean matchesFlag(ForgeFlagCheckEvent check) {
+    public static boolean matchesFlag(FlagCheckEvent check) {
         return LoggingConfig.getFlagsToLog().contains(check.getRegionFlag().name);
     }
 }
