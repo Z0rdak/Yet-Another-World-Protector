@@ -28,15 +28,12 @@ public class NeoForgeLoggingConfigHelper implements ILoggingConfigHelper {
 
     @Override
     public boolean logCheck(FlagCheckEvent check) {
-        NeoForgeFlagCheckEvent event = new NeoForgeFlagCheckEvent(check.getTarget(), check.getRegionFlag(), check.getDimension(), check.getPlayer(), check.getId());
-        return LoggingConfig.logCheck(event);
+        return LoggingConfig.logCheck(check);
     }
 
     @Override
     public FlagCheckResult logResult(FlagCheckResult result) {
-        NeoForgeFlagCheckResult event = NeoForgeFlagCheckResult.asEvent(result);
-        LoggingConfig.logResult(event);
-        return NeoForgeFlagCheckResult.asNonEvent(event);
+        return LoggingConfig.logResult(result);
     }
 
     @Override
