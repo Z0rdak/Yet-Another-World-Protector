@@ -70,6 +70,10 @@ public class NeoForgeFlagCheckEvent extends Event implements ICancellableEvent {
         this(target, regionFlag, dimension, null);
     }
 
+    public static FlagCheckEvent asNonEvent(NeoForgeFlagCheckEvent check) {
+        return new FlagCheckEvent(check.getTarget(), check.getRegionFlag(), check.getDimension(), check.getPlayer(), check.getId());
+    }
+
     public String getId() {
         return id;
     }
