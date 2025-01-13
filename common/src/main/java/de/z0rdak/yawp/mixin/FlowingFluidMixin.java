@@ -29,21 +29,26 @@ public class FlowingFluidMixin {
         }
 
         FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, FLUID_FLOW, level.dimension());
+        if (Services.EVENT.post(checkEvent)) {
+            return;
+        }
         HandlerUtil.processCheck(checkEvent, deny -> {
             cir.setReturnValue(false);
         });
-
+        if (cir.isCancelled()) {
+            return;
+        }
+        
         FlagCheckEvent specificFluidCheckEvent = null;
         if (fluid instanceof WaterFluid) {
             specificFluidCheckEvent = new FlagCheckEvent(blockPos, WATER_FLOW, level.dimension());
         } else if (fluid instanceof LavaFluid) {
             specificFluidCheckEvent = new FlagCheckEvent(blockPos, LAVA_FLOW, level.dimension());
         }
-
-        if (cir.isCancelled() || specificFluidCheckEvent == null) {
+        
+        if (specificFluidCheckEvent != null && Services.EVENT.post(specificFluidCheckEvent)) {
             return;
         }
-
         HandlerUtil.processCheck(specificFluidCheckEvent, deny -> {
             cir.setReturnValue(false);
         });
