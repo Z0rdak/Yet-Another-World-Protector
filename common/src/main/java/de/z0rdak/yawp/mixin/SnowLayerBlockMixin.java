@@ -20,11 +20,9 @@ public class SnowLayerBlockMixin {
     @Inject(method = "randomTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/SnowLayerBlock;dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)V"), cancellable = true)
     public void onRandomTick(BlockState blockState, ServerLevel level, BlockPos blockPos, RandomSource randomSource, CallbackInfo ci) {
         FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, RegionFlag.SNOW_SMELTING, level.dimension());
-
         if (Services.EVENT.post(checkEvent)) {
             return;
         }
-
         HandlerUtil.processCheck(checkEvent, deny -> {
             ci.cancel();
         });
