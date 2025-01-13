@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.platform;
 
 import de.z0rdak.yawp.constants.Constants;
+import de.z0rdak.yawp.platform.services.IConfigHelper;
 import de.z0rdak.yawp.platform.services.IPermissionHelper;
 import de.z0rdak.yawp.platform.services.config.IFlagConfigHelper;
 import de.z0rdak.yawp.platform.services.config.ILoggingConfigHelper;
@@ -26,6 +27,7 @@ public class Services {
     public static final IRegionConfigHelper REGION_CONFIG = load(IRegionConfigHelper.class);
     public static final ILoggingConfigHelper LOGGING_CONFIG = load(ILoggingConfigHelper.class);
     public static final IPermissionHelper PERMISSIONS = load(IPermissionHelper.class);
+    public static final IConfigHelper CONFIG_REGISTRY = load(IConfigHelper.class);
     
     // This code is used to load a service for the current environment. Your implementation of the service must be defined
     // manually by including a text file in META-INF/services named with the fully qualified class name of the service.

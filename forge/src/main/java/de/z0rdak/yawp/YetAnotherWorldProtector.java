@@ -6,6 +6,7 @@ import de.z0rdak.yawp.config.ConfigRegistry;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.data.region.RegionDataManager;
+import de.z0rdak.yawp.platform.ForgeConfigHelper;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -18,6 +19,7 @@ import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -110,10 +112,7 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
 
     @Override
     public void registerConfig() {
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerConfigForge);
-    }
-
-    public void registerConfigForge(FMLCommonSetupEvent event) {
-        ConfigRegistry.register();
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        modEventBus.addListener((FMLCommonSetupEvent event) ->  Services.CONFIG_REGISTRY.register());
     }
 }

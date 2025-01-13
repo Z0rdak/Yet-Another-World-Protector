@@ -28,15 +28,12 @@ public class ForgeLoggingConfigHelper implements ILoggingConfigHelper {
 
     @Override
     public boolean logCheck(FlagCheckEvent check) {
-        ForgeFlagCheckEvent event = new ForgeFlagCheckEvent(check.getTarget(), check.getRegionFlag(), check.getDimension(), check.getPlayer(), check.getId());
-        return LoggingConfig.logCheck(event);
+        return LoggingConfig.logCheck(check);
     }
 
     @Override
     public FlagCheckResult logResult(FlagCheckResult result) {
-        ForgeFlagCheckResult event = ForgeFlagCheckResult.asEvent(result);
-        LoggingConfig.logResult(event);
-        return ForgeFlagCheckResult.asNonEvent(event);
+        return LoggingConfig.logResult(result);
     }
 
     @Override
