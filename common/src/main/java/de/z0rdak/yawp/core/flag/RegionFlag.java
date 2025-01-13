@@ -61,6 +61,8 @@ public enum RegionFlag {
     SHOVEL_PATH("shovel-path", FlagType.BOOLEAN_FLAG, Arrays.asList(FlagCategory.PLAYER, FlagCategory.BLOCK)),
     SHULKER_TELEPORT_FROM_REGION("shulker-tp-from", FlagType.BOOLEAN_FLAG, Collections.singletonList(FlagCategory.ENTITY)),
     SLEEP("sleep", FlagType.BOOLEAN_FLAG, Arrays.asList(FlagCategory.PLAYER, FlagCategory.BLOCK)),
+    SNOW_FALL("snow-fall", FlagType.BOOLEAN_FLAG, Arrays.asList(FlagCategory.BLOCK, FlagCategory.ENVIRONMENT)),
+    SNOW_SMELTING("snow-smelting", FlagType.BOOLEAN_FLAG, Arrays.asList(FlagCategory.BLOCK, FlagCategory.ENVIRONMENT)),
     SPAWNING_ALL("spawning-all", FlagType.BOOLEAN_FLAG, Arrays.asList(FlagCategory.ENVIRONMENT, FlagCategory.ENTITY)),
     SPAWNING_ANIMAL("spawning-animal", FlagType.BOOLEAN_FLAG, Arrays.asList(FlagCategory.ENVIRONMENT, FlagCategory.ENTITY)),
     SPAWNING_GOLEM("spawning-golem", FlagType.BOOLEAN_FLAG, Arrays.asList(FlagCategory.ENVIRONMENT, FlagCategory.ENTITY)),
