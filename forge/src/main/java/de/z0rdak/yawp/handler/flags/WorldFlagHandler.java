@@ -14,6 +14,7 @@ import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
+import net.minecraftforge.event.entity.item.ItemExpireEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -166,5 +167,18 @@ public class WorldFlagHandler {
                 }
             }
         }
+    }
+
+    @SubscribeEvent
+    public static void onItemExpire(ItemExpireEvent event) {
+        FlagCheckEvent checkEvent = new FlagCheckEvent(event.getEntity().blockPosition(), NO_ITEM_DESPAWN, event.getEntity().level().dimension());
+        if (Services.EVENT.post(checkEvent)) {
+            return;
+        }
+
+        processCheck(checkEvent, deny -> {
+            event.setCanceled(true);
+            event.setExtraLife(6000); // Reset age to avoid flag checking every tick.
+        });
     }
 }

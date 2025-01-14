@@ -53,6 +53,7 @@ public enum RegionFlag {
     MELEE_WANDERING_TRADER("melee-wtrader", FlagType.BOOLEAN_FLAG, Arrays.asList(FlagCategory.PLAYER, FlagCategory.ENTITY)),
     MOB_GRIEFING("mob-griefing", FlagType.BOOLEAN_FLAG, Collections.singletonList(FlagCategory.ENVIRONMENT)),
     NO_FLIGHT("no-flight", FlagType.BOOLEAN_FLAG, Collections.singletonList(FlagCategory.PLAYER)),
+    NO_ITEM_DESPAWN("no-item-despawn", FlagType.BOOLEAN_FLAG, Collections.singletonList(FlagCategory.ITEM)),
     NO_PVP("no-pvp", FlagType.BOOLEAN_FLAG, Arrays.asList(FlagCategory.PLAYER, FlagCategory.ENTITY)),
     NO_SIGN_EDIT("no-sign-edit", FlagType.BOOLEAN_FLAG, Arrays.asList(FlagCategory.PLAYER, FlagCategory.BLOCK)),
     PLACE_BLOCKS("place-blocks", FlagType.BOOLEAN_FLAG, Arrays.asList(FlagCategory.PLAYER, FlagCategory.BLOCK)),
