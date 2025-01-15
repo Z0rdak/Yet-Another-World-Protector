@@ -46,7 +46,7 @@ public class FlowingFluidMixin {
             specificFluidCheckEvent = new FlagCheckEvent(blockPos, LAVA_FLOW, level.dimension());
         }
         
-        if (specificFluidCheckEvent != null && Services.EVENT.post(specificFluidCheckEvent)) {
+        if (specificFluidCheckEvent == null || Services.EVENT.post(specificFluidCheckEvent)) {
             return;
         }
         HandlerUtil.processCheck(specificFluidCheckEvent, deny -> {
