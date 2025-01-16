@@ -51,6 +51,7 @@ some great advantages for the future:
 - Fix animal and monster check to exclude/include monster horses correctly
 - Fix `explosions-entities` and `explosions-blocks` not working correctly
 - Fix `fall-damage-players` not working correctly
+- Fix `no-pvp` flag not checking for damage source to be a player
 
 ## Removed
 
