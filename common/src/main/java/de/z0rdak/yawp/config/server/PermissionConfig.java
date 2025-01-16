@@ -141,11 +141,11 @@ public class PermissionConfig {
     }
 
     public static boolean hasUUIDConfigEntry(Player player) {
-        return Services.PERMISSION_CONFIG.UUIDsWithPermission().contains(player.getStringUUID());
+        return PermissionConfig.UUIDsWithPermission().contains(player.getStringUUID());
     }
 
     public static boolean hasRequiredOpLevel(Player player) {
-        return player.hasPermissions(Services.PERMISSION_CONFIG.getRequiredOpLevel());
+        return player.hasPermissions(PermissionConfig.getRequiredOpLevel());
     }
 
     public static boolean hasConfigPermission(CommandSourceStack src, CommandSourceType cmdSrcType) throws CommandSyntaxException {
