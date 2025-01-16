@@ -2,6 +2,7 @@ package de.z0rdak.yawp.api.permission;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.commands.CommandSourceType;
+import de.z0rdak.yawp.config.server.PermissionConfig;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.commands.CommandSourceStack;
@@ -33,17 +34,17 @@ public final class Permissions {
     }
 
     public boolean hasConfigPermAndOpBypassFlags(Player player) {
-        boolean byPassFlagAllowed = Services.PERMISSION_CONFIG.byPassFlagAllowed();
-        boolean hasConfigPerm = Services.PERMISSION_CONFIG.hasConfigPermission(player);
+        boolean byPassFlagAllowed = PermissionConfig.byPassFlagAllowed();
+        boolean hasConfigPerm = PermissionConfig.hasConfigPermission(player);
         return hasConfigPerm && byPassFlagAllowed;
     }
     
     public boolean hasConfigPermission(CommandSourceStack src, CommandSourceType srcType) throws CommandSyntaxException {
-        return Services.PERMISSION_CONFIG.hasConfigPermission(src, srcType);
+        return PermissionConfig.hasConfigPermission(src, srcType);
     }
 
     public boolean hasConfigPermission(Player player) {
-        return Services.PERMISSION_CONFIG.hasConfigPermission(player);
+        return PermissionConfig.hasConfigPermission(player);
     }
 
     public boolean hasOwnerPermission(IProtectedRegion region, Player player) {
@@ -59,7 +60,7 @@ public final class Permissions {
     public boolean hasCmdPermission(CommandSourceStack src) {
         CommandSourceType cmdSrcType = CommandSourceType.of(src);
         try {
-            return Services.PERMISSION_CONFIG.hasConfigPermission(src, cmdSrcType);
+            return PermissionConfig.hasConfigPermission(src, cmdSrcType);
         } catch (CommandSyntaxException e) {
             return false;
         }
@@ -68,15 +69,15 @@ public final class Permissions {
     public boolean isAllowedForNonOp(CommandSourceStack src) {
         CommandSourceType cmdSrcType = CommandSourceType.of(src);
         try {
-            boolean hasConfigPerm = Services.PERMISSION_CONFIG.hasConfigPermission(src, cmdSrcType);
-            return hasConfigPerm || Services.PERMISSION_CONFIG.isCmdEnabledForNonOp();
+            boolean hasConfigPerm = PermissionConfig.hasConfigPermission(src, cmdSrcType);
+            return hasConfigPerm || PermissionConfig.isCmdEnabledForNonOp();
         } catch (CommandSyntaxException e) {
             return false;
         }
     }
 
     public boolean hasGroupPermission(IProtectedRegion region, Player player, String permissionGroup) {
-        return Services.PERMISSION_CONFIG.isHierarchyOwnershipEnabled()
+        return PermissionConfig.isHierarchyOwnershipEnabled()
                 ? hasRegionHierarchyPermission(region, player, permissionGroup)
                 : isInGroup(region, player, permissionGroup);
     }
