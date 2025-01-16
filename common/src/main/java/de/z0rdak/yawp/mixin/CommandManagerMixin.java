@@ -1,4 +1,4 @@
-package de.z0rdak.yawp.mixin.flag.player;
+package de.z0rdak.yawp.mixin;
 
 import com.mojang.brigadier.ParseResults;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
