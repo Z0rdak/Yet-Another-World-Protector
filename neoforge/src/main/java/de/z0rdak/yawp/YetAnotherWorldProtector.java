@@ -33,18 +33,15 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
     private static IEventBus yawpEventBus;
     public YetAnotherWorldProtector(IEventBus modEventBus) {
         yawpEventBus = modEventBus;
-        yawpEventBus.addListener(this::onInit);
+        yawpEventBus.addListener((FMLCommonSetupEvent event) -> registerConfig());
         YAWPCommon.init();
 
-        registerConfig();
         initServerInstance();
         loadRegionData();
         addDimKeyOnPlayerLogin();
         addDimKeyOnDimensionChange();
         registerCommands();
 
-        //Make sure the mod being absent on the other network side does not cause the client to display the server as incompatible
-        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> IExtensionPoint.DisplayTest.IGNORESERVERONLY, (s, b) -> true));
         NeoForge.EVENT_BUS.register(YetAnotherWorldProtector.class);
     }
 
@@ -52,11 +49,6 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
     public void registerConfig() {
         ((NeoForgeConfigHelper)Services.CONFIG_REGISTRY).setEventBus(yawpEventBus);
         Services.CONFIG_REGISTRY.register();
-    }
-    
-    @SubscribeEvent
-    public void onInit(FMLCommonSetupEvent event) {
-        registerConfig();
     }
 
     @SubscribeEvent
