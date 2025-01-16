@@ -39,7 +39,6 @@
     "flag.player.AxeItemMixin",
     "flag.player.BoneMealItemMixin",
     "flag.player.BucketItemMixin",
-    "flag.player.CommandManagerMixin",
     "flag.player.ExperienceOrbEntityMixin",
     "flag.player.FarmLandBlockMixin",
     "flag.player.HoeItemMixin",

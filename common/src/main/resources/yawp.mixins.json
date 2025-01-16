@@ -6,8 +6,8 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "BiomeMixin",
+    "CommandManagerMixin",
     "FireBlockMixin",
-    "FlowingFluidMixin",
     "FrostWalkerEnchantmentMixin",
     "LeavesBlockMixin",
     "LightningEntityMixin",
