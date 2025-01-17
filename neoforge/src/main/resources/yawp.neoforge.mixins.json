@@ -5,8 +5,11 @@
   "refmap": "${mod_id}.refmap.json",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "PlayerEntityMixin",
-    "TntBlockMixin"
+    "TntBlockMixin",
+    "flag.player.AxeItemMixin",
+    "flag.player.BucketItemMixin",
+    "flag.player.HoeItemMixin",
+    "flag.player.ShovelItemMixin"
   ],
   "client": [
   ],
