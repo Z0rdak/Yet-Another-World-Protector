@@ -129,8 +129,9 @@ final class FlagCommands {
 
     private static int setFlagMuteState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag flag, boolean setMuted) {
         flag.getFlagMsg().mute(setMuted);
+        String muteState = flag.getFlagMsg().isMuted() ? "on" : "off";
         MutableComponent infoMsg = Component.translatableWithFallback("cli.flag.msg.mute.success.text", "Set mute state of %s to: '%s'",
-                buildFlagInfoLink(region, flag), flag.getFlagMsg().isMuted());
+                buildFlagInfoLink(region, flag), muteState);
         MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!setMuted), String.valueOf(setMuted));
         MutableComponent msg = Messages.substitutable("%s %s", infoMsg, undoLink);
         sendCmdFeedback(ctx.getSource(), msg);
@@ -201,8 +202,9 @@ final class FlagCommands {
 
     private static int setOverride(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag flag, boolean override) {
         flag.setOverride(override);
+        String overrideState = flag.doesOverride() ? "on" : "off";
         MutableComponent infoMsg = Component.translatableWithFallback("cli.flag.override.success.text", "Set flag override for %s to %s",
-                buildFlagInfoLink(region, flag), flag.doesOverride());
+                buildFlagInfoLink(region, flag), overrideState);
         MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!override), String.valueOf(override));
         MutableComponent msg = Messages.substitutable("%s %s", infoMsg, undoLink);
         sendCmdFeedback(ctx.getSource(), msg);

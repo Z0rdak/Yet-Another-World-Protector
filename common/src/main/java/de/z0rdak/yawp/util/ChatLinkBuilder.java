@@ -223,9 +223,9 @@ public class ChatLinkBuilder {
 
     public static MutableComponent buildFlagOverrideToggleLink(IProtectedRegion region, IFlag flag, boolean shortLink) {
         String fallback = flag.doesOverride() ? "active" : "inactive";
-        String fallbackHover = (!flag.doesOverride() ? "Disable" : "Enable") + " flag override for '%s' of '%s'";
-        MutableComponent linkText = Component.translatableWithFallback("cli.flag.override.link.Component." + flag.doesOverride(), fallback);
-        MutableComponent hoverText = Component.translatableWithFallback("cli.flag.override.link.hover." + !flag.doesOverride(), fallbackHover, flag.getName(), region.getName());
+        String fallbackHover = (flag.doesOverride() ? "Disable" : "Enable") + " flag override for '%s' of '%s'";
+        MutableComponent linkText = Component.translatableWithFallback("cli.flag.override.link.text." + flag.doesOverride(), fallback);
+        MutableComponent hoverText = Component.translatableWithFallback("cli.flag.override.link.hover." + flag.doesOverride(), fallbackHover, flag.getName(), region.getName());
         if (shortLink) {
             linkText = Component.translatableWithFallback("cli.flag.override.link.Component.toggle", "o");
         }
@@ -252,7 +252,7 @@ public class ChatLinkBuilder {
     public static MutableComponent buildFlagMuteToggleLink(IProtectedRegion region, IFlag flag, boolean shortLink) {
         String fallback = !flag.getFlagMsg().isMuted() ? "inactive" : "active";
         MutableComponent hover = Component.translatableWithFallback("cli.flag.msg.mute.set.link.hover", "Activate flag alert for '%s' in '%s'", flag.getName(), region.getName());
-        MutableComponent text = Component.translatableWithFallback("cli.flag.msg.mute.set.link.Component." + !flag.getFlagMsg().isMuted(), fallback);
+        MutableComponent text = Component.translatableWithFallback("cli.flag.msg.mute.set.link.text." + !flag.getFlagMsg().isMuted(), fallback);
         if (shortLink) {
             text = Component.translatableWithFallback("cli.flag.msg.mute.set.link.Component.toggle", "m");
         }
