@@ -1,4 +1,4 @@
-package de.z0rdak.yawp.mixin;
+package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.platform.Services;
@@ -14,7 +14,7 @@ import static de.z0rdak.yawp.handler.HandlerUtil.processCheck;
 
 @Mixin({Player.class})
 public abstract class PlayerEntityMixin {
-    // TODO: Could be moved to common, fabric has its own dedicated event for this. Maintainability > platform dependent code?
+    
     @Inject(method = "tryToStartFallFlying()Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;startFallFlying()V"), allow = 1, cancellable = true)
     void injectElytraCheck(CallbackInfoReturnable<Boolean> cir) {
         Player player = (Player) (Object) this;
