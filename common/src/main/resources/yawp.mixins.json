@@ -11,6 +11,7 @@
     "FrostWalkerEnchantmentMixin",
     "LeavesBlockMixin",
     "LightningEntityMixin",
+    "flag.player.PlayerEntityMixin",
     "ServerWorldMixin",
     "SignBlockMixin",
     "SnowLayerBlockMixin",
