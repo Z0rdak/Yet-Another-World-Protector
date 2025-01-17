@@ -24,8 +24,6 @@ public enum RegionFlag {
     EXPLOSION_CREEPER_BLOCK("creeper-explosion-blocks", FlagType.BOOLEAN_FLAG, Collections.emptyList()),
     EXPLOSION_CREEPER_ENTITY("creeper-explosion-entities", FlagType.BOOLEAN_FLAG, Collections.emptyList()),
     EXPLOSION_ENTITY("explosions-entities", FlagType.BOOLEAN_FLAG, Collections.emptyList()),
-    EXPLOSION_OTHER_BLOCKS("other-explosion-blocks", FlagType.BOOLEAN_FLAG, Collections.emptyList()),
-    EXPLOSION_OTHER_ENTITY("other-explosion-entities", FlagType.BOOLEAN_FLAG, Collections.emptyList()),
     FALL_DAMAGE("fall-damage", FlagType.BOOLEAN_FLAG, Collections.singletonList(FlagCategory.PROTECTION)),
     FALL_DAMAGE_ANIMALS("fall-damage-animals", FlagType.BOOLEAN_FLAG, Collections.singletonList(FlagCategory.PROTECTION)),
     FALL_DAMAGE_MONSTERS("fall-damage-monsters", FlagType.BOOLEAN_FLAG, Collections.singletonList(FlagCategory.PROTECTION)),
