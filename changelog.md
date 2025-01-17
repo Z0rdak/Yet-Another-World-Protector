@@ -56,6 +56,8 @@ some great advantages for the future:
 ## Removed
 
 * Remove old mod logo
+* Remove `other-explosion-blocks` flag (was redundant)
+* Remove `other-explosion-entities` flag (was redundant)
 
 # [0.0.4.1-beta5] - 2024-10-09
 
