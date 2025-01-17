@@ -248,13 +248,6 @@ public class GrievingFlagHandler {
                     protectedEntities = event.getAffectedEntities().stream()
                             .filter(explosionEntityPosFilterPredicate(dim, RegionFlag.EXPLOSION_CREEPER_ENTITY))
                             .collect(Collectors.toSet());
-                } else {
-                    protectedBlocks = event.getAffectedBlocks().stream()
-                            .filter(explosionBlockPosFilterPredicate(dim, RegionFlag.EXPLOSION_OTHER_BLOCKS))
-                            .collect(Collectors.toSet());
-                    protectedEntities = event.getAffectedEntities().stream()
-                            .filter(explosionEntityPosFilterPredicate(dim, RegionFlag.EXPLOSION_OTHER_ENTITY))
-                            .collect(Collectors.toSet());
                 }
                 preventDestructionFor(event, protectedBlocks, protectedEntities);
             }
