@@ -513,49 +513,6 @@ public final class PlayerFlagHandler {
     }
 
     @SubscribeEvent
-    public static void onPlayerUseToolSecondary(BlockEvent.BlockToolModificationEvent event) {
-        if (NeoForgeHandlerUtil.isServerSide(event)) {
-            Player player = event.getPlayer();
-            if (player == null) return;
-            BlockPos target = event.getPos();
-            ResourceKey<Level> dim = getDimKey(player);
-            FlagCheckEvent checkEvent = new FlagCheckEvent(target, TOOL_SECONDARY_USE, dim, player);
-            if (Services.EVENT.post(checkEvent)) {
-                return;
-            }
-            FlagState flagState = processCheck(checkEvent, onDeny -> {
-                event.setCanceled(true);
-                sendFlagMsg(onDeny);
-            });
-            if (flagState == FlagState.DENIED) return;
-            //if (event.getToolAction().equals(ToolActions.AXE_STRIP)) {
-            //    checkEvent = new FlagCheckEvent(target, AXE_STRIP, dim, player);
-            //    if (Services.EVENT.post(checkEvent)) {
-            //        return;
-            //    }
-            //}
-            //if (event.getToolAction().equals(ToolActions.HOE_TILL)) {
-            //    checkEvent = new FlagCheckEvent(target, HOE_TILL, dim, player);
-            //    if (Services.EVENT.post(checkEvent)) {
-            //        return;
-            //    }
-            //}
-            //if (event.getToolAction().equals(ToolActions.SHOVEL_FLATTEN)) {
-            //    checkEvent = new FlagCheckEvent(target, SHOVEL_PATH, dim, player);
-            //    if (Services.EVENT.post(checkEvent)) {
-            //        return;
-            //    }
-            //}
-            if (checkEvent != null) {
-                processCheck(checkEvent, onDeny -> {
-                    event.setCanceled(true);
-                    sendFlagMsg(onDeny);
-                });
-            }
-        }
-    }
-
-    @SubscribeEvent
     public static void onPlayerRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (notServerSideOrPlayerNull(event.getEntity())) return;
         Player player = event.getEntity();
@@ -781,63 +738,6 @@ public final class PlayerFlagHandler {
                 }
             }
         }
-    }
-
-    /**
-     * Note: Does not prevent from fluids generate additional blocks (cobble generator). Use BlockEvent.FluidPlaceBlockEvent for this
-     * TODO: Maybe create own mixin like in fabric to better differentiate
-     */
-    @SubscribeEvent
-    public static void onBucketFill(BlockEvent.BreakEvent event) {
-        if (notServerSideOrPlayerNull(event.getPlayer())) return;
-        Player player = event.getPlayer();
-
-        
-        //if (event.getTarget() != null) {
-        //    HitResult pos = event.getTarget();
-        //    BlockPos targetPos = new BlockPos((int) event.getTarget().getLocation().x, (int) event.getTarget().getLocation().y, (int) event.getTarget().getLocation().z);
-        //    // MaxStackSize: 1 -> full bucket so only placeable; >1 -> empty bucket, only fillable
-        //    int bucketItemMaxStackCount = event.getEmptyBucket().getMaxStackSize();
-        //    // placing fluid
-        //    if (bucketItemMaxStackCount == 1) {
-        //        FlagCheckEvent checkEvent = new FlagCheckEvent(targetPos, PLACE_FLUIDS, getDimKey(player), player);
-        //        if (Services.EVENT.post(checkEvent)) {
-        //            return;
-        //        }
-        //        processCheck(checkEvent, onDeny -> {
-        //            event.setCanceled(true);
-        //            sendFlagMsg(onDeny);
-        //        });
-        //    }
-        //    // scooping fluid (breaking fluid)
-        //    if (bucketItemMaxStackCount > 1) {
-        //        boolean isWaterlogged = false;
-        //        boolean isFluid = false;
-        //        if (pos != null && pos.getType() == HitResult.Type.BLOCK) {
-        //            BlockState blockState = event.getLevel().getBlockState(targetPos);
-        //            // check for waterlogged block
-        //            if (blockState.getBlock() instanceof SimpleWaterloggedBlock) {
-        //                isWaterlogged = blockState.getValue(BlockStateProperties.WATERLOGGED);
-        //            }
-        //            // check if entityPos has a fluid tag
-        //            ITagManager<Fluid> tags = ForgeRegistries.FLUIDS.tags();
-        //            if (tags != null) {
-        //                isFluid = tags.getTagNames().anyMatch(tag -> blockState.getFluidState().is(tag));
-        //            }
-        //            if (isWaterlogged || isFluid) {
-        //                FlagCheckEvent checkEvent = new FlagCheckEvent(targetPos, SCOOP_FLUIDS, getDimKey(player), player);
-        //                if (Services.EVENT.post(checkEvent)) {
-        //                    return;
-        //                }
-        //                processCheck(checkEvent, onDeny -> {
-        //                    event.setCanceled(true);
-        //                    sendFlagMsg(onDeny);
-        //                });
-        //            }
-        //        }
-        //    }
-        //}
-
     }
 
     /**
