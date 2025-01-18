@@ -2,6 +2,7 @@ package de.z0rdak.yawp.core.area;
 
 import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import de.z0rdak.yawp.util.AreaUtil;
+import de.z0rdak.yawp.util.NbtCompatHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -231,8 +232,8 @@ public class CuboidArea extends AbstractArea {
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-        this.p1 = NbtUtils.readBlockPos(nbt, RegionNbtKeys.P1).orElseThrow();
-        this.p2 = NbtUtils.readBlockPos(nbt, RegionNbtKeys.P2).orElseThrow();
+        this.p1 = NbtCompatHelper.toBlockPos(nbt, RegionNbtKeys.P1).orElseThrow();
+        this.p2 = NbtCompatHelper.toBlockPos(nbt, RegionNbtKeys.P1).orElseThrow();
         this.area = BoundingBox.fromCorners(p1, p2);
     }
 

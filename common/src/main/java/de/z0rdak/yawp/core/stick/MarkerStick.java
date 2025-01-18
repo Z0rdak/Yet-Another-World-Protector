@@ -122,7 +122,7 @@ public class MarkerStick extends AbstractStick implements INbtSerializable<Compo
         this.areaType = AreaType.of(nbt.getString(ItemNbtKeys.AREA_TYPE));
         boolean isTpSet = nbt.getBoolean(ItemNbtKeys.IS_TP_SET);
         if (isTpSet) {
-            this.teleportPos = NbtUtils.readBlockPos(nbt, ItemNbtKeys.TP_POS).orElse(null);
+            this.teleportPos = NbtCompatHelper.toBlockPos(nbt, ItemNbtKeys.TP_POS).orElse(null);
         }
         this.dimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(nbt.getString(ItemNbtKeys.DIM)));
         ListTag markedBlocksNBT = (ListTag) nbt.get(ItemNbtKeys.MARKED_BLOCKS);

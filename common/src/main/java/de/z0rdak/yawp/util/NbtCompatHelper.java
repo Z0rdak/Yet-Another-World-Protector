@@ -11,13 +11,12 @@ import java.util.Optional;
 public class NbtCompatHelper {
 	public static Optional<BlockPos> toBlockPosFromCompound(CompoundTag nbt, String key) {
         if (nbt.getTagType(key) == Tag.TAG_COMPOUND) {
-            CompoundTag c = nbt.getCompound(key);
-    		return Optional.of(new BlockPos(c.getInt("X"), c.getInt("Y"), c.getInt("Z")));
+    		return readBlockPosFromCompound(nbt.getCompound(key));
         }
 		return Optional.empty();
 	}
 
-    public static Optional<BlockPos> readBlockPosFromCompound(CompoundTag nbt) {
+    private static Optional<BlockPos> readBlockPosFromCompound(CompoundTag nbt) {
         return Optional.of(new BlockPos(nbt.getInt("X"), nbt.getInt("Y"), nbt.getInt("Z")));
     }
 	
