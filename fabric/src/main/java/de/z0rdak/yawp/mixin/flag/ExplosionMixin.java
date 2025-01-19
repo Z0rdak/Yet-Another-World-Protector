@@ -62,9 +62,6 @@ public abstract class ExplosionMixin {
             if (explosionTriggeredByCreeper) {
                 explosion.getToBlow().removeAll(filterBlocks.apply(explosion.getToBlow(), EXPLOSION_CREEPER_BLOCK));
                 affectedEntities.removeAll(filterEntities.apply(affectedEntities, EXPLOSION_CREEPER_ENTITY));
-            } else {
-                explosion.getToBlow().removeAll(filterBlocks.apply(explosion.getToBlow(), EXPLOSION_OTHER_BLOCKS));
-                affectedEntities.removeAll(filterEntities.apply(affectedEntities, EXPLOSION_OTHER_ENTITY));
             }
         }
     }
