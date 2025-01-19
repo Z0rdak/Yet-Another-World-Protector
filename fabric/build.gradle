@@ -5,7 +5,7 @@ plugins {
     id 'fabric-loom'
 }
 base {
-    archivesName = "${mod_id}-${minecraft_version}-fabric"
+    archivesName = "${mod_id}-${minecraft_version}-${project.name}"
 }
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
