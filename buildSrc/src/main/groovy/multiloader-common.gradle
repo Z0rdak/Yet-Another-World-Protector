@@ -4,7 +4,7 @@ plugins {
 }
 
 base {
-    archivesName = "${mod_id}-${project.name}-${minecraft_version}"
+    archivesName = "${mod_id}-${minecraft_version}-${project.name}"
 }
 
 java {
@@ -142,7 +142,8 @@ processResources {
             'java_version'                 : java_version,
             'mc_username'                  : mc_username,
             'mc_uuid'                      : mc_uuid,
-            'resource_pack_desc'           : resource_pack_desc
+            'resource_pack_desc'           : resource_pack_desc,
+            'versionType'                  : versionType
     ]
 
     filesMatching(['pack.mcmeta', 'fabric.mod.json', 'META-INF/mods.toml', 'META-INF/neoforge.mods.toml', '*.mixins.json']) {
