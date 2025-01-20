@@ -3,6 +3,7 @@
 ## Fixed
 
 - Fix old flags not being automatically removed during loading
+- (Fabric) Fix explosion flags not working
 
 # [0.5.0-beta1] - 2025-01-18
 
