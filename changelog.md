@@ -1,3 +1,9 @@
+# [0.5.0-beta2] - 2025-01-20
+
+## Fixed
+
+- Fix old flags not being automatically removed during loading
+
 # [0.5.0-beta1] - 2025-01-18
 
 This update for **1.20.1+** is firstly build using the multi-loader project setup. With this the file name format changed
