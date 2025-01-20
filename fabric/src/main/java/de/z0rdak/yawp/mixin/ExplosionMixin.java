@@ -22,7 +22,7 @@ public abstract class ExplosionMixin {
 
     @Unique
     @Mutable
-    private ExplosionDamageCalculator behavior;
+    private ExplosionDamageCalculator damageCalculator;
 
     // Note: part of the explosion flag handling system is in ServerWorldMixin
     @Inject(method = "<init>(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lnet/minecraft/world/level/ExplosionDamageCalculator;DDDFZLnet/minecraft/world/level/Explosion$BlockInteraction;Lnet/minecraft/core/particles/ParticleOptions;Lnet/minecraft/core/particles/ParticleOptions;Lnet/minecraft/core/Holder;)V", at = @At("TAIL"))
@@ -38,6 +38,6 @@ public abstract class ExplosionMixin {
             Holder<SoundEvent> explosionSound, 
             CallbackInfo ci
     ) {
-        this.behavior = new ExplosionDamageCalculatorInterceptor(this.behavior);
+        this.damageCalculator = new ExplosionDamageCalculatorInterceptor(this.damageCalculator);
     }
 }
