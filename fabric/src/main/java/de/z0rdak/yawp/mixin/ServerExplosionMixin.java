@@ -4,6 +4,7 @@ import de.z0rdak.yawp.handler.flags.ExplosionDamageCalculatorInterceptor;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.EntityBasedExplosionDamageCalculator;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.ServerExplosion;
@@ -17,14 +18,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ServerExplosion.class)
 public abstract class ServerExplosionMixin {
 
-
-    @Unique
     @Final
-    private ServerLevel world;
-
-    @Unique
+    @Shadow
     @Mutable
-    private ExplosionDamageCalculator behavior;
+    private ExplosionDamageCalculator damageCalculator;
 
     // Note: part of the explosion flag handling system is in ServerWorldMixin
     @Inject(method = "<init>", at = @At("TAIL"))
@@ -38,6 +35,6 @@ public abstract class ServerExplosionMixin {
             Explosion.BlockInteraction blockInteraction,
             CallbackInfo ci
     ) {
-        this.behavior = new ExplosionDamageCalculatorInterceptor(this.behavior);
+        this.damageCalculator = new ExplosionDamageCalculatorInterceptor(this.damageCalculator);
     }
 }

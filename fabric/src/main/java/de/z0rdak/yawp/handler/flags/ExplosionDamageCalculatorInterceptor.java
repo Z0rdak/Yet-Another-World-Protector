@@ -4,18 +4,23 @@
 package de.z0rdak.yawp.handler.flags;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.handler.HandlerUtil;
+import net.minecraft.client.renderer.item.properties.numeric.Damage;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -31,7 +36,8 @@ public class ExplosionDamageCalculatorInterceptor extends ExplosionDamageCalcula
 	public boolean shouldBlockExplode(Explosion explosion, BlockGetter blockGetter, BlockPos pos, BlockState state, float power) {
 		RegionFlag flag = switch (explosion.getIndirectSourceEntity()) {
 			case Creeper c -> RegionFlag.EXPLOSION_CREEPER_BLOCK;
-			case null, default -> RegionFlag.EXPLOSION_BLOCK;
+			// case Player p -> RegionFlag.EXPLOSION_PLAYER_BLOCK;
+			case null, default -> RegionFlag.EXPLOSION_BLOCK; // is null for dispenser etc
 		};
 		FlagCheckEvent checkEvent = new FlagCheckEvent(pos, flag, explosion.level().dimension());
 		FlagState flagState = HandlerUtil.processCheck(checkEvent);
