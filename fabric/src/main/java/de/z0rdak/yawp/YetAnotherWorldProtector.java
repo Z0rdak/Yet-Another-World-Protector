@@ -2,10 +2,12 @@ package de.z0rdak.yawp;
 
 import de.z0rdak.yawp.api.events.flag.FabricFlagEvents;
 import de.z0rdak.yawp.api.events.flag.FlagEvent;
+import de.z0rdak.yawp.api.events.region.FabricRegionEvents;
 import de.z0rdak.yawp.commands.CommandRegistry;
 import de.z0rdak.yawp.config.ConfigRegistry;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.data.region.RegionDataManager;
+import de.z0rdak.yawp.external.WebMapRegistry;
 import de.z0rdak.yawp.handler.flags.PlayerFlagHandler;
 import de.z0rdak.yawp.platform.Services;
 import net.fabricmc.api.ModInitializer;
@@ -49,6 +51,13 @@ public class YetAnotherWorldProtector implements ModInitializer, YAWPModInitiali
     @Override
     public void initServerInstance() {
         ServerLifecycleEvents.SERVER_STARTING.register(RegionDataManager::initServerInstance);
+
+        var extensions = new WebMapRegistry();
+        extensions.initialize();
+        FabricRegionEvents.CREATE_REGION.register(extensions::notify);
+        FabricRegionEvents.DELETE_REGION.register(extensions::notify);
+        FabricRegionEvents.RENAME_REGION.register(extensions::notify);
+        FabricRegionEvents.UPDATE_AREA.register(extensions::notify);
     }
 
     @Override
