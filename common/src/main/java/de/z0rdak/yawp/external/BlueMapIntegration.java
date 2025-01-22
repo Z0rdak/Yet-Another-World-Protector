@@ -8,12 +8,10 @@ import de.bluecolored.bluemap.api.markers.ExtrudeMarker.Builder;
 import de.bluecolored.bluemap.api.markers.MarkerSet;
 import de.bluecolored.bluemap.api.math.Shape;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
-import de.z0rdak.yawp.api.permission.Permissions;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
-import de.z0rdak.yawp.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
@@ -38,7 +36,6 @@ public class BlueMapIntegration implements WebMapInitializer {
             Constants.LOGGER.info("Activate BlueMap integration for YAWP");
             var listener = new Listener(api);
             listener.registerMarkerSetForAllMapsInAllDimensions();
-            listener.createMarkerForRegions(RegionDataManager.getDimensionCaches());
             registry.register(listener);
         });
     }
@@ -58,8 +55,9 @@ public class BlueMapIntegration implements WebMapInitializer {
             markerSets.put(MARKER_SET, markerSet);
         }
 
-        public void createMarkerForRegions(List<DimensionRegionCache> dimensionCaches) {
-            dimensionCaches.forEach(cache -> {
+        @Override
+        public void onLoad() {
+            RegionDataManager.getDimensionCaches().forEach(cache -> {
                 var marketSets = getMarkerSets(cache.dimensionKey());
                 cache.getAllLocal().forEach(region -> marketSets.forEach(set -> addMarker(set, region, region.getName())));
             });
@@ -122,14 +120,6 @@ public class BlueMapIntegration implements WebMapInitializer {
                 return marker.shape(shape, box.minY(), box.maxY());
             }
             return null;
-        }
-
-        private String getDetails(IMarkableRegion region, String name) {
-            var owners = region.getGroup(Permissions.OWNER);
-            var ownerNames = owners.getPlayers().values().stream()
-                    .map("<b> %s </b>"::formatted)
-                    .collect(Collectors.joining(", "));
-            return "%s owned by %s".formatted(name, ownerNames);
         }
     }
 }

@@ -91,10 +91,14 @@ subprojects {
                 includeGroup("com.github.BlueMap-Minecraft")
             }
         }
+        maven {
+            url "https://repo.mikeprimm.com/"
+        }
     }
 
     dependencies {
         implementation group: 'com.github.BlueMap-Minecraft', name: 'BlueMapAPI', version: 'v2.6.2'
+        implementation group: 'us.dynmap', name: 'DynmapCoreAPI', version: '3.7-beta-6'
     }
 
     tasks.withType(JavaCompile).configureEach {

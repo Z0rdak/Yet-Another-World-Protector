@@ -1,9 +1,12 @@
 package de.z0rdak.yawp.external;
 
 import de.z0rdak.yawp.api.events.region.RegionEvent;
+import de.z0rdak.yawp.constants.Constants;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Singleton to register extensions for mod integrations and notify them on certain events as observers.
@@ -15,8 +18,20 @@ public class WebMapRegistry {
     }
 
     public void initialize() {
-        List.of(new BlueMapIntegration())
-                .forEach(ext -> ext.initialize(this));
+        Map.<String, Supplier<WebMapInitializer>>of(
+            "de.bluecolored.bluemap.api.BlueMapAPI", BlueMapIntegration::new,
+            "org.dynmap.DynmapCommonAPIListener", () -> new DynMapIntegration() // Using method reference causes ClassLoader to already load DynmapCommonAPIListener
+        ).forEach(this::initializeWebMapIntegration);
+    }
+
+    private void initializeWebMapIntegration(String className, Supplier<WebMapInitializer> initializer) {
+        try {
+            Class.forName(className, false, getClass().getClassLoader());
+        } catch (ClassNotFoundException e) {
+            Constants.LOGGER.debug("WebMap Integration could not be activated du to missing API: {}", className);
+            return;
+        }
+        initializer.get().initialize(this);
     }
 
     void register(WebMapIntegration extension) {
@@ -41,5 +56,9 @@ public class WebMapRegistry {
     public boolean notify(RegionEvent.UpdateArea event) {
         extensions.forEach(ext -> ext.on(event));
         return true;
+    }
+
+    public void notifyOnLoad() {
+        extensions.forEach(WebMapIntegration::onLoad);
     }
 }

@@ -58,6 +58,7 @@ public class YetAnotherWorldProtector implements ModInitializer, YAWPModInitiali
         FabricRegionEvents.DELETE_REGION.register(extensions::notify);
         FabricRegionEvents.RENAME_REGION.register(extensions::notify);
         FabricRegionEvents.UPDATE_AREA.register(extensions::notify);
+        ServerLifecycleEvents.SERVER_STARTED.register(e -> extensions.notifyOnLoad());
     }
 
     @Override
