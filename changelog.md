@@ -1,3 +1,18 @@
+# [0.5.1-beta1] - 2025-01-23
+
+## Added 
+
+- Add language support for euskara (aka. basque) and spanisch. Thanks to Jaie55#8188 for this contribution
+
+## Changed
+
+- Update russian language - thanks again Reincarnaciya
+
+## Fixed
+
+- Fix neoforge crashing due to mixin error
+- Fix explosion flags not working (this time for real)
+
 # [0.5.0-beta2] - 2025-01-20
 
 ## Fixed
