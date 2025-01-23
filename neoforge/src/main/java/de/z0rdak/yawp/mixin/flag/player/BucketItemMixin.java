@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
@@ -44,17 +45,17 @@ public abstract class BucketItemMixin {
     }
 
     @Inject(method = "use", locals = LocalCapture.CAPTURE_FAILSOFT,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/BucketItem;emptyContents(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/phys/BlockHitResult;)Z"), cancellable = true, allow = 1)
-    public void onEmptyBucket(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir, ItemStack itemStack, BlockHitResult blockHitResult, BlockPos blockPos, Direction direction, BlockPos blockPos2, BlockState blockState, BlockPos blockPos3) {
-        if (isServerSide(world)) {
-            if (user != null) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos3, PLACE_FLUIDS, getDimKey(world), user);
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/BucketItem;emptyContents(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/phys/BlockHitResult;Lnet/minecraft/world/item/ItemStack;)Z"), cancellable = true, allow = 1)
+    public void onEmptyBucket(Level level, Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir, ItemStack itemStack, BlockHitResult blockHitResult, BlockPos blockPos, Direction direction, BlockPos blockPos2, BlockState blockState, BlockPos blockPos3) {
+        if (isServerSide(level)) {
+            if (player != null) {
+                FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos3, PLACE_FLUIDS, getDimKey(level), player);
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
                 processCheck(checkEvent, deny -> {
                     sendFlagMsg(deny);
-                    cir.setReturnValue(InteractionResult.FAIL);
+                    cir.setReturnValue(InteractionResultHolder.fail(itemStack));
                 });
             }
         }
