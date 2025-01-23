@@ -356,6 +356,7 @@
   "flag.msg.deny.melee-wtrader": "「{flag}」旗標在此拒絕此動作！",
   "flag.msg.deny.no-flight": "「{flag}」旗標在此拒絕此動作！",
   "flag.msg.deny.no-pvp": "「{flag}」旗標在此拒絕此動作！",
+  "flag.msg.deny.no-sign-edit": "THe §9{flag}§r flag denies this action here!",
   "flag.msg.deny.place-blocks": "「{flag}」旗標在此拒絕此動作！",
   "flag.msg.deny.place-fluids": "「{flag}」旗標在此拒絕此動作！",
   "flag.msg.deny.scoop-fluids": "「{flag}」旗標在此拒絕此動作！",
