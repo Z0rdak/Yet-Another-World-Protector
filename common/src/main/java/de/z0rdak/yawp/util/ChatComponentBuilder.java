@@ -320,7 +320,7 @@ public class ChatComponentBuilder {
             case PLAYER -> {
                 Player player = RegionDataManager.serverInstance.getPlayerList().getPlayerByName(groupMemberName);
                 if (player == null) {
-                    yield Messages.substitutable("%s %s", Component.literal(groupMemberName).withStyle(GRAY), Component.translatableWithFallback("cli.msg.info.player.list.entry.offline", "(offline)"));
+                    yield Component.translatable("%s %s", Component.literal(groupMemberName).withStyle(GRAY), Component.translatableWithFallback("cli.msg.info.player.list.entry.offline", "(offline)"));
                 } else {
                     yield buildPlayerHoverComponent(player);
                 }
