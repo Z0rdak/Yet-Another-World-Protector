@@ -20,13 +20,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Explosion.class)
 public abstract class ExplosionMixin {
 
-    @Unique
+    @Final
+    @Shadow
     @Mutable
     private ExplosionDamageCalculator damageCalculator;
 
     // Note: part of the explosion flag handling system is in ServerWorldMixin
     @Inject(method = "<init>(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lnet/minecraft/world/level/ExplosionDamageCalculator;DDDFZLnet/minecraft/world/level/Explosion$BlockInteraction;Lnet/minecraft/core/particles/ParticleOptions;Lnet/minecraft/core/particles/ParticleOptions;Lnet/minecraft/core/Holder;)V", at = @At("TAIL"))
-    private void interposeExplosionBehavior(
+    public void interposeExplosionBehavior(
             Level level, 
             @Nullable Entity source, 
             @Nullable DamageSource damageSource, 
