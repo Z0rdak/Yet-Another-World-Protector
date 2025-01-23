@@ -33,11 +33,11 @@ public abstract class ExplosionMixin {
 
     @Unique
     @Final
-    private Level world;
+    private Level level;
 
     @Unique
     @Final
-    private @Nullable Entity entity;
+    private @Nullable Entity source;
 
     @Unique
     private static void filterExplosionTargets(Explosion explosion, Level world, List<Entity> affectedEntities) {
@@ -72,10 +72,10 @@ public abstract class ExplosionMixin {
         is captured and provided as argument here through the LocalCapture feature 
         */
         Explosion explosion = (Explosion) (Object) this;
-        if (isServerSide(world)) {
-            if (this.entity != null) {
+        if (this.level != null && isServerSide(this.level)) {
+            if (this.source != null) {
                 // flag check
-                filterExplosionTargets(explosion, this.world, list);
+                filterExplosionTargets(explosion, this.level, list);
             }
         }
     }
