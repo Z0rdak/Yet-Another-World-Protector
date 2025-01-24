@@ -111,7 +111,8 @@ public class RegionDataManager extends SavedData {
             if (serverInstance == null) {
                 serverInstance = minecraftServer;
             }
-            if (isServerSide(serverWorld) && serverWorld.dimension().location().equals(new ResourceLocation("minecraft:overworld"))) {
+            var isOverworld = serverWorld.dimension().location().equals(ServerLevel.OVERWORLD.location());
+            if (isServerSide(serverWorld) && isOverworld) {
                 DimensionDataStorage storage = serverWorld.getDataStorage();
                 RegionDataManager data = storage.computeIfAbsent(RegionDataManager::load, RegionDataManager::new, DATA_NAME);
                 storage.set(DATA_NAME, data);
