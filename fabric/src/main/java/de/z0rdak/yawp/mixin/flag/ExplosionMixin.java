@@ -10,9 +10,7 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -31,12 +29,12 @@ import static de.z0rdak.yawp.handler.HandlerUtil.processCheck;
 @Mixin(Explosion.class)
 public abstract class ExplosionMixin {
 
-    @Unique
     @Final
+    @Shadow
     private Level level;
 
-    @Unique
     @Final
+    @Shadow
     private @Nullable Entity source;
 
     @Unique
@@ -72,7 +70,7 @@ public abstract class ExplosionMixin {
         is captured and provided as argument here through the LocalCapture feature 
         */
         Explosion explosion = (Explosion) (Object) this;
-        if (this.level != null && isServerSide(this.level)) {
+        if (isServerSide(this.level)) {
             if (this.source != null) {
                 // flag check
                 filterExplosionTargets(explosion, this.level, list);
