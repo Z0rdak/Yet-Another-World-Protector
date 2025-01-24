@@ -63,7 +63,8 @@ public class ChatComponentBuilder {
     }
 
     public static MutableComponent buildHeader(MutableComponent header) {
-        return Messages.substitutable("%s %s %s", ChatFormatting.BOLD, header, ChatFormatting.BOLD);
+        // return Messages.substitutable("%s %s %s", ChatFormatting.BOLD, header, ChatFormatting.BOLD);
+        return header;
     }
 
     public static MutableComponent buildExecuteCmdComponent(MutableComponent linkText, MutableComponent hoverText, String command, ClickEvent.Action eventAction, ChatFormatting color) {
@@ -75,11 +76,11 @@ public class ChatComponentBuilder {
     }
 
     public static MutableComponent buildPlayerHoverComponent(Player player) {
-        HoverEvent.EntityTooltipInfo entityTooltipInfo = new HoverEvent.EntityTooltipInfo(EntityType.PLAYER, player.getUUID(), player.getName());
         MutableComponent playerName = Component.literal(player.getScoreboardName());
+        MutableComponent playerInfo = Messages.substitutable("%s (%s)", player.getDisplayName(), player.getUUID().toString());
         playerName.setStyle(playerName.getStyle()
                 .withColor(LINK_COLOR)
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, entityTooltipInfo))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, playerInfo))
                 .withClickEvent(new ClickEvent(SUGGEST_COMMAND, "/tell " + playerName.getString() + " ")));
         return playerName;
     }
@@ -165,12 +166,12 @@ public class ChatComponentBuilder {
         return group.getPlayers().size() + group.getTeams().size();
     }
 
-    public static MutableComponent buildGroupHeader(IProtectedRegion region, String group) {
+    public static MutableComponent buildGroupListHeader(IProtectedRegion region, String group) {
         MutableComponent groupLink = buildGroupLink(region, group, getGroupSize(region, group));
         return buildHeader(Component.translatableWithFallback("cli.msg.info.header.in", "== %s in %s ==", groupLink, buildRegionInfoLink(region)));
     }
 
-    public static MutableComponent buildGroupHeader(IProtectedRegion region, String group, GroupType groupType) {
+    public static MutableComponent buildGroupTypeHeader(IProtectedRegion region, String group, GroupType groupType) {
         String fallback = "== Region '%s' " + groupType.name + " in %s ==";
         return Component.translatableWithFallback("cli.msg.info.region.group." + groupType.name + ".list", fallback, buildRegionInfoLink(region), group);
     }
@@ -319,7 +320,7 @@ public class ChatComponentBuilder {
             case PLAYER -> {
                 Player player = RegionDataManager.serverInstance.getPlayerList().getPlayerByName(groupMemberName);
                 if (player == null) {
-                    yield Messages.substitutable("%s %s", Component.literal(groupMemberName).withStyle(GRAY), Component.translatableWithFallback("cli.msg.info.player.list.entry.offline", "(offline)"));
+                    yield Component.translatable("%s %s", Component.literal(groupMemberName).withStyle(GRAY), Component.translatableWithFallback("cli.msg.info.player.list.entry.offline", "(offline)"));
                 } else {
                     yield buildPlayerHoverComponent(player);
                 }

@@ -4,6 +4,7 @@ import de.z0rdak.yawp.constants.serialization.ItemNbtKeys;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.renderer.entity.TadpoleRenderer;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -33,10 +34,6 @@ public final class StickUtil {
     private StickUtil() {
     }
 
-    public static void applyEnchantmentGlint(ItemStack item) {
-
-    }
-
     /**
      * Set init (default) nbt value for sticks
      *
@@ -45,12 +42,16 @@ public final class StickUtil {
      */
     public static void initStickTag(ItemStack stick, ResourceKey<Level> dim) {
         CustomData customData = stick.get(CUSTOM_DATA);
-        if (customData != null) {
+        if (customData == null) {
+            stick.set(CUSTOM_DATA, CustomData.EMPTY);
+        }
+        customData = stick.get(CUSTOM_DATA);
+        if (customData != null) {     
             CompoundTag customDataTag = customData.copyTag();
             if (!customDataTag.contains(ItemNbtKeys.STICK)) {
                 CompoundTag compoundNBT = new MarkerStick(dim).serializeNBT();
                 customDataTag.put(ItemNbtKeys.STICK, compoundNBT);
-                stick.set(CUSTOM_DATA, customData);
+                stick.set(CUSTOM_DATA, CustomData.of(customDataTag));
             }
         }
     }
@@ -58,7 +59,7 @@ public final class StickUtil {
     public static void initMarkerNbt(ItemStack stack, ResourceKey<Level> dim) {
         stack.setCount(1);
         initStickTag(stack, dim);
-        setStickName(stack);
+        updateStickName(stack);
         stack.set(DataComponents.LORE, buildToolTip());
         stack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
     }
@@ -96,16 +97,19 @@ public final class StickUtil {
         return null;
     }
 
-    public static void setStickName(ItemStack stick) {
-        MarkerStick marker = new MarkerStick(getStickNBT(stick));
-        boolean isTpPosSet = marker.getTeleportPos() != null;
-        MutableComponent markerIndicators = buildRegionMarkerIndicators(marker)
-                .append(" ")
-                .append(buildTpPosIndicator(isTpPosSet));
-        MutableComponent markerHoverName = buildStickName(marker)
-                .append(" ")
-                .append(markerIndicators);
-        stick.set(DataComponents.CUSTOM_NAME, markerHoverName);
+    public static void updateStickName(ItemStack stick) {
+        CompoundTag stickNBT = getStickNBT(stick);
+        if (stickNBT != null) {
+            MarkerStick marker = new MarkerStick(stickNBT);
+            boolean isTpPosSet = marker.getTeleportPos() != null;
+            MutableComponent markerIndicators = buildRegionMarkerIndicators(marker)
+                    .append(" ")
+                    .append(buildTpPosIndicator(isTpPosSet));
+            MutableComponent markerHoverName = buildStickName(marker)
+                    .append(" ")
+                    .append(markerIndicators);
+            stick.set(DataComponents.CUSTOM_NAME, markerHoverName);
+        }      
     }
 
     private static MutableComponent buildStickName(MarkerStick marker) {
@@ -155,6 +159,15 @@ public final class StickUtil {
     public static boolean hasCustomDataTag(ItemStack itemStack) {
         return itemStack.get(CUSTOM_DATA) != null;
     }
+
+    public static void setMarkerNbt(ItemStack itemStack, CompoundTag markerTag) {
+        if (hasCustomDataTag(itemStack)) {
+            CompoundTag compoundTag = itemStack.get(CUSTOM_DATA).copyTag();
+            compoundTag.put(ItemNbtKeys.STICK, markerTag);
+            itemStack.set(CUSTOM_DATA, CustomData.of(compoundTag));
+        }       
+    }
+
 
     private static ItemLore buildToolTip() {
         List<Component> lore = new ArrayList<>();

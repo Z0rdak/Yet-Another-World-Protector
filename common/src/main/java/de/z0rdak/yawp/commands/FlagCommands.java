@@ -35,12 +35,12 @@ import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.ChatLinkBuilder.*;
 import static de.z0rdak.yawp.util.text.MessageSender.sendCmdFeedback;
 
-public final class FlagCommands {
+final class FlagCommands {
 
     private FlagCommands() {
     }
 
-    public static LiteralArgumentBuilder<CommandSourceStack> build() {
+    static LiteralArgumentBuilder<CommandSourceStack> build() {
         return literal(FLAG)
                 .then(literal(GLOBAL)
                         .executes(ctx -> CommandUtil.promptRegionFlagList(ctx, getGlobalRegion(), 0))
@@ -51,13 +51,13 @@ public final class FlagCommands {
                         .then(flagLocalSubCommands()));
     }
 
-    public static RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> flagDimSubCommands() {
+    private static RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> flagDimSubCommands() {
         return Commands.argument(DIM.toString(), DimensionArgument.dimension())
                 .executes(ctx -> CommandUtil.promptRegionFlagList(ctx, getDimCacheArgument(ctx).getDimensionalRegion(), 0))
                 .then(flagSubCmd((ctx) -> getDimCacheArgument(ctx).getDimensionalRegion()));
     }
 
-    public static RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> flagLocalSubCommands() {
+    private static RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> flagLocalSubCommands() {
         return Commands.argument(DIM.toString(), DimensionArgument.dimension())
                 .then(Commands.argument(CommandConstants.LOCAL.toString(), StringArgumentType.word())
                         .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestions(ctx, builder))
@@ -129,8 +129,9 @@ public final class FlagCommands {
 
     private static int setFlagMuteState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag flag, boolean setMuted) {
         flag.getFlagMsg().mute(setMuted);
+        String muteState = flag.getFlagMsg().isMuted() ? "on" : "off";
         MutableComponent infoMsg = Component.translatableWithFallback("cli.flag.msg.mute.success.text", "Set mute state of %s to: '%s'",
-                buildFlagInfoLink(region, flag), flag.getFlagMsg().isMuted());
+                buildFlagInfoLink(region, flag), muteState);
         MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!setMuted), String.valueOf(setMuted));
         MutableComponent msg = Messages.substitutable("%s %s", infoMsg, undoLink);
         sendCmdFeedback(ctx.getSource(), msg);
@@ -187,7 +188,7 @@ public final class FlagCommands {
 
     }
 
-    public static int setOverride(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag regionFlag) {
+    private static int setOverride(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag regionFlag) {
         if (region.containsFlag(regionFlag.getName())) {
             IFlag flag = region.getFlag(regionFlag.getName());
             return setOverride(ctx, region, flag, !flag.doesOverride());
@@ -199,10 +200,11 @@ public final class FlagCommands {
         }
     }
 
-    public static int setOverride(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag flag, boolean override) {
+    private static int setOverride(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag flag, boolean override) {
         flag.setOverride(override);
+        String overrideState = flag.doesOverride() ? "on" : "off";
         MutableComponent infoMsg = Component.translatableWithFallback("cli.flag.override.success.text", "Set flag override for %s to %s",
-                buildFlagInfoLink(region, flag), flag.doesOverride());
+                buildFlagInfoLink(region, flag), overrideState);
         MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!override), String.valueOf(override));
         MutableComponent msg = Messages.substitutable("%s %s", infoMsg, undoLink);
         sendCmdFeedback(ctx.getSource(), msg);

@@ -12,6 +12,10 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
     modApi "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:21.4.1"
+    
+    // WorldEdit API for optional WorldEdit integration
+    // modCompileOnlyApi "com.sk89q.worldedit:worldedit-fabric-mc${project.minecraft_version}:7.3.10-SNAPSHOT"
+    // modImplementation "curse.maven:worldedit-225608:6013137"
 }
 
 loom {

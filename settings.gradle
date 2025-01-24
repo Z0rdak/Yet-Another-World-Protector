@@ -1,7 +1,8 @@
 pluginManagement {
     repositories {
-        gradlePluginPortal()
         mavenCentral()
+        maven { url "https://maven.architectury.dev/" }
+        gradlePluginPortal()
         exclusiveContent {
             forRepository {
                 maven {

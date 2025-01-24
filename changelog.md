@@ -1,6 +1,28 @@
-# [0.5.0-beta1] - 2024-12-31
+# [0.5.1-beta1] - 2025-01-23
 
-This update for 1.20.1 + is firstly build using the multi-loader project setup. With it the file name format changed
+## Added
+
+- Add language support for euskara (aka. basque) and spanisch. Thanks to Jaie55#8188 for this contribution
+
+## Changed
+
+- Update russian language - thanks again Reincarnaciya
+
+## Fixed
+
+- Fix neoforge crashing due to mixin error
+- Fix explosion flags not working (this time for real)
+
+# [0.5.0-beta2] - 2025-01-20
+
+## Fixed
+
+- Fix old flags not being automatically removed during loading
+- (Fabric) Fix explosion flags not working 
+
+# [0.5.0-beta1] - 2025-01-18
+
+This update for **1.20.1+** is firstly build using the multi-loader project setup. With this the file name format changed
 
 - from `yawp-<mc-version>-<yawp-version>-<modloader>.jar`
 - to `yawp-<mc-version>-<modloader>-<yawp-version>.jar`
@@ -18,6 +40,7 @@ some great advantages for the future:
 
 ## Added
 
+* Add new flags: `no-sign-edit`, `snow-melt`, `snow-fall`, `fluid-flow`, `lava-flow`, `water-flow`. Thanks to Magnus Jensen aka. legenden#7526!
 * New iteration of the programming API. This includes new events, an API to query regions, change them and save them.
 * Added new flag events:
   * `AddFlagEvent`, fired when a flag is added to a region. This is just an info event, its values can't be changed, and
@@ -32,6 +55,7 @@ some great advantages for the future:
 * Add Builders to create Local Region, Area and Flag instances.
 * Add API to get Global and query/manage Dimensional Regions
 * Add Dimensional Region API to query and manage Local Regions of a dimension
+* Add builder to easily create multiline and pagination text components. This might be further polished and extracted into the API. Currently, this is located in `de.z0rdak.yawp.util.text`.
 * Add new mod logo
 
 ## Changed
@@ -40,13 +64,21 @@ some great advantages for the future:
 * Update some flag lang keys to highlight the flag name in blue color
 * Overhaul building of text components for the CLI by adding a whole abstraction layer.
 * Separated building of text components from building CLI links, removing many code duplicates.
-* Add builder to easily create multiline and pagination text components. This might be further polished and extracted
-  into the API. Currently, this is located in `de.z0rdak.yawp.util.text`.
 * Ditched forge suggestion for versioning schema. It's now back to https://keepachangelog.com/en/1.0.0/
+* Change configs from server to common type. This means that config should no longer be synced to clients. As it should be. The clients will have the config by default, but it will be useless for them.
+
+## Fixed
+
+- Fix animal and monster check to exclude/include monster horses correctly
+- Fix `explosions-entities` and `explosions-blocks` not working correctly
+- Fix `fall-damage-players` not working correctly
+- Fix `no-pvp` flag not checking for damage source to be a player
 
 ## Removed
 
 * Remove old mod logo
+* Remove `other-explosion-blocks` flag (was redundant)
+* Remove `other-explosion-entities` flag (was redundant)
 
 # [0.0.4.1-beta5] - 2024-10-09
 

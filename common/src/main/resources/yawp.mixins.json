@@ -5,11 +5,19 @@
   "refmap": "${mod_id}.refmap.json",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "BiomeMixin",
+    "CommandManagerMixin",
     "FireBlockMixin",
+    "FlowingFluidMixin",
     "FrostWalkerEnchantmentMixin",
     "LeavesBlockMixin",
     "LightningEntityMixin",
-    "ServerWorldMixin"
+    "ServerWorldMixin",
+    "SignBlockMixin",
+    "SnowLayerBlockMixin",
+    "flag.player.PlayerEntityMixin",
+    "stick.AnvilScreenHandlerMixin",
+    "stick.ServerPlayerInteractionManagerMixin"
   ],
   "client": [
   ],

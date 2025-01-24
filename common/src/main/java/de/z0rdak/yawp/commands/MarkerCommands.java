@@ -40,7 +40,7 @@ public final class MarkerCommands {
     private MarkerCommands() {
     }
 
-    public static LiteralArgumentBuilder<CommandSourceStack> build() {
+    static LiteralArgumentBuilder<CommandSourceStack> build() {
         return literal(MARKER)
                 .then(literal(GIVE)
                         .executes(MarkerCommands::giveMarkerStick))
@@ -144,7 +144,7 @@ public final class MarkerCommands {
         }
     }
 
-    public static int giveMarkerStick(CommandContext<CommandSourceStack> ctx) {
+    private static int giveMarkerStick(CommandContext<CommandSourceStack> ctx) {
         try {
             Player targetPlayer = ctx.getSource().getPlayerOrException();
             ItemStack marker = Items.STICK.getDefaultInstance();

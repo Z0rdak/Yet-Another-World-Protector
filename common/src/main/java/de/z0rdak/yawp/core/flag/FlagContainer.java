@@ -41,26 +41,28 @@ public class FlagContainer extends HashMap<String, IFlag> implements IFlagContai
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         Set<String> flagKeys = nbt.getAllKeys();
-        flagKeys.forEach(key -> {
-            CompoundTag flagNbt = nbt.getCompound(key);
-            FlagType flagType = FlagType.of(flagNbt.getString(FLAG_TYPE));
-            if (flagType != null) {
-                switch (flagType) {
-                    case BOOLEAN_FLAG:
-                        this.put(key, new BooleanFlag(flagNbt));
-                        break;
-                    case LIST_FLAG:
-                        this.put(key, new ListFlag(flagNbt));
-                        break;
-                    case INT_FLAG:
-                        this.put(key, new IntFlag(flagNbt));
-                        break;
-                }
-            } else {
-                // TODO: Throw error to give error message in abstract region to be more precise with error
-                Constants.LOGGER.warn("Error reading entry for flag '{}'.", key);
-            }
-        });
+        flagKeys.stream()
+                .filter(RegionFlag::contains)
+                .forEach(key -> {
+                    CompoundTag flagNbt = nbt.getCompound(key);
+                    FlagType flagType = FlagType.of(flagNbt.getString(FLAG_TYPE));
+                    if (flagType != null) {
+                        switch (flagType) {
+                            case BOOLEAN_FLAG:
+                                this.put(key, new BooleanFlag(flagNbt));
+                                break;
+                            case LIST_FLAG:
+                                this.put(key, new ListFlag(flagNbt));
+                                break;
+                            case INT_FLAG:
+                                this.put(key, new IntFlag(flagNbt));
+                                break;
+                        }
+                    } else {
+                        // TODO: Throw error to give error message in abstract region to be more precise with error
+                        Constants.LOGGER.warn("Error reading entry for flag '{}'.", key);
+                    }
+                });
     }
 
     public FlagContainer deepCopy() {

@@ -17,6 +17,12 @@ public interface IPlatformHelper {
      */
     boolean isModLoaded(String modId);
 
+    boolean isWorldEditLoaded();
+    
+    boolean isWorldEditCuiLoaded();
+
+    boolean isJourneyMapLoaded();
+
     /**
      * Check if the game is currently in a development environment.
      *

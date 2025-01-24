@@ -1,6 +1,6 @@
 {
     "schemaVersion": 1,
-  "id": "${mod_id}",
+    "id": "${mod_id}",
     "version": "${version}",
     "name": "${mod_name}",
     "description": "${description}",
@@ -8,16 +8,16 @@
         "${mod_author}"
     ],
     "contact": {
-      "homepage": "https://www.curseforge.com/minecraft/mc-mods/yawp",
-      "sources": "https://github.com/Z0rdak/Yet-Another-World-Protector",
-      "issues": "https://github.com/Z0rdak/Yet-Another-World-Protector/issues"
+        "homepage": "https://www.curseforge.com/minecraft/mc-mods/yawp",
+        "sources": "https://github.com/Z0rdak/Yet-Another-World-Protector",
+        "issues": "https://github.com/Z0rdak/Yet-Another-World-Protector/issues"
     },
     "license": "${license}",
-  "icon": "logo.png",
+    "icon": "logo.png",
     "environment": "*",
     "entrypoints": {
         "main": [
-          "de.z0rdak.yawp.YetAnotherWorldProtector"
+            "de.z0rdak.yawp.YetAnotherWorldProtector"
         ]
     },
     "mixins": [
@@ -25,15 +25,13 @@
         "${mod_id}.fabric.mixins.json"
     ],
     "depends": {
-        "fabricloader": ">=0.14",
-        "fabric": "*",
-      "fabric-api": ">=0.85.0",
-      "forgeconfigapiport": "*",
+        "fabricloader": ">=${fabric_loader_version}",
+        "fabric-api": "*",
         "minecraft": "${minecraft_version}",
-        "java": ">=17"
+        "forgeconfigapiport": "*",
+        "java": ">=${java_version}"
     },
     "suggests": {
         "another-mod": "*"
     }
 }
-  

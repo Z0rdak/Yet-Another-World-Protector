@@ -3,9 +3,6 @@ plugins {
     id 'net.minecraftforge.gradle' version '[6.0.24,6.2)'
     id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
 }
-base {
-    archivesName = "${mod_name}-forge-${minecraft_version}"
-}
 mixin {
     config("${mod_id}.mixins.json")
     config("${mod_id}.forge.mixins.json")
@@ -77,7 +74,7 @@ dependencies {
 
     // Forge's hack fix
     implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
-
+        
     api(fg.deobf("fuzs.forgeconfigapiport:forgeconfigapiport-forge:21.4.1"))
 }
 

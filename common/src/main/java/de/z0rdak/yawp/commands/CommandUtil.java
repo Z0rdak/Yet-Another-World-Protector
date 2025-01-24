@@ -25,8 +25,6 @@ import de.z0rdak.yawp.util.ChatLinkBuilder;
 import de.z0rdak.yawp.util.MojangApiHelper;
 import de.z0rdak.yawp.util.text.Messages;
 import de.z0rdak.yawp.util.text.messages.multiline.MultiLineMessage;
-import de.z0rdak.yawp.util.text.messages.multiline.RegionInfoMessage;
-import de.z0rdak.yawp.util.text.messages.multiline.RegionStateMessage;
 import de.z0rdak.yawp.util.text.messages.pagination.*;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -228,12 +226,12 @@ public class CommandUtil {
     }
 
     public static int promptRegionInfo(CommandContext<CommandSourceStack> ctx, IProtectedRegion region) {
-        MultiLineMessage.send(ctx.getSource(), RegionInfoMessage.of(region));
+        MultiLineMessage.send(ctx.getSource(),  MultiLineMessage.regionInfo(region));
         return 0;
     }
 
     public static int promptRegionState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region) {
-        MultiLineMessage.send(ctx.getSource(), RegionStateMessage.of(region));
+        MultiLineMessage.send(ctx.getSource(), MultiLineMessage.regionState(region));
         return 0;
     }
 
@@ -247,7 +245,7 @@ public class CommandUtil {
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.region.info.group.invalid", "cli.msg.region.info.group.invalid", group).withStyle(RED));
             return -1;
         }
-        sendCmdFeedback(ctx.getSource(), buildGroupHeader(region, group));
+        sendCmdFeedback(ctx.getSource(), buildGroupListHeader(region, group));
         sendCmdFeedback(ctx.getSource(), ChatLinkBuilder.buildGroupPlayerListLink(region, group));
         sendCmdFeedback(ctx.getSource(), ChatLinkBuilder.buildGroupTeamListLink(region, group));
         return 0;

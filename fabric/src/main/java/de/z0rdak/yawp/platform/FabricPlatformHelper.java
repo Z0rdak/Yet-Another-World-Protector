@@ -17,6 +17,21 @@ public class FabricPlatformHelper implements IPlatformHelper {
     }
 
     @Override
+    public boolean isWorldEditLoaded() {
+        return this.isModLoaded("worldedit");
+    }
+
+    @Override
+    public boolean isWorldEditCuiLoaded() {
+        return this.isModLoaded("worldedit-cui");
+    }
+
+    @Override
+    public boolean isJourneyMapLoaded() {
+        return this.isModLoaded("journeymap");
+    }
+    
+    @Override
     public boolean isDevelopmentEnvironment() {
 
         return FabricLoader.getInstance().isDevelopmentEnvironment();

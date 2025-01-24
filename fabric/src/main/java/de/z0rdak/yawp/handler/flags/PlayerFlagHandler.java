@@ -54,7 +54,7 @@ public final class PlayerFlagHandler {
     public static void register() {
         EntitySleepEvents.ALLOW_SLEEPING.register(PlayerFlagHandler::onAllowSleeping);
         EntitySleepEvents.ALLOW_SETTING_SPAWN.register(PlayerFlagHandler::onSettingSpawn);
-        EntityElytraEvents.ALLOW.register(PlayerFlagHandler::onElytraFlight);
+        // EntityElytraEvents.ALLOW.register(PlayerFlagHandler::onElytraFlight);
 
         UseItemCallback.EVENT.register(PlayerFlagHandler::onUseItem);
         UseBlockCallback.EVENT.register(PlayerFlagHandler::onUseBlock);
@@ -155,7 +155,7 @@ public final class PlayerFlagHandler {
             if (!hasEmptyHand) {
                 boolean targetsContainerWhileNotSneaking = (isContainer || isEnderChest) && !player.isShiftKeyDown();
                 if (targetsContainerWhileNotSneaking) { // should be allowed to access container in this case
-                    FLAG_LOGGER.info("### targetsContainerWhileNotSneaking ###");
+                    // FLAG_LOGGER.info("### targetsContainerWhileNotSneaking ###");
                 }
 
                 ResourceLocation itemRl = BuiltInRegistries.ITEM.getKey(stackInHand.getItem());

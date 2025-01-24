@@ -5,10 +5,10 @@
   "refmap": "${mod_id}.refmap.json",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "ServerExplosionMixin",
     "flag.AbstractFireBlockMixin",
     "flag.EnderManEntityMixin",
     "flag.EntityMixin",
-    "flag.ExplosionMixin",
     "flag.LivingEntityMixin",
     "flag.ServerWorldMixin",
     "flag.ShulkerEntityMixin",
@@ -39,7 +39,6 @@
     "flag.player.AxeItemMixin",
     "flag.player.BoneMealItemMixin",
     "flag.player.BucketItemMixin",
-    "flag.player.CommandManagerMixin",
     "flag.player.ExperienceOrbEntityMixin",
     "flag.player.FarmLandBlockMixin",
     "flag.player.HoeItemMixin",
@@ -51,8 +50,7 @@
     "flag.player.ThrownEnderPearlMixin",
     "flag.player.breeding.AnimalMixin",
     "flag.player.breeding.FrogMixin",
-    "flag.player.breeding.SnifferMixin",
-    "stick.ServerPlayerInteractionManagerMixin"
+    "flag.player.breeding.SnifferMixin"
   ],
   "client": [
   ],

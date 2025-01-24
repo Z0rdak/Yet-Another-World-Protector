@@ -76,8 +76,8 @@ public abstract class EntityMixin {
      * Covers USE_PORTAL* flags
      * Note: does not seem to trigger for players, which is fine
      */
-    @Inject(method = "teleport", at = @At(value = "HEAD"), cancellable = true, allow = 1)
-    public void onChangeDimension(TeleportTransition teleportTransition, CallbackInfoReturnable<Entity> cir) {
+    @Inject(method = "teleportCrossDimension", at = @At(value = "HEAD"), cancellable = true, allow = 1)
+    public void onChangeDimension(ServerLevel level, TeleportTransition teleportTransition, CallbackInfoReturnable<Entity> cir) {
         Entity self = (Entity) (Object) this;
         if (isServerSide(self.level())) {
             RegionDataManager.addDimKeyOnDimensionChange(null, self.level(), teleportTransition.newLevel());

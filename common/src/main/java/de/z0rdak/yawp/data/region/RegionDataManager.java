@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.data.region;
 
+import com.mojang.datafixers.types.Type;
 import de.z0rdak.yawp.api.commands.CommandConstants;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.constants.Constants;
@@ -26,6 +27,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import org.apache.commons.lang3.NotImplementedException;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -113,10 +115,11 @@ public class RegionDataManager extends SavedData {
             if (serverInstance == null) {
                 serverInstance = minecraftServer;
             }
-            if (isServerSide(serverWorld) && serverWorld.dimension().location().equals(ResourceLocation.parse("minecraft:overworld"))) {
+            var isOverworld = serverWorld.dimension().location().equals(ServerLevel.OVERWORLD.location());
+            if (isServerSide(serverWorld) && isOverworld) {
                 DimensionDataStorage storage = serverWorld.getDataStorage();
                 Factory<RegionDataManager> rdmt = new Factory<>(RegionDataManager::new, RegionDataManager::load, DataFixTypes.SAVED_DATA_MAP_DATA);
-                RegionDataManager data = storage.get(rdmt, DATA_NAME);
+                RegionDataManager data = storage.computeIfAbsent(rdmt, DATA_NAME);
                 storage.set(DATA_NAME, data);
                 regionDataCache = data;
                 Constants.LOGGER.info(Component.translatableWithFallback("data.nbt.dimensions.load.success", "Loaded %s region(s) for %s dimension(s)", data.getTotalRegionAmount(), data.getDimensionAmount()).getString());
@@ -248,7 +251,7 @@ public class RegionDataManager extends SavedData {
         compound.put(GLOBAL, globalRegion.serializeNBT());
         CompoundTag dimRegionNbtData = new CompoundTag();
         // Constants.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.save.amount", this.getTotalRegionAmount(), dimCacheMap.keySet().size()).getString());
-        Constants.LOGGER.info(Component.translatable("Saving " + this.getTotalRegionAmount() + " region(s) for " + dimCacheMap.size() + " dimensions").getString());
+        Constants.LOGGER.info(Component.translatable("Saving " + this.getTotalRegionAmount() + " region(s) for " + dimCacheMap.keySet().size() + " dimensions").getString());
         for (Map.Entry<ResourceKey<Level>, DimensionRegionCache> entry : dimCacheMap.entrySet()) {
             // Constants.LOGGER.info(new TranslationTextComponent("data.nbt.dimensions.save.dim.amount", this.getRegionAmount(entry.getKey()), entry.getKey().location().toString()).getString());
             Constants.LOGGER.info(Component.translatable("Saving " + this.getRegionAmount(entry.getKey()) + " region(s) for dimension '" + entry.getKey().location() + "'").getString());
@@ -297,7 +300,7 @@ public class RegionDataManager extends SavedData {
     }
 
     public int getDimensionAmount() {
-        return dimCacheMap.size();
+        return dimCacheMap.keySet().size();
     }
 
     @Nullable

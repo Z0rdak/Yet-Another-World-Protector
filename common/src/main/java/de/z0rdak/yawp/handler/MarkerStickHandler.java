@@ -1,7 +1,6 @@
 package de.z0rdak.yawp.handler;
 
 import de.z0rdak.yawp.constants.Constants;
-import de.z0rdak.yawp.constants.serialization.ItemNbtKeys;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.util.StickUtil;
@@ -38,17 +37,16 @@ public class MarkerStickHandler {
                 }
                 if (player.isShiftKeyDown()) {
                     marker.setTeleportPos(target);
-                    CompoundTag stickNBT = getStickNBT(involvedItem);
-                    stickNBT.put(ItemNbtKeys.STICK, marker.serializeNBT());
+                    StickUtil.setMarkerNbt(involvedItem, marker.serializeNBT());
+                    StickUtil.updateStickName(involvedItem);
                     return;
                 }
                 // add block to NBT list
                 marker.addMarkedBlock(target);
                 // check whether marked blocks form a valid marked area
                 marker.checkValidArea();
-                CompoundTag stickNBT = getStickNBT(involvedItem);
-                stickNBT.put(ItemNbtKeys.STICK, marker.serializeNBT());
-                setStickName(involvedItem);
+                StickUtil.setMarkerNbt(involvedItem, marker.serializeNBT());
+                StickUtil.updateStickName(involvedItem);
             }
         }
     }
@@ -72,8 +70,8 @@ public class MarkerStickHandler {
                     // change area nbt, reset marked blocks, set valid to false
                     marker.cycleMode();
                     // update stick name
-                    stickNBT.put(ItemNbtKeys.STICK, marker.serializeNBT());
-                    StickUtil.setStickName(involvedItem);
+                    StickUtil.setMarkerNbt(involvedItem, marker.serializeNBT());
+                    StickUtil.updateStickName(involvedItem);
                 }
             }
         }
