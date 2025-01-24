@@ -83,7 +83,7 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
 
     private void loadRegionDataForge(ServerStartingEvent event) {
         MinecraftServer server = event.getServer();
-        ResourceLocation levelRl = ResourceLocation.parse("minecraft:overworld");
+        ResourceLocation levelRl = ServerLevel.OVERWORLD.location();
         server.getAllLevels().forEach(level -> {
             if (level.dimension().location().equals(levelRl)) {
                 RegionDataManager.loadRegionDataForWorld(server, level);
