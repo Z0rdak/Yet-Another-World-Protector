@@ -1,13 +1,14 @@
 package de.z0rdak.yawp;
 
 import de.z0rdak.yawp.api.events.flag.ForgeFlagEvent;
+import de.z0rdak.yawp.api.events.region.ForgeRegionEvent;
 import de.z0rdak.yawp.commands.CommandRegistry;
 import de.z0rdak.yawp.config.ConfigRegistry;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.data.region.RegionDataManager;
+import de.z0rdak.yawp.external.WebMapRegistry;
 import de.z0rdak.yawp.platform.Services;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
@@ -15,6 +16,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -68,6 +70,14 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
 
     public void initServerInstanceForge(ServerStartingEvent event) {
         RegionDataManager.initServerInstance(event.getServer());
+
+        var extensions = new WebMapRegistry();
+        extensions.initialize();
+        MinecraftForge.EVENT_BUS.addListener((ForgeRegionEvent.Create e) -> extensions.notify(ForgeRegionEvent.Create.asCommonEvent(e)));
+        MinecraftForge.EVENT_BUS.addListener((ForgeRegionEvent.Remove e) -> extensions.notify(ForgeRegionEvent.Remove.asCommonEvent(e)));
+        MinecraftForge.EVENT_BUS.addListener((ForgeRegionEvent.Rename e) -> extensions.notify(ForgeRegionEvent.Rename.asCommonEvent(e)));
+        MinecraftForge.EVENT_BUS.addListener((ForgeRegionEvent.UpdateArea e) -> extensions.notify(ForgeRegionEvent.UpdateArea.asCommonEvent(e)));
+        MinecraftForge.EVENT_BUS.addListener((ServerStartedEvent e) -> extensions.notifyOnLoad());
     }
 
     @Override
