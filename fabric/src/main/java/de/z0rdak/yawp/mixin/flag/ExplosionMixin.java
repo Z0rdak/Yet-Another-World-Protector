@@ -70,7 +70,7 @@ public abstract class ExplosionMixin {
         is captured and provided as argument here through the LocalCapture feature 
         */
         Explosion explosion = (Explosion) (Object) this;
-        if (isServerSide(this.level)) {
+        if (this.level != null && isServerSide(this.level)) {
             if (this.source != null) {
                 // flag check
                 filterExplosionTargets(explosion, this.level, list);
