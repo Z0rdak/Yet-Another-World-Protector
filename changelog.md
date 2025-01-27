@@ -1,3 +1,15 @@
+# [0.5.1-beta3] - 2025-01-27
+
+## Fixed
+
+- Fix NPE when updating area
+
+# [0.5.1-beta2] - 2025-01-26
+
+## Fixed
+
+- Fix NPE causing crash on explosions
+
 # [0.5.1-beta1] - 2025-01-23
 
 ## Added

@@ -32,14 +32,15 @@ public class FabricEventHelper implements IEventHelper {
             return FabricRegionEvents.DELETE_REGION.invoker().deleteRegion((RegionEvent.Remove) event);
         }
         if (event instanceof RegionEvent.UpdateArea) {
-            return FabricRegionEvents.UPDATE_AREA.invoker().updateArea((RegionEvent.UpdateArea) event);
+            post((RegionEvent.UpdateArea) event);
         }
         return false;
     }
 
     @Override
     public RegionEvent.UpdateArea post(RegionEvent.UpdateArea event) {
-        return null;
+        FabricRegionEvents.UPDATE_AREA.invoker().updateArea(event);
+        return event;
     }
 
     @Override
