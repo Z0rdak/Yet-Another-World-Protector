@@ -1,3 +1,9 @@
+# [0.5.1-beta3] - 2025-01-27
+
+## Fixed
+
+- Fix NPE when updating area 
+
 # [0.5.1-beta2] - 2025-01-26
 
 ## Fixed
