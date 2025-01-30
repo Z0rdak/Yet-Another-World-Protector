@@ -2,6 +2,7 @@ package de.z0rdak.yawp.handler.flags;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.config.server.FlagConfig;
+import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.util.text.MessageSender;
@@ -106,7 +107,7 @@ public final class PlayerFlagHandler {
         if (isServerSide(world)) {
             UseOnContext useOnContext = new UseOnContext(player, hand, blockHitResult);
             BlockPos targetPos = useOnContext.getClickedPos();
-            BlockPos placeBlockTarget = targetPos.relative(useOnContext.getClickedFace().getOpposite());
+            BlockPos placeBlockTarget = targetPos.relative(useOnContext.getClickedFace());
             BlockEntity targetEntity = world.getBlockEntity(targetPos);
             boolean hasEmptyHand = hasEmptyHand(player, hand);
             ItemStack stackInHand = useOnContext.getItemInHand();
