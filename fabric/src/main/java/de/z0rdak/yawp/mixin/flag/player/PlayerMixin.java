@@ -114,10 +114,10 @@ public abstract class PlayerMixin {
 
     @Inject(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getDamageAfterArmorAbsorb(Lnet/minecraft/world/damagesource/DamageSource;F)F"), cancellable = true, allow = 1)
     public void onHurt(ServerLevel level, DamageSource source, float amount, CallbackInfo ci) {
-        Player player = (Player) (Object) this;
-        if (isServerSide(player)) {
-            if (source.getEntity() instanceof Player) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), NO_PVP, getDimKey(player), player);
+        Player self = (Player) (Object) this;
+        if (isServerSide(self)) {
+            if (source.getEntity() instanceof Player attackingPlayer) {
+                FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), NO_PVP, getDimKey(self), attackingPlayer);
                 if (Services.EVENT.post(checkEvent))
                     return;
                 processCheck(checkEvent, deny -> {
@@ -125,7 +125,7 @@ public abstract class PlayerMixin {
                     ci.cancel();
                 });
             }
-            FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), INVINCIBLE, getDimKey(player), player);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), INVINCIBLE, getDimKey(self));
             if (Services.EVENT.post(checkEvent))
                 return;
             processCheck(checkEvent, deny -> {
