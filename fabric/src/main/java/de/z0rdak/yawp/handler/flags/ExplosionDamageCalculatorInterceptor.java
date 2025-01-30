@@ -17,6 +17,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ExplosionDamageCalculator;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import org.jetbrains.annotations.NotNull;
@@ -26,10 +27,12 @@ import java.util.Optional;
 
 public class ExplosionDamageCalculatorInterceptor extends ExplosionDamageCalculator {
 	protected ExplosionDamageCalculator nextBehavior;
+	protected Level level;
 	
-	public ExplosionDamageCalculatorInterceptor(ExplosionDamageCalculator nextBehavior) 
+	public ExplosionDamageCalculatorInterceptor(ExplosionDamageCalculator nextBehavior, Level level) 
 	{
 		this.nextBehavior = nextBehavior;
+		this.level = level;
 	}
 	
 	@Override
@@ -39,7 +42,7 @@ public class ExplosionDamageCalculatorInterceptor extends ExplosionDamageCalcula
 			// case Player p -> RegionFlag.EXPLOSION_PLAYER_BLOCK;
 			case null, default -> RegionFlag.EXPLOSION_BLOCK; // is null for dispenser etc
 		};
-		FlagCheckEvent checkEvent = new FlagCheckEvent(pos, flag, explosion.level().dimension());
+		FlagCheckEvent checkEvent = new FlagCheckEvent(pos, flag, this.level.dimension());
 		FlagState flagState = HandlerUtil.processCheck(checkEvent);
 		return flagState == FlagState.DENIED 
 				? false : nextBehavior.shouldBlockExplode(explosion, blockGetter, pos, state, power);

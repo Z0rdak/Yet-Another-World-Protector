@@ -35,6 +35,6 @@ public abstract class ServerExplosionMixin {
             Explosion.BlockInteraction blockInteraction,
             CallbackInfo ci
     ) {
-        this.damageCalculator = new ExplosionDamageCalculatorInterceptor(this.damageCalculator);
+        this.damageCalculator = new ExplosionDamageCalculatorInterceptor(this.damageCalculator, level);
     }
 }
