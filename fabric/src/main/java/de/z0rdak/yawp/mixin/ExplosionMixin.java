@@ -39,6 +39,6 @@ public abstract class ExplosionMixin {
             Holder<SoundEvent> explosionSound, 
             CallbackInfo ci
     ) {
-        this.damageCalculator = new ExplosionDamageCalculatorInterceptor(this.damageCalculator);
+        this.damageCalculator = new ExplosionDamageCalculatorInterceptor(this.damageCalculator, level);
     }
 }
