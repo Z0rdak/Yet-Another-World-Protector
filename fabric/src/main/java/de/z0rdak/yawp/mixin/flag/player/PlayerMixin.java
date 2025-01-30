@@ -149,7 +149,7 @@ public abstract class PlayerMixin {
             Player player = (Player) (Object) this;
             if (target == null) return;
             if (target instanceof Player) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), MELEE_PLAYERS, getDimKey(player), player);
+                FlagCheckEvent checkEvent = new FlagCheckEvent(target.blockPosition(), MELEE_PLAYERS, getDimKey(player), player);
                 if (Services.EVENT.post(checkEvent))
                     return;
                 processCheck(checkEvent, deny -> {
@@ -158,7 +158,7 @@ public abstract class PlayerMixin {
                 });
             } else {
                 if (isAnimal(target)) {
-                    FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), MELEE_ANIMALS, getDimKey(player), player);
+                    FlagCheckEvent checkEvent = new FlagCheckEvent(target.blockPosition(), MELEE_ANIMALS, getDimKey(player), player);
                     if (Services.EVENT.post(checkEvent))
                         return;
                     processCheck(checkEvent, deny -> {
@@ -167,7 +167,7 @@ public abstract class PlayerMixin {
                     });
                 }
                 if (isMonster(target)) {
-                    FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), MELEE_MONSTERS, getDimKey(player), player);
+                    FlagCheckEvent checkEvent = new FlagCheckEvent(target.blockPosition(), MELEE_MONSTERS, getDimKey(player), player);
                     if (Services.EVENT.post(checkEvent))
                         return;
                     processCheck(checkEvent, deny -> {
@@ -176,7 +176,7 @@ public abstract class PlayerMixin {
                     });
                 }
                 if (target instanceof Villager) {
-                    FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), MELEE_VILLAGERS, getDimKey(player), player);
+                    FlagCheckEvent checkEvent = new FlagCheckEvent(target.blockPosition(), MELEE_VILLAGERS, getDimKey(player), player);
                     if (Services.EVENT.post(checkEvent))
                         return;
                     processCheck(checkEvent, deny -> {
@@ -185,7 +185,7 @@ public abstract class PlayerMixin {
                     });
                 }
                 if (target instanceof WanderingTrader) {
-                    FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), MELEE_WANDERING_TRADER, getDimKey(player), player);
+                    FlagCheckEvent checkEvent = new FlagCheckEvent(target.blockPosition(), MELEE_WANDERING_TRADER, getDimKey(player), player);
                     if (Services.EVENT.post(checkEvent))
                         return;
                     processCheck(checkEvent, deny -> {
