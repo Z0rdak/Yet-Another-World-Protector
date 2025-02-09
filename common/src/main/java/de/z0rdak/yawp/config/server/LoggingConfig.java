@@ -42,7 +42,7 @@ public class LoggingConfig {
                 .define("log_flag_check", false);
 
         FLAG_RESULT_LOG = BUILDER.comment("Enable logging of flag check results.")
-                .define("log_flag_result", true);
+                .define("log_flag_result", false);
 
         LOG_EMPTY_RESULTS = BUILDER.comment("Enable logging of empty (without responsible region) flag check results.")
                 .define("log_empty_results", false);
