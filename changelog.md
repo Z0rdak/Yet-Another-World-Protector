@@ -1,3 +1,13 @@
+# [0.5.1-beta4] - 2025-02-09
+
+## Fixed
+
+- (Fabric) Fix place-block flag target position being calculated incorrectly
+- Fix explosion flag causing npe
+- Fix melee flags using wrong position for check
+- Fix no-pvp flag having the wrong position for check and messaging the wrong player
+- (Fabric) Fix missing UpdateArea event implementation 
+
 # [0.5.1-beta3] - 2025-01-27
 
 ## Fixed
