@@ -92,6 +92,8 @@ public enum RegionFlag {
     USE_PORTAL_VILLAGERS("use-portal-villagers", FlagType.BOOLEAN_FLAG, Arrays.asList(FlagCategory.ENVIRONMENT, FlagCategory.ENTITY)),
     WATER_FLOW("water-flow", FlagType.BOOLEAN_FLAG, Collections.singletonList(FlagCategory.ENVIRONMENT)),
     WITHER_BLOCK_PROT("wither-destruction", FlagType.BOOLEAN_FLAG, Arrays.asList(FlagCategory.ENVIRONMENT, FlagCategory.BLOCK)),
+    KEEP_XP("keep-xp", FlagType.BOOLEAN_FLAG, Arrays.asList(FlagCategory.PROTECTION, FlagCategory.PLAYER)),
+    KEEP_INV("keep-inv", FlagType.BOOLEAN_FLAG, Arrays.asList(FlagCategory.PROTECTION, FlagCategory.PLAYER)),
     XP_DROP_ALL("xp-drop-all", FlagType.BOOLEAN_FLAG, Collections.emptyList()),
     XP_DROP_MONSTER("xp-drop-monsters", FlagType.BOOLEAN_FLAG, Collections.emptyList()),
     XP_DROP_OTHER("xp-drop-other", FlagType.BOOLEAN_FLAG, Collections.emptyList()),
