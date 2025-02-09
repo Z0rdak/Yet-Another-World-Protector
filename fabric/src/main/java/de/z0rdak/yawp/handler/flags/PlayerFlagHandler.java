@@ -106,7 +106,7 @@ public final class PlayerFlagHandler {
         if (isServerSide(world)) {
             UseOnContext useOnContext = new UseOnContext(player, hand, blockHitResult);
             BlockPos targetPos = useOnContext.getClickedPos();
-            BlockPos placeBlockTarget = targetPos.relative(useOnContext.getClickedFace().getOpposite());
+            BlockPos placeBlockTarget = targetPos.relative(useOnContext.getClickedFace());
             BlockEntity targetEntity = world.getBlockEntity(targetPos);
             boolean hasEmptyHand = hasEmptyHand(player, hand);
             ItemStack stackInHand = useOnContext.getItemInHand();
