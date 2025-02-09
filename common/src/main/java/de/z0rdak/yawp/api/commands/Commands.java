@@ -1,11 +1,11 @@
 package de.z0rdak.yawp.api.commands;
 
+import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.group.GroupType;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.platform.Services;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
@@ -17,10 +17,9 @@ public final class Commands {
     }
 
     public static String buildCommandStr(String... cmdTokens) {
-        
-        String preamble = "/" + Services.PERMISSION_CONFIG.getBaseCmd();
+        String baseCmd = "/" + Constants.MOD_ID;
         String cmdStr = String.join(" ", cmdTokens);
-        return preamble + " " + cmdStr;
+        return baseCmd + " " + cmdStr;
     }
 
     public static String buildRegionBaseCmd(IProtectedRegion region) {

@@ -60,9 +60,4 @@ public class NeoForgePermissionConfigHelper implements IPermissionConfigHelper {
     public boolean allowRegionTp() {
         return PermissionConfig.allowRegionTp();
     }
-
-    @Override
-    public String getBaseCmd() {
-        return PermissionConfig.getBaseCmd();
-    }
 }

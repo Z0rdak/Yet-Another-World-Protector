@@ -49,7 +49,7 @@ public class RegionArgumentType implements ArgumentType<String> {
         List<ParsedCommandNode<S>> nodes = context.getNodes();
         if (nodes.size() >= 2) {
             String baseCmd = nodes.get(0).getNode().getName();
-            if (baseCmd.equals(Services.PERMISSION_CONFIG.getBaseCmd())) {
+            if (baseCmd.equals(Constants.MOD_ID)) {
                 String regionTypeLiteral = nodes.get(1).getNode().getName();
                 RegionType regionType = RegionType.of(regionTypeLiteral);
                 boolean isFlagSubCmd = regionTypeLiteral.equals(FLAG.toString()) && nodes.size() >= 3;

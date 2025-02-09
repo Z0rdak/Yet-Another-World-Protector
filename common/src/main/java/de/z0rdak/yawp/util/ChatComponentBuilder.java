@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.util;
 
 import de.z0rdak.yawp.api.commands.CommandConstants;
+import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.area.SphereArea;
@@ -12,14 +13,12 @@ import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.data.region.RegionDataManager;
-import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.util.text.Messages;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -153,7 +152,7 @@ public class ChatComponentBuilder {
     public static MutableComponent buildHelpStartComponent() {
         String command = buildCommandStr(CommandConstants.GLOBAL.toString(), CommandConstants.INFO.toString());
         MutableComponent text = Component.translatableWithFallback("help.hint.link.text", "Start here");
-        MutableComponent hover = Component.translatableWithFallback("help.hint.link.hover", "Use '/%s global info' as a starting point to manage the global region", Services.PERMISSION_CONFIG.getBaseCmd());
+        MutableComponent hover = Component.translatableWithFallback("help.hint.link.hover", "Use '/%s global info' as a starting point to manage the global region", "/" + Constants.MOD_ID);
         return buildExecuteCmdComponent(text, hover, command, ClickEvent.Action.RUN_COMMAND, LINK_COLOR);
     }
 
