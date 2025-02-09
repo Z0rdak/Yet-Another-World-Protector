@@ -1,11 +1,9 @@
 package de.z0rdak.yawp.config;
 
-import de.z0rdak.yawp.commands.CommandRegistry;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.config.server.LoggingConfig;
 import de.z0rdak.yawp.config.server.PermissionConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
-import de.z0rdak.yawp.platform.Services;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,18 +19,11 @@ public final class ConfigRegistry {
     public static void onModLoaded(String configName, Runnable registerHandler) {
         switch (configName) {
             case PermissionConfig.CONFIG_NAME: {
-                PermissionConfig.BASE_CMD = PermissionConfig.getBaseCmd();
-                if (Services.PLATFORM.isJourneyMapLoaded()) {
-                    PermissionConfig.BASE_CMD = PermissionConfig.getBaseCmdAlt();
-                    CONFIG_LOGGER.info("Detected JourneyMap to be loaded beside YAWP.");
-                }
-                CONFIG_LOGGER.info("Setting YAWP base command to '/{}'", PermissionConfig.BASE_CMD);
                 int numOfUuidsWithPermission = PermissionConfig.UUIDsWithPermission().size();
                 String uuidsWithPermission = (numOfUuidsWithPermission > 0
                         ? ": " + String.join(", ", PermissionConfig.UUIDsWithPermission())
                         : "");
                 CONFIG_LOGGER.info("{} UUID(s) with permission read from config{}", numOfUuidsWithPermission, uuidsWithPermission);
-                CommandRegistry.register(PermissionConfig.BASE_CMD);
             }
             break;
             case RegionConfig.CONFIG_NAME: {

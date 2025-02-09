@@ -19,5 +19,4 @@ public interface IPermissionConfigHelper {
     boolean hasConfigPermission(CommandSourceStack src, CommandSourceType srcType) throws CommandSyntaxException;
     boolean isReadOnlyAllowed();
     boolean allowRegionTp();
-    String getBaseCmd();
 }
