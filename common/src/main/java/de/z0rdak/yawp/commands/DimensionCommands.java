@@ -79,7 +79,7 @@ class DimensionCommands {
                                 .then(Commands.argument(CommandConstants.LOCAL.toString(), StringArgumentType.word())
                                         .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestions(ctx, builder))
                                         .executes(ctx -> attemptDeleteRegion(ctx, getDimCacheArgument(ctx), getRegionArgument(ctx)))
-                                        .then(Commands.literal("-y")
+                                        .then(literal(FOR_SURE)
                                                 .executes(ctx -> deleteRegion(ctx, getDimCacheArgument(ctx), getRegionArgument(ctx))))))
                         .then(literal(DELETE_ALL)
                                 .then(literal(REGIONS)
@@ -275,7 +275,7 @@ class DimensionCommands {
         return createRegion(ctx, regionName, dimCache, region, parent);
     }
 
-    private static int attemptDeleteRegion(CommandContext<CommandSourceStack> ctx, DimensionRegionCache dim, IMarkableRegion region) {
+    public static int attemptDeleteRegion(CommandContext<CommandSourceStack> ctx, DimensionRegionCache dim, IMarkableRegion region) {
         if (dim.contains(region.getName())) {
             MutableComponent removeRegionLink = ChatLinkBuilder.buildRemoveRegionLink(region);
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.dim.region.remove.attempt", "Attempt to remove region %s from %s. Confirm by clicking here %s",
@@ -285,7 +285,7 @@ class DimensionCommands {
         return 1;
     }
 
-    private static int deleteRegion(CommandContext<CommandSourceStack> ctx, DimensionRegionCache dim, IMarkableRegion region) {
+    public static int deleteRegion(CommandContext<CommandSourceStack> ctx, DimensionRegionCache dim, IMarkableRegion region) {
         ServerPlayer player;
         try {
             player = ctx.getSource().getPlayerOrException();
@@ -295,9 +295,6 @@ class DimensionCommands {
         if (Services.EVENT.post(new RegionEvent.Remove(region, player))) {
             return 1;
         }
-        //if (RegionEvents.DELETE_REGION.invoker().deleteRegion(new RegionEvent.RemoveRegionEvent(region, player))) {
-        //    return 0;
-        //}
         if (dim.contains(region.getName())) {
             if (!region.getChildren().isEmpty()) {
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.dim.region.remove.fail.hasChildren", "Region %s can't be deleted because it has child regions.", ChatLinkBuilder.buildRegionInfoLink(region)));

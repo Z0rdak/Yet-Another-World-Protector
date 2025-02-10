@@ -38,7 +38,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Relative;
 
 import java.util.Collections;
-import java.util.Set;
 
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.CommandUtil.*;
@@ -67,13 +66,15 @@ class RegionCommands {
                                 .then(buildListSubCommand(ArgumentUtil::getRegionArgument))
                                 .then(buildRemoveSubCommand(ArgumentUtil::getRegionArgument))
                                 .then(buildCopySubCommand(ArgumentUtil::getRegionArgument))
-                                .then(literal(ADD)
-                                        .then(literal(CHILD)
+                                .then(literal(DELETE)
+                                        .executes(ctx -> DimensionCommands.attemptDeleteRegion(ctx, getDimCacheArgument(ctx), getRegionArgument(ctx)))
+                                        .then(literal(FOR_SURE)
+                                                .executes(ctx -> DimensionCommands.deleteRegion(ctx, getDimCacheArgument(ctx), getRegionArgument(ctx)))))
+                                .then(literal(ADD).then(literal(CHILD)
                                                 .then(Commands.argument(CHILD.toString(), StringArgumentType.word())
                                                         .suggests((ctx, builder) -> AddRegionChildArgumentType.potentialChildRegions().listSuggestions(ctx, builder))
                                                         .executes(ctx -> addChildren(ctx, getRegionArgument(ctx), getChildRegionArgument(ctx))))))
-                                .then(literal(REMOVE)
-                                        .then(literal(CHILD)
+                                .then(literal(REMOVE).then(literal(CHILD)
                                                 .then(Commands.argument(CHILD.toString(), StringArgumentType.word())
                                                         .suggests((ctx, builder) -> RemoveRegionChildArgumentType.childRegions().listSuggestions(ctx, builder))
                                                         .executes(ctx -> removeChildren(ctx, getDimCacheArgument(ctx), getRegionArgument(ctx), getChildRegionArgument(ctx))))))
