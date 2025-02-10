@@ -7,6 +7,7 @@ import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.flag.FlagMessage;
 import de.z0rdak.yawp.core.flag.IFlag;
+import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.group.GroupType;
 import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
@@ -393,6 +394,10 @@ public class ChatLinkBuilder {
 
     public static MutableComponent buildSuggestAddFlagLink(IProtectedRegion region) {
         return buildAddFlagLink(region, "", SUGGEST_COMMAND);
+    }
+
+    public static MutableComponent buildAddFlagLink(IProtectedRegion region, String flag) {
+        return buildAddFlagLink(region, flag, RUN_COMMAND);
     }
 
     public static MutableComponent buildAddFlagLink(IProtectedRegion region, String flag, ClickEvent.Action action) {
