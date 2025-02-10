@@ -21,6 +21,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -45,6 +46,7 @@ public class IFlagArgumentType implements ArgumentType<String> {
     private IFlagArgumentType() {
     }
 
+    @Nullable
     public static IFlag getFlag(CommandContext<CommandSourceStack> context, String argName) throws CommandSyntaxException {
         RegionType regionType = RegionArgumentType.getRegionType(context);
         String flagIdentifier = context.getArgument(argName, String.class);
@@ -53,9 +55,10 @@ public class IFlagArgumentType implements ArgumentType<String> {
             if (region.containsFlag(flagIdentifier)) {
                 return region.getFlag(flagIdentifier);
             } else {
-                sendCmdFeedback(context.getSource(), Component.literal("Region '" + region.getName() + "' does not contain flag '" + flagIdentifier + "'!"));
-                // Should not happen!
-                throw new IllegalArgumentException("Region '" + region.getName() + "' does not contain flag '" + flagIdentifier + "'!");
+                MutableComponent flagAddHint = Component.translatableWithFallback("cli.msg.info.region.flag.add-hint", "Add flag by clicking: %s", ChatLinkBuilder.buildAddFlagLink(region, flagIdentifier));
+                MutableComponent flagNotPresentInfo = Component.translatableWithFallback("cli.msg.info.region.flag.not-present", "Region %s does not contain flag '%s'. %s", buildRegionInfoLink(region), flagIdentifier, flagAddHint);
+                sendCmdFeedback(context.getSource(), flagNotPresentInfo);
+                return null;
             }
         } else {
             sendCmdFeedback(context.getSource(), Component.literal("Invalid flag identifier: '" + flagIdentifier + "'!"));

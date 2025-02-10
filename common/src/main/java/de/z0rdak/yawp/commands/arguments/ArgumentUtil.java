@@ -28,6 +28,7 @@ import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.scores.Team;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -129,6 +130,7 @@ public class ArgumentUtil {
         return RegionFlagArgumentType.getFlags(ctx, CommandConstants.FLAGS.toString());
     }
 
+    @Nullable
     public static IFlag getIFlagArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         return IFlagArgumentType.getFlag(ctx, CommandConstants.FLAG.toString());
     }
