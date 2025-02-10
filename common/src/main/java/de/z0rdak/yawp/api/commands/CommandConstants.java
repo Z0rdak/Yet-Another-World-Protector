@@ -20,6 +20,7 @@ public enum CommandConstants {
     CREATE("create"),
     DEC("-"),
     DELETE("delete"),
+    FOR_SURE("-y"),
     DELETE_ALL("delete-all"),
     FOREVER("forever"),
     SERIOUSLY("seriously"),
