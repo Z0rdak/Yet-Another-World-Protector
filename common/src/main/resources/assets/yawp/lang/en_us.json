@@ -216,7 +216,7 @@
   "cli.msg.info.region.flag.link.hover": "Show region flags for %s",
   "cli.msg.info.region.flag.link.text": "%s responsible flag(s) | %s flag(s)",
   "cli.msg.info.region.flag.no-flags": "No flags defined in region %s! %s",
-  "cli.msg.info.region.flag.not-present": "Region %s does not contain flag '%s'. %",
+  "cli.msg.info.region.flag.not-present": "Region %s does not contain flag '%s'. %s",
   "cli.msg.info.region.flag.number.hover": "%s flag(s) defined in %s",
   "cli.msg.info.region.flag.region.link.text": "%s flag(s)",
   "cli.msg.info.region.flag.remove.link.hover": "Remove flag '%s' from region %s",
