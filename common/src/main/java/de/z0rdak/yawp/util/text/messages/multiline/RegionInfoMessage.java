@@ -6,6 +6,7 @@ import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.text.Messages;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -29,8 +30,13 @@ public class RegionInfoMessage implements MultiLineMessage<IProtectedRegion> {
         this.regionInfoLines = new ArrayList<>();
     }
 
+    private final static int MAX_ENCODER_LIMIT = 30000;
+    
     public static MutableComponent buildRegionOverviewHeader(IProtectedRegion region) {
-        String nbtClipBoardText = NbtUtils.prettyPrint(region.serializeNBT(), true);
+        CompoundTag regionNbt = region.serializeNBT();
+        String nbtClipBoardText = regionNbt.sizeInBytes() > MAX_ENCODER_LIMIT 
+                ? "Sorry, region data is too big. I am working on a fix." 
+                : NbtUtils.prettyPrint(regionNbt, true);
         switch (region.getRegionType()) {
             case GLOBAL: {
                 MutableComponent dumpLinkText = Component.translatableWithFallback("cli.msg.global.overview.header.dump.link.text", "Global overview");
