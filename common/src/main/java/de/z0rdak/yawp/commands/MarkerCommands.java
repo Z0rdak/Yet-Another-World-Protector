@@ -146,7 +146,7 @@ public final class MarkerCommands {
             Player player = ctx.getSource().getPlayerOrException();
             ItemStack mainHandItem = player.getMainHandItem();
             if (!mainHandItem.equals(ItemStack.EMPTY) && StickUtil.isMarker(mainHandItem)) {
-                StickUtil.initMarkerNbt(mainHandItem, player.level().dimension());
+                StickUtil.resetMarkerNbt(mainHandItem, player.level().dimension());
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.reset", "RegionMarker successfully reset!"));
                 return 0;
             } else {

@@ -40,15 +40,15 @@ public final class StickUtil {
      * @param stick stick item
      * @param dim dimension tag to set for sticks
      */
-    public static void initStickTag(ItemStack stick, ResourceKey<Level> dim) {
+    public static void initStickTag(ItemStack stick, ResourceKey<Level> dim, boolean reset) {
         CustomData customData = stick.get(CUSTOM_DATA);
         if (customData == null) {
             stick.set(CUSTOM_DATA, CustomData.EMPTY);
         }
         customData = stick.get(CUSTOM_DATA);
-        if (customData != null) {     
+        if (customData != null) {
             CompoundTag customDataTag = customData.copyTag();
-            if (!customDataTag.contains(ItemNbtKeys.STICK)) {
+            if (!customDataTag.contains(ItemNbtKeys.STICK) || reset) {
                 CompoundTag compoundNBT = new MarkerStick(dim).serializeNBT();
                 customDataTag.put(ItemNbtKeys.STICK, compoundNBT);
                 stick.set(CUSTOM_DATA, CustomData.of(customDataTag));
@@ -58,7 +58,16 @@ public final class StickUtil {
 
     public static void initMarkerNbt(ItemStack stack, ResourceKey<Level> dim) {
         stack.setCount(1);
-        initStickTag(stack, dim);
+        initStickTag(stack, dim, false);
+        updateStickMetadata(stack);
+    }
+
+    public static void resetMarkerNbt(ItemStack stack, ResourceKey<Level> dim) {
+        initStickTag(stack, dim, true);
+        updateStickMetadata(stack);
+    }
+
+    private static void updateStickMetadata(ItemStack stack) {
         updateStickName(stack);
         stack.set(DataComponents.LORE, buildToolTip());
         stack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
