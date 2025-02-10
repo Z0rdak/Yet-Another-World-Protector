@@ -111,11 +111,13 @@ final class FlagCommands {
     }
 
     private static int promptFlagInfo(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag flag) {
+        if (flag == null) return 1;
         MultiLineMessage.send(ctx.getSource(), MultiLineMessage.flagDetail(region, flag));
         return 0;
     }
 
     private static int setFlagMuteState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag regionFlag) {
+        if (regionFlag == null) return 1;
         if (region.containsFlag(regionFlag.getName())) {
             IFlag flag = region.getFlag(regionFlag.getName());
             return setFlagMuteState(ctx, region, flag, !flag.getFlagMsg().isMuted());
@@ -128,6 +130,7 @@ final class FlagCommands {
     }
 
     private static int setFlagMuteState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag flag, boolean setMuted) {
+        if (flag == null) return 1;
         flag.getFlagMsg().mute(setMuted);
         String muteState = flag.getFlagMsg().isMuted() ? "on" : "off";
         MutableComponent infoMsg = Component.translatableWithFallback("cli.flag.msg.mute.success.text", "Set mute state of %s to: '%s'",
@@ -141,6 +144,7 @@ final class FlagCommands {
     }
 
     private static int setRegionFlagMsg(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag flag, String flagMsgStr) {
+        if (flag == null) return 1;
         String oldFlagMsg = flag.getFlagMsg().msg();
 
         FlagEvent.UpdateFlagMessageEvent editMsgEvent = new FlagEvent.UpdateFlagMessageEvent(ctx.getSource(), region, flag, flagMsgStr);
@@ -158,6 +162,7 @@ final class FlagCommands {
     }
 
     private static int setFlagState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag regionFlag) {
+        if (regionFlag == null) return 1;
         if (region.containsFlag(regionFlag.getName())) {
             IFlag flag = region.getFlag(regionFlag.getName());
             if (flag.getState() == FlagState.ALLOWED || flag.getState() == FlagState.DENIED) {
@@ -176,6 +181,7 @@ final class FlagCommands {
     }
 
     private static int setFlagState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag flag, FlagState flagState) {
+        if (flag == null) return 1;
         FlagState oldState = flag.getState();
         flag.setState(flagState);
         MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), flagState.name, oldState.name);
@@ -189,6 +195,7 @@ final class FlagCommands {
     }
 
     private static int setOverride(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag regionFlag) {
+        if (regionFlag == null) return 1;
         if (region.containsFlag(regionFlag.getName())) {
             IFlag flag = region.getFlag(regionFlag.getName());
             return setOverride(ctx, region, flag, !flag.doesOverride());
@@ -201,6 +208,7 @@ final class FlagCommands {
     }
 
     private static int setOverride(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, IFlag flag, boolean override) {
+        if (flag == null) return 1;
         flag.setOverride(override);
         String overrideState = flag.doesOverride() ? "on" : "off";
         MutableComponent infoMsg = Component.translatableWithFallback("cli.flag.override.success.text", "Set flag override for %s to %s",
