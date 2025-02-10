@@ -20,6 +20,7 @@ import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.EntityStruckByLightningEvent;
 import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
 import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
+import net.neoforged.neoforge.event.entity.item.ItemExpireEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 
@@ -59,6 +60,18 @@ public class WorldFlagHandler {
                 event.getLightning().remove(Entity.RemovalReason.DISCARDED);
             });
         }
+    }
+
+    @SubscribeEvent
+    public static void onItemExpire(ItemExpireEvent event) {
+        FlagCheckEvent checkEvent = new FlagCheckEvent(event.getEntity().blockPosition(), NO_ITEM_DESPAWN, event.getEntity().level().dimension());
+        if (Services.EVENT.post(checkEvent)) {
+            return;
+        }
+
+        processCheck(checkEvent, deny -> {
+            event.setExtraLife(6000); // Reset age to avoid flag checking every tick.
+        });
     }
 
     /**
