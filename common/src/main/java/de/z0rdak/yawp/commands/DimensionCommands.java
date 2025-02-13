@@ -38,8 +38,8 @@ import java.util.*;
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.CommandUtil.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
-import static de.z0rdak.yawp.util.text.MessageSender.sendCmdFeedback;
-import static de.z0rdak.yawp.util.text.MessageSender.sendError;
+import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
+import static de.z0rdak.yawp.api.MessageSender.sendError;
 
 class DimensionCommands {
 

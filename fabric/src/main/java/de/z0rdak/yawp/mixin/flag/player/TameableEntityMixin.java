@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.ANIMAL_TAMING;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
-import static de.z0rdak.yawp.util.text.MessageSender.sendFlagMsg;
+import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 
 @Mixin(TamableAnimal.class)
 public abstract class TameableEntityMixin {

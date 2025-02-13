@@ -23,7 +23,7 @@ import javax.annotation.Nullable;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
-import static de.z0rdak.yawp.util.text.MessageSender.sendFlagMsg;
+import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 
 /**

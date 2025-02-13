@@ -44,7 +44,7 @@ import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.constants.Constants.MAX_BUILD_LIMIT;
 import static de.z0rdak.yawp.constants.Constants.MIN_BUILD_LIMIT;
 import static de.z0rdak.yawp.util.ChatLinkBuilder.*;
-import static de.z0rdak.yawp.util.text.MessageSender.sendCmdFeedback;
+import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 
 
 class RegionCommands {

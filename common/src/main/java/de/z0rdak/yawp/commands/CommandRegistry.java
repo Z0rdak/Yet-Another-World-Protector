@@ -6,7 +6,6 @@ import de.z0rdak.yawp.api.commands.CommandConstants;
 import de.z0rdak.yawp.api.permission.Permissions;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.constants.Constants;
-import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.util.text.Messages;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -17,7 +16,7 @@ import net.minecraft.network.chat.MutableComponent;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.buildHeader;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.buildHelpStartComponent;
 import static de.z0rdak.yawp.util.ChatLinkBuilder.buildWikiLink;
-import static de.z0rdak.yawp.util.text.MessageSender.sendCmdFeedback;
+import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 
 public final class CommandRegistry {
 

@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.mixin.flag;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -24,7 +25,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
-import static de.z0rdak.yawp.util.text.MessageSender.sendFlagMsg;
+import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
@@ -136,13 +137,15 @@ public abstract class LivingEntityMixin {
             target = "Lnet/minecraft/world/entity/ExperienceOrb;award(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/phys/Vec3;I)V"), cancellable = true, allow = 1)
     public void onXpDrop(CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
-        FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), XP_DROP_ALL, getDimKey(self));
-        if (Services.EVENT.post(checkEvent))
-            return;
-        processCheck(checkEvent, deny -> {
-            ci.cancel();
-        });
         if (this.attackingPlayer != null) {
+            FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), XP_DROP_ALL, getDimKey(self));
+            if (Services.EVENT.post(checkEvent))
+                return;
+            processCheck(checkEvent, deny -> {
+                ci.cancel();
+            });
+            
+            // if this entity is killed by a player, prevent xp dropping
             checkEvent = new FlagCheckEvent(self.blockPosition(), XP_DROP_PLAYER, getDimKey(self), this.attackingPlayer);
             if (Services.EVENT.post(checkEvent))
                 return;
@@ -150,21 +153,31 @@ public abstract class LivingEntityMixin {
                 sendFlagMsg(deny);
                 ci.cancel();
             });
+            
+            if (isMonster(self)) {
+                checkEvent = new FlagCheckEvent(self.blockPosition(), XP_DROP_MONSTER, getDimKey(self));
+                if (Services.EVENT.post(checkEvent))
+                    return;
+                processCheck(checkEvent, deny -> {
+                    sendFlagMsg(deny);
+                    ci.cancel();
+                });
+            } else {
+                checkEvent = new FlagCheckEvent(self.blockPosition(), XP_DROP_OTHER, getDimKey(self));
+                if (Services.EVENT.post(checkEvent))
+                    return;
+                processCheck(checkEvent, deny -> {
+                    sendFlagMsg(deny);
+                    ci.cancel();
+                });
+            }
         }
-        if (isMonster(self)) {
-            checkEvent = new FlagCheckEvent(self.blockPosition(), XP_DROP_MONSTER, getDimKey(self));
+        
+        if (self instanceof Player) {
+            FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), RegionFlag.KEEP_XP, getDimKey(self));
             if (Services.EVENT.post(checkEvent))
                 return;
             processCheck(checkEvent, deny -> {
-                sendFlagMsg(deny);
-                ci.cancel();
-            });
-        } else {
-            checkEvent = new FlagCheckEvent(self.blockPosition(), XP_DROP_OTHER, getDimKey(self));
-            if (Services.EVENT.post(checkEvent))
-                return;
-            processCheck(checkEvent, deny -> {
-                sendFlagMsg(deny);
                 ci.cancel();
             });
         }
