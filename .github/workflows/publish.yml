@@ -8,10 +8,25 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # ...
-    permissions:
-      contents: write
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Setup Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: "temurin"
+          java-version: 17
+
+      - name: Make Gradle Wrapper Executable
+        if: ${{ runner.os != 'Windows' }}
+        run: chmod +x ./gradlew
+
+      - name: Build
+        run: ./gradlew clean build
+      
       - uses: Kir-Antipov/mc-publish@v3.3
         with:
           modrinth-id: py6EMmAJ
@@ -26,14 +41,14 @@ jobs:
           # github-commitish: ${{ source-branch= }}
           # github-token: ${{ secrets.GITHUB_TOKEN }}
 
-          files: |
-            *build/libs/!(*-@(dev|sources|javadoc)).jar
-            *build/libs/*-@(dev|sources|javadoc).jar
+          #files: |
+          #  build/libs/!(*-@(dev|sources|javadoc)).jar
+          #  build/libs/*-@(dev|sources|javadoc).jar
           
           #name: ${{ yawp-1.21.4-0.5.5-beta5 }} // Sodium 0.3.2 for Minecraft 1.17.1
           #version: ${{ mc1.17.1-0.3.2 TODO }} 
           #version-type: ${{ beta TODO }}
-          #changelog-file: CHANGELOG.*
+          changelog-file: CHANGELOG.md
           #
           #java: |
           #  Java 21
