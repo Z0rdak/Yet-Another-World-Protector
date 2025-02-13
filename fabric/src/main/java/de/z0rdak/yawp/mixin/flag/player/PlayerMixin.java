@@ -71,27 +71,6 @@ public abstract class PlayerMixin {
         }
     }
 
-    /**
-     * TODO: add no-hunger flag enum
-     * As seen below this is already implemented. It just need to be tested
-     */
-    @Inject(method = "causeFoodExhaustion", at = @At(value = "HEAD"), cancellable = true, allow = 1)
-    public void onGainHunger(float exhaustion, CallbackInfo ci) {
-        Player player = (Player) (Object) this;
-        if (isServerSide(player)) {
-            /*
-            FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), NO_HUNGER, getEntityDim(player), player);
-            if (Services.EVENT.post(checkEvent))
-                return;
-            processCheck(checkEvent, deny -> {
-                sendFlagMsg(deny);
-                ci.cancel();
-            });          
-             */
-        }
-    }
-
-
     @Inject(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getDamageAfterArmorAbsorb(Lnet/minecraft/world/damagesource/DamageSource;F)F"), cancellable = true, allow = 1)
     public void onHurt(DamageSource source, float amount, CallbackInfo ci) {
         Player self = (Player) (Object) this;
