@@ -15,7 +15,7 @@ import net.fabricmc.fabric.api.event.EventFactory;
  */
 public final class FabricRegionEvents {
 
-    public static final Event<CreateRegion> CREATE_REGION = EventFactory.createArrayBacked(CreateRegion.class, callbacks -> (createRegionEvent) -> {
+    public static final Event<RegionEvent.Create> CREATE_REGION = EventFactory.createArrayBacked(CreateRegion.class, callbacks -> (createRegionEvent) -> {
         for (CreateRegion callback : callbacks) {
             if (!callback.createRegion(createRegionEvent)) {
                 return true;

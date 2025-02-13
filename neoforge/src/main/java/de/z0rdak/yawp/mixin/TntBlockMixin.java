@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import static de.z0rdak.yawp.core.flag.RegionFlag.IGNITE_EXPLOSIVES;
 import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
 import static de.z0rdak.yawp.handler.HandlerUtil.processCheck;
-import static de.z0rdak.yawp.util.text.MessageSender.sendFlagMsg;
+import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 
 @Mixin(TntBlock.class)
 public class TntBlockMixin {

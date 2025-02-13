@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import static de.z0rdak.yawp.core.flag.RegionFlag.SHOVEL_PATH;
 import static de.z0rdak.yawp.core.flag.RegionFlag.TOOL_SECONDARY_USE;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
-import static de.z0rdak.yawp.util.text.MessageSender.sendFlagMsg;
+import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 
 @Mixin(ShovelItem.class)
 public abstract class ShovelItemMixin {

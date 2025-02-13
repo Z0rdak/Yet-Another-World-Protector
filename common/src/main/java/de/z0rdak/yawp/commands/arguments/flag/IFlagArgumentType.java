@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 import static de.z0rdak.yawp.api.commands.CommandConstants.ADD;
 import static de.z0rdak.yawp.api.commands.CommandConstants.REMOVE;
 import static de.z0rdak.yawp.util.ChatLinkBuilder.buildRegionInfoLink;
-import static de.z0rdak.yawp.util.text.MessageSender.sendCmdFeedback;
+import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 
 public class IFlagArgumentType implements ArgumentType<String> {
 
