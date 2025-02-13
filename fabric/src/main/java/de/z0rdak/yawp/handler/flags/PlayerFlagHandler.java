@@ -2,11 +2,9 @@ package de.z0rdak.yawp.handler.flags;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.config.server.FlagConfig;
-import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.platform.Services;
-import de.z0rdak.yawp.util.text.MessageSender;
-import net.fabricmc.fabric.api.entity.event.v1.EntityElytraEvents;
+import de.z0rdak.yawp.api.MessageSender;
 import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
@@ -36,9 +34,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
-import java.util.Stack;
 
-import static de.z0rdak.yawp.config.server.LoggingConfig.FLAG_LOGGER;
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 

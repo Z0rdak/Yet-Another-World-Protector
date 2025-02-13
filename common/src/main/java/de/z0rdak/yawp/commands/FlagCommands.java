@@ -33,7 +33,7 @@ import java.util.function.Function;
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.ChatLinkBuilder.*;
-import static de.z0rdak.yawp.util.text.MessageSender.sendCmdFeedback;
+import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 
 final class FlagCommands {
 

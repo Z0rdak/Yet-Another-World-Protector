@@ -18,7 +18,6 @@ import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.data.region.RegionDataManager;
-import de.z0rdak.yawp.platform.Services;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
@@ -33,7 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static de.z0rdak.yawp.api.commands.CommandConstants.FLAG;
-import static de.z0rdak.yawp.util.text.MessageSender.sendCmdFeedback;
+import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 
 public class RegionArgumentType implements ArgumentType<String> {
 

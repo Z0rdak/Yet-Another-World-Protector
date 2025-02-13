@@ -49,8 +49,8 @@ import java.util.stream.Collectors;
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
-import static de.z0rdak.yawp.util.text.MessageSender.sendCmdFeedback;
-import static de.z0rdak.yawp.util.text.MessageSender.sendError;
+import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
+import static de.z0rdak.yawp.api.MessageSender.sendError;
 import static net.minecraft.ChatFormatting.RED;
 
 public class CommandUtil {

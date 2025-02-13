@@ -3,7 +3,6 @@ package de.z0rdak.yawp.mixin;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -17,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.NO_SIGN_EDIT;
 import static de.z0rdak.yawp.handler.HandlerUtil.processCheck;
-import static de.z0rdak.yawp.util.text.MessageSender.sendFlagMsg;
+import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 
 @Mixin(SignBlock.class)
 public class SignBlockMixin {

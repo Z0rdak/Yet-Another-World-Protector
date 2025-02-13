@@ -9,7 +9,7 @@ import de.z0rdak.yawp.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.handler.HandlerUtil;
 import de.z0rdak.yawp.platform.Services;
-import de.z0rdak.yawp.util.text.MessageSender;
+import de.z0rdak.yawp.api.MessageSender;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -67,7 +67,7 @@ import java.util.function.Consumer;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
-import static de.z0rdak.yawp.util.text.MessageSender.sendFlagMsg;
+import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 
 /**

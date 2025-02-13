@@ -11,7 +11,7 @@ import net.minecraft.network.chat.Component;
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.ChatLinkBuilder.buildRegionInfoLink;
-import static de.z0rdak.yawp.util.text.MessageSender.sendCmdFeedback;
+import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 
 public class GlobalCommands {
 
