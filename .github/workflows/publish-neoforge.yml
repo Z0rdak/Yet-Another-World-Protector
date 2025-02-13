@@ -1,4 +1,4 @@
-name: Publish Mod
+name: Publish NeoForge Mod
 
 on: [ workflow_dispatch ]
 

@@ -1,4 +1,4 @@
-name: Publish Mod
+name: Publish Forge Mod
 
 on: [ workflow_dispatch ]
 

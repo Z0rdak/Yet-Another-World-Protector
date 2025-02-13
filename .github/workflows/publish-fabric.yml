@@ -1,4 +1,4 @@
-name: Publish Mod
+name: Publish Fabric Mod
 
 on: [ workflow_dispatch ]
 
