@@ -28,7 +28,7 @@ public class FlagBuilder {
         return new BooleanFlag(this.flag, this.state, this.msg, this.override);
     }
 
-    public FlagBuilder deactivated(FlagState state) {
+    public FlagBuilder deactivated() {
         return this.withState(FlagState.DISABLED);
     }
 

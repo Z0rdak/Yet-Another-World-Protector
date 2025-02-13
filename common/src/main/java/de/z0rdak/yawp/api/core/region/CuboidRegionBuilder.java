@@ -7,6 +7,10 @@ public class CuboidRegionBuilder extends LocalRegionBuilder<CuboidRegion> {
 
     private CuboidArea cuboidArea;
 
+    public CuboidRegionBuilder(String name) {
+        super(name);
+    }
+    
     public CuboidRegionBuilder setArea(CuboidArea area) {
         this.cuboidArea = area;
         return this;

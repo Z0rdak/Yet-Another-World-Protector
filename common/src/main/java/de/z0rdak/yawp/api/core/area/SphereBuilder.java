@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.api.core.area;
 
+import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.area.SphereArea;
 import net.minecraft.core.BlockPos;
@@ -48,7 +49,7 @@ public class SphereBuilder implements AreaBuilder {
     }
 
     @Override
-    public IMarkableArea build() {
+    public SphereArea build() {
         if (this.center == null)
             throw new IllegalArgumentException("No center specified");
         return new SphereArea(this.center, this.radius);

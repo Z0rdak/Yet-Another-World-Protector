@@ -41,7 +41,7 @@ public abstract class LocalRegionBuilder<T extends IMarkableRegion> {
         Permissions.GROUP_LIST.forEach(group -> this.groups.put(group, new PlayerContainer(group)));
     }
 
-    public LocalRegionBuilder<T> rename(String name) {
+    public LocalRegionBuilder<T> withName(String name) {
         this.name = name;
         return this;
     }
