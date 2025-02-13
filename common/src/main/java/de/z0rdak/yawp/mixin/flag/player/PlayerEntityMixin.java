@@ -31,7 +31,7 @@ public abstract class PlayerEntityMixin {
     }
 
     @Inject(method = "dropEquipment", at = @At(value = "HEAD"), allow = 1, cancellable = true)
-    void onDropEquipment(ServerLevel level, CallbackInfo ci) {
+    void onDropEquipment(CallbackInfo ci) {
         Player self = (Player) (Object) this;
         if (isServerSide(self.level())) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), RegionFlag.KEEP_INV, getDimKey(self));
