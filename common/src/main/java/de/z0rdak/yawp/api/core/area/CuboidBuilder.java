@@ -24,13 +24,13 @@ public class CuboidBuilder implements AreaBuilder {
         return this.area(pos, pos);
     }
 
-    protected CuboidBuilder around(BlockPos center, int offsetX, int offsetY, int offsetZ) {
+    public CuboidBuilder around(BlockPos center, int offsetX, int offsetY, int offsetZ) {
         this.pos1 = center.offset(-offsetX, -offsetY, -offsetZ);
         this.pos2 = center.offset(offsetX, offsetY, offsetZ);
         return this;
     }
 
-    protected CuboidBuilder startingAt(BlockPos corner, int widthX, int heightY, int depthZ) {
+    public CuboidBuilder startingAt(BlockPos corner, int widthX, int heightY, int depthZ) {
         this.pos1 = corner;
         this.pos2 = corner.offset(widthX, heightY, depthZ);
         return this;
@@ -43,7 +43,7 @@ public class CuboidBuilder implements AreaBuilder {
     }
 
     @Override
-    public IMarkableArea build() {
+    public CuboidArea build() {
         return new CuboidArea(pos1, pos2);
     }
 
