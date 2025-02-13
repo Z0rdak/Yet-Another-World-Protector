@@ -48,7 +48,7 @@ jobs:
           #name: ${{ yawp-1.21.4-0.5.5-beta5 }} // Sodium 0.3.2 for Minecraft 1.17.1
           #version: ${{ mc1.17.1-0.3.2 TODO }} 
           #version-type: ${{ beta TODO }}
-          changelog-file: CHANGELOG.md
+          #changelog-file: CHANGELOG.md
           #
           #java: |
           #  Java 21
