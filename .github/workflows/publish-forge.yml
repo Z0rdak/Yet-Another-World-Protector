@@ -24,8 +24,8 @@ jobs:
         if: ${{ runner.os != 'Windows' }}
         run: chmod +x ./gradlew
 
-      - name: Build
-        run: ./gradlew clean build
+      - name: Build Forge
+        run: ./gradlew :forge:clean :forge:build
       
       - uses: Kir-Antipov/mc-publish@v3.3
         with:
@@ -41,9 +41,9 @@ jobs:
           # github-commitish: ${{ source-branch= }}
           # github-token: ${{ secrets.GITHUB_TOKEN }}
 
-          #files: |
-          #  build/libs/!(*-@(dev|sources|javadoc)).jar
-          #  build/libs/*-@(dev|sources|javadoc).jar
+          files: |
+            forge/build/libs/!(*-@(dev|sources|javadoc)).jar
+            forge/build/libs/*-@(dev|sources|javadoc).jar
           
           #name: ${{ yawp-1.21.4-0.5.5-beta5 }} // Sodium 0.3.2 for Minecraft 1.17.1
           #version: ${{ mc1.17.1-0.3.2 TODO }} 
