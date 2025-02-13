@@ -26,10 +26,10 @@ jobs:
           # github-commitish: ${{ source-branch= }}
           # github-token: ${{ secrets.GITHUB_TOKEN }}
 
-          #files: |
-          #  build/libs/!(*-@(dev|sources|javadoc)).jar
-          #  build/libs/*-@(dev|sources|javadoc).jar
-          #
+          files: |
+            *build/libs/!(*-@(dev|sources|javadoc)).jar
+            *build/libs/*-@(dev|sources|javadoc).jar
+          
           #name: ${{ yawp-1.21.4-0.5.5-beta5 }} // Sodium 0.3.2 for Minecraft 1.17.1
           #version: ${{ mc1.17.1-0.3.2 TODO }} 
           #version-type: ${{ beta TODO }}
