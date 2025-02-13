@@ -7,6 +7,7 @@ import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Player;
 
@@ -18,6 +19,22 @@ public class MessageSender {
 
     public static void sendCmdFeedback(CommandSourceStack src, MutableComponent text) {
         src.sendSystemMessage(text);
+    }
+
+    public static void message(Player player, MutableComponent msg) {
+        player.displayClientMessage(msg, false);
+    }
+
+    public static void message(Player player, String msg) {
+        player.displayClientMessage(Component.literal(msg), false);
+    }
+
+    public static void overLayMessage(Player player, String msg) {
+        player.displayClientMessage(Component.literal(msg), true);
+    }
+
+    public static void overLayMessage(Player player, MutableComponent msg) {
+        player.displayClientMessage(msg, true);
     }
 
     public static void sendError(CommandSourceStack src, MutableComponent text) {
