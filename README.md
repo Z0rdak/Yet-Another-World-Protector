@@ -1,5 +1,12 @@
 # Yet Another World Protector
 
+[![](http://cf.way2muchnoise.eu/full_663276.svg)![](http://cf.way2muchnoise.eu/versions/663276.svg)](https://www.curseforge.com/minecraft/mc-mods/yawp)
+
+[![](https://img.shields.io/modrinth/dt/py6EMmAJ?logo=modrinth&label=Modrinth)![](https://img.shields.io/modrinth/game-versions/py6EMmAJ?logo=modrinth&label=Latest%20for)](https://modrinth.com/mod/yawp)
+
+[![Discord](https://img.shields.io/discord/1010986742905585759?color=0a48c4&label=discord)](https://discord.gg/d7hArKCUtm)
+
+
 Yet Another World Protector (YAWP) is _the_ admin tool to protect your minecraft server (dedicated or LAN as well as single-player!).
 
 YAWP designed to be used on dedicated servers, but can also be used in single player worlds and worlds opened to LAN.
@@ -14,18 +21,33 @@ the [WorldGuard](https://dev.bukkit.org/projects/worldguard) plugin.
 
 ## Supported Versions
 
-This mod is available for Minecraft versions 1.16.5+ for (Neo-) Forge and Fabric.
-
-Starting with Minecraft **1.20.4**, YAWP will no longer be available for Forge and adapt **NeoForge** instead.
+This mod is available for Minecraft versions 1.16.5+ for (Neo-) Forge and Fabric. Starting with Minecraft **1.20.4**, YAWP will also adapt **NeoForge**.
 
 For detailed [version information](https://github.com/Z0rdak/Yet-Another-World-Protector/wiki#supported-minecraftmodloader-versions) please visit the Wiki or ask at the discord server.
 
-# Links
+# YAWP API
 
-***
-| [Discord](https://discord.gg/d7hArKCUtm) | [Paypal](https://www.paypal.com/donate/?hosted_button_id=XV65M85SPMD3Y) | [Patreon](https://www.patreon.com/z0rdak) | [Github](https://github.com/Z0rdak/Yet-Another-World-Protector) | [Wiki](https://github.com/Z0rdak/Yet-Another-World-Protector/wiki) | [Issues](https://github.com/Z0rdak/Yet-Another-World-Protector/issues) | [Curseforge](https://www.curseforge.com/minecraft/mc-mods/yawp) | [Modrinth](https://modrinth.com/mod/yawp) |
-|:----------------------------------------:|:-----------------------------------------------------------------------:|:-----------------------------------------:|:---------------------------------------------------------------:|:------------------------------------------------------------------:|:----------------------------------------------------------------------:|:---------------------------------------------------------------:|:-----------------------------------------:|
-***
+Currently, YAWP uses cursemaven. To use the YAWP API, add the following snippet to your build.gradle
+```groovy
+repositories {
+    maven {
+        url "https://cursemaven.com"
+    }
+}
+
+// Note: The cursemaven site explains how to select a specific file: https://www.cursemaven.com/
+// The format is "curse.maven:yawp-663276:<fileId>"
+dependencies {    
+    //Fabric==========    
+    modImplementation "curse.maven:yawp-663276:6176022"
+    
+    //Forge==========
+    implementation fg.deobf("curse.maven:yawp-663276:6117986")
+    
+    //NeoForge
+    implementation "curse.maven:yawp-663276:6176016"
+}
+```
 
 
 # [Wiki](https://github.com/Z0rdak/Yet-Another-World-Protector/wiki) & [Discord](https://discord.gg/d7hArKCUtm)
@@ -36,10 +58,14 @@ For further help feel free to visit the [YAWP discord server](https://discord.gg
 
 # Contribution
 
-Found a bug? Or do you have an [idea for a new flag](https://github.com/Z0rdak/Yet-Another-World-Protector/issues/66) or just general suggestions for the mod?
+Please refer to [CONTRIBUTING.md](CONTRIBUTING.md) :-)
 
-Don't hesitate to propose them to me. Just hop on to our discord server! Or alternatively, open a
-new [issue](https://github.com/Z0rdak/Yet-Another-World-Protector/issues) on our GitHub page!
+# Links
+
+***
+| [Discord](https://discord.gg/d7hArKCUtm) | [Paypal](https://www.paypal.com/donate/?hosted_button_id=XV65M85SPMD3Y) | [Patreon](https://www.patreon.com/z0rdak) | [Github](https://github.com/Z0rdak/Yet-Another-World-Protector) | [Wiki](https://github.com/Z0rdak/Yet-Another-World-Protector/wiki) | [Issues](https://github.com/Z0rdak/Yet-Another-World-Protector/issues) | [Curseforge](https://www.curseforge.com/minecraft/mc-mods/yawp) | [Modrinth](https://modrinth.com/mod/yawp) |
+|:----------------------------------------:|:-----------------------------------------------------------------------:|:-----------------------------------------:|:---------------------------------------------------------------:|:------------------------------------------------------------------:|:----------------------------------------------------------------------:|:---------------------------------------------------------------:|:-----------------------------------------:|
+***
 
 # License
 
