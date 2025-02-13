@@ -7,6 +7,10 @@ public class SphereRegionBuilder extends LocalRegionBuilder<SphereRegion> {
 
     private SphereArea sphereArea;
 
+    public SphereRegionBuilder(String name) {
+        super(name);
+    }
+    
     public SphereRegionBuilder setArea(SphereArea area) {
         this.sphereArea = area;
         return this;
