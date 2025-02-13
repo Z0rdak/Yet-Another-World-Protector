@@ -56,26 +56,6 @@ public abstract class PlayerMixin {
         }
     }
 
-    /**
-     * TODO: add keep-inventory flag enum
-     * As seen below this is already implemented. It just need to be tested
-     */
-    @Inject(method = "dropEquipment", at = @At(value = "HEAD"), cancellable = true, allow = 1)
-    public void onDropInventory(CallbackInfo ci) {
-        Player player = (Player) (Object) this;
-        /*
-        if (isServerSide(player)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), KEEP_INVENTORY, getEntityDim(player), player);
-            if (Services.EVENT.post(checkEvent))
-                return;
-            processCheck(checkEvent, deny -> {
-                sendFlagMsg(deny);
-                ci.cancel();
-            });
-        }
-        */
-    }
-
     @Inject(method = "giveExperiencePoints", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onGainExperience(int experience, CallbackInfo ci) {
         Player player = (Player) (Object) this;
