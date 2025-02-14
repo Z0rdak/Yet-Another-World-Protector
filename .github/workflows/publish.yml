@@ -118,3 +118,5 @@ jobs:
           files: |
             fabric/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
             fabric/build/libs/*-@(sources|javadoc).jar
+          dependencies: |
+            forge-config-api-port(required){modrinth:ohNO6lps}{curseforge:547434}#(ignore:github)
