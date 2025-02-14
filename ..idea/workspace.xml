@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="0eed6503-2d82-4853-a425-ec969276b411" name="Changes" comment="fix fluid flag check">
+      <change beforePath="$PROJECT_DIR$/settings.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager">
+    <option name="groupingKeys">
+      <option value="directory" />
+      <option value="module" />
+    </option>
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <task path="$PROJECT_DIR$">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$/fabric">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$/forge">
+          <activation />
+        </task>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="YAWP-MultiLoader-1.20.1" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="Git.Settings">
+    <favorite-branches>
+      <branch-storage>
+        <map>
+          <entry type="REMOTE">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="origin/multi/1.20.1" />
+              </list>
+            </value>
+          </entry>
+        </map>
+      </branch-storage>
+    </favorite-branches>
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="98bbdea7da3ce8248f1d88152f07ddb616d1ff98" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Z0rdak&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:Z0rdak/Yet-Another-World-Protector.git&quot;,
+    &quot;accountId&quot;: &quot;a8872829-32f5-4d70-9f60-94a818984786&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="2r03fl631G898tI7tk7SvuONE1X" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Gradle.1.20.1 [:forge:createMcpToSrg].executor": "Run",
+    "Gradle.1.20.1:fabric [runClient].executor": "Debug",
+    "Gradle.1.20.1:fabric [runServer].executor": "Debug",
+    "Gradle.1.20.1:forge [Client].executor": "Debug",
+    "Gradle.1.20.1:forge [Server].executor": "Debug",
+    "Gradle.1.20.1:forge [build].executor": "Debug",
+    "Gradle.1.21.4-example [:forge:createMcpToSrg].executor": "Run",
+    "Gradle.C:/Users/Marce/IdeaProjects/YAWP/multi/1.21.4-example [:forge:createMcpToSrg].executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "multi/1.20.1",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/Marce/IdeaProjects/YAWP/multi/1.20.1/build.gradle",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.42922902",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RunManager" selected="Gradle.1.20.1:fabric [runClient]">
+    <configuration name="NeoForge Client (:neoforge)" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="net.neoforged.devlaunch.Main" />
+      <module name="MultiLoader-Template.neoforge.main" />
+      <option name="PROGRAM_PARAMETERS" value="@C:\\Users\\Marce\\IdeaProjects\\YAWP\\multi\\1.21.4-example\\neoforge\\build\\moddev\\clientRunProgramArgs.txt" />
+      <option name="VM_PARAMETERS" value="@C:\\Users\\Marce\\IdeaProjects\\YAWP\\multi\\1.21.4-example\\neoforge\\build\\moddev\\clientRunVmArgs.txt -Dfml.modFolders=examplemod%%C:\\Users\\Marce\\IdeaProjects\\YAWP\\multi\\1.21.4-example\\neoforge\\build\\classes\\java\\main;examplemod%%C:\\Users\\Marce\\IdeaProjects\\YAWP\\multi\\1.21.4-example\\neoforge\\build\\resources\\main" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/neoforge/run" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="NeoForge Data (:neoforge)" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="net.neoforged.devlaunch.Main" />
+      <module name="MultiLoader-Template.neoforge.main" />
+      <option name="PROGRAM_PARAMETERS" value="@C:\\Users\\Marce\\IdeaProjects\\YAWP\\multi\\1.21.4-example\\neoforge\\build\\moddev\\dataRunProgramArgs.txt" />
+      <option name="VM_PARAMETERS" value="@C:\\Users\\Marce\\IdeaProjects\\YAWP\\multi\\1.21.4-example\\neoforge\\build\\moddev\\dataRunVmArgs.txt -Dfml.modFolders=examplemod%%C:\\Users\\Marce\\IdeaProjects\\YAWP\\multi\\1.21.4-example\\neoforge\\build\\classes\\java\\main;examplemod%%C:\\Users\\Marce\\IdeaProjects\\YAWP\\multi\\1.21.4-example\\neoforge\\build\\resources\\main" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/neoforge/run" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="NeoForge Server (:neoforge)" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="net.neoforged.devlaunch.Main" />
+      <module name="MultiLoader-Template.neoforge.main" />
+      <option name="PROGRAM_PARAMETERS" value="@C:\\Users\\Marce\\IdeaProjects\\YAWP\\multi\\1.21.4-example\\neoforge\\build\\moddev\\serverRunProgramArgs.txt" />
+      <option name="VM_PARAMETERS" value="@C:\\Users\\Marce\\IdeaProjects\\YAWP\\multi\\1.21.4-example\\neoforge\\build\\moddev\\serverRunVmArgs.txt -Dfml.modFolders=examplemod%%C:\\Users\\Marce\\IdeaProjects\\YAWP\\multi\\1.21.4-example\\neoforge\\build\\classes\\java\\main;examplemod%%C:\\Users\\Marce\\IdeaProjects\\YAWP\\multi\\1.21.4-example\\neoforge\\build\\resources\\main" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/neoforge/run" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="1.20.1:fabric [runClient]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/fabric" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="runClient" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="1.20.1:fabric [runServer]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/fabric" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="runServer" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="1.20.1:forge [Client]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/forge" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="Client" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="1.20.1:forge [Server]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/forge" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="Server" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="1.20.1:forge [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/forge" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="build" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="JetRunConfigurationType">
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <option name="filePath" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Gradle.1.20.1:fabric [runClient]" />
+        <item itemvalue="Gradle.1.20.1:forge [Server]" />
+        <item itemvalue="Gradle.1.20.1:forge [Client]" />
+        <item itemvalue="Gradle.1.20.1:forge [build]" />
+        <item itemvalue="Gradle.1.20.1:fabric [runServer]" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-fdfe4dae3a2d-intellij.indexing.shared.core-IU-243.22562.218" />
+        <option value="bundled-js-predefined-d6986cc7102b-deb605915726-JavaScript-IU-243.22562.218" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="0eed6503-2d82-4853-a425-ec969276b411" name="Changes" comment="" />
+      <created>1735682270952</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1735682270952</updated>
+      <workItem from="1735682272040" duration="3120000" />
+      <workItem from="1735687668654" duration="1000" />
+      <workItem from="1736156142210" duration="1278000" />
+      <workItem from="1736158127158" duration="40000" />
+      <workItem from="1736158179696" duration="8981000" />
+      <workItem from="1736355241598" duration="1093000" />
+      <workItem from="1736404688595" duration="2673000" />
+      <workItem from="1736703442718" duration="4398000" />
+      <workItem from="1736800410254" duration="5154000" />
+      <workItem from="1736932456831" duration="1601000" />
+      <workItem from="1736934086215" duration="35000" />
+    </task>
+    <task id="LOCAL-00001" summary="update SubstituteTextContent - deprecated it since it can't be used until YAWP is also used client sided">
+      <option name="closed" value="true" />
+      <created>1736285607169</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1736285607169</updated>
+    </task>
+    <task id="LOCAL-00002" summary="add null check">
+      <option name="closed" value="true" />
+      <created>1736285620831</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1736285620831</updated>
+    </task>
+    <task id="LOCAL-00003" summary="update fabric and forge mod meta info">
+      <option name="closed" value="true" />
+      <created>1736287825047</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1736287825047</updated>
+    </task>
+    <task id="LOCAL-00004" summary="update gradle">
+      <option name="closed" value="true" />
+      <created>1736288009132</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1736288009132</updated>
+    </task>
+    <task id="LOCAL-00005" summary="revert config type back to server because it causes problems with forge loading order">
+      <option name="closed" value="true" />
+      <created>1736366027829</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1736366027829</updated>
+    </task>
+    <task id="LOCAL-00006" summary="move marker creation and marking handler to common">
+      <option name="closed" value="true" />
+      <created>1736718016560</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1736718016560</updated>
+    </task>
+    <task id="LOCAL-00007" summary="move config as service to common">
+      <option name="closed" value="true" />
+      <created>1736800595765</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1736800595765</updated>
+    </task>
+    <task id="LOCAL-00008" summary="add worldedit repo and deps, update platform helper">
+      <option name="closed" value="true" />
+      <created>1736800744731</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1736800744731</updated>
+    </task>
+    <task id="LOCAL-00009" summary="remove cherry pick files which dont belong here">
+      <option name="closed" value="true" />
+      <created>1736801614301</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1736801614301</updated>
+    </task>
+    <task id="LOCAL-00010" summary="readd posting of flagchecks">
+      <option name="closed" value="true" />
+      <created>1736805907505</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1736805907505</updated>
+    </task>
+    <task id="LOCAL-00011" summary="fix fluid flag check">
+      <option name="closed" value="true" />
+      <created>1736933392588</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1736933392588</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="update SubstituteTextContent - deprecated it since it can't be used until YAWP is also used client sided" />
+    <MESSAGE value="add null check" />
+    <MESSAGE value="update fabric and forge mod meta info" />
+    <MESSAGE value="update gradle" />
+    <MESSAGE value="revert config type back to server because it causes problems with forge loading order" />
+    <MESSAGE value="move marker creation and marking handlers to common" />
+    <MESSAGE value="move marker creation and marking handler to common" />
+    <MESSAGE value="move config as service to common" />
+    <MESSAGE value="add worldedit repo and deps, update platform helper" />
+    <MESSAGE value="remove cherry pick files which dont belong here" />
+    <MESSAGE value="readd posting of flagchecks" />
+    <MESSAGE value="fix fluid flag check" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix fluid flag check" />
+  </component>
+</project>

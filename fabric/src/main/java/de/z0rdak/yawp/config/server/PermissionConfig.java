@@ -27,9 +27,6 @@ public class PermissionConfig {
     private static final ForgeConfigSpec.ConfigValue<Integer> REQUIRED_OP_LEVEL;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> PLAYERS_WITH_PERMISSION;
     private static final ForgeConfigSpec.ConfigValue<Boolean> COMMAND_BLOCK_EXECUTION;
-    private static final ForgeConfigSpec.ConfigValue<Integer> WP_COMMAND_ALTERNATIVE;
-    private static final String[] WP_CMDS = new String[]{"wp", "yawp"};
-    public static String BASE_CMD = "wp";
 
     static {
         final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
@@ -38,10 +35,6 @@ public class PermissionConfig {
 
         COMMAND_BLOCK_EXECUTION = BUILDER.comment("Permission for command blocks to execute mod commands")
                 .define("command_block_execution", true);
-
-        WP_COMMAND_ALTERNATIVE = BUILDER.comment("Default command alternative used in quick commands in chat.\nThis is only important if another mod uses the /wp command (like Journey Map). Defaults to 0.\n" +
-                        " 0 -> /wp\n 1 -> /yawp")
-                .defineInRange("wp_root_command", 0, 0, 1);
 
         REQUIRED_OP_LEVEL = BUILDER.comment("Minimum OP level to use mod commands.\n 0 -> everyone can use the commands.\n 1-4 -> OP with specific level can use the commands.\n 5 -> no operator can use the commands.\n Defaults to 5.")
                 .defineInRange("command_op_level", 4, 0, 5);
@@ -86,19 +79,6 @@ public class PermissionConfig {
     public static boolean isCmdEnabledForNonOp() {
         return !DISABLE_CMD_FOR_NON_OP.get();
     }
-
-    public static String getBaseCmdAlt() {
-        return WP_CMDS[1];
-    }
-
-    public static String getBaseCmd() {
-        return WP_CMDS[WP_COMMAND_ALTERNATIVE.get()];
-    }
-
-    public static int getCmdAlt() {
-        return WP_COMMAND_ALTERNATIVE.get();
-    }
-
 
     public static boolean allowRegionTp() {
         return ENABLE_REGION_TP.get();

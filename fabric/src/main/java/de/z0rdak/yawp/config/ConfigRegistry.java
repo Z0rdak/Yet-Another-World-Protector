@@ -44,19 +44,11 @@ public final class ConfigRegistry {
         if (modConfig.getModId().equals(MOD_ID)) {
             switch (modConfig.getFileName()) {
                 case PermissionConfig.CONFIG_NAME: {
-                    PermissionConfig.BASE_CMD = PermissionConfig.getBaseCmd();
-
-                    if (Services.PLATFORM.isModLoaded("journeymap")) {
-                        PermissionConfig.BASE_CMD = PermissionConfig.getBaseCmdAlt();
-                        CONFIG_LOGGER.info("Detected JourneyMap to be loaded beside YAWP.");
-                    }
-                    CONFIG_LOGGER.info("Setting YAWP base command to '/{}'", PermissionConfig.BASE_CMD);
                     int numOfUuidsWithPermission = PermissionConfig.UUIDsWithPermission().size();
                     String uuidsWithPermission = (numOfUuidsWithPermission > 0
                             ? ": " + String.join(", ", PermissionConfig.UUIDsWithPermission())
                             : "");
                     CONFIG_LOGGER.info("{} UUID(s) with permission read from config{}", numOfUuidsWithPermission, uuidsWithPermission);
-                    CommandRegistry.register(PermissionConfig.BASE_CMD);
                 }
                 break;
                 case RegionConfig.CONFIG_NAME: {

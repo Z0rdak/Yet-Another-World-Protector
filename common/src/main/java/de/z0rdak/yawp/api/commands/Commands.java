@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.api.commands;
 
+import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
@@ -17,10 +18,9 @@ public final class Commands {
     }
 
     public static String buildCommandStr(String... cmdTokens) {
-        
-        String preamble = "/" + Services.PERMISSION_CONFIG.getBaseCmd();
+        String baseCmd = "/" + Constants.MOD_ID;
         String cmdStr = String.join(" ", cmdTokens);
-        return preamble + " " + cmdStr;
+        return baseCmd + " " + cmdStr;
     }
 
     public static String buildRegionBaseCmd(IProtectedRegion region) {

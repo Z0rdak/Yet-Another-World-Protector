@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/YAWP-MultiLoader-1.20.1.common.main.iml" filepath="$PROJECT_DIR$/.idea/modules/common/YAWP-MultiLoader-1.20.1.common.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/YAWP-MultiLoader-1.20.1.common.test.iml" filepath="$PROJECT_DIR$/.idea/modules/common/YAWP-MultiLoader-1.20.1.common.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/fabric/YAWP-MultiLoader-1.20.1.fabric.main.iml" filepath="$PROJECT_DIR$/.idea/modules/fabric/YAWP-MultiLoader-1.20.1.fabric.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/fabric/YAWP-MultiLoader-1.20.1.fabric.test.iml" filepath="$PROJECT_DIR$/.idea/modules/fabric/YAWP-MultiLoader-1.20.1.fabric.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/forge/YAWP-MultiLoader-1.20.1.forge.main.iml" filepath="$PROJECT_DIR$/.idea/modules/forge/YAWP-MultiLoader-1.20.1.forge.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/forge/YAWP-MultiLoader-1.20.1.forge.test.iml" filepath="$PROJECT_DIR$/.idea/modules/forge/YAWP-MultiLoader-1.20.1.forge.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/de.z0rdak.yawp.YAWP-1.20.1-multiloader.iml" filepath="$PROJECT_DIR$/.idea/modules/de.z0rdak.yawp.YAWP-1.20.1-multiloader.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/de.z0rdak.yawp.YAWP-1.20.1-multiloader.common.iml" filepath="$PROJECT_DIR$/.idea/modules/common/de.z0rdak.yawp.YAWP-1.20.1-multiloader.common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/de.z0rdak.yawp.YAWP-1.20.1-multiloader.common.main.iml" filepath="$PROJECT_DIR$/.idea/modules/common/de.z0rdak.yawp.YAWP-1.20.1-multiloader.common.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/de.z0rdak.yawp.YAWP-1.20.1-multiloader.common.test.iml" filepath="$PROJECT_DIR$/.idea/modules/common/de.z0rdak.yawp.YAWP-1.20.1-multiloader.common.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/fabric/de.z0rdak.yawp.YAWP-1.20.1-multiloader.fabric.iml" filepath="$PROJECT_DIR$/.idea/modules/fabric/de.z0rdak.yawp.YAWP-1.20.1-multiloader.fabric.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/fabric/de.z0rdak.yawp.YAWP-1.20.1-multiloader.fabric.main.iml" filepath="$PROJECT_DIR$/.idea/modules/fabric/de.z0rdak.yawp.YAWP-1.20.1-multiloader.fabric.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/fabric/de.z0rdak.yawp.YAWP-1.20.1-multiloader.fabric.test.iml" filepath="$PROJECT_DIR$/.idea/modules/fabric/de.z0rdak.yawp.YAWP-1.20.1-multiloader.fabric.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/forge/de.z0rdak.yawp.YAWP-1.20.1-multiloader.forge.iml" filepath="$PROJECT_DIR$/.idea/modules/forge/de.z0rdak.yawp.YAWP-1.20.1-multiloader.forge.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/forge/de.z0rdak.yawp.YAWP-1.20.1-multiloader.forge.test.iml" filepath="$PROJECT_DIR$/.idea/modules/forge/de.z0rdak.yawp.YAWP-1.20.1-multiloader.forge.test.iml" />
+    </modules>
+  </component>
+</project>

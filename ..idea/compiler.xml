@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Gradle Imported" enabled="true">
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.spongepowered/mixin/0.8.5-SNAPSHOT/98b6c982030c7e9d79d3e78b31d86b285f292146/mixin-0.8.5-SNAPSHOT-processor.jar" />
+        </processorPath>
+        <module name="YAWP-MultiLoader-1.20.1.forge.main" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="YAWP-1.20.1-multiloader.buildSrc" target="17" />
+      <module name="YAWP-1.20.1-multiloader.buildSrc.main" target="17" />
+      <module name="YAWP-1.20.1-multiloader.buildSrc.test" target="17" />
+      <module name="YAWP-1.20.1-multiloader.common" target="17" />
+      <module name="YAWP-1.20.1-multiloader.common.main" target="17" />
+      <module name="YAWP-1.20.1-multiloader.common.test" target="17" />
+      <module name="YAWP-1.20.1-multiloader.fabric" target="17" />
+      <module name="YAWP-1.20.1-multiloader.fabric.main" target="17" />
+      <module name="YAWP-1.20.1-multiloader.fabric.test" target="17" />
+      <module name="YAWP-1.20.1-multiloader.forge" target="17" />
+      <module name="YAWP-1.20.1-multiloader.forge.main" target="17" />
+      <module name="YAWP-1.20.1-multiloader.forge.test" target="17" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

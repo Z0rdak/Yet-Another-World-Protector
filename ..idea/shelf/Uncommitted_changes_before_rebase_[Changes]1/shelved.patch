@@ -1,0 +1,129 @@
+Index: fabric/build.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>plugins {\r\n    id 'java'\r\n    id 'idea'\r\n    id 'maven-publish'\r\n    id 'fabric-loom'\r\n}\r\nbase {\r\n    archivesName = \"${mod_id}-${minecraft_version}-fabric\"\r\n}\r\ndependencies {\r\n    minecraft \"com.mojang:minecraft:${minecraft_version}\"\r\n    mappings loom.officialMojangMappings()\r\n    modImplementation \"net.fabricmc:fabric-loader:${fabric_loader_version}\"\r\n    modImplementation \"net.fabricmc.fabric-api:fabric-api:${fabric_version}\"\r\n    implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'\r\n    implementation project(\":common\")\r\n    // all required ids for this version are found here: https://www.curseforge.com/minecraft/mc-mods/forge-config-api-port-fabric/files/3671141\r\n    // 1.20.1\r\n    // modImplementation \"curse.maven:forge-config-api-port-fabric-547434:4583000\"\r\n    modImplementation \"fuzs.forgeconfigapiport:forgeconfigapiport-fabric:8.0.0\"\r\n}\r\n\r\nloom {\r\n    if (project(\":common\").file(\"src/main/resources/${mod_id}.accesswidener\").exists()) {\r\n        accessWidenerPath.set(project(\":common\").file(\"src/main/resources/${mod_id}.accesswidener\"))\r\n    }\r\n    mixin {\r\n        defaultRefmapName.set(\"${mod_id}.refmap.json\")\r\n    }\r\n    runs {\r\n        client {\r\n            client()\r\n            setConfigName(\"Fabric Client\")\r\n            ideConfigGenerated(true)\r\n            runDir(\"run\")\r\n        }\r\n        server {\r\n            server()\r\n            setConfigName(\"Fabric Server\")\r\n            ideConfigGenerated(true)\r\n            runDir(\"run\")\r\n        }\r\n    }\r\n}\r\n\r\ntasks.withType(JavaCompile).configureEach {\r\n    source(project(\":common\").sourceSets.main.allSource)\r\n}\r\ntasks.withType(Javadoc).configureEach {\r\n    source(project(\":common\").sourceSets.main.allJava)\r\n}\r\ntasks.named(\"sourcesJar\", Jar) {\r\n    from(project(\":common\").sourceSets.main.allSource)\r\n}\r\n\r\nprocessResources {\r\n    from project(\":common\").sourceSets.main.resources\r\n}\r\n\r\npublishing {\r\n    publications {\r\n        mavenJava(MavenPublication) {\r\n            artifactId base.archivesName.get()\r\n            from components.java\r\n        }\r\n    }\r\n    repositories {\r\n        maven {\r\n            url \"file://\" + System.getenv(\"local_maven\")\r\n        }\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/fabric/build.gradle b/fabric/build.gradle
+--- a/fabric/build.gradle	(revision 105aae8296ccf2ba8a29c701cfd2aff65307d6e6)
++++ b/fabric/build.gradle	(date 1736801126712)
+@@ -17,7 +17,7 @@
+     // all required ids for this version are found here: https://www.curseforge.com/minecraft/mc-mods/forge-config-api-port-fabric/files/3671141
+     // 1.20.1
+     // modImplementation "curse.maven:forge-config-api-port-fabric-547434:4583000"
+-    modImplementation "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:8.0.0"
++    modImplementation "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:8.0.1"
+ }
+ 
+ loom {
+Index: common/build.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>/*\r\nVanillaGradle likes to push breaking changes without updating their version\r\nIf this happens in the future, try update your gradle version on the project\r\nIf a gradle update doesn't fix the issue, you can pin the VanillaGradle version to a specific version that was working before.\r\nYou can find the versions here https://repo.spongepowered.org/#browse/browse:maven-snapshots:org%2Fspongepowered%2Fvanillagradle\r\nand you can pin them with the following code:\r\n\r\nbuildscript {\r\n    dependencies.add 'classpath', 'org.spongepowered:vanillagradle:0.2.1-20240507.024226-82'\r\n}\r\n\r\nplugins {\r\n    id 'org.spongepowered.gradle.vanilla' version '0.2.1-20240507.024226-82'\r\n}\r\n*/\r\n\r\nplugins {\r\n    id 'idea'\r\n    id 'java'\r\n    id 'maven-publish'\r\n    id 'org.spongepowered.gradle.vanilla'\r\n}\r\nbase {\r\n    archivesName = \"${mod_id}-${minecraft_version}-common\"\r\n}\r\nminecraft {\r\n    version(minecraft_version)\r\n    if(file(\"src/main/resources/${mod_id}.accesswidener\").exists()){\r\n        accessWideners(file(\"src/main/resources/${mod_id}.accesswidener\"))\r\n    }\r\n}\r\n\r\ndependencies {\r\n     compileOnly group:'org.spongepowered', name:'mixin', version:'0.8.5'\r\n     implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'\r\n  \r\n}\r\n\r\npublishing {\r\n    publications {\r\n        mavenJava(MavenPublication) {\r\n            artifactId base.archivesName.get()\r\n            from components.java\r\n        }\r\n    }\r\n    repositories {\r\n        maven {\r\n            url \"file://\" + System.getenv(\"local_maven\")\r\n        }\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/common/build.gradle b/common/build.gradle
+--- a/common/build.gradle	(revision 105aae8296ccf2ba8a29c701cfd2aff65307d6e6)
++++ b/common/build.gradle	(date 1736801989402)
+@@ -33,7 +33,13 @@
+ dependencies {
+      compileOnly group:'org.spongepowered', name:'mixin', version:'0.8.5'
+      implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
+-  
++    
++    implementation 'com.electronwill.night-config:toml:3.8.1'
++    implementation 'com.electronwill.night-config:json:3.8.1'
++    implementation 'com.electronwill.night-config:core:3.8.1'
++
++    // Forge's config system
++    implementation "fuzs.forgeconfigapiport:forgeconfigapiport-common:8.0.1"
+ }
+ 
+ publishing {
+Index: build.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>plugins {\r\n    id 'fabric-loom' version '1.6-SNAPSHOT' apply(false)\r\n    id 'net.minecraftforge.gradle' version '[6.0,6.2)' apply(false)\r\n    id 'org.spongepowered.gradle.vanilla' version '0.2.1-SNAPSHOT' apply(false)\r\n    id(\"org.spongepowered.mixin\") version \"0.7-SNAPSHOT\" apply(false)\r\n}\r\n\r\nsubprojects {\r\n    apply plugin: 'java'\r\n\r\n    java.toolchain.languageVersion = JavaLanguageVersion.of(17)\r\n    java.withSourcesJar()\r\n    java.withJavadocJar()\r\n        \r\n    jar {\r\n        from(rootProject.file(\"LICENSE\")) {\r\n            rename { \"${it}\" }\r\n        }\r\n        from(rootProject.file(\"CREDITS\")) {\r\n            rename { \"${it}\" }\r\n        }\r\n        from(rootProject.file(\"README.md\")) {\r\n            rename { \"${it}\" }\r\n        }\r\n        from(rootProject.file(\"changelog.md\")) {\r\n            rename { \"${it}\" }\r\n        }\r\n        manifest {\r\n            attributes([\r\n                'Specification-Title'     : mod_name,\r\n                'Specification-Vendor'    : mod_author,\r\n                'Specification-Version'   : project.jar.archiveVersion,\r\n                'Implementation-Title'    : project.name,\r\n                'Implementation-Version'  : project.jar.archiveVersion,\r\n                'Implementation-Vendor'   : mod_author,\r\n                'Implementation-Timestamp': new Date().format(\"yyyy-MM-dd'T'HH:mm:ssZ\"),\r\n                'Timestamp'               : System.currentTimeMillis(),\r\n                'Built-On-Java'           : \"${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})\",\r\n                'Built-On-Minecraft'      : minecraft_version\r\n            ])\r\n        }\r\n    }\r\n\r\n    javadocJar {\r\n        from(rootProject.file(\"LICENSE\")) {\r\n            rename { \"${it}\" }\r\n        }\r\n        from(rootProject.file(\"CREDITS\")) {\r\n            rename { \"${it}\" }\r\n        }\r\n        from(rootProject.file(\"README.md\")) {\r\n            rename { \"${it}\" }\r\n        }\r\n        from(rootProject.file(\"changelog.md\")) {\r\n            rename { \"${it}\" }\r\n        }\r\n    }\r\n\r\n    sourcesJar {\r\n        from(rootProject.file(\"LICENSE\")) {\r\n            rename { \"${it}\" }\r\n        }\r\n        from(rootProject.file(\"CREDITS\")) {\r\n            rename { \"${it}\" }\r\n        }\r\n        from(rootProject.file(\"README.md\")) {\r\n            rename { \"${it}\" }\r\n        }\r\n        from(rootProject.file(\"changelog.md\")) {\r\n            rename { \"${it}\" }\r\n        }\r\n    }\r\n\r\n    repositories {\r\n        mavenCentral()\r\n        maven {\r\n            name = 'Sponge / Mixin'\r\n            url = 'https://repo.spongepowered.org/repository/maven-public/'\r\n        }\r\n        maven {\r\n            name = \"Fuzs Mod Resources\"\r\n            url = \"https://raw.githubusercontent.com/Fuzss/modresources/main/maven/\"\r\n        }\r\n    }\r\n\r\n    tasks.withType(JavaCompile).configureEach {\r\n        it.options.encoding = 'UTF-8'\r\n        it.options.getRelease().set(17)\r\n    }\r\n\r\n    processResources {\r\n        def expandProps = [\r\n                \"version\": version,\r\n                \"group\": project.group, //Else we target the task's group.\r\n                \"minecraft_version\": minecraft_version,\r\n                \"forge_version\": forge_version,\r\n                \"forge_loader_version_range\": forge_loader_version_range,\r\n                \"forge_version_range\": forge_version_range,\r\n                \"minecraft_version_range\": minecraft_version_range,\r\n                \"fabric_version\": fabric_version,\r\n                \"fabric_loader_version\": fabric_loader_version,\r\n                \"mod_name\": mod_name,\r\n                \"mod_author\": mod_author,\r\n                \"mod_id\": mod_id,\r\n                \"license\": license,\r\n                \"description\": project.description,\r\n                \"resource_pack_desc\":resource_pack_desc,\r\n                \"credits\": credits\r\n        ]\r\n\r\n        filesMatching(['pack.mcmeta', 'fabric.mod.json', 'META-INF/mods.toml', '*.mixins.json']) {\r\n            expand expandProps\r\n        }\r\n        inputs.properties(expandProps)\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/build.gradle b/build.gradle
+--- a/build.gradle	(revision 105aae8296ccf2ba8a29c701cfd2aff65307d6e6)
++++ b/build.gradle	(date 1736801853130)
+@@ -81,6 +81,10 @@
+             name = "Fuzs Mod Resources"
+             url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
+         }
++        maven {
++            name = "Curse Maven"
++            url = "https://cursemaven.com"
++        }
+     }
+ 
+     tasks.withType(JavaCompile).configureEach {
+Index: forge/src/main/java/de/z0rdak/yawp/platform/ForgePlatformHelper.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package de.z0rdak.yawp.platform;\n\nimport de.z0rdak.yawp.platform.services.IPlatformHelper;\nimport net.minecraftforge.fml.ModList;\nimport net.minecraftforge.fml.loading.FMLLoader;\n\npublic class ForgePlatformHelper implements IPlatformHelper {\n\n    @Override\n    public String getPlatformName() {\n\n        return \"Forge\";\n    }\n\n    @Override\n    public boolean isModLoaded(String modId) {\n\n        return ModList.get().isLoaded(modId);\n    }\n\n    @Override\n    public boolean isDevelopmentEnvironment() {\n\n        return !FMLLoader.isProduction();\n    }\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/forge/src/main/java/de/z0rdak/yawp/platform/ForgePlatformHelper.java b/forge/src/main/java/de/z0rdak/yawp/platform/ForgePlatformHelper.java
+--- a/forge/src/main/java/de/z0rdak/yawp/platform/ForgePlatformHelper.java	(revision 105aae8296ccf2ba8a29c701cfd2aff65307d6e6)
++++ b/forge/src/main/java/de/z0rdak/yawp/platform/ForgePlatformHelper.java	(date 1736800879978)
+@@ -18,6 +18,21 @@
+         return ModList.get().isLoaded(modId);
+     }
+ 
++    @Override
++    public boolean isWorldEditLoaded() {
++        return this.isModLoaded("worldedit");
++    }
++
++    @Override
++    public boolean isWorldEditCuiLoaded() {
++        return this.isModLoaded("worldedit-cui");
++    }
++
++    @Override
++    public boolean isJourneyMapLoaded() {
++        return this.isModLoaded("journeymap");
++    }
++
+     @Override
+     public boolean isDevelopmentEnvironment() {
+ 
+Index: fabric/src/main/java/de/z0rdak/yawp/platform/FabricPlatformHelper.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package de.z0rdak.yawp.platform;\n\nimport de.z0rdak.yawp.platform.services.IPlatformHelper;\nimport net.fabricmc.loader.api.FabricLoader;\n\npublic class FabricPlatformHelper implements IPlatformHelper {\n\n    @Override\n    public String getPlatformName() {\n        return \"Fabric\";\n    }\n\n    @Override\n    public boolean isModLoaded(String modId) {\n\n        return FabricLoader.getInstance().isModLoaded(modId);\n    }\n\n    @Override\n    public boolean isDevelopmentEnvironment() {\n\n        return FabricLoader.getInstance().isDevelopmentEnvironment();\n    }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/fabric/src/main/java/de/z0rdak/yawp/platform/FabricPlatformHelper.java b/fabric/src/main/java/de/z0rdak/yawp/platform/FabricPlatformHelper.java
+--- a/fabric/src/main/java/de/z0rdak/yawp/platform/FabricPlatformHelper.java	(revision 105aae8296ccf2ba8a29c701cfd2aff65307d6e6)
++++ b/fabric/src/main/java/de/z0rdak/yawp/platform/FabricPlatformHelper.java	(date 1736800879976)
+@@ -16,6 +16,21 @@
+         return FabricLoader.getInstance().isModLoaded(modId);
+     }
+ 
++    @Override
++    public boolean isWorldEditLoaded() {
++        return this.isModLoaded("worldedit");
++    }
++
++    @Override
++    public boolean isWorldEditCuiLoaded() {
++        return this.isModLoaded("worldedit-cui");
++    }
++
++    @Override
++    public boolean isJourneyMapLoaded() {
++        return this.isModLoaded("journeymap");
++    }
++
+     @Override
+     public boolean isDevelopmentEnvironment() {
+ 

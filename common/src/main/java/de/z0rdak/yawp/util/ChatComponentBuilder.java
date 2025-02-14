@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.util;
 
 import de.z0rdak.yawp.api.commands.CommandConstants;
+import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.area.SphereArea;
@@ -153,7 +154,7 @@ public class ChatComponentBuilder {
     public static MutableComponent buildHelpStartComponent() {
         String command = buildCommandStr(CommandConstants.GLOBAL.toString(), CommandConstants.INFO.toString());
         MutableComponent text = Component.translatableWithFallback("help.hint.link.text", "Start here");
-        MutableComponent hover = Component.translatableWithFallback("help.hint.link.hover", "Use '/%s global info' as a starting point to manage the global region", Services.PERMISSION_CONFIG.getBaseCmd());
+        MutableComponent hover = Component.translatableWithFallback("help.hint.link.hover", "Use '/%s global info' as a starting point to manage the global region", "/" + Constants.MOD_ID);
         return buildExecuteCmdComponent(text, hover, command, ClickEvent.Action.RUN_COMMAND, LINK_COLOR);
     }
 

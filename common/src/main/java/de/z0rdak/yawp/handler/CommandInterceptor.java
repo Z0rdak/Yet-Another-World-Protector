@@ -336,7 +336,7 @@ public class CommandInterceptor {
     }
 
     private static boolean hasModBaseCmd(List<String> nodeNames) {
-        return !nodeNames.isEmpty() && nodeNames.get(0) != null && nodeNames.get(0).equals(Services.PERMISSION_CONFIG.getBaseCmd());
+        return !nodeNames.isEmpty() && nodeNames.get(0) != null && nodeNames.get(0).equals(Constants.MOD_ID);
     }
 
     @Nullable

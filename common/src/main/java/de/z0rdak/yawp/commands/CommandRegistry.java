@@ -29,8 +29,8 @@ public final class CommandRegistry {
         dispatcher = cmdDispatcher;
         if (env == Commands.CommandSelection.DEDICATED || env == Commands.CommandSelection.INTEGRATED) {
             try {
-                String baseCmd = Services.PERMISSION_CONFIG.getBaseCmd();
-                CommandRegistry.register(baseCmd);                    
+                LiteralArgumentBuilder<CommandSourceStack> modCmds = buildCommands();
+                cmdDispatcher.register(modCmds);      
             }
             catch (Exception e) {
                 // Nothing to do here. Since multi project structure was introduced,
@@ -39,15 +39,8 @@ public final class CommandRegistry {
         }
     }
 
-    public static void register(String modRootCmd) {
-        if (dispatcher != null) {
-            Constants.LOGGER.info("Registering YAWP commands with root '/{}'", modRootCmd);
-            dispatcher.register(buildCommands(modRootCmd));
-        }
-    }
-
-    private static LiteralArgumentBuilder<CommandSourceStack> buildCommands(String baseCmd) {
-        return Commands.literal(baseCmd)
+    private static LiteralArgumentBuilder<CommandSourceStack> buildCommands() {
+        return Commands.literal(Constants.MOD_ID)
                 .requires(Permissions.get()::isAllowedForNonOp)
                 .executes(ctx -> promptHelp(ctx.getSource()))
                 .then(ArgumentUtil.literal(CommandConstants.HELP)
