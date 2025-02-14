@@ -84,9 +84,6 @@ jobs:
           files: |
             forge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
             forge/build/libs/*-@(sources|javadoc).jar
-          game-versions: |
-            1.20.1
-            Server
 
       - name: Publish (Fabric)
         uses: Kir-Antipov/mc-publish@v3.3
@@ -94,13 +91,10 @@ jobs:
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           modrinth-featured: true
           modrinth-unfeature-mode: subset
-          #curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
           version: 1.20.1-${{ github.ref_name }}-fabric  # should resolve to <mc-version>-<mod-version>, e.g.: 1.21.4-0.5.2-beta1
           name:  ${{ github.ref_name }} # Sodium 0.3.2 for Minecraft 1.17.1
           changelog-file: changelog.md
           files: |
             fabric/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
             fabric/build/libs/*-@(sources|javadoc).jar
-          game-versions: |
-            1.20.1
-            Server
