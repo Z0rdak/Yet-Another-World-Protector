@@ -1,10 +1,15 @@
 package de.z0rdak.yawp.mixin;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.constants.Constants;
+import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.handler.HandlerUtil;
 import de.z0rdak.yawp.platform.Services;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -46,14 +51,15 @@ public abstract class PlayerEntityMixin {
     public void onGainHunger(float exhaustion, CallbackInfo ci) {
         Player self = (Player) (Object) this;
         if (isServerSide(self)) {
-           
             FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), RegionFlag.NO_HUNGER, getDimKey(self), self);
             if (Services.EVENT.post(checkEvent))
                 return;
-            processCheck(checkEvent, 
-                    onAllow -> ci.cancel(), 
+            FlagState flagState = processCheck(checkEvent,
                     deny -> { /* player has no permission -> do nothing to apply hunger */ }
             );
+            if (flagState == FlagState.ALLOWED) {
+                ci.cancel();
+            }            
         }
     }
 
