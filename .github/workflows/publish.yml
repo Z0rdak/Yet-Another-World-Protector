@@ -29,7 +29,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: $JAVA_VERSION
+          java-version: {{$JAVA_VERSION}}
 
       - name: Get current time
         uses: srfrnk/current-time@master
@@ -87,7 +87,7 @@ jobs:
             forge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
             forge/build/libs/*-@(sources|javadoc).jar
           java: |
-            $JAVA_VERSION
+            {{$JAVA_VERSION}}
             
       - name: Publish NeoForge to Curseforge
         uses: Kir-Antipov/mc-publish@v3.3
@@ -100,7 +100,7 @@ jobs:
             neoforge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
             neoforge/build/libs/*-@(sources|javadoc).jar
           java: |
-            $JAVA_VERSION
+            {{$JAVA_VERSION}}
 
       - name: Publish Fabric to Curseforge
         uses: Kir-Antipov/mc-publish@v3.3
@@ -115,7 +115,7 @@ jobs:
           dependencies: |
             forge-config-api-port(required){modrinth:ohNO6lps}{curseforge:547434}#(ignore:github)
           java: |
-            $JAVA_VERSION
+            {{$JAVA_VERSION}}
 
       - name: Publish Forge to Modrinth
         uses: Kir-Antipov/mc-publish@v3.3
@@ -130,7 +130,7 @@ jobs:
             forge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
             forge/build/libs/*-@(sources|javadoc).jar
           java: |
-            $JAVA_VERSION
+            {{$JAVA_VERSION}}
             
       - name: Publish NeoForge to Modrinth
         uses: Kir-Antipov/mc-publish@v3.3
@@ -145,7 +145,7 @@ jobs:
             neoforge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
             neoforge/build/libs/*-@(sources|javadoc).jar
           java: |
-            $JAVA_VERSION
+            {{$JAVA_VERSION}}
 
       - name: Publish Fabric to Modrinth
         uses: Kir-Antipov/mc-publish@v3.3
@@ -162,4 +162,4 @@ jobs:
           dependencies: |
             forge-config-api-port(required){modrinth:ohNO6lps}{curseforge:547434}#(ignore:github)
           java: |
-            $JAVA_VERSION
+            {{$JAVA_VERSION}}
