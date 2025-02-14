@@ -5,9 +5,6 @@ on:
     tags:
       - '*'
 
-env:
-  JAVA_VERSION: 21
-
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -29,7 +26,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: {{$JAVA_VERSION}}
+          java-version: 21
 
       - name: Get current time
         uses: srfrnk/current-time@master
@@ -87,7 +84,7 @@ jobs:
             forge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
             forge/build/libs/*-@(sources|javadoc).jar
           java: |
-            {{$JAVA_VERSION}}
+            21
             
       - name: Publish NeoForge to Curseforge
         uses: Kir-Antipov/mc-publish@v3.3
@@ -100,7 +97,7 @@ jobs:
             neoforge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
             neoforge/build/libs/*-@(sources|javadoc).jar
           java: |
-            {{$JAVA_VERSION}}
+            21
 
       - name: Publish Fabric to Curseforge
         uses: Kir-Antipov/mc-publish@v3.3
@@ -115,7 +112,7 @@ jobs:
           dependencies: |
             forge-config-api-port(required){modrinth:ohNO6lps}{curseforge:547434}#(ignore:github)
           java: |
-            {{$JAVA_VERSION}}
+            21
 
       - name: Publish Forge to Modrinth
         uses: Kir-Antipov/mc-publish@v3.3
@@ -130,7 +127,7 @@ jobs:
             forge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
             forge/build/libs/*-@(sources|javadoc).jar
           java: |
-            {{$JAVA_VERSION}}
+            21
             
       - name: Publish NeoForge to Modrinth
         uses: Kir-Antipov/mc-publish@v3.3
@@ -145,7 +142,7 @@ jobs:
             neoforge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
             neoforge/build/libs/*-@(sources|javadoc).jar
           java: |
-            {{$JAVA_VERSION}}
+            21
 
       - name: Publish Fabric to Modrinth
         uses: Kir-Antipov/mc-publish@v3.3
@@ -162,4 +159,4 @@ jobs:
           dependencies: |
             forge-config-api-port(required){modrinth:ohNO6lps}{curseforge:547434}#(ignore:github)
           java: |
-            {{$JAVA_VERSION}}
+            21
