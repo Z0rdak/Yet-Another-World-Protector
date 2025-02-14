@@ -37,7 +37,7 @@ jobs:
         env:
           BUILD_TIME: ${{ steps.current-time.outputs.formattedTime }}
           BUILD_NUMBER: ${{ github.run_number }}
-        run: ./gradlew build
+        run: ./gradlew assemble
 
       #- name: Maven Release
       #  if: steps.extract_maven_upload_url.outputs.maven_upload_url
