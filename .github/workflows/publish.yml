@@ -62,62 +62,62 @@ jobs:
             **/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
             **/build/libs/*-@(sources|javadoc).jar
 
-      #- name: Publish Forge to Curseforge
-      #  uses: Kir-Antipov/mc-publish@v3.3
-      #  with:
-      #    curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-      #    name: ${{ github.ref_name }}
-      #    version:  1.20.1-${{ github.ref_name }}-forge
-      #    changelog-file: changelogs/${{ github.ref_name }}.md
-      #    files: |
-      #      forge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
-      #      forge/build/libs/*-@(sources|javadoc).jar
-      #    java: |
-      #      17
-#
-      #- name: Publish Fabric to Curseforge
-      #  uses: Kir-Antipov/mc-publish@v3.3
-      #  with:
-      #    curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-      #    name: ${{ github.ref_name }}
-      #    version: 1.20.1-${{ github.ref_name }}-fabric
-      #    changelog-file: changelogs/${{ github.ref_name }}.md
-      #    files: |
-      #      fabric/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
-      #      fabric/build/libs/*-@(sources|javadoc).jar
-      #    dependencies: |
-      #      forge-config-api-port(required){modrinth:ohNO6lps}{curseforge:547434}#(ignore:github)
-      #    java: |
-      #      17
-#
-      #- name: Publish Forge to Modrinth
-      #  uses: Kir-Antipov/mc-publish@v3.3
-      #  with:
-      #    modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
-      #    modrinth-featured: true
-      #    modrinth-unfeature-mode: subset
-      #    version: ${{ github.ref_name }}  
-      #    name:  1.20.1-${{ github.ref_name }}-forge
-      #    changelog-file: changelogs/${{ github.ref_name }}.md
-      #    files: |
-      #      forge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
-      #      forge/build/libs/*-@(sources|javadoc).jar
-      #    java: |
-      #      17
-#
-      #- name: Publish Fabric to Modrinth
-      #  uses: Kir-Antipov/mc-publish@v3.3
-      #  with:
-      #    modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
-      #    modrinth-featured: true
-      #    modrinth-unfeature-mode: subset
-      #    version: ${{ github.ref_name }} 
-      #    name: 1.20.1-${{ github.ref_name }}-fabric
-      #    changelog-file: changelogs/${{ github.ref_name }}.md
-      #    files: |
-      #      fabric/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
-      #      fabric/build/libs/*-@(sources|javadoc).jar
-      #    dependencies: |
-      #      forge-config-api-port(required){modrinth:ohNO6lps}{curseforge:547434}#(ignore:github)
-      #    java: |
-      #      17
+      - name: Publish Forge to Curseforge
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+          name: ${{ github.ref_name }}
+          version:  1.20.1-${{ github.ref_name }}-forge
+          changelog-file: changelogs/${{ github.ref_name }}.md
+          files: |
+            forge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
+            forge/build/libs/*-@(sources|javadoc).jar
+          java: |
+            17
+
+      - name: Publish Fabric to Curseforge
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+          name: ${{ github.ref_name }}
+          version: 1.20.1-${{ github.ref_name }}-fabric
+          changelog-file: changelogs/${{ github.ref_name }}.md
+          files: |
+            fabric/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
+            fabric/build/libs/*-@(sources|javadoc).jar
+          dependencies: |
+            forge-config-api-port(required){modrinth:ohNO6lps}{curseforge:547434}#(ignore:github)
+          java: |
+            17
+
+      - name: Publish Forge to Modrinth
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          modrinth-featured: true
+          modrinth-unfeature-mode: subset
+          version: ${{ github.ref_name }}  
+          name:  1.20.1-${{ github.ref_name }}-forge
+          changelog-file: changelogs/${{ github.ref_name }}.md
+          files: |
+            forge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
+            forge/build/libs/*-@(sources|javadoc).jar
+          java: |
+            17
+
+      - name: Publish Fabric to Modrinth
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          modrinth-featured: true
+          modrinth-unfeature-mode: subset
+          version: ${{ github.ref_name }} 
+          name: 1.20.1-${{ github.ref_name }}-fabric
+          changelog-file: changelogs/${{ github.ref_name }}.md
+          files: |
+            fabric/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
+            fabric/build/libs/*-@(sources|javadoc).jar
+          dependencies: |
+            forge-config-api-port(required){modrinth:ohNO6lps}{curseforge:547434}#(ignore:github)
+          java: |
+            17
