@@ -55,8 +55,8 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           github-draft: false
           github-prerelease: false
-          name: ${{ github.ref_name }}
-          version: 1.20.1-${{ github.ref_name }}-forge
+          name: 1.20.1-${{ github.ref_name }}
+          version: 1.20.1-${{ github.ref_name }}
           changelog-file: changelogs/${{ github.ref_name }}.md
           files: |
             **/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
