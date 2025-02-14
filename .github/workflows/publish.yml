@@ -93,7 +93,7 @@ jobs:
           modrinth-unfeature-mode: subset
           # curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
           version: YAWP ${{ github.ref_name }}  # should resolve to <mc-version>-<mod-version>, e.g.: 1.21.4-0.5.2-beta1
-          name: 1.20.1-${{ github.ref_name }}-forge # Sodium 0.3.2 for Minecraft 1.17.1
+          name: 1.20.1-${{ github.ref_name }}-fabric # Sodium 0.3.2 for Minecraft 1.17.1
           changelog-file: changelogs/${{ github.ref_name }}.md
           files: |
             fabric/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
