@@ -49,62 +49,47 @@ jobs:
       #    MAVEN_UPLOAD_PASSWORD: ${{ secrets.MAVEN_UPLOAD_PASSWORD }}
       #  run: ./gradlew publish
 
-      #- name: Publish (GitHub Releases)
-      #  uses: Kir-Antipov/mc-publish@v3.3
-      #  with:
-      #    github-token: ${{ secrets.GITHUB_TOKEN }}
-      #    github-draft: false
-      #    github-prerelease: false
-      #    files: |
-      #      **/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
-      #      **/build/libs/*-@(sources|javadoc).jar
+      - name: Publish to GitHub Releases
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-draft: false
+          github-prerelease: false
+          name: ${{ github.ref_name }}
+          version: 1.20.1-${{ github.ref_name }}-forge
+          changelog-file: changelogs/${{ github.ref_name }}.md
+          files: |
+            **/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
+            **/build/libs/*-@(sources|javadoc).jar
 
-      #- name: Publish (NeoForge)
+      #- name: Publish Forge to Curseforge
       #  uses: Kir-Antipov/mc-publish@v3.3
       #  with:
-      #    modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
       #    curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-      #    version: ${{ github.ref_name }}-neoforge  # should resolve to <mc-version>-<mod-version>, e.g.: 1.21.4-0.5.2-beta1
-      #    name:  yawp-${{ github.ref_name }}-neoforge # Sodium 0.3.2 for Minecraft 1.17.1
-      #    changelog-file: changelog.*
+      #    name: ${{ github.ref_name }}
+      #    version:  1.20.1-${{ github.ref_name }}-forge
+      #    changelog-file: changelogs/${{ github.ref_name }}.md
       #    files: |
-      #      neoforge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
-      #      neoforge/build/libs/*-@(sources|javadoc).jar
-
-      - name: Publish Forge to Curseforge
-        uses: Kir-Antipov/mc-publish@v3.3
-        with:
-          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-          name: ${{ github.ref_name }}
-          version:  1.20.1-${{ github.ref_name }}-forge
-          changelog-file: changelogs/${{ github.ref_name }}.md
-          files: |
-            forge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
-            forge/build/libs/*-@(sources|javadoc).jar
-          java: |
-            17
-          game-versions: |
-            Server
-            1.20.1
-
-      - name: Publish Fabric to Curseforge
-        uses: Kir-Antipov/mc-publish@v3.3
-        with:
-          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-          name: ${{ github.ref_name }}
-          version: 1.20.1-${{ github.ref_name }}-fabric
-          changelog-file: changelogs/${{ github.ref_name }}.md
-          files: |
-            fabric/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
-            fabric/build/libs/*-@(sources|javadoc).jar
-          dependencies: |
-            forge-config-api-port(required){modrinth:ohNO6lps}{curseforge:547434}#(ignore:github)
-          java: |
-            17
-          game-versions: |
-            Server
-            1.20.1
-
+      #      forge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
+      #      forge/build/libs/*-@(sources|javadoc).jar
+      #    java: |
+      #      17
+#
+      #- name: Publish Fabric to Curseforge
+      #  uses: Kir-Antipov/mc-publish@v3.3
+      #  with:
+      #    curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+      #    name: ${{ github.ref_name }}
+      #    version: 1.20.1-${{ github.ref_name }}-fabric
+      #    changelog-file: changelogs/${{ github.ref_name }}.md
+      #    files: |
+      #      fabric/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
+      #      fabric/build/libs/*-@(sources|javadoc).jar
+      #    dependencies: |
+      #      forge-config-api-port(required){modrinth:ohNO6lps}{curseforge:547434}#(ignore:github)
+      #    java: |
+      #      17
+#
       #- name: Publish Forge to Modrinth
       #  uses: Kir-Antipov/mc-publish@v3.3
       #  with:
@@ -119,7 +104,7 @@ jobs:
       #      forge/build/libs/*-@(sources|javadoc).jar
       #    java: |
       #      17
-
+#
       #- name: Publish Fabric to Modrinth
       #  uses: Kir-Antipov/mc-publish@v3.3
       #  with:
