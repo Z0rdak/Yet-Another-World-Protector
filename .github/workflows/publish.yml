@@ -9,6 +9,17 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
+      
+      # get the YAWP version (e.g. 0.5.2-beta1) from the published tag, to identify the correct changelog file
+      # ${{github.ref_name}} is <mc-version>-<yawp-version>, e.g. 1.17.4-0.5.2-beta1
+      # In the future, it would be better just to grab the latest section from the changelog file,
+      # instead creating new files for each version
+      - id: get-yawp-version
+        run: |
+          yawpVersion=$(echo ${{github.ref_name}} | cut -d- -f2,3)
+          echo "::set-output name=yawpVersion::$yawpVersion"
+      - run: echo "${{steps.get-yawp-version.outputs.yawpVersion}}"
+
       - uses: actions/checkout@v4
 
       - name: Set up JDK 17
@@ -55,9 +66,9 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           github-draft: false
           github-prerelease: false
-          name: 1.20.1-${{ github.ref_name }}
-          version: 1.20.1-${{ github.ref_name }}
-          changelog-file: changelogs/${{ github.ref_name }}.md
+          name: ${{ github.ref_name }}
+          version: ${{ github.ref_name }}
+          changelog-file: changelogs/${{steps.get-yawp-version.outputs.yawpVersion}}.md
           files: |
             **/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
             **/build/libs/*-@(sources|javadoc).jar
@@ -67,8 +78,8 @@ jobs:
         with:
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
           name: ${{ github.ref_name }}
-          version:  1.20.1-${{ github.ref_name }}-forge
-          changelog-file: changelogs/${{ github.ref_name }}.md
+          version:  ${{ github.ref_name }}-forge
+          changelog-file: changelogs/${{steps.get-yawp-version.outputs.yawpVersion}}.md
           files: |
             forge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
             forge/build/libs/*-@(sources|javadoc).jar
@@ -80,8 +91,8 @@ jobs:
         with:
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
           name: ${{ github.ref_name }}
-          version: 1.20.1-${{ github.ref_name }}-fabric
-          changelog-file: changelogs/${{ github.ref_name }}.md
+          version: ${{ github.ref_name }}-fabric
+          changelog-file: changelogs/${{steps.get-yawp-version.outputs.yawpVersion}}.md
           files: |
             fabric/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
             fabric/build/libs/*-@(sources|javadoc).jar
@@ -96,9 +107,9 @@ jobs:
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           modrinth-featured: true
           modrinth-unfeature-mode: subset
-          version: ${{ github.ref_name }}  
-          name:  1.20.1-${{ github.ref_name }}-forge
-          changelog-file: changelogs/${{ github.ref_name }}.md
+          version: ${{ github.ref_name }}
+          name:  ${{ github.ref_name }}-forge
+          changelog-file: changelogs/${{steps.get-yawp-version.outputs.yawpVersion}}.md
           files: |
             forge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
             forge/build/libs/*-@(sources|javadoc).jar
@@ -111,9 +122,9 @@ jobs:
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           modrinth-featured: true
           modrinth-unfeature-mode: subset
-          version: ${{ github.ref_name }} 
-          name: 1.20.1-${{ github.ref_name }}-fabric
-          changelog-file: changelogs/${{ github.ref_name }}.md
+          version: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}-fabric
+          changelog-file: changelogs/${{steps.get-yawp-version.outputs.yawpVersion}}.md
           files: |
             fabric/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
             fabric/build/libs/*-@(sources|javadoc).jar
