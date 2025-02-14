@@ -49,13 +49,15 @@ jobs:
       #    MAVEN_UPLOAD_PASSWORD: ${{ secrets.MAVEN_UPLOAD_PASSWORD }}
       #  run: ./gradlew publish
 
-      - name: Publish (GitHub Releases)
-        uses: Kir-Antipov/mc-publish@v3.3
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          files: |
-            **/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
-            **/build/libs/*-@(sources|javadoc).jar
+      #- name: Publish (GitHub Releases)
+      #  uses: Kir-Antipov/mc-publish@v3.3
+      #  with:
+      #    github-token: ${{ secrets.GITHUB_TOKEN }}
+      #    github-draft: false
+      #    github-prerelease: false
+      #    files: |
+      #      **/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
+      #      **/build/libs/*-@(sources|javadoc).jar
 
       #- name: Publish (NeoForge)
       #  uses: Kir-Antipov/mc-publish@v3.3
@@ -73,22 +75,32 @@ jobs:
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
-          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-          version: ${{ github.ref_name }}-forge  # should resolve to <mc-version>-<mod-version>, e.g.: 1.21.4-0.5.2-beta1
-          name:  yawp-${{ github.ref_name }}-forge # Sodium 0.3.2 for Minecraft 1.17.1
-          changelog-file: changelog.*
+          modrinth-featured: true
+          modrinth-unfeature-mode: subset
+          #curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+          version: 1.20.1-${{ github.ref_name }}-forge  # should resolve to <mc-version>-<mod-version>, e.g.: 1.21.4-0.5.2-beta1
+          name:  ${{ github.ref_name }} # Sodium 0.3.2 for Minecraft 1.17.1
+          changelog-file: changelog.md
           files: |
             forge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
             forge/build/libs/*-@(sources|javadoc).jar
+          game-versions: |
+            1.20.1
+            Server
 
       - name: Publish (Fabric)
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
-          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-          version: ${{ github.ref_name }}-fabric  # should resolve to <mc-version>-<mod-version>, e.g.: 1.21.4-0.5.2-beta1
-          name:  yawp-${{ github.ref_name }}-fabric # Sodium 0.3.2 for Minecraft 1.17.1
-          changelog-file: changelog.*
+          modrinth-featured: true
+          modrinth-unfeature-mode: subset
+          #curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+          version: 1.20.1-${{ github.ref_name }}-fabric  # should resolve to <mc-version>-<mod-version>, e.g.: 1.21.4-0.5.2-beta1
+          name:  ${{ github.ref_name }} # Sodium 0.3.2 for Minecraft 1.17.1
+          changelog-file: changelog.md
           files: |
             fabric/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
             fabric/build/libs/*-@(sources|javadoc).jar
+          game-versions: |
+            1.20.1
+            Server
