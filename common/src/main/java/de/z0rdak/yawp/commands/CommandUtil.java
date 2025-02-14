@@ -26,7 +26,6 @@ import de.z0rdak.yawp.util.MojangApiHelper;
 import de.z0rdak.yawp.util.text.Messages;
 import de.z0rdak.yawp.util.text.messages.multiline.MultiLineMessage;
 import de.z0rdak.yawp.util.text.messages.multiline.RegionInfoMessage;
-import de.z0rdak.yawp.util.text.messages.multiline.RegionStateMessage;
 import de.z0rdak.yawp.util.text.messages.pagination.*;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;

@@ -36,7 +36,7 @@ import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.ChatLinkBuilder.buildRegionInfoLink;
 import static de.z0rdak.yawp.constants.serialization.ItemNbtKeys.STICK;
 import static de.z0rdak.yawp.util.StickUtil.getStickType;
-import static de.z0rdak.yawp.util.text.MessageSender.sendCmdFeedback;
+import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 import static net.minecraft.ChatFormatting.RED;
 
 public final class MarkerCommands {
