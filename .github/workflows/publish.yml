@@ -71,29 +71,49 @@ jobs:
       #      neoforge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
       #      neoforge/build/libs/*-@(sources|javadoc).jar
 
-      - name: Publish (Forge)
+      #- name: Publish Forge to Curseforge
+      #  uses: Kir-Antipov/mc-publish@v3.3
+      #  with:
+      #    curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+      #    version: ${{ github.ref_name }}  # should resolve to <mc-version>-<mod-version>, e.g.: 1.21.4-0.5.2-beta1
+      #    name:  1.20.1-${{ github.ref_name }}-forge # Sodium 0.3.2 for Minecraft 1.17.1
+      #    changelog-file: changelogs/${{ github.ref_name }}.md
+      #    files: |
+      #      forge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
+      #      forge/build/libs/*-@(sources|javadoc).jar
+
+      #- name: Publish Fabric to Curseforge
+      #  uses: Kir-Antipov/mc-publish@v3.3
+      #  with:
+      #    curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+      #    version: ${{ github.ref_name }}
+      #    name: 1.20.1-${{ github.ref_name }}-fabric
+      #    changelog-file: changelogs/${{ github.ref_name }}.md
+      #    files: |
+      #      fabric/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
+      #      fabric/build/libs/*-@(sources|javadoc).jar
+
+      - name: Publish Forge to Modrinth
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           modrinth-featured: true
           modrinth-unfeature-mode: subset
-          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-          version: ${{ github.ref_name }}  # should resolve to <mc-version>-<mod-version>, e.g.: 1.21.4-0.5.2-beta1
-          name:  1.20.1-${{ github.ref_name }}-forge # Sodium 0.3.2 for Minecraft 1.17.1
+          version: ${{ github.ref_name }}  
+          name:  1.20.1-${{ github.ref_name }}-forge
           changelog-file: changelogs/${{ github.ref_name }}.md
           files: |
             forge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
             forge/build/libs/*-@(sources|javadoc).jar
 
-      - name: Publish (Fabric)
+      - name: Publish Fabric to Modrinth
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           modrinth-featured: true
           modrinth-unfeature-mode: subset
-          # curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-          version: YAWP ${{ github.ref_name }}  # should resolve to <mc-version>-<mod-version>, e.g.: 1.21.4-0.5.2-beta1
-          name: 1.20.1-${{ github.ref_name }}-fabric # Sodium 0.3.2 for Minecraft 1.17.1
+          version: ${{ github.ref_name }} 
+          name: 1.20.1-${{ github.ref_name }}-fabric
           changelog-file: changelogs/${{ github.ref_name }}.md
           files: |
             fabric/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
