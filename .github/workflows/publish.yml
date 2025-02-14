@@ -1,58 +1,165 @@
-name: Publish Mod
+name: Upload Release Artifacts
 
-on: [ workflow_dispatch ]
+on:
+  push:
+    tags:
+      - '*'
 
-permissions:
-  contents: write  # Required for publishing
+env:
+  JAVA_VERSION: 21
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-        with:
-          submodules: true
+      
+      # get the YAWP version (e.g. 0.5.2-beta1) from the published tag, to identify the correct changelog file
+      # ${{github.ref_name}} is <mc-version>-<yawp-version>, e.g. 1.21.4-0.5.2-beta1
+      # In the future, it would be better just to grab the latest section from the changelog file,
+      # instead creating new files for each version
+      - id: get-yawp-version
+        run: |
+          yawpVersion=$(echo ${{github.ref_name}} | cut -d- -f2)
+          echo "::set-output name=yawpVersion::$yawpVersion"
+      - run: echo "${{steps.get-yawp-version.outputs.yawpVersion}}"
 
-      - name: Setup Java
-        uses: actions/setup-java@v2
-        with:
-          distribution: "temurin"
-          java-version: 21
+      - uses: actions/checkout@v4
 
-      - name: Make Gradle Wrapper Executable
-        if: ${{ runner.os != 'Windows' }}
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: $JAVA_VERSION
+
+      - name: Get current time
+        uses: srfrnk/current-time@master
+        id: current-time
+        with:
+          format: YYYYMMDDHHmmss
+
+      - name: Setup ENV
+        run: echo "TAG=${{ github.ref_name }}" >> $GITHUB_ENV
+
+      #- name: Copy Maven Upload URL
+      #  id: extract_maven_upload_url
+      #  run: echo "maven_upload_url=${{secrets.MAVEN_UPLOAD_URL}}" >> $GITHUB_OUTPUT
+
+      - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      - name: Build
-        run: ./gradlew clean build
-      
-      - uses: Kir-Antipov/mc-publish@v3.3
+      - name: Build with Gradle
+        env:
+          BUILD_TIME: ${{ steps.current-time.outputs.formattedTime }}
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: ./gradlew assemble
+
+      #- name: Maven Release
+      #  if: steps.extract_maven_upload_url.outputs.maven_upload_url
+      #  env:
+      #    BUILD_TIME: ${{ steps.current-time.outputs.formattedTime }}
+      #    BUILD_NUMBER: ${{ github.run_number }}
+      #    MAVEN_UPLOAD_URL: ${{ secrets.MAVEN_UPLOAD_URL }}
+      #    MAVEN_UPLOAD_USERNAME: ${{ secrets.MAVEN_UPLOAD_USERNAME }}
+      #    MAVEN_UPLOAD_PASSWORD: ${{ secrets.MAVEN_UPLOAD_PASSWORD }}
+      #  run: ./gradlew publish
+
+      - name: Publish to GitHub Releases
+        uses: Kir-Antipov/mc-publish@v3.3
         with:
-          modrinth-id: py6EMmAJ
-          # modrinth-featured: true
-          # modrinth-unfeature-mode: subset
-          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-draft: false
+          github-prerelease: false
+          name: ${{ github.ref_name }}
+          version: ${{ github.ref_name }}
+          changelog-file: changelogs/${{steps.get-yawp-version.outputs.yawpVersion}}.md
+          files: |
+            **/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
+            **/build/libs/*-@(sources|javadoc).jar
 
-          curseforge-id: 663276
+      - name: Publish Forge to Curseforge
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+          name: ${{ github.ref_name }}
+          version:  ${{ github.ref_name }}-forge
+          changelog-file: changelogs/${{steps.get-yawp-version.outputs.yawpVersion}}.md
+          files: |
+            forge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
+            forge/build/libs/*-@(sources|javadoc).jar
+          java: |
+            $JAVA_VERSION
 
-          # github-tag: ${{ TODO version get here }}
-          # github-commitish: ${{ source-branch= }}
-          # github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish NeoForge to Curseforge
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+          name: ${{ github.ref_name }}
+          version:  ${{ github.ref_name }}-neoforge
+          changelog-file: changelogs/${{steps.get-yawp-version.outputs.yawpVersion}}.md
+          files: |
+            neoforge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
+            neoforge/build/libs/*-@(sources|javadoc).jar
+          java: |
+            $JAVA_VERSION
 
-          #files: |
-          #  build/libs/!(*-@(dev|sources|javadoc)).jar
-          #  build/libs/*-@(dev|sources|javadoc).jar
-          
-          #name: ${{ yawp-1.21.4-0.5.5-beta5 }} // Sodium 0.3.2 for Minecraft 1.17.1
-          #version: ${{ mc1.17.1-0.3.2 TODO }} 
-          #version-type: ${{ beta TODO }}
-          #changelog-file: CHANGELOG.md
-          #
-          #java: |
-          #  Java 21
-          #
-          #retry-attempts: 2
-          #retry-delay: 10000
-          #fail-mode: fail
+      - name: Publish Fabric to Curseforge
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+          name: ${{ github.ref_name }}
+          version: ${{ github.ref_name }}-fabric
+          changelog-file: changelogs/${{steps.get-yawp-version.outputs.yawpVersion}}.md
+          files: |
+            fabric/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
+            fabric/build/libs/*-@(sources|javadoc).jar
+          dependencies: |
+            forge-config-api-port(required){modrinth:ohNO6lps}{curseforge:547434}#(ignore:github)
+          java: |
+            $JAVA_VERSION
+
+      - name: Publish Forge to Modrinth
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          modrinth-featured: true
+          modrinth-unfeature-mode: subset
+          version: ${{ github.ref_name }}
+          name:  ${{ github.ref_name }}-forge
+          changelog-file: changelogs/${{steps.get-yawp-version.outputs.yawpVersion}}.md
+          files: |
+            forge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
+            forge/build/libs/*-@(sources|javadoc).jar
+          java: |
+            $JAVA_VERSION
+
+      - name: Publish NeoForge to Modrinth
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          modrinth-featured: true
+          modrinth-unfeature-mode: subset
+          version: ${{ github.ref_name }}
+          name:  ${{ github.ref_name }}-neoforge
+          changelog-file: changelogs/${{steps.get-yawp-version.outputs.yawpVersion}}.md
+          files: |
+            neoforge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
+            neoforge/build/libs/*-@(sources|javadoc).jar
+          java: |
+            $JAVA_VERSION
+
+      - name: Publish Fabric to Modrinth
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          modrinth-featured: true
+          modrinth-unfeature-mode: subset
+          version: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}-fabric
+          changelog-file: changelogs/${{steps.get-yawp-version.outputs.yawpVersion}}.md
+          files: |
+            fabric/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
+            fabric/build/libs/*-@(sources|javadoc).jar
+          dependencies: |
+            forge-config-api-port(required){modrinth:ohNO6lps}{curseforge:547434}#(ignore:github)
+          java: |
+            $JAVA_VERSION
