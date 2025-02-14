@@ -196,6 +196,15 @@ public class GrievingFlagHandler {
                     });
                 }
             }
+
+            if (xpDroppingEntity instanceof Player) {
+                FlagCheckEvent checkEvent = new FlagCheckEvent(xpDroppingEntity.blockPosition(), RegionFlag.KEEP_XP, getDimKey(xpDroppingEntity));
+                if (Services.EVENT.post(checkEvent))
+                    return;
+                processCheck(checkEvent, deny -> {
+                    event.setCanceled(true);
+                });
+            }
         }
     }
 
