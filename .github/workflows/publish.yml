@@ -83,6 +83,9 @@ jobs:
             forge/build/libs/*-@(sources|javadoc).jar
           java: |
             17
+          game-versions: |
+            Server
+            1.20.1
 
       - name: Publish Fabric to Curseforge
         uses: Kir-Antipov/mc-publish@v3.3
@@ -98,6 +101,9 @@ jobs:
             forge-config-api-port(required){modrinth:ohNO6lps}{curseforge:547434}#(ignore:github)
           java: |
             17
+          game-versions: |
+            Server
+            1.20.1
 
       #- name: Publish Forge to Modrinth
       #  uses: Kir-Antipov/mc-publish@v3.3
@@ -111,6 +117,8 @@ jobs:
       #    files: |
       #      forge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
       #      forge/build/libs/*-@(sources|javadoc).jar
+      #    java: |
+      #      17
 
       #- name: Publish Fabric to Modrinth
       #  uses: Kir-Antipov/mc-publish@v3.3
@@ -126,3 +134,5 @@ jobs:
       #      fabric/build/libs/*-@(sources|javadoc).jar
       #    dependencies: |
       #      forge-config-api-port(required){modrinth:ohNO6lps}{curseforge:547434}#(ignore:github)
+      #    java: |
+      #      17
