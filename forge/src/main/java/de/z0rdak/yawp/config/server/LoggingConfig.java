@@ -16,14 +16,13 @@ import org.apache.logging.log4j.Logger;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static de.z0rdak.yawp.config.ConfigRegistry.CONFIG_LOGGER;
+import static de.z0rdak.yawp.constants.Constants.MOD_ID;
 
 public class LoggingConfig {
 
     public static final ForgeConfigSpec CONFIG_SPEC;
     public static final String CONFIG_NAME = Constants.MOD_ID + "-logging.toml";
-
-    public static final Logger FLAG_LOGGER = LogManager.getLogger(Constants.MOD_ID.toUpperCase() + "-Flags");
+    public static final Logger LOGGING_CONFIG_LOGGER = LogManager.getLogger(MOD_ID.toUpperCase() + "-Logging-Config");
 
     private static final ForgeConfigSpec.ConfigValue<Boolean> FLAG_CHECK_LOG;
     private static final ForgeConfigSpec.ConfigValue<Boolean> FLAG_RESULT_LOG;
@@ -90,7 +89,7 @@ public class LoggingConfig {
                 FlagCategory category = FlagCategory.from(str);
                 return category != null || str.equalsIgnoreCase("*");
             } catch (IllegalArgumentException e) {
-                CONFIG_LOGGER.warn("Invalid flag category supplied for 'log_flag_categories': {}", entity);
+                LOGGING_CONFIG_LOGGER.warn("Invalid flag category supplied for 'log_flag_categories': {}", entity);
                 return false;
             }
         }
@@ -101,11 +100,11 @@ public class LoggingConfig {
         if (flag instanceof String) {
             boolean contains = RegionFlag.contains((String) flag);
             if (!contains) {
-                CONFIG_LOGGER.warn("Invalid flag supplied for 'log_flags': {}", flag);
+                LOGGING_CONFIG_LOGGER.warn("Invalid flag supplied for 'log_flags': {}", flag);
             }
             return contains;
         }
-        CONFIG_LOGGER.warn("Invalid flag supplied for 'log_flags': {}", flag);
+        LOGGING_CONFIG_LOGGER.warn("Invalid flag supplied for 'log_flags': {}", flag);
         return false;
     }
 
@@ -113,11 +112,11 @@ public class LoggingConfig {
         if (flagState instanceof String) {
             boolean contains = FlagState.validLoggingStates((String) flagState);
             if (!contains) {
-                CONFIG_LOGGER.warn("Invalid FlagState supplied for 'log_result_values': {}", flagState);
+                LOGGING_CONFIG_LOGGER.warn("Invalid FlagState supplied for 'log_result_values': {}", flagState);
             }
             return contains;
         }
-        CONFIG_LOGGER.warn("Invalid FlagState supplied for 'log_result_values': {}", flagState);
+        LOGGING_CONFIG_LOGGER.warn("Invalid FlagState supplied for 'log_result_values': {}", flagState);
         return false;
     }
 
@@ -142,7 +141,7 @@ public class LoggingConfig {
     public static boolean logCheck(ForgeFlagCheckEvent check) {
         boolean matchesFlagOrCategory = (flagMatchesCategory(check) || matchesFlag(check));
         if (matchesFlagOrCategory) {
-            FLAG_LOGGER.info("[Check] {}, at {}, in '{}', Player={}, Id={}",
+            LOGGING_CONFIG_LOGGER.info("[Check] {}, at {}, in '{}', Player={}, Id={}",
                     check.getRegionFlag().name,
                     AreaUtil.blockPosStr(check.getTarget()),
                     check.getDimension().location().toString(),
@@ -159,19 +158,19 @@ public class LoggingConfig {
             if (result.getResponsible() == null || result.getFlag() == null) {
                 // semantically equals to result.getFlagState() == FlagState.UNDEFINED
                 if (shouldLogEmptyResults()) {
-                    FLAG_LOGGER.info("[Result] No region for check with Id={}", check.getId());
+                    LOGGING_CONFIG_LOGGER.info("[Result] No region for check with Id={}", check.getId());
                 }
             } else {
                 if (result.getResponsible().getRegionType() != RegionType.LOCAL) {
                     IFlag flag = result.getFlag();
-                    FLAG_LOGGER.info("[Result] {} ({}), Region='{}', Id={}",
+                    LOGGING_CONFIG_LOGGER.info("[Result] {} ({}), Region='{}', Id={}",
                             flag.getName(),
                             result.getFlagState().name,
                             result.getResponsible().getName(),
                             result.getFlagCheck().getId());
                 } else {
                     IFlag flag = result.getFlag();
-                    FLAG_LOGGER.info("[Result] {} ({}), Region='{}', in '{}', Id={}",
+                    LOGGING_CONFIG_LOGGER.info("[Result] {} ({}), Region='{}', in '{}', Id={}",
                             flag.getName(),
                             result.getFlagState().name,
                             result.getResponsible().getName(),

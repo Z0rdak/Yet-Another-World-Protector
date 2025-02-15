@@ -7,17 +7,20 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.ForgeConfigSpec;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static de.z0rdak.yawp.config.ConfigRegistry.CONFIG_LOGGER;
+import static de.z0rdak.yawp.constants.Constants.MOD_ID;
 import static de.z0rdak.yawp.constants.Constants.MOD_ID;
 
 public class PermissionConfig {
 
     public static final ForgeConfigSpec CONFIG_SPEC;
     public static final String CONFIG_NAME = MOD_ID + "-common.toml";
+    public static final Logger PERMISSION_CONFIG_LOGGER = LogManager.getLogger(MOD_ID.toUpperCase() + "-Permission-Config");
 
     private static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_REGION_TP;
     private static final ForgeConfigSpec.ConfigValue<Boolean> ALLOW_READ_ONLY_CMDS;
@@ -27,6 +30,7 @@ public class PermissionConfig {
     private static final ForgeConfigSpec.ConfigValue<Integer> REQUIRED_OP_LEVEL;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> PLAYERS_WITH_PERMISSION;
     private static final ForgeConfigSpec.ConfigValue<Boolean> COMMAND_BLOCK_EXECUTION;
+    private static final ModConfigSpec.ConfigValue<Boolean> ENABLE_MARKER_CREATION;
 
     static {
         final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
@@ -54,6 +58,9 @@ public class PermissionConfig {
         ENABLE_REGION_TP = BUILDER.comment("Defines whether teleport in and out of a region is allowed by everyone. Mostly useful when using something like Waystones inside of regions.")
                 .define("allow_region_tp", false);
 
+        ENABLE_MARKER_CREATION = BUILDER.comment("Enable creation of RegionMarker by renaming a stick in an Anvil.")
+                .define("enable_marker_creation", true);
+        
         PLAYERS_WITH_PERMISSION = BUILDER.comment("Player UUIDs with permission to use mod commands.\n Make sure to put the UUIDs in parentheses, just like a normal string.\n Example: players_with_permission = [\"614c9eac-11c9-3ca6-b697-938355fa8235\", \"b9f5e998-520a-3fa2-8208-0c20f22aa20f\"]")
                 .defineListAllowEmpty(Collections.singletonList("players_with_permission"), ArrayList::new, PermissionConfig::validateUuid);
         BUILDER.pop();
@@ -82,6 +89,10 @@ public class PermissionConfig {
 
     public static boolean allowRegionTp() {
         return ENABLE_REGION_TP.get();
+    }
+    
+    public static boolean isMarkerCreationEnabled() {
+        return ENABLE_MARKER_CREATION.get();
     }
 
     public static boolean isHierarchyOwnershipEnabled() {
@@ -114,7 +125,7 @@ public class PermissionConfig {
                 }
                 return true;
             } catch (IllegalArgumentException e) {
-                CONFIG_LOGGER.warn("Invalid UUID '{}' in config", uuid);
+                PERMISSION_CONFIG_LOGGER.warn("Invalid UUID '{}' in config", uuid);
                 return false;
             }
         }
