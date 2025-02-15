@@ -220,12 +220,13 @@ class DimensionCommands {
      * This keeps region hierarchy and flags intact.<br>
      */
     private static int resetDimRegion(CommandContext<CommandSourceStack> ctx, DimensionRegionCache dimCache) {
-        dimCache.getDimensionalRegion().resetGroups();
-        dimCache.getDimensionalRegion().setIsActive(true);
-        dimCache.getDimensionalRegion().setIsMuted(false);
-        dimCache.getDimensionalRegion().getRegionFlags().clear();
+        DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
+        dimRegion.resetGroups();
+        dimRegion.setIsActive(true);
+        dimRegion.setIsMuted(false);
+        dimRegion.getFlags().clear();
         RegionDataManager.save();
-        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.dim.reset.confirm", "Successfully reset dimensional region %s", ChatLinkBuilder.buildRegionInfoLink(dimCache.getDimensionalRegion())));
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.dim.reset.confirm", "Successfully reset dimensional region %s", ChatLinkBuilder.buildRegionInfoLink(dimRegion)));
         return 0;
     }
 

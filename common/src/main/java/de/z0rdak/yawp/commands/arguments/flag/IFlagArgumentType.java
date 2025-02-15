@@ -120,7 +120,7 @@ public class IFlagArgumentType implements ArgumentType<String> {
     }
 
     private <S> List<String> getSuggestionFlags(FlagEditType flagEditType, IProtectedRegion region) throws CommandSyntaxException {
-        List<String> flagsInRegion = region.getFlags()
+        List<String> flagsInRegion = region.getFlags().flags()
                 .stream()
                 .map(IFlag::getName)
                 .distinct()

@@ -118,17 +118,12 @@ public abstract class AbstractRegion implements IProtectedRegion {
         return this.flags.contains(flag);
     }
 
-    @Override
-    public Collection<IFlag> getFlags() {
-        return List.copyOf(this.flags.flags());
-    }
-
     public void setFlags(RegionFlags flags) {
         this.flags = flags;
     }
 
     @Override
-    public RegionFlags getRegionFlags() {
+    public RegionFlags getFlags() {
         return flags;
     }
 
