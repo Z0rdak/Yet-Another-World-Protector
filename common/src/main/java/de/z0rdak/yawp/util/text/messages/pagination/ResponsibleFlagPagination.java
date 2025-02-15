@@ -40,7 +40,7 @@ public class ResponsibleFlagPagination extends BasePaginationMessage<FlagMessage
     }
 
     public static List<Component> buildRegionFlagEntries(IProtectedRegion region) {
-        return buildRegionFlagEntries(region, region.getFlagContainer().values().stream().toList());
+        return buildRegionFlagEntries(region, region.getRegionFlags().flags().stream().toList());
     }
 
     public static List<Component> buildRegionFlagEntries(IProtectedRegion region, List<IFlag> selectedFlags) {
@@ -137,9 +137,9 @@ public class ResponsibleFlagPagination extends BasePaginationMessage<FlagMessage
 
     public static Map<FlagState, List<IFlag>> sortFlagsByState(IProtectedRegion region) {
         HashMap<FlagState, List<IFlag>> flagStateListMap = new HashMap<>();
-        flagStateListMap.put(FlagState.DENIED, region.getFlagContainer().getFlags(FlagState.DENIED));
-        flagStateListMap.put(FlagState.ALLOWED, region.getFlagContainer().getFlags(FlagState.ALLOWED));
-        flagStateListMap.put(FlagState.DISABLED, region.getFlagContainer().getFlags(FlagState.DISABLED));
+        flagStateListMap.put(FlagState.DENIED, region.getRegionFlags().flags(FlagState.DENIED));
+        flagStateListMap.put(FlagState.ALLOWED, region.getRegionFlags().flags(FlagState.ALLOWED));
+        flagStateListMap.put(FlagState.DISABLED, region.getRegionFlags().flags(FlagState.DISABLED));
         return flagStateListMap;
     }
 
