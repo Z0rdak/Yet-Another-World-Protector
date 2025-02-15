@@ -60,4 +60,9 @@ public class NeoForgePermissionConfigHelper implements IPermissionConfigHelper {
     public boolean allowRegionTp() {
         return PermissionConfig.allowRegionTp();
     }
+
+    @Override
+    public boolean isMarkerCreationEnabled() {
+        return PermissionConfig.isMarkerCreationEnabled();
+    }
 }
