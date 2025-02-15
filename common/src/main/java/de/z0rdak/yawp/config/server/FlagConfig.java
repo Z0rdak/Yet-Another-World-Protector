@@ -2,16 +2,19 @@ package de.z0rdak.yawp.config.server;
 
 import de.z0rdak.yawp.constants.Constants;
 import net.neoforged.neoforge.common.ModConfigSpec;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static de.z0rdak.yawp.config.ConfigRegistry.CONFIG_LOGGER;
+import static de.z0rdak.yawp.constants.Constants.MOD_ID;
 
 public class FlagConfig {
 
     public static final ModConfigSpec CONFIG_SPEC;
     public static final String CONFIG_NAME = Constants.MOD_ID + "-flags.toml";
+    public static final Logger FLAG_CONFIG_LOGGER = LogManager.getLogger(MOD_ID.toUpperCase() + "-Flag-Config");
 
     private static final ModConfigSpec.ConfigValue<Boolean> REMOVE_ENTITIES_FOR_SPAWNING_FLAGS;
     private static final ModConfigSpec.ConfigValue<List<? extends String>> COVERED_BLOCK_ENTITIES;
@@ -63,7 +66,7 @@ public class FlagConfig {
         if (entity instanceof String str) {
             boolean isNotEmptyAndContainsColon = !str.isEmpty() && !str.isBlank() && str.contains(":");
             if (!isNotEmptyAndContainsColon) {
-                CONFIG_LOGGER.warn("Invalid block tile resource key supplied for 'break_flag_entities': {}", entity);
+                FLAG_CONFIG_LOGGER.warn("Invalid block tile resource key supplied for 'break_flag_entities': {}", entity);
             }
             return isNotEmptyAndContainsColon;
         }
@@ -74,7 +77,7 @@ public class FlagConfig {
         if (entity instanceof String str) {
             boolean isNotEmptyAndContainsColon = !str.isEmpty() && !str.isBlank() && str.contains(":");
             if (!isNotEmptyAndContainsColon) {
-                CONFIG_LOGGER.warn("Invalid block tile resource key supplied for 'break_flag_entity_tags': {}", entity);
+                FLAG_CONFIG_LOGGER.warn("Invalid block tile resource key supplied for 'break_flag_entity_tags': {}", entity);
             }
             return isNotEmptyAndContainsColon;
         }
