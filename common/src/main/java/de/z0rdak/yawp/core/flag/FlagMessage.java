@@ -195,34 +195,4 @@ public class FlagMessage implements INbtSerializable<CompoundTag> {
         this.isDefault = nbt.getBoolean(DEFAULT);
     }
 
-    /**
-     * A correlation of a region and a flag. <br>
-     * This is used to determine the responsible region for a flag state.
-     * This region is not necessarily the region responsible for the flag check event.
-     * It could be a parent region which overrides the flag state of the child region.
-     */
-    public static final class FlagCorrelation {
-    
-        public final IProtectedRegion region;
-        @Nullable
-        public final IFlag flag;
-    
-        public FlagCorrelation(IProtectedRegion region, @Nullable IFlag flag) {
-            this.region = region;
-            this.flag = flag;
-        }
-    
-        public IProtectedRegion getRegion() {
-            return region;
-        }
-    
-        @Nullable
-        public IFlag getFlag() {
-            return flag;
-        }
-    
-        public boolean hasFlag() {
-            return flag != null;
-        }
-    }
 }

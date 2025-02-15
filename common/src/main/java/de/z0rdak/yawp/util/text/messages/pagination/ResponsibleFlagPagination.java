@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.util.text.messages.pagination;
 
 import de.z0rdak.yawp.api.commands.CommandConstants;
-import de.z0rdak.yawp.core.flag.FlagMessage;
+import de.z0rdak.yawp.core.flag.FlagCorrelation;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
@@ -26,7 +26,7 @@ import static de.z0rdak.yawp.util.text.messages.pagination.RegionFlagPagination.
 import static net.minecraft.ChatFormatting.*;
 import static net.minecraft.network.chat.ClickEvent.Action.RUN_COMMAND;
 
-public class ResponsibleFlagPagination extends BasePaginationMessage<FlagMessage.FlagCorrelation> {
+public class ResponsibleFlagPagination extends BasePaginationMessage<FlagCorrelation> {
 
     private final IProtectedRegion region;
 
@@ -113,22 +113,22 @@ public class ResponsibleFlagPagination extends BasePaginationMessage<FlagMessage
      */
     public static List<MutableComponent> buildFlagEntries(IProtectedRegion region) {
         List<MutableComponent> flagEntries = new ArrayList<>();
-        Map<String, FlagMessage.FlagCorrelation> flagMapRecursive = getFlagMapRecursive(region, null);
-        Map<FlagState, List<FlagMessage.FlagCorrelation>> flagStateListMap = sortFlagsByState(flagMapRecursive);
+        Map<String, FlagCorrelation> flagMapRecursive = getFlagMapRecursive(region, null);
+        Map<FlagState, List<FlagCorrelation>> flagStateListMap = sortFlagsByState(flagMapRecursive);
         flagEntries.addAll(buildFlagEntries(flagStateListMap, FlagState.ALLOWED));
         flagEntries.addAll(buildFlagEntries(flagStateListMap, FlagState.DENIED));
         flagEntries.addAll(buildFlagEntries(flagStateListMap, FlagState.DISABLED));
         return flagEntries;
     }
 
-    public static List<Component> buildFlagEntries(List<FlagMessage.FlagCorrelation> flags) {
+    public static List<Component> buildFlagEntries(List<FlagCorrelation> flags) {
         return flags.stream()
                 .map(fc -> buildRemoveFlagEntry(fc.getRegion(), fc.getFlag(), colorForState(fc.getFlag().getState())))
                 .collect(Collectors.toList());
     }
 
-    public static List<MutableComponent> buildFlagEntries(Map<FlagState, List<FlagMessage.FlagCorrelation>> flagStateListMap, FlagState state) {
-        List<FlagMessage.FlagCorrelation> flagsByState = flagStateListMap.get(state);
+    public static List<MutableComponent> buildFlagEntries(Map<FlagState, List<FlagCorrelation>> flagStateListMap, FlagState state) {
+        List<FlagCorrelation> flagsByState = flagStateListMap.get(state);
         flagsByState.sort(Comparator.comparing(flagCorrelation -> flagCorrelation.getFlag().getName()));
         return flagsByState.stream()
                 .map(flagCorrelation -> buildRemoveFlagEntry(flagCorrelation.getRegion(), flagCorrelation.getFlag(), colorForState(state)))
@@ -143,16 +143,16 @@ public class ResponsibleFlagPagination extends BasePaginationMessage<FlagMessage
         return flagStateListMap;
     }
 
-    public static Map<FlagState, List<FlagMessage.FlagCorrelation>> sortFlagsByState(Map<String, FlagMessage.FlagCorrelation> flagMap) {
-        HashMap<FlagState, List<FlagMessage.FlagCorrelation>> flagStateListMap = new HashMap<>();
+    public static Map<FlagState, List<FlagCorrelation>> sortFlagsByState(Map<String, FlagCorrelation> flagMap) {
+        HashMap<FlagState, List<FlagCorrelation>> flagStateListMap = new HashMap<>();
         flagStateListMap.put(FlagState.DENIED, getCorrelationByState(flagMap, FlagState.DENIED));
         flagStateListMap.put(FlagState.ALLOWED, getCorrelationByState(flagMap, FlagState.ALLOWED));
         flagStateListMap.put(FlagState.DISABLED, getCorrelationByState(flagMap, FlagState.DISABLED));
         return flagStateListMap;
     }
 
-    public static List<FlagMessage.FlagCorrelation> getCorrelations(IProtectedRegion region) {
-        Map<String, FlagMessage.FlagCorrelation> flagMap = getFlagMapRecursive(region, null);
+    public static List<FlagCorrelation> getCorrelations(IProtectedRegion region) {
+        Map<String, FlagCorrelation> flagMap = getFlagMapRecursive(region, null);
         return flagMap.values().stream()
                 .filter(c -> c.getFlag() != null)
                 .sorted(Comparator.comparing(c -> c.getFlag().getState()))
@@ -160,7 +160,7 @@ public class ResponsibleFlagPagination extends BasePaginationMessage<FlagMessage
                 .collect(Collectors.toList());
     }
 
-    private static List<FlagMessage.FlagCorrelation> getCorrelationByState(Map<String, FlagMessage.FlagCorrelation> flagMap, FlagState state) {
+    private static List<FlagCorrelation> getCorrelationByState(Map<String, FlagCorrelation> flagMap, FlagState state) {
         return flagMap.values().stream()
                 .filter(c -> c.getFlag() != null) // TODO: ??
                 .filter(c -> c.getFlag().getState() == state)

@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.api.core;
 
 import de.z0rdak.yawp.core.area.CuboidArea;
-import de.z0rdak.yawp.core.flag.FlagMessage;
+import de.z0rdak.yawp.core.flag.FlagCorrelation;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
@@ -241,13 +241,13 @@ public final class RegionManager implements IRegionManager {
         }
 
         @Override
-        public Optional<FlagMessage.FlagCorrelation> getResponsibleRegionAndFlag(BlockPos pos, RegionFlag flag) {
+        public Optional<FlagCorrelation> getResponsibleRegionAndFlag(BlockPos pos, RegionFlag flag) {
             Optional<IProtectedRegion> responsibleRegion = getResponsible(pos);
             if (responsibleRegion.isEmpty()) {
                 return Optional.empty();
             }
             IProtectedRegion region = responsibleRegion.get();
-            FlagMessage.FlagCorrelation flagCorrelation = getResponsibleFlag(region, flag, null);
+            FlagCorrelation flagCorrelation = getResponsibleFlag(region, flag, null);
             return Optional.of(flagCorrelation);
         }
 

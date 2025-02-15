@@ -5,9 +5,8 @@ import de.z0rdak.yawp.api.commands.Commands;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.area.CuboidArea;
-import de.z0rdak.yawp.core.flag.FlagMessage;
+import de.z0rdak.yawp.core.flag.FlagCorrelation;
 import de.z0rdak.yawp.core.flag.IFlag;
-import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.group.GroupType;
 import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
@@ -373,7 +372,7 @@ public class ChatLinkBuilder {
      * @return [n] responsible flag(s) | [m] flag(s) [+]
      */
     public static MutableComponent buildResponsibleFlagListLink(IProtectedRegion region) {
-        Map<String, FlagMessage.FlagCorrelation> flagsInHierarchy = getFlagMapRecursive(region, null);
+        Map<String, FlagCorrelation> flagsInHierarchy = getFlagMapRecursive(region, null);
         MutableComponent responsibleFlagsNumber = buildTextWithHoverMsg(Messages.substitutable("%s", flagsInHierarchy.size()), Component.translatableWithFallback("cli.msg.info.region.flag.responsible.number.hover", "%s responsible flag(s) applicable for %s", flagsInHierarchy.size(), region.getName()), LINK_COLOR);
         MutableComponent responsibleFlagListHoverText = Component.translatableWithFallback("cli.msg.info.region.flag.responsible.link.hover", "Show responsible region flags for %s", region.getName());
         String flagListCmd = buildListFlagsCommand(region);

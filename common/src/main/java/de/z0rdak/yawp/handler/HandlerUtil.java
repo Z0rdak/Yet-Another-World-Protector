@@ -4,6 +4,7 @@ import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
 import de.z0rdak.yawp.api.permission.Permissions;
 import de.z0rdak.yawp.core.flag.*;
+import de.z0rdak.yawp.core.flag.FlagCorrelation;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.data.region.RegionDataManager;
@@ -167,7 +168,7 @@ public final class HandlerUtil {
         if (targetRegion == null) {
             return FlagCheckResult.Undefined(checkEvent);
         }
-        FlagMessage.FlagCorrelation responsibleFlag = getResponsibleFlag(targetRegion, regionFlag, null);
+        FlagCorrelation responsibleFlag = getResponsibleFlag(targetRegion, regionFlag, null);
         FlagState playerRelatedState = getFlagState(responsibleFlag.getRegion(), regionFlag, checkEvent.getPlayer());
         return new FlagCheckResult(checkEvent, playerRelatedState, responsibleFlag.getRegion(), responsibleFlag.getFlag());
     }
@@ -253,18 +254,18 @@ public final class HandlerUtil {
         }
     }
 
-    public static Map<String, FlagMessage.FlagCorrelation> getFlagMapRecursive(IProtectedRegion region, Map<String, FlagMessage.FlagCorrelation> carry) {
+    public static Map<String, FlagCorrelation> getFlagMapRecursive(IProtectedRegion region, Map<String, FlagCorrelation> carry) {
         if (carry == null) {
             carry = region.getFlags().flagEntries().stream()
                     .filter(flag -> flag.getValue().getState() != FlagState.UNDEFINED)
-                    .collect(Collectors.toMap(Map.Entry::getKey, entry -> new FlagMessage.FlagCorrelation(region, entry.getValue())));
+                    .collect(Collectors.toMap(Map.Entry::getKey, entry -> new FlagCorrelation(region, entry.getValue())));
         }
         if (region.equals(region.getParent())) {
             // global region has itself as parent
             Set<Map.Entry<String, IFlag>> flags = getNonUndefinedFlags(region);
             for (Map.Entry<String, IFlag> entry : flags) {
                 if (!carry.containsKey(entry.getKey())) {
-                    carry.put(entry.getValue().getName(), new FlagMessage.FlagCorrelation(region, entry.getValue()));
+                    carry.put(entry.getValue().getName(), new FlagCorrelation(region, entry.getValue()));
                 }
             }
             return carry;
@@ -272,10 +273,10 @@ public final class HandlerUtil {
         Set<Map.Entry<String, IFlag>> parentFlags = getNonUndefinedFlags(region.getParent());
         for (Map.Entry<String, IFlag> entry : parentFlags) {
             if (!carry.containsKey(entry.getKey())) {
-                carry.put(entry.getValue().getName(), new FlagMessage.FlagCorrelation(region.getParent(), entry.getValue()));
+                carry.put(entry.getValue().getName(), new FlagCorrelation(region.getParent(), entry.getValue()));
             }
             if (entry.getValue().doesOverride()) {
-                carry.put(entry.getValue().getName(), new FlagMessage.FlagCorrelation(region.getParent(), entry.getValue()));
+                carry.put(entry.getValue().getName(), new FlagCorrelation(region.getParent(), entry.getValue()));
             }
         }
         return getFlagMapRecursive(region.getParent(), carry);
@@ -350,12 +351,12 @@ public final class HandlerUtil {
      * @param carry      the flag correlation to carry (initially null)
      * @return the flag correlation for the given region and flag
      */
-    private static FlagMessage.FlagCorrelation getFlagCorrelation(IProtectedRegion region, RegionFlag regionFlag, @Nullable FlagMessage.FlagCorrelation carry) {
+    private static FlagCorrelation getFlagCorrelation(IProtectedRegion region, RegionFlag regionFlag, @Nullable FlagCorrelation carry) {
         if (region.equals(region.getParent())) {
             if (region.getFlags().flagState(regionFlag.name) != FlagState.UNDEFINED) {
                 IFlag flag = region.getFlag(regionFlag.name);
                 if (flag.doesOverride()) {
-                    carry = new FlagMessage.FlagCorrelation(region, flag);
+                    carry = new FlagCorrelation(region, flag);
                 }
             }
             return carry;
@@ -363,24 +364,24 @@ public final class HandlerUtil {
         FlagState flagState = region.getFlags().flagState(regionFlag.name);
         if (flagState != FlagState.UNDEFINED) {
             // allowed or denied
-            carry = new FlagMessage.FlagCorrelation(region, region.getFlag(regionFlag.name));
+            carry = new FlagCorrelation(region, region.getFlag(regionFlag.name));
         }
         return getFlagCorrelation(region.getParent(), regionFlag, carry);
     }
 
-    public static FlagMessage.FlagCorrelation getResponsibleFlag(IProtectedRegion region, RegionFlag regionFlag, @Nullable FlagMessage.FlagCorrelation carry) {
+    public static FlagCorrelation getResponsibleFlag(IProtectedRegion region, RegionFlag regionFlag, @Nullable FlagCorrelation carry) {
         if (carry == null) {
             FlagState flagState = region.getFlags().flagState(regionFlag.name);
             if (flagState == FlagState.ALLOWED || flagState == FlagState.DENIED) {
                 IFlag flag = region.getFlag(regionFlag.name);
-                carry = new FlagMessage.FlagCorrelation(region, flag);
+                carry = new FlagCorrelation(region, flag);
             } else
-                carry = new FlagMessage.FlagCorrelation(region, null);
+                carry = new FlagCorrelation(region, null);
         }
         if (region.equals(region.getParent())) {
             if (region.getFlags().flagState(regionFlag.name) != FlagState.UNDEFINED) {
                 if (carry.getFlag() == null) {
-                    carry = new FlagMessage.FlagCorrelation(region, region.getFlag(regionFlag.name));
+                    carry = new FlagCorrelation(region, region.getFlag(regionFlag.name));
                 }
             }
             return carry;
@@ -389,10 +390,10 @@ public final class HandlerUtil {
         if (flagState == FlagState.ALLOWED || flagState == FlagState.DENIED) {
             IFlag flag = region.getParent().getFlag(regionFlag.name);
             if (carry.getFlag() == null) {
-                carry = new FlagMessage.FlagCorrelation(region.getParent(), flag);
+                carry = new FlagCorrelation(region.getParent(), flag);
             }
             if (flag.doesOverride()) {
-                carry = new FlagMessage.FlagCorrelation(region.getParent(), flag);
+                carry = new FlagCorrelation(region.getParent(), flag);
             }
         }
         return getResponsibleFlag(region.getParent(), regionFlag, carry);
