@@ -7,15 +7,20 @@ import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import javax.annotation.Nullable;
 
 import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
 
 // TODO: Remove with WorldEdit integration feature
 @Mixin(AnvilMenu.class)
 public abstract class AnvilScreenHandlerMixin {
+
+    @Shadow @Nullable private String itemName;
 
     @Inject(method = "onTake", at = @At("HEAD"), cancellable = true, allow = 1)
     private void onTakeOutput(Player player, ItemStack outputItem, CallbackInfo ci) {
@@ -27,7 +32,8 @@ public abstract class AnvilScreenHandlerMixin {
                 ItemStack stick = Items.STICK.getDefaultInstance();
                 boolean isInputAndOutputStick = ItemStack.isSameItem(outputItem, stick)
                         && ItemStack.isSameItem(inputItem, stick);
-                if (isInputAndOutputStick && ingredientInput.isEmpty()) {
+                var outputIsNamedAsMarker = this.itemName != null && this.itemName.equals(StickType.MARKER.stickName);
+                if (isInputAndOutputStick && ingredientInput.isEmpty() && outputIsNamedAsMarker) {
                     MarkerStickHandler.onCreateStick(player, inputItem, outputItem, StickType.MARKER);
                     player.getInventory().setChanged();
                     ci.cancel();
