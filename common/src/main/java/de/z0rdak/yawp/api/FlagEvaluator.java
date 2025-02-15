@@ -12,8 +12,9 @@ import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.data.region.RegionDataManager;
+import de.z0rdak.yawp.core.flag.FlagContext;
 import de.z0rdak.yawp.handler.HandlerUtil;
-import de.z0rdak.yawp.handler.RegionFlagResolution;
+import de.z0rdak.yawp.core.flag.RegionFlagResolution;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
@@ -62,15 +63,11 @@ public class FlagEvaluator {
     public static FlagState processCheck(@NotNull FlagCheckEvent checkEvent, @Nullable Consumer<FlagCheckResult> onAllow, @Nullable Consumer<FlagCheckResult> onDeny) {
         FlagCheckResult result = evaluate(checkEvent);
         result = Services.EVENT.post(result);
-        if (result.getFlagState() == FlagState.ALLOWED
-                || result.getFlagState() == FlagState.UNDEFINED
-                || result.getFlagState() == FlagState.DISABLED) {
-            if (onAllow != null)
-                onAllow.accept(result);
+        if (result.getFlagState() == FlagState.ALLOWED && onAllow != null) {
+            onAllow.accept(result);
         }
-        if (result.getFlagState() == FlagState.DENIED) {
-            if (onDeny != null)
-                onDeny.accept(result);
+        if (result.getFlagState() == FlagState.DENIED && onDeny != null) {
+            onDeny.accept(result);
         }
         return result.getFlagState();
     }
