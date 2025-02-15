@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.mixin.flag;
 
+import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.world.entity.monster.Shulker;
@@ -20,7 +21,7 @@ public abstract class ShulkerEntityMixin {
             FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), SHULKER_TELEPORT_FROM_REGION, getDimKey(self));
             if (Services.EVENT.post(checkEvent))
                 return;
-            processCheck(checkEvent, deny -> cir.setReturnValue(false));
+            FlagEvaluator.processCheck(checkEvent, deny -> cir.setReturnValue(false));
         }
     }
 }

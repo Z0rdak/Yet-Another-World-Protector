@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
-import de.z0rdak.yawp.handler.HandlerUtil;
+import de.z0rdak.yawp.api.FlagEvaluator;
 import net.minecraft.world.entity.animal.Fox;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -21,6 +21,6 @@ public class FoxEatBerriesGoalMixin {
 
     @Inject(method = "onReachedTarget", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onEatBerries(CallbackInfo ci) {
-        HandlerUtil.checkMobGrief(fox, ci);
+        FlagEvaluator.checkMobGrief(fox, ci);
     }
 }

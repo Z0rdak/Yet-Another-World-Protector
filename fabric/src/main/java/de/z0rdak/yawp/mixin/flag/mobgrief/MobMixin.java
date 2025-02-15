@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
-import de.z0rdak.yawp.handler.HandlerUtil;
+import de.z0rdak.yawp.api.FlagEvaluator;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,7 +18,7 @@ public abstract class MobMixin {
         Mob self = (Mob) (Object) this;
         Level world = self.level();
         if (isServerSide(world) && self.canPickUpLoot() && self.isAlive()) {
-            HandlerUtil.checkMobGrief(self, ci);
+            FlagEvaluator.checkMobGrief(self, ci);
         }
     }
 

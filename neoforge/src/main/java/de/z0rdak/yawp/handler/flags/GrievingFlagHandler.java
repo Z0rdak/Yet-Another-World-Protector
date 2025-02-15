@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.handler.flags;
 
+import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.FlagState;
@@ -48,7 +49,7 @@ public class GrievingFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            FlagState flagState = processCheck(checkEvent, denyResult -> {
+            FlagState flagState = FlagEvaluator.processCheck(checkEvent, denyResult -> {
                 event.setCanceled(true);
                 sendFlagMsg(denyResult);
             });
@@ -60,7 +61,7 @@ public class GrievingFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, denyResult -> {
+                FlagEvaluator.processCheck(checkEvent, denyResult -> {
                     event.setCanceled(true);
                     sendFlagMsg(denyResult);
                 });
@@ -69,7 +70,7 @@ public class GrievingFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, denyResult -> {
+                FlagEvaluator.processCheck(checkEvent, denyResult -> {
                     event.setCanceled(true);
                 });
             }
@@ -102,7 +103,7 @@ public class GrievingFlagHandler {
                 }
             }
             if (checkEvent != null) {
-                processCheck(checkEvent, denyResult -> {
+                FlagEvaluator.processCheck(checkEvent, denyResult -> {
                     event.setCanceled(true);
                 });
             }
@@ -121,7 +122,7 @@ public class GrievingFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            FlagState flagState = processCheck(checkEvent, denyResult -> {
+            FlagState flagState = FlagEvaluator.processCheck(checkEvent, denyResult -> {
                 event.setCanceled(true);
                 sendFlagMsg(denyResult);
             });
@@ -132,7 +133,7 @@ public class GrievingFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, denyResult -> {
+                FlagEvaluator.processCheck(checkEvent, denyResult -> {
                     event.setCanceled(true);
                     sendFlagMsg(denyResult);
                 });
@@ -153,7 +154,7 @@ public class GrievingFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                FlagState flagState = processCheck(checkEvent, denyResult -> {
+                FlagState flagState = FlagEvaluator.processCheck(checkEvent, denyResult -> {
                     event.setCanceled(true);
                 });
                 if (flagState == FlagState.DENIED)
@@ -164,7 +165,7 @@ public class GrievingFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                flagState = processCheck(checkEvent, denyResult -> {
+                flagState = FlagEvaluator.processCheck(checkEvent, denyResult -> {
                     event.setCanceled(true);
                     sendFlagMsg(denyResult);
                 });
@@ -177,7 +178,7 @@ public class GrievingFlagHandler {
                     if (Services.EVENT.post(checkEvent)) {
                         return;
                     }
-                    flagState = processCheck(checkEvent, denyResult -> {
+                    flagState = FlagEvaluator.processCheck(checkEvent, denyResult -> {
                         event.setCanceled(true);
                         sendFlagMsg(denyResult);
                     });
@@ -188,7 +189,7 @@ public class GrievingFlagHandler {
                     if (Services.EVENT.post(checkEvent)) {
                         return;
                     }
-                    processCheck(checkEvent, denyResult -> {
+                    FlagEvaluator.processCheck(checkEvent, denyResult -> {
                         event.setCanceled(true);
                         sendFlagMsg(denyResult);
                     });
@@ -199,7 +200,7 @@ public class GrievingFlagHandler {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(xpDroppingEntity.blockPosition(), RegionFlag.KEEP_XP, getDimKey(xpDroppingEntity));
                 if (Services.EVENT.post(checkEvent))
                     return;
-                processCheck(checkEvent, deny -> {
+                FlagEvaluator.processCheck(checkEvent, deny -> {
                     event.setCanceled(true);
                 });
             }
@@ -216,7 +217,7 @@ public class GrievingFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            FlagState flagState = processCheck(checkEvent, denyResult -> {
+            FlagState flagState = FlagEvaluator.processCheck(checkEvent, denyResult -> {
                 event.setCanGrief(false);
                 //.setResult(Event.Result.DENY);
             });
@@ -227,7 +228,7 @@ public class GrievingFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, denyResult -> {
+                FlagEvaluator.processCheck(checkEvent, denyResult -> {
                     event.setCanGrief(false);
                     //event.setResult(Event.Result.DENY);
                 });
@@ -284,7 +285,7 @@ public class GrievingFlagHandler {
                 return true;
             }
             // TODO: Same for check result, here we only need one result for all blocks
-            FlagState flagState = processCheck(checkEvent, null, null);
+            FlagState flagState = FlagEvaluator.processCheck(checkEvent, null, null);
             return flagState == FlagState.DENIED;
         };
     }
@@ -298,7 +299,7 @@ public class GrievingFlagHandler {
                 return true;
             }
             // TODO: Same for check result, here we only need one result for all blocks
-            FlagState flagState = processCheck(checkEvent, null, null);
+            FlagState flagState = FlagEvaluator.processCheck(checkEvent, null, null);
             return flagState == FlagState.DENIED;
         };
     }

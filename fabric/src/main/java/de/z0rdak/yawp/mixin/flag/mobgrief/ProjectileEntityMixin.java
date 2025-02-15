@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
-import de.z0rdak.yawp.handler.HandlerUtil;
+import de.z0rdak.yawp.api.FlagEvaluator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
@@ -15,7 +15,7 @@ public abstract class ProjectileEntityMixin {
     public void onCanModifyAt(Level world, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         Projectile self = (Projectile) (Object) this;
         if (self.getOwner() != null) {
-            HandlerUtil.checkMobGrief(self, cir);
+            FlagEvaluator.checkMobGrief(self, cir);
         }
     }
 }

@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
 
+import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.world.entity.Mob;
@@ -28,7 +29,7 @@ public abstract class BreakDoorGoal extends DoorInteractGoal {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, deny -> {
+            FlagEvaluator.processCheck(checkEvent, deny -> {
                 cir.setReturnValue(false);
             });
 
@@ -36,7 +37,7 @@ public abstract class BreakDoorGoal extends DoorInteractGoal {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, deny -> {
+            FlagEvaluator.processCheck(checkEvent, deny -> {
                 cir.setReturnValue(null);
             });
         }

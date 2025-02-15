@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
-import de.z0rdak.yawp.handler.HandlerUtil;
+import de.z0rdak.yawp.api.FlagEvaluator;
 import net.minecraft.world.entity.animal.Rabbit;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,7 +18,7 @@ public class RabbitRaidGardenGoalMixin {
 
     @Inject(method = "canUse", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onCanStart(CallbackInfoReturnable<Boolean> cir) {
-        HandlerUtil.checkMobGrief(rabbit, cir);
+        FlagEvaluator.checkMobGrief(rabbit, cir);
     }
 
 

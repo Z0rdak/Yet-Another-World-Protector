@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.mixin.flag;
 
+import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.server.level.ServerLevel;
@@ -27,56 +28,56 @@ public class ServerWorldMixin {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, deny -> cir.setReturnValue(false));
+            FlagEvaluator.processCheck(checkEvent, deny -> cir.setReturnValue(false));
 
             if (isMonster(entity)) {
                 checkEvent = new FlagCheckEvent(entity.blockPosition(), SPAWNING_MONSTER, getDimKey(entity));
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, deny -> cir.setReturnValue(false));
+                FlagEvaluator.processCheck(checkEvent, deny -> cir.setReturnValue(false));
             }
             if (isAnimal(entity)) {
                 checkEvent = new FlagCheckEvent(entity.blockPosition(), SPAWNING_ANIMAL, getDimKey(entity));
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, deny -> cir.setReturnValue(false));
+                FlagEvaluator.processCheck(checkEvent, deny -> cir.setReturnValue(false));
             }
             if (isVillager(entity)) {
                 checkEvent = new FlagCheckEvent(entity.blockPosition(), SPAWNING_VILLAGER, getDimKey(entity));
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, deny -> cir.setReturnValue(false));
+                FlagEvaluator.processCheck(checkEvent, deny -> cir.setReturnValue(false));
             }
             if (entity instanceof WanderingTrader) {
                 checkEvent = new FlagCheckEvent(entity.blockPosition(), SPAWNING_TRADER, getDimKey(entity));
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, deny -> cir.setReturnValue(false));
+                FlagEvaluator.processCheck(checkEvent, deny -> cir.setReturnValue(false));
             }
             if (entity instanceof SnowGolem || entity instanceof IronGolem) {
                 checkEvent = new FlagCheckEvent(entity.blockPosition(), SPAWNING_GOLEM, getDimKey(entity));
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, deny -> cir.setReturnValue(false));
+                FlagEvaluator.processCheck(checkEvent, deny -> cir.setReturnValue(false));
             }
             if (entity instanceof Slime) {
                 checkEvent = new FlagCheckEvent(entity.blockPosition(), SPAWNING_SLIME, getDimKey(entity));
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, deny -> cir.setReturnValue(false));
+                FlagEvaluator.processCheck(checkEvent, deny -> cir.setReturnValue(false));
             }
             if (entity instanceof ExperienceOrb) {
                 checkEvent = new FlagCheckEvent(entity.blockPosition(), SPAWNING_XP, getDimKey(entity));
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, deny -> cir.setReturnValue(false));
+                FlagEvaluator.processCheck(checkEvent, deny -> cir.setReturnValue(false));
             }
         }
     }

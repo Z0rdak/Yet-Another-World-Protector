@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.mixin.flag;
 
+import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.Services;
@@ -36,7 +37,7 @@ public abstract class EntityMixin {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, deny -> {
+                FlagEvaluator.processCheck(checkEvent, deny -> {
                     sendFlagMsg(deny);
                     cir.setReturnValue(false);
                 });
@@ -52,7 +53,7 @@ public abstract class EntityMixin {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, deny -> {
+            FlagEvaluator.processCheck(checkEvent, deny -> {
                 ci.cancel();
             });
         }
@@ -67,7 +68,7 @@ public abstract class EntityMixin {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, deny -> {
+                FlagEvaluator.processCheck(checkEvent, deny -> {
                     sendFlagMsg(deny);
                     ci.cancel();
                 });
@@ -88,7 +89,7 @@ public abstract class EntityMixin {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, deny -> {
+            FlagEvaluator.processCheck(checkEvent, deny -> {
                 cir.setReturnValue(null);
             });
             if (self instanceof Player player) {
@@ -96,7 +97,7 @@ public abstract class EntityMixin {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, deny -> {
+                FlagEvaluator.processCheck(checkEvent, deny -> {
                     sendFlagMsg(deny);
                     cir.setReturnValue(null);
                 });
@@ -106,7 +107,7 @@ public abstract class EntityMixin {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, deny -> {
+                FlagEvaluator.processCheck(checkEvent, deny -> {
                     cir.setReturnValue(null);
                 });
             }
@@ -115,7 +116,7 @@ public abstract class EntityMixin {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, deny -> {
+                FlagEvaluator.processCheck(checkEvent, deny -> {
                     cir.setReturnValue(null);
                 });
             }
@@ -124,7 +125,7 @@ public abstract class EntityMixin {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, deny -> {
+                FlagEvaluator.processCheck(checkEvent, deny -> {
                     cir.setReturnValue(null);
                 });
             }
@@ -133,7 +134,7 @@ public abstract class EntityMixin {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, deny -> {
+                FlagEvaluator.processCheck(checkEvent, deny -> {
                     cir.setReturnValue(null);
                 });
             }
@@ -142,7 +143,7 @@ public abstract class EntityMixin {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, deny -> {
+                FlagEvaluator.processCheck(checkEvent, deny -> {
                     cir.setReturnValue(null);
                 });
             }
