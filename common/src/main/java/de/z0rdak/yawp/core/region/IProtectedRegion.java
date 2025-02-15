@@ -10,7 +10,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -44,13 +43,11 @@ public interface IProtectedRegion extends INbtSerializable<CompoundTag> {
 
     boolean containsFlag(RegionFlag flag);
 
-    Collection<IFlag> getFlags();
-
     void setFlags(RegionFlags flags);
 
     void setGroups(Map<String, PlayerContainer> groups);
 
-    RegionFlags getRegionFlags();
+    RegionFlags getFlags();
 
     IFlag getFlag(String flagName);
 

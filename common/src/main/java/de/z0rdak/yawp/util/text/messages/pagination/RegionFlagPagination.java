@@ -30,7 +30,7 @@ public class RegionFlagPagination extends BasePaginationMessage<IFlag> {
     private final IProtectedRegion region;
 
     public RegionFlagPagination(IProtectedRegion region, int pageNumber, int pageSize) throws InvalidPageNumberException {
-        super(region.getFlags().stream().toList(), buildListRegionFlagsCommand(region), pageNumber, pageSize);
+        super(region.getFlags().flags(), buildListRegionFlagsCommand(region), pageNumber, pageSize);
         this.region = region;
     }
 
@@ -39,7 +39,7 @@ public class RegionFlagPagination extends BasePaginationMessage<IFlag> {
     }
 
     public static List<Component> buildRegionFlagEntries(IProtectedRegion region) {
-        return buildRegionFlagEntries(region, region.getRegionFlags().flags().stream().toList());
+        return buildRegionFlagEntries(region, region.getFlags().flags());
     }
 
     public static List<Component> buildRegionFlagEntries(IProtectedRegion region, List<IFlag> selectedFlags) {

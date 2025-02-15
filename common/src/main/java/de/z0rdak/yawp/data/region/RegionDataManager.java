@@ -375,7 +375,7 @@ public class RegionDataManager extends SavedData {
 
     public List<String> getFlagsIdsForDim(DimensionRegionCache dimCache) {
         if (dimCache != null) {
-            return dimCache.getDimensionalRegion().getFlags()
+            return dimCache.getDimensionalRegion().getFlags().flags()
                     .stream()
                     .map(IFlag::getName)
                     .collect(Collectors.toList());

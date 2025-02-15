@@ -47,6 +47,10 @@ public interface IFlagContainer extends INbtSerializable<CompoundTag> {
 
     void clear();
 
+    boolean isEmpty();
+    
+    int size();
+    
     /**
      * Retrieves the state of the specified flag.
      *

@@ -76,6 +76,16 @@ public class RegionFlags implements IFlagContainer {
     }
 
     @Override
+    public boolean isEmpty() {
+        return flags.isEmpty();
+    }
+
+    @Override
+    public int size() {
+        return flags.size();
+    }
+
+    @Override
     public Set<Map.Entry<String, IFlag>> flagEntries() {
         return Collections.unmodifiableSet(flags.entrySet());
     }

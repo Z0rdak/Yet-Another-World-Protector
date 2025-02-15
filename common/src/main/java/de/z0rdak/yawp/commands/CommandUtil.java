@@ -574,11 +574,11 @@ public class CommandUtil {
             return 1;
         }
         // get the flags which are in the srcRegion but not in the targetRegion
-        Set<IFlag> flagsToCopy = srcRegion.getFlags().stream()
+        Set<IFlag> flagsToCopy = srcRegion.getFlags().flags().stream()
                 .filter(flag -> !targetRegion.containsFlag(flag.getName()))
                 .collect(Collectors.toSet());
         // flagsToCopy.forEach(region::addFlag);
-        srcRegion.getFlags().forEach(targetRegion::addFlag);
+        srcRegion.getFlags().flags().forEach(targetRegion::addFlag);
         RegionDataManager.save();
         sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.copy.region.flags", "Copied %s flag(s) from region %s to %s", flagsToCopy.size(), ChatLinkBuilder.buildRegionInfoLink(srcRegion), ChatLinkBuilder.buildRegionInfoLink(targetRegion)));
         return 0;
@@ -624,7 +624,7 @@ public class CommandUtil {
             sendCmdFeedback(ctx.getSource(), feedbackMsg);
             return 1;
         }
-        Collection<IFlag> flags = region.getFlags(); // TODO: Undo action link
+        Collection<IFlag> flags = region.getFlags().flags(); // TODO: Undo action link
         region.getFlags().clear();
         MutableComponent feedbackMsg = Component.translatableWithFallback("cli.msg.info.region.flag.cleared", "Removed %s flag(s) from %s", amount, ChatLinkBuilder.buildRegionInfoLink(region));
         sendCmdFeedback(ctx.getSource(), feedbackMsg);
