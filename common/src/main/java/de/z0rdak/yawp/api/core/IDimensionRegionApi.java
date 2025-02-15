@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.api.core;
 
-import de.z0rdak.yawp.core.flag.FlagMessage;
+import de.z0rdak.yawp.core.flag.FlagCorrelation;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
@@ -129,7 +129,7 @@ public interface IDimensionRegionApi {
      */
     boolean removeLocalRegion(String regionName);
 
-    Optional<FlagMessage.FlagCorrelation> getResponsibleRegionAndFlag(BlockPos pos, RegionFlag flag);
+    Optional<FlagCorrelation> getResponsibleRegionAndFlag(BlockPos pos, RegionFlag flag);
 
     /**
      * Gets the region with the highest priority among all involved regions at the given location and dimension. <br>
