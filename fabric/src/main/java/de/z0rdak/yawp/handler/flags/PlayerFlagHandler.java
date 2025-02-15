@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.handler.flags;
 
+import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.core.flag.FlagState;
@@ -81,7 +82,7 @@ public final class PlayerFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return InteractionResultHolder.pass(stackInHand);
             }
-            FlagState flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
+            FlagState flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
             if (flagState == FlagState.DENIED) {
                 return InteractionResultHolder.fail(stackInHand);
             }
@@ -123,7 +124,7 @@ public final class PlayerFlagHandler {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(targetPos, USE_BLOCKS, getDimKey(player), player);
                 if (Services.EVENT.post(checkEvent))
                     return InteractionResult.PASS;
-                FlagState flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
+                FlagState flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
                 if (flagState == FlagState.DENIED)
                     return InteractionResult.FAIL;
 
@@ -134,7 +135,7 @@ public final class PlayerFlagHandler {
                         checkEvent = new FlagCheckEvent(targetPos, ENDER_CHEST_ACCESS, getDimKey(player), player);
                         if (Services.EVENT.post(checkEvent))
                             return InteractionResult.PASS;
-                        flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
+                        flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
                         if (flagState == FlagState.DENIED)
                             return InteractionResult.FAIL;
                     }
@@ -145,7 +146,7 @@ public final class PlayerFlagHandler {
                         checkEvent = new FlagCheckEvent(targetPos, CONTAINER_ACCESS, getDimKey(player), player);
                         if (Services.EVENT.post(checkEvent))
                             return InteractionResult.PASS;
-                        flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
+                        flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
                         if (flagState == FlagState.DENIED)
                             return InteractionResult.FAIL;
                     }
@@ -174,7 +175,7 @@ public final class PlayerFlagHandler {
                     if (Services.EVENT.post(checkEvent)) {
                         return InteractionResult.PASS;
                     }
-                    FlagState flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
+                    FlagState flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
                     if (flagState == FlagState.DENIED) {
                         return InteractionResult.FAIL;
                     }
@@ -187,7 +188,7 @@ public final class PlayerFlagHandler {
                     FlagCheckEvent checkEvent = new FlagCheckEvent(placeBlockTarget, PLACE_BLOCKS, getDimKey(player), player);
                     if (Services.EVENT.post(checkEvent))
                         return InteractionResult.PASS;
-                    FlagState flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
+                    FlagState flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
                     if (flagState == FlagState.DENIED)
                         return InteractionResult.FAIL;
                 }
@@ -195,7 +196,7 @@ public final class PlayerFlagHandler {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(targetPos, USE_ITEMS, getDimKey(player), player);
                 if (Services.EVENT.post(checkEvent))
                     return InteractionResult.PASS;
-                FlagState flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
+                FlagState flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
                 if (flagState == FlagState.DENIED)
                     return InteractionResult.FAIL;
             }
@@ -238,7 +239,7 @@ public final class PlayerFlagHandler {
             FlagCheckEvent checkEvent = new FlagCheckEvent(entity.blockPosition(), USE_ENTITIES, getDimKey(player), player);
             if (Services.EVENT.post(checkEvent))
                 return InteractionResult.PASS;
-            FlagState flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
+            FlagState flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
             if (flagState == FlagState.DENIED)
                 return InteractionResult.FAIL;
 
@@ -246,7 +247,7 @@ public final class PlayerFlagHandler {
                 checkEvent = new FlagCheckEvent(entity.blockPosition(), USE_ITEMS, getDimKey(player), player);
                 if (Services.EVENT.post(checkEvent))
                     return InteractionResult.PASS;
-                flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
+                flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
                 if (flagState == FlagState.DENIED)
                     return InteractionResult.FAIL;
             }
@@ -254,7 +255,7 @@ public final class PlayerFlagHandler {
                 checkEvent = new FlagCheckEvent(player.blockPosition(), CONTAINER_ACCESS, getDimKey(player), player);
                 if (Services.EVENT.post(checkEvent))
                     return InteractionResult.PASS;
-                flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
+                flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
                 if (flagState == FlagState.DENIED)
                     return InteractionResult.FAIL;
             }
@@ -272,7 +273,7 @@ public final class PlayerFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return InteractionResult.PASS;
             }
-            FlagState flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
+            FlagState flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
             return flagState == FlagState.DENIED ? InteractionResult.FAIL : InteractionResult.PASS;
         }
         return InteractionResult.PASS;
@@ -284,7 +285,7 @@ public final class PlayerFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return ALLOW;
             }
-            FlagState flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
+            FlagState flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
             return flagState != FlagState.DENIED;
         }
         return ALLOW;
@@ -296,7 +297,7 @@ public final class PlayerFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return null;
             }
-            FlagState flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
+            FlagState flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
             if (flagState == FlagState.DENIED) {
                 return Player.BedSleepingProblem.NOT_POSSIBLE_HERE;
             }
@@ -311,7 +312,7 @@ public final class PlayerFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return ALLOW;
                 }
-                FlagState flagState = processCheck(checkEvent, MessageSender::sendFlagMsg);
+                FlagState flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
                 return flagState != FlagState.DENIED;
             }
         }

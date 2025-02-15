@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
 import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
-import static de.z0rdak.yawp.handler.HandlerUtil.processCheck;
+import static de.z0rdak.yawp.api.FlagEvaluator.processCheck;
 
 @Mixin(targets = "net.minecraft.world.entity.monster.Silverfish$SilverfishWakeUpFriendsGoal")
 public abstract class SilverfishWakeUpFriendsGoalMixin {

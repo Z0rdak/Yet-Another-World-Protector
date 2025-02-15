@@ -1,15 +1,11 @@
 package de.z0rdak.yawp.mixin;
 
+import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
-import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.handler.HandlerUtil;
 import de.z0rdak.yawp.platform.Services;
-import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -31,7 +27,7 @@ public abstract class PlayerEntityMixin {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, denyResult -> cir.setReturnValue(false));
+            FlagEvaluator.processCheck(checkEvent, denyResult -> cir.setReturnValue(false));
         }
     }
 
@@ -43,7 +39,7 @@ public abstract class PlayerEntityMixin {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, denyResult -> ci.cancel());
+            FlagEvaluator.processCheck(checkEvent, denyResult -> ci.cancel());
         }
     }
 
@@ -54,7 +50,7 @@ public abstract class PlayerEntityMixin {
             FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), RegionFlag.NO_HUNGER, getDimKey(self), self);
             if (Services.EVENT.post(checkEvent))
                 return;
-            FlagState flagState = processCheck(checkEvent,
+            FlagState flagState = FlagEvaluator.processCheck(checkEvent,
                     deny -> { /* player has no permission -> do nothing to apply hunger */ }
             );
             if (flagState == FlagState.ALLOWED) {

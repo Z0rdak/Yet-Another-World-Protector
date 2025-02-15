@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
-import de.z0rdak.yawp.handler.HandlerUtil;
+import de.z0rdak.yawp.api.FlagEvaluator;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.item.ItemStack;
@@ -17,6 +17,6 @@ public abstract class AllayEntityMixin {
 
     @Inject(method = "canTakeItem", at = @At(value = "HEAD"), cancellable = true)
     public void onCanGather(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
-        HandlerUtil.checkMobGrief(self.level(), self.blockPosition(), cir);
+        FlagEvaluator.checkMobGrief(self.level(), self.blockPosition(), cir);
     }
 }

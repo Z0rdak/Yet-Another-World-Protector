@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.mixin;
 
+import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
-import de.z0rdak.yawp.handler.HandlerUtil;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -30,7 +30,7 @@ public class FlowingFluidMixin {
         if (Services.EVENT.post(checkEvent)) {
             return;
         }
-        HandlerUtil.processCheck(checkEvent, deny -> {
+        FlagEvaluator.processCheck(checkEvent, deny -> {
             cir.setReturnValue(false);
         });
         if (cir.isCancelled()) {
@@ -46,7 +46,7 @@ public class FlowingFluidMixin {
         if (specificFluidCheckEvent == null || Services.EVENT.post(specificFluidCheckEvent)) {
             return;
         }
-        HandlerUtil.processCheck(specificFluidCheckEvent, deny -> {
+        FlagEvaluator.processCheck(specificFluidCheckEvent, deny -> {
             cir.setReturnValue(false);
         });
     }

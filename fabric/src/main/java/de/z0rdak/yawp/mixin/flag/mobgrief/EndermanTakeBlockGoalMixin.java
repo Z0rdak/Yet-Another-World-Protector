@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import static de.z0rdak.yawp.core.flag.RegionFlag.ENDERMAN_GRIEFING;
 import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
 import static de.z0rdak.yawp.handler.HandlerUtil.getDimKey;
-import static de.z0rdak.yawp.handler.HandlerUtil.processCheck;
+import static de.z0rdak.yawp.api.FlagEvaluator.processCheck;
 
 @Mixin(targets = "net.minecraft.world.entity.monster.EnderMan$EndermanTakeBlockGoal")
 public abstract class EndermanTakeBlockGoalMixin {

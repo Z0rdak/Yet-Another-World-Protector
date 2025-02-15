@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.handler.flags;
 
+import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.platform.Services;
@@ -49,7 +50,7 @@ public class WorldFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, denyResult -> {
+            FlagEvaluator.processCheck(checkEvent, denyResult -> {
                 event.setCanceled(true);
                 event.getLightning().remove(Entity.RemovalReason.DISCARDED);
             });
@@ -63,7 +64,7 @@ public class WorldFlagHandler {
             return;
         }
 
-        processCheck(checkEvent, deny -> {
+        FlagEvaluator.processCheck(checkEvent, deny -> {
             event.setCanceled(true);
             event.setExtraLife(6000); // Reset age to avoid flag checking every tick.
         });
@@ -84,7 +85,7 @@ public class WorldFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, deny -> event.setCanceled(true));
+            FlagEvaluator.processCheck(checkEvent, deny -> event.setCanceled(true));
         }
     }
 
@@ -106,7 +107,7 @@ public class WorldFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, denyResult -> {
+            FlagEvaluator.processCheck(checkEvent, denyResult -> {
                 event.setCanceled(true);
             });
 
@@ -115,7 +116,7 @@ public class WorldFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, denyResult -> {
+                FlagEvaluator.processCheck(checkEvent, denyResult -> {
                     event.setCanceled(true);
                 });
             } else {
@@ -124,7 +125,7 @@ public class WorldFlagHandler {
                     if (Services.EVENT.post(checkEvent)) {
                         return;
                     }
-                    processCheck(checkEvent, denyResult -> {
+                    FlagEvaluator.processCheck(checkEvent, denyResult -> {
                         event.setCanceled(true);
                     });
                 }
@@ -173,7 +174,7 @@ public class WorldFlagHandler {
                     if (Services.EVENT.post(checkGeneralEvent)) {
                         return;
                     }
-                    processCheck(checkGeneralEvent, denyResult -> {
+                    FlagEvaluator.processCheck(checkGeneralEvent, denyResult -> {
                         event.setCanceled(true);
                         sendFlagMsg(denyResult);
                     });

@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
+import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
@@ -26,7 +27,7 @@ public abstract class WitherEntityMixin {
             FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, WITHER_BLOCK_PROT, getDimKey(self));
             if (Services.EVENT.post(checkEvent))
                 return;
-            processCheck(checkEvent, deny -> ci.cancel());
+            FlagEvaluator.processCheck(checkEvent, deny -> ci.cancel());
         }
     }
 
@@ -37,7 +38,7 @@ public abstract class WitherEntityMixin {
             FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), MOB_GRIEFING, getDimKey(self));
             if (Services.EVENT.post(checkEvent))
                 return;
-            processCheck(checkEvent, deny -> ci.cancel());
+            FlagEvaluator.processCheck(checkEvent, deny -> ci.cancel());
         }
     }
 }

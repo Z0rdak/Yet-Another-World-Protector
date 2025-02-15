@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
-import de.z0rdak.yawp.handler.HandlerUtil;
+import de.z0rdak.yawp.api.FlagEvaluator;
 import net.minecraft.world.entity.monster.Evoker;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -22,6 +22,6 @@ public abstract class EvokerWololoSpellGoal {
 
     @Inject(method = "canUse", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onCanStart(CallbackInfoReturnable<Boolean> cir) {
-        HandlerUtil.checkMobGrief(evoker, cir);
+        FlagEvaluator.checkMobGrief(evoker, cir);
     }
 }
