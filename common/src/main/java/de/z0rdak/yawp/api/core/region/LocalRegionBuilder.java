@@ -2,7 +2,7 @@ package de.z0rdak.yawp.api.core.region;
 
 import de.z0rdak.yawp.api.permission.Permissions;
 import de.z0rdak.yawp.core.area.AreaType;
-import de.z0rdak.yawp.core.flag.FlagContainer;
+import de.z0rdak.yawp.core.flag.RegionFlags;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
@@ -24,7 +24,7 @@ public abstract class LocalRegionBuilder<T extends IMarkableRegion> {
     protected ResourceKey<Level> dim;
     protected boolean active;
     protected boolean muted;
-    protected FlagContainer flags;
+    protected RegionFlags flags;
     protected AreaType areaType;
 
     protected LocalRegionBuilder(final String name) {
@@ -33,7 +33,7 @@ public abstract class LocalRegionBuilder<T extends IMarkableRegion> {
     }
 
     protected LocalRegionBuilder() {
-        this.flags = new FlagContainer();
+        this.flags = new RegionFlags();
         this.groups = new HashMap<>();
         this.active = true;
         this.muted = false;
@@ -111,19 +111,19 @@ public abstract class LocalRegionBuilder<T extends IMarkableRegion> {
         return this;
     }
 
-    public LocalRegionBuilder<T> withFlags(FlagContainer flags) {
+    public LocalRegionBuilder<T> withFlags(RegionFlags flags) {
         this.flags = flags;
         return this;
     }
 
     public LocalRegionBuilder<T> withFlags(List<IFlag> flags) {
-        if (this.flags == null) this.flags = new FlagContainer();
+        if (this.flags == null) this.flags = new RegionFlags();
         flags.forEach(flag -> this.flags.put(flag));
         return this;
     }
 
     public LocalRegionBuilder<T> addFlag(IFlag flag) {
-        if (this.flags == null) this.flags = new FlagContainer();
+        if (this.flags == null) this.flags = new RegionFlags();
         this.flags.put(flag);
         return this;
     }

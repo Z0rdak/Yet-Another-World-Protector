@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.core.region;
 
 import de.z0rdak.yawp.api.permission.Permissions;
-import de.z0rdak.yawp.core.flag.FlagContainer;
+import de.z0rdak.yawp.core.flag.RegionFlags;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.group.PlayerContainer;
@@ -32,7 +32,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
     protected String parentName;
     private String name;
     private RegionType regionType;
-    private FlagContainer flags;
+    private RegionFlags flags;
     private Map<String, PlayerContainer> groups;
     private boolean isActive;
     private boolean isMuted;
@@ -44,7 +44,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.children = new HashMap<>(0);
         this.parentName = null;
         this.parent = null;
-        this.flags = new FlagContainer();
+        this.flags = new RegionFlags();
         this.groups = new HashMap<>();
         this.groups.put(Permissions.MEMBER, new PlayerContainer(Permissions.MEMBER));
         this.groups.put(Permissions.OWNER, new PlayerContainer(Permissions.OWNER));
@@ -55,7 +55,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.name = name;
         this.dimension = dimension;
         this.regionType = type;
-        this.flags = new FlagContainer();
+        this.flags = new RegionFlags();
         this.groups = new HashMap<>();
         this.groups.put(Permissions.MEMBER, new PlayerContainer(Permissions.MEMBER));
         this.groups.put(Permissions.OWNER, new PlayerContainer(Permissions.OWNER));
@@ -120,15 +120,15 @@ public abstract class AbstractRegion implements IProtectedRegion {
 
     @Override
     public Collection<IFlag> getFlags() {
-        return Collections.unmodifiableList(new ArrayList<>(this.flags.values()));
+        return List.copyOf(this.flags.flags());
     }
 
-    public void setFlags(FlagContainer flags) {
+    public void setFlags(RegionFlags flags) {
         this.flags = flags;
     }
 
     @Override
-    public FlagContainer getFlagContainer() {
+    public RegionFlags getRegionFlags() {
         return flags;
     }
 
@@ -320,7 +320,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.isActive = nbt.getBoolean(ACTIVE);
         this.isMuted = nbt.getBoolean(MUTED);
         this.regionType = RegionType.of(nbt.getString(REGION_TYPE));
-        this.flags = new FlagContainer(nbt.getCompound(FLAGS));
+        this.flags = new RegionFlags(nbt.getCompound(FLAGS));
         this.groups = new HashMap<>();
         this.groups.put(OWNERS, new PlayerContainer(nbt.getCompound(OWNERS)));
         this.groups.put(MEMBERS, new PlayerContainer(nbt.getCompound(MEMBERS)));

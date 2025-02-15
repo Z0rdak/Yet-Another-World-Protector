@@ -223,7 +223,7 @@ class DimensionCommands {
         dimCache.getDimensionalRegion().resetGroups();
         dimCache.getDimensionalRegion().setIsActive(true);
         dimCache.getDimensionalRegion().setIsMuted(false);
-        dimCache.getDimensionalRegion().getFlagContainer().clear();
+        dimCache.getDimensionalRegion().getRegionFlags().clear();
         RegionDataManager.save();
         sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.dim.reset.confirm", "Successfully reset dimensional region %s", ChatLinkBuilder.buildRegionInfoLink(dimCache.getDimensionalRegion())));
         return 0;

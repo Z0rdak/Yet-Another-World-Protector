@@ -23,7 +23,7 @@ public enum FlagState {
      * This state is used to indicate that a flag is not set during flag checks. <br>
      * It is not accessible for users to set this state.
      *
-     * @see FlagContainer
+     * @see RegionFlags
      */
     UNDEFINED("Undefined");
 
