@@ -1,13 +1,13 @@
 package de.z0rdak.yawp.handler.flags;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.data.region.RegionDataManager;
-import de.z0rdak.yawp.handler.HandlerUtil;
 import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.api.MessageSender;
 import net.minecraft.core.BlockPos;
@@ -88,7 +88,7 @@ public final class PlayerFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, onDeny -> {
+                FlagEvaluator.processCheck(checkEvent, onDeny -> {
                     event.player.stopFallFlying();
                 });
             }
@@ -108,7 +108,7 @@ public final class PlayerFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, onDeny -> {
+            FlagEvaluator.processCheck(checkEvent, onDeny -> {
                 event.setCanceled(true);
                 sendFlagMsg(onDeny);
             });
@@ -154,7 +154,7 @@ public final class PlayerFlagHandler {
             }
         }
         if (checkEvent != null) {
-            processCheck(checkEvent, onDeny -> {
+            FlagEvaluator.processCheck(checkEvent, onDeny -> {
                 event.setCanceled(true);
                 sendFlagMsg(onDeny);
             });
@@ -169,7 +169,7 @@ public final class PlayerFlagHandler {
         if (Services.EVENT.post(checkEvent)) {
             return;
         }
-        processCheck(checkEvent, onDeny -> {
+        FlagEvaluator.processCheck(checkEvent, onDeny -> {
             event.setCanceled(true);
             sendFlagMsg(onDeny);
         });
@@ -187,7 +187,7 @@ public final class PlayerFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, onDeny -> {
+            FlagEvaluator.processCheck(checkEvent, onDeny -> {
                 event.setCanceled(true);
                 sendFlagMsg(onDeny);
             });
@@ -205,7 +205,7 @@ public final class PlayerFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, onDeny -> {
+            FlagEvaluator.processCheck(checkEvent, onDeny -> {
                 event.setCanceled(true);
                 sendFlagMsg(onDeny);
             });
@@ -220,7 +220,7 @@ public final class PlayerFlagHandler {
         if (Services.EVENT.post(checkEvent)) {
             return;
         }
-        processCheck(checkEvent, onDeny -> {
+        FlagEvaluator.processCheck(checkEvent, onDeny -> {
             event.setCanceled(true);
             sendFlagMsg(onDeny);
         });
@@ -235,7 +235,7 @@ public final class PlayerFlagHandler {
         if (Services.EVENT.post(checkEvent)) {
             return;
         }
-        processCheck(checkEvent, onDeny -> {
+        FlagEvaluator.processCheck(checkEvent, onDeny -> {
             event.setCanceled(true);
             event.setAmount(0);
             sendFlagMsg(onDeny);
@@ -251,7 +251,7 @@ public final class PlayerFlagHandler {
         if (Services.EVENT.post(checkEvent)) {
             return;
         }
-        processCheck(checkEvent, onDeny -> {
+        FlagEvaluator.processCheck(checkEvent, onDeny -> {
             event.setCanceled(true);
             event.getOrb().remove(Entity.RemovalReason.DISCARDED);
             sendFlagMsg(onDeny);
@@ -270,7 +270,7 @@ public final class PlayerFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, onDeny -> {
+                FlagEvaluator.processCheck(checkEvent, onDeny -> {
                     event.setCanceled(true);
                     event.setAmount(0f);
                     sendFlagMsg(onDeny);
@@ -288,7 +288,7 @@ public final class PlayerFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, onDeny -> {
+                FlagEvaluator.processCheck(checkEvent, onDeny -> {
                     event.setCanceled(true);
                     event.setAmount(0f);
                     sendFlagMsg(onDeny);
@@ -312,7 +312,7 @@ public final class PlayerFlagHandler {
                     return;
                 }
                 // another check for PVP - this does not prevent knock-back? but prevents dmg
-                processCheck(checkEvent, onDeny -> {
+                FlagEvaluator.processCheck(checkEvent, onDeny -> {
                     event.setCanceled(true);
                     event.setAmount(0f);
                     sendFlagMsg(onDeny);
@@ -329,7 +329,7 @@ public final class PlayerFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, onDeny -> {
+                FlagEvaluator.processCheck(checkEvent, onDeny -> {
                     event.setCanceled(true);
                     event.setStrength(0);
                     sendFlagMsg(onDeny);
@@ -338,7 +338,7 @@ public final class PlayerFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, onDeny -> {
+                FlagEvaluator.processCheck(checkEvent, onDeny -> {
                     event.setCanceled(true);
                     event.setStrength(0);
                     sendFlagMsg(onDeny);
@@ -356,7 +356,7 @@ public final class PlayerFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, onDeny -> {
+            FlagEvaluator.processCheck(checkEvent, onDeny -> {
                 event.setCanceled(true);
                 updateBlockState((Level) event.getLevel(), event.getPos());
                 sendFlagMsg(onDeny);
@@ -374,7 +374,7 @@ public final class PlayerFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, onDeny -> {
+            FlagEvaluator.processCheck(checkEvent, onDeny -> {
                 event.setCanceled(true);
                 updateBlockState((Level) event.getLevel(), event.getPos());
                 sendFlagMsg(onDeny);
@@ -405,7 +405,7 @@ public final class PlayerFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, onDeny -> {
+                FlagEvaluator.processCheck(checkEvent, onDeny -> {
                     event.setCanceled(true);
                     sendFlagMsg(onDeny);
                 });
@@ -426,7 +426,7 @@ public final class PlayerFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, onDeny -> {
+                FlagEvaluator.processCheck(checkEvent, onDeny -> {
                     event.setCanceled(true);
                 });
             } else {
@@ -435,7 +435,7 @@ public final class PlayerFlagHandler {
                     if (Services.EVENT.post(checkEvent)) {
                         return;
                     }
-                    processCheck(checkEvent, onDeny -> {
+                    FlagEvaluator.processCheck(checkEvent, onDeny -> {
                         event.setCanceled(true);
                         sendFlagMsg(onDeny);
                     });
@@ -445,7 +445,7 @@ public final class PlayerFlagHandler {
                     if (Services.EVENT.post(checkEvent)) {
                         return;
                     }
-                    processCheck(checkEvent, onDeny -> {
+                    FlagEvaluator.processCheck(checkEvent, onDeny -> {
                         event.setCanceled(true);
                     });
                 } else {
@@ -453,7 +453,7 @@ public final class PlayerFlagHandler {
                     if (Services.EVENT.post(checkEvent)) {
                         return;
                     }
-                    processCheck(checkEvent, onDeny -> {
+                    FlagEvaluator.processCheck(checkEvent, onDeny -> {
                         event.setCanceled(true);
                     });
                 }
@@ -469,7 +469,7 @@ public final class PlayerFlagHandler {
         if (Services.EVENT.post(checkEvent)) {
             return;
         }
-        processCheck(checkEvent, onDeny -> {
+        FlagEvaluator.processCheck(checkEvent, onDeny -> {
             event.setCanceled(true);
             sendFlagMsg(onDeny);
         });
@@ -488,7 +488,7 @@ public final class PlayerFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                FlagState flagState = processCheck(checkEvent, onDeny -> {
+                FlagState flagState = FlagEvaluator.processCheck(checkEvent, onDeny -> {
                     event.setCanceled(true);
                     sendFlagMsg(onDeny);
                 });
@@ -499,7 +499,7 @@ public final class PlayerFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, onDeny -> {
+                FlagEvaluator.processCheck(checkEvent, onDeny -> {
                     event.setCanceled(true);
                     sendFlagMsg(onDeny);
                 });
@@ -519,7 +519,7 @@ public final class PlayerFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            FlagState flagState = processCheck(checkEvent, onDeny -> {
+            FlagState flagState = FlagEvaluator.processCheck(checkEvent, onDeny -> {
                 event.setCanceled(true);
                 sendFlagMsg(onDeny);
             });
@@ -544,7 +544,7 @@ public final class PlayerFlagHandler {
                 }
             }
             if (checkEvent != null) {
-                processCheck(checkEvent, onDeny -> {
+                FlagEvaluator.processCheck(checkEvent, onDeny -> {
                     event.setCanceled(true);
                     sendFlagMsg(onDeny);
                 });
@@ -576,7 +576,7 @@ public final class PlayerFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, onDeny -> {
+            FlagEvaluator.processCheck(checkEvent, onDeny -> {
                 event.setCanceled(true);
                 sendFlagMsg(onDeny);
                 event.getLevel().updateNeighborsAt(pos.getBlockPos(), event.getLevel().getBlockState(pos.getBlockPos()).getBlock());
@@ -589,7 +589,7 @@ public final class PlayerFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, onDeny -> {
+                FlagEvaluator.processCheck(checkEvent, onDeny -> {
                     event.setCanceled(true);
                     sendFlagMsg(onDeny);
                 });
@@ -600,7 +600,7 @@ public final class PlayerFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, onDeny -> {
+                FlagEvaluator.processCheck(checkEvent, onDeny -> {
                     event.setCanceled(true);
                     sendFlagMsg(onDeny);
                 });
@@ -632,14 +632,14 @@ public final class PlayerFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, onDenyAction);
+                FlagEvaluator.processCheck(checkEvent, onDenyAction);
             }
 
             FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPos(), USE_ITEMS, getDimKey(player), player);
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, onDenyAction);
+            FlagEvaluator.processCheck(checkEvent, onDenyAction);
         }
 
     }
@@ -654,7 +654,7 @@ public final class PlayerFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, onDeny -> {
+            FlagEvaluator.processCheck(checkEvent, onDeny -> {
                 event.setCanceled(true);
                 sendFlagMsg(onDeny);
             });
@@ -669,7 +669,7 @@ public final class PlayerFlagHandler {
         if (Services.EVENT.post(checkEvent)) {
             return;
         }
-        processCheck(checkEvent, onDeny -> {
+        FlagEvaluator.processCheck(checkEvent, onDeny -> {
             event.setCanceled(true);
             sendFlagMsg(onDeny);
         });
@@ -679,7 +679,7 @@ public final class PlayerFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, onDeny -> {
+            FlagEvaluator.processCheck(checkEvent, onDeny -> {
                 event.setCanceled(true);
                 sendFlagMsg(onDeny);
             });
@@ -703,7 +703,7 @@ public final class PlayerFlagHandler {
         if (Services.EVENT.post(checkEvent)) {
             return;
         }
-        processCheck(checkEvent, onDeny -> {
+        FlagEvaluator.processCheck(checkEvent, onDeny -> {
             event.setCanceled(true);
             sendFlagMsg(onDeny);
         });
@@ -712,7 +712,7 @@ public final class PlayerFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, onDeny -> {
+            FlagEvaluator.processCheck(checkEvent, onDeny -> {
                 event.setCanceled(true);
                 sendFlagMsg(onDeny);
             });
@@ -731,7 +731,7 @@ public final class PlayerFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, onDeny -> {
+            FlagEvaluator.processCheck(checkEvent, onDeny -> {
                 event.setCanceled(true);
                 sendFlagMsg(onDeny);
             });
@@ -740,7 +740,7 @@ public final class PlayerFlagHandler {
         if (Services.EVENT.post(checkEvent)) {
             return;
         }
-        processCheck(checkEvent, onDeny -> {
+        FlagEvaluator.processCheck(checkEvent, onDeny -> {
             event.setCanceled(true);
             sendFlagMsg(onDeny);
         });
@@ -770,7 +770,7 @@ public final class PlayerFlagHandler {
                     playerCheckEventMap.put(player, checkEvent);
                 }
                 for (Map.Entry<Player, FlagCheckEvent> entry : playerCheckEventMap.entrySet()) {
-                    FlagState state = processCheck(entry.getValue(), null, MessageSender::sendFlagMsg);
+                    FlagState state = FlagEvaluator.processCheck(entry.getValue(), null, MessageSender::sendFlagMsg);
                     if (state == FlagState.DENIED) {
                         cumulativeState[0] = state;
                     }
@@ -804,7 +804,7 @@ public final class PlayerFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, onDeny -> {
+                FlagEvaluator.processCheck(checkEvent, onDeny -> {
                     event.setCanceled(true);
                     sendFlagMsg(onDeny);
                 });
@@ -829,7 +829,7 @@ public final class PlayerFlagHandler {
                         if (Services.EVENT.post(checkEvent)) {
                             return;
                         }
-                        processCheck(checkEvent, onDeny -> {
+                        FlagEvaluator.processCheck(checkEvent, onDeny -> {
                             event.setCanceled(true);
                             sendFlagMsg(onDeny);
                         });
@@ -852,7 +852,7 @@ public final class PlayerFlagHandler {
         if (Services.EVENT.post(checkEvent)) {
             return;
         }
-        processCheck(checkEvent, onDeny -> {
+        FlagEvaluator.processCheck(checkEvent, onDeny -> {
             event.setCanceled(true);
             sendFlagMsg(onDeny);
         });
@@ -867,7 +867,7 @@ public final class PlayerFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, onDeny -> {
+            FlagEvaluator.processCheck(checkEvent, onDeny -> {
                 event.setCanceled(true);
                 sendFlagMsg(onDeny);
             });
@@ -886,7 +886,7 @@ public final class PlayerFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, onDeny -> {
+            FlagEvaluator.processCheck(checkEvent, onDeny -> {
                 event.setResult(Event.Result.DENY);
                 sendFlagMsg(onDeny);
             });
@@ -904,7 +904,7 @@ public final class PlayerFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, onDeny -> {
+            FlagEvaluator.processCheck(checkEvent, onDeny -> {
                 event.setCanceled(true);
                 sendFlagMsg(onDeny);
             });
@@ -920,7 +920,7 @@ public final class PlayerFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, onDeny -> {
+            FlagEvaluator.processCheck(checkEvent, onDeny -> {
                 event.setCanceled(true);
                 player.addItem(event.getEntity().getItem());
                 player.getInventory().setChanged();
@@ -941,7 +941,7 @@ public final class PlayerFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, onDeny -> {
+                FlagEvaluator.processCheck(checkEvent, onDeny -> {
                     event.setCanceled(true);
                     sendFlagMsg(onDeny);
                 });
@@ -950,7 +950,7 @@ public final class PlayerFlagHandler {
                     if (Services.EVENT.post(checkEvent)) {
                         return;
                     }
-                    HandlerUtil.processCheck(checkEvent, onDeny -> {
+                    FlagEvaluator.processCheck(checkEvent, onDeny -> {
                         event.setCanceled(true);
                         sendFlagMsg(onDeny);
                     });

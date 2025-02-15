@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.player;
 
+import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
@@ -35,7 +36,7 @@ public abstract class BucketItemMixin {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, deny -> {
+                FlagEvaluator.processCheck(checkEvent, deny -> {
                     sendFlagMsg(deny);
                     cir.setReturnValue(InteractionResult.FAIL);
                 });
@@ -52,7 +53,7 @@ public abstract class BucketItemMixin {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, deny -> {
+                FlagEvaluator.processCheck(checkEvent, deny -> {
                     sendFlagMsg(deny);
                     cir.setReturnValue(InteractionResult.FAIL);
                 });

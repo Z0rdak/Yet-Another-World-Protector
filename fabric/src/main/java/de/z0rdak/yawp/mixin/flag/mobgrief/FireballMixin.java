@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
-import de.z0rdak.yawp.handler.HandlerUtil;
+import de.z0rdak.yawp.api.FlagEvaluator;
 import net.minecraft.world.entity.projectile.LargeFireball;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -14,7 +14,7 @@ public class FireballMixin {
     public void onBlockHit(CallbackInfo ci) {
         LargeFireball self = (LargeFireball) (Object) this;
         if (self.getOwner() != null) {
-            HandlerUtil.checkMobGrief(self, ci);
+            FlagEvaluator.checkMobGrief(self, ci);
         }
     }
 

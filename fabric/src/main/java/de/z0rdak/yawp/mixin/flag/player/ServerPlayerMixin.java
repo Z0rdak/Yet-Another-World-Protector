@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.player;
 
+import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.Services;
@@ -33,7 +34,7 @@ public abstract class ServerPlayerMixin {
             FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), ITEM_DROP, getDimKey(player), player);
             if (Services.EVENT.post(checkEvent))
                 return;
-            processCheck(checkEvent, deny -> {
+            FlagEvaluator.processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
                 player.addItem(stack);
                 player.getInventory().setChanged();
@@ -51,7 +52,7 @@ public abstract class ServerPlayerMixin {
             FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), USE_PORTAL_PLAYERS, getDimKey(player), player);
             if (Services.EVENT.post(checkEvent))
                 return;
-            processCheck(checkEvent, deny -> {
+            FlagEvaluator.processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
                 cir.setReturnValue(null);
             });
@@ -59,7 +60,7 @@ public abstract class ServerPlayerMixin {
             checkEvent = new FlagCheckEvent(player.blockPosition(), ENTER_DIM, getDimKey(teleportTransition.newLevel()), player);
             if (Services.EVENT.post(checkEvent))
                 return;
-            processCheck(checkEvent, deny -> {
+            FlagEvaluator.processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
                 cir.setReturnValue(null);
             });
@@ -74,7 +75,7 @@ public abstract class ServerPlayerMixin {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, deny -> {
+            FlagEvaluator.processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
                 cir.setReturnValue(false);
             });

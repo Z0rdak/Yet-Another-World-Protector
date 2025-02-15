@@ -5,10 +5,8 @@ import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.item.enchantment.effects.ReplaceDisk;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.NO_WALKER_FREEZE;
 import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
-import static de.z0rdak.yawp.handler.HandlerUtil.processCheck;
+import static de.z0rdak.yawp.api.FlagEvaluator.processCheck;
 
 @Mixin(ReplaceDisk.class)
 public class FrostWalkerEnchantmentMixin {

@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.player;
 
+import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.world.entity.ExperienceOrb;
@@ -25,7 +26,7 @@ public abstract class ExperienceOrbEntityMixin {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, deny -> {
+            FlagEvaluator.processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
                 ci.cancel();
             });

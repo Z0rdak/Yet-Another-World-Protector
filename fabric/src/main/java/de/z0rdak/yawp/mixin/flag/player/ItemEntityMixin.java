@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.player;
 
+import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.platform.Services;
@@ -30,7 +31,7 @@ public abstract class ItemEntityMixin {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, deny -> {
+            FlagEvaluator.processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
                 ci.cancel();
             });
@@ -46,7 +47,7 @@ public abstract class ItemEntityMixin {
             return;
         }
 
-        processCheck(checkEvent, deny -> {
+        FlagEvaluator.processCheck(checkEvent, deny -> {
             this.age = 6000; // Reset age to avoid flag checking every tick.
             ci.cancel();
         });

@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.handler.flags;
 
+import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
 import de.z0rdak.yawp.constants.Constants;
@@ -49,7 +50,7 @@ public class EntityFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, denyResult -> event.setCanceled(true));
+                FlagEvaluator.processCheck(checkEvent, denyResult -> event.setCanceled(true));
             }
             // handle shulker teleportation
             if (event.getEntityLiving() instanceof Shulker) {
@@ -57,7 +58,7 @@ public class EntityFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, denyResult -> event.setCanceled(true));
+                FlagEvaluator.processCheck(checkEvent, denyResult -> event.setCanceled(true));
             }
         }
     }
@@ -78,7 +79,7 @@ public class EntityFlagHandler {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            FlagState flagState = processCheck(checkEvent, preventFallDmg);
+            FlagState flagState = FlagEvaluator.processCheck(checkEvent, preventFallDmg);
             if (flagState == FlagState.DENIED)
                 return;
 
@@ -107,7 +108,7 @@ public class EntityFlagHandler {
                 }
             }
             if (checkEvent != null) {
-                processCheck(checkEvent, preventFallDmg);
+                FlagEvaluator.processCheck(checkEvent, preventFallDmg);
             }
         }
     }
@@ -126,7 +127,7 @@ public class EntityFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                FlagState flagState = processCheck(checkEvent, onDenyHandler);
+                FlagState flagState = FlagEvaluator.processCheck(checkEvent, onDenyHandler);
                 if (flagState == FlagState.DENIED)
                     return;
             }
@@ -173,7 +174,7 @@ public class EntityFlagHandler {
                 }
             }
             if (checkEvent != null) {
-                processCheck(checkEvent, onDenyHandler);
+                FlagEvaluator.processCheck(checkEvent, onDenyHandler);
             }
         }
     }

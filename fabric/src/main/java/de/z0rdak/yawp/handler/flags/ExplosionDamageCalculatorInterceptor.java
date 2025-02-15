@@ -3,17 +3,13 @@
  */
 package de.z0rdak.yawp.handler.flags;
 
+import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
-import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.handler.HandlerUtil;
-import net.minecraft.client.renderer.item.properties.numeric.Damage;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.Creeper;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ExplosionDamageCalculator;
@@ -21,7 +17,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -43,7 +38,7 @@ public class ExplosionDamageCalculatorInterceptor extends ExplosionDamageCalcula
 			case null, default -> RegionFlag.EXPLOSION_BLOCK; // is null for dispenser etc
 		};
 		FlagCheckEvent checkEvent = new FlagCheckEvent(pos, flag, this.level.dimension());
-		FlagState flagState = HandlerUtil.processCheck(checkEvent);
+		FlagState flagState = FlagEvaluator.processCheck(checkEvent);
 		return flagState == FlagState.DENIED 
 				? false : nextBehavior.shouldBlockExplode(explosion, blockGetter, pos, state, power);
 	}
@@ -55,7 +50,7 @@ public class ExplosionDamageCalculatorInterceptor extends ExplosionDamageCalcula
 			case null, default -> RegionFlag.EXPLOSION_ENTITY;
 		};
 		FlagCheckEvent checkEvent = new FlagCheckEvent(entity.blockPosition(), flag, explosion.level().dimension());
-		FlagState flagState = HandlerUtil.processCheck(checkEvent);
+		FlagState flagState = FlagEvaluator.processCheck(checkEvent);
 		return flagState == FlagState.DENIED
 				? false : nextBehavior.shouldDamageEntity(explosion, entity);
 	}
@@ -66,8 +61,8 @@ public class ExplosionDamageCalculatorInterceptor extends ExplosionDamageCalcula
 	public float getKnockbackMultiplier(Entity entity) {
 		FlagCheckEvent checkExplosionEntityFlag = new FlagCheckEvent(entity.blockPosition(), RegionFlag.EXPLOSION_ENTITY, entity.level().dimension());
 		FlagCheckEvent checkCreeperExplosionEntityFlag = new FlagCheckEvent(entity.blockPosition(), RegionFlag.EXPLOSION_CREEPER_ENTITY, entity.level().dimension());
-		FlagState flagState1 = HandlerUtil.processCheck(checkExplosionEntityFlag);
-		FlagState flagState2 = HandlerUtil.processCheck(checkCreeperExplosionEntityFlag);
+		FlagState flagState1 = FlagEvaluator.processCheck(checkExplosionEntityFlag);
+		FlagState flagState2 = FlagEvaluator.processCheck(checkCreeperExplosionEntityFlag);
 		return flagState1 == FlagState.DENIED || flagState2 == FlagState.DENIED
 				? 0	: nextBehavior.getKnockbackMultiplier(entity);
 	}

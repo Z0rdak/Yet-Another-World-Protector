@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.mixin.flag;
 
+import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
@@ -25,7 +26,7 @@ public abstract class AbstractFireBlockMixin {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, deny -> info.cancel());
+            FlagEvaluator.processCheck(checkEvent, deny -> info.cancel());
         }
     }
 }

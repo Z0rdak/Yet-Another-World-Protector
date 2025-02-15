@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
-import static de.z0rdak.yawp.handler.HandlerUtil.processCheck;
+import static de.z0rdak.yawp.api.FlagEvaluator.processCheck;
 
 public class FlagPermissions {
 

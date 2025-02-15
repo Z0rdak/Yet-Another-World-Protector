@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
-import de.z0rdak.yawp.handler.HandlerUtil;
+import de.z0rdak.yawp.api.FlagEvaluator;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.item.ItemStack;
@@ -17,7 +17,7 @@ public abstract class PiglinEntityMixin {
 
     @Inject(method = "canAddToInventory(Lnet/minecraft/world/item/ItemStack;)Z", at = @At(value = "HEAD"), cancellable = true)
     public void onCanGather(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
-        HandlerUtil.checkMobGrief(self.level(), self.blockPosition(), cir);
+        FlagEvaluator.checkMobGrief(self.level(), self.blockPosition(), cir);
     }
 
 }

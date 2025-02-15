@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.mixin.flag;
 
+import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.world.entity.monster.EnderMan;
@@ -22,7 +23,7 @@ public abstract class EnderManEntityMixin {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, deny -> {
+            FlagEvaluator.processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
                 cir.setReturnValue(false);
             });

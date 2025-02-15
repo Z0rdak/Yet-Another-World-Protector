@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.ANIMAL_BREEDING;
 import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
-import static de.z0rdak.yawp.handler.HandlerUtil.processCheck;
+import static de.z0rdak.yawp.api.FlagEvaluator.processCheck;
 
 @Mixin(Frog.class)
 public abstract class FrogMixin {

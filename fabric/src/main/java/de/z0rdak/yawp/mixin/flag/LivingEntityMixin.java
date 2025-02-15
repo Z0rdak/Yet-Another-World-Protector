@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.mixin.flag;
 
+import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.platform.Services;
@@ -43,14 +44,14 @@ public abstract class LivingEntityMixin {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, deny -> {
+                FlagEvaluator.processCheck(checkEvent, deny -> {
                     ci.cancel();
                 });
                 checkEvent = new FlagCheckEvent(target.blockPosition(), INVINCIBLE, getDimKey(target));
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, deny -> {
+                FlagEvaluator.processCheck(checkEvent, deny -> {
                     ci.cancel();
                 });
             }
@@ -66,7 +67,7 @@ public abstract class LivingEntityMixin {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, deny -> {
+            FlagEvaluator.processCheck(checkEvent, deny -> {
                 ci.cancel();
             });
             if (source.getEntity() instanceof Player player) {
@@ -74,7 +75,7 @@ public abstract class LivingEntityMixin {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, deny -> {
+                FlagEvaluator.processCheck(checkEvent, deny -> {
                     sendFlagMsg(deny);
                     ci.cancel();
                 });
@@ -90,7 +91,7 @@ public abstract class LivingEntityMixin {
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
-            processCheck(checkEvent, deny -> {
+            FlagEvaluator.processCheck(checkEvent, deny -> {
                 cir.setReturnValue(false);
             });
             if (isMonster(self)) {
@@ -98,7 +99,7 @@ public abstract class LivingEntityMixin {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, deny -> {
+                FlagEvaluator.processCheck(checkEvent, deny -> {
                     cir.setReturnValue(false);
                 });
             }
@@ -107,7 +108,7 @@ public abstract class LivingEntityMixin {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, deny -> {
+                FlagEvaluator.processCheck(checkEvent, deny -> {
                     cir.setReturnValue(false);
                 });
             }
@@ -116,7 +117,7 @@ public abstract class LivingEntityMixin {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, deny -> {
+                FlagEvaluator.processCheck(checkEvent, deny -> {
                     cir.setReturnValue(false);
                 });
             }
@@ -125,7 +126,7 @@ public abstract class LivingEntityMixin {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                processCheck(checkEvent, deny -> {
+                FlagEvaluator.processCheck(checkEvent, deny -> {
                     sendFlagMsg(deny);
                     cir.setReturnValue(false);
                 });
@@ -141,7 +142,7 @@ public abstract class LivingEntityMixin {
             FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), XP_DROP_ALL, getDimKey(self));
             if (Services.EVENT.post(checkEvent))
                 return;
-            processCheck(checkEvent, deny -> {
+            FlagEvaluator.processCheck(checkEvent, deny -> {
                 ci.cancel();
             });
             
@@ -149,7 +150,7 @@ public abstract class LivingEntityMixin {
             checkEvent = new FlagCheckEvent(self.blockPosition(), XP_DROP_PLAYER, getDimKey(self), this.attackingPlayer);
             if (Services.EVENT.post(checkEvent))
                 return;
-            processCheck(checkEvent, deny -> {
+            FlagEvaluator.processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
                 ci.cancel();
             });
@@ -158,7 +159,7 @@ public abstract class LivingEntityMixin {
                 checkEvent = new FlagCheckEvent(self.blockPosition(), XP_DROP_MONSTER, getDimKey(self));
                 if (Services.EVENT.post(checkEvent))
                     return;
-                processCheck(checkEvent, deny -> {
+                FlagEvaluator.processCheck(checkEvent, deny -> {
                     sendFlagMsg(deny);
                     ci.cancel();
                 });
@@ -166,7 +167,7 @@ public abstract class LivingEntityMixin {
                 checkEvent = new FlagCheckEvent(self.blockPosition(), XP_DROP_OTHER, getDimKey(self));
                 if (Services.EVENT.post(checkEvent))
                     return;
-                processCheck(checkEvent, deny -> {
+                FlagEvaluator.processCheck(checkEvent, deny -> {
                     sendFlagMsg(deny);
                     ci.cancel();
                 });
@@ -177,7 +178,7 @@ public abstract class LivingEntityMixin {
             FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), RegionFlag.KEEP_XP, getDimKey(self));
             if (Services.EVENT.post(checkEvent))
                 return;
-            processCheck(checkEvent, deny -> {
+            FlagEvaluator.processCheck(checkEvent, deny -> {
                 ci.cancel();
             });
         }
@@ -198,7 +199,7 @@ public abstract class LivingEntityMixin {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(pos, MOB_GRIEFING, serverLevel.dimension(), null);
                 if (Services.EVENT.post(checkEvent))
                     return;
-                processCheck(checkEvent, deny -> {
+                FlagEvaluator.processCheck(checkEvent, deny -> {
                     // prevent the rose to be placed as block, but spawn it as item-entity as vanilla does it
                     ci.cancel();
                     ItemEntity itemEntity = new ItemEntity(serverLevel, self.getX(), self.getY(), self.getZ(), new ItemStack(Items.WITHER_ROSE));

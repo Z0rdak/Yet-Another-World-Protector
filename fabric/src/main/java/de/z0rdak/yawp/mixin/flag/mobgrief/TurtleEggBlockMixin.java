@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
-import de.z0rdak.yawp.handler.HandlerUtil;
+import de.z0rdak.yawp.api.FlagEvaluator;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -19,6 +19,6 @@ public abstract class TurtleEggBlockMixin {
         if (entity instanceof Player || entity instanceof Bat || !(entity instanceof LivingEntity)) {
             return;
         }
-        HandlerUtil.checkMobGrief(entity, cir);
+        FlagEvaluator.checkMobGrief(entity, cir);
     }
 }
