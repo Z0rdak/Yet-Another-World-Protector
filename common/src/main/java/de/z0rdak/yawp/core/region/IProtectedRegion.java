@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.core.region;
 
 import de.z0rdak.yawp.core.INbtSerializable;
-import de.z0rdak.yawp.core.flag.FlagContainer;
+import de.z0rdak.yawp.core.flag.RegionFlags;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.group.PlayerContainer;
@@ -46,11 +46,11 @@ public interface IProtectedRegion extends INbtSerializable<CompoundTag> {
 
     Collection<IFlag> getFlags();
 
-    void setFlags(FlagContainer flags);
+    void setFlags(RegionFlags flags);
 
     void setGroups(Map<String, PlayerContainer> groups);
 
-    FlagContainer getFlagContainer();
+    RegionFlags getRegionFlags();
 
     IFlag getFlag(String flagName);
 

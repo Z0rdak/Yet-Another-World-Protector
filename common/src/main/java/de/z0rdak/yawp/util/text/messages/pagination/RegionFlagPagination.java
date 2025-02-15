@@ -39,7 +39,7 @@ public class RegionFlagPagination extends BasePaginationMessage<IFlag> {
     }
 
     public static List<Component> buildRegionFlagEntries(IProtectedRegion region) {
-        return buildRegionFlagEntries(region, region.getFlagContainer().values().stream().toList());
+        return buildRegionFlagEntries(region, region.getRegionFlags().flags().stream().toList());
     }
 
     public static List<Component> buildRegionFlagEntries(IProtectedRegion region, List<IFlag> selectedFlags) {
