@@ -54,6 +54,9 @@ repositories {
             includeGroup 'curse.maven'
         }
     }
+    repositories {
+        maven { url = "https://api.modrinth.com/maven" }
+    }
     maven {
         name = "Fuzs Mod Resources"
         url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
