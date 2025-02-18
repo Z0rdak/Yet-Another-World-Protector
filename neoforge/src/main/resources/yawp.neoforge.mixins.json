@@ -4,12 +4,14 @@
   "package": "de.z0rdak.yawp.mixin",
   "refmap": "${mod_id}.refmap.json",
   "compatibilityLevel": "JAVA_21",
+  "plugin": "de.z0rdak.yawp.mixin.MixinPlugin",
   "mixins": [
     "TntBlockMixin",
     "flag.player.AxeItemMixin",
     "flag.player.BucketItemMixin",
     "flag.player.HoeItemMixin",
-    "flag.player.ShovelItemMixin"
+    "flag.player.ShovelItemMixin",
+    "integrations.snowrealmagic.SRMWorldTickHandlerMixin"
   ],
   "client": [
   ],
