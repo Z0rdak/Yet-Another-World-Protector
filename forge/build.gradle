@@ -74,10 +74,18 @@ minecraft {
 
 sourceSets.main.resources.srcDir 'src/generated/resources'
 
+repositories {
+    maven { url = "https://api.modrinth.com/maven" }
+}
+
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     compileOnly project(":common")
     annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT:processor")
+
+    // Mod compats
+    // implementation fg.deobf("maven.modrinth:kiwi:A4YxIHAO") // Snow Real Magic dependency
+    compileOnly fg.deobf("maven.modrinth:snow-real-magic:Z5A25ipN")
 }
 
 tasks.withType(JavaCompile).configureEach {
