@@ -4,32 +4,15 @@ import de.z0rdak.yawp.core.region.IProtectedRegion;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * A correlation of a region and a flag. <br>
- * This is used to determine the responsible region for a flag state.
- * This region is not necessarily the region responsible for the flag check event.
- * It could be a parent region which overrides the flag state of the child region.
+ * Represents the resolved association between a region and a flag. <br>
+ * This is used to determine the region responsible for a specific flag state. <br>
+ * The responsible region may not always be the one directly involved in a flag check event;
+ * it could be a parent region that overrides the flag state of a child region. <br>
+ * <br>
+ * This class is primarily used for passing information between recursive calls when evaluating flag checks
+ * and for retaining flag resolution details for use in the CLI.
  */
-public final class FlagCorrelation {
-
-    public final IProtectedRegion region;
-    @Nullable
-    public final IFlag flag;
-
-    public FlagCorrelation(IProtectedRegion region, @Nullable IFlag flag) {
-        this.region = region;
-        this.flag = flag;
-    }
-
-    public IProtectedRegion getRegion() {
-        return region;
-    }
-
-    @Nullable
-    public IFlag getFlag() {
-        return flag;
-    }
-
-    public boolean hasFlag() {
-        return flag != null;
-    }
+public record FlagCorrelation(
+        IProtectedRegion region,
+        @Nullable IFlag flag) {
 }
