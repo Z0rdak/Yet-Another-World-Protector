@@ -100,6 +100,17 @@ public class RegionFlags implements IFlagContainer {
         return flags.values().stream().filter(flag -> flag.getState() == state).toList();
     }
 
+    /**
+     * Retrieves the {@link FlagState} of a specified flag within this region.
+     * <p>
+     * Since {@code RegionFlags} does not allow null values, a {@code null} flag is treated as 
+     * {@link FlagState#UNDEFINED}. If the flag exists in the region, its state is returned.
+     * Otherwise, the method returns {@code FlagState.UNDEFINED}.
+     * </p>
+     *
+     * @param flagName the name of the flag to check
+     * @return the {@link FlagState} of the specified flag, or {@link FlagState#UNDEFINED} if the flag is not present
+     */
     @Override
     public FlagState flagState(String flagName) {
         if (this.contains(flagName)) {
@@ -114,7 +125,7 @@ public class RegionFlags implements IFlagContainer {
     }
 
     @Override
-    public boolean isAllowedOrDefined(@NotNull String flagName) {
+    public boolean isAllowedOrDenied(@NotNull String flagName) {
         FlagState flagState = flagState(flagName);
         return flagState == FlagState.ALLOWED || flagState == FlagState.DENIED;
     }
