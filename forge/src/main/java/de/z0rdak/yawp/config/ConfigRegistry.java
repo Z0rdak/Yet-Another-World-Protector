@@ -17,6 +17,11 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import static de.z0rdak.yawp.config.server.FlagConfig.FLAG_CONFIG_LOGGER;
+import static de.z0rdak.yawp.config.server.LoggingConfig.LOGGING_CONFIG_LOGGER;
+import static de.z0rdak.yawp.config.server.PermissionConfig.PERMISSION_CONFIG_LOGGER;
+import static de.z0rdak.yawp.config.server.RegionConfig.REGION_CONFIG_LOGGER;
+
 public final class ConfigRegistry {
 
     public static final Logger CONFIG_LOGGER = LogManager.getLogger(Constants.MOD_ID.toUpperCase() + "-Config");
@@ -43,7 +48,15 @@ public final class ConfigRegistry {
                     String uuidsWithPermission = (numOfUuidsWithPermission > 0
                             ? ": " + String.join(", ", PermissionConfig.UUIDsWithPermission())
                             : "");
-                    CONFIG_LOGGER.info("{} UUID(s) with permission read from config{}", numOfUuidsWithPermission, uuidsWithPermission);
+                    PERMISSION_CONFIG_LOGGER.info("{} UUID(s) with permission read from config{}", numOfUuidsWithPermission, uuidsWithPermission);
+                    PERMISSION_CONFIG_LOGGER.info("Required OP level to use commands: {}", PermissionConfig.getRequiredOpLevel());
+                    PERMISSION_CONFIG_LOGGER.info("Command block execution: {}", PermissionConfig.isCommandBlockExecutionAllowed() ? "enabled" : "disabled");
+                    PERMISSION_CONFIG_LOGGER.info("Region info commands for all players: {}", PermissionConfig.isReadOnlyAllowed() ? "enabled" : "disabled");
+                    PERMISSION_CONFIG_LOGGER.info("Region-Hierarchy ownership: {}", PermissionConfig.isHierarchyOwnershipEnabled() ? "enabled" : "disabled");
+                    PERMISSION_CONFIG_LOGGER.info("OP bypassing flags: {}", PermissionConfig.byPassFlagAllowed() ? "enabled" : "disabled");
+                    PERMISSION_CONFIG_LOGGER.info("Commands for non OPs: {}", PermissionConfig.isCmdEnabledForNonOp() ? "enabled" : "disabled");
+                    PERMISSION_CONFIG_LOGGER.info("RegionMarker creation: {}", PermissionConfig.isMarkerCreationEnabled() ? "enabled" : "disabled");
+                    PERMISSION_CONFIG_LOGGER.info("Region teleportation: {}", PermissionConfig.allowRegionTp() ? "enabled" : "disabled");
                 }
                 break;
                 case RegionConfig.CONFIG_NAME: {
@@ -51,13 +64,14 @@ public final class ConfigRegistry {
                     String loadedLocalFlags = (numLocalDefaultFlags > 0
                             ? ": " + String.join(", ", RegionConfig.getDefaultFlags())
                             : "");
-                    CONFIG_LOGGER.info("{} default flag(s) for Local Regions read from config{}", numLocalDefaultFlags, loadedLocalFlags);
+                    REGION_CONFIG_LOGGER.info("{} default flag(s) for Local Regions read from config{}", numLocalDefaultFlags, loadedLocalFlags);
 
                     int numDimDefaultFlags = RegionConfig.getDefaultDimFlags().size();
                     String loadedDimFlags = (numDimDefaultFlags > 0
                             ? ": " + String.join(", ", RegionConfig.getDefaultDimFlags())
                             : "");
-                    CONFIG_LOGGER.info("{} default flag(s) for Dimensional Regions read from config{}", numDimDefaultFlags, loadedDimFlags);
+                    REGION_CONFIG_LOGGER.info("{} default flag(s) for Dimensional Regions read from config{}", numDimDefaultFlags, loadedDimFlags);
+                    REGION_CONFIG_LOGGER.info("Enabling newly created Dimensional Regions: {}", RegionConfig.shouldActivateNewDimRegion() ? "enabled" : "disabled");
                 }
                 break;
                 case FlagConfig.CONFIG_NAME: {
@@ -65,22 +79,24 @@ public final class ConfigRegistry {
                     String loadedBreakEntities = (numBreakEntityEntries > 0
                             ? ": " + String.join(", ", FlagConfig.getCoveredBlockEntities())
                             : "");
-                    CONFIG_LOGGER.info("{} Block Entity entries read from config{}", numBreakEntityEntries, loadedBreakEntities);
+                    FLAG_CONFIG_LOGGER.info("{} Block Entity entries read from config{}", numBreakEntityEntries, loadedBreakEntities);
 
                     int numBreakEntityTagEntries = FlagConfig.getCoveredBlockEntityTags().size();
                     String loadedBreakEntityTags = (numBreakEntityTagEntries > 0
                             ? ": " + String.join(", ", FlagConfig.getCoveredBlockEntityTags())
                             : "");
-                    CONFIG_LOGGER.info("{} Block Entity tag entries read from config{}", numBreakEntityTagEntries, loadedBreakEntityTags);
+                    FLAG_CONFIG_LOGGER.info("{} Block Entity tag entries read from config{}", numBreakEntityTagEntries, loadedBreakEntityTags);
+                    FLAG_CONFIG_LOGGER.info("Remove entities when enabling spawning flags: {}", FlagConfig.removeEntitiesEnabled() ? "enabled" : "disabled");
+                    break;
                 }
-                break;
                 case LoggingConfig.CONFIG_NAME: {
-                    CONFIG_LOGGER.info("Logging flag checks: {}", LoggingConfig.shouldLogFlagChecks());
-                    CONFIG_LOGGER.info("Logging flag check results: {}", LoggingConfig.shouldLogFlagCheckResults());
-                    CONFIG_LOGGER.info("Logging flag categories: [{}]", String.join(",", LoggingConfig.getFlagCategories()));
-                    CONFIG_LOGGER.info("Logging flags: [{}]", String.join(",", LoggingConfig.getFlagsToLog()));
-                    CONFIG_LOGGER.info("Logging empty flag results: {}", LoggingConfig.shouldLogEmptyResults());
-                    // CONFIG_LOGGER.info("Logging detailed player flag checks: {}", LoggingConfig.shouldLogDetailedPlayerFlags());
+                    LOGGING_CONFIG_LOGGER.info("Logging flag checks: {}", LoggingConfig.shouldLogFlagChecks());
+                    LOGGING_CONFIG_LOGGER.info("Logging flag check results: {}", LoggingConfig.shouldLogFlagCheckResults());
+                    LOGGING_CONFIG_LOGGER.info("Logging empty flag results: {}", LoggingConfig.shouldLogEmptyResults());
+                    LOGGING_CONFIG_LOGGER.info("Logging flag categories: [{}]", String.join(",", LoggingConfig.getFlagCategories()));
+                    LOGGING_CONFIG_LOGGER.info("Logging flag results: [{}]", String.join(",", LoggingConfig.getResultValuesToLog()));
+                    LOGGING_CONFIG_LOGGER.info("Logging flags: [{}]", String.join(",", LoggingConfig.getFlagsToLog()));
+                    // LOGGING_CONFIG_LOGGER.info("Logging detailed player flag checks: {}", LoggingConfig.shouldLogDetailedPlayerFlags());
 
                     if (LoggingConfig.shouldLogFlagChecks()) {
                         MinecraftForge.EVENT_BUS.addListener(LoggingConfig::logCheck);
@@ -89,6 +105,7 @@ public final class ConfigRegistry {
                         MinecraftForge.EVENT_BUS.addListener(LoggingConfig::logResult);
                     }
                 }
+                break;
             }
         }
     }

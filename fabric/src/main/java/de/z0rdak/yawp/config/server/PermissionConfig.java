@@ -30,7 +30,7 @@ public class PermissionConfig {
     private static final ForgeConfigSpec.ConfigValue<Integer> REQUIRED_OP_LEVEL;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> PLAYERS_WITH_PERMISSION;
     private static final ForgeConfigSpec.ConfigValue<Boolean> COMMAND_BLOCK_EXECUTION;
-    private static final ModConfigSpec.ConfigValue<Boolean> ENABLE_MARKER_CREATION;
+    private static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_MARKER_CREATION;
 
     static {
         final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();

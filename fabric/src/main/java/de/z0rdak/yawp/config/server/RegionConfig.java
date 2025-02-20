@@ -2,6 +2,8 @@ package de.z0rdak.yawp.config.server;
 
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import net.minecraftforge.common.ForgeConfigSpec;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +18,7 @@ public class RegionConfig {
 
     public static final ForgeConfigSpec CONFIG_SPEC;
     public static final String CONFIG_NAME = MOD_ID + "-region-defaults.toml";
+    public static final Logger REGION_CONFIG_LOGGER = LogManager.getLogger(MOD_ID.toUpperCase() + "-Region-Config");
     public static final ForgeConfigSpec.ConfigValue<Integer> CLI_PAGINATION_ENTRY_SIZE;
     public static final ForgeConfigSpec.ConfigValue<Integer> CLI_REGION_DEFAULT_PRIORITY_INC;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> REGION_DEFAULT_FLAGS;
@@ -81,11 +84,11 @@ public class RegionConfig {
         if (flag instanceof String) {
             boolean contains = RegionFlag.contains((String) flag);
             if (!contains) {
-                CONFIG_LOGGER.warn("Invalid default flag supplied for 'dim_default_flags': {}", flag);
+                REGION_CONFIG_LOGGER.warn("Invalid default flag supplied for 'dim_default_flags': {}", flag);
             }
             return contains;
         }
-        CONFIG_LOGGER.warn("Invalid default flag supplied for 'dim_default_flags': {}", flag);
+        REGION_CONFIG_LOGGER.warn("Invalid default flag supplied for 'dim_default_flags': {}", flag);
         return false;
     }
 
@@ -93,11 +96,11 @@ public class RegionConfig {
         if (flag instanceof String) {
             boolean contains = RegionFlag.contains((String) flag);
             if (!contains) {
-                CONFIG_LOGGER.warn("Invalid default flag supplied for 'default_flags': {}", flag);
+                REGION_CONFIG_LOGGER.warn("Invalid default flag supplied for 'default_flags': {}", flag);
             }
             return contains;
         }
-        CONFIG_LOGGER.warn("Invalid default flag supplied for 'default_flags': {}", flag);
+        REGION_CONFIG_LOGGER.warn("Invalid default flag supplied for 'default_flags': {}", flag);
         return false;
     }
 }
