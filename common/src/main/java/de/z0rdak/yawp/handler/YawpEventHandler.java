@@ -16,6 +16,7 @@ import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.animal.SnowGolem;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
@@ -64,7 +65,7 @@ public class YawpEventHandler {
     private static Predicate<? super Entity> getEntityFilterForFlag(RegionFlag flag) {
         switch (flag) {
             case SPAWNING_ALL:
-                return e -> !(e instanceof Player);
+                return e -> e instanceof Mob;
             case SPAWNING_MONSTER:
                 return HandlerUtil::isMonster;
             case SPAWNING_ANIMAL:
