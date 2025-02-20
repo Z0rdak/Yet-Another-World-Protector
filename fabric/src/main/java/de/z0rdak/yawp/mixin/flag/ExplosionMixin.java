@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.mixin.flag;
 
+import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.RegionFlag;
@@ -24,7 +25,6 @@ import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
-import static de.z0rdak.yawp.handler.HandlerUtil.processCheck;
 
 @Mixin(Explosion.class)
 public abstract class ExplosionMixin {
@@ -43,7 +43,7 @@ public abstract class ExplosionMixin {
             if (Services.EVENT.post(fce)) {
                 return true;
             }
-            return processCheck(fce) == FlagState.DENIED;
+            return FlagEvaluator.processCheck(fce) == FlagState.DENIED;
         };
         BiFunction<List<BlockPos>, RegionFlag, Set<BlockPos>> filterBlocks = (in, flag) -> in.stream()
                 .filter(blockPos -> isProtected.test(new FlagCheckEvent(blockPos, flag, world.dimension())))
