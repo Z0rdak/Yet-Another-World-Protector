@@ -123,15 +123,15 @@ public class ResponsibleFlagPagination extends BasePaginationMessage<FlagCorrela
 
     public static List<Component> buildFlagEntries(List<FlagCorrelation> flags) {
         return flags.stream()
-                .map(fc -> buildRemoveFlagEntry(fc.getRegion(), fc.getFlag(), colorForState(fc.getFlag().getState())))
+                .map(fc -> buildRemoveFlagEntry(fc.region(), fc.flag(), colorForState(fc.flag().getState())))
                 .collect(Collectors.toList());
     }
 
     public static List<MutableComponent> buildFlagEntries(Map<FlagState, List<FlagCorrelation>> flagStateListMap, FlagState state) {
         List<FlagCorrelation> flagsByState = flagStateListMap.get(state);
-        flagsByState.sort(Comparator.comparing(flagCorrelation -> flagCorrelation.getFlag().getName()));
+        flagsByState.sort(Comparator.comparing(flagCorrelation -> flagCorrelation.flag().getName()));
         return flagsByState.stream()
-                .map(flagCorrelation -> buildRemoveFlagEntry(flagCorrelation.getRegion(), flagCorrelation.getFlag(), colorForState(state)))
+                .map(flagCorrelation -> buildRemoveFlagEntry(flagCorrelation.region(), flagCorrelation.flag(), colorForState(state)))
                 .collect(Collectors.toList());
     }
 
@@ -154,17 +154,17 @@ public class ResponsibleFlagPagination extends BasePaginationMessage<FlagCorrela
     public static List<FlagCorrelation> getCorrelations(IProtectedRegion region) {
         Map<String, FlagCorrelation> flagMap = getFlagMapRecursive(region, null);
         return flagMap.values().stream()
-                .filter(c -> c.getFlag() != null)
-                .sorted(Comparator.comparing(c -> c.getFlag().getState()))
-                .sorted(Comparator.comparing(c -> c.getFlag().getName()))
+                .filter(c -> c.flag() != null)
+                .sorted(Comparator.comparing(c -> c.flag().getState()))
+                .sorted(Comparator.comparing(c -> c.flag().getName()))
                 .collect(Collectors.toList());
     }
 
     private static List<FlagCorrelation> getCorrelationByState(Map<String, FlagCorrelation> flagMap, FlagState state) {
         return flagMap.values().stream()
-                .filter(c -> c.getFlag() != null) // TODO: ??
-                .filter(c -> c.getFlag().getState() == state)
-                .sorted(Comparator.comparing(c -> c.getFlag().getName()))
+                .filter(c -> c.flag() != null) // TODO: ??
+                .filter(c -> c.flag().getState() == state)
+                .sorted(Comparator.comparing(c -> c.flag().getName()))
                 .collect(Collectors.toList());
     }
 
