@@ -7,6 +7,8 @@ import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,6 +33,15 @@ public final class Permissions {
 
     public static List<String> getGroups(IProtectedRegion region, Player player) {
         return GROUP_LIST;
+    }
+
+    public static boolean playerHasBypassPermission(@NotNull IProtectedRegion region, @Nullable Player player) {
+        return player != null && hasPermissionOrIsOpWithBypass(region, player);
+    }
+
+    private static boolean hasPermissionOrIsOpWithBypass(@NotNull IProtectedRegion region, @NotNull Player player) {
+        boolean hasPermission = permission.hasAnyPermission(region, player, getGroups(region, player));
+        return hasPermission || permission.hasConfigPermAndOpBypassFlags(player);
     }
 
     public boolean hasConfigPermAndOpBypassFlags(Player player) {
