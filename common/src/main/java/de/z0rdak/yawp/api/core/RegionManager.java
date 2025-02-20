@@ -1,8 +1,6 @@
 package de.z0rdak.yawp.api.core;
 
 import de.z0rdak.yawp.core.area.CuboidArea;
-import de.z0rdak.yawp.core.flag.FlagCorrelation;
-import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
@@ -19,7 +17,6 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static de.z0rdak.yawp.api.FlagEvaluator.getResponsibleFlag;
 
 public final class RegionManager implements IRegionManager {
 
@@ -240,17 +237,6 @@ public final class RegionManager implements IRegionManager {
                     .collect(Collectors.toList());
         }
 
-        @Override
-        public Optional<FlagCorrelation> getResponsibleRegionAndFlag(BlockPos pos, RegionFlag flag) {
-            Optional<IProtectedRegion> responsibleRegion = getResponsible(pos);
-            if (responsibleRegion.isEmpty()) {
-                return Optional.empty();
-            }
-            IProtectedRegion region = responsibleRegion.get();
-            FlagCorrelation flagCorrelation = getResponsibleFlag(region, flag, null);
-            return Optional.of(flagCorrelation);
-        }
-
         /**
          * Gets the region with the highest priority among all involved regions at the given location and dimension. <br>
          * This considers the active state of the region as well. <br>
@@ -281,7 +267,7 @@ public final class RegionManager implements IRegionManager {
         }
 
         @Override
-        public Optional<IProtectedRegion> getResponsible(BlockPos pos) {
+        public Optional<IProtectedRegion> findResponsibleRegion(BlockPos pos) {
             Optional<IMarkableRegion> maybeRegion = getInvolvedRegionFor(pos);
             if (maybeRegion.isEmpty()) {
                 IProtectedRegion dimRegion = cache.getDimensionalRegion();
