@@ -15,6 +15,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -22,6 +23,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
@@ -53,30 +55,22 @@ public class ServerWorldMixin {
      */
     @Inject(method = "explode", at = @At("HEAD"), cancellable = true, allow = 1)
     public void onIgniteExplosive(
-            Entity entity, 
-            DamageSource ds, 
-            ExplosionDamageCalculator edc, 
-            double x, double y, double z, 
-            float power, boolean createFire, 
-            Level.ExplosionInteraction explosionMode, 
-            ParticleOptions small, ParticleOptions big, 
-            Holder<SoundEvent> soundEvent, 
-            CallbackInfo ci) {
+            Entity source, DamageSource damageSource, ExplosionDamageCalculator damageCalculator, double x, double y, double z, float radius, boolean fire, Level.ExplosionInteraction explosionInteraction, ParticleOptions smallExplosionParticles, ParticleOptions largeExplosionParticles, Holder<SoundEvent> explosionSound, CallbackInfoReturnable<Explosion> cir) {
         ServerLevel world = (ServerLevel) (Object) this;
         if (isServerSide(world)) {
-            if (explosionMode == Level.ExplosionInteraction.TNT || explosionMode == Level.ExplosionInteraction.BLOCK) {
+            if (explosionInteraction == Level.ExplosionInteraction.TNT || explosionInteraction == Level.ExplosionInteraction.BLOCK) {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(new BlockPos((int) x, (int) y, (int) z), IGNITE_EXPLOSIVES, world.dimension());
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                FlagEvaluator.processCheck(checkEvent, denyResult -> ci.cancel());
+                FlagEvaluator.processCheck(checkEvent, denyResult -> cir.setReturnValue(null));
             }
-            if (explosionMode == Level.ExplosionInteraction.MOB) {
+            if (explosionInteraction == Level.ExplosionInteraction.MOB) {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(new BlockPos((int) x, (int) y, (int) z), MOB_GRIEFING, world.dimension());
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                FlagEvaluator.processCheck(checkEvent, denyResult -> ci.cancel());
+                FlagEvaluator.processCheck(checkEvent, denyResult -> cir.setReturnValue(null));
             }
         }
     }
