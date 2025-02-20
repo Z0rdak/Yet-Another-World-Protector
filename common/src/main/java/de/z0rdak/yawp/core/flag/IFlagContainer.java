@@ -60,7 +60,7 @@ public interface IFlagContainer extends INbtSerializable<CompoundTag> {
      */
     FlagState flagState(String flag);
 
-    boolean isAllowedOrDefined(@NotNull String flagName);
+    boolean isAllowedOrDenied(@NotNull String flagName);
 
     /**
      * Checks whether the specified flag is defined (i.e., not {@code UNDEFINED}).
