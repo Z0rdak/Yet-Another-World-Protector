@@ -1,7 +1,5 @@
 package de.z0rdak.yawp.api.core;
 
-import de.z0rdak.yawp.core.flag.FlagCorrelation;
-import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import net.minecraft.core.BlockPos;
@@ -129,8 +127,6 @@ public interface IDimensionRegionApi {
      */
     boolean removeLocalRegion(String regionName);
 
-    Optional<FlagCorrelation> getResponsibleRegionAndFlag(BlockPos pos, RegionFlag flag);
-
     /**
      * Gets the region with the highest priority among all involved regions at the given location and dimension. <br>
      * This considers the active state of the region as well. <br>
@@ -147,5 +143,5 @@ public interface IDimensionRegionApi {
      * @param pos the position to get the responsible region for
      * @return the responsible region for the given position and dimension
      */
-    Optional<IProtectedRegion> getResponsible(BlockPos pos);
+    Optional<IProtectedRegion> findResponsibleRegion(BlockPos pos);
 }
