@@ -9,6 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Set;
@@ -49,6 +50,7 @@ public interface IProtectedRegion extends INbtSerializable<CompoundTag> {
 
     RegionFlags getFlags();
 
+    @Nullable
     IFlag getFlag(String flagName);
 
     void addPlayer(Player player, String group);

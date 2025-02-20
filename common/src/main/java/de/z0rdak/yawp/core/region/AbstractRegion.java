@@ -127,7 +127,6 @@ public abstract class AbstractRegion implements IProtectedRegion {
         return flags;
     }
 
-    @Nullable
     @Override
     public IFlag getFlag(String flagName) {
         if (this.flags.contains(flagName)) {
