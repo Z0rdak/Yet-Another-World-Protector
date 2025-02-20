@@ -47,9 +47,8 @@ public record FlagContext(
      *   <li>If the parent flag is set, the child flag is not set, and the player does not have a bypass permission, the parent context is returned.</li>
      *   <li>Otherwise, the current context is retained.</li>
      * </ul>
-     * </p>
-     * This method is typically used in recursive flag resolution, ensuring that higher-priority 
-     * regions or inherited flag settings take effect when applicable.</p>
+     * <p> This method is typically used in recursive flag resolution, ensuring that higher-priority 
+     * regions or inherited flag settings take effect when applicable.
      *
      * @param parent the parent {@link FlagContext} to inherit from, must not be {@code null}
      * @return the effective {@link FlagContext} after applying inheritance rules

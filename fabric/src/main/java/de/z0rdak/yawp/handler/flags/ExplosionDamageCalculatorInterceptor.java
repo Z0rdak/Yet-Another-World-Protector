@@ -23,23 +23,22 @@ import java.util.Optional;
 public class ExplosionDamageCalculatorInterceptor extends ExplosionDamageCalculator {
 	protected ExplosionDamageCalculator nextBehavior;
 	protected Level level;
-	
-	public ExplosionDamageCalculatorInterceptor(ExplosionDamageCalculator nextBehavior, Level level) 
+
+	public ExplosionDamageCalculatorInterceptor(ExplosionDamageCalculator nextBehavior, Level level)
 	{
 		this.nextBehavior = nextBehavior;
 		this.level = level;
 	}
-	
+
 	@Override
 	public boolean shouldBlockExplode(Explosion explosion, BlockGetter blockGetter, BlockPos pos, BlockState state, float power) {
 		RegionFlag flag = switch (explosion.getIndirectSourceEntity()) {
 			case Creeper c -> RegionFlag.EXPLOSION_CREEPER_BLOCK;
-			// case Player p -> RegionFlag.EXPLOSION_PLAYER_BLOCK;
-			case null, default -> RegionFlag.EXPLOSION_BLOCK; // is null for dispenser etc
+			case null, default -> RegionFlag.EXPLOSION_BLOCK;
 		};
 		FlagCheckEvent checkEvent = new FlagCheckEvent(pos, flag, this.level.dimension());
 		FlagState flagState = FlagEvaluator.processCheck(checkEvent);
-		return flagState == FlagState.DENIED 
+		return flagState == FlagState.DENIED
 				? false : nextBehavior.shouldBlockExplode(explosion, blockGetter, pos, state, power);
 	}
 
@@ -49,7 +48,7 @@ public class ExplosionDamageCalculatorInterceptor extends ExplosionDamageCalcula
 			case Creeper c -> RegionFlag.EXPLOSION_CREEPER_ENTITY;
 			case null, default -> RegionFlag.EXPLOSION_ENTITY;
 		};
-		FlagCheckEvent checkEvent = new FlagCheckEvent(entity.blockPosition(), flag, explosion.level().dimension());
+		FlagCheckEvent checkEvent = new FlagCheckEvent(entity.blockPosition(), flag, entity.level().dimension());
 		FlagState flagState = FlagEvaluator.processCheck(checkEvent);
 		return flagState == FlagState.DENIED
 				? false : nextBehavior.shouldDamageEntity(explosion, entity);
@@ -66,16 +65,16 @@ public class ExplosionDamageCalculatorInterceptor extends ExplosionDamageCalcula
 		return flagState1 == FlagState.DENIED || flagState2 == FlagState.DENIED
 				? 0	: nextBehavior.getKnockbackMultiplier(entity);
 	}
-	
+
 	// Note: All other method implementations pass the call directly to the underlying ExplosionDamageCalculator
-	
-	@Override		
+
+	@Override
 	public @NotNull Optional<Float> getBlockExplosionResistance(Explosion explosion, BlockGetter blockGetter, BlockPos pos, BlockState blockState, FluidState fluidState) {
 		return nextBehavior.getBlockExplosionResistance(explosion, blockGetter, pos, blockState, fluidState);
 	}
 
 	@Override
-	public float getEntityDamageAmount(Explosion explosion, Entity entity, float amount) {
-		return nextBehavior.getEntityDamageAmount(explosion, entity, amount);
+	public float getEntityDamageAmount(Explosion explosion, Entity entity) {
+		return nextBehavior.getEntityDamageAmount(explosion, entity);
 	}
 }

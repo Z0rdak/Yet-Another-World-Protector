@@ -16,7 +16,7 @@ public abstract class AllayEntityMixin {
     @Unique
     Entity self = (Allay) (Object) this;
     @Inject(method = "wantsToPickUp", at = @At(value = "HEAD"), cancellable = true)
-    public void onCanGather(ServerLevel world, ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
+    public void onCanGather(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
         FlagEvaluator.checkMobGrief(self.level(), self.blockPosition(), cir);
     }
 }
