@@ -6,8 +6,10 @@ import de.z0rdak.yawp.platform.Services;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.animal.SnowGolem;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.npc.WanderingTrader;
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,12 +26,14 @@ public class ServerWorldMixin {
     @Inject(method = "addEntity", at = @At("HEAD"), cancellable = true, allow = 1)
     public void onSpawnEntity(Entity entity, CallbackInfoReturnable<Boolean> cir) {
         if (isServerSide(entity.level())) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(entity.blockPosition(), SPAWNING_ALL, getDimKey(entity));
-            if (Services.EVENT.post(checkEvent)) {
-                return;
+            FlagCheckEvent checkEvent;
+            if (entity instanceof Mob) { // should not cover paintings, armor stands, item entities, players
+                checkEvent = new FlagCheckEvent(entity.blockPosition(), SPAWNING_ALL, getDimKey(entity));
+                if (Services.EVENT.post(checkEvent)) {
+                    return;
+                }
+                FlagEvaluator.processCheck(checkEvent, deny -> cir.setReturnValue(false));
             }
-            FlagEvaluator.processCheck(checkEvent, deny -> cir.setReturnValue(false));
-
             if (isMonster(entity)) {
                 checkEvent = new FlagCheckEvent(entity.blockPosition(), SPAWNING_MONSTER, getDimKey(entity));
                 if (Services.EVENT.post(checkEvent)) {
