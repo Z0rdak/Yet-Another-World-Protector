@@ -1,95 +1,98 @@
 package de.z0rdak.yawp.util;
 
-import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.exceptions.MinecraftClientException;
+import com.mojang.authlib.exceptions.MinecraftClientHttpException;
+import com.mojang.authlib.minecraft.client.ObjectMapper;
+import com.mojang.authlib.yggdrasil.response.ErrorResponse;
 import com.mojang.brigadier.context.CommandContext;
-import de.z0rdak.yawp.constants.Constants;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.players.GameProfileCache;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.InputStream;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static de.z0rdak.yawp.constants.Constants.LOGGER;
 
 public class MojangApiHelper {
+
+    private static final ObjectMapper OBJECT_MAPPER = ObjectMapper.create();
 
     private MojangApiHelper() {
     }
 
-    @Nullable
-    public static GameProfile getGameProfileInfo(UUID uuid, Consumer<GameProfile> onResult) {
-        try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+    public static void getGameProfileInfo(UUID uuid, Consumer<@Nullable GameProfile> onResult) {
+        try {
             String uuidWithOutDashes = uuid.toString().replace("-", "");
-            String uri = "https://sessionserver.mojang.com/session/minecraft/profile/" + uuidWithOutDashes;
-            HttpGet httpGet = new HttpGet(uri);
-            try {
-                CloseableHttpResponse response = httpclient.execute(httpGet);
-                GameProfile gameProfile = deserializeGameProfile(response);
-                if (gameProfile != null) {
-                    return gameProfile;
-                }
-                onResult.accept(null);
-                return null;
-            } catch (IOException e) {
-                Constants.LOGGER.error("Error fetching game profile info for player '{}': {}", uuid.toString(), e);
-                throw e;
-            }
-        } catch (IOException e) {
+            String uri = "https://api.minecraftservices.com/minecraft/profile/lookup/" + uuidWithOutDashes;
+            onResult.accept(fetchGameProfileInfo(uri));
+        } catch (Exception e) {
             onResult.accept(null);
-            Constants.LOGGER.error("Error fetching game profile info for player '{}': {}", uuid.toString(), e);
-            return null;
+            LOGGER.error("Error fetching game profile info for player '{}': {}", uuid.toString(), e);
         }
     }
 
-    @Nullable
-    private static GameProfile deserializeGameProfile(CloseableHttpResponse response) throws IOException {
-        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-            Reader reader = new InputStreamReader(response.getEntity().getContent(), UTF_8);
-            MojangProfileResponse profileResponse = new Gson().fromJson(reader, MojangProfileResponse.class);
-            String uuidStr = profileResponse.id.replaceAll(
-                    "(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5");
-            return new GameProfile(UUID.fromString(uuidStr), profileResponse.name);
-        }
-        return null;
-    }
-
-    @Nullable
-    public static GameProfile getGameProfileInfo(String username, Consumer<GameProfile> onResult) {
-        try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+    public static void getGameProfileInfo(String username, Consumer<@Nullable  GameProfile> onResult) {
+        try {
             String uri = "https://api.mojang.com/users/profiles/minecraft/" + username;
-            HttpGet httpGet = new HttpGet(uri);
-            try {
-                CloseableHttpResponse response = httpclient.execute(httpGet);
-                if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
-                    // if status code is 204, then the player does not exist
-                    Constants.LOGGER.error("Could not retrieve game profile for player {}", username);
-                    return null;
-                }
-                GameProfile gameProfile = deserializeGameProfile(response);
-                if (gameProfile != null) {
-                    return gameProfile;
-                }
-                onResult.accept(null);
-                return null;
-            } catch (IOException e) {
-                Constants.LOGGER.error("Error fetching game profile info for player '{}': {}", username, e);
-                throw e;
-            }
-        } catch (IOException e) {
-            Constants.LOGGER.error("Error fetching game profile info for player '{}': {}", username, e);
+            onResult.accept(fetchGameProfileInfo(uri));
+        } catch (Exception e) {
             onResult.accept(null);
+            LOGGER.error("Error fetching game profile info for player '{}': {}", username, e);
+        }
+    }
+
+    /**
+     * Referenced: {@link com.mojang.authlib.minecraft.client.MinecraftClient#readInputStream(URL, Class, HttpURLConnection)}
+     */
+    private static GameProfile fetchGameProfileInfo(String uri) {
+        try {
+            HttpURLConnection connection = createUrlConnection(new URI(uri).toURL());
+            InputStream inputStream = null;
+            try {
+                final int status = connection.getResponseCode();
+
+                final String result;
+                if (status < 400) {
+                    inputStream = connection.getInputStream();
+                    result = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+                    if (result.isEmpty()) {
+                        return null;
+                    }
+                    return OBJECT_MAPPER.readValue(result, GameProfile.class);
+                } else {
+                    final String contentType = connection.getContentType();
+                    inputStream = connection.getErrorStream();
+                    final ErrorResponse errorResponse;
+                    if (inputStream != null) {
+                        result = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+                        if (contentType != null && contentType.startsWith("text/html")) {
+                            LOGGER.error("Got an error with a html body connecting to {}: {}", uri, result);
+                            throw new MinecraftClientHttpException(status);
+                        }
+                        errorResponse = OBJECT_MAPPER.readValue(result, ErrorResponse.class);
+                        throw new MinecraftClientHttpException(status, errorResponse);
+                    } else {
+                        throw new MinecraftClientHttpException(status);
+                    }
+                }
+            } catch (final IOException e) {
+                //Connection errors
+                throw new MinecraftClientException(
+                    MinecraftClientException.ErrorType.SERVICE_UNAVAILABLE , "Failed to read from " + uri + " due to " + e.getMessage(), e);
+            } finally {
+                IOUtils.closeQuietly(inputStream);
+            }
+        } catch (URISyntaxException|MalformedURLException e) {
+            LOGGER.error("Could not create URL of {}", uri);
             return null;
         }
     }
@@ -114,5 +117,21 @@ public class MojangApiHelper {
         public String name;
         @SerializedName("id")
         public String id;
+    }
+
+    /**
+     * Referenced: {@link com.mojang.authlib.minecraft.client.MinecraftClient#createUrlConnection(URL)}
+     */
+    private static HttpURLConnection createUrlConnection(URL url) {
+        try {
+            LOGGER.debug("Connecting to {}", url);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+            connection.setUseCaches(false);
+            return connection;
+        } catch (IOException io) {
+            throw new MinecraftClientException(MinecraftClientException.ErrorType.SERVICE_UNAVAILABLE, "Failed connecting to " + url, io);
+        }
     }
 }
