@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.mixin.integrations.snowrealmagic;
 
+import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.handler.HandlerUtil;
@@ -21,7 +22,7 @@ public class SRMWorldTickHandlerMixin {
         if (Services.EVENT.post(checkEvent)){
             return;
         }
-        HandlerUtil.processCheck(checkEvent, deny -> {
+        FlagEvaluator.processCheck(checkEvent, deny -> {
             ci.cancel();
         });
     }
