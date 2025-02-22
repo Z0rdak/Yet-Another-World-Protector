@@ -112,13 +112,6 @@ public class MojangApiHelper {
         return profileCache.get(uuid);
     }
 
-    private static class MojangProfileResponse {
-        @SerializedName("name")
-        public String name;
-        @SerializedName("id")
-        public String id;
-    }
-
     /**
      * Referenced: {@link com.mojang.authlib.minecraft.client.MinecraftClient#createUrlConnection(URL)}
      */
