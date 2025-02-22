@@ -85,7 +85,7 @@ dependencies {
 
     // Mod compats
     // implementation fg.deobf("maven.modrinth:kiwi:A4YxIHAO") // Snow Real Magic dependency
-    compileOnly fg.deobf("maven.modrinth:snow-real-magic:Z5A25ipN")
+    compileOnly fg.deobf("maven.modrinth:snow-real-magic:bNWqJXif")
 }
 
 tasks.withType(JavaCompile).configureEach {
