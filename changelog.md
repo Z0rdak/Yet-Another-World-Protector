@@ -1,4 +1,15 @@
-# [0.5.2-beta2] - 2025-02-16
+# [0.5.2-beta3] - 2025-02-22
+
+## Added
+
+* Add simplified chinese localization. Thank you very much kaixue#6395!
+
+## Fixed
+
+* (1.21.1+) Fix crash when adding player by-uuid or by-name, thanks legenden#7526! ([PR#]())
+* (1.20.1, 1.21.1) Crash due to prev added compat with [Snow! Real Magic!](<https://www.curseforge.com/minecraft/mc-mods/snow-real-magic>)
+
+# [0.5.2-beta2] - 2025-02-21
 
 ## Added
 
