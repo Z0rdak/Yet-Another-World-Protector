@@ -4,10 +4,8 @@
   "package": "de.z0rdak.yawp.mixin",
   "refmap": "${mod_id}.refmap.json",
   "compatibilityLevel": "JAVA_21",
-  "plugin": "de.z0rdak.yawp.mixin.MixinPlugin",
   "mixins": [
     "ExplosionMixin",
-    "integrations.snowrealmagic.SRMWorldTickHandlerMixin",
     "flag.AbstractFireBlockMixin",
     "flag.EnderManEntityMixin",
     "flag.EntityMixin",

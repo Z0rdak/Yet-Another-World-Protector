@@ -8,7 +8,7 @@ dependencies {
 
     // Snow Real Magic
     // implementation "maven.modrinth:kiwi:M8h5uYyf" // Snow Real Magic dependency
-    api "maven.modrinth:snow-real-magic:Dc0gkbuC"
+    // api "maven.modrinth:snow-real-magic:Dc0gkbuC"
 }
 
 neoForge {

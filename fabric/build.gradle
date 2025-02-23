@@ -19,7 +19,7 @@ dependencies {
 
     // Snow Real Magic
     // modImplementation "maven.modrinth:kiwi:LzP2xOQB" // Snow Real Magic dependency
-    modCompileOnly "maven.modrinth:snow-real-magic:Xm9IuQvC"
+    // modCompileOnly "maven.modrinth:snow-real-magic:Xm9IuQvC"
 }
 
 loom {

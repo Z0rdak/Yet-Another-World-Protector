@@ -1,3 +1,9 @@
+# [0.5.2-beta4] - 2025-02-23
+
+## Changed
+
+* Disabled compat with [Snow! Real Magic!](<https://www.curseforge.com/minecraft/mc-mods/snow-real-magic>) to prevent crashes.
+
 # [0.5.2-beta3] - 2025-02-22
 
 ## Added
