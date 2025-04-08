@@ -121,7 +121,7 @@ public class SphereArea extends CenteredArea {
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-        this.radius = nbt.getInt(RegionNbtKeys.RADIUS);
+        this.radius = nbt.getInt(RegionNbtKeys.RADIUS).orElseThrow();
     }
 
     @Override

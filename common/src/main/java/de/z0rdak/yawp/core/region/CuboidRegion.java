@@ -8,6 +8,8 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
+import java.util.Optional;
+
 /**
  * A cuboid regions represents it's area as a simple rectangular cuboid (a BlockBox).
  * The region is marked with two blocks representing the bounding box of the area.
@@ -34,6 +36,7 @@ public final class CuboidRegion extends AbstractMarkableRegion {
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-        this.area = new CuboidArea(nbt.getCompound(RegionNbtKeys.AREA));
+        Optional<CompoundTag> compound = nbt.getCompound(RegionNbtKeys.AREA);
+        compound.ifPresent(compoundTag -> this.area = new CuboidArea(compoundTag));
     }
 }

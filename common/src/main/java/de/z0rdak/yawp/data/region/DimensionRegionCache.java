@@ -143,16 +143,16 @@ public class DimensionRegionCache implements INbtSerializable<CompoundTag> {
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
-        if (nbt.contains(DIM_REGION, Tag.TAG_COMPOUND)) {
-            this.dimensionalRegion = new DimensionalRegion(nbt.getCompound(DIM_REGION));
+        if (nbt.contains(DIM_REGION)) {
+            this.dimensionalRegion = new DimensionalRegion(nbt.getCompound(DIM_REGION).orElseThrow());
         } else {
             throw new IllegalArgumentException("Unable to load dimensional region data from NBT");
         }
         this.regionsInDimension = new HashMap<>();
-        CompoundTag regionsNbt = nbt.getCompound(REGIONS);
-        regionsNbt.getAllKeys().forEach(regionName -> {
-            CompoundTag regionNbt = regionsNbt.getCompound(regionName);
-            AreaType areaType = AreaType.of(regionNbt.getString(AREA_TYPE));
+        CompoundTag regionsNbt = nbt.getCompound(REGIONS).orElseThrow();
+        regionsNbt.keySet().forEach(regionName -> {
+            CompoundTag regionNbt = regionsNbt.getCompound(regionName).orElseThrow();
+            AreaType areaType = AreaType.of(regionNbt.getString(AREA_TYPE).orElseThrow());
             if (areaType != null) {
                 Constants.LOGGER.debug("Loading region data for region '{}'", regionName);
                 IMarkableRegion newRegion = DimensionRegionCache.deserializeLocalRegion(areaType, regionNbt);

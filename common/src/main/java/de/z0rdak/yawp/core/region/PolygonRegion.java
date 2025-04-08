@@ -26,6 +26,6 @@ public final class PolygonRegion extends AbstractMarkableRegion {
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-        this.area = new Polygon3DArea(nbt.getCompound(RegionNbtKeys.AREA));
+        this.area = new Polygon3DArea(nbt.getCompound(RegionNbtKeys.AREA).orElseThrow());
     }
 }

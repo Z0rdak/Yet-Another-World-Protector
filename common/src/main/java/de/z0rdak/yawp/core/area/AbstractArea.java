@@ -3,6 +3,8 @@ package de.z0rdak.yawp.core.area;
 import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import net.minecraft.nbt.CompoundTag;
 
+import java.util.Optional;
+
 public abstract class AbstractArea implements IMarkableArea {
 
     private AreaType areaType;
@@ -28,6 +30,7 @@ public abstract class AbstractArea implements IMarkableArea {
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
-        this.areaType = AreaType.of(nbt.getString(RegionNbtKeys.AREA_TYPE));
+        Optional<String> maybeStr = nbt.getString(RegionNbtKeys.AREA_TYPE);
+        maybeStr.ifPresent(areaType -> this.areaType = AreaType.of(areaType));
     }
 }

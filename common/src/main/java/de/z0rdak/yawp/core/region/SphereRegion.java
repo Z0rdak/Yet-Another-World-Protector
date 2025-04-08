@@ -30,6 +30,6 @@ public final class SphereRegion extends AbstractMarkableRegion {
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-        this.area = new SphereArea(nbt.getCompound(RegionNbtKeys.AREA));
+        this.area = new SphereArea(nbt.getCompound(RegionNbtKeys.AREA).orElseThrow());
     }
 }

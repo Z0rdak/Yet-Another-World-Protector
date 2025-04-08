@@ -6,7 +6,6 @@ import de.z0rdak.yawp.util.NbtCompatHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -224,16 +223,16 @@ public class CuboidArea extends AbstractArea {
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag nbt = super.serializeNBT();
-        nbt.put(RegionNbtKeys.P1, NbtUtils.writeBlockPos(this.p1));
-        nbt.put(RegionNbtKeys.P2, NbtUtils.writeBlockPos(this.p2));
+        nbt.put(RegionNbtKeys.P1, NbtCompatHelper.asInts(this.p1));
+        nbt.put(RegionNbtKeys.P2, NbtCompatHelper.asInts(this.p2));
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-        this.p1 = NbtCompatHelper.toBlockPos(nbt, RegionNbtKeys.P1).orElseThrow();
-        this.p2 = NbtCompatHelper.toBlockPos(nbt, RegionNbtKeys.P2).orElseThrow();
+        this.p1 = NbtCompatHelper.asBlockPos(nbt, RegionNbtKeys.P1).orElseThrow();
+        this.p2 = NbtCompatHelper.asBlockPos(nbt, RegionNbtKeys.P2).orElseThrow();
         this.area = BoundingBox.fromCorners(p1, p2);
     }
 

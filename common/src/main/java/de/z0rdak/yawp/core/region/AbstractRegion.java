@@ -309,31 +309,31 @@ public abstract class AbstractRegion implements IProtectedRegion {
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
-        this.name = nbt.getString(NAME);
-        this.dimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(nbt.getString(DIM)));
-        this.isActive = nbt.getBoolean(ACTIVE);
-        this.isMuted = nbt.getBoolean(MUTED);
-        this.regionType = RegionType.of(nbt.getString(REGION_TYPE));
-        this.flags = new RegionFlags(nbt.getCompound(FLAGS));
+        this.name = nbt.getString(NAME).orElseThrow();
+        this.dimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(nbt.getString(DIM).orElseThrow()));
+        this.isActive = nbt.getBoolean(ACTIVE).orElseThrow();
+        this.isMuted = nbt.getBoolean(MUTED).orElseThrow();
+        this.regionType = RegionType.of(nbt.getString(REGION_TYPE).orElseThrow());
+        this.flags = new RegionFlags(nbt.getCompound(FLAGS).orElseThrow());
         this.groups = new HashMap<>();
-        this.groups.put(OWNERS, new PlayerContainer(nbt.getCompound(OWNERS)));
-        this.groups.put(MEMBERS, new PlayerContainer(nbt.getCompound(MEMBERS)));
-        if (this.parent == null && nbt.contains(PARENT, Tag.TAG_STRING)) {
-            String parentName = nbt.getString(PARENT);
+        this.groups.put(OWNERS, new PlayerContainer(nbt.getCompound(OWNERS).orElseThrow()));
+        this.groups.put(MEMBERS, new PlayerContainer(nbt.getCompound(MEMBERS).orElseThrow()));
+        if (this.parent == null && nbt.contains(PARENT)) {
+            String parentName = nbt.getString(PARENT).orElseThrow();
             if (!parentName.isEmpty()) {
-                this.parentName = nbt.getString(PARENT);
+                this.parentName = nbt.getString(PARENT).orElseThrow();
             } else {
                 this.parentName = null;
             }
         }
         if (this.children != null && this.children.isEmpty()) {
-            if (nbt.contains(CHILDREN, Tag.TAG_LIST)) {
-                ListTag childrenNbt = nbt.getList(CHILDREN, Tag.TAG_STRING);
+            if (nbt.contains(CHILDREN)) {
+                ListTag childrenNbt = nbt.getList(CHILDREN).orElseThrow();
                 if (!childrenNbt.isEmpty()) {
                     this.children = new HashMap<>(childrenNbt.size());
                     this.childrenNames = new HashSet<>(childrenNbt.size());
                     for (int i = 0; i < childrenNbt.size(); i++) {
-                        this.childrenNames.add(childrenNbt.getString(i));
+                        this.childrenNames.add(childrenNbt.getString(i).orElseThrow());
                     }
                 }
             }

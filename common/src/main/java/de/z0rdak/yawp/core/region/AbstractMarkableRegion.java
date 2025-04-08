@@ -84,7 +84,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag nbt = super.serializeNBT();
-        nbt.put(TP_POS, NbtUtils.writeBlockPos(this.tpTarget));
+        nbt.put(TP_POS, NbtCompatHelper.asInts(this.tpTarget));
         nbt.putInt(PRIORITY, priority);
         nbt.putString(AREA_TYPE, this.areaType.areaType);
         nbt.put(AREA, this.area.serializeNBT());
@@ -94,9 +94,9 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-        this.tpTarget = NbtCompatHelper.toBlockPos(nbt, TP_POS).orElseThrow();
-        this.priority = nbt.getInt(PRIORITY);
-        AreaType areaType = AreaType.of(nbt.getString(AREA_TYPE));
+        this.tpTarget = NbtCompatHelper.asBlockPos(nbt, TP_POS).orElseThrow();
+        this.priority = nbt.getInt(PRIORITY).orElse(Services.REGION_CONFIG.getDefaultPriority());
+        AreaType areaType = AreaType.of(nbt.getString(AREA_TYPE).orElseThrow());
         if (areaType == null) {
             Constants.LOGGER.error("Error loading region data for: '{}' in dim '{}'", this.getName(), this.dimension.location());
             throw new IllegalArgumentException("Error loading region data for: '" + this.getName() + "' in dim '" + this.dimension.location() + "'");

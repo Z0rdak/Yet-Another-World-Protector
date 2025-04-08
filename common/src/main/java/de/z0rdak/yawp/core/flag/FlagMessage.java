@@ -190,9 +190,9 @@ public class FlagMessage implements INbtSerializable<CompoundTag> {
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
-        this.msg = nbt.getString(MSG);
-        this.muted = nbt.getBoolean(MUTED);
-        this.isDefault = nbt.getBoolean(DEFAULT);
+        this.msg = nbt.getString(MSG).orElseThrow();
+        this.muted = nbt.getBoolean(MUTED).orElseThrow();
+        this.isDefault = nbt.getBoolean(DEFAULT).orElseThrow();
     }
 
 }

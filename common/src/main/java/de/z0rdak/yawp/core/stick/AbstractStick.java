@@ -23,7 +23,7 @@ public abstract class AbstractStick implements INbtSerializable<CompoundTag> {
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
-        this.stickType = StickType.of(nbt.getString(STICK_TYPE));
+        this.stickType = StickType.of(nbt.getString(STICK_TYPE).orElseThrow());
     }
 
     public StickType getStickType() {

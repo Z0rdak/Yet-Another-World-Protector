@@ -1,11 +1,9 @@
 package de.z0rdak.yawp.core.area;
 
-import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import de.z0rdak.yawp.util.NbtCompatHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -44,14 +42,15 @@ public abstract class CenteredArea extends AbstractArea {
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag nbt = super.serializeNBT();
-        nbt.put("center", NbtUtils.writeBlockPos(this.center));
+        IntArrayTag blockPosInts = new IntArrayTag(new int[]{this.center.getX(), this.center.getY(), this.getCenter().getZ()});
+        nbt.put("center", blockPosInts);
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-        this.center = NbtCompatHelper.toBlockPos(nbt, "center").orElseThrow();
+        this.center = NbtCompatHelper.asBlockPos(nbt, "center").orElseThrow();
     }
 
     @Override

@@ -90,8 +90,8 @@ public class VerticalCylinderArea extends CenteredArea {
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-        this.distance = nbt.getInt(RegionNbtKeys.RADIUS);
-        this.radius = nbt.getInt(RegionNbtKeys.HEIGHT);
+        this.distance = nbt.getInt(RegionNbtKeys.RADIUS).orElseThrow();
+        this.radius = nbt.getInt(RegionNbtKeys.HEIGHT).orElseThrow();
     }
 
 

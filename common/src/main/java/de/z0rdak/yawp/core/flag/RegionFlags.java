@@ -32,10 +32,10 @@ public class RegionFlags implements IFlagContainer {
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         flags.clear();
-        for (String key : nbt.getAllKeys()) {
+        for (String key : nbt.keySet()) {
             if (RegionFlag.contains(key)) {
-                CompoundTag flagNbt = nbt.getCompound(key);
-                FlagType flagType = FlagType.of(flagNbt.getString(FLAG_TYPE));
+                CompoundTag flagNbt = nbt.getCompound(key).orElseThrow();
+                FlagType flagType = FlagType.of(flagNbt.getString(FLAG_TYPE).orElseThrow());
                 if (flagType != null) {
                     IFlag flag = switch (flagType) {
                         case BOOLEAN_FLAG -> new BooleanFlag(flagNbt);
