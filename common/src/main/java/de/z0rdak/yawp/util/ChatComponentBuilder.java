@@ -25,6 +25,8 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.scores.Team;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -68,10 +70,39 @@ public class ChatComponentBuilder {
 
     public static MutableComponent buildExecuteCmdComponent(MutableComponent linkText, MutableComponent hoverText, String command, ClickEvent.Action eventAction, ChatFormatting color) {
         MutableComponent text = ComponentUtils.wrapInSquareBrackets(linkText);
+        ClickEvent clickEvent = mapActionToClickEvent(eventAction, command);
         return text.setStyle(text.getStyle()
                 .withColor(color)
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText))
-                .withClickEvent(new ClickEvent(eventAction, command)));
+                .withHoverEvent(new HoverEvent.ShowText(hoverText))
+                .withClickEvent(clickEvent));
+    }
+
+    public static ClickEvent mapActionToClickEvent(ClickEvent.Action clickAction, String content) {
+        try {
+            switch (clickAction) {
+                case OPEN_URL -> {
+                    return new ClickEvent.OpenUrl(new URI(content));
+                }
+                case OPEN_FILE -> {
+                    return new ClickEvent.OpenFile(content);
+                }
+                case RUN_COMMAND -> {
+                    return new ClickEvent.RunCommand(content);
+                }
+                case SUGGEST_COMMAND -> {
+                    return new ClickEvent.SuggestCommand(content);
+                }
+                case CHANGE_PAGE -> {
+                    return new ClickEvent.ChangePage(Integer.parseInt(content));
+                }
+                case COPY_TO_CLIPBOARD -> {
+                    return new ClickEvent.CopyToClipboard(content);
+                }
+            }
+        } catch (RuntimeException | URISyntaxException e) {
+            throw new IllegalArgumentException("Unknown click action: " + clickAction);
+        }
+        throw new IllegalArgumentException("Unknown click action: " + clickAction);
     }
 
     public static MutableComponent buildPlayerHoverComponent(Player player) {
@@ -79,8 +110,8 @@ public class ChatComponentBuilder {
         MutableComponent playerInfo = Messages.substitutable("%s (%s)", player.getDisplayName(), player.getUUID().toString());
         playerName.setStyle(playerName.getStyle()
                 .withColor(LINK_COLOR)
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, playerInfo))
-                .withClickEvent(new ClickEvent(SUGGEST_COMMAND, "/tell " + playerName.getString() + " ")));
+                .withHoverEvent(new HoverEvent.ShowText(playerInfo))
+                .withClickEvent(new ClickEvent.SuggestCommand("/tell " + playerName.getString() + " ")));
         return playerName;
     }
 
@@ -88,8 +119,8 @@ public class ChatComponentBuilder {
         MutableComponent playerName = Component.literal(team.getName());
         playerName.setStyle(playerName.getStyle()
                 .withColor(LINK_COLOR)
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatableWithFallback("cli.msg.info.region.group.link.hover", "Click to display team info")))
-                .withClickEvent(new ClickEvent(RUN_COMMAND, "/team list " + team.getName())));
+                .withHoverEvent(new HoverEvent.ShowText(Component.translatableWithFallback("cli.msg.info.region.group.link.hover", "Click to display team info")))
+                .withClickEvent(new ClickEvent.RunCommand("/team list " + team.getName())));
         return playerName;
     }
 
@@ -145,7 +176,9 @@ public class ChatComponentBuilder {
     }
 
     public static MutableComponent buildTextWithHoverMsg(MutableComponent text, MutableComponent hoverText, ChatFormatting color) {
-        text.setStyle(text.getStyle().withColor(color).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText)));
+        text.setStyle(text.getStyle()
+                .withColor(color)
+                .withHoverEvent(new HoverEvent.ShowText(hoverText)));
         return text;
     }
 
