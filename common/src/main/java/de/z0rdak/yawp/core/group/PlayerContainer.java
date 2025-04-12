@@ -1,19 +1,27 @@
 package de.z0rdak.yawp.core.group;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.world.level.entity.UUIDLookup;
-import net.minecraft.world.level.entity.UniquelyIdentifyable;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class PlayerContainer implements IMemberContainer {
 
+    public static final Codec<PlayerContainer> CODEC = RecordCodecBuilder.create(
+            instance -> instance.group(
+                    Codec.STRING.fieldOf("name")
+                            .forGetter(pc -> pc.groupName),
+                    Codec.list(Codec.STRING).fieldOf("teams")
+                            .forGetter(pc -> new ArrayList<>(pc.teams)),
+                    Codec.unboundedMap(UUIDUtil.STRING_CODEC, Codec.STRING).fieldOf("players")
+                            .forGetter(pc -> pc.players)
+                    ).apply(instance, PlayerContainer::new));
     private final Set<String> teams;
     private final Map<UUID, String> players;
     private final String groupName;
@@ -27,6 +35,12 @@ public class PlayerContainer implements IMemberContainer {
         this.groupName = groupName;
         this.teams = new HashSet<>(0);
         this.players = new HashMap<>(0);
+    }
+
+    public PlayerContainer(String groupName, List<String> teams, Map<UUID, String> players) {
+        this(groupName);
+        this.teams.addAll(teams);
+        this.players.putAll(players);
     }
 
     @Override
