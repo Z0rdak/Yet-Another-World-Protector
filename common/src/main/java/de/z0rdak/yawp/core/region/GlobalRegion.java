@@ -1,17 +1,50 @@
 package de.z0rdak.yawp.core.region;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import de.z0rdak.yawp.core.flag.IFlag;
+import de.z0rdak.yawp.core.flag.RegionFlags;
+import de.z0rdak.yawp.core.group.PlayerContainer;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
-public class GlobalRegion extends AbstractRegion {
+public class GlobalRegion extends ProtectedRegion {
+    public static final Codec<GlobalRegion> CODEC = RecordCodecBuilder.create(
+            instance -> instance.group(
+                            Codec.STRING.fieldOf("name")
+                                    .forGetter(ProtectedRegion::getName),
+                            ResourceKey.codec(Registries.DIMENSION)
+                                    .fieldOf("dimension")
+                                    .forGetter(ProtectedRegion::getDim),
+                            Codec.STRING.fieldOf("parentName")
+                                    .forGetter(ProtectedRegion::getParentName),
+                            Codec.STRING.fieldOf("type")
+                                    .forGetter(r -> r.getRegionType().type),
+                            Codec.unboundedMap(Codec.STRING, IFlag.CODEC)
+                                    .fieldOf("flags")
+                                    .forGetter(r -> r.getFlags().getFlagMap()),
+                            Codec.BOOL.fieldOf("isActive")
+                                    .forGetter(ProtectedRegion::isActive),
+                            Codec.BOOL.fieldOf("isMuted")
+                                    .forGetter(ProtectedRegion::isMuted),
+                            Codec.unboundedMap(Codec.STRING, PlayerContainer.CODEC).fieldOf("groups")
+                                    .forGetter(ProtectedRegion::getGroups),
+                            Codec.list(Codec.STRING).fieldOf("childrenNames")
+                                    .forGetter(r -> new ArrayList<>(r.getChildrenNames()))
+                    )
+                    .apply(instance, (name, dim, parentName, regionType,
+                                      flags, isActive, isMuted, groups, childrenNames) ->
+                            new GlobalRegion(new RegionFlags(flags), isActive, isMuted, groups, childrenNames)
+                    )
+    );
+
+
 
     public static final ResourceLocation GLOBAL = ResourceLocation.fromNamespaceAndPath("yawp", "global");
     public static final ResourceKey<Level> GLOBAL_DIMENSION = ResourceKey.create(Registries.DIMENSION, GLOBAL);
@@ -23,6 +56,16 @@ public class GlobalRegion extends AbstractRegion {
     public GlobalRegion() {
         this(GLOBAL.toString(), RegionType.GLOBAL);
         this.setParent(this);
+    }
+
+    private GlobalRegion(RegionFlags flags, boolean isActive, boolean isMuted, Map<String, PlayerContainer> groups, List<String> childrenNames) {
+        this(GLOBAL.toString(), RegionType.GLOBAL);
+        this.setParent(this);
+        this.setFlags(flags);
+        this.setIsActive(isActive);
+        this.setIsMuted(isMuted);
+        this.setGroups(groups);
+        this.setChildrenNames(childrenNames);
     }
 
     protected GlobalRegion(String name, RegionType type) {
