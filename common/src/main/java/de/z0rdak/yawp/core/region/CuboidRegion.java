@@ -14,7 +14,7 @@ import java.util.Optional;
  * A cuboid regions represents it's area as a simple rectangular cuboid (a BlockBox).
  * The region is marked with two blocks representing the bounding box of the area.
  */
-public final class CuboidRegion extends AbstractMarkableRegion {
+public final class CuboidRegion extends MarkedRegion {
 
     public CuboidRegion(CompoundTag nbt) {
         super(nbt);

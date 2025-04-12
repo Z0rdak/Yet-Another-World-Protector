@@ -8,7 +8,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
-public final class PolygonRegion extends AbstractMarkableRegion {
+public final class PolygonRegion extends MarkedRegion {
 
     public PolygonRegion(CompoundTag nbt) {
         super(nbt);

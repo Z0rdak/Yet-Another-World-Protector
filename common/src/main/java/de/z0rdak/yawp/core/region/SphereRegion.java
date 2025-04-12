@@ -8,7 +8,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
-public final class SphereRegion extends AbstractMarkableRegion {
+public final class SphereRegion extends MarkedRegion {
 
     public SphereRegion(CompoundTag nbt) {
         super(nbt);

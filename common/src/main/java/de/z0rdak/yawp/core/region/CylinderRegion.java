@@ -8,7 +8,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
-public final class CylinderRegion extends AbstractMarkableRegion {
+public final class CylinderRegion extends MarkedRegion {
 
     public CylinderRegion(CompoundTag nbt) {
         super(nbt);
