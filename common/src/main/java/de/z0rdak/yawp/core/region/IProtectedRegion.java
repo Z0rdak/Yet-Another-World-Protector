@@ -69,6 +69,8 @@ public interface IProtectedRegion extends INbtSerializable<CompoundTag> {
 
     PlayerContainer getGroup(String group);
 
+    Map<String, PlayerContainer> getGroups();
+
     boolean permits(Player player);
 
     boolean isInGroup(Player player, String group);
