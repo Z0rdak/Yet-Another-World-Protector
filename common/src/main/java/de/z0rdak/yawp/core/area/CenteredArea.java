@@ -8,7 +8,7 @@ import net.minecraft.nbt.*;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class CenteredArea extends AbstractArea {
+public abstract class CenteredArea extends MarkedArea {
 
     protected BlockPos center;
 

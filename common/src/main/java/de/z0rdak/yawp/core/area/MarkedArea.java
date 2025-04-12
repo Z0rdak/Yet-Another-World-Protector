@@ -5,15 +5,15 @@ import net.minecraft.nbt.CompoundTag;
 
 import java.util.Optional;
 
-public abstract class AbstractArea implements IMarkableArea {
+public abstract class MarkedArea implements IMarkableArea {
 
     private AreaType areaType;
 
-    protected AbstractArea(AreaType areaType) {
+    protected MarkedArea(AreaType areaType) {
         this.areaType = areaType;
     }
 
-    protected AbstractArea(CompoundTag nbt) {
+    protected MarkedArea(CompoundTag nbt) {
         this.deserializeNBT(nbt);
     }
 

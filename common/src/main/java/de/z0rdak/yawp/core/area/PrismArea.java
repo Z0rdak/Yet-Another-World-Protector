@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class PrismArea extends AbstractArea {
+public class PrismArea extends MarkedArea {
 
     public List<BlockPos> blockNodes;
 

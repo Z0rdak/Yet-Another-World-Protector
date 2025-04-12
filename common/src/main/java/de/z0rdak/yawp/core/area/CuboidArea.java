@@ -23,7 +23,7 @@ import static de.z0rdak.yawp.util.AreaUtil.distanceManhattan;
  * Represents and wraps a simple AxisAlignedBB.
  * This area is marked by two positions and thus spans a cuboid shape
  */
-public class CuboidArea extends AbstractArea {
+public class CuboidArea extends MarkedArea {
 
     private BoundingBox area;
     private BlockPos p1;

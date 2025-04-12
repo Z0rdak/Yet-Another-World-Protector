@@ -4,8 +4,6 @@ import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.nbt.Tag;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.ArrayList;
@@ -13,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-public class Polygon3DArea extends AbstractArea {
+public class Polygon3DArea extends MarkedArea {
 
     private List<BlockPos> positions;
 
