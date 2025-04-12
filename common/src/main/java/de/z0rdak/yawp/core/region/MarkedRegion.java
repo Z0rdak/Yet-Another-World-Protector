@@ -1,16 +1,25 @@
 package de.z0rdak.yawp.core.region;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.IMarkableArea;
+import de.z0rdak.yawp.core.flag.IFlag;
+import de.z0rdak.yawp.core.flag.RegionFlags;
+import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.util.NbtCompatHelper;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import static de.z0rdak.yawp.constants.serialization.RegionNbtKeys.*;
 
@@ -18,14 +27,67 @@ import static de.z0rdak.yawp.constants.serialization.RegionNbtKeys.*;
  * The AbstractMarkableRegion represents an abstract implementation for a markable region.
  * This can be used to implement different types of regions which define their area in a different way.
  */
-public abstract class AbstractMarkableRegion extends AbstractRegion implements IMarkableRegion {
+public class MarkedRegion extends ProtectedRegion implements IMarkableRegion {
+
+    public static final Codec<IMarkableRegion> CODEC = RecordCodecBuilder.create(
+            instance -> instance.group(
+                            Codec.STRING.fieldOf("name")
+                                    .forGetter(IMarkableRegion::getName),
+                            ResourceKey.codec(Registries.DIMENSION)
+                                    .fieldOf("dimension")
+                                    .forGetter(IMarkableRegion::getDim),
+                            Codec.STRING.fieldOf("parentName")
+                                    .forGetter(IMarkableRegion::getParentName),
+                            Codec.STRING.fieldOf("type")
+                                    .forGetter(r -> r.getRegionType().type),
+                            Codec.unboundedMap(Codec.STRING, IFlag.CODEC)
+                                    .fieldOf("flags")
+                                    .forGetter(r -> r.getFlags().getFlagMap()),
+                            Codec.BOOL.fieldOf("isActive")
+                                    .forGetter(IMarkableRegion::isActive),
+                            Codec.BOOL.fieldOf("isMuted")
+                                    .forGetter(IMarkableRegion::isMuted),
+                            Codec.INT.fieldOf("priority")
+                                    .forGetter(IMarkableRegion::getPriority),
+                            Codec.STRING.fieldOf("areaType")
+                                    .forGetter(r -> r.getAreaType().areaType),
+                            IMarkableArea.CODEC.fieldOf("area")
+                                    .forGetter(IMarkableRegion::getArea),
+                            BlockPos.CODEC.fieldOf("tpTarget")
+                                    .forGetter(IMarkableRegion::getTpTarget),
+                            Codec.unboundedMap(Codec.STRING, PlayerContainer.CODEC).fieldOf("groups")
+                                    .forGetter(IMarkableRegion::getGroups),
+                            Codec.list(Codec.STRING).fieldOf("childrenNames")
+                                    .forGetter(r -> new ArrayList<>(r.getChildrenNames()))
+                    )
+                    .apply(instance, MarkedRegion::new)
+    );
+
 
     protected int priority;
     protected IMarkableArea area;
     protected AreaType areaType;
     protected BlockPos tpTarget;
 
-    public AbstractMarkableRegion(String name, IMarkableArea area, Player owner, ResourceKey<Level> dimension, AbstractRegion parent) {
+    private MarkedRegion(String name, ResourceKey<Level> dim, String parentName,
+                         String regionType, Map<String, IFlag> flags, boolean isActive, boolean isMuted,
+                         Integer priority, String areaType, IMarkableArea area, BlockPos blockPos,
+                         Map<String, PlayerContainer> groups, List<String> childrenNames) {
+        super(name, dim, RegionType.LOCAL, null);
+        this.setArea(area);
+        this.setPriority(priority);
+        this.areaType = AreaType.of(areaType);
+        this.parentName = parentName;
+        this.setFlags(new RegionFlags(flags));
+        this.setIsActive(isActive);
+        this.setIsMuted(isMuted);
+        this.setTpTarget(blockPos);
+        this.setGroups(groups);
+        this.setChildrenNames(childrenNames);
+    }
+
+
+    public MarkedRegion(String name, IMarkableArea area, Player owner, ResourceKey<Level> dimension, ProtectedRegion parent) {
         super(name, dimension, RegionType.LOCAL, owner);
         this.area = area;
         this.areaType = area.getAreaType();
@@ -35,16 +97,16 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         }
     }
 
-    public AbstractMarkableRegion(String name, IMarkableArea area, Player owner, ResourceKey<Level> dimension) {
+    public MarkedRegion(String name, IMarkableArea area, Player owner, ResourceKey<Level> dimension) {
         this(name, area, owner, dimension, null);
     }
 
-    public AbstractMarkableRegion(String name, IMarkableArea area, BlockPos tpTarget, Player owner, ResourceKey<Level> dimension) {
+    public MarkedRegion(String name, IMarkableArea area, BlockPos tpTarget, Player owner, ResourceKey<Level> dimension) {
         this(name, area, owner, dimension, null);
         this.tpTarget = tpTarget;
     }
 
-    public AbstractMarkableRegion(CompoundTag nbt) {
+    public MarkedRegion(CompoundTag nbt) {
         super(nbt);
         this.deserializeNBT(nbt);
     }
@@ -129,6 +191,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         this.priority = priority;
     }
 
+    @Override
     public AreaType getAreaType() {
         return areaType;
     }
