@@ -9,12 +9,10 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,7 +24,8 @@ import static de.z0rdak.yawp.constants.serialization.RegionNbtKeys.*;
  * This abstraction can be used for markable regions as well as regions without
  * an area (dimensions). <br>
  */
-public abstract class AbstractRegion implements IProtectedRegion {
+public abstract class ProtectedRegion implements IProtectedRegion {
+
     protected ResourceKey<Level> dimension;
     protected IProtectedRegion parent;
     protected String parentName;
@@ -39,7 +38,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
     private Map<String, IProtectedRegion> children;
     private Set<String> childrenNames;
 
-    protected AbstractRegion(CompoundTag nbt) {
+    protected ProtectedRegion(CompoundTag nbt) {
         this.childrenNames = new HashSet<>(0);
         this.children = new HashMap<>(0);
         this.parentName = null;
@@ -51,7 +50,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.deserializeNBT(nbt);
     }
 
-    protected AbstractRegion(String name, ResourceKey<Level> dimension, RegionType type) {
+    protected ProtectedRegion(String name, ResourceKey<Level> dimension, RegionType type) {
         this.name = name;
         this.dimension = dimension;
         this.regionType = type;
@@ -64,7 +63,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.childrenNames = new HashSet<>();
     }
 
-    protected AbstractRegion(String name, ResourceKey<Level> dimension, RegionType regionType, Player owner) {
+    protected ProtectedRegion(String name, ResourceKey<Level> dimension, RegionType regionType, Player owner) {
         this(name, dimension, regionType);
         if (owner != null) {
             this.groups.get(Permissions.OWNER).addPlayer(owner.getUUID(), owner.getScoreboardName());
@@ -87,6 +86,10 @@ public abstract class AbstractRegion implements IProtectedRegion {
 
     public void setGroups(Map<String, PlayerContainer> groups) {
         this.groups = groups;
+    }
+
+    public Map<String, PlayerContainer> getGroups() {
+        return Collections.unmodifiableMap(groups);
     }
 
     @Override
@@ -247,6 +250,11 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.childrenNames.clear();
     }
 
+    public void setChildrenNames(List<String> childrenNames) {
+        this.childrenNames.clear();
+        this.childrenNames.addAll(childrenNames);
+    }
+
     @Override
     public Map<String, IProtectedRegion> getChildren() {
         return Collections.unmodifiableMap(this.children);
@@ -266,7 +274,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
     public boolean addChild(IProtectedRegion child) {
         this.children.put(child.getName(), child);
         this.childrenNames.add(child.getName());
-        ((AbstractRegion) child).setParent(this);
+        ((ProtectedRegion) child).setParent(this);
         return true;
     }
 
