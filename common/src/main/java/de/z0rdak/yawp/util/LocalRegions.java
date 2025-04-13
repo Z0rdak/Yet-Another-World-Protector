@@ -135,7 +135,7 @@ public final class LocalRegions {
     }
 
     public static RegionOverlappingInfo getOverlappingRegions(IMarkableRegion region) {
-        Collection<IMarkableRegion> regionsInDim = RegionDataManager.get().getRegionsFor(region.getDim()).stream()
+        Collection<IMarkableRegion> regionsInDim = RegionDataManager.getLocalsFor(region.getDim()).stream()
                 .filter(r -> !r.equals(region))
                 .collect(Collectors.toList());
         List<IMarkableRegion> intersectingRegions = regionsInDim.stream()
@@ -148,7 +148,7 @@ public final class LocalRegions {
     }
 
     public static RegionOverlappingInfo getOverlappingRegions(IMarkableArea area, ResourceKey<Level> dim) {
-        Collection<IMarkableRegion> regionsInDim = RegionDataManager.get().getRegionsFor(dim);
+        Collection<IMarkableRegion> regionsInDim = RegionDataManager.getLocalsFor(dim);
         List<IMarkableRegion> intersectingRegions = regionsInDim.stream()
                 .filter(r -> r.getArea().intersects(area))
                 .collect(Collectors.toList());

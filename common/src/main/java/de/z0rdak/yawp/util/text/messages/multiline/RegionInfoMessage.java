@@ -3,7 +3,7 @@ package de.z0rdak.yawp.util.text.messages.multiline;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
-import de.z0rdak.yawp.data.region.DimensionRegionCache;
+import de.z0rdak.yawp.data.region.LevelRegionData;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.text.Messages;
 import net.minecraft.nbt.CompoundTag;
@@ -84,8 +84,8 @@ public class RegionInfoMessage implements MultiLineMessage<IProtectedRegion> {
             case DIMENSION: {
                 // Parent: [global], [n children], [n regions] [+]
                 MutableComponent globalRegionLink = buildRegionInfoLink(region.getParent(), Component.translatableWithFallback("cli.msg.info.region.global.link.hover", "Show global region info"));
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(region.getDim());
-                MutableComponent hierarchyLinks = Messages.substitutable("%s, %s, %s", globalRegionLink, buildDimRegionsLink(dimCache), listChildrenLink);
+                LevelRegionData levelData = RegionDataManager.getOrCreate(region.getDim());
+                MutableComponent hierarchyLinks = Messages.substitutable("%s, %s, %s", globalRegionLink, buildDimRegionsLink(levelData), listChildrenLink);
                 return buildInfoComponent("cli.msg.info.region.hierarchy", "Hierarchy", hierarchyLinks);
             }
             case LOCAL: {
