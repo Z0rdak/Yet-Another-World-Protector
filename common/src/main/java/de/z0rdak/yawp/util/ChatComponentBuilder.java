@@ -12,6 +12,7 @@ import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
+import de.z0rdak.yawp.data.PlayerManager;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.text.Messages;
 import net.minecraft.ChatFormatting;
@@ -39,7 +40,6 @@ import static de.z0rdak.yawp.util.ChatLinkBuilder.*;
 import static de.z0rdak.yawp.util.text.Messages.LINK_COLOR;
 import static de.z0rdak.yawp.util.text.Messages.REMOVE_CMD_COLOR;
 import static net.minecraft.ChatFormatting.*;
-import static net.minecraft.network.chat.ClickEvent.Action.RUN_COMMAND;
 import static net.minecraft.network.chat.ClickEvent.Action.SUGGEST_COMMAND;
 
 public class ChatComponentBuilder {
@@ -336,7 +336,7 @@ public class ChatComponentBuilder {
         MutableComponent regionRemoveLink;
         // TODO: could be moved to ChatLinkBuilder
         if (groupType == GroupType.PLAYER) {
-            Player player = RegionDataManager.serverInstance.getPlayerList().getPlayerByName(name);
+            Player player = PlayerManager.getPlayer(name);
             boolean isOffline = player == null;
             if (isOffline) {
                 MutableComponent offlinePlayerRemoveLink = buildRemoveLinkForOfflinePlayer(region, name, groupType, group, linkText, hoverText);
@@ -350,7 +350,7 @@ public class ChatComponentBuilder {
     public static MutableComponent buildGroupInfo(IProtectedRegion region, String groupMemberName, GroupType groupType) {
         return switch (groupType) {
             case PLAYER -> {
-                Player player = RegionDataManager.serverInstance.getPlayerList().getPlayerByName(groupMemberName);
+                Player player = PlayerManager.getPlayer(groupMemberName);
                 if (player == null) {
                     yield Component.translatable("%s %s", Component.literal(groupMemberName).withStyle(GRAY), Component.translatableWithFallback("cli.msg.info.player.list.entry.offline", "(offline)"));
                 } else {
@@ -358,7 +358,7 @@ public class ChatComponentBuilder {
                 }
             }
             case TEAM -> {
-                Team team = RegionDataManager.serverInstance.getScoreboard().getPlayerTeam(groupMemberName);
+                Team team = PlayerManager.getTeam(groupMemberName);
                 yield team == null ? Component.literal(groupMemberName) : buildTeamHoverComponent(team);
             }
         };
@@ -383,7 +383,7 @@ public class ChatComponentBuilder {
         List<String> names = new ArrayList<>(region.getGroup(group).getPlayers().values());
         // Lookup which players are online and put them first, sorted alphabetical by their name
         List<String> onlinePlayerNames = names.stream()
-                .map(name -> Map.entry(name, RegionDataManager.serverInstance.getPlayerList().getPlayerByName(name) != null))
+                .map(name -> Map.entry(name, PlayerManager.getPlayer(name) != null))
                 .filter(Map.Entry::getValue)
                 .map(Map.Entry::getKey)
                 .sorted().toList();
