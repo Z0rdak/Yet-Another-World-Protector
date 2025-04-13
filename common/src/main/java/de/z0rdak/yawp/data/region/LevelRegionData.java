@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.data.region;
 
+import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.api.commands.CommandConstants;
@@ -12,20 +13,14 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.api.commands.CommandConstants.values;
 
 public class LevelRegionData extends SavedData {
-
-    private final ResourceLocation id;
-    private Map<String, IMarkableRegion> locals;
-    private DimensionalRegion dim;
 
     public static Codec<LevelRegionData> CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
@@ -46,6 +41,10 @@ public class LevelRegionData extends SavedData {
                 null);
     }
 
+    private final ResourceLocation id;
+    private Map<String, IMarkableRegion> locals;
+    private DimensionalRegion dim;
+
     public LevelRegionData(ResourceLocation id, DimensionalRegion dim, Map<String, IMarkableRegion> locals) {
         this(id);
         this.dim = dim;
@@ -58,6 +57,30 @@ public class LevelRegionData extends SavedData {
         var global = RegionDataManager.getGlobalRegion();
         ResourceKey<Level> levelRk = ResourceKey.create(Registries.DIMENSION, id);
         this.dim = new DimensionalRegion(levelRk, global);
+    }
+
+    public Map<String, IMarkableRegion> getLocals() {
+        return locals;
+    }
+
+    public ResourceLocation getId() {
+        return id;
+    }
+
+    public int regionCount() {
+        return locals.size();
+    }
+
+    public Collection<IMarkableRegion> getLocalList() {
+        return locals.values().stream().toList();
+    }
+
+    public Collection<String> getLocalNames() {
+        return locals.keySet().stream().toList();
+    }
+
+    public DimensionalRegion getDim() {
+        return dim;
     }
 
     public void renameLocal(IMarkableRegion region, String regionName) {
@@ -128,6 +151,10 @@ public class LevelRegionData extends SavedData {
 
     public boolean hasLocal(String regionName) {
         return locals.containsKey(regionName);
+    }
+
+    public IMarkableRegion getLocal(String regionName) {
+        return locals.get(regionName);
     }
 
     public void clearLocals() {
