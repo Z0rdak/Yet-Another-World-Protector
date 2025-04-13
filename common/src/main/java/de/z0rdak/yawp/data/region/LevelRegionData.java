@@ -98,11 +98,10 @@ public class LevelRegionData extends SavedData {
      * Method to check if a region name is valid for a given dimension. <br>
      * A region name is valid if it matches the pattern and is not already used in the dimension.
      *
-     * @param dim        the dimension to be checked.
      * @param regionName the name of the region to be checked.
      * @return -1 if the region name is invalid, 0 if the region name is valid, 1 if the region name is already used in the dimension.
      */
-    public int isValidRegionName(ResourceKey<Level> dim, String regionName) {
+    public int isValidRegionName(String regionName) {
         List<String> commandStrings = Arrays.stream(values()).map(CommandConstants::toString).collect(Collectors.toList());
         if (!regionName.matches(RegionArgumentType.VALID_NAME_PATTERN.pattern())
                 || commandStrings.contains(regionName.toLowerCase())) {
@@ -113,22 +112,6 @@ public class LevelRegionData extends SavedData {
         }
         return 0;
     }
-
-    /**
-     * Method to check if a region name is valid for a given dimension. <br>
-     * A region name is valid if it matches the pattern and is not already used in the dimension.
-     *
-     * @param dim        the dimension to be checked.
-     * @param regionName the name of the region to be checked.
-     * @return -1 if the region name is invalid, 0 if the region name is valid, 1 if the region name is already used in the dimension.
-     */
-    public boolean isAvailableForLocal(ResourceKey<Level> dim, String regionName) {
-        if (this.locals.containsKey(regionName)) {
-            return false;
-        }
-        return isValidRegionName(dim, regionName) == 0;
-    }
-
 
     public void addLocal(IProtectedRegion parent, IMarkableRegion child) {
         parent.addChild(child);

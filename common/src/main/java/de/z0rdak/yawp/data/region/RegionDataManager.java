@@ -295,6 +295,10 @@ public class RegionDataManager {
         return dimRegionStorage.get(rl);
     }
 
+    public static LevelRegionData getOrCreate(Level level)  {
+        return getOrCreate(level.dimension().location());
+    }
+
     public static Collection<IMarkableRegion> getLocalsFor(ResourceKey<Level> dim) {
         return getOrCreate(dim.location()).getLocalList();
     }
