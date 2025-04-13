@@ -1,5 +1,7 @@
 package de.z0rdak.yawp.core.flag;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
 import de.z0rdak.yawp.core.INbtSerializable;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
@@ -42,6 +44,16 @@ public class FlagMessage implements INbtSerializable<CompoundTag> {
         MSG_TOKEN.add("{block}");
     }
 
+    public static Codec<FlagMessage> CODEC = RecordCodecBuilder.create(
+            instance -> instance.group(
+                    Codec.STRING.fieldOf("msg")
+                            .forGetter(FlagMessage::msg),
+                    Codec.BOOL.fieldOf("muted")
+                            .forGetter(FlagMessage::isMuted),
+                    Codec.BOOL.fieldOf("default")
+                            .forGetter(FlagMessage::isDefault)
+                    ).apply(instance, FlagMessage::new));
+
     private String msg;
     private boolean muted;
     private boolean isDefault;
@@ -54,6 +66,11 @@ public class FlagMessage implements INbtSerializable<CompoundTag> {
     public FlagMessage(String msg, boolean muted) {
         this(msg);
         this.muted = muted;
+    }
+
+    public FlagMessage(String msg, boolean muted, boolean isDefault) {
+        this(msg, muted);
+        this.isDefault = isDefault;
     }
 
     public FlagMessage(CompoundTag msgNbt) {
