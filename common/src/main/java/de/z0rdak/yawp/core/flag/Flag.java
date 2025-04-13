@@ -1,10 +1,35 @@
 package de.z0rdak.yawp.core.flag;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
 
 import static de.z0rdak.yawp.constants.serialization.RegionNbtKeys.*;
 
-public abstract class AbstractFlag implements IFlag {
+public abstract class Flag implements IFlag {
+
+    public static Codec<IFlag> CODEC = RecordCodecBuilder.create(
+            instance -> instance.group(
+                    Codec.STRING.fieldOf("name")
+                            .forGetter(IFlag::getName),
+                    Codec.STRING.fieldOf("type")
+                            .forGetter(f -> f.getType().flagType),
+                    Codec.STRING.fieldOf("state")
+                            .forGetter(f -> f.getState().name),
+                    Codec.BOOL.fieldOf("override")
+                            .forGetter(IFlag::doesOverride),
+                    FlagMessage.CODEC.fieldOf("msg")
+                            .forGetter(IFlag::getFlagMsg)
+                    ).apply(instance, (name, type, state, override, flagMessage) -> {
+                        var flagType = FlagType.of(type);
+                        switch (flagType) {
+                            case BOOLEAN_FLAG -> {
+                                return new BooleanFlag(RegionFlag.fromId(name), FlagState.from(state), override, flagMessage);
+                            }
+                            default -> throw new IllegalStateException("Unexpected value: " + flagType);
+                        }
+                    }
+            ));
 
     protected String name;
     protected FlagType type;
@@ -12,11 +37,11 @@ public abstract class AbstractFlag implements IFlag {
     protected boolean doesOverride;
     protected FlagMessage msg;
 
-    public AbstractFlag(String name, FlagType type, boolean override) {
+    public Flag(String name, FlagType type, boolean override) {
         this(name, type, override, FlagState.DENIED);
     }
 
-    public AbstractFlag(String name, FlagType type, boolean override, FlagState state) {
+    public Flag(String name, FlagType type, boolean override, FlagState state) {
         this.name = name;
         this.type = type;
         this.state = state;
@@ -24,16 +49,21 @@ public abstract class AbstractFlag implements IFlag {
         this.msg = FlagMessage.DEFAULT_FLAG_MSG;
     }
 
-    public AbstractFlag(String name, FlagType type) {
+    public Flag(String name, FlagType type) {
         this(name, type, false, FlagState.DENIED);
     }
 
-    public AbstractFlag(String name, FlagType type, boolean override, FlagState state, String msg) {
+    public Flag(String name, FlagType type, boolean override, FlagState state, String msg) {
         this(name, type, override, state);
         this.msg = new FlagMessage(msg);
     }
 
-    public AbstractFlag(CompoundTag nbt) {
+    public Flag(String name, FlagType type, boolean override, FlagState state, FlagMessage msg) {
+        this(name, type, override, state);
+        this.msg = msg;
+    }
+
+    public Flag(CompoundTag nbt) {
         this.deserializeNBT(nbt);
     }
 
