@@ -1,5 +1,7 @@
 package de.z0rdak.yawp.core.flag;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.constants.Constants;
 import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
@@ -9,13 +11,27 @@ import java.util.*;
 import static de.z0rdak.yawp.constants.serialization.RegionNbtKeys.FLAG_TYPE;
 
 public class RegionFlags implements IFlagContainer {
+    public static Codec<RegionFlags> CODEC = RecordCodecBuilder.create(
+            instance -> instance.group(
+                    Codec.unboundedMap(Codec.STRING, Flag.CODEC)
+                            .fieldOf("flags")
+                            .forGetter(a -> a.flags)
+            ).apply(instance, RegionFlags::new)
+    );
 
-    private final Map<String, IFlag> flags = new HashMap<>();
+    private final Map<String, IFlag> flags;
 
-    public RegionFlags() {}
+    public RegionFlags() {
+        this.flags = new HashMap<>();
+    }
 
     public RegionFlags(CompoundTag nbt) {
+        this.flags = new HashMap<>();
         this.deserializeNBT(nbt);
+    }
+
+    public RegionFlags(Map<String, IFlag> flags) {
+        this.flags = flags;
     }
 
     @Override
@@ -142,5 +158,9 @@ public class RegionFlags implements IFlagContainer {
             }
         });
         return activeFlags;
+    }
+
+    public Map<String, IFlag> getFlagMap() {
+        return this.flags;
     }
 }
