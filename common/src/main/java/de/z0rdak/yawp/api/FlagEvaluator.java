@@ -2,8 +2,6 @@ package de.z0rdak.yawp.api;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
-import de.z0rdak.yawp.api.permission.Permissions;
-import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.*;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
@@ -14,7 +12,6 @@ import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +24,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.BREAK_BLOCKS;
 import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
 
 public class FlagEvaluator {
@@ -170,11 +166,11 @@ public class FlagEvaluator {
     public static IProtectedRegion findResponsibleRegion(@NotNull BlockPos pos, @NotNull ResourceKey<Level> dim) {
         var localRegion = getInvolvedRegionFor(pos, dim);
         if (localRegion == null) {
-            var dimRegion = RegionDataManager.get().cacheFor(dim).getDimensionalRegion();
+            var dimRegion = RegionDataManager.getOrCreate(dim).getDim();
             if (dimRegion.isActive()) {
                 return dimRegion;
             } else {
-                var globalRegion = RegionDataManager.get().getGlobalRegion();
+                var globalRegion = RegionDataManager.getGlobalRegion();
                 return globalRegion.isActive() ? globalRegion : null;
             }
         }
@@ -189,7 +185,7 @@ public class FlagEvaluator {
      * @return all active regions which contain the given location and dimension
      */
     private static List<IMarkableRegion> getInvolvedRegionsFor(BlockPos position, ResourceKey<Level> dim) {
-        return RegionDataManager.get().getRegionsFor(dim).stream()
+        return RegionDataManager.getLocalsFor(dim).stream()
                 .filter(IMarkableRegion::isActive)
                 .filter(region -> region.contains(position))
                 .collect(Collectors.toList());
