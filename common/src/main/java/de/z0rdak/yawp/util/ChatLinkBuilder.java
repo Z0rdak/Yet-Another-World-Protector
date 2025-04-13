@@ -28,6 +28,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
@@ -323,7 +324,7 @@ public class ChatLinkBuilder {
         return switch (region.getRegionType()) {
             case GLOBAL -> {
                 // [n dimensions(s)]
-                Collection<String> dimensionList = RegionDataManager.get().getDimensionList();
+                Set<String> dimensionList = RegionDataManager.getLevelNames();
                 MutableComponent listDimRegionsLinkText = Component.translatableWithFallback("cli.msg.global.info.region.list.link.text", "%s dimensions(s)", dimensionList.size());
                 MutableComponent listDimRegionsHoverText = Component.translatableWithFallback("cli.msg.global.info.region.list.link.hover", "List all Dimensional Regions");
                 yield buildExecuteCmdComponent(listDimRegionsLinkText, listDimRegionsHoverText, command, RUN_COMMAND, LINK_COLOR);
