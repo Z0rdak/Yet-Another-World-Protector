@@ -8,7 +8,7 @@ import java.util.Set;
 import static de.z0rdak.yawp.core.flag.FlagType.LIST_FLAG;
 
 @Deprecated
-public class ListFlag extends AbstractFlag {
+public class ListFlag extends Flag {
 
     public Set<String> resourceKey;
 

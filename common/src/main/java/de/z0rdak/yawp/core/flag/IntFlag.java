@@ -9,7 +9,7 @@ import static de.z0rdak.yawp.core.flag.FlagType.INT_FLAG;
  * Will be used for applying effects with a specific value and interval
  */
 @Deprecated
-public class IntFlag extends AbstractFlag {
+public class IntFlag extends Flag {
     private int value;
     private int tickInterval;
 

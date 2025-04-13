@@ -5,7 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 /**
  * A simple boolean state flag.
  */
-public class BooleanFlag extends AbstractFlag {
+public class BooleanFlag extends Flag {
 
     public BooleanFlag(CompoundTag nbt) {
         super(nbt);
@@ -19,6 +19,10 @@ public class BooleanFlag extends AbstractFlag {
     public BooleanFlag(RegionFlag flag, FlagState state, FlagMessage msg, boolean override) {
         this(flag, state, override);
         this.msg = msg;
+    }
+
+    public BooleanFlag(RegionFlag regionFlag, FlagState state, Boolean override, FlagMessage flagMessage) {
+        this(regionFlag, state, flagMessage, override);
     }
 
     public BooleanFlag(RegionFlag flag) {
