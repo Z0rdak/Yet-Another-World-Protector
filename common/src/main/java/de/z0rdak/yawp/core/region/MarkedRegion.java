@@ -5,6 +5,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.IMarkableArea;
+import de.z0rdak.yawp.core.area.MarkedArea;
+import de.z0rdak.yawp.core.flag.Flag;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlags;
 import de.z0rdak.yawp.core.group.PlayerContainer;
@@ -24,10 +26,10 @@ import java.util.Map;
 import static de.z0rdak.yawp.constants.serialization.RegionNbtKeys.*;
 
 /**
- * The AbstractMarkableRegion represents an abstract implementation for a markable region.
+ * The MarkedRegion represents an abstract implementation for a markable region.
  * This can be used to implement different types of regions which define their area in a different way.
  */
-public class MarkedRegion extends ProtectedRegion implements IMarkableRegion {
+public abstract class MarkedRegion extends ProtectedRegion implements IMarkableRegion {
 
     public static final Codec<IMarkableRegion> CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
@@ -40,7 +42,7 @@ public class MarkedRegion extends ProtectedRegion implements IMarkableRegion {
                                     .forGetter(IMarkableRegion::getParentName),
                             Codec.STRING.fieldOf("type")
                                     .forGetter(r -> r.getRegionType().type),
-                            Codec.unboundedMap(Codec.STRING, IFlag.CODEC)
+                            Codec.unboundedMap(Codec.STRING, Flag.CODEC)
                                     .fieldOf("flags")
                                     .forGetter(r -> r.getFlags().getFlagMap()),
                             Codec.BOOL.fieldOf("isActive")
@@ -51,7 +53,7 @@ public class MarkedRegion extends ProtectedRegion implements IMarkableRegion {
                                     .forGetter(IMarkableRegion::getPriority),
                             Codec.STRING.fieldOf("areaType")
                                     .forGetter(r -> r.getAreaType().areaType),
-                            IMarkableArea.CODEC.fieldOf("area")
+                            MarkedArea.CODEC.fieldOf("area")
                                     .forGetter(IMarkableRegion::getArea),
                             BlockPos.CODEC.fieldOf("tpTarget")
                                     .forGetter(IMarkableRegion::getTpTarget),
@@ -60,7 +62,19 @@ public class MarkedRegion extends ProtectedRegion implements IMarkableRegion {
                             Codec.list(Codec.STRING).fieldOf("childrenNames")
                                     .forGetter(r -> new ArrayList<>(r.getChildrenNames()))
                     )
-                    .apply(instance, MarkedRegion::new)
+                    .apply(instance, (name, dim, parentName, regionType, flags, isActive, isMuted,
+                                      priority, areaType, area, blockPos, groups, childrenNames) -> {
+                        var areaT = AreaType.of(areaType);
+                        switch (areaT) {
+                            case CUBOID -> {
+                                return new CuboidRegion(name, dim, parentName, flags, isActive, isMuted, priority, area, blockPos, groups, childrenNames);
+                            }
+                            case SPHERE -> {
+                                return new SphereRegion(name, dim, parentName, flags, isActive, isMuted, priority, area, blockPos, groups, childrenNames);
+                            }
+                            default -> throw new IllegalStateException("Unexpected value: " + areaT);
+                        }
+                    })
     );
 
 
@@ -69,10 +83,10 @@ public class MarkedRegion extends ProtectedRegion implements IMarkableRegion {
     protected AreaType areaType;
     protected BlockPos tpTarget;
 
-    private MarkedRegion(String name, ResourceKey<Level> dim, String parentName,
-                         String regionType, Map<String, IFlag> flags, boolean isActive, boolean isMuted,
-                         Integer priority, String areaType, IMarkableArea area, BlockPos blockPos,
-                         Map<String, PlayerContainer> groups, List<String> childrenNames) {
+    protected MarkedRegion(String name, ResourceKey<Level> dim, String parentName,
+                           Map<String, IFlag> flags, boolean isActive, boolean isMuted,
+                           int priority, String areaType, IMarkableArea area, BlockPos blockPos,
+                           Map<String, PlayerContainer> groups, List<String> childrenNames) {
         super(name, dim, RegionType.LOCAL, null);
         this.setArea(area);
         this.setPriority(priority);

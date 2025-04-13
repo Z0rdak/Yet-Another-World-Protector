@@ -2,14 +2,13 @@ package de.z0rdak.yawp.core.region;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.z0rdak.yawp.core.flag.IFlag;
+import de.z0rdak.yawp.core.flag.Flag;
 import de.z0rdak.yawp.core.flag.RegionFlags;
 import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
@@ -33,7 +32,7 @@ public final class DimensionalRegion extends ProtectedRegion {
                                     .forGetter(ProtectedRegion::getParentName),
                             Codec.STRING.fieldOf("type")
                                     .forGetter(r -> r.getRegionType().type),
-                            Codec.unboundedMap(Codec.STRING, IFlag.CODEC)
+                            Codec.unboundedMap(Codec.STRING, Flag.CODEC)
                                     .fieldOf("flags")
                                     .forGetter(r -> r.getFlags().getFlagMap()),
                             Codec.BOOL.fieldOf("isActive")
@@ -63,7 +62,7 @@ public final class DimensionalRegion extends ProtectedRegion {
     private DimensionalRegion(ResourceKey<Level> dim, RegionFlags flags, boolean isActive, boolean isMuted, Map<String, PlayerContainer> groups, List<String> childrenNames) {
         super(dim.location().toString(), dim, RegionType.DIMENSION);
         this.dimension = dim;
-        var globalRegion = RegionDataManager.get().getGlobalRegion();
+        var globalRegion = RegionDataManager.getGlobalRegion();
         this.setParent(globalRegion);
         this.setFlags(flags);
         this.setIsActive(isActive);
@@ -74,7 +73,7 @@ public final class DimensionalRegion extends ProtectedRegion {
 
     public DimensionalRegion(CompoundTag nbt) {
         super(nbt);
-        this.parent = RegionDataManager.get().getGlobalRegion();
+        this.parent = RegionDataManager.getGlobalRegion();
         this.deserializeNBT(nbt);
     }
 
