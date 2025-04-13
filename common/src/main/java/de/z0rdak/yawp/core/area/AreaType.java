@@ -57,7 +57,7 @@ public enum AreaType {
             case "Prism":
                 return PRISM;
             default:
-                return null;
+                throw new IllegalArgumentException("Unknown area type: " + name);
         }
     }
 
