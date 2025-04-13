@@ -198,7 +198,7 @@ public class CommandUtil {
                                                 .executes(ctx -> copyRegionFlags(ctx, srcSupplier.apply(ctx), getTargetLocalRegionArgument(ctx))))))
                         .then(literal(TO_DIM)
                                 .then(Commands.argument(TARGET_DIM.toString(), DimensionArgument.dimension())
-                                        .executes(ctx -> copyRegionFlags(ctx, srcSupplier.apply(ctx), getTargetDimRegionArgument(ctx).getDimensionalRegion()))))
+                                        .executes(ctx -> copyRegionFlags(ctx, srcSupplier.apply(ctx), getTargetDimRegionArgument(ctx).getDim()))))
                 )
                 .then(literal(PLAYERS)
                         .then(literal(TO_LOCAL)
@@ -212,7 +212,7 @@ public class CommandUtil {
                                 .then(Commands.argument(TARGET_DIM.toString(), DimensionArgument.dimension())
                                         .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
                                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Permissions.GROUP_LIST, builder))
-                                                .executes(ctx -> copyRegionPlayers(ctx, srcSupplier.apply(ctx), getTargetDimRegionArgument(ctx).getDimensionalRegion(), getGroupArgument(ctx)))))))
+                                                .executes(ctx -> copyRegionPlayers(ctx, srcSupplier.apply(ctx), getTargetDimRegionArgument(ctx).getDim(), getGroupArgument(ctx)))))))
                 .then(literal(STATE)
                         .then(literal(TO_LOCAL)
                                 .then(Commands.argument(TARGET_DIM.toString(), DimensionArgument.dimension())
@@ -221,7 +221,7 @@ public class CommandUtil {
                                                 .executes(ctx -> copyRegionState(ctx, srcSupplier.apply(ctx), getTargetLocalRegionArgument(ctx))))))
                         .then(literal(TO_DIM)
                                 .then(Commands.argument(TARGET_DIM.toString(), DimensionArgument.dimension())
-                                        .executes(ctx -> copyRegionState(ctx, srcSupplier.apply(ctx), getTargetDimRegionArgument(ctx).getDimensionalRegion()))))
+                                        .executes(ctx -> copyRegionState(ctx, srcSupplier.apply(ctx), getTargetDimRegionArgument(ctx).getDim()))))
                 );
     }
 

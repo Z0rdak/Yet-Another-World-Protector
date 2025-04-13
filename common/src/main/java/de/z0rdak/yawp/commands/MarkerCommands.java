@@ -9,10 +9,12 @@ import de.z0rdak.yawp.api.events.region.RegionEvent;
 import de.z0rdak.yawp.api.permission.Permissions;
 import de.z0rdak.yawp.commands.arguments.region.ContainingOwnedRegionArgumentType;
 import de.z0rdak.yawp.constants.Constants;
+import de.z0rdak.yawp.core.flag.BooleanFlag;
+import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.stick.MarkerStick;
-import de.z0rdak.yawp.data.region.DimensionRegionCache;
+import de.z0rdak.yawp.data.region.LevelRegionData;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.util.LocalRegions;
@@ -79,14 +81,14 @@ public final class MarkerCommands {
 
     private static int createMarkedRegion(CommandContext<CommandSourceStack> ctx, String regionName, IProtectedRegion parentRegion) {
         try {
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(ctx.getSource().getLevel().dimension());
-            int res = RegionDataManager.get().isValidRegionName(dimCache.getDimensionalRegion().getDim(), regionName);
+            LevelRegionData levelData = RegionDataManager.getOrCreate(ctx.getSource().getLevel().dimension().location());
+            int res = levelData.isValidRegionName(regionName);
             if (res == -1) {
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.invalid", "Invalid region name supplied: '%s'", regionName));
                 return res;
             }
             if (res == 1) {
-                sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.exists", "Dimension %s already contains region with name %s", buildRegionInfoLink(dimCache.getDimensionalRegion()), buildRegionInfoLink(dimCache.getRegion(regionName))));
+                sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.exists", "Dimension %s already contains region with name %s", buildRegionInfoLink(levelData.getDim()), buildRegionInfoLink(levelData.getLocal(regionName))));
                 return res;
             }
             Player player = ctx.getSource().getPlayerOrException();
@@ -95,8 +97,8 @@ public final class MarkerCommands {
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.area.invalid", "Marked area is not valid").withStyle(RED));
                 return -1;
             }
-            IProtectedRegion parent = parentRegion == null ? dimCache.getDimensionalRegion() : parentRegion;
-            return createRegion(ctx, player, dimCache, newRegion, parent);
+            IProtectedRegion parent = parentRegion == null ? levelData.getDim() : parentRegion;
+            return createRegion(ctx, player, levelData, newRegion, parent);
         } catch (CommandSyntaxException e) {
             Constants.LOGGER.error(e);
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.no-player", "This command can only be executed as a player!").withStyle(RED));
@@ -104,7 +106,7 @@ public final class MarkerCommands {
         }
     }
 
-    private static int createRegion(CommandContext<CommandSourceStack> ctx, Player player, DimensionRegionCache dimCache, IMarkableRegion region, IProtectedRegion parentRegion) {
+    private static int createRegion(CommandContext<CommandSourceStack> ctx, Player player, LevelRegionData dimCache, IMarkableRegion region, IProtectedRegion parentRegion) {
         if (Services.EVENT.post(new RegionEvent.Create(region, player)) ) {
             return 1;
         }
@@ -114,8 +116,10 @@ public final class MarkerCommands {
         boolean hasConfigPermission = Permissions.get().hasConfigPermission(player);
         boolean hasRegionPermission = Permissions.get().hasGroupPermission(parentRegion, player, Permissions.OWNER);
         if (hasConfigPermission || hasRegionPermission) {
-            RegionDataManager.addFlags(Services.REGION_CONFIG.getDefaultFlags(), region);
-            dimCache.addRegion(parentRegion, region);
+            Services.REGION_CONFIG.getDefaultFlags().stream()
+                    .map(RegionFlag::fromId)
+                    .forEach(flag -> region.addFlag(new BooleanFlag(flag)));
+            dimCache.addLocal(parentRegion, region);
             LocalRegions.ensureHigherRegionPriorityFor(region, Services.REGION_CONFIG.getDefaultPriority());
             RegionDataManager.save();
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.success", "Successfully created region %s (with parent %s)", buildRegionInfoLink(region), buildRegionInfoLink(parentRegion)));

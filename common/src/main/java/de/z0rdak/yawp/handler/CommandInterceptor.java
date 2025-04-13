@@ -12,7 +12,7 @@ import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.data.region.DimensionRegionCache;
+import de.z0rdak.yawp.data.region.LevelRegionData;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.ChatFormatting;
@@ -119,23 +119,23 @@ public class CommandInterceptor {
                 // wp marker create <name> >parent>
                 boolean isParentArgProvided = nodeNames.size() >= 5 && nodeNames.get(4) != null;
                 Player player = cmdContext.getSource().getPlayerOrException();
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(player.level().dimension());
+                LevelRegionData dimCache = RegionDataManager.getOrCreate(player.level().dimension());
                 boolean hasPermission = Services.PERMISSION_CONFIG.hasConfigPermission(cmdContext.getSource(), cmdSrcType);
                 boolean hasRegionPermission = false;
                 if (isCreateCmd) {
                     if (isParentArgProvided) {
                         ParsedArgument<CommandSourceStack, ?> commandSourceParsedArgument = cmdContext.getArguments().get(nodeNames.get(4));
                         if (commandSourceParsedArgument.getResult() instanceof String parentName) {
-                            IMarkableRegion parent = dimCache.getRegion(parentName);
+                            IMarkableRegion parent = dimCache.getLocal(parentName);
                             if (parent != null) {
                                 hasRegionPermission = Permissions.get().hasGroupPermission(parent, player, Permissions.OWNER);
                             }
                         }
                     } else { // assuming dimensional regions as parent
-                        hasRegionPermission = Permissions.get().hasGroupPermission(dimCache.getDimensionalRegion(), player, Permissions.OWNER);
+                        hasRegionPermission = Permissions.get().hasGroupPermission(dimCache.getDim(), player, Permissions.OWNER);
                     }
                 } else {
-                    hasRegionPermission = Permissions.get().hasGroupPermission(dimCache.getDimensionalRegion(), player, Permissions.OWNER);
+                    hasRegionPermission = Permissions.get().hasGroupPermission(dimCache.getDim(), player, Permissions.OWNER);
                 }
                 hasPermission = hasPermission || hasRegionPermission;
                 handlePermission(cmdContext.getSource(), hasPermission);
@@ -184,11 +184,11 @@ public class CommandInterceptor {
                     return hasPermission ? ALLOW_CMD : CANCEL_CMD;
                 }
                 case "dim": {
-                    DimensionRegionCache dimCache = checkValidDimRegion(cmdContext);
+                    LevelRegionData dimCache = checkValidDimRegion(cmdContext);
                     if (dimCache == null) {
                         return ALLOW_CMD;
                     }
-                    IProtectedRegion region = dimCache.getDimensionalRegion();
+                    IProtectedRegion region = dimCache.getDim();
                     Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
                         //  0   1    2     3    4    5          6
                         // /wp flag dim <dim> <flag> enable|msg ...
@@ -202,7 +202,7 @@ public class CommandInterceptor {
                     return hasPermission ? ALLOW_CMD : CANCEL_CMD;
                 }
                 case "global": {
-                    GlobalRegion region = RegionDataManager.get().getGlobalRegion();
+                    GlobalRegion region = RegionDataManager.getGlobalRegion();
                     Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
                         //  0   1    2       3      4         5
                         // /wp flag global <flag> enable|msg ...
@@ -231,7 +231,7 @@ public class CommandInterceptor {
      */
     private static int verifyGlobalCommandPermission(CommandContextBuilder<CommandSourceStack> cmdContext, CommandSourceType cmdSrcType) {
         CommandSourceStack src = cmdContext.getSource();
-        GlobalRegion region = RegionDataManager.get().getGlobalRegion();
+        GlobalRegion region = RegionDataManager.getGlobalRegion();
         try {
             Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
                 //  0  1      2         3
@@ -311,12 +311,12 @@ public class CommandInterceptor {
 
     public static int handleDimCommandExecution(CommandContextBuilder<CommandSourceStack> cmdContext, CommandSourceType cmdSrcType) {
         CommandSourceStack src = cmdContext.getSource();
-        DimensionRegionCache dimCache = checkValidDimRegion(cmdContext);
+        LevelRegionData dimCache = checkValidDimRegion(cmdContext);
         if (dimCache == null) {
             return CANCEL_CMD;
         }
         try {
-            IProtectedRegion region = dimCache.getDimensionalRegion();
+            IProtectedRegion region = dimCache.getDim();
             Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
                 //  0   1    2       3      4
                 // /wp dim <dim> info|list ...
@@ -340,11 +340,11 @@ public class CommandInterceptor {
     }
 
     @Nullable
-    private static DimensionRegionCache checkValidDimRegion(CommandContextBuilder<CommandSourceStack> cmdContext) {
+    private static LevelRegionData checkValidDimRegion(CommandContextBuilder<CommandSourceStack> cmdContext) {
         ParsedArgument<CommandSourceStack, ?> dimParsedArgument = cmdContext.getArguments().get(DIM.toString());
         if (dimParsedArgument != null && dimParsedArgument.getResult() instanceof ResourceLocation dimResLoc) {
             ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, dimResLoc);
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
+            LevelRegionData dimCache = RegionDataManager.getOrCreate(dim);
             if (dimCache == null) {
                 sendCmdFeedback(cmdContext.getSource(), Component.literal("Dimension not found in region data").withStyle(ChatFormatting.RED));
                 return null;
@@ -361,14 +361,14 @@ public class CommandInterceptor {
             ParsedArgument<CommandSourceStack, ?> dimParsedArgument = cmdContext.getArguments().get(DIM.toString());
             if (dimParsedArgument != null && dimParsedArgument.getResult() instanceof ResourceLocation dimResLoc) {
                 ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, dimResLoc);
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(dim);
-                if (!dimCache.contains(regionName)) {
-                    sendCmdFeedback(cmdContext.getSource(), Component.literal("No region with name '" + regionName + "' defined in dim '" + dimCache.getDimensionalRegion().getName() + "'"));
+                LevelRegionData dimCache = RegionDataManager.getOrCreate(dim);
+                if (!dimCache.hasLocal(regionName)) {
+                    sendCmdFeedback(cmdContext.getSource(), Component.literal("No region with name '" + regionName + "' defined in dim '" + dimCache.getDim().getName() + "'"));
                     return null;
                 }
-                IMarkableRegion region = dimCache.getRegion(regionName);
+                IMarkableRegion region = dimCache.getLocal(regionName);
                 if (region == null) {
-                    sendCmdFeedback(cmdContext.getSource(), Component.literal("No region with name '" + regionName + "' defined in dim '" + dimCache.getDimensionalRegion().getName() + "'"));
+                    sendCmdFeedback(cmdContext.getSource(), Component.literal("No region with name '" + regionName + "' defined in dim '" + dimCache.getDim().getName() + "'"));
                     return null;
                 }
                 return region;

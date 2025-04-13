@@ -19,7 +19,7 @@ import de.z0rdak.yawp.core.area.SphereArea;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
-import de.z0rdak.yawp.data.region.DimensionRegionCache;
+import de.z0rdak.yawp.data.region.LevelRegionData;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.util.LocalRegions;
@@ -67,9 +67,9 @@ class RegionCommands {
                                 .then(buildRemoveSubCommand(ArgumentUtil::getRegionArgument))
                                 .then(buildCopySubCommand(ArgumentUtil::getRegionArgument))
                                 .then(literal(DELETE)
-                                        .executes(ctx -> DimensionCommands.attemptDeleteRegion(ctx, getDimCacheArgument(ctx), getRegionArgument(ctx)))
+                                        .executes(ctx -> DimensionCommands.attemptDeleteRegion(ctx, getLevelDataArgument(ctx), getRegionArgument(ctx)))
                                         .then(literal(FOR_SURE)
-                                                .executes(ctx -> DimensionCommands.deleteRegion(ctx, getDimCacheArgument(ctx), getRegionArgument(ctx)))))
+                                                .executes(ctx -> DimensionCommands.deleteRegion(ctx, getLevelDataArgument(ctx), getRegionArgument(ctx)))))
                                 .then(literal(ADD).then(literal(CHILD)
                                                 .then(Commands.argument(CHILD.toString(), StringArgumentType.word())
                                                         .suggests((ctx, builder) -> AddRegionChildArgumentType.potentialChildRegions().listSuggestions(ctx, builder))
@@ -77,7 +77,7 @@ class RegionCommands {
                                 .then(literal(REMOVE).then(literal(CHILD)
                                                 .then(Commands.argument(CHILD.toString(), StringArgumentType.word())
                                                         .suggests((ctx, builder) -> RemoveRegionChildArgumentType.childRegions().listSuggestions(ctx, builder))
-                                                        .executes(ctx -> removeChildren(ctx, getDimCacheArgument(ctx), getRegionArgument(ctx), getChildRegionArgument(ctx))))))
+                                                        .executes(ctx -> removeChildren(ctx, getLevelDataArgument(ctx), getRegionArgument(ctx), getChildRegionArgument(ctx))))))
                                 .then(literal(STATE)
                                         .executes(ctx -> CommandUtil.promptRegionState(ctx, getRegionArgument(ctx)))
                                         .then(literal(ALERT)
@@ -136,7 +136,7 @@ class RegionCommands {
                                 ).then(literal(RENAME)
                                         .then(Commands.argument(NAME.toString(), StringArgumentType.word())
                                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Collections.singletonList(getRegionArgument(ctx).getName()), builder))
-                                                .executes(ctx -> renameRegion(ctx, getRegionArgument(ctx), getRegionNameArgument(ctx), getDimCacheArgument(ctx))))
+                                                .executes(ctx -> renameRegion(ctx, getRegionArgument(ctx), getRegionNameArgument(ctx), getLevelDataArgument(ctx))))
                                 )
                         )
                 );
@@ -231,18 +231,18 @@ class RegionCommands {
         }
     }
 
-    private static int renameRegion(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, String regionName, DimensionRegionCache dimCache) {
+    private static int renameRegion(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, String regionName, LevelRegionData levelData) {
         if (region.getName().equals(regionName)) {
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.no-change", regionName));
             return 1;
         }
-        int res = RegionDataManager.get().isValidRegionName(dimCache.getDimensionalRegion().getDim(), regionName);
+        int res = levelData.isValidRegionName(regionName);
         if (res == -1) {
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.invalid", regionName));
             return res;
         }
         if (res == 1) {
-            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.exists", "Dimension %s already contains region with name %s", dimCache.getDimensionalRegion().getName(), buildRegionInfoLink(dimCache.getRegion(regionName))));
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.exists", "Dimension %s already contains region with name %s", levelData.getDim().getName(), buildRegionInfoLink(levelData.getLocal(regionName))));
             return res;
         }
         try {
@@ -261,26 +261,26 @@ class RegionCommands {
             //    return 0;
             //}
             String oldName = region.getName();
-            dimCache.renameRegion(region, regionName);
+            levelData.renameLocal(region, regionName);
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.success", "Changed name of region %s from '%s' to '%s'", buildRegionInfoLink(region), oldName, regionName));
             RegionDataManager.save();
             return 0;
         } catch (IllegalArgumentException ex) {
-            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.exists", "Dimension %s already contains region with name %s", dimCache.getDimensionalRegion().getName(), buildRegionInfoLink(dimCache.getRegion(regionName))));
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.exists", "Dimension %s already contains region with name %s", levelData.getDim().getName(), buildRegionInfoLink(levelData.getLocal(regionName))));
             return 1;
         }
     }
 
     // TODO: Test removing child does not set priority correct with overlapping regions
-    private static int removeChildren(CommandContext<CommandSourceStack> ctx, DimensionRegionCache dimCache, IProtectedRegion parent, IMarkableRegion child) {
+    private static int removeChildren(CommandContext<CommandSourceStack> ctx, LevelRegionData dimCache, IProtectedRegion parent, IMarkableRegion child) {
         if (parent.hasChild(child)) {
             parent.removeChild(child);
-            dimCache.getDimensionalRegion().addChild(child);
+            dimCache.getDim().addChild(child);
             LocalRegions.ensureLowerRegionPriorityFor(child, Services.REGION_CONFIG.getDefaultPriority());
             RegionDataManager.save();
             MutableComponent parentLink = buildRegionInfoLink(parent);
             MutableComponent notLongerChildLink = buildRegionInfoLink(child);
-            MutableComponent dimensionalLink = buildRegionInfoLink(dimCache.getDimensionalRegion());
+            MutableComponent dimensionalLink = buildRegionInfoLink(dimCache.getDim());
             MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), REMOVE, ADD);
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.children.remove", "Removed child '%s' from region %s", notLongerChildLink, parentLink).append(" ")
                     .append(undoLink));

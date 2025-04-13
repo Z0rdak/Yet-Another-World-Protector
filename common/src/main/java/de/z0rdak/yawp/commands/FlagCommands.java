@@ -53,15 +53,15 @@ final class FlagCommands {
 
     private static RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> flagDimSubCommands() {
         return Commands.argument(DIM.toString(), DimensionArgument.dimension())
-                .executes(ctx -> CommandUtil.promptRegionFlagList(ctx, getDimCacheArgument(ctx).getDimensionalRegion(), 0))
-                .then(flagSubCmd((ctx) -> getDimCacheArgument(ctx).getDimensionalRegion()));
+                .executes(ctx -> CommandUtil.promptRegionFlagList(ctx, getLevelDataArgument(ctx).getDim(), 0))
+                .then(flagSubCmd((ctx) -> getLevelDataArgument(ctx).getDim()));
     }
 
     private static RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> flagLocalSubCommands() {
         return Commands.argument(DIM.toString(), DimensionArgument.dimension())
                 .then(Commands.argument(CommandConstants.LOCAL.toString(), StringArgumentType.word())
                         .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestions(ctx, builder))
-                        .executes(ctx -> CommandUtil.promptRegionFlagList(ctx, getDimCacheArgument(ctx).getDimensionalRegion(), 0))
+                        .executes(ctx -> CommandUtil.promptRegionFlagList(ctx, getLevelDataArgument(ctx).getDim(), 0))
                         .then(flagSubCmd(ArgumentUtil::getRegionArgument))
                 );
     }
