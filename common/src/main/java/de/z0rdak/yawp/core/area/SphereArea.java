@@ -44,13 +44,18 @@ public class SphereArea extends CenteredArea {
         return distance(this.center, pos) < this.radius + 0.5;
     }
 
+    public boolean isHullBlock(BlockPos pos) {
+        var d = distance(this.center, pos);
+        return d > this.radius - 0.5 && d < this.radius + 0.5;
+    }
+
     @Override
     public Set<BlockPos> getHull() {
         BlockPos p1 = this.center.offset(-this.radius, -this.radius, -this.radius);
         BlockPos p2 = new BlockPos(this.center).offset(this.radius, this.radius, this.radius);
         BoundingBox cube = BoundingBox.fromCorners(p1, p2);
         Set<BlockPos> cubeBlocks = AreaUtil.blocksBetween(cube);
-        return cubeBlocks.stream().filter(pos -> distanceManhattan(this.center, pos) == this.radius).collect(Collectors.toSet());
+        return cubeBlocks.stream().filter(this::isHullBlock).collect(Collectors.toSet());
     }
 
     public boolean contains(CuboidArea inner) {
@@ -109,6 +114,11 @@ public class SphereArea extends CenteredArea {
             default:
                 throw new NotImplementedException("Area type not implemented yet");
         }
+    }
+
+    @Override
+    public MarkedAreaType<?> getType() {
+        return null;
     }
 
     @Override
