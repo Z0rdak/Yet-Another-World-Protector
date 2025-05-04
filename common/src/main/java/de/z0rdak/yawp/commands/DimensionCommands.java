@@ -233,7 +233,7 @@ class DimensionCommands {
     }
 
     private static int createRegion(CommandContext<CommandSourceStack> ctx, String regionName, LevelRegionData levelData, IMarkableRegion region, IProtectedRegion parent) {
-        int res = levelData.isValidRegionName(levelData.getDim().getDim(), regionName);
+        int res = levelData.isValidRegionName(regionName);
         if (res == -1) {
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.invalid", "Invalid region name supplied: '%s'", regionName));
             return res;
@@ -262,22 +262,22 @@ class DimensionCommands {
         return 0;
     }
 
-    private static int createCuboidRegion(CommandContext<CommandSourceStack> ctx, String regionName, LevelRegionData dimCache, BlockPos pos1, BlockPos pos2, @Nullable IProtectedRegion parentRegion) {
-        CuboidRegion region = new CuboidRegion(regionName, new CuboidArea(pos1, pos2), null, dimCache.dimensionKey());
-        IProtectedRegion parent = parentRegion == null ? dimCache.getDim() : parentRegion;
-        return createRegion(ctx, regionName, dimCache, region, parent);
+    private static int createCuboidRegion(CommandContext<CommandSourceStack> ctx, String regionName, LevelRegionData levelData, BlockPos pos1, BlockPos pos2, @Nullable IProtectedRegion parentRegion) {
+        CuboidRegion region = new CuboidRegion(regionName, new CuboidArea(pos1, pos2), null, levelData.getDimKey());
+        IProtectedRegion parent = parentRegion == null ? levelData.getDim() : parentRegion;
+        return createRegion(ctx, regionName, levelData, region, parent);
     }
 
-    private static int createSphereRegion(CommandContext<CommandSourceStack> ctx, String regionName, LevelRegionData dimCache, BlockPos centerPos, BlockPos radiusPos, @Nullable IProtectedRegion parentRegion) {
-        SphereRegion region = new SphereRegion(regionName, new SphereArea(centerPos, radiusPos), null, dimCache.dimensionKey());
-        IProtectedRegion parent = parentRegion == null ? dimCache.getDim() : parentRegion;
-        return createRegion(ctx, regionName, dimCache, region, parent);
+    private static int createSphereRegion(CommandContext<CommandSourceStack> ctx, String regionName, LevelRegionData levelData, BlockPos centerPos, BlockPos radiusPos, @Nullable IProtectedRegion parentRegion) {
+        SphereRegion region = new SphereRegion(regionName, new SphereArea(centerPos, radiusPos), null, levelData.getDimKey());
+        IProtectedRegion parent = parentRegion == null ? levelData.getDim() : parentRegion;
+        return createRegion(ctx, regionName, levelData, region, parent);
     }
 
-    private static int createSphereRegion(CommandContext<CommandSourceStack> ctx, String regionName, LevelRegionData dimCache, BlockPos centerPos, int radius, @Nullable IProtectedRegion parentRegion) {
-        SphereRegion region = new SphereRegion(regionName, new SphereArea(centerPos, radius), null, dimCache.dimensionKey());
-        IProtectedRegion parent = parentRegion == null ? dimCache.getDim() : parentRegion;
-        return createRegion(ctx, regionName, dimCache, region, parent);
+    private static int createSphereRegion(CommandContext<CommandSourceStack> ctx, String regionName, LevelRegionData levelData, BlockPos centerPos, int radius, @Nullable IProtectedRegion parentRegion) {
+        SphereRegion region = new SphereRegion(regionName, new SphereArea(centerPos, radius), null, levelData.getDimKey());
+        IProtectedRegion parent = parentRegion == null ? levelData.getDim() : parentRegion;
+        return createRegion(ctx, regionName, levelData, region, parent);
     }
 
     public static int attemptDeleteRegion(CommandContext<CommandSourceStack> ctx, LevelRegionData levelData, IMarkableRegion region) {
