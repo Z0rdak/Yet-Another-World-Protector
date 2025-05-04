@@ -3,8 +3,8 @@ package de.z0rdak.yawp;
 import de.z0rdak.yawp.api.events.flag.FabricFlagEvents;
 import de.z0rdak.yawp.api.events.flag.FlagEvent;
 import de.z0rdak.yawp.commands.CommandRegistry;
-import de.z0rdak.yawp.config.ConfigRegistry;
 import de.z0rdak.yawp.core.flag.RegionFlag;
+import de.z0rdak.yawp.data.PlayerManager;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.handler.flags.PlayerFlagHandler;
 import de.z0rdak.yawp.platform.Services;
@@ -48,22 +48,27 @@ public class YetAnotherWorldProtector implements ModInitializer, YAWPModInitiali
 
     @Override
     public void initServerInstance() {
-        ServerLifecycleEvents.SERVER_STARTING.register(RegionDataManager::initServerInstance);
+        ServerLifecycleEvents.SERVER_STARTING.register(RegionDataManager::onServerStat);
+        ServerLifecycleEvents.SERVER_STARTING.register(PlayerManager::onServerStart);
+        ServerLifecycleEvents.BEFORE_SAVE.register(RegionDataManager::save);
+        ServerLifecycleEvents.SERVER_STOPPING.register(RegionDataManager::saveOnStop);
     }
 
     @Override
     public void loadRegionData() {
-        ServerWorldEvents.LOAD.register(RegionDataManager::loadRegionDataForWorld);
+        ServerWorldEvents.LOAD.register(RegionDataManager::worldLoad);
+        ServerWorldEvents.UNLOAD.register(RegionDataManager::saveOnUnload);
+        ServerLifecycleEvents.SERVER_STARTED.register(RegionDataManager::onStarted);
     }
 
     @Override
     public void addDimKeyOnPlayerLogin() {
-        ServerEntityEvents.ENTITY_LOAD.register(RegionDataManager::addDimKeyOnPlayerLogin);
+        ServerEntityEvents.ENTITY_LOAD.register(RegionDataManager::initLevelDataOnLogin);
     }
 
     @Override
     public void addDimKeyOnDimensionChange() {
-        ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register(RegionDataManager::addDimKeyOnDimensionChange);
+        ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register(RegionDataManager::initLevelDataOnChangeWorld);
     }
 
     @Override
