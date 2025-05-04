@@ -4,7 +4,7 @@ import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.data.region.DimensionRegionCache;
+import de.z0rdak.yawp.data.region.LevelRegionData;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -20,11 +20,7 @@ import java.util.stream.Collectors;
 
 public final class RegionManager implements IRegionManager {
 
-    private final RegionDataManager rdm;
-
-    private RegionManager() {
-        this.rdm = RegionDataManager.get();
-    }
+    private RegionManager() {}
 
     public static RegionManager get() {
         return new RegionManager();
@@ -32,29 +28,29 @@ public final class RegionManager implements IRegionManager {
 
     @Override
     public GlobalRegion getGlobalRegion() {
-        return this.rdm.getGlobalRegion();
+        return RegionDataManager.getGlobalRegion();
     }
 
     @Override
     public void resetGlobal() {
-        this.rdm.resetGlobalRegion();
+        RegionDataManager.getGlobalRegionData().reset();
         save();
     }
 
     @Override
     public Optional<IProtectedRegion> getDimensionalRegion(ResourceKey<Level> dim) {
-        Optional<DimensionRegionCache> cache = rdm.getCache(dim);
-        return cache.map(DimensionRegionCache::getDimensionalRegion);
+        Optional<LevelRegionData> cache = getLevelRegionData(dim);
+        return cache.map(LevelRegionData::getDim);
     }
 
     @Override
-    public Optional<DimensionRegionCache> getDimensionCache(ResourceKey<Level> dim) {
-        return rdm.getCache(dim);
+    public Optional<LevelRegionData> getLevelRegionData(ResourceKey<Level> dim) {
+        return RegionManager.get().getLevelRegionData(dim);
     }
 
     @Override
     public void save() {
-        rdm.setDirty();
+        RegionDataManager.save(true);
     }
 
     /**
@@ -65,8 +61,11 @@ public final class RegionManager implements IRegionManager {
      */
     @Override
     public Optional<IDimensionRegionApi> getDimRegionApi(ResourceKey<Level> dim) {
-        if (rdm.containsCacheFor(dim))
-            return Optional.of(new DimensionRegionApi(dim));
+        if (RegionDataManager.hasLevel(dim.location())){
+            LevelRegionData levelRegionData = RegionDataManager.getOrCreate(dim.location());
+            return Optional.of(new DimensionRegionApi(levelRegionData));
+        }
+
         return Optional.empty();
     }
 
@@ -87,68 +86,63 @@ public final class RegionManager implements IRegionManager {
     }
 
     @Override
-    public boolean hasRegionFor(ResourceKey<Level> dim) {
-        return rdm.containsCacheFor(dim);
+    public boolean hasLevelData(ResourceKey<Level> dim) {
+        return RegionDataManager.hasLevel(dim.location());
     }
 
     @Override
     public boolean createDimRegion(ResourceKey<Level> dim) {
-        if (hasRegionFor(dim)) {
+        if (hasLevelData(dim)) {
             return false;
         }
-        rdm.newCacheFor(dim);
+        RegionDataManager.getOrCreate(dim);
         save();
         return true;
     }
 
     @Override
-    public Set<ResourceKey<Level>> getDimensions() {
-        return rdm.getDimKeys();
+    public Set<ResourceLocation> getLevels() {
+        return RegionDataManager.getLevels();
     }
 
     @Override
-    public void resetDimension(ResourceKey<Level> dim) {
-        rdm.resetDimensionCache(dim);
+    public void resetLevelData(ResourceKey<Level> dim) {
+        RegionDataManager.resetLevelData(dim);
         save();
     }
 
     public static class DimensionRegionApi implements IDimensionRegionApi {
+        private final LevelRegionData levelData;
 
-        private final RegionDataManager rdm;
-        private final ResourceKey<Level> dim;
-        private final DimensionRegionCache cache;
-
-        private DimensionRegionApi(ResourceKey<Level> dim) {
-            this.rdm = RegionDataManager.get();
-            this.dim = dim;
-            this.cache = this.rdm.cacheFor(dim);
+        private DimensionRegionApi(LevelRegionData levelData) {
+            this.levelData = levelData;
         }
 
         @Override
         public void save() {
-            rdm.setDirty();
+            RegionDataManager.save();
         }
 
         @Override
         public Optional<IMarkableRegion> getLocalRegion(String name) {
-            IMarkableRegion region = cache.getRegion(name);
+            IMarkableRegion region = levelData.getLocal(name);
             return region != null ? Optional.of(region) : Optional.empty();
         }
 
         @Override
         public ResourceKey<Level> getDimKey() {
-            return dim;
+            return levelData.getDim().getDim();
         }
 
         @Override
         public boolean hasLocal(String name) {
-            return cache.contains(name);
+            return levelData.hasLocal(name);
         }
 
         @Override
         public boolean addLocalRegion(IMarkableRegion region) {
             if (hasLocal(region.getName())) return false;
-            cache.addRegion(region);
+            levelData.addLocal(region);
             return true;
         }
 
@@ -162,10 +156,9 @@ public final class RegionManager implements IRegionManager {
             if (hasLocal(regionName)) {
                 Optional<IMarkableRegion> localRegion = getLocalRegion(regionName);
                 if (localRegion.isPresent()) {
-                    cache.removeRegion(localRegion.get());
+                    levelData.removeLocal(localRegion.get());
                     return true;
                 }
-                return false;
             }
             return false;
         }
@@ -184,7 +177,7 @@ public final class RegionManager implements IRegionManager {
 
         @Override
         public Collection<IMarkableRegion> getAllLocalRegions() {
-            return this.cache.getAllLocal();
+            return this.levelData.getLocalList();
         }
 
         @Override
@@ -270,19 +263,18 @@ public final class RegionManager implements IRegionManager {
         public Optional<IProtectedRegion> findResponsibleRegion(BlockPos pos) {
             Optional<IMarkableRegion> maybeRegion = getInvolvedRegionFor(pos);
             if (maybeRegion.isEmpty()) {
-                IProtectedRegion dimRegion = cache.getDimensionalRegion();
+                IProtectedRegion dimRegion = levelData.getDim();
                 if (dimRegion.isActive()) {
                     return Optional.of(dimRegion);
                 } else {
-                    return rdm.getGlobalRegion().isActive()
-                            ? Optional.of(rdm.getGlobalRegion())
+                    return RegionDataManager.getGlobalRegion().isActive()
+                            ? Optional.of(RegionDataManager.getGlobalRegion())
                             : Optional.empty();
                 }
             }
             IProtectedRegion region = maybeRegion.get();
             return Optional.of(region);
         }
-
     }
 
 }
