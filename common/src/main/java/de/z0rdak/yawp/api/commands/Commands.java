@@ -6,8 +6,7 @@ import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.group.GroupType;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.Level;
+import net.minecraft.resources.ResourceLocation;
 
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 
@@ -189,8 +188,8 @@ public final class Commands {
         return buildAddCommand(region, subCmd);
     }
 
-    public static String buildListLocalRegionCommand(ResourceKey<Level> dim) {
-        return buildCommandStr(DIM.toString(), dim.location().toString(), LIST.toString(), LOCAL.toString());
+    public static String buildListLocalRegionCommand(ResourceLocation levelRl) {
+        return buildCommandStr(DIM.toString(), levelRl.toString(), LIST.toString(), LOCAL.toString());
     }
 
     public static String buildListGroupMemberCommand(IProtectedRegion region, String group, GroupType groupType) {
