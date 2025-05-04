@@ -84,7 +84,7 @@ public abstract class LivingEntityMixin {
     }
 
     @Inject(method = "causeFallDamage", at = @At(value = "HEAD"), cancellable = true, allow = 1)
-    public void onFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
+    public void onFallDamage(double fallDistance, float damageMultiplier, DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
         LivingEntity self = (LivingEntity) (Object) this;
         if (isServerSide(self)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), FALL_DAMAGE, getDimKey(self));

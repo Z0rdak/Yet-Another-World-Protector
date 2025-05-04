@@ -29,7 +29,7 @@ public abstract class FarmLandBlockMixin extends Block {
     }
 
     @Inject(method = "fallOn", at = @At(value = "HEAD"), cancellable = true)
-    private void onTrampleFarmland(Level world, BlockState state, BlockPos pos, Entity trampler, float fallDistance, CallbackInfo ci) {
+    private void onTrampleFarmland(Level world, BlockState state, BlockPos pos, Entity trampler, double fallDistance, CallbackInfo ci) {
         if (isServerSide(world)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(pos, TRAMPLE_FARMLAND, getDimKey(world), null);
             if (Services.EVENT.post(checkEvent)) {

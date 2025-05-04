@@ -29,8 +29,8 @@ import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 public abstract class PlayerMixin {
 
     // TODO: This does not seem to be triggered
-    @Inject(method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;", at = @At(value = "HEAD"), allow = 1, cancellable = true)
-    private void onDropItem(ItemStack stack, boolean b1, boolean retainOwnership, CallbackInfoReturnable<ItemStack> cir) {
+    @Inject(method = "drop", at = @At(value = "HEAD"), allow = 1, cancellable = true)
+    private void onDropItem(ItemStack stack, boolean includeThrowerName, CallbackInfoReturnable<ItemStack> cir) {
         Player player = (Player) (Object) this;
         if (isServerSide(player)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), ITEM_DROP, getDimKey(player), player);
