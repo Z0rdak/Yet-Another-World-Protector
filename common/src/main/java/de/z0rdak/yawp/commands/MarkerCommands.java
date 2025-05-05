@@ -9,6 +9,8 @@ import de.z0rdak.yawp.api.events.region.RegionEvent;
 import de.z0rdak.yawp.api.permission.Permissions;
 import de.z0rdak.yawp.commands.arguments.region.ContainingOwnedRegionArgumentType;
 import de.z0rdak.yawp.constants.Constants;
+import de.z0rdak.yawp.core.area.CuboidArea;
+import de.z0rdak.yawp.core.area.SphereArea;
 import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
@@ -19,16 +21,24 @@ import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.util.LocalRegions;
 import de.z0rdak.yawp.util.StickUtil;
+import de.z0rdak.yawp.util.visualization.BlockDisplayProperty;
+import de.z0rdak.yawp.util.visualization.RegionOutlineBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
 
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.DimensionCommands.getRandomExample;
@@ -150,6 +160,26 @@ public final class MarkerCommands {
 
     private static int giveMarkerStick(CommandContext<CommandSourceStack> ctx) {
         try {
+            ServerLevel level = ctx.getSource().getLevel();
+            ResourceLocation levelRl = level.dimension().location();
+            Optional<LevelRegionData> optLrd = RegionDataManager.getLevelRegionData(levelRl);
+            if (optLrd.isPresent()) {
+                LevelRegionData levelRegionData = optLrd.get();
+                var displayTestRegion = "display-test";
+                if (levelRegionData.hasLocal(displayTestRegion)) {
+                    IMarkableRegion displayTest = levelRegionData.getLocal(displayTestRegion);
+                    Set<BlockPos> frame =  displayTest.getArea().getFrame();
+                    frame.forEach(blockPos -> {
+                        BlockDisplayProperty glowingRedStainedGlassFrame = new BlockDisplayProperty("red_stained_glass", true, true);
+                        CompoundTag displayTag = RegionOutlineBuilder.buildBlockDisplayTag(glowingRedStainedGlassFrame);
+                        Entity entity = RegionOutlineBuilder.buildBlockDisplay(level, blockPos, displayTag);
+                        if (entity != null) {
+                            level.addFreshEntity(entity);
+                        }
+                    });
+                }
+            }
+
             Player targetPlayer = ctx.getSource().getPlayerOrException();
             ItemStack marker = Items.STICK.getDefaultInstance();
             StickUtil.initMarkerNbt(marker, targetPlayer.level().dimension());
