@@ -64,7 +64,12 @@ public class VerticalCylinderArea extends CenteredArea {
 
     @Override
     public Set<BlockPos> getHull() {
-        throw new NotImplementedException("ChunkArea.getHull() not implemented yet");
+        throw new NotImplementedException("CylinderArea.getHull() not implemented yet");
+    }
+
+    @Override
+    public Set<BlockPos> getFrame() {
+        throw new NotImplementedException("CylinderArea.getFrame() not implemented yet");
     }
 
     public int getDistance() {
@@ -103,6 +108,11 @@ public class VerticalCylinderArea extends CenteredArea {
     @Override
     public boolean intersects(IMarkableArea other) {
         throw new NotImplementedException("Not yet implemented");
+    }
+
+    @Override
+    public MarkedAreaType<?> getType() {
+        return null;
     }
 
     // Cylinder [x,y,z] with radius r and height h

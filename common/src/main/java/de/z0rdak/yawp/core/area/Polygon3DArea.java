@@ -106,9 +106,13 @@ public class Polygon3DArea extends MarkedArea {
 
     @Override
     public Set<BlockPos> getHull() {
-        throw new NotImplementedException("ChunkArea.getHull() not implemented yet");
+        throw new NotImplementedException("Polygon3DArea.getHull() not implemented yet");
     }
 
+    @Override
+    public Set<BlockPos> getFrame() {
+        throw new NotImplementedException("Polygon3DArea.getFrame() not implemented yet");
+    }
 
     @Override
     public boolean containsOther(IMarkableArea other) {
@@ -118,5 +122,10 @@ public class Polygon3DArea extends MarkedArea {
     @Override
     public boolean intersects(IMarkableArea other) {
         throw new NotImplementedException("Not yet implemented");
+    }
+
+    @Override
+    public MarkedAreaType<?> getType() {
+        return null;
     }
 }
