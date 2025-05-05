@@ -20,9 +20,22 @@ public interface IMarkableArea extends INbtSerializable<CompoundTag> {
 
     List<BlockPos> markedBlocks();
 
+    /**
+     * Set containing all block positions which represent the outer hull of the marked area.
+     * The hull is the solid outer perimeter of the marked area.
+     */
     Set<BlockPos> getHull();
+
+    /**
+     * Set containing all block positions which represent the outer frame of the marked area.
+     * The frame is the minimum required blocks to give a rough outline o the marked area
+     */
+    Set<BlockPos> getFrame();
 
     boolean containsOther(IMarkableArea other);
 
     boolean intersects(IMarkableArea other);
+
+    MarkedAreaType<?> getType();
+
 }

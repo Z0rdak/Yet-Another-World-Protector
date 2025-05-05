@@ -1,5 +1,8 @@
 package de.z0rdak.yawp.core.area;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import de.z0rdak.yawp.util.AreaUtil;
 import de.z0rdak.yawp.util.NbtCompatHelper;
@@ -24,6 +27,21 @@ import static de.z0rdak.yawp.util.AreaUtil.distanceManhattan;
  * This area is marked by two positions and thus spans a cuboid shape
  */
 public class CuboidArea extends MarkedArea {
+
+    public static MapCodec<CuboidArea> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            BlockPos.CODEC.fieldOf("p1")
+                    .forGetter(CuboidArea::getAreaP1),
+            BlockPos.CODEC.fieldOf("p2")
+                    .forGetter(CuboidArea::getAreaP2),
+            Codec.STRING.fieldOf("areaType")
+                    .forGetter(r->r.getAreaType().areaType)
+            ).apply(instance, (p1, p2, area) -> new CuboidArea(p1, p2))
+    );
+
+    @Override
+    public MarkedAreaType<?> getType() {
+        return MarkedAreaTypes.CUBOID_AREA;
+    }
 
     private BoundingBox area;
     private BlockPos p1;

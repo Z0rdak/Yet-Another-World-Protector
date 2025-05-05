@@ -1,5 +1,8 @@
 package de.z0rdak.yawp.core.area;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import de.z0rdak.yawp.util.AreaUtil;
 import net.minecraft.core.BlockPos;
@@ -7,6 +10,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.apache.commons.lang3.NotImplementedException;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -14,6 +18,16 @@ import static de.z0rdak.yawp.util.AreaUtil.distance;
 import static de.z0rdak.yawp.util.AreaUtil.distanceManhattan;
 
 public class SphereArea extends CenteredArea {
+
+    public static MapCodec<SphereArea> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                    BlockPos.CODEC.fieldOf("center")
+                            .forGetter(SphereArea::getCenterPos),
+                    Codec.INT.fieldOf("radius")
+                            .forGetter(SphereArea::getRadius),
+                    Codec.STRING.fieldOf("areaType")
+                            .forGetter(r->r.getAreaType().areaType)
+            ).apply(instance, (center, radius, area) -> new SphereArea(center, radius))
+    );
 
     private int radius;
 
@@ -57,6 +71,15 @@ public class SphereArea extends CenteredArea {
         Set<BlockPos> cubeBlocks = AreaUtil.blocksBetween(cube);
         return cubeBlocks.stream().filter(this::isHullBlock).collect(Collectors.toSet());
     }
+
+    @Override
+    public Set<BlockPos> getFrame() {
+        // TODO: Outline is the center cross around the sphere in x, y, z
+        Set<BlockPos> cubeBlocks = new HashSet<>();
+
+        return cubeBlocks.stream().filter(this::isHullBlock).collect(Collectors.toSet());
+    }
+
 
     public boolean contains(CuboidArea inner) {
         double maxDistance = Double.NEGATIVE_INFINITY;
@@ -118,7 +141,7 @@ public class SphereArea extends CenteredArea {
 
     @Override
     public MarkedAreaType<?> getType() {
-        return null;
+        return MarkedAreaTypes.SPHERE_AREA;
     }
 
     @Override
