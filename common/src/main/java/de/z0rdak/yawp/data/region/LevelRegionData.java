@@ -1,6 +1,5 @@
 package de.z0rdak.yawp.data.region;
 
-import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.api.commands.CommandConstants;
@@ -13,7 +12,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -42,13 +40,19 @@ public class LevelRegionData extends SavedData {
     }
 
     private final ResourceLocation id;
-    private Map<String, IMarkableRegion> locals;
+    private  HashMap<String, IMarkableRegion> locals;
     private DimensionalRegion dim;
 
     public LevelRegionData(ResourceLocation id, DimensionalRegion dim, Map<String, IMarkableRegion> locals) {
         this(id);
         this.dim = dim;
-        this.locals = locals;
+        this.locals.putAll(locals);
+    }
+
+    public LevelRegionData(ResourceLocation id, DimensionalRegion dim) {
+        this(id);
+        this.dim = dim;
+        this.locals = new HashMap<>();
     }
 
     public LevelRegionData(ResourceLocation id) {
@@ -59,12 +63,16 @@ public class LevelRegionData extends SavedData {
         this.dim = new DimensionalRegion(levelRk, global);
     }
 
-    public Map<String, IMarkableRegion> getLocals() {
+    public HashMap<String, IMarkableRegion> getLocals() {
         return locals;
     }
 
     public ResourceLocation getId() {
         return id;
+    }
+
+    public ResourceKey<Level> getDimKey() {
+        return ResourceKey.create(Registries.DIMENSION, this.getId());
     }
 
     public int regionCount() {
