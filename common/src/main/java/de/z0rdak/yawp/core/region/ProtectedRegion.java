@@ -85,7 +85,7 @@ public abstract class ProtectedRegion implements IProtectedRegion {
     }
 
     public void setGroups(Map<String, PlayerContainer> groups) {
-        this.groups = groups;
+        this.groups.putAll(groups);
     }
 
     public Map<String, PlayerContainer> getGroups() {
