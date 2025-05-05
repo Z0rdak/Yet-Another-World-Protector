@@ -45,7 +45,7 @@ public final class RegionManager implements IRegionManager {
 
     @Override
     public Optional<LevelRegionData> getLevelRegionData(ResourceKey<Level> dim) {
-        return RegionManager.get().getLevelRegionData(dim);
+        return RegionDataManager.getLevelRegionData(dim);
     }
 
     @Override
