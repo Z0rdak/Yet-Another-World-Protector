@@ -1,12 +1,8 @@
 package de.z0rdak.yawp.data.region;
 
 import de.z0rdak.yawp.constants.Constants;
-import de.z0rdak.yawp.core.flag.BooleanFlag;
-import de.z0rdak.yawp.core.flag.RegionFlag;
-import de.z0rdak.yawp.core.region.DimensionalRegion;
-import de.z0rdak.yawp.core.region.GlobalRegion;
-import de.z0rdak.yawp.core.region.IMarkableRegion;
-import de.z0rdak.yawp.core.region.IProtectedRegion;
+import de.z0rdak.yawp.core.flag.*;
+import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -129,10 +125,10 @@ public class RegionDataManager {
     private static void saveLevelData(MinecraftServer server, Level level) {
         DimensionDataStorage storage = server.overworld().getDataStorage();
         ResourceLocation levelRl = level.dimension().location();
-        LevelRegionData levelRegionData = new LevelRegionData(levelRl);
+        LevelRegionData levelRegionData = dimRegionStorage.get(levelRl);
         LOGGER.info("Saving region data for level '{}'", levelRl);
-        levelRegionData.setDirty();
         storage.set(LevelRegionData.buildSavedDataType(levelRl), levelRegionData);
+        levelRegionData.setDirty();
     }
 
     private static LevelRegionData loadLevelData(MinecraftServer server, Level level) {
@@ -175,34 +171,36 @@ public class RegionDataManager {
                     }
                 }
 
-                // init level data
                 ResourceLocation levelRl = level.dimension().location();
+                // init level data
                 if (savedLevelData.hasDimEntry(levelRl)) {
                     LevelRegionData levelRegionData = loadLevelData(server, level);
                     if (levelRegionData == null) {
                         levelRegionData = new LevelRegionData(levelRl);
                         LOGGER.info("Initializing region data for '{}'", levelRl);
+                        dimRegionStorage.put(levelRl, levelRegionData);
+                        savedLevelData.addDimEntry(levelRl);
                         saveLevelData(server, level);
                     } else {
                         LOGGER.info("Loaded region data for '{}'", levelRl);
+                        dimRegionStorage.put(levelRl, levelRegionData);
+                        savedLevelData.addDimEntry(levelRl);
+                        saveLevelData(server, level);
                     }
-                    dimRegionStorage.put(levelRl, levelRegionData);
+                    // restoring region hierarchy
+                    int regionCount = levelRegionData.regionCount();
+                    LOGGER.info("Restoring region hierarchy for '{}'. Found {} local regions.", levelRl, regionCount);
+
+                    // restore dim <-> global hierarchy
+                    DimensionalRegion dimensionalRegion = levelRegionData.getDim();
+                    RegionDataManager.getGlobalRegion().addChild(dimensionalRegion);
+                    restoreHierarchy(levelRegionData, dimensionalRegion);
+
+                    // restore dim <-> local <-> local hierarchy
+                    levelRegionData.getLocals().forEach((regionName, region) -> {
+                        restoreHierarchy(dimRegionStorage.get(levelRl), region);
+                    });
                 }
-
-                // restoring region hierarchy
-                LevelRegionData levelRegionData = dimRegionStorage.get(levelRl);
-                int regionCount = levelRegionData.regionCount();
-                LOGGER.info("Restoring region hierarchy for '{}'. Found {} local regions.", levelRl, regionCount);
-
-                // restore dim <-> global hierarchy
-                DimensionalRegion dimensionalRegion = levelRegionData.getDim();
-                RegionDataManager.getGlobalRegion().addChild(dimensionalRegion);
-                restoreHierarchy(levelRegionData, dimensionalRegion);
-                
-                // restore dim <-> local <-> local hierarchy
-                levelRegionData.getLocals().forEach((regionName, region) -> {
-                    restoreHierarchy(levelRegionData, region);
-                });
             }
         } catch (NullPointerException npe) {
             LOGGER.error(Component.translatableWithFallback("data.nbt.dimensions.load.failure", "Loading regions failed!").getString());
@@ -216,6 +214,7 @@ public class RegionDataManager {
             } else {
                 IMarkableRegion child = levelRegionData.getLocal(childName);
                 if (child != null) {
+                    levelRegionData.getDim().removeChild(child);
                     region.addChild(child);
                 }
             }
@@ -305,10 +304,6 @@ public class RegionDataManager {
 
     public static LevelRegionData getOrCreate(ResourceKey<Level> dim) {
        return getOrCreate(dim.location());
-    }
-
-    public static Set<ResourceLocation> getDimKeys() {
-        return new HashSet<>(dimRegionStorage.keySet());
     }
 
     public static void resetLevelData(ResourceLocation rl) {
