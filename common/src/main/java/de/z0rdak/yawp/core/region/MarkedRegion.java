@@ -3,9 +3,7 @@ package de.z0rdak.yawp.core.region;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.constants.Constants;
-import de.z0rdak.yawp.core.area.AreaType;
-import de.z0rdak.yawp.core.area.IMarkableArea;
-import de.z0rdak.yawp.core.area.MarkedArea;
+import de.z0rdak.yawp.core.area.*;
 import de.z0rdak.yawp.core.flag.Flag;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlags;
@@ -53,7 +51,7 @@ public abstract class MarkedRegion extends ProtectedRegion implements IMarkableR
                                     .forGetter(IMarkableRegion::getPriority),
                             Codec.STRING.fieldOf("areaType")
                                     .forGetter(r -> r.getAreaType().areaType),
-                            MarkedArea.CODEC.fieldOf("area")
+                            MarkedAreaType.MARKED_AREA_CODEC.fieldOf("area")
                                     .forGetter(IMarkableRegion::getArea),
                             BlockPos.CODEC.fieldOf("tpTarget")
                                     .forGetter(IMarkableRegion::getTpTarget),
