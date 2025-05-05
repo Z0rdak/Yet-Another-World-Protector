@@ -31,7 +31,7 @@ public class RegionFlags implements IFlagContainer {
     }
 
     public RegionFlags(Map<String, IFlag> flags) {
-        this.flags = flags;
+        this.flags = new HashMap<>(flags);
     }
 
     @Override
