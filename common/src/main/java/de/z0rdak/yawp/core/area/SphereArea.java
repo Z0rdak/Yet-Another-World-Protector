@@ -74,10 +74,8 @@ public class SphereArea extends CenteredArea {
 
     @Override
     public Set<BlockPos> getFrame() {
-        // TODO: Outline is the center cross around the sphere in x, y, z
-        Set<BlockPos> cubeBlocks = new HashSet<>();
-
-        return cubeBlocks.stream().filter(this::isHullBlock).collect(Collectors.toSet());
+        // TODO: Implement frame
+        return getHull();
     }
 
 
