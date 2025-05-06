@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import de.z0rdak.yawp.util.AreaUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.apache.commons.lang3.NotImplementedException;
@@ -25,7 +26,7 @@ public class SphereArea extends CenteredArea {
                     Codec.INT.fieldOf("radius")
                             .forGetter(SphereArea::getRadius),
                     Codec.STRING.fieldOf("areaType")
-                            .forGetter(r->r.getAreaType().areaType)
+                            .forGetter(r -> MarkedAreaType.areaIdentifier(r.getAreaType()).toString())
             ).apply(instance, (center, radius, area) -> new SphereArea(center, radius))
     );
 
@@ -68,16 +69,26 @@ public class SphereArea extends CenteredArea {
         BlockPos p1 = this.center.offset(-this.radius, -this.radius, -this.radius);
         BlockPos p2 = new BlockPos(this.center).offset(this.radius, this.radius, this.radius);
         BoundingBox cube = BoundingBox.fromCorners(p1, p2);
-        Set<BlockPos> cubeBlocks = AreaUtil.blocksBetween(cube);
+        Set<BlockPos> cubeBlocks = AreaUtil.blocksIn(cube);
         return cubeBlocks.stream().filter(this::isHullBlock).collect(Collectors.toSet());
     }
 
     @Override
     public Set<BlockPos> getFrame() {
-        // TODO: Implement frame
-        return getHull();
-    }
+        Set<BlockPos> frameBlocks = new HashSet<>();
+        frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, 0, Direction.Axis.X, this::isHullBlock));
+        frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, 0, Direction.Axis.Y, this::isHullBlock));
+        frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, 0, Direction.Axis.Z, this::isHullBlock));
 
+        int halfRadius = this.radius / 2;
+        frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, halfRadius, Direction.Axis.X, this::isHullBlock));
+        frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, -halfRadius, Direction.Axis.X, this::isHullBlock));
+        frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, halfRadius, Direction.Axis.Y, this::isHullBlock));
+        frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, -halfRadius, Direction.Axis.Y, this::isHullBlock));
+        frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, halfRadius, Direction.Axis.Z, this::isHullBlock));
+        frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, -halfRadius, Direction.Axis.Z, this::isHullBlock));
+        return frameBlocks;
+    }
 
     public boolean contains(CuboidArea inner) {
         double maxDistance = Double.NEGATIVE_INFINITY;

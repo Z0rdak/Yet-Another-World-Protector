@@ -3,19 +3,18 @@ package de.z0rdak.yawp.core.area;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import de.z0rdak.yawp.util.AreaUtil;
 import de.z0rdak.yawp.util.NbtCompatHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.apache.commons.lang3.NotImplementedException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -34,7 +33,7 @@ public class CuboidArea extends MarkedArea {
             BlockPos.CODEC.fieldOf("p2")
                     .forGetter(CuboidArea::getAreaP2),
             Codec.STRING.fieldOf("areaType")
-                    .forGetter(r->r.getAreaType().areaType)
+                    .forGetter(r -> MarkedAreaType.areaIdentifier(r.getAreaType()).toString())
             ).apply(instance, (p1, p2, area) -> new CuboidArea(p1, p2))
     );
 
