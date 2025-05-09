@@ -14,7 +14,7 @@ public class RegionFlags implements IFlagContainer {
     public static Codec<RegionFlags> CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
                     Codec.unboundedMap(Codec.STRING, Flag.CODEC)
-                            .fieldOf("flags")
+                            .optionalFieldOf("flags", new HashMap<>())
                             .forGetter(a -> a.flags)
             ).apply(instance, RegionFlags::new)
     );
@@ -25,45 +25,8 @@ public class RegionFlags implements IFlagContainer {
         this.flags = new HashMap<>();
     }
 
-    public RegionFlags(CompoundTag nbt) {
-        this.flags = new HashMap<>();
-        this.deserializeNBT(nbt);
-    }
-
     public RegionFlags(Map<String, IFlag> flags) {
         this.flags = new HashMap<>(flags);
-    }
-
-    @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = new CompoundTag();
-        flags.forEach((flagName, iFlag) -> {
-            if (RegionFlag.contains(flagName)) {
-                nbt.put(flagName, iFlag.serializeNBT());
-            }
-        });
-        return nbt;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        flags.clear();
-        for (String key : nbt.keySet()) {
-            if (RegionFlag.contains(key)) {
-                CompoundTag flagNbt = nbt.getCompound(key).orElseThrow();
-                FlagType flagType = FlagType.of(flagNbt.getString(FLAG_TYPE).orElseThrow());
-                if (flagType != null) {
-                    IFlag flag = switch (flagType) {
-                        case BOOLEAN_FLAG -> new BooleanFlag(flagNbt);
-                        case LIST_FLAG -> new ListFlag(flagNbt);
-                        case INT_FLAG -> new IntFlag(flagNbt);
-                    };
-                    flags.put(key, flag);
-                } else {
-                    Constants.LOGGER.warn("Error reading entry for flag '{}'.", key);
-                }
-            }
-        }
     }
 
     @Override
@@ -144,10 +107,6 @@ public class RegionFlags implements IFlagContainer {
     public boolean isAllowedOrDenied(@NotNull String flagName) {
         FlagState flagState = flagState(flagName);
         return flagState == FlagState.ALLOWED || flagState == FlagState.DENIED;
-    }
-
-    public RegionFlags deepCopy() {
-        return new RegionFlags(this.serializeNBT());
     }
 
     public Map<String, IFlag> getActiveFlags() {

@@ -17,19 +17,14 @@ public class PlayerContainer implements IMemberContainer {
             instance -> instance.group(
                     Codec.STRING.fieldOf("name")
                             .forGetter(pc -> pc.groupName),
-                    Codec.list(Codec.STRING).fieldOf("teams")
+                    Codec.list(Codec.STRING).optionalFieldOf("teams", new ArrayList<>())
                             .forGetter(pc -> new ArrayList<>(pc.teams)),
-                    Codec.unboundedMap(UUIDUtil.STRING_CODEC, Codec.STRING).fieldOf("players")
+                    Codec.unboundedMap(UUIDUtil.STRING_CODEC, Codec.STRING).optionalFieldOf("players", new HashMap<>())
                             .forGetter(pc -> pc.players)
                     ).apply(instance, PlayerContainer::new));
     private final Set<String> teams;
     private final Map<UUID, String> players;
     private final String groupName;
-
-    public PlayerContainer(CompoundTag nbt) {
-        this("n/a");
-        this.deserializeNBT(nbt);
-    }
 
     public PlayerContainer(String groupName) {
         this.groupName = groupName;
@@ -104,46 +99,5 @@ public class PlayerContainer implements IMemberContainer {
     @Override
     public void clearTeams() {
         this.teams.clear();
-    }
-
-    @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = new CompoundTag();
-        // serialize player data
-        ListTag playerList = new ListTag();
-        players.forEach((uuid, name) -> {
-            CompoundTag playerNBT = new CompoundTag();
-            int[] uuidInts = UUIDUtil.uuidToIntArray(uuid);
-            playerNBT.putIntArray(RegionNbtKeys.UUID, uuidInts);
-            playerNBT.putString(RegionNbtKeys.NAME, name);
-            playerList.add(playerNBT);
-        });
-        nbt.put(RegionNbtKeys.PLAYERS, playerList);
-        // serialize team data
-        ListTag teamList = new ListTag();
-        teamList.addAll(teams.stream()
-                .map(StringTag::valueOf)
-                .collect(Collectors.toSet()));
-        nbt.put(RegionNbtKeys.TEAMS, teamList);
-        return nbt;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        // deserialize players data
-        this.players.clear();
-        ListTag playerLists = nbt.getList(RegionNbtKeys.PLAYERS).orElse(new ListTag());
-        for (int i = 0; i < playerLists.size(); i++) {
-            CompoundTag playerMapping = playerLists.getCompound(i).orElseThrow();
-            var uuidInts = playerMapping.getIntArray(RegionNbtKeys.UUID).orElseThrow();
-            var uuid = UUIDUtil.uuidFromIntArray(uuidInts);
-            players.put(uuid, playerMapping.getString(RegionNbtKeys.NAME).orElseThrow());
-        }
-        // deserialize teams data
-        this.teams.clear();
-        ListTag teamList = nbt.getList(RegionNbtKeys.TEAMS).orElse(new ListTag());
-        for (int i = 0; i < teamList.size(); i++) {
-            teams.add(teamList.getString(i).orElseThrow());
-        }
     }
 }

@@ -19,11 +19,6 @@ public class IntFlag extends Flag {
         this.tickInterval = tickInterval;
     }
 
-    public IntFlag(CompoundTag nbt) {
-        super(nbt);
-        this.deserializeNBT(nbt);
-    }
-
     public int getValue() {
         return value;
     }
@@ -40,15 +35,4 @@ public class IntFlag extends Flag {
         this.tickInterval = tickInterval;
     }
 
-    @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
-        throw new NotImplementedException("Missing serializeNBT implementation in IntFlag");
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
-        throw new NotImplementedException("Missing deserializeNBT implementation in IntFlag");
-    }
 }

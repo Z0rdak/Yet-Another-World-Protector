@@ -3,10 +3,8 @@ package de.z0rdak.yawp.core.flag;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
-import de.z0rdak.yawp.core.INbtSerializable;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Player;
@@ -14,12 +12,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static de.z0rdak.yawp.constants.serialization.RegionNbtKeys.*;
 import static de.z0rdak.yawp.core.flag.FlagCategory.PLAYER;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.shortBlockPos;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.tinyBlockPos;
 
-public class FlagMessage implements INbtSerializable<CompoundTag> {
+public class FlagMessage {
 
     public static final String FLAG_TEMPLATE = "{flag}";
     public static final String POS_TEMPLATE = "{pos}";
@@ -71,10 +68,6 @@ public class FlagMessage implements INbtSerializable<CompoundTag> {
     public FlagMessage(String msg, boolean muted, boolean isDefault) {
         this(msg, muted);
         this.isDefault = isDefault;
-    }
-
-    public FlagMessage(CompoundTag msgNbt) {
-        this.deserializeNBT(msgNbt);
     }
 
     /**
@@ -195,21 +188,4 @@ public class FlagMessage implements INbtSerializable<CompoundTag> {
     public String toString() {
         return msg;
     }
-
-    @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = new CompoundTag();
-        nbt.putString(MSG, this.msg);
-        nbt.putBoolean(DEFAULT, this.isDefault);
-        nbt.putBoolean(MUTED, this.muted);
-        return nbt;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        this.msg = nbt.getString(MSG).orElseThrow();
-        this.muted = nbt.getBoolean(MUTED).orElseThrow();
-        this.isDefault = nbt.getBoolean(DEFAULT).orElseThrow();
-    }
-
 }
