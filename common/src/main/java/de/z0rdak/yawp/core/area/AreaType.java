@@ -2,6 +2,7 @@ package de.z0rdak.yawp.core.area;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 public enum AreaType {
@@ -45,16 +46,16 @@ public enum AreaType {
     }
 
     public static AreaType of(String name) {
-        switch (name) {
-            case "Cuboid":
+        switch (name.toLowerCase(Locale.ROOT)) {
+            case "cuboid":
                 return CUBOID;
-            case "Cylinder":
+            case "cylinder":
                 return CYLINDER;
-            case "Sphere":
+            case "sphere":
                 return SPHERE;
-            case "Polygon":
+            case "polygon":
                 return POLYGON_3D;
-            case "Prism":
+            case "prism":
                 return PRISM;
             default:
                 throw new IllegalArgumentException("Unknown area type: " + name);
