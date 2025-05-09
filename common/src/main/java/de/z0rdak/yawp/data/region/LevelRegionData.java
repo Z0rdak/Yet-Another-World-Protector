@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.data.region;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.api.commands.CommandConstants;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
@@ -26,7 +27,7 @@ public class LevelRegionData extends SavedData {
                             .forGetter(lrd -> lrd.id),
                     DimensionalRegion.CODEC.fieldOf("dim_region")
                             .forGetter(lrd -> lrd.dim),
-                    Codec.unboundedMap(Codec.STRING, MarkedRegion.CODEC).fieldOf("local_regions")
+                    Codec.unboundedMap(Codec.STRING, MarkedRegion.CODEC).optionalFieldOf("local_regions", Lifecycle.stable(), new HashMap<>(), Lifecycle.stable())
                             .forGetter(lrd -> lrd.locals)
             ).apply(instance, LevelRegionData::new));
 

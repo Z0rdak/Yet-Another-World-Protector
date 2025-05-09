@@ -16,7 +16,7 @@ public class GlobalRegionData extends SavedData {
             instance -> instance.group(
                     ResourceLocation.CODEC.fieldOf("id")
                             .forGetter(r -> GlobalRegion.GLOBAL),
-                    GlobalRegion.CODEC.fieldOf("global")
+                    GlobalRegion.CODEC.optionalFieldOf("global", new GlobalRegion())
                             .forGetter(GlobalRegionData::getGlobal))
                     .apply(instance, GlobalRegionData::new));
 
@@ -27,7 +27,7 @@ public class GlobalRegionData extends SavedData {
             null);
 
     private final ResourceLocation id;
-    private final GlobalRegion globalRegion;
+    private GlobalRegion globalRegion;
 
     public GlobalRegionData(){
        this.id = GlobalRegion.GLOBAL;
@@ -45,6 +45,10 @@ public class GlobalRegionData extends SavedData {
 
     public ResourceLocation getId() {
         return id;
+    }
+
+    public void reset() {
+        this.globalRegion = new GlobalRegion();
     }
 }
 

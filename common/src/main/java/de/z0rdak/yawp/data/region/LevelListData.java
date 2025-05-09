@@ -15,7 +15,7 @@ public class LevelListData extends SavedData {
 
     public static Codec<LevelListData> LEVEL_LIST_CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
-                    Codec.list(ResourceLocation.CODEC).fieldOf("dims")
+                    Codec.list(ResourceLocation.CODEC).optionalFieldOf("dims", new ArrayList<>())
                             .forGetter(LevelListData::getLevels)
             ).apply(instance, LevelListData::new));
     public final static SavedDataType<LevelListData> TYPE = new SavedDataType<>(
