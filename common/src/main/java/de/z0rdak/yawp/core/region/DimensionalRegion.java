@@ -71,12 +71,6 @@ public final class DimensionalRegion extends ProtectedRegion {
         this.setChildrenNames(childrenNames);
     }
 
-    public DimensionalRegion(CompoundTag nbt) {
-        super(nbt);
-        this.parent = RegionDataManager.getGlobalRegion();
-        this.deserializeNBT(nbt);
-    }
-
     @Override
     protected boolean setParent(IProtectedRegion parent) {
         if (parent.getRegionType() == RegionType.GLOBAL) {
@@ -104,17 +98,6 @@ public final class DimensionalRegion extends ProtectedRegion {
         }
         return false;
     }
-
-    @Override
-    public CompoundTag serializeNBT() {
-        return super.serializeNBT();
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
-    }
-
     @Override
     public String getName() {
         return this.dimension.location().toString();

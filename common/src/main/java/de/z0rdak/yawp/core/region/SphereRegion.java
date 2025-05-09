@@ -17,11 +17,6 @@ import java.util.Map;
 
 public final class SphereRegion extends MarkedRegion {
 
-    public SphereRegion(CompoundTag nbt) {
-        super(nbt);
-        this.deserializeNBT(nbt);
-    }
-
     public SphereRegion(String name, SphereArea area, ResourceKey<Level> dimension) {
         this(name, area, area.getCenterPos(), null, dimension);
     }
@@ -38,11 +33,5 @@ public final class SphereRegion extends MarkedRegion {
                         boolean isActive, boolean isMuted, int priority, IMarkableArea area, BlockPos blockPos,
                         Map<String, PlayerContainer> groups, List<String> childrenNames){
         super(name, dim, parentName, flags, isActive, isMuted, priority, AreaType.SPHERE.areaType, area, blockPos, groups, childrenNames);
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
-        this.area = new SphereArea(nbt.getCompound(RegionNbtKeys.AREA).orElseThrow());
     }
 }

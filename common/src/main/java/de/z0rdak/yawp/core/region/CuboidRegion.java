@@ -22,11 +22,6 @@ import java.util.Optional;
  */
 public final class CuboidRegion extends MarkedRegion {
 
-    public CuboidRegion(CompoundTag nbt) {
-        super(nbt);
-        this.deserializeNBT(nbt);
-    }
-
     public CuboidRegion(String name, CuboidArea area, ResourceKey<Level> dim) {
         super(name, area, area.getArea().getCenter(), null, dim);
     }
@@ -43,12 +38,5 @@ public final class CuboidRegion extends MarkedRegion {
                         boolean isActive, boolean isMuted, int priority, IMarkableArea area, BlockPos blockPos,
                         Map<String, PlayerContainer> groups, List<String> childrenNames){
         super(name, dim, parentName, flags, isActive, isMuted, priority, AreaType.CUBOID.areaType, area, blockPos, groups, childrenNames);
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
-        Optional<CompoundTag> compound = nbt.getCompound(RegionNbtKeys.AREA);
-        compound.ifPresent(compoundTag -> this.area = new CuboidArea(compoundTag));
     }
 }

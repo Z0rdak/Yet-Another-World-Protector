@@ -28,7 +28,7 @@ import java.util.UUID;
  * Classes which implement this interface must also provide a way
  * to serialize the region data into a CompoundNBT.
  */
-public interface IProtectedRegion extends INbtSerializable<CompoundTag> {
+public interface IProtectedRegion{
 
     String getName();
 

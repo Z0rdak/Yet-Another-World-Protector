@@ -10,22 +10,11 @@ import net.minecraft.world.level.Level;
 
 public final class PolygonRegion extends MarkedRegion {
 
-    public PolygonRegion(CompoundTag nbt) {
-        super(nbt);
-        this.deserializeNBT(nbt);
-    }
-
     public PolygonRegion(String name, Polygon3DArea area, Player owner, ResourceKey<Level> dimension) {
         super(name, area, owner, dimension);
     }
 
     public PolygonRegion(String name, Polygon3DArea area, BlockPos tpTarget, Player owner, ResourceKey<Level> dimension) {
         super(name, area, tpTarget, owner, dimension);
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
-        this.area = new Polygon3DArea(nbt.getCompound(RegionNbtKeys.AREA).orElseThrow());
     }
 }

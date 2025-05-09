@@ -121,11 +121,6 @@ public abstract class MarkedRegion extends ProtectedRegion implements IMarkableR
         this.tpTarget = tpTarget;
     }
 
-    public MarkedRegion(CompoundTag nbt) {
-        super(nbt);
-        this.deserializeNBT(nbt);
-    }
-
     @Override
     protected boolean setParent(IProtectedRegion parent) {
         if (this.parent == null) {
@@ -166,6 +161,7 @@ public abstract class MarkedRegion extends ProtectedRegion implements IMarkableR
     @Override
     public void setArea(IMarkableArea area) {
         this.area = area;
+        this.areaType = area.getAreaType();
     }
 
     @Override

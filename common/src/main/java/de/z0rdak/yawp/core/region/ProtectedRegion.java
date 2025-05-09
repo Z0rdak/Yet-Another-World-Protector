@@ -30,25 +30,13 @@ public abstract class ProtectedRegion implements IProtectedRegion {
     protected IProtectedRegion parent;
     protected String parentName;
     private String name;
-    private RegionType regionType;
+    private final RegionType regionType;
     private RegionFlags flags;
-    private Map<String, PlayerContainer> groups;
+    private final Map<String, PlayerContainer> groups;
     private boolean isActive;
     private boolean isMuted;
-    private Map<String, IProtectedRegion> children;
-    private Set<String> childrenNames;
-
-    protected ProtectedRegion(CompoundTag nbt) {
-        this.childrenNames = new HashSet<>(0);
-        this.children = new HashMap<>(0);
-        this.parentName = null;
-        this.parent = null;
-        this.flags = new RegionFlags();
-        this.groups = new HashMap<>();
-        this.groups.put(Permissions.MEMBER, new PlayerContainer(Permissions.MEMBER));
-        this.groups.put(Permissions.OWNER, new PlayerContainer(Permissions.OWNER));
-        this.deserializeNBT(nbt);
-    }
+    private final Map<String, IProtectedRegion> children;
+    private final Set<String> childrenNames;
 
     protected ProtectedRegion(String name, ResourceKey<Level> dimension, RegionType type) {
         this.name = name;
@@ -289,62 +277,4 @@ public abstract class ProtectedRegion implements IProtectedRegion {
         return parent;
     }
 
-    @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = new CompoundTag();
-        nbt.putString(NAME, this.name);
-        nbt.putString(DIM, dimension.location().toString());
-        nbt.putString(REGION_TYPE, this.regionType.type);
-        nbt.putBoolean(ACTIVE, this.isActive);
-        nbt.putBoolean(MUTED, this.isMuted);
-        nbt.put(FLAGS, this.flags.serializeNBT());
-        nbt.put(OWNERS, this.groups.get(OWNERS).serializeNBT());
-        nbt.put(MEMBERS, this.groups.get(MEMBERS).serializeNBT());
-        if (this.parent != null) {
-            nbt.putString(PARENT, this.parent.getName());
-        } else {
-            nbt.putString(PARENT, "");
-        }
-        if (this.children != null) {
-            ListTag childrenList = new ListTag();
-            childrenList.addAll(this.children.keySet().stream().map(StringTag::valueOf).collect(Collectors.toSet()));
-            nbt.put(CHILDREN, childrenList);
-        } else {
-            nbt.put(CHILDREN, new ListTag());
-        }
-        return nbt;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        this.name = nbt.getString(NAME).orElseThrow();
-        this.dimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(nbt.getString(DIM).orElseThrow()));
-        this.isActive = nbt.getBoolean(ACTIVE).orElseThrow();
-        this.isMuted = nbt.getBoolean(MUTED).orElseThrow();
-        this.regionType = RegionType.of(nbt.getString(REGION_TYPE).orElseThrow());
-        this.flags = new RegionFlags(nbt.getCompound(FLAGS).orElseThrow());
-        this.groups = new HashMap<>();
-        this.groups.put(OWNERS, new PlayerContainer(nbt.getCompound(OWNERS).orElseThrow()));
-        this.groups.put(MEMBERS, new PlayerContainer(nbt.getCompound(MEMBERS).orElseThrow()));
-        if (this.parent == null && nbt.contains(PARENT)) {
-            String parentName = nbt.getString(PARENT).orElseThrow();
-            if (!parentName.isEmpty()) {
-                this.parentName = nbt.getString(PARENT).orElseThrow();
-            } else {
-                this.parentName = null;
-            }
-        }
-        if (this.children != null && this.children.isEmpty()) {
-            if (nbt.contains(CHILDREN)) {
-                ListTag childrenNbt = nbt.getList(CHILDREN).orElseThrow();
-                if (!childrenNbt.isEmpty()) {
-                    this.children = new HashMap<>(childrenNbt.size());
-                    this.childrenNames = new HashSet<>(childrenNbt.size());
-                    for (int i = 0; i < childrenNbt.size(); i++) {
-                        this.childrenNames.add(childrenNbt.getString(i).orElseThrow());
-                    }
-                }
-            }
-        }
-    }
 }

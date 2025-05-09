@@ -49,10 +49,6 @@ public class GlobalRegion extends ProtectedRegion {
     public static final ResourceLocation GLOBAL = ResourceLocation.fromNamespaceAndPath("yawp", "global");
     public static final ResourceKey<Level> GLOBAL_DIMENSION = ResourceKey.create(Registries.DIMENSION, GLOBAL);
 
-    public GlobalRegion(CompoundTag nbt) {
-        super(nbt);
-    }
-
     public GlobalRegion() {
         this(GLOBAL.toString(), RegionType.GLOBAL);
         this.setParent(this);
@@ -104,16 +100,5 @@ public class GlobalRegion extends ProtectedRegion {
             return super.addChild(child);
         }
         return false;
-    }
-
-    @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
-        return nbt;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
     }
 }
