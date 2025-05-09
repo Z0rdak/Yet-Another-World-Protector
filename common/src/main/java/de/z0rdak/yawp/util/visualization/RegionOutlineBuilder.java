@@ -30,10 +30,13 @@ public class RegionOutlineBuilder {
     public static CompoundTag buildBlockDisplayTag(BlockDisplayProperty properties) {
         var blockDisplayTag = new CompoundTag();
         blockDisplayTag.putBoolean("Glowing", properties.glowing());
-        blockDisplayTag.putBoolean("PersistenceRequired", properties.persistent());
         var blockstateTag = new CompoundTag();
         blockstateTag.putString("Name", properties.blockName());
         blockDisplayTag.put("block_state", blockstateTag);
+        var brightnessTag = new CompoundTag();
+        brightnessTag.putInt("sky", 15);
+        brightnessTag.putInt("block", 15);
+        blockDisplayTag.put("brightness", brightnessTag);
         return blockDisplayTag;
     }
 }
