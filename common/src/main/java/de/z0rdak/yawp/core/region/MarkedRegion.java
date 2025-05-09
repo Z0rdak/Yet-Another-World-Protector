@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.core.region;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.area.*;
@@ -14,12 +15,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static de.z0rdak.yawp.constants.serialization.RegionNbtKeys.*;
 
@@ -41,28 +41,31 @@ public abstract class MarkedRegion extends ProtectedRegion implements IMarkableR
                             Codec.STRING.fieldOf("type")
                                     .forGetter(r -> r.getRegionType().type),
                             Codec.unboundedMap(Codec.STRING, Flag.CODEC)
-                                    .fieldOf("flags")
+                                    .optionalFieldOf("flags", Lifecycle.stable(), new HashMap<>(), Lifecycle.stable())
                                     .forGetter(r -> r.getFlags().getFlagMap()),
-                            Codec.BOOL.fieldOf("isActive")
+                            Codec.BOOL.optionalFieldOf("isActive", true)
                                     .forGetter(IMarkableRegion::isActive),
-                            Codec.BOOL.fieldOf("isMuted")
+                            Codec.BOOL.optionalFieldOf("isMuted", false)
                                     .forGetter(IMarkableRegion::isMuted),
                             Codec.INT.fieldOf("priority")
                                     .forGetter(IMarkableRegion::getPriority),
                             Codec.STRING.fieldOf("areaType")
-                                    .forGetter(r -> r.getAreaType().areaType),
-                            MarkedAreaType.MARKED_AREA_CODEC.fieldOf("area")
+                                    .forGetter(r -> MarkedAreaTypes.areaIdentifier(r.getAreaType()).toString()),
+                            MarkedAreaTypes.MARKED_AREA_CODEC.fieldOf("area")
                                     .forGetter(IMarkableRegion::getArea),
                             BlockPos.CODEC.fieldOf("tpTarget")
                                     .forGetter(IMarkableRegion::getTpTarget),
-                            Codec.unboundedMap(Codec.STRING, PlayerContainer.CODEC).fieldOf("groups")
+                            Codec.unboundedMap(Codec.STRING, PlayerContainer.CODEC)
+                                    .optionalFieldOf("groups", Lifecycle.stable(), new HashMap<>(), Lifecycle.stable())
                                     .forGetter(IMarkableRegion::getGroups),
-                            Codec.list(Codec.STRING).fieldOf("childrenNames")
+                            Codec.list(Codec.STRING)
+                                    .optionalFieldOf("childrenNames", Lifecycle.stable(), new ArrayList<>(), Lifecycle.stable())
                                     .forGetter(r -> new ArrayList<>(r.getChildrenNames()))
                     )
                     .apply(instance, (name, dim, parentName, regionType, flags, isActive, isMuted,
                                       priority, areaType, area, blockPos, groups, childrenNames) -> {
-                        var areaT = AreaType.of(areaType);
+                        String lowerCase = areaType.toLowerCase(Locale.ROOT);
+                        var areaT = AreaType.of(ResourceLocation.parse(lowerCase).getPath());
                         switch (areaT) {
                             case CUBOID -> {
                                 return new CuboidRegion(name, dim, parentName, flags, isActive, isMuted, priority, area, blockPos, groups, childrenNames);
@@ -153,29 +156,6 @@ public abstract class MarkedRegion extends ProtectedRegion implements IMarkableR
     @Override
     public boolean contains(BlockPos position) {
         return this.area.contains(position);
-    }
-
-    @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
-        nbt.put(TP_POS, NbtCompatHelper.asInts(this.tpTarget));
-        nbt.putInt(PRIORITY, priority);
-        nbt.putString(AREA_TYPE, this.areaType.areaType);
-        nbt.put(AREA, this.area.serializeNBT());
-        return nbt;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
-        this.tpTarget = NbtCompatHelper.asBlockPos(nbt, TP_POS).orElseThrow();
-        this.priority = nbt.getInt(PRIORITY).orElse(Services.REGION_CONFIG.getDefaultPriority());
-        AreaType areaType = AreaType.of(nbt.getString(AREA_TYPE).orElseThrow());
-        if (areaType == null) {
-            Constants.LOGGER.error("Error loading region data for: '{}' in dim '{}'", this.getName(), this.dimension.location());
-            throw new IllegalArgumentException("Error loading region data for: '" + this.getName() + "' in dim '" + this.dimension.location() + "'");
-        }
-        this.areaType = areaType;
     }
 
     @Override
