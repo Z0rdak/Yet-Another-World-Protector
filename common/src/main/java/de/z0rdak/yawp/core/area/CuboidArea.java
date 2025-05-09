@@ -33,7 +33,7 @@ public class CuboidArea extends MarkedArea {
             BlockPos.CODEC.fieldOf("p2")
                     .forGetter(CuboidArea::getAreaP2),
             Codec.STRING.fieldOf("areaType")
-                    .forGetter(r -> MarkedAreaType.areaIdentifier(r.getAreaType()).toString())
+                    .forGetter(r -> MarkedAreaTypes.areaIdentifier(r.getAreaType()).toString())
             ).apply(instance, (p1, p2, area) -> new CuboidArea(p1, p2))
     );
 
@@ -55,11 +55,6 @@ public class CuboidArea extends MarkedArea {
         this(BoundingBox.fromCorners(p1, p2));
         this.p1 = AreaUtil.getLowerPos(p1, p2);
         this.p2 = AreaUtil.getHigherPos(p1, p2);
-    }
-
-    public CuboidArea(CompoundTag nbt) {
-        super(nbt);
-        this.deserializeNBT(nbt);
     }
 
     public static CuboidArea expand(CuboidArea area, int min, int max) {
@@ -235,22 +230,6 @@ public class CuboidArea extends MarkedArea {
 
     public BlockPos getAreaP2() {
         return this.p2;
-    }
-
-    @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
-        nbt.put(RegionNbtKeys.P1, NbtCompatHelper.asInts(this.p1));
-        nbt.put(RegionNbtKeys.P2, NbtCompatHelper.asInts(this.p2));
-        return nbt;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
-        this.p1 = NbtCompatHelper.asBlockPos(nbt, RegionNbtKeys.P1).orElseThrow();
-        this.p2 = NbtCompatHelper.asBlockPos(nbt, RegionNbtKeys.P2).orElseThrow();
-        this.area = BoundingBox.fromCorners(p1, p2);
     }
 
     @Override

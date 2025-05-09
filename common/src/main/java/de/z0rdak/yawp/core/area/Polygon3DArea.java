@@ -25,11 +25,6 @@ public class Polygon3DArea extends MarkedArea {
         this.positions = positions;
     }
 
-    public Polygon3DArea(CompoundTag nbt) {
-        super(nbt);
-        this.deserializeNBT(nbt);
-    }
-
     /**
      * <a href="https://www.eecs.umich.edu/courses/eecs380/HANDOUTS/PROJ2/InsidePoly.html">...</a>
      *
@@ -68,30 +63,6 @@ public class Polygon3DArea extends MarkedArea {
     @Override
     public boolean contains(BlockPos q) {
         return calcAngleSum(q, this.positions, this.positions.size()) == 2 * Math.PI;
-    }
-
-    @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
-        ListTag pointList = new ListTag();
-        this.positions.forEach((point) -> {
-            //Tag pointNbt = NbtUtils.writeBlockPos(point);
-            //pointList.add(pointNbt);
-        });
-        nbt.put(RegionNbtKeys.BLOCKS, pointList);
-        return nbt;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        this.positions.clear();
-        this.deserializeNBT(nbt);
-        ListTag pointList = nbt.getList(RegionNbtKeys.BLOCKS).orElseThrow();
-        for (int i = 0; i < pointList.size(); i++) {
-            // FIXME-ALPHA
-            //BlockPos pos = NbtUtils.readBlockPos(pointList.getCompound(i));
-            //this.positions.add(pos);
-        }
     }
 
     @Override

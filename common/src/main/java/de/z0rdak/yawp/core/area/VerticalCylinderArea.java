@@ -18,9 +18,9 @@ import static de.z0rdak.yawp.util.AreaUtil.length;
  */
 public class VerticalCylinderArea extends CenteredArea {
 
-    private BlockPos centerTopPos;
-    private int distance;
-    private int radius;
+    private final BlockPos centerTopPos;
+    private final int distance;
+    private final int radius;
 
     public VerticalCylinderArea(BlockPos centerBottomPos, BlockPos scopePos) {
         super(centerBottomPos, AreaType.CYLINDER);
@@ -34,11 +34,6 @@ public class VerticalCylinderArea extends CenteredArea {
         this.centerTopPos = centerBottomPos.offset(0, distance, 0);
         this.radius = radius;
         this.distance = distance;
-    }
-
-    public VerticalCylinderArea(CompoundTag nbt) {
-        super(nbt);
-        this.deserializeNBT(nbt);
     }
 
     public Vec3i getCenter() {
@@ -83,22 +78,6 @@ public class VerticalCylinderArea extends CenteredArea {
     public BlockPos multiply(BlockPos p1, BlockPos p2) {
         return new BlockPos(p1.getX() * p2.getX(), p1.getY() * p2.getY(), p1.getZ() * p2.getZ());
     }
-
-    @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
-        nbt.putInt(RegionNbtKeys.RADIUS, this.radius);
-        nbt.putInt(RegionNbtKeys.HEIGHT, this.distance);
-        return nbt;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
-        this.distance = nbt.getInt(RegionNbtKeys.RADIUS).orElseThrow();
-        this.radius = nbt.getInt(RegionNbtKeys.HEIGHT).orElseThrow();
-    }
-
 
     @Override
     public boolean containsOther(IMarkableArea other) {

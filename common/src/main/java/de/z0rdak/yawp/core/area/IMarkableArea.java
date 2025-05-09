@@ -12,7 +12,7 @@ import java.util.Set;
  * The most basic area would be a simple AxisAlignedBB.
  * This type of mark-able area is already implemented in the class CuboidArea.
  */
-public interface IMarkableArea extends INbtSerializable<CompoundTag> {
+public interface IMarkableArea {
 
     boolean contains(BlockPos pos);
 

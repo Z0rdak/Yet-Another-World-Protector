@@ -26,16 +26,11 @@ public class SphereArea extends CenteredArea {
                     Codec.INT.fieldOf("radius")
                             .forGetter(SphereArea::getRadius),
                     Codec.STRING.fieldOf("areaType")
-                            .forGetter(r -> MarkedAreaType.areaIdentifier(r.getAreaType()).toString())
+                            .forGetter(r -> MarkedAreaTypes.areaIdentifier(r.getAreaType()).toString())
             ).apply(instance, (center, radius, area) -> new SphereArea(center, radius))
     );
 
-    private int radius;
-
-    public SphereArea(CompoundTag nbt) {
-        super(nbt);
-        this.deserializeNBT(nbt);
-    }
+    private final int radius;
 
     public SphereArea(BlockPos centerPos, BlockPos scopePos) {
         super(centerPos, AreaType.SPHERE);
@@ -151,19 +146,6 @@ public class SphereArea extends CenteredArea {
     @Override
     public MarkedAreaType<?> getType() {
         return MarkedAreaTypes.SPHERE_AREA;
-    }
-
-    @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
-        nbt.putInt(RegionNbtKeys.RADIUS, this.radius);
-        return nbt;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
-        this.radius = nbt.getInt(RegionNbtKeys.RADIUS).orElseThrow();
     }
 
     @Override
