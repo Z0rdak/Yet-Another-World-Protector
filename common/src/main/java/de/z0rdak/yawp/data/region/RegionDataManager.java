@@ -10,7 +10,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -94,7 +93,7 @@ public class RegionDataManager {
         return savedLevelData;
     }
 
-    public static void onServerStat(MinecraftServer server) {
+    public static void onServerStarting(MinecraftServer server) {
         LOGGER.info("Initializing RegionDataManager...");
         serverInstance = server;
         checkYawpDir(server);
@@ -111,6 +110,7 @@ public class RegionDataManager {
 
     public static void save(MinecraftServer server, boolean flush, boolean force) {
         LOGGER.info("Cyclic or forced save. Saving region data for all levels.");
+        if (serverInstance == null) serverInstance = server;
         save(force);
     }
 
@@ -140,6 +140,7 @@ public class RegionDataManager {
     }
 
     public static void saveOnStop(MinecraftServer server) {
+        if (serverInstance == null) serverInstance = server;
         LOGGER.info("Stopping server. Saving region data for all levels.");
         save(true);
     }
