@@ -28,7 +28,7 @@ public final class RegionManager implements IRegionManager {
 
     @Override
     public GlobalRegion getGlobalRegion() {
-        return RegionManager.get().getGlobalRegion();
+        return RegionDataManager.getGlobalRegion();
     }
 
     @Override
