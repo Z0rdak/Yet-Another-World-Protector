@@ -2,6 +2,7 @@ package de.z0rdak.yawp.core.region;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.core.flag.Flag;
 import de.z0rdak.yawp.core.flag.RegionFlags;
 import de.z0rdak.yawp.core.group.PlayerContainer;

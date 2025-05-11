@@ -240,13 +240,13 @@ public class RegionDataManager {
     }
 
 
-    public static void initLevelDataOnLogin(Entity entity, ServerLevel level) {
+    public static void initLevelDataOnLogin(Entity entity, Level level) {
         if (isServerSide(level) && entity instanceof Player) {
             initLevelData(level.dimension().location());
         }
     }
 
-    public static void initLevelDataOnChangeWorld(ServerPlayer player, ServerLevel srcLvl, ServerLevel dstLvl) {
+    public static void initLevelDataOnChangeWorld(Player player, Level srcLvl, Level dstLvl) {
         if (isServerSide(srcLvl)) {
             initLevelData(dstLvl.dimension().location());
         }
