@@ -19,7 +19,6 @@ import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.data.region.LevelRegionData;
-import de.z0rdak.yawp.data.region.RegionDataManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -56,7 +55,7 @@ public class ArgumentUtil {
     }
 
     public static GlobalRegion getGlobalRegion() {
-        return RegionDataManager.getGlobalRegion();
+        return RegionManager.get().getGlobalRegion();
     }
 
     public static AreaType getAreaTypeArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {

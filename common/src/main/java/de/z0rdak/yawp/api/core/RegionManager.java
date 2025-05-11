@@ -28,7 +28,7 @@ public final class RegionManager implements IRegionManager {
 
     @Override
     public GlobalRegion getGlobalRegion() {
-        return RegionDataManager.getGlobalRegion();
+        return RegionManager.get().getGlobalRegion();
     }
 
     @Override
@@ -105,6 +105,10 @@ public final class RegionManager implements IRegionManager {
         return RegionDataManager.getLevels();
     }
 
+    public Set<String> getLevelNames() {
+        return RegionDataManager.getLevelNames();
+    }
+
     @Override
     public void resetLevelData(ResourceKey<Level> dim) {
         RegionDataManager.resetLevelData(dim);
@@ -120,7 +124,7 @@ public final class RegionManager implements IRegionManager {
 
         @Override
         public void save() {
-            RegionDataManager.save();
+            RegionManager.get().save();
         }
 
         @Override
@@ -267,8 +271,8 @@ public final class RegionManager implements IRegionManager {
                 if (dimRegion.isActive()) {
                     return Optional.of(dimRegion);
                 } else {
-                    return RegionDataManager.getGlobalRegion().isActive()
-                            ? Optional.of(RegionDataManager.getGlobalRegion())
+                    return RegionManager.get().getGlobalRegion().isActive()
+                            ? Optional.of(RegionManager.get().getGlobalRegion())
                             : Optional.empty();
                 }
             }

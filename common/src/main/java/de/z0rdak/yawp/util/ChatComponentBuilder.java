@@ -13,7 +13,6 @@ import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.data.PlayerManager;
-import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.text.Messages;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;

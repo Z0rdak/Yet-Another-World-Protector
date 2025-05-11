@@ -84,7 +84,7 @@ public class RegionArgumentType implements ArgumentType<String> {
     public static IProtectedRegion getRegion(CommandContext<CommandSourceStack> ctx, RegionType regionType) throws CommandSyntaxException {
         switch (regionType) {
             case GLOBAL:
-                return RegionDataManager.getGlobalRegion();
+                return RegionManager.get().getGlobalRegion();
             case DIMENSION: {
                 LevelRegionData dimCache = ArgumentUtil.getLevelDataArgument(ctx);
                 return dimCache.getDim();

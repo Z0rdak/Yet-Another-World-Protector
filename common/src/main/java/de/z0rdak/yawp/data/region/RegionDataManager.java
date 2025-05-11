@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.data.region;
 
+import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.*;
 import de.z0rdak.yawp.core.region.*;
@@ -46,6 +47,7 @@ public class RegionDataManager {
         return savedLevelData.hasDimEntry(level);
     }
 
+    // TODO: Move to API
     public static Set<String> getLevelNames() {
         return getLevels().stream().map(ResourceLocation::toString).collect(Collectors.toSet());
     }
@@ -139,9 +141,7 @@ public class RegionDataManager {
 
     public static void saveOnStop(MinecraftServer server) {
         LOGGER.info("Stopping server. Saving region data for all levels.");
-        saveDimList(server);
-        saveGlobalData(server);
-        saveTrackedLevels(server);
+        save(true);
     }
 
     public static void saveOnUnload(MinecraftServer server, ServerLevel level) {
@@ -193,7 +193,7 @@ public class RegionDataManager {
 
                     // restore dim <-> global hierarchy
                     DimensionalRegion dimensionalRegion = levelRegionData.getDim();
-                    RegionDataManager.getGlobalRegion().addChild(dimensionalRegion);
+                    RegionManager.get().getGlobalRegion().addChild(dimensionalRegion);
                     restoreHierarchy(levelRegionData, dimensionalRegion);
 
                     // restore dim <-> local <-> local hierarchy
@@ -265,7 +265,7 @@ public class RegionDataManager {
             // set state from config
             dimensionalRegion.setIsActive(Services.REGION_CONFIG.shouldActivateNewDimRegion());
             // add as child of global
-            RegionDataManager.getGlobalRegion().addChild(dimensionalRegion);
+            RegionManager.get().getGlobalRegion().addChild(dimensionalRegion);
 
             dimRegionStorage.put(rl, levelRegionData);
             savedLevelData.addDimEntry(rl);
@@ -298,10 +298,16 @@ public class RegionDataManager {
         return getOrCreate(level.dimension().location());
     }
 
+
+    // TODO: Move to API?
+    // RegionManager.get().getLevelRegionData(region.getDim()).get().getLocalList()
+    // Instead
+    // RegionManager.get().getOrCreate(region.getDim()).getLocalList()
     public static Collection<IMarkableRegion> getLocalsFor(ResourceKey<Level> dim) {
         return getOrCreate(dim.location()).getLocalList();
     }
 
+    // TODO: Change API to offer a getOrCreate method
     public static LevelRegionData getOrCreate(ResourceKey<Level> dim) {
        return getOrCreate(dim.location());
     }

@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.api;
 
+import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
 import de.z0rdak.yawp.core.flag.*;
@@ -170,7 +171,7 @@ public class FlagEvaluator {
             if (dimRegion.isActive()) {
                 return dimRegion;
             } else {
-                var globalRegion = RegionDataManager.getGlobalRegion();
+                var globalRegion = RegionManager.get().getGlobalRegion();
                 return globalRegion.isActive() ? globalRegion : null;
             }
         }

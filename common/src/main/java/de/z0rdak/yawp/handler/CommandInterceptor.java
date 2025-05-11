@@ -6,6 +6,7 @@ import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.api.commands.CommandConstants;
+import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.permission.Permissions;
 import de.z0rdak.yawp.commands.CommandSourceType;
 import de.z0rdak.yawp.constants.Constants;
@@ -27,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -202,7 +204,7 @@ public class CommandInterceptor {
                     return hasPermission ? ALLOW_CMD : CANCEL_CMD;
                 }
                 case "global": {
-                    GlobalRegion region = RegionDataManager.getGlobalRegion();
+                    GlobalRegion region = RegionManager.get().getGlobalRegion();
                     Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
                         //  0   1    2       3      4         5
                         // /wp flag global <flag> enable|msg ...
@@ -231,7 +233,7 @@ public class CommandInterceptor {
      */
     private static int verifyGlobalCommandPermission(CommandContextBuilder<CommandSourceStack> cmdContext, CommandSourceType cmdSrcType) {
         CommandSourceStack src = cmdContext.getSource();
-        GlobalRegion region = RegionDataManager.getGlobalRegion();
+        GlobalRegion region = RegionManager.get().getGlobalRegion();
         try {
             Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
                 //  0  1      2         3
@@ -344,12 +346,12 @@ public class CommandInterceptor {
         ParsedArgument<CommandSourceStack, ?> dimParsedArgument = cmdContext.getArguments().get(DIM.toString());
         if (dimParsedArgument != null && dimParsedArgument.getResult() instanceof ResourceLocation dimResLoc) {
             ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, dimResLoc);
-            LevelRegionData dimCache = RegionDataManager.getOrCreate(dim);
-            if (dimCache == null) {
+            Optional<LevelRegionData> levelData = RegionManager.get().getLevelRegionData(dim);
+            if (levelData.isEmpty()) {
                 sendCmdFeedback(cmdContext.getSource(), Component.literal("Dimension not found in region data").withStyle(ChatFormatting.RED));
                 return null;
             }
-            return dimCache;
+            return levelData.get();
         }
         return null;
     }

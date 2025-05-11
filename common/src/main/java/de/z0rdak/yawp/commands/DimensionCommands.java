@@ -17,7 +17,6 @@ import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.data.region.LevelRegionData;
-import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.util.ChatLinkBuilder;
 import de.z0rdak.yawp.util.LocalRegions;
@@ -178,7 +177,7 @@ class DimensionCommands {
             else
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.state.enable.all.set.off.value",
                         "Deactivated all local regions of %s", ChatLinkBuilder.buildRegionInfoLink(dimCache.getDim())));
-            RegionDataManager.save();
+            RegionManager.get().save();
             return 0;
         } else {
             return 1;
@@ -194,7 +193,7 @@ class DimensionCommands {
             else
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.state.alert.all.set.off.value",
                         "Deactivated alert for all local regions of %s", ChatLinkBuilder.buildRegionInfoLink(dimCache.getDim())));
-            RegionDataManager.save();
+            RegionManager.get().save();
             return 0;
         } else {
             return 1;
@@ -212,7 +211,7 @@ class DimensionCommands {
             region.setIsActive(true);
             region.setIsMuted(false);
         });
-        RegionDataManager.save();
+        RegionManager.get().save();
         sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.dim.reset.all.confirm", "Successfully reset all local regions in %s", ChatLinkBuilder.buildRegionInfoLink(dimCache.getDim())));
         return 0;
     }
@@ -227,7 +226,7 @@ class DimensionCommands {
         dimRegion.setIsActive(true);
         dimRegion.setIsMuted(false);
         dimRegion.getFlags().clear();
-        RegionDataManager.save();
+        RegionManager.get().save();
         sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.dim.reset.confirm", "Successfully reset dimensional region %s", ChatLinkBuilder.buildRegionInfoLink(dimRegion)));
         return 0;
     }
@@ -257,7 +256,7 @@ class DimensionCommands {
                 .forEach(flag -> region.addFlag(new BooleanFlag(flag)));
         levelData.addLocal(parent, region);
         LocalRegions.ensureHigherRegionPriorityFor(region, Services.REGION_CONFIG.getDefaultPriority());
-        RegionDataManager.save();
+        RegionManager.get().save();
         sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.success", "Successfully created region %s (with parent %s)", ChatLinkBuilder.buildRegionInfoLink(region), ChatLinkBuilder.buildRegionInfoLink(parent)));
         return 0;
     }
@@ -308,7 +307,7 @@ class DimensionCommands {
             RegionType parentType = region.getParent().getRegionType();
             if (parentType == RegionType.DIMENSION) {
                 levelData.removeLocal(region);
-                RegionDataManager.save();
+                RegionManager.get().save();
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.dim.region.remove.confirm", "Removed region '%s' from %s", region.getName(), ChatLinkBuilder.buildRegionInfoLink(levelData.getDim())));
                 return 0;
             }
@@ -331,7 +330,7 @@ class DimensionCommands {
     private static int deleteRegions(CommandContext<CommandSourceStack> ctx, LevelRegionData levelData) {
         int amount = levelData.regionCount();
         levelData.clearLocals();
-        RegionDataManager.save();
+        RegionManager.get().save();
         sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.dim.region.remove.all.confirm", "Removed %s regions from dimension %s", amount, ChatLinkBuilder.buildRegionInfoLink(levelData.getDim())));
         return 0;
     }

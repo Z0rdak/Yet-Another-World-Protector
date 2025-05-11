@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.api.commands.CommandConstants;
+import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.region.*;
@@ -59,7 +60,7 @@ public class LevelRegionData extends SavedData {
     public LevelRegionData(ResourceLocation id) {
         this.id = id;
         this.locals = new HashMap<>();
-        var global = RegionDataManager.getGlobalRegion();
+        var global = RegionManager.get().getGlobalRegion();
         ResourceKey<Level> levelRk = ResourceKey.create(Registries.DIMENSION, id);
         this.dim = new DimensionalRegion(levelRk, global);
     }

@@ -1,22 +1,16 @@
 package de.z0rdak.yawp.util.text.messages.multiline;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.realmsclient.util.JsonUtils;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
-import de.z0rdak.yawp.core.area.MarkedAreaType;
 import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.data.region.LevelRegionData;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.text.Messages;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minidev.json.JSONUtil;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

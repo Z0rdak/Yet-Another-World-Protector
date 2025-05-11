@@ -5,9 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.core.flag.Flag;
 import de.z0rdak.yawp.core.flag.RegionFlags;
 import de.z0rdak.yawp.core.group.PlayerContainer;
-import de.z0rdak.yawp.data.region.RegionDataManager;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
@@ -62,7 +60,7 @@ public final class DimensionalRegion extends ProtectedRegion {
     private DimensionalRegion(ResourceKey<Level> dim, RegionFlags flags, boolean isActive, boolean isMuted, Map<String, PlayerContainer> groups, List<String> childrenNames) {
         super(dim.location().toString(), dim, RegionType.DIMENSION);
         this.dimension = dim;
-        var globalRegion = RegionDataManager.getGlobalRegion();
+        var globalRegion = RegionManager.get().getGlobalRegion();
         this.setParent(globalRegion);
         this.setFlags(flags);
         this.setIsActive(isActive);

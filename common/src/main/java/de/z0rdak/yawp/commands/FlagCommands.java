@@ -6,6 +6,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import de.z0rdak.yawp.api.commands.CommandConstants;
+import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.events.flag.FlagEvent;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.commands.arguments.flag.IFlagArgumentType;
@@ -14,7 +15,6 @@ import de.z0rdak.yawp.core.flag.FlagMessage;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.util.text.Messages;
 import de.z0rdak.yawp.util.text.messages.multiline.MultiLineMessage;
@@ -138,7 +138,7 @@ final class FlagCommands {
         MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!setMuted), String.valueOf(setMuted));
         MutableComponent msg = Messages.substitutable("%s %s", infoMsg, undoLink);
         sendCmdFeedback(ctx.getSource(), msg);
-        RegionDataManager.save();
+        RegionManager.get().save();
         return 0;
 
     }
@@ -157,7 +157,7 @@ final class FlagCommands {
         MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), flagMsgStr, oldFlagMsg);
         MutableComponent msg = Messages.substitutable("%s %s", infoMsg, undoLink);
         sendCmdFeedback(ctx.getSource(), msg);
-        RegionDataManager.save();
+        RegionManager.get().save();
         return 0;
     }
 
@@ -189,7 +189,7 @@ final class FlagCommands {
                 buildFlagInfoLink(region, flag), flag.getState().name);
         MutableComponent msg = Messages.substitutable("%s %s", infoMsg, undoLink);
         sendCmdFeedback(ctx.getSource(), msg);
-        RegionDataManager.save();
+        RegionManager.get().save();
         return 0;
 
     }
@@ -216,7 +216,7 @@ final class FlagCommands {
         MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!override), String.valueOf(override));
         MutableComponent msg = Messages.substitutable("%s %s", infoMsg, undoLink);
         sendCmdFeedback(ctx.getSource(), msg);
-        RegionDataManager.save();
+        RegionManager.get().save();
         return 0;
     }
 

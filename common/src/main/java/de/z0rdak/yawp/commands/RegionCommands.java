@@ -6,6 +6,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.commands.arguments.region.AddRegionChildArgumentType;
@@ -20,7 +21,6 @@ import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.data.region.LevelRegionData;
-import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.util.LocalRegions;
 import de.z0rdak.yawp.util.text.messages.multiline.MultiLineMessage;
@@ -221,7 +221,7 @@ class RegionCommands {
                 sendCmdFeedback(ctx.getSource(), updateAreaFailMsg);
             }
             region.setArea(area);
-            RegionDataManager.save();
+            RegionManager.get().save();
             MutableComponent updateAreaMsg = Component.translatableWithFallback("cli.msg.info.region.area.area.update", "Updated %s for region %s", buildRegionAreaLink(region), buildRegionInfoLink(region));
             sendCmdFeedback(ctx.getSource(), updateAreaMsg);
             return 0;
@@ -263,7 +263,7 @@ class RegionCommands {
             String oldName = region.getName();
             levelData.renameLocal(region, regionName);
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.success", "Changed name of region %s from '%s' to '%s'", buildRegionInfoLink(region), oldName, regionName));
-            RegionDataManager.save();
+            RegionManager.get().save();
             return 0;
         } catch (IllegalArgumentException ex) {
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.exists", "Dimension %s already contains region with name %s", levelData.getDim().getName(), buildRegionInfoLink(levelData.getLocal(regionName))));
@@ -277,7 +277,7 @@ class RegionCommands {
             parent.removeChild(child);
             dimCache.getDim().addChild(child);
             LocalRegions.ensureLowerRegionPriorityFor(child, Services.REGION_CONFIG.getDefaultPriority());
-            RegionDataManager.save();
+            RegionManager.get().save();
             MutableComponent parentLink = buildRegionInfoLink(parent);
             MutableComponent notLongerChildLink = buildRegionInfoLink(child);
             MutableComponent dimensionalLink = buildRegionInfoLink(dimCache.getDim());
@@ -297,7 +297,7 @@ class RegionCommands {
             child.getParent().removeChild(child);
             parent.addChild(child);
             LocalRegions.ensureHigherRegionPriorityFor(child, parent.getPriority() + 1);
-            RegionDataManager.save();
+            RegionManager.get().save();
             MutableComponent parentLink = buildRegionInfoLink(parent);
             MutableComponent childLink = buildRegionInfoLink(child);
             MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), ADD, REMOVE);
@@ -342,7 +342,7 @@ class RegionCommands {
             int oldPriority = region.getPriority();
             if (oldPriority != priority) {
                 region.setPriority(priority);
-                RegionDataManager.save();
+                RegionManager.get().save();
                 MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(oldPriority), String.valueOf(priority));
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.state.priority.set.success", "Changed priority for region %s: %s -> %s",
                                 buildRegionInfoLink(region), oldPriority, region.getPriority())
@@ -404,7 +404,7 @@ class RegionCommands {
     private static int setTeleportPos(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, BlockPos target) {
         if (!region.getTpTarget().equals(target)) {
             region.setTpTarget(target);
-            RegionDataManager.save();
+            RegionManager.get().save();
             MutableComponent newTpTargetLink = buildDimensionalBlockTpLink(region.getDim(), target);
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.area.tp.set.msg", "Set new teleport anchor for %s to %s", buildRegionInfoLink(region), newTpTargetLink));
             return 0;

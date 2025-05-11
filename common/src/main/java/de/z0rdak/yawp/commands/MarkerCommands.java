@@ -35,6 +35,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -46,6 +47,7 @@ import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.ChatLinkBuilder.buildRegionInfoLink;
 import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 import static net.minecraft.ChatFormatting.RED;
+import static net.minecraft.core.component.DataComponents.CUSTOM_DATA;
 
 public final class MarkerCommands {
 
@@ -131,7 +133,7 @@ public final class MarkerCommands {
                     .forEach(flag -> region.addFlag(new BooleanFlag(flag)));
             dimCache.addLocal(parentRegion, region);
             LocalRegions.ensureHigherRegionPriorityFor(region, Services.REGION_CONFIG.getDefaultPriority());
-            RegionDataManager.save();
+            RegionManager.get().save();
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.success", "Successfully created region %s (with parent %s)", buildRegionInfoLink(region), buildRegionInfoLink(parentRegion)));
             return 0;
         } else {
@@ -169,14 +171,17 @@ public final class MarkerCommands {
                 if (levelRegionData.hasLocal(displayTestRegion)) {
                     IMarkableRegion displayTest = levelRegionData.getLocal(displayTestRegion);
                     Set<BlockPos> frame =  displayTest.getArea().getFrame();
-                    frame.forEach(blockPos -> {
-                        BlockDisplayProperty glowingRedStainedGlassFrame = new BlockDisplayProperty("red_stained_glass", true, true);
+                    for (BlockPos blockPos : frame) {
+                        BlockDisplayProperty glowingRedStainedGlassFrame = new BlockDisplayProperty("red_stained_glass", true, false);
                         CompoundTag displayTag = RegionOutlineBuilder.buildBlockDisplayTag(glowingRedStainedGlassFrame);
                         Entity entity = RegionOutlineBuilder.buildBlockDisplay(level, blockPos, displayTag);
+                        
                         if (entity != null) {
+                            // TODO: region data in custom data
+                            CustomData customData = entity.get(CUSTOM_DATA);
                             level.addFreshEntity(entity);
                         }
-                    });
+                    }
                 }
             }
 
