@@ -2,7 +2,6 @@ package de.z0rdak.yawp.mixin.flag;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
-import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -81,7 +80,6 @@ public abstract class EntityMixin {
     public void onChangeDimension(ServerLevel level, TeleportTransition teleportTransition, CallbackInfoReturnable<Entity> cir) {
         Entity self = (Entity) (Object) this;
         if (isServerSide(self.level())) {
-            RegionDataManager.addDimKeyOnDimensionChange(null, self.level(), teleportTransition.newLevel());
             FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL, getDimKey(self));
             if (Services.EVENT.post(checkEvent)) {
                 return;

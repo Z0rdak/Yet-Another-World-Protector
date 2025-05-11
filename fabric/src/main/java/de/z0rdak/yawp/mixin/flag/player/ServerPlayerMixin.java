@@ -2,7 +2,6 @@ package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
-import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -47,8 +46,6 @@ public abstract class ServerPlayerMixin {
     private void onChangeDimension(TeleportTransition teleportTransition, CallbackInfoReturnable<Entity> cir) {
         Player player = (Player) (Object) this;
         if (isServerSide(player)) {
-            RegionDataManager.addDimKeyOnDimensionChange(player, player.level(), teleportTransition.newLevel());
-
             FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), USE_PORTAL_PLAYERS, getDimKey(player), player);
             if (Services.EVENT.post(checkEvent))
                 return;
