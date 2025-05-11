@@ -2,7 +2,6 @@ package de.z0rdak.yawp.platform;
 
 import de.z0rdak.yawp.api.events.region.ForgeFlagCheckEvent;
 import de.z0rdak.yawp.api.events.region.ForgeFlagCheckResult;
-import de.z0rdak.yawp.commands.CommandRegistry;
 import de.z0rdak.yawp.config.ConfigRegistry;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.config.server.LoggingConfig;
@@ -10,7 +9,7 @@ import de.z0rdak.yawp.config.server.PermissionConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.platform.services.IConfigHelper;
-import fuzs.forgeconfigapiport.forge.api.neoforge.v4.NeoForgeConfigRegistry;
+import fuzs.forgeconfigapiport.forge.api.v5.NeoForgeConfigRegistry;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.config.ModConfig;

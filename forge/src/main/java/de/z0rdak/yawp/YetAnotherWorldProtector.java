@@ -2,21 +2,20 @@ package de.z0rdak.yawp;
 
 import de.z0rdak.yawp.api.events.flag.ForgeFlagEvent;
 import de.z0rdak.yawp.commands.CommandRegistry;
-import de.z0rdak.yawp.config.ConfigRegistry;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.data.region.RegionDataManager;
-import de.z0rdak.yawp.platform.ForgeConfigHelper;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.common.ForgeConfig;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -67,11 +66,8 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
 
     @Override
     public void initServerInstance() {
-        MinecraftForge.EVENT_BUS.addListener(this::initServerInstanceForge);
-    }
-
-    public void initServerInstanceForge(ServerStartingEvent event) {
-        RegionDataManager.initServerInstance(event.getServer());
+        MinecraftForge.EVENT_BUS.addListener(
+                (ServerAboutToStartEvent startEvent) -> RegionDataManager.onServerStarting(startEvent.getServer()));
     }
 
     @Override
@@ -84,30 +80,26 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
         ResourceLocation levelRl = ServerLevel.OVERWORLD.location();
         server.getAllLevels().forEach(level -> {
             if (level.dimension().location().equals(levelRl)) {
-                RegionDataManager.loadRegionDataForWorld(server, level);
+                //RegionDataManager.loadRegionDataForWorld(server, level);
             }
         });
     }
 
     @Override
     public void addDimKeyOnPlayerLogin() {
-        MinecraftForge.EVENT_BUS.addListener(this::addDimKeyOnPlayerLoginForge);
-    }
-
-    private void addDimKeyOnPlayerLoginForge(PlayerEvent.PlayerLoggedInEvent event) {
-        RegionDataManager.addDimKeyOnPlayerLogin(event.getEntity(), event.getEntity().level());
+        MinecraftForge.EVENT_BUS.addListener(
+                (PlayerEvent.PlayerLoggedInEvent event) -> RegionDataManager.initLevelDataOnLogin(event.getEntity(), event.getEntity().level()));
     }
 
     @Override
     public void addDimKeyOnDimensionChange() {
-        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true, this::addDimKeyOnDimensionChangeForge);
-    }
-
-    private void addDimKeyOnDimensionChangeForge(EntityTravelToDimensionEvent event) {
-        if (event.getEntity() instanceof Player && event.getEntity().getServer() != null) {
-            ServerLevel level = event.getEntity().getServer().getLevel(event.getDimension());
-            RegionDataManager.addDimKeyOnDimensionChange((Player) event.getEntity(), event.getEntity().level(), level);
-        }
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
+                (EntityTravelToDimensionEvent event)  -> {
+                    if (event.getEntity() instanceof Player player && event.getEntity().getServer() != null) {
+                        Level targetLevel = event.getEntity().getServer().getLevel(event.getDimension());
+                        RegionDataManager.initLevelDataOnChangeWorld(player, player.level(), targetLevel);
+                    }
+                });
     }
 
     @Override

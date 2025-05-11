@@ -6,8 +6,6 @@ import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.FlagState;
-import de.z0rdak.yawp.data.region.DimensionRegionCache;
-import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.api.MessageSender;
 import net.minecraft.core.BlockPos;
@@ -77,6 +75,11 @@ import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 public final class PlayerFlagHandler {
 
     private PlayerFlagHandler() {
+    }
+
+    @SubscribeEvent
+    public static void onElytraaFlying(Event event) {
+
     }
 
     @SubscribeEvent
@@ -791,8 +794,6 @@ public final class PlayerFlagHandler {
         // Note: FilledBucket seems to always be null. use maxStackSize to determine bucket state (empty or filled)
         if (notServerSideOrPlayerNull(event.getEntity())) return;
         Player player = event.getEntity();
-
-        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getDimKey(event.getEntity()));
         if (event.getTarget() != null) {
             HitResult pos = event.getTarget();
             BlockPos targetPos = new BlockPos((int) event.getTarget().getLocation().x, (int) event.getTarget().getLocation().y, (int) event.getTarget().getLocation().z);
@@ -897,9 +898,9 @@ public final class PlayerFlagHandler {
     @SubscribeEvent
     public static void onSetSpawn(PlayerSetSpawnEvent event) {
         if (notServerSideOrPlayerNull(event.getEntity())) return;
-        BlockPos newSpawn = event.getNewSpawn();
-        Player player = event.getEntity();
-        if (newSpawn != null) {
+        if (event.getConfig() != null) {
+            BlockPos newSpawn = event.getConfig().pos();
+            Player player = event.getEntity();
             FlagCheckEvent checkEvent = new FlagCheckEvent(newSpawn, SET_SPAWN, getDimKey(player), player);
             if (Services.EVENT.post(checkEvent)) {
                 return;
