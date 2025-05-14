@@ -72,7 +72,6 @@ public class RegionDataManager {
             saveGlobalData(serverInstance);
             saveTrackedLevels(serverInstance);
         } else {
-            LOGGER.debug(Component.translatableWithFallback("data.nbt.dimensions.save", "Save for RegionDataManager called. Attempting to save region data...").getString());
             savedLevelData.setDirty();
             globalRegionData.setDirty();
             dimRegionStorage.forEach((key, value) -> value.setDirty());
@@ -86,7 +85,6 @@ public class RegionDataManager {
                 if (!overworld.isClientSide) {
                     DimensionDataStorage storage = overworld.getDataStorage();
                     savedLevelData = storage.computeIfAbsent(LevelListData.TYPE);
-
                 }
             }
         }
@@ -94,7 +92,7 @@ public class RegionDataManager {
     }
 
     public static void onServerStarting(MinecraftServer server) {
-        LOGGER.info("Initializing RegionDataManager...");
+        LOGGER.info(Component.translatableWithFallback("data.region.init","Initializing RegionDataManager...").getString());
         serverInstance = server;
         checkYawpDir(server);
     }
@@ -109,7 +107,7 @@ public class RegionDataManager {
     }
 
     public static void save(MinecraftServer server, boolean flush, boolean force) {
-        LOGGER.info("Cyclic or forced save. Saving region data for all levels.");
+        LOGGER.info(Component.translatableWithFallback("data.region.levels.save.forced", "Cyclic or forced save. Saving region data for all levels").getString());
         if (serverInstance == null) serverInstance = server;
         save(force);
     }
@@ -128,7 +126,7 @@ public class RegionDataManager {
         DimensionDataStorage storage = server.overworld().getDataStorage();
         ResourceLocation levelRl = level.dimension().location();
         LevelRegionData levelRegionData = dimRegionStorage.get(levelRl);
-        LOGGER.info("Saving region data for level '{}'", levelRl);
+        LOGGER.info(Component.translatableWithFallback("data.region.level.save", "Saving region data for level '%s'", levelRl.toString()).getString());
         storage.set(LevelRegionData.buildSavedDataType(levelRl), levelRegionData);
         levelRegionData.setDirty();
     }
@@ -141,14 +139,37 @@ public class RegionDataManager {
 
     public static void saveOnStop(MinecraftServer server) {
         if (serverInstance == null) serverInstance = server;
-        LOGGER.info("Stopping server. Saving region data for all levels.");
+        LOGGER.info(Component.translatableWithFallback("data.region.levels.save.stopped", "Stopping server. Saving region data for all levels").getString());
         save(true);
     }
 
     public static void saveOnUnload(MinecraftServer server, ServerLevel level) {
         if (savedLevelData.hasDimEntry(level.dimension().location())) {
-            LOGGER.info("Unloading level '{}'. Saving region data.", level.dimension().location());
+            LOGGER.info(Component.translatableWithFallback("data.region.level.save.unload", "Unloading level '%s'. Saving region data", level.dimension().location().toString()).getString());
             saveLevelData(server, level);
+        }
+    }
+
+    public static void loadLevelListData(MinecraftServer server) {
+        try {
+            if (serverInstance == null)
+                serverInstance = server;
+            DimensionDataStorage dataStorage = server.overworld().getDataStorage();
+            savedLevelData = dataStorage.get(LevelListData.TYPE);
+            if (savedLevelData == null) {
+                LOGGER.info(Component.translatableWithFallback("data.region.levels.load.missing", "Missing level list for region data (ignore on first startup). Initializing...").getString());
+                savedLevelData = new LevelListData();
+                saveDimList(server);
+            }
+            LOGGER.info(Component.translatableWithFallback("data.region.levels.load.success", "Found region data for %s dimension(s)", savedLevelData.getLevels().size()).getString());
+            globalRegionData = dataStorage.get(GlobalRegionData.TYPE);
+            if (globalRegionData == null) {
+                LOGGER.info(Component.translatableWithFallback("data.region.global.missing", "Missing global region data (ignore on first startup). Initializing...").getString());
+                globalRegionData = new GlobalRegionData();
+                saveGlobalData(server);
+            }
+        } catch (NullPointerException npe) {
+            LOGGER.error(Component.translatableWithFallback("data.region.level.local.load.failed", "Loading level region list failed!").getString(), npe);
         }
     }
 
@@ -156,62 +177,42 @@ public class RegionDataManager {
         try {
             if (serverInstance == null)
                 serverInstance = server;
-            if (isServerSide(level)) {
-                // if overworld, init level independent data
-                if (level.dimension() == Level.OVERWORLD) {
-                    DimensionDataStorage dataStorage = server.overworld().getDataStorage();
-                    savedLevelData = dataStorage.get(LevelListData.TYPE);
-                    if (savedLevelData == null) {
-                        savedLevelData = new LevelListData();
-                        saveDimList(server);
-                    }
-                    globalRegionData = dataStorage.get(GlobalRegionData.TYPE);
-                    if (globalRegionData == null) {
-                        globalRegionData = new GlobalRegionData();
-                        saveGlobalData(server);
-                    }
+            ResourceLocation levelRl = level.dimension().location();
+            // init level data
+            if (savedLevelData.hasDimEntry(levelRl)) {
+                LevelRegionData levelRegionData = loadLevelData(server, level);
+                if (levelRegionData == null) {
+                    levelRegionData = new LevelRegionData(levelRl);
+                    LOGGER.info(Component.translatableWithFallback("data.region.level.local.missing", "Initializing region data for '%s'", levelRl.toString()).getString());
+                    dimRegionStorage.put(levelRl, levelRegionData);
+                    saveLevelData(server, level);
+                } else {
+                    LOGGER.info(Component.translatableWithFallback("data.region.level.local.load.success", "Loaded %s region(s) for '%s'", levelRegionData.regionCount(), levelRl.toString()).getString());
+                    dimRegionStorage.put(levelRl, levelRegionData);
+                    savedLevelData.addDimEntry(levelRl);
                 }
+                // restoring region hierarchy
+                LOGGER.info(Component.translatableWithFallback("data.region.level.local.load.restore", "Restoring region hierarchy for '%s'.", levelRl.toString()).getString());
 
-                ResourceLocation levelRl = level.dimension().location();
-                // init level data
-                if (savedLevelData.hasDimEntry(levelRl)) {
-                    LevelRegionData levelRegionData = loadLevelData(server, level);
-                    if (levelRegionData == null) {
-                        levelRegionData = new LevelRegionData(levelRl);
-                        LOGGER.info("Initializing region data for '{}'", levelRl);
-                        dimRegionStorage.put(levelRl, levelRegionData);
-                        savedLevelData.addDimEntry(levelRl);
-                        saveLevelData(server, level);
-                    } else {
-                        LOGGER.info("Loaded region data for '{}'", levelRl);
-                        dimRegionStorage.put(levelRl, levelRegionData);
-                        savedLevelData.addDimEntry(levelRl);
-                        saveLevelData(server, level);
-                    }
-                    // restoring region hierarchy
-                    int regionCount = levelRegionData.regionCount();
-                    LOGGER.info("Restoring region hierarchy for '{}'. Found {} local regions.", levelRl, regionCount);
+                // restore dim <-> global hierarchy
+                DimensionalRegion dimensionalRegion = levelRegionData.getDim();
+                RegionManager.get().getGlobalRegion().addChild(dimensionalRegion);
+                restoreHierarchy(levelRegionData, dimensionalRegion);
 
-                    // restore dim <-> global hierarchy
-                    DimensionalRegion dimensionalRegion = levelRegionData.getDim();
-                    RegionManager.get().getGlobalRegion().addChild(dimensionalRegion);
-                    restoreHierarchy(levelRegionData, dimensionalRegion);
-
-                    // restore dim <-> local <-> local hierarchy
-                    levelRegionData.getLocals().forEach((regionName, region) -> {
-                        restoreHierarchy(dimRegionStorage.get(levelRl), region);
-                    });
-                }
+                // restore dim <-> local <-> local hierarchy
+                levelRegionData.getLocals().forEach((regionName, region) -> {
+                    restoreHierarchy(dimRegionStorage.get(levelRl), region);
+                });
             }
         } catch (NullPointerException npe) {
-            LOGGER.error(Component.translatableWithFallback("data.nbt.dimensions.load.failure", "Loading regions failed!").getString());
+            LOGGER.error(Component.translatableWithFallback("data.region.level.local.load.failed", "Loading regions failed!").getString(), npe);
         }
     }
     
     private static void restoreHierarchy(LevelRegionData levelRegionData, IProtectedRegion region) {
         region.getChildrenNames().forEach(childName -> {
             if (!levelRegionData.hasLocal(childName)) {
-                LOGGER.warn("No region with name '{}' found in save data of '{}'! Your region data is most likely corrupt.", childName, levelRegionData.getId());
+                LOGGER.warn(Component.translatableWithFallback("data.region.level.local.load.restore.failed", "No region with name '%s' found in save data of '%s'! Your region data is most likely corrupt.", childName, levelRegionData.getId().toString()).getString());
             } else {
                 IMarkableRegion child = levelRegionData.getLocal(childName);
                 if (child != null) {
@@ -222,19 +223,15 @@ public class RegionDataManager {
         });
     }
 
-    public static void onStarted(MinecraftServer server) {
-        // LOG about regions?
-    }
-
     private static void checkYawpDir(MinecraftServer server) {
         Path worldRootPath = server.getWorldPath(LevelResource.ROOT).normalize();
         Path dataDirPath = worldRootPath.resolve("data/" + Constants.MOD_ID);
         if (Files.notExists(dataDirPath)) {
             try {
                 Files.createDirectories(dataDirPath);
-                LOGGER.info("Subdirectory created: {}", dataDirPath);
+                LOGGER.info(Component.translatableWithFallback("data.region.env.init", "Created region data directory '%s'", dataDirPath.toString()).getString());
             } catch (IOException e) {
-                LOGGER.error("Failed to create subdirectory: {}", dataDirPath, e);
+                LOGGER.error(Component.translatableWithFallback("data.region.env.error", "Failed to create directory for region data: '%s'").getString(), e);
                 throw new RuntimeException(e);
             }
         }
@@ -254,9 +251,8 @@ public class RegionDataManager {
     }
 
     private static LevelRegionData initLevelData(ResourceLocation rl){
-        if (!dimRegionStorage.containsKey(rl)) {
+        if (!savedLevelData.hasDimEntry(rl)) {
             LevelRegionData levelRegionData = new LevelRegionData(rl);
-
             DimensionalRegion dimensionalRegion = levelRegionData.getDim();
             // add default flags from config
             Set<String> defaultDimFlags = Services.REGION_CONFIG.getDefaultDimFlags();
@@ -270,15 +266,15 @@ public class RegionDataManager {
 
             dimRegionStorage.put(rl, levelRegionData);
             savedLevelData.addDimEntry(rl);
-            LOGGER.info("Initializing region data for: '{}'", rl);
-            save(true);
+            LOGGER.info(Component.translatableWithFallback("data.region.level.init", "Initializing region data for level '%s'", rl.toString()).getString());
+            save(false);
             return levelRegionData;
         }
         return dimRegionStorage.get(rl);
     }
 
     public static Optional<LevelRegionData> getLevelRegionData(ResourceLocation rl) {
-        if (!dimRegionStorage.containsKey(rl)) {
+        if (!savedLevelData.hasDimEntry(rl)) {
             return Optional.empty();
         }
         return Optional.of(dimRegionStorage.get(rl));
@@ -289,7 +285,7 @@ public class RegionDataManager {
     }
 
     public static LevelRegionData getOrCreate(ResourceLocation rl) {
-        if (!dimRegionStorage.containsKey(rl)) {
+        if (!savedLevelData.hasDimEntry(rl)) {
             return initLevelData(rl);
         }
         return dimRegionStorage.get(rl);
