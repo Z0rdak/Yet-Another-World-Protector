@@ -4,10 +4,9 @@ import de.z0rdak.yawp.api.events.flag.ForgeFlagEvent;
 import de.z0rdak.yawp.commands.CommandRegistry;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.RegionFlag;
+import de.z0rdak.yawp.data.PlayerManager;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.Services;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -15,8 +14,9 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -36,10 +36,7 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
         YAWPCommon.init();
 
         registerConfig();
-        initServerInstance();
-        loadRegionData();
-        addDimKeyOnPlayerLogin();
-        addDimKeyOnDimensionChange();
+        setupRegionDataLifecycleHooks();
         registerCommands();
 
         ModLoadingContext modLoadingContext = new ModLoadingContext();
@@ -54,57 +51,41 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
             removeInvolvedEntities(event.getSrc(), event.getRegion(), RegionFlag.fromId(event.getFlag().getName()));
         }
     }
-    
+
     @Override
     public void registerCommands() {
-        MinecraftForge.EVENT_BUS.addListener(this::registerCommandsForge);
-    }
-
-    private void registerCommandsForge(RegisterCommandsEvent event) {
-        CommandRegistry.registerCommands(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection());
+        MinecraftForge.EVENT_BUS.addListener((RegisterCommandsEvent event) -> CommandRegistry.registerCommands(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection()));
     }
 
     @Override
-    public void initServerInstance() {
-        MinecraftForge.EVENT_BUS.addListener(
-                (ServerAboutToStartEvent startEvent) -> RegionDataManager.onServerStarting(startEvent.getServer()));
-    }
-
-    @Override
-    public void loadRegionData() {
-        MinecraftForge.EVENT_BUS.addListener(this::loadRegionDataForge);
-    }
-
-    private void loadRegionDataForge(ServerStartingEvent event) {
-        MinecraftServer server = event.getServer();
-        ResourceLocation levelRl = ServerLevel.OVERWORLD.location();
-        server.getAllLevels().forEach(level -> {
-            if (level.dimension().location().equals(levelRl)) {
-                //RegionDataManager.loadRegionDataForWorld(server, level);
-            }
-        });
-    }
-
-    @Override
-    public void addDimKeyOnPlayerLogin() {
-        MinecraftForge.EVENT_BUS.addListener(
-                (PlayerEvent.PlayerLoggedInEvent event) -> RegionDataManager.initLevelDataOnLogin(event.getEntity(), event.getEntity().level()));
-    }
-
-    @Override
-    public void addDimKeyOnDimensionChange() {
+    public void setupRegionDataLifecycleHooks() {
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
-                (EntityTravelToDimensionEvent event)  -> {
+                (ServerAboutToStartEvent startEvent) -> RegionDataManager.onServerStarting(startEvent.getServer()));
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
+                (ServerAboutToStartEvent startEvent) -> PlayerManager.onServerStart(startEvent.getServer()));
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
+                (LevelEvent.Load event) -> RegionDataManager.worldLoad(event.getLevel().getServer(), (ServerLevel) event.getLevel()));
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
+                (PlayerEvent.PlayerLoggedInEvent event) -> RegionDataManager.initLevelDataOnLogin(event.getEntity(), event.getEntity().level()));
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
+                (LevelEvent.Save saveEvent) -> RegionDataManager.save(saveEvent.getLevel().getServer(), false, false));
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
+                (EntityTravelToDimensionEvent event) -> {
                     if (event.getEntity() instanceof Player player && event.getEntity().getServer() != null) {
                         Level targetLevel = event.getEntity().getServer().getLevel(event.getDimension());
                         RegionDataManager.initLevelDataOnChangeWorld(player, player.level(), targetLevel);
                     }
                 });
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
+                (ServerStoppingEvent stoppingEvent) -> RegionDataManager.saveOnStop(stoppingEvent.getServer()));
+
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
+                (LevelEvent.Unload unloadEvent) -> RegionDataManager.saveOnUnload(unloadEvent.getLevel().getServer(), (ServerLevel) unloadEvent.getLevel()));
     }
 
     @Override
     public void registerConfig() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        modEventBus.addListener((FMLCommonSetupEvent event) ->  Services.CONFIG_REGISTRY.register());
+        modEventBus.addListener((FMLCommonSetupEvent event) -> Services.CONFIG_REGISTRY.register());
     }
 }

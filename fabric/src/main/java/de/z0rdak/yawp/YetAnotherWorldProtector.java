@@ -14,31 +14,29 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
+import net.minecraft.server.level.ServerLevel;
 
 import static de.z0rdak.yawp.handler.YawpEventHandler.removeInvolvedEntities;
 
 public class YetAnotherWorldProtector implements ModInitializer, YAWPModInitializer {
-    
-    private static void onAddFlag(FlagEvent.AddFlagEvent event) {
-        if (event.getFlag().getName().contains("spawning") && Services.FLAG_CONFIG.removeEntitiesEnabled()) {
-            removeInvolvedEntities(event.getSrc(), event.getRegion(), RegionFlag.fromId(event.getFlag().getName()));
-        }
-    }
 
     @Override
     public void onInitialize() {
         YAWPCommon.init();
 
         registerConfig();
-        initServerInstance();
-        loadRegionData();
-        addDimKeyOnPlayerLogin();
-        addDimKeyOnDimensionChange();
+        setupRegionDataLifecycleHooks();
         registerCommands();
 
         // register flag handlers
         PlayerFlagHandler.register();
         FabricFlagEvents.ADD_FLAG.register(YetAnotherWorldProtector::onAddFlag);
+    }
+
+    private static void onAddFlag(FlagEvent.AddFlagEvent event) {
+        if (event.getFlag().getName().contains("spawning") && Services.FLAG_CONFIG.removeEntitiesEnabled()) {
+            removeInvolvedEntities(event.getSrc(), event.getRegion(), RegionFlag.fromId(event.getFlag().getName()));
+        }
     }
 
     @Override
@@ -47,28 +45,20 @@ public class YetAnotherWorldProtector implements ModInitializer, YAWPModInitiali
     }
 
     @Override
-    public void initServerInstance() {
-        ServerLifecycleEvents.SERVER_STARTING.register(RegionDataManager::onServerStat);
+    public void setupRegionDataLifecycleHooks() {
+        ServerLifecycleEvents.SERVER_STARTING.register(RegionDataManager::onServerStarting);
         ServerLifecycleEvents.SERVER_STARTING.register(PlayerManager::onServerStart);
-        ServerLifecycleEvents.BEFORE_SAVE.register(RegionDataManager::save);
-        ServerLifecycleEvents.SERVER_STOPPING.register(RegionDataManager::saveOnStop);
-    }
-
-    @Override
-    public void loadRegionData() {
+        ServerWorldEvents.LOAD.register((server, level) -> {
+            if (level.dimension().equals(ServerLevel.OVERWORLD)) {
+                RegionDataManager.loadLevelListData(server);
+            }
+        });
         ServerWorldEvents.LOAD.register(RegionDataManager::worldLoad);
-        ServerWorldEvents.UNLOAD.register(RegionDataManager::saveOnUnload);
-        ServerLifecycleEvents.SERVER_STARTED.register(RegionDataManager::onStarted);
-    }
-
-    @Override
-    public void addDimKeyOnPlayerLogin() {
         ServerEntityEvents.ENTITY_LOAD.register(RegionDataManager::initLevelDataOnLogin);
-    }
-
-    @Override
-    public void addDimKeyOnDimensionChange() {
         ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register(RegionDataManager::initLevelDataOnChangeWorld);
+        ServerLifecycleEvents.BEFORE_SAVE.register(RegionDataManager::save);
+        ServerWorldEvents.UNLOAD.register(RegionDataManager::saveOnUnload);
+        ServerLifecycleEvents.SERVER_STOPPING.register(RegionDataManager::saveOnStop);
     }
 
     @Override
