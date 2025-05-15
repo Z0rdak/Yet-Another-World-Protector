@@ -9,7 +9,11 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-        
+      # 0. push everything for the release
+      # 1. git tag <mc-version>-<yawp-version>, e.g. git tag 1.21.4-0.5.2-beta1
+      # 2. git push --tags
+      # 3. pray pipeline goes through
+      # 4. profit
       # get the YAWP version (e.g. 0.5.2-beta1) from the published tag, to identify the correct changelog file
       # ${{github.ref_name}} is <mc-version>-<yawp-version>, e.g. 1.21.4-0.5.2-beta1
       # In the future, it would be better just to grab the latest section from the changelog file,
