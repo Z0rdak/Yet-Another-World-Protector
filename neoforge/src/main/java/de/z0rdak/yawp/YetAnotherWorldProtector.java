@@ -30,6 +30,7 @@ import static de.z0rdak.yawp.handler.YawpEventHandler.removeInvolvedEntities;
 public class YetAnotherWorldProtector implements YAWPModInitializer {
 
     private static IEventBus yawpEventBus;
+
     public YetAnotherWorldProtector(IEventBus modEventBus) {
         yawpEventBus = modEventBus;
         yawpEventBus.addListener((FMLCommonSetupEvent event) -> registerConfig());
@@ -50,38 +51,45 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
 
     @Override
     public void registerCommands() {
-        NeoForge.EVENT_BUS.addListener((RegisterCommandsEvent event) ->  CommandRegistry.registerCommands(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection()));
+        NeoForge.EVENT_BUS.addListener((RegisterCommandsEvent event) -> CommandRegistry.registerCommands(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection()));
     }
 
     @Override
     public void setupRegionDataLifecycleHooks() {
-        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
-                (ServerAboutToStartEvent startEvent) -> RegionDataManager.onServerStarting(startEvent.getServer()));
-        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
-                (ServerAboutToStartEvent startEvent) -> PlayerManager.onServerStart(startEvent.getServer()));
-        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
-                (LevelEvent.Load event) -> RegionDataManager.worldLoad(event.getLevel().getServer(), (ServerLevel) event.getLevel()));
-        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
-                (PlayerEvent.PlayerLoggedInEvent event) -> RegionDataManager.initLevelDataOnLogin(event.getEntity(), event.getEntity().level()));
-        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
-                (LevelEvent.Save saveEvent) -> RegionDataManager.save(saveEvent.getLevel().getServer(), false, false));
-        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
-                (EntityTravelToDimensionEvent event) -> {
-                    if (event.getEntity() instanceof Player player && event.getEntity().getServer() != null) {
-                        Level targetLevel = event.getEntity().getServer().getLevel(event.getDimension());
-                        RegionDataManager.initLevelDataOnChangeWorld(player, player.level(), targetLevel);
-                    }
-                });
-        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
-                (ServerStoppingEvent stoppingEvent) -> RegionDataManager.saveOnStop(stoppingEvent.getServer()));
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true, (ServerAboutToStartEvent startEvent) -> RegionDataManager.onServerStarting(startEvent.getServer()));
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true, (ServerAboutToStartEvent startEvent) -> PlayerManager.onServerStart(startEvent.getServer()));
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true, (LevelEvent.Load event) -> {
+            if (event.getLevel() instanceof ServerLevel serverLevel)
+                RegionDataManager.worldLoad(serverLevel.getServer(), serverLevel);
+        });
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true, (PlayerEvent.PlayerLoggedInEvent event) -> {
+            if (event.getEntity().getCommandSenderWorld() instanceof ServerLevel serverLevel) {
+                RegionDataManager.initLevelDataOnLogin(event.getEntity(), serverLevel);
+            }
+        });
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true, (LevelEvent.Save saveEvent) -> {
+            if (saveEvent.getLevel() instanceof ServerLevel serverLevel) {
+                RegionDataManager.save(serverLevel.getServer(), false, false);
+            }
+        });
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true, (EntityTravelToDimensionEvent event) -> {
+            if (event.getEntity() instanceof Player player && event.getEntity().getServer() != null) {
+                Level targetLevel = event.getEntity().getServer().getLevel(event.getDimension());
+                RegionDataManager.initLevelDataOnChangeWorld(player, player.level(), targetLevel);
+            }
+        });
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true, (ServerStoppingEvent stoppingEvent) -> RegionDataManager.saveOnStop(stoppingEvent.getServer()));
 
-        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
-                (LevelEvent.Unload unloadEvent) -> RegionDataManager.saveOnUnload(unloadEvent.getLevel().getServer(), (ServerLevel) unloadEvent.getLevel()));
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true, (LevelEvent.Unload unloadEvent) -> {
+            if (unloadEvent.getLevel() instanceof ServerLevel serverLevel)
+                RegionDataManager.saveOnUnload(unloadEvent.getLevel().getServer(), serverLevel);
+        });
+
     }
 
     @Override
     public void registerConfig() {
-        ((NeoForgeConfigHelper)Services.CONFIG_REGISTRY).setEventBus(yawpEventBus);
+        ((NeoForgeConfigHelper) Services.CONFIG_REGISTRY).setEventBus(yawpEventBus);
         Services.CONFIG_REGISTRY.register();
     }
 }

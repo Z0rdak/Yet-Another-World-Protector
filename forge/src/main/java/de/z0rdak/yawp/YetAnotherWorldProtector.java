@@ -64,11 +64,23 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
                 (ServerAboutToStartEvent startEvent) -> PlayerManager.onServerStart(startEvent.getServer()));
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
-                (LevelEvent.Load event) -> RegionDataManager.worldLoad(event.getLevel().getServer(), (ServerLevel) event.getLevel()));
+                (LevelEvent.Load event) -> {
+            if (event.getLevel() instanceof ServerLevel serverLevel) {
+                RegionDataManager.worldLoad(serverLevel.getServer(), serverLevel);
+            }
+                });
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
-                (PlayerEvent.PlayerLoggedInEvent event) -> RegionDataManager.initLevelDataOnLogin(event.getEntity(), event.getEntity().level()));
+                (PlayerEvent.PlayerLoggedInEvent event) -> {
+                    if (event.getEntity().getCommandSenderWorld() instanceof ServerLevel serverLevel) {
+                        RegionDataManager.initLevelDataOnLogin(event.getEntity(), serverLevel);
+                    }
+                });
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
-                (LevelEvent.Save saveEvent) -> RegionDataManager.save(saveEvent.getLevel().getServer(), false, false));
+                (LevelEvent.Save saveEvent) -> {
+                    if (saveEvent.getLevel() instanceof ServerLevel serverLevel) {
+                        RegionDataManager.save(serverLevel.getServer(), false, false);
+                    }
+                });
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
                 (EntityTravelToDimensionEvent event) -> {
                     if (event.getEntity() instanceof Player player && event.getEntity().getServer() != null) {
@@ -80,7 +92,11 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
                 (ServerStoppingEvent stoppingEvent) -> RegionDataManager.saveOnStop(stoppingEvent.getServer()));
 
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
-                (LevelEvent.Unload unloadEvent) -> RegionDataManager.saveOnUnload(unloadEvent.getLevel().getServer(), (ServerLevel) unloadEvent.getLevel()));
+                (LevelEvent.Unload unloadEvent) -> {
+                    if (unloadEvent.getLevel() instanceof ServerLevel serverLevel) {
+                        RegionDataManager.saveOnUnload(serverLevel.getServer(), serverLevel);
+                    }
+                });
     }
 
     @Override

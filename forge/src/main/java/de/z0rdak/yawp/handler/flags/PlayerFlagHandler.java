@@ -78,11 +78,6 @@ public final class PlayerFlagHandler {
     }
 
     @SubscribeEvent
-    public static void onElytraaFlying(Event event) {
-
-    }
-
-    @SubscribeEvent
     public static void onElytraFlying(TickEvent.PlayerTickEvent event) {
         if (isServerSide(event.player) && event.phase == TickEvent.Phase.END) {
             ResourceKey<Level> dim = getDimKey(event.player);
