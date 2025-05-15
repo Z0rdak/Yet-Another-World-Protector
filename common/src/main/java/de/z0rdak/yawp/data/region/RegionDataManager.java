@@ -107,7 +107,7 @@ public class RegionDataManager {
     }
 
     public static void save(MinecraftServer server, boolean flush, boolean force) {
-        LOGGER.info(Component.translatableWithFallback("data.region.levels.save.forced", "Cyclic or forced save. Saving region data for all levels").getString());
+        LOGGER.info(Component.translatableWithFallback("data.region.levels.save.forced", "Requested save. Saving region data for all levels").getString());
         if (serverInstance == null) serverInstance = server;
         save(force);
     }

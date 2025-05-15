@@ -329,7 +329,7 @@
   "data.region.levels.load.missing": "Missing level list for region data (ignore on first startup). Initializing...",
   "data.region.levels.load.success": "Found region data for %s levels(s)",
   "data.region.levels.save.stopped": "Stopping server. Saving region data for all levels",
-  "data.region.levels.save.forced": "Cyclic or forced save. Saving region data for all levels",
+  "data.region.levels.save.forced": "Requested save. Saving region data for all levels",
   "data.region.global.missing": "Missing global region data (ignore on first startup). Initializing...",
   "data.region.global.save": "    ",
   "data.region.level.save.unload": "Unloading level '%s'. Saving region data",
