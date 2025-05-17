@@ -210,7 +210,8 @@ public class RegionDataManager {
     }
     
     private static void restoreHierarchy(LevelRegionData levelRegionData, IProtectedRegion region) {
-        region.getChildrenNames().forEach(childName -> {
+        ArrayList<String> childNames = new ArrayList<>(region.getChildrenNames());
+        childNames.forEach(childName -> {
             if (!levelRegionData.hasLocal(childName)) {
                 LOGGER.warn(Component.translatableWithFallback("data.region.level.local.load.restore.failed", "No region with name '%s' found in save data of '%s'! Your region data is most likely corrupt.", childName, levelRegionData.getId().toString()).getString());
             } else {
