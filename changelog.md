@@ -1,3 +1,9 @@
+# [0.5.3-beta2] - 2025-05-17
+
+## Fixed
+
+- Fix CME during region hierarchy resolving, causing server to crash on startup
+
 # [0.5.3-beta1] - 2025-05-14
 
 This version states the changes need for the YAWP port for Minecraft 1.21.5.
