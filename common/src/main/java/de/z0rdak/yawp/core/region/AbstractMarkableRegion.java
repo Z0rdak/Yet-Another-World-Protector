@@ -111,6 +111,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     @Override
     public void setArea(IMarkableArea area) {
         this.area = area;
+        this.areaType = area.getAreaType();
     }
 
     @Override
