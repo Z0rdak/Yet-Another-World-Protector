@@ -5,6 +5,7 @@ import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -21,17 +22,19 @@ public abstract class AnimalMixin {
     public void spawnChildFromBreeding(ServerLevel world, Animal parentB, CallbackInfo ci) {
         if (isServerSide(world)) {
             Animal parentA = (Animal) (Object) this;
-            FlagCheckEvent checkEvent = new FlagCheckEvent(parentA.blockPosition(), ANIMAL_BREEDING, world.dimension(), null);
-            if (Services.EVENT.post(checkEvent)) {
-                return;
+            if (parentA.getLoveCause() instanceof Player breeder) {
+                FlagCheckEvent checkEvent = new FlagCheckEvent(parentA.blockPosition(), ANIMAL_BREEDING, world.dimension(), breeder);
+                if (Services.EVENT.post(checkEvent)) {
+                    return;
+                }
+                processCheck(checkEvent, deny -> {
+                    parentA.setAge(6000);
+                    parentB.setAge(6000);
+                    parentA.resetLove();
+                    parentB.resetLove();
+                    ci.cancel();
+                });
             }
-            processCheck(checkEvent, deny -> {
-                parentA.setAge(6000);
-                parentB.setAge(6000);
-                parentA.resetLove();
-                parentB.resetLove();
-                ci.cancel();
-            });
         }
     }
 }
