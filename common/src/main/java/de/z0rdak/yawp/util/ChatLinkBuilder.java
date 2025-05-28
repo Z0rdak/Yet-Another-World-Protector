@@ -227,7 +227,7 @@ public class ChatLinkBuilder {
         MutableComponent linkText = Component.translatableWithFallback("cli.flag.override.link.text." + flag.doesOverride(), fallback);
         MutableComponent hoverText = Component.translatableWithFallback("cli.flag.override.link.hover." + flag.doesOverride(), fallbackHover, flag.getName(), region.getName());
         if (shortLink) {
-            linkText = Component.translatableWithFallback("cli.flag.override.link.Component.toggle", "o");
+            linkText = Component.translatableWithFallback("cli.flag.override.link.text.toggle", "o");
         }
         ChatFormatting color = flag.doesOverride() ? GREEN : GRAY;
         String cmd = buildFlagOverrideToggleCmd(region, flag.getName());
@@ -235,15 +235,15 @@ public class ChatLinkBuilder {
     }
 
     public static MutableComponent buildFlagMessageEditLink(IProtectedRegion region, IFlag flag) {
-        MutableComponent hover = Component.translatableWithFallback("cli.flag.msg.Component.set.link.hover", "Change the message shown when the flag '%s' of '%s' is triggered", flag.getName(), region.getName());
-        MutableComponent text = Component.translatableWithFallback("cli.flag.msg.Component.set.link.text", "Edit");
+        MutableComponent hover = Component.translatableWithFallback("cli.flag.msg.text.set.link.hover", "Change the message shown when the flag '%s' of '%s' is triggered", flag.getName(), region.getName());
+        MutableComponent text = Component.translatableWithFallback("cli.flag.msg.text.set.link.text", "Edit");
         String msg = "\"" + flag.getFlagMsg().msg() + "\"";
         String cmd = buildFlagMsgSetCmd(region, flag.getName(), msg);
         return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, LINK_COLOR);
     }
 
     public static MutableComponent buildFlagMessageClearLink(IProtectedRegion region, IFlag flag) {
-        MutableComponent hover = Component.translatableWithFallback("cli.flag.msg.Component.set.default", "Reset flag message for flag '%s' of '%s' to config default", flag.getName(), region.getName());
+        MutableComponent hover = Component.translatableWithFallback("cli.flag.msg.text.set.default", "Reset flag message for flag '%s' of '%s' to config default", flag.getName(), region.getName());
         MutableComponent text = Component.translatableWithFallback("cli.link.remove", "x");
         String cmd = buildFlagMsgClearCmd(region, flag.getName());
         return buildExecuteCmdComponent(text, hover, cmd, RUN_COMMAND, REMOVE_CMD_COLOR);
@@ -254,7 +254,7 @@ public class ChatLinkBuilder {
         MutableComponent hover = Component.translatableWithFallback("cli.flag.msg.mute.set.link.hover", "Activate flag alert for '%s' in '%s'", flag.getName(), region.getName());
         MutableComponent text = Component.translatableWithFallback("cli.flag.msg.mute.set.link.text." + !flag.getFlagMsg().isMuted(), fallback);
         if (shortLink) {
-            text = Component.translatableWithFallback("cli.flag.msg.mute.set.link.Component.toggle", "m");
+            text = Component.translatableWithFallback("cli.flag.msg.mute.set.link.text.toggle", "m");
         }
         ChatFormatting textChatFormatting = !flag.getFlagMsg().isMuted() ? GREEN : GRAY;
         String cmd = buildFlagMsgMuteToggleCmd(region, flag.getName());

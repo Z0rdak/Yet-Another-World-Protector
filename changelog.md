@@ -4,6 +4,7 @@
 
 * Fix `animal-breeding` flag not considering player permissions
 * Fix `use-elytra` flag not considering player permissions
+* Fix wrong language keys (Component -> text)
 
 # [0.5.2-beta4] - 2025-02-23
 
