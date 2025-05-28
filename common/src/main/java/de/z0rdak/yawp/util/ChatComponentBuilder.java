@@ -140,7 +140,7 @@ public class ChatComponentBuilder {
      * Size: X=69, Y=10, Z=42
      */
     private static MutableComponent buildCuboidAreaInfo(CuboidArea cuboidArea) {
-        return Component.translatableWithFallback("cli.msg.info.region.area.area.size.Component.cuboid", "Size: %s %s %s",
+        return Component.translatableWithFallback("cli.msg.info.region.area.area.size.text.cuboid", "Size: %s %s %s",
                 buildAreaAxisInfoComponent(cuboidArea, Direction.Axis.X),
                 buildAreaAxisInfoComponent(cuboidArea, Direction.Axis.Y),
                 buildAreaAxisInfoComponent(cuboidArea, Direction.Axis.Z));
@@ -152,7 +152,7 @@ public class ChatComponentBuilder {
     private static MutableComponent buildSphereAreaInfo(SphereArea sphereArea) {
         int diameter = (sphereArea.getRadius() * 2) + 1;
         MutableComponent centerPos = Component.literal(buildBlockPosLinkText(sphereArea.getCenterPos()));
-        return Component.translatableWithFallback("cli.msg.info.region.area.area.size.Component.sphere", "Center: %s, Radius: %s, Diameter: %s",
+        return Component.translatableWithFallback("cli.msg.info.region.area.area.size.text.sphere", "Center: %s, Radius: %s, Diameter: %s",
                 buildTextWithHoverAndBracketsMsg(centerPos, centerPos, WHITE), sphereArea.getRadius(), diameter);
     }
 

@@ -105,7 +105,7 @@ final class FlagCommands {
         final int amountOfExamples = 10;
         List<String> examples = new ArrayList<>(amountOfExamples);
         for (int i = 0; i < amountOfExamples; i++) {
-            examples.add(Component.translatableWithFallback("cli.flag.msg.Component.example." + i, "<Your flag message here>").getString());
+            examples.add(Component.translatableWithFallback("cli.flag.msg.text.example." + i, "<Your flag message here>").getString());
         }
         return examples;
     }
