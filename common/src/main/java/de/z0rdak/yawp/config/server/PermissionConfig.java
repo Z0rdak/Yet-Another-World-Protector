@@ -75,7 +75,7 @@ public class PermissionConfig {
         return PLAYERS_WITH_PERMISSION.get()
                 .stream()
                 .filter(Objects::nonNull)
-                .map(s -> (String) s)
+                .map(s -> ((String) s).toLowerCase())
                 .collect(Collectors.toSet());
     }
 
@@ -114,7 +114,7 @@ public class PermissionConfig {
     private static boolean validateUuid(Object uuid) {
         if (uuid instanceof String) {
             try {
-                String uuidStr = (String) uuid;
+                String uuidStr = ((String) uuid).toLowerCase(Locale.ROOT);
                 if (uuidStr.length() != 36) {
                     throw new IllegalArgumentException("Invalid UUID - wrong length");
                 }
