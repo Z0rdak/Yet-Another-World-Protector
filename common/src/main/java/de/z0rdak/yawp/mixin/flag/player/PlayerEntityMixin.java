@@ -22,7 +22,7 @@ public abstract class PlayerEntityMixin {
     void injectElytraCheck(CallbackInfoReturnable<Boolean> cir) {
         Player self = (Player) (Object) this;
         if (isServerSide(self.level())) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), RegionFlag.USE_ELYTRA, getDimKey(self));
+            FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), RegionFlag.USE_ELYTRA, getDimKey(self), self);
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
