@@ -1,3 +1,9 @@
+# [0.5.2-beta5] - unreleased
+
+## Fixed
+
+* Fix `animal-breeding` flag not considering player permissions
+
 # [0.5.2-beta4] - 2025-02-23
 
 ## Changed
