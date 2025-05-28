@@ -5,6 +5,7 @@
 * Fix `animal-breeding` flag not considering player permissions
 * Fix `use-elytra` flag not considering player permissions
 * Fix wrong language keys (Component -> text)
+* Fix uuid check considering case, although it should not (config uuids are now handled as lower-case)
 
 # [0.5.2-beta4] - 2025-02-23
 
