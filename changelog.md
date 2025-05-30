@@ -8,6 +8,7 @@
 * Fix uuid check considering case, although it should not (config uuids are now handled as lower-case)
 * Fix changing area type not working and breaking region data
 * Fix missing region containment check when adding child region
+* Fix chat spam when checking for flags in regions and when looking up parent regions
 
 # [0.5.2-beta4] - 2025-02-23
 
