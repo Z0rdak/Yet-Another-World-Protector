@@ -29,8 +29,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static de.z0rdak.yawp.api.MessageSender.overLayMessage;
 import static de.z0rdak.yawp.api.commands.CommandConstants.ADD;
 import static de.z0rdak.yawp.api.commands.CommandConstants.REMOVE;
+import static de.z0rdak.yawp.api.commands.Commands.buildAddFlagCommand;
 import static de.z0rdak.yawp.util.ChatLinkBuilder.buildRegionInfoLink;
 import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 
@@ -157,6 +159,10 @@ public class IFlagArgumentType implements ArgumentType<String> {
                 FlagEditType flagEditType = getEditType(ctx);
                 List<String> flagToSuggest = getSuggestionFlags(flagEditType, region);
                 if ((flagEditType == FlagEditType.REMOVE || flagEditType == FlagEditType.INFO) && flagToSuggest.isEmpty()) {
+                    if (src.isPlayer()) {
+                        overLayMessage(src.getPlayer(), Component.translatableWithFallback("cli.msg.info.region.flag.no-flags-plain", "No flags defined in region %s!", buildRegionInfoLink(region)));
+                        return Suggestions.empty();
+                    }
                     MutableComponent hint = Component.translatableWithFallback("cli.msg.info.region.flag.add-hint", "Add flag by clicking: %s", ChatLinkBuilder.buildSuggestAddFlagLink(region));
                     sendCmdFeedback(src, Component.translatableWithFallback("cli.msg.info.region.flag.no-flags", "No flags defined in region %s! %s", buildRegionInfoLink(region), hint));
                     return Suggestions.empty();
