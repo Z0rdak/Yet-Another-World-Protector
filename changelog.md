@@ -7,6 +7,7 @@
 * Fix wrong language keys (Component -> text)
 * Fix uuid check considering case, although it should not (config uuids are now handled as lower-case)
 * Fix changing area type not working and breaking region data
+* Fix missing region containment check when adding child region
 
 # [0.5.2-beta4] - 2025-02-23
 
