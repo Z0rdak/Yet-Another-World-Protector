@@ -1,6 +1,7 @@
 {
   "cli.arg.area.invalid": "Invalid area value provided: '%s'",
-  "cli.arg.area.owned.no-containment": "No suitable Local Region as parent for the marked area. Attempting to set Dimensional Region as parent.",
+  "cli.arg.area.owned.no-containment": "No containing region available as parent for given area.",
+  "cli.arg.area.marked.no-containment": "No containing region available as parent for marked area.",
   "cli.arg.area.parse.invalid": "Unable to parse provided area value",
   "cli.arg.dim.invalid": "Dimension '%s' does not exist!",
   "cli.arg.flag.invalid": "Invalid flag identifier: '%s'",
@@ -215,6 +216,7 @@
   "cli.msg.info.region.flag.empty.parents": "No flags defined in %s and its parents",
   "cli.msg.info.region.flag.link.hover": "Show region flags for %s",
   "cli.msg.info.region.flag.link.text": "%s responsible flag(s) | %s flag(s)",
+  "cli.msg.info.region.flag.no-flags-plain": "No flags defined in region %s!",
   "cli.msg.info.region.flag.no-flags": "No flags defined in region %s! %s",
   "cli.msg.info.region.flag.not-present": "Region %s does not contain flag '%s'. %s",
   "cli.msg.info.region.flag.number.hover": "%s flag(s) defined in %s",

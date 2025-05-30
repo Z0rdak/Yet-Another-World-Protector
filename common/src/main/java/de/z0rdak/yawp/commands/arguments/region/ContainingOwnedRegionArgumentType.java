@@ -41,6 +41,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static de.z0rdak.yawp.api.MessageSender.overLayMessage;
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.MarkerCommands.fromMarkedBlocks;
 import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
@@ -196,7 +197,7 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
                         IMarkableArea markedArea = StickUtil.getMarkedArea(player.getMainHandItem());
                         LocalRegions.RegionOverlappingInfo overlapping = LocalRegions.getOverlappingWithPermission(markedArea, player);
                         if (!overlapping.hasContaining()) {
-                            sendCmdFeedback(src, Component.translatableWithFallback("cli.arg.area.owned.no-containment", "No suitable Local Region as parent for the marked area. Attempting to set Dimensional Region as parent."));
+                            overLayMessage(src.getPlayer(), Component.translatableWithFallback("cli.arg.area.marked.no-containment", "No containing region available as parent for marked area."));
                             return Suggestions.empty();
                         }
                         Set<String> containingRegionName = overlapping.containingRegions.stream().map(IProtectedRegion::getName).collect(Collectors.toSet());
@@ -233,7 +234,11 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
                     overlapping = LocalRegions.getOverlappingRegions(markedArea, src.getLevel().dimension());
                 }
                 if (!overlapping.hasContaining()) {
-                    sendCmdFeedback(src, Component.translatableWithFallback("cli.arg.area.owned.no-containment", "No suitable Local Region as parent for the marked area. Attempting to set Dimensional Region as parent."));
+                    if (src.isPlayer()) {
+                        overLayMessage(src.getPlayer(), Component.translatableWithFallback("cli.arg.area.owned.no-containment", "No containing region available as parent for given area."));
+                        return Suggestions.empty();
+                    }
+                    sendCmdFeedback(src, Component.translatableWithFallback("cli.arg.area.owned.no-containment", "No containing region available as parent for given area."));
                     return Suggestions.empty();
                 }
                 Set<String> containingRegionName = overlapping.containingRegions.stream().map(IProtectedRegion::getName).collect(Collectors.toSet());
