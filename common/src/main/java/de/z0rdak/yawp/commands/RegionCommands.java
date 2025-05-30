@@ -291,8 +291,12 @@ class RegionCommands {
     }
 
     private static int addChildren(CommandContext<CommandSourceStack> ctx, IMarkableRegion parent, IMarkableRegion child) {
-        boolean parentIsNotNullAndDimension = child.getParent() != null && child.getParent().getRegionType() == RegionType.DIMENSION;
-        if (!parent.hasChild(child) && parentIsNotNullAndDimension) {
+        boolean currentParentIsNotNullAndDimension = child.getParent() != null && child.getParent().getRegionType() == RegionType.DIMENSION;
+        if (!parent.hasChild(child) && currentParentIsNotNullAndDimension) {
+            if (!parent.getArea().containsOther(child.getArea())) { // does child fit into parent?
+                sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.arg.region.owned.invalid.containment", "Region %s is not suitable as parent for %s (does not fully contain child region)", buildRegionInfoLink(parent), buildRegionInfoLink(child)));
+                return -1;
+            }
             child.getParent().removeChild(child);
             parent.addChild(child);
             LocalRegions.ensureHigherRegionPriorityFor(child, parent.getPriority() + 1);
