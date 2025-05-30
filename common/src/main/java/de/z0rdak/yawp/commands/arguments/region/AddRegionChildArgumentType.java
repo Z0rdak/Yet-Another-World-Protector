@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static de.z0rdak.yawp.api.MessageSender.overLayMessage;
 import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 
 public class AddRegionChildArgumentType implements ArgumentType<String> {
@@ -87,6 +88,10 @@ public class AddRegionChildArgumentType implements ArgumentType<String> {
                     .map(IMarkableRegion::getName)
                     .collect(Collectors.toList());
             if (potentialChildrenNames.isEmpty()) {
+                if (src.isPlayer()) {
+                    overLayMessage(src.getPlayer() ,Component.translatableWithFallback("cli.arg.region.add.child.no-valid", "There are no valid child regions for region %s.", ChatLinkBuilder.buildRegionInfoLink(region)));
+                    return Suggestions.empty();
+                }
                 sendCmdFeedback(src, Component.translatableWithFallback("cli.arg.region.add.child.no-valid", "There are no valid child regions for region %s.", ChatLinkBuilder.buildRegionInfoLink(region)));
                 return Suggestions.empty();
             }

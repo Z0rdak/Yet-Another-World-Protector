@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static de.z0rdak.yawp.api.MessageSender.overLayMessage;
 import static de.z0rdak.yawp.util.ChatLinkBuilder.buildRegionInfoLink;
 import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 
@@ -79,6 +80,10 @@ public class RemoveRegionChildArgumentType implements ArgumentType<String> {
                     .map(IProtectedRegion::getName)
                     .collect(Collectors.toList());
             if (childNames.isEmpty()) {
+                if (src.isPlayer()) {
+                    overLayMessage(src.getPlayer(), Component.translatableWithFallback("cli.arg.region.add.child.no-children", "Region %s has no child regions.", buildRegionInfoLink(region)));
+                    return Suggestions.empty();
+                }
                 sendCmdFeedback(src, Component.translatableWithFallback("cli.arg.region.add.child.no-children", "Region %s has no child regions.", buildRegionInfoLink(region)));
                 return Suggestions.empty();
             }
