@@ -77,7 +77,7 @@ public abstract class EntityMixin {
      * Note: does not seem to trigger for players, which is fine
      */
     @Inject(method = "teleportCrossDimension", at = @At(value = "HEAD"), cancellable = true, allow = 1)
-    public void onChangeDimension(ServerLevel level, TeleportTransition teleportTransition, CallbackInfoReturnable<Entity> cir) {
+    public void onChangeDimension(ServerLevel level, ServerLevel level2, TeleportTransition teleportTransition, CallbackInfoReturnable<Entity> cir) {
         Entity self = (Entity) (Object) this;
         if (isServerSide(self.level())) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL, getDimKey(self));

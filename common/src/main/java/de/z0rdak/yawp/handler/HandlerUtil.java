@@ -7,7 +7,7 @@ import de.z0rdak.yawp.core.region.IProtectedRegion;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.FlyingMob;
+//import net.minecraft.world.entity.FlyingMob;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.animal.horse.SkeletonHorse;
@@ -67,7 +67,7 @@ public final class HandlerUtil {
     public static boolean isMonster(Entity entity) {
         return entity instanceof Enemy
                 || entity instanceof Slime
-                || entity instanceof FlyingMob
+//                || entity instanceof FlyingMob
                 || entity instanceof EnderDragon
                 || entity instanceof Shulker 
                 || entity instanceof ZombieHorse || entity instanceof SkeletonHorse;
