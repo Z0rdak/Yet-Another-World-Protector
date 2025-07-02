@@ -1,26 +1,20 @@
 package de.z0rdak.yawp.handler;
 
-import de.z0rdak.yawp.api.permission.Permissions;
 import de.z0rdak.yawp.core.flag.*;
 import de.z0rdak.yawp.core.flag.FlagCorrelation;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.FlyingMob;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.animal.horse.SkeletonHorse;
 import net.minecraft.world.entity.animal.horse.ZombieHorse;
-import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
-import net.minecraft.world.entity.monster.Enemy;
-import net.minecraft.world.entity.monster.Shulker;
-import net.minecraft.world.entity.monster.Slime;
+import net.minecraft.world.entity.monster.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.trading.Merchant;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -66,10 +60,6 @@ public final class HandlerUtil {
 
     public static boolean isMonster(Entity entity) {
         return entity instanceof Enemy
-                || entity instanceof Slime
-                || entity instanceof FlyingMob
-                || entity instanceof EnderDragon
-                || entity instanceof Shulker 
                 || entity instanceof ZombieHorse || entity instanceof SkeletonHorse;
     }
 
