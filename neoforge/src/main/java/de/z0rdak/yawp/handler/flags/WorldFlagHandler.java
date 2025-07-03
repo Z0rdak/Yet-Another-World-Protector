@@ -30,7 +30,7 @@ import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
  * Contains event handler for flags not directly related to player actions.
  * E.g.
  */
-@EventBusSubscriber(modid = Constants.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
+@EventBusSubscriber(modid = Constants.MOD_ID)
 public class WorldFlagHandler {
 
     private WorldFlagHandler() {

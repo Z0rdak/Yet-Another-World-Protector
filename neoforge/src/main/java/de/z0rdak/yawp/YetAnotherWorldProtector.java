@@ -63,7 +63,7 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
                 RegionDataManager.worldLoad(serverLevel.getServer(), serverLevel);
         });
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true, (PlayerEvent.PlayerLoggedInEvent event) -> {
-            if (event.getEntity().getCommandSenderWorld() instanceof ServerLevel serverLevel) {
+            if (event.getEntity().level() instanceof ServerLevel serverLevel) {
                 RegionDataManager.initLevelDataOnLogin(event.getEntity(), serverLevel);
             }
         });

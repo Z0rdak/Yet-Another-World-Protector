@@ -32,7 +32,7 @@ import java.util.function.Consumer;
 
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 
-@EventBusSubscriber(modid = Constants.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
+@EventBusSubscriber(modid = Constants.MOD_ID)
 public class EntityFlagHandler {
 
     private EntityFlagHandler() {

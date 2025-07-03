@@ -63,7 +63,7 @@ import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 /**
  * Contains flag handler for events directly related/cause to/by players.
  */
-@EventBusSubscriber(modid = Constants.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
+@EventBusSubscriber(modid = Constants.MOD_ID)
 public final class PlayerFlagHandler {
 
     private PlayerFlagHandler() {
@@ -173,7 +173,7 @@ public final class PlayerFlagHandler {
         if (player == null) {
             return;
         }
-        if (!player.getCommandSenderWorld().isClientSide) {
+        if (!player.level().isClientSide) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(event.getParentB().blockPosition(), ANIMAL_BREEDING, getDimKey(player), event.getCausedByPlayer());
             if (Services.EVENT.post(checkEvent)) {
                 return;
@@ -191,7 +191,7 @@ public final class PlayerFlagHandler {
         if (player == null) {
             return;
         }
-        if (!player.getCommandSenderWorld().isClientSide) {
+        if (!player.level().isClientSide) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(event.getAnimal().blockPosition(), ANIMAL_TAMING, getDimKey(player), player);
             if (Services.EVENT.post(checkEvent)) {
                 return;
@@ -800,7 +800,7 @@ public final class PlayerFlagHandler {
 
     @SubscribeEvent
     public static void onPlayerDropItem(ItemTossEvent event) {
-        if (!event.getPlayer().getCommandSenderWorld().isClientSide) {
+        if (!event.getPlayer().level().isClientSide) {
             Player player = event.getPlayer();
             if (player == null) return;
             FlagCheckEvent checkEvent = new FlagCheckEvent(event.getEntity().blockPosition(), ITEM_DROP, getDimKey(player), player);
