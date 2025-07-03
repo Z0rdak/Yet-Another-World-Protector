@@ -31,6 +31,7 @@ minecraft {
 
     runs {
         client {
+            property 'eventbus.api.strictRuntimeChecks', 'true'
             workingDirectory file('runs/client')
             ideaModule "${rootProject.name}.${project.name}.main"
             taskName 'Client'
@@ -42,6 +43,7 @@ minecraft {
         }
 
         server {
+            property 'eventbus.api.strictRuntimeChecks', 'true'
             workingDirectory file('runs/server')
             ideaModule "${rootProject.name}.${project.name}.main"
             taskName 'Server'
@@ -70,6 +72,7 @@ sourceSets.main.resources.srcDir 'src/generated/resources'
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    annotationProcessor('net.minecraftforge:eventbus-validator:7.0-beta.7')
     annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT:processor")
 
     // Forge's hack fix
