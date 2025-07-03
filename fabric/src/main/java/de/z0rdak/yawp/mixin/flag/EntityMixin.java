@@ -77,10 +77,10 @@ public abstract class EntityMixin {
      * Note: does not seem to trigger for players, which is fine
      */
     @Inject(method = "teleportCrossDimension", at = @At(value = "HEAD"), cancellable = true, allow = 1)
-    public void onChangeDimension(ServerLevel level, TeleportTransition teleportTransition, CallbackInfoReturnable<Entity> cir) {
+    public void onChangeDimension(ServerLevel from, ServerLevel to, TeleportTransition teleportTransition, CallbackInfoReturnable<Entity> cir) {
         Entity self = (Entity) (Object) this;
-        if (isServerSide(self.level())) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL, getDimKey(self));
+        if (isServerSide(from)) {
+            FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL, getDimKey(from));
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
@@ -88,7 +88,7 @@ public abstract class EntityMixin {
                 cir.setReturnValue(null);
             });
             if (self instanceof Player player) {
-                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_PLAYERS, getDimKey(self), player);
+                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_PLAYERS, getDimKey(from), player);
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
@@ -98,7 +98,7 @@ public abstract class EntityMixin {
                 });
             }
             if (self instanceof ItemEntity) {
-                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_ITEMS, getDimKey(self));
+                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_ITEMS, getDimKey(from));
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
@@ -107,7 +107,7 @@ public abstract class EntityMixin {
                 });
             }
             if (isAnimal(self)) {
-                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_ANIMALS, getDimKey(self));
+                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_ANIMALS, getDimKey(from));
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
@@ -116,7 +116,7 @@ public abstract class EntityMixin {
                 });
             }
             if (isMonster(self)) {
-                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_MONSTERS, getDimKey(self));
+                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_MONSTERS, getDimKey(from));
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
@@ -125,7 +125,7 @@ public abstract class EntityMixin {
                 });
             }
             if (self instanceof Merchant) {
-                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_VILLAGERS, getDimKey(self));
+                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_VILLAGERS, getDimKey(from));
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
@@ -134,7 +134,7 @@ public abstract class EntityMixin {
                 });
             }
             if (self instanceof AbstractMinecart) {
-                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_MINECARTS, getDimKey(self));
+                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_MINECARTS, getDimKey(from));
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
