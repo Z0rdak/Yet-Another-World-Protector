@@ -76,19 +76,6 @@ jobs:
           files: |
             **/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
             **/build/libs/*-@(sources|javadoc).jar
-
-      - name: Publish Forge to Curseforge
-        uses: Kir-Antipov/mc-publish@v3.3
-        with:
-          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-          name: ${{ github.ref_name }}
-          version:  ${{ github.ref_name }}-forge
-          changelog-file: changelogs/${{steps.get-yawp-version.outputs.yawpVersion}}.md
-          files: |
-            forge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
-            forge/build/libs/*-@(sources|javadoc).jar
-          java: |
-            21
             
       - name: Publish NeoForge to Curseforge
         uses: Kir-Antipov/mc-publish@v3.3
@@ -118,21 +105,6 @@ jobs:
           java: |
             21
 
-      - name: Publish Forge to Modrinth
-        uses: Kir-Antipov/mc-publish@v3.3
-        with:
-          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
-          modrinth-featured: true
-          modrinth-unfeature-mode: subset
-          version: ${{ github.ref_name }}
-          name:  ${{ github.ref_name }}-forge
-          changelog-file: changelogs/${{steps.get-yawp-version.outputs.yawpVersion}}.md
-          files: |
-            forge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
-            forge/build/libs/*-@(sources|javadoc).jar
-          java: |
-            21
-            
       - name: Publish NeoForge to Modrinth
         uses: Kir-Antipov/mc-publish@v3.3
         with:
