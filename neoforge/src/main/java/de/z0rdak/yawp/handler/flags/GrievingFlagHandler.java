@@ -196,8 +196,8 @@ public class GrievingFlagHandler {
                 }
             }
 
-            if (xpDroppingEntity instanceof Player) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(xpDroppingEntity.blockPosition(), RegionFlag.KEEP_XP, getDimKey(xpDroppingEntity));
+            if (xpDroppingEntity instanceof Player targetPlayer) {
+                FlagCheckEvent checkEvent = new FlagCheckEvent(targetPlayer.blockPosition(), RegionFlag.KEEP_XP, getDimKey(targetPlayer), targetPlayer);
                 if (Services.EVENT.post(checkEvent))
                     return;
                 FlagEvaluator.processCheck(checkEvent, deny -> {
