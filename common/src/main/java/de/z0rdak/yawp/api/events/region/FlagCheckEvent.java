@@ -12,6 +12,7 @@ import java.util.UUID;
 /**
  * Event that is fired before a flag is checked.
  * Can be used to cancel the flag check.
+ * TODO: Dedicated event for player checks which requires non-null player instance to increase robustness
  */
 public final class FlagCheckEvent {
 
@@ -39,6 +40,13 @@ public final class FlagCheckEvent {
      */
     private final String id;
 
+    /**
+     *
+     * @param target target block position to check applicable regions for
+     * @param regionFlag involved flag in the check
+     * @param dimension dimension where to look for regions at the target pos
+     * @param player the player to consider permissions for during check
+     */
     public FlagCheckEvent(BlockPos target, RegionFlag regionFlag, ResourceKey<Level> dimension, @Nullable Player player) {
         this.player = player;
         this.target = target;
@@ -47,6 +55,13 @@ public final class FlagCheckEvent {
         this.id = UUID.randomUUID().toString();
     }
 
+    /**
+     *
+     * @param target target block position to check applicable regions for
+     * @param regionFlag involved flag in the check
+     * @param dimension dimension where to look for regions at the target pos
+     * @param player to consider permissions for during check
+     */
     public FlagCheckEvent(BlockPos target, RegionFlag regionFlag, ResourceKey<Level> dimension, @Nullable Player player, String id) {
         this.player = player;
         this.target = target;
