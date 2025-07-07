@@ -14,6 +14,7 @@ import de.z0rdak.yawp.commands.arguments.region.ContainingOwnedRegionArgumentTyp
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.area.AreaType;
+import de.z0rdak.yawp.core.area.DisplayType;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.FlagType;
 import de.z0rdak.yawp.core.flag.IFlag;
@@ -23,9 +24,12 @@ import de.z0rdak.yawp.data.region.LevelRegionData;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.TeamArgument;
 import net.minecraft.commands.arguments.UuidArgument;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.scores.Team;
 import org.jetbrains.annotations.Nullable;
 
@@ -67,9 +71,30 @@ public class ArgumentUtil {
         return StringArgumentType.getString(ctx, CommandConstants.NAME.toString());
     }
 
+    public static DisplayType getDisplayTypeArgument(CommandContext<CommandSourceStack> ctx) {
+        String displayType = StringArgumentType.getString(ctx, STYLE.toString());
+        return DisplayType.of(displayType);
+    }
+
+    public static ResourceLocation getDisplayBlockArgument(CommandContext<CommandSourceStack> ctx) {
+        return ResourceLocationArgument.getId(ctx, CommandConstants.BLOCK.toString());
+    }
+
+    public static boolean getDisplayGlowArgument(CommandContext<CommandSourceStack> ctx) {
+        return BoolArgumentType.getBool(ctx, CommandConstants.GLOW.toString());
+    }
+
     public static IMarkableRegion getRegionArgument(CommandContext<CommandSourceStack> ctx) {
         try {
             return RegionArgumentType.getRegion(ctx, LOCAL.toString());
+        } catch (CommandSyntaxException e) {
+            Constants.LOGGER.error(e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+    public static IMarkableRegion getRegionIn(CommandContext<CommandSourceStack> ctx, Level level) {
+        try {
+            return RegionArgumentType.getRegionIn(ctx, LOCAL.toString(), level);
         } catch (CommandSyntaxException e) {
             Constants.LOGGER.error(e.getMessage());
             throw new RuntimeException(e);
