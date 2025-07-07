@@ -1,3 +1,22 @@
+# [0.5.2-beta5] - unreleased
+
+## Changed
+
+- Disable `keep_inv` and `no_hunger` flag for now until its fixed properly.
+
+## Fixed
+
+* Fix `animal-breeding` flag not considering player permissions
+* Fix `invincible` flag not considering player permissions
+* Fix `knockback-players` flag not considering player permissions
+* Fix `fall-damage` flag not considering player permission
+* Fix `use-elytra` flag not considering player permissions
+* Fix wrong language keys (Component -> text)
+* Fix uuid check considering case, although it should not (config uuids are now handled as lower-case)
+* Fix changing area type not working and breaking region data
+* Fix missing region containment check when adding child region
+* Fix chat spam when checking for flags in regions and when looking up parent regions
+
 # [0.5.3-beta2] - 2025-05-17
 
 ## Fixed
