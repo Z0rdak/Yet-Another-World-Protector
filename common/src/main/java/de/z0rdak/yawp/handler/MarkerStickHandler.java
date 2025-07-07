@@ -36,7 +36,6 @@ public class MarkerStickHandler {
                     return;
                 }
                 if (player.isShiftKeyDown()) {
-                    marker.setTeleportPos(target);
                     StickUtil.setMarkerNbt(involvedItem, marker.serializeNBT());
                     StickUtil.updateStickName(involvedItem);
                     return;
