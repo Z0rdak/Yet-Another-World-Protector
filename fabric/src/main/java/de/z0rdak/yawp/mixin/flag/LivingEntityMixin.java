@@ -121,8 +121,8 @@ public abstract class LivingEntityMixin {
                     cir.setReturnValue(false);
                 });
             }
-            if (isPlayer(self)) {
-                checkEvent = new FlagCheckEvent(self.blockPosition(), FALL_DAMAGE_PLAYERS, getDimKey(self), (Player) self);
+            if (self instanceof Player player) {
+                checkEvent = new FlagCheckEvent(player.blockPosition(), FALL_DAMAGE_PLAYERS, getDimKey(player), player);
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
