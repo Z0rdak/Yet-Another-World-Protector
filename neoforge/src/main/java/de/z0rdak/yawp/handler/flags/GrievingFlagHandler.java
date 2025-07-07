@@ -117,7 +117,7 @@ public class GrievingFlagHandler {
     public static void onEntityDropLoot(LivingDropsEvent event) {
         if (NeoForgeHandlerUtil.isServerSide(event)) {
             LivingEntity lootEntity = event.getEntity();
-            Player player = isPlayer(lootEntity) ? (Player) lootEntity : null;
+            Player player = lootEntity instanceof Player ? (Player) lootEntity : null;
             FlagCheckEvent checkEvent = new FlagCheckEvent(lootEntity.blockPosition(), RegionFlag.DROP_LOOT_ALL, event.getEntity().level().dimension(), player);
             if (Services.EVENT.post(checkEvent)) {
                 return;
