@@ -38,4 +38,6 @@ public interface IMarkableArea {
 
 
     BlockDisplayProperties getDisplay();
+
+    void updateDisplay(BlockDisplayProperties properties);
 }
