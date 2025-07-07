@@ -36,4 +36,6 @@ public interface IMarkableArea {
 
     MarkedAreaType<?> getType();
 
+
+    BlockDisplayProperties getDisplay();
 }
