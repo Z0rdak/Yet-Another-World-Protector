@@ -46,7 +46,8 @@ public final class CommandRegistry {
                 .then(MarkerCommands.build())
                 .then(GlobalCommands.build())
                 .then(DimensionCommands.build())
-                .then(RegionCommands.build());
+                .then(RegionCommands.build())
+                .then(PlayerCommands.build());
     }
 
     private static int promptHelp(CommandSourceStack src) {
