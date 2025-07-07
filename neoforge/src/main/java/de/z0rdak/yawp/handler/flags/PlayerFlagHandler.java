@@ -275,7 +275,7 @@ public final class PlayerFlagHandler {
         if (NeoForgeHandlerUtil.isServerSide(event)) {
             Entity hurtEntity = event.getEntity();
             if (hurtEntity instanceof Player playerTarget) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(playerTarget.blockPosition(), INVINCIBLE, getDimKey(playerTarget), null);
+                FlagCheckEvent checkEvent = new FlagCheckEvent(playerTarget.blockPosition(), INVINCIBLE, getDimKey(playerTarget), playerTarget);
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
