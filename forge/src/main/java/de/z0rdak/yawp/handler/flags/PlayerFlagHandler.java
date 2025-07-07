@@ -323,7 +323,7 @@ public final class PlayerFlagHandler {
     public static void onPlayerKnockback(LivingKnockBackEvent event) {
         if (ForgeHandlerUtil.isServerSide(event)) {
             if (event.getEntity() instanceof Player dmgTarget) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(dmgTarget.blockPosition(), KNOCKBACK_PLAYERS, getDimKey(dmgTarget), null);
+                FlagCheckEvent checkEvent = new FlagCheckEvent(dmgTarget.blockPosition(), KNOCKBACK_PLAYERS, getDimKey(dmgTarget), dmgTarget);
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
@@ -332,7 +332,7 @@ public final class PlayerFlagHandler {
                     event.setStrength(0);
                     sendFlagMsg(onDeny);
                 });
-                checkEvent = new FlagCheckEvent(dmgTarget.blockPosition(), INVINCIBLE, getDimKey(dmgTarget), null);
+                checkEvent = new FlagCheckEvent(dmgTarget.blockPosition(), INVINCIBLE, getDimKey(dmgTarget), dmgTarget);
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
