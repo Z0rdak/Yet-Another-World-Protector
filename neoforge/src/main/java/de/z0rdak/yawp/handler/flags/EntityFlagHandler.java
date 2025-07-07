@@ -75,7 +75,7 @@ public class EntityFlagHandler {
                 event.setDamageMultiplier(0.0f);
             };
 
-            FlagCheckEvent checkEvent = new FlagCheckEvent(target, RegionFlag.FALL_DAMAGE, dim);
+            FlagCheckEvent checkEvent = new FlagCheckEvent(target, RegionFlag.FALL_DAMAGE, dim, entity instanceof Player ? (Player) entity : null);
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
