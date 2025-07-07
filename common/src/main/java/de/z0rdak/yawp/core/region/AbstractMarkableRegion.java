@@ -3,6 +3,8 @@ package de.z0rdak.yawp.core.region;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.IMarkableArea;
+import de.z0rdak.yawp.core.area.TeleportAnchor;
+import de.z0rdak.yawp.core.area.TeleportAnchors;
 import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.util.NbtCompatHelper;
 import net.minecraft.core.BlockPos;
@@ -12,7 +14,11 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static de.z0rdak.yawp.constants.serialization.RegionNbtKeys.*;
+import static de.z0rdak.yawp.util.ChatComponentBuilder.tinyBlockPos;
 
 /**
  * The AbstractMarkableRegion represents an abstract implementation for a markable region.
@@ -23,7 +29,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     protected int priority;
     protected IMarkableArea area;
     protected AreaType areaType;
-    protected BlockPos tpTarget;
+    protected TeleportAnchors tpAnchors;
 
     public AbstractMarkableRegion(String name, IMarkableArea area, Player owner, ResourceKey<Level> dimension, AbstractRegion parent) {
         super(name, dimension, RegionType.LOCAL, owner);
@@ -33,6 +39,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         if (parent != null) {
             this.setParent(parent);
         }
+        this.tpAnchors = new TeleportAnchors();
     }
 
     public AbstractMarkableRegion(String name, IMarkableArea area, Player owner, ResourceKey<Level> dimension) {
@@ -41,7 +48,6 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
 
     public AbstractMarkableRegion(String name, IMarkableArea area, BlockPos tpTarget, Player owner, ResourceKey<Level> dimension) {
         this(name, area, owner, dimension, null);
-        this.tpTarget = tpTarget;
     }
 
     public AbstractMarkableRegion(CompoundTag nbt) {
@@ -84,7 +90,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag nbt = super.serializeNBT();
-        nbt.put(TP_POS, NbtUtils.writeBlockPos(this.tpTarget));
+        nbt.put(TP_POS, this.tpAnchors.serializeNBT());
         nbt.putInt(PRIORITY, priority);
         nbt.putString(AREA_TYPE, this.areaType.areaType);
         nbt.put(AREA, this.area.serializeNBT());
@@ -94,7 +100,11 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
-        this.tpTarget = NbtCompatHelper.toBlockPos(nbt, TP_POS).orElseThrow();
+        try {
+            this.tpAnchors = new TeleportAnchors(nbt.getCompound("tpAnchors"));
+        } catch (Exception e) {
+            this.tpAnchors = new TeleportAnchors();
+        }
         this.priority = nbt.getInt(PRIORITY);
         AreaType areaType = AreaType.of(nbt.getString(AREA_TYPE));
         if (areaType == null) {
@@ -135,12 +145,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     }
 
     @Override
-    public BlockPos getTpTarget() {
-        return tpTarget;
-    }
-
-    @Override
-    public void setTpTarget(BlockPos tpTarget) {
-        this.tpTarget = tpTarget;
+    public TeleportAnchors getTpAnchors() {
+        return null;
     }
 }
