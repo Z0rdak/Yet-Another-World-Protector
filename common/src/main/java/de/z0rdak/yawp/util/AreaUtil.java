@@ -7,6 +7,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.function.Predicate;
 
 public final class AreaUtil {
 
@@ -70,12 +71,27 @@ public final class AreaUtil {
         return blocks;
     }
 
-    public static Set<BlockPos> blocksBetween(BoundingBox cube) {
+    public static Set<BlockPos> blocksIn(BoundingBox cube) {
         Set<BlockPos> blocks = new HashSet<>();
         for (int x = cube.minX(); x <= cube.maxX(); x++) {
             for (int y = cube.minY(); y <= cube.maxY(); y++) {
                 for (int z = cube.minZ(); z <= cube.maxZ(); z++) {
                     blocks.add(new BlockPos(x, y, z));
+                }
+            }
+        }
+        return blocks;
+    }
+
+    public static Set<BlockPos> blocksIn(BoundingBox cube, Predicate<BlockPos> inclusion) {
+        Set<BlockPos> blocks = new HashSet<>();
+        for (int x = cube.minX(); x <= cube.maxX(); x++) {
+            for (int y = cube.minY(); y <= cube.maxY(); y++) {
+                for (int z = cube.minZ(); z <= cube.maxZ(); z++) {
+                    BlockPos blockPos = new BlockPos(x, y, z);
+                    if (inclusion.test(blockPos)) {
+                        blocks.add(blockPos);
+                    }
                 }
             }
         }
@@ -93,5 +109,30 @@ public final class AreaUtil {
             default:
                 throw new IllegalArgumentException();
         }
+    }
+
+    public static BoundingBox getSlice(BlockPos center, int halfSize, int offset, Direction.Axis axis) {
+        return switch (axis) {
+            case X -> {
+                var p1 = center.offset(halfSize, halfSize, offset);
+                var p2 = center.offset(-halfSize, -halfSize, offset);
+                yield  BoundingBox.fromCorners(p1, p2);
+            }
+            case Y -> {
+                var p1 = center.offset(halfSize, offset, halfSize);
+                var p2 = center.offset(-halfSize, offset, -halfSize);
+                yield BoundingBox.fromCorners(p1, p2);
+            }
+            case Z -> {
+                var p1 = center.offset(offset, halfSize, halfSize);
+                var p2 = center.offset(offset, -halfSize, -halfSize);
+                yield BoundingBox.fromCorners(p1, p2);
+            }
+        };
+    }
+
+    public static Set<BlockPos> getSliceBlocks(BlockPos center, int halfSize, int offset, Direction.Axis axis, Predicate<BlockPos> include) {
+        var slice = getSlice(center, halfSize, offset, axis);
+        return blocksIn(slice, include);
     }
 }
