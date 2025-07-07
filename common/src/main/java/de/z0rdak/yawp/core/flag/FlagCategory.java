@@ -4,10 +4,25 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum FlagCategory {
+    /**
+     * Flags in this category involve preventing a certain event for the player.
+     * E.g. gaining XP/levels without reporting it to the player
+     */
     PLAYER("player"),
+    BENEFICIAL("beneficial"),
+    /**
+     * Flags in this category involve reporting back the prevented action to the player.
+     * E.g. break-blocks
+     */
+    PLAYER_PREVENTION("prevention"),
+    /**
+     * Flags related to actions directly targeting blocks
+     */
     BLOCK("block"),
+    /**
+     * Flags related to actions directly targeting entities
+     */
     ENTITY("entity"),
-    ITEM("item"),
     ENVIRONMENT("environment"),
     PROTECTION("protection");
 
