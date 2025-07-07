@@ -24,7 +24,7 @@
   "cli.flag.msg.mute.set.link.text.toggle": "m",
   "cli.flag.msg.mute.set.link.text.true": "active",
   "cli.flag.msg.mute.set.value": "Flag alert for %s in %s is now: %s",
-  "cli.flag.msg.mute.success.text": "Set mute state of %s to: '%s'",
+  "cli.flag.msg.mute.success.text": "Set flag alert of %s to: '%s'",
   "cli.flag.msg.text": "Message",
   "cli.flag.msg.text.example.0": "PVP is disabled in this region {region}!",
   "cli.flag.msg.text.example.1": "<Your flag message here>",
