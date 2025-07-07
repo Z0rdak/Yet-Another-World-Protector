@@ -3,10 +3,12 @@ package de.z0rdak.yawp.core.area;
 import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import de.z0rdak.yawp.util.AreaUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.apache.commons.lang3.NotImplementedException;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -44,13 +46,35 @@ public class SphereArea extends CenteredArea {
         return distance(this.center, pos) < this.radius + 0.5;
     }
 
+    public boolean isHullBlock(BlockPos pos) {
+        var d = distance(this.center, pos);
+        return d > this.radius - 0.5 && d < this.radius + 0.5;
+    }
+
     @Override
     public Set<BlockPos> getHull() {
         BlockPos p1 = this.center.offset(-this.radius, -this.radius, -this.radius);
         BlockPos p2 = new BlockPos(this.center).offset(this.radius, this.radius, this.radius);
         BoundingBox cube = BoundingBox.fromCorners(p1, p2);
-        Set<BlockPos> cubeBlocks = AreaUtil.blocksBetween(cube);
-        return cubeBlocks.stream().filter(pos -> distanceManhattan(this.center, pos) == this.radius).collect(Collectors.toSet());
+        Set<BlockPos> cubeBlocks = AreaUtil.blocksIn(cube);
+        return cubeBlocks.stream().filter(this::isHullBlock).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<BlockPos> getFrame() {
+        Set<BlockPos> frameBlocks = new HashSet<>();
+        frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, 0, Direction.Axis.X, this::isHullBlock));
+        frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, 0, Direction.Axis.Y, this::isHullBlock));
+        frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, 0, Direction.Axis.Z, this::isHullBlock));
+
+        int halfRadius = this.radius / 2;
+        frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, halfRadius, Direction.Axis.X, this::isHullBlock));
+        frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, -halfRadius, Direction.Axis.X, this::isHullBlock));
+        frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, halfRadius, Direction.Axis.Y, this::isHullBlock));
+        frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, -halfRadius, Direction.Axis.Y, this::isHullBlock));
+        frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, halfRadius, Direction.Axis.Z, this::isHullBlock));
+        frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, -halfRadius, Direction.Axis.Z, this::isHullBlock));
+        return frameBlocks;
     }
 
     public boolean contains(CuboidArea inner) {
