@@ -30,6 +30,7 @@ public abstract class PlayerEntityMixin {
         }
     }
 
+    /*
     @Inject(method = "dropEquipment", at = @At(value = "HEAD"), allow = 1, cancellable = true)
     void onDropEquipment(ServerLevel level, CallbackInfo ci) {
         Player self = (Player) (Object) this;
@@ -41,7 +42,8 @@ public abstract class PlayerEntityMixin {
             FlagEvaluator.processCheck(checkEvent, denyResult -> ci.cancel());
         }
     }
-
+    */
+    /*
     @Inject(method = "causeFoodExhaustion", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/food/FoodData;addExhaustion(F)V"), cancellable = true, allow = 1)
     public void onGainHunger(float exhaustion, CallbackInfo ci) {
         Player self = (Player) (Object) this;
@@ -50,12 +52,13 @@ public abstract class PlayerEntityMixin {
             if (Services.EVENT.post(checkEvent))
                 return;
             FlagState flagState = FlagEvaluator.processCheck(checkEvent,
-                    deny -> { /* player has no permission -> do nothing to apply hunger */ }
+                    deny -> { /* player has no permission -> do nothing to apply hunger  }
             );
             if (flagState == FlagState.ALLOWED) {
                 ci.cancel();
             }            
         }
     }
+    */
 
 }
