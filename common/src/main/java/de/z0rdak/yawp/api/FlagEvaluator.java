@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.BREAK_BLOCKS;
@@ -57,6 +58,13 @@ public class FlagEvaluator {
             onDeny.accept(result);
         }
         return state;
+    }
+
+    public static FlagState processCheckF(@NotNull FlagCheckEvent checkEvent, @Nullable Function<FlagCheckResult, FlagState> handleResult) {
+        FlagCheckResult result = evaluate(checkEvent);
+        result = Services.EVENT.post(result);
+        if (handleResult != null) return handleResult.apply(result);
+        return result.getFlagState();
     }
 
     /**
