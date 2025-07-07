@@ -16,7 +16,7 @@ players, mobs and the environment.
 Create regions for your builds and apply region flags to protect them.
 Assign players or vanilla teams to regions, so they can manage their own regions.
 
-YAWP was inspired by the forge mod [WorldProtector](https://www.curseforge.com/minecraft/mc-mods/worldprotector) and
+YAWP was _inspired_ by the forge mod [WorldProtector](https://www.curseforge.com/minecraft/mc-mods/worldprotector) and
 the [WorldGuard](https://dev.bukkit.org/projects/worldguard) plugin.
 
 ## Supported Versions
