@@ -85,7 +85,7 @@ public abstract class PlayerMixin {
                     ci.cancel();
                 });
             }
-            FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), INVINCIBLE, getDimKey(self));
+            FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), INVINCIBLE, getDimKey(self), self);
             if (Services.EVENT.post(checkEvent))
                 return;
             FlagEvaluator.processCheck(checkEvent, deny -> {
