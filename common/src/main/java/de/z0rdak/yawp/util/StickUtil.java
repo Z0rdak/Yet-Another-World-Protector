@@ -132,10 +132,7 @@ public final class StickUtil {
     public static void setStickName(ItemStack stick, StickType type) {
         if (Objects.requireNonNull(type) == StickType.MARKER) {
             MarkerStick marker = new MarkerStick(getStickNBT(stick));
-            boolean isTpPosSet = marker.getTeleportPos() != null;
-            MutableComponent markerIndicators = buildRegionMarkerIndicators(marker)
-                    .append(" ")
-                    .append(buildTpPosIndicator(isTpPosSet));
+            MutableComponent markerIndicators = buildRegionMarkerIndicators(marker);
             MutableComponent markerHoverName = buildStickName(marker)
                     .append(" ")
                     .append(markerIndicators);
@@ -157,13 +154,6 @@ public final class StickUtil {
         String indicator = isMarked ? MARKED_BLOCK_INDICATOR : UNMARKED_BLOCK_INDICATOR;
         ChatFormatting color = isMarked ? MARKED_BLOCK_COLOR : UNMARKED_BLOCK_COLOR;
         MutableComponent indicatorComp = Component.literal(indicator).withStyle(color);
-        MutableComponent closedResetComp = Component.literal("]").withStyle(RESET);
-        return Component.literal("[").append(indicatorComp).append(closedResetComp);
-    }
-
-    private static MutableComponent buildTpPosIndicator(boolean isMarked) {
-        ChatFormatting color = isMarked ? MARKED_BLOCK_COLOR : UNMARKED_POS_COLOR;
-        MutableComponent indicatorComp = Component.literal(TP_POS_INDICATOR).withStyle(color);
         MutableComponent closedResetComp = Component.literal("]").withStyle(RESET);
         return Component.literal("[").append(indicatorComp).append(closedResetComp);
     }
