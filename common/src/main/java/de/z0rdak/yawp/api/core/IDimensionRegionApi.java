@@ -2,6 +2,7 @@ package de.z0rdak.yawp.api.core;
 
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
+import de.z0rdak.yawp.data.region.DimensionRegionCache;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceKey;
@@ -19,6 +20,8 @@ public interface IDimensionRegionApi {
     Optional<IMarkableRegion> getLocalRegion(String name);
 
     ResourceKey<Level> getDimKey();
+
+    DimensionRegionCache getCache();
 
     /**
      * Test if a name is available for creating a local region
@@ -76,6 +79,8 @@ public interface IDimensionRegionApi {
      * @return a list of all regions in the given AABB area, may be empty if no regions exist
      */
     List<IMarkableRegion> getRegionsInBox(BoundingBox blockBox);
+
+    List<IMarkableRegion> getRegionsAround(BlockPos pos, int radius);
 
     List<IMarkableRegion> getIntersectingRegions(BoundingBox blockBox);
 
