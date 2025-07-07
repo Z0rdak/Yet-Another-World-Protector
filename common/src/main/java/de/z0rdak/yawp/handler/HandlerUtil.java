@@ -60,10 +60,6 @@ public final class HandlerUtil {
         return entity instanceof Merchant;
     }
 
-    public static boolean isPlayer(Entity entity) {
-        return entity instanceof Player;
-    }
-
     public static boolean isMonster(Entity entity) {
         return entity instanceof Enemy
                 || entity instanceof Slime
