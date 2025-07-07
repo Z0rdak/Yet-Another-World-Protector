@@ -21,6 +21,7 @@ import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.WanderingTrader;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -82,8 +83,8 @@ public class EntityFlagHandler {
             if (flagState == FlagState.DENIED)
                 return;
 
-            if (isPlayer(entity)) {
-                checkEvent = new FlagCheckEvent(target, RegionFlag.FALL_DAMAGE_PLAYERS, dim);
+            if (entity instanceof Player player) {
+                checkEvent = new FlagCheckEvent(target, RegionFlag.FALL_DAMAGE_PLAYERS, dim, player);
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
