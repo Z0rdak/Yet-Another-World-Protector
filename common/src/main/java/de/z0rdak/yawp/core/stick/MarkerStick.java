@@ -20,7 +20,6 @@ import java.util.UUID;
 
 public class MarkerStick extends AbstractStick implements INbtSerializable<CompoundTag> {
 
-    private BlockPos teleportPos;
     private ResourceKey<Level> dimension;
     private AreaType areaType;
     private boolean isValidArea;
@@ -32,7 +31,6 @@ public class MarkerStick extends AbstractStick implements INbtSerializable<Compo
         this.isValidArea = false;
         this.markedBlocks = new ArrayList<>(this.areaType.maxBlocks);
         this.dimension = dim;
-        this.teleportPos = null;
     }
 
     public MarkerStick(CompoundTag nbt) {
@@ -48,15 +46,6 @@ public class MarkerStick extends AbstractStick implements INbtSerializable<Compo
     public void reset() {
         this.markedBlocks = new ArrayList<>(this.areaType.maxBlocks);
         this.isValidArea = false;
-        this.teleportPos = null;
-    }
-
-    public BlockPos getTeleportPos() {
-        return teleportPos;
-    }
-
-    public void setTeleportPos(BlockPos teleportPos) {
-        this.teleportPos = teleportPos;
     }
 
     public ResourceKey<Level> getDimension() {
@@ -107,10 +96,6 @@ public class MarkerStick extends AbstractStick implements INbtSerializable<Compo
         nbt.putBoolean(ItemNbtKeys.VALID_AREA, this.isValidArea);
         nbt.putString(ItemNbtKeys.AREA_TYPE, this.areaType.areaType);
         nbt.putString(ItemNbtKeys.DIM, this.dimension.location().toString());
-        nbt.putBoolean(ItemNbtKeys.IS_TP_SET, this.teleportPos != null);
-        if (this.teleportPos != null) {
-            nbt.put(ItemNbtKeys.TP_POS, NbtUtils.writeBlockPos(this.teleportPos));
-        }
         ListTag blocks = new ListTag();
         this.markedBlocks.forEach(block -> blocks.add(NbtUtils.writeBlockPos(block)));
         nbt.put(ItemNbtKeys.MARKED_BLOCKS, blocks);
@@ -122,13 +107,15 @@ public class MarkerStick extends AbstractStick implements INbtSerializable<Compo
         super.deserializeNBT(nbt);
         this.isValidArea = nbt.getBoolean(ItemNbtKeys.VALID_AREA);
         this.areaType = AreaType.of(nbt.getString(ItemNbtKeys.AREA_TYPE));
-        boolean isTpSet = nbt.getBoolean(ItemNbtKeys.IS_TP_SET);
-        if (isTpSet) {
-            this.teleportPos = NbtUtils.readBlockPos(nbt.getCompound(ItemNbtKeys.TP_POS));
-        }
-        this.dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(nbt.getString(ItemNbtKeys.DIM)));
-        ListTag markedBlocksNBT = nbt.getList(ItemNbtKeys.MARKED_BLOCKS, Tag.TAG_COMPOUND);
-        this.markedBlocks = new ArrayList<>(this.areaType.maxBlocks);
-        markedBlocksNBT.forEach(block -> this.markedBlocks.add(NbtUtils.readBlockPos((CompoundTag) block)));
+        this.dimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(nbt.getString(ItemNbtKeys.DIM)));
+        ListTag markedBlocksNBT = (ListTag) nbt.get(ItemNbtKeys.MARKED_BLOCKS);
+        if (markedBlocksNBT != null) {
+            this.markedBlocks = new ArrayList<>(this.areaType.maxBlocks);
+            for (int i = 0; i < markedBlocksNBT.size(); i++) {
+                int[] intArray = markedBlocksNBT.getIntArray(i);
+                IntArrayTag intArrayTag = new IntArrayTag(intArray);
+                NbtCompatHelper.toBlockPos(intArrayTag).ifPresent(pos -> this.markedBlocks.add(pos));
+            }
+        }      
     }
 }
