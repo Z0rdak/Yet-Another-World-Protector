@@ -21,8 +21,11 @@ public interface IMarkableArea extends INbtSerializable<CompoundTag> {
     List<BlockPos> markedBlocks();
 
     Set<BlockPos> getHull();
+    Set<BlockPos> getFrame();
 
     boolean containsOther(IMarkableArea other);
 
     boolean intersects(IMarkableArea other);
+
+    BlockDisplayProperties getDisplay();
 }
