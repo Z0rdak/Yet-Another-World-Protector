@@ -39,15 +39,15 @@ public abstract class LivingEntityMixin {
     public void onKnockback(double strength, double x, double z, CallbackInfo ci) {
         LivingEntity target = (LivingEntity) (Object) this;
         if (isServerSide(target)) {
-            if (target instanceof Player) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(target.blockPosition(), KNOCKBACK_PLAYERS, getDimKey(target));
+            if (target instanceof Player player) {
+                FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), KNOCKBACK_PLAYERS, getDimKey(player), player);
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, deny -> {
                     ci.cancel();
                 });
-                checkEvent = new FlagCheckEvent(target.blockPosition(), INVINCIBLE, getDimKey(target));
+                checkEvent = new FlagCheckEvent(player.blockPosition(), INVINCIBLE, getDimKey(player), player);
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
