@@ -28,4 +28,6 @@ public interface IMarkableArea extends INbtSerializable<CompoundTag> {
     boolean intersects(IMarkableArea other);
 
     BlockDisplayProperties getDisplay();
+
+    void updateDisplay(BlockDisplayProperties properties);
 }
