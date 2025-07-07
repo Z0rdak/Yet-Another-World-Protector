@@ -87,7 +87,7 @@ public abstract class LivingEntityMixin {
     public void onFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
         LivingEntity self = (LivingEntity) (Object) this;
         if (isServerSide(self)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), FALL_DAMAGE, getDimKey(self));
+            FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), FALL_DAMAGE, getDimKey(self), self instanceof Player ? (Player) self : null);
             if (Services.EVENT.post(checkEvent)) {
                 return;
             }
