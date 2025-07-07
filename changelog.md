@@ -1,3 +1,22 @@
+# [0.5.3-beta3] - unreleased
+
+## Changed
+
+- Disable `keep_inv` and `no_hunger` flag for now until its fixed properly.
+
+## Fixed
+
+* Fix `animal-breeding` flag not considering player permissions
+* Fix `invincible` flag not considering player permissions
+* Fix `knockback-players` flag not considering player permissions
+* Fix `fall-damage` flag not considering player permission
+* Fix `use-elytra` flag not considering player permissions
+* Fix wrong language keys (Component -> text)
+* Fix uuid check considering case, although it should not (config uuids are now handled as lower-case)
+* Fix changing area type not working and breaking region data
+* Fix missing region containment check when adding child region
+* Fix chat spam when checking for flags in regions and when looking up parent regions
+
 # [0.5.3-beta2] - 2025-05-17
 
 ## Fixed
@@ -89,9 +108,9 @@ This version states the changes need for the YAWP port for Minecraft 1.21.5.
 
 - (Fabric) Fix place-block flag target position being calculated incorrectly
 - Fix explosion flag causing npe
-- Fix melee flags using wrong position for check
+- Fix meele-* flags using wrong position for check
 - Fix no-pvp flag having the wrong position for check and messaging the wrong player
-- (Fabric) Fix missing UpdateArea event implementation 
+- (Fabric) Fix missing UpdateArea event implementation
 
 # [0.5.1-beta3] - 2025-01-27
 
@@ -125,7 +144,7 @@ This version states the changes need for the YAWP port for Minecraft 1.21.5.
 ## Fixed
 
 - Fix old flags not being automatically removed during loading
-- (Fabric) Fix explosion flags not working 
+- (Fabric) Fix explosion flags not working
 
 # [0.5.0-beta1] - 2025-01-18
 
