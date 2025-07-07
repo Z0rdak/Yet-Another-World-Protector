@@ -1,41 +1,32 @@
 package de.z0rdak.yawp.util.visualization;
 
-import de.z0rdak.yawp.core.area.MarkedArea;
+import de.z0rdak.yawp.core.area.BlockDisplayProperties;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class RegionOutlineBuilder {
 
-    public static Set<Entity> buildAreaDisplaySet(ServerLevel level, Set<BlockPos> frame, CompoundTag blockDisplayTag) {
-        return frame.stream()
-                .map(blockPos -> buildBlockDisplay(level, blockPos, blockDisplayTag))
-                .collect(Collectors.toSet());
-    }
-
-    public static Entity buildBlockDisplay(ServerLevel level, BlockPos pos, CompoundTag displayTag) {
-        displayTag.putString("id",  EntityType.BLOCK_DISPLAY.builtInRegistryHolder().key().location().toString());
-        return EntityType.loadEntityRecursive(displayTag, level, EntitySpawnReason.COMMAND, p_396566_ -> {
-            p_396566_.snapTo(pos.getX(), pos.getY(), pos.getZ(), p_396566_.getYRot(), p_396566_.getXRot());
+    public static Entity createBlockDisplay(ServerLevel level, BlockPos pos, CompoundTag displayTag) {
+        return EntityType.loadEntityRecursive(displayTag, level, p_396566_ -> {
+            p_396566_.moveTo(pos.getX(), pos.getY(), pos.getZ(), p_396566_.getYRot(), p_396566_.getXRot());
             return p_396566_;
         });
     }
 
-    public static CompoundTag buildBlockDisplayTag(BlockDisplayProperty properties) {
+    public static CompoundTag buildBlockDisplayTag(BlockDisplayProperties properties) {
         var blockDisplayTag = new CompoundTag();
-        blockDisplayTag.putBoolean("Glowing", properties.glowing());
+        String displayBlockId = EntityType.BLOCK_DISPLAY.builtInRegistryHolder().key().location().toString();
+        blockDisplayTag.putString("id", displayBlockId);
+        blockDisplayTag.putBoolean("Glowing", properties.hasGlow());
         var blockstateTag = new CompoundTag();
-        blockstateTag.putString("Name", properties.blockName());
+        blockstateTag.putString("Name", properties.blockRl().toString());
         blockDisplayTag.put("block_state", blockstateTag);
         var brightnessTag = new CompoundTag();
-        brightnessTag.putInt("sky", 15);
-        brightnessTag.putInt("block", 15);
+        brightnessTag.putInt("sky", properties.lightLevel());
+        brightnessTag.putInt("block", properties.lightLevel());
         blockDisplayTag.put("brightness", brightnessTag);
         return blockDisplayTag;
     }
