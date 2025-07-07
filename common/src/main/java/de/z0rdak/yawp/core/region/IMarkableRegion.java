@@ -1,7 +1,11 @@
 package de.z0rdak.yawp.core.region;
 
 import de.z0rdak.yawp.core.area.IMarkableArea;
+import de.z0rdak.yawp.core.area.TeleportAnchor;
+import de.z0rdak.yawp.core.area.TeleportAnchors;
 import net.minecraft.core.BlockPos;
+
+import java.util.Map;
 
 /**
  * A mark-able region extends the general IProtectedRegion by allowing
@@ -20,14 +24,11 @@ public interface IMarkableRegion extends IProtectedRegion {
 
     boolean contains(BlockPos position);
 
-    BlockPos getTpTarget();
-
-    void setTpTarget(BlockPos pos);
-
     int getPriority();
 
     void setPriority(int priority);
 
     void rename(String newName);
 
+    TeleportAnchors getTpAnchors();
 }
