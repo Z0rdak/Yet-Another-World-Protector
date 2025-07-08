@@ -4,8 +4,7 @@ import de.z0rdak.yawp.core.INbtSerializable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static de.z0rdak.yawp.util.ChatComponentBuilder.tinyBlockPos;
 
@@ -26,6 +25,11 @@ public class TeleportAnchors implements INbtSerializable<CompoundTag> {
         return this.addTpAnchor(pos, derivedName);
     }
 
+    public boolean hasAnchor(String name) {
+        return this.tpAnchors.containsKey(name);
+    }
+
+
     public TeleportAnchor addTpAnchor(BlockPos pos, String name) {
         var anchor = new TeleportAnchor(pos, name);
         this.tpAnchors.put(name, anchor);
@@ -36,12 +40,32 @@ public class TeleportAnchors implements INbtSerializable<CompoundTag> {
         this.tpAnchors.remove(name);
     }
 
+    public void rename(String name, String newName) {
+        TeleportAnchor teleportAnchor = this.tpAnchors.get(name);
+        this.tpAnchors.remove(name);
+        teleportAnchor.setName(newName);
+        this.tpAnchors.put(newName, teleportAnchor);
+    }
+
+    public void addOrUpdate(String name, BlockPos pos) {
+        if (this.tpAnchors.containsKey(name)) {
+            TeleportAnchor teleportAnchor = this.tpAnchors.get(name);
+            teleportAnchor.setPos(pos);
+            return;
+        }
+        this.addTpAnchor(pos, name);
+    }
+
     public void removeTpAnchor(BlockPos pos) {
         this.tpAnchors.remove(tinyBlockPos(pos));
     }
 
     public TeleportAnchor getTpAnchor(String name) {
         return this.tpAnchors.get(name);
+    }
+
+    public List<TeleportAnchor> getAnchors() {
+        return new ArrayList<>(this.tpAnchors.values());
     }
 
     @Override
