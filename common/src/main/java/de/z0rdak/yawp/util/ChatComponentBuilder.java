@@ -51,8 +51,12 @@ public class ChatComponentBuilder {
         return target.getX() + " " + target.getY() + " " + target.getZ();
     }
 
+    public static String shortBlockPosBracketed(BlockPos target) {
+        return "[" + shortBlockPos(target) + "]";
+    }
+
     public static String shortBlockPos(BlockPos target) {
-        return "[X=" + target.getX() + ", Y=" + target.getY() + ", Z=" + target.getZ() + "]";
+        return "X=" + target.getX() + ", Y=" + target.getY() + ", Z=" + target.getZ();
     }
 
     public static String tinyBlockPos(BlockPos target) {
@@ -279,6 +283,13 @@ public class ChatComponentBuilder {
         return Messages.substitutable("%s: %s", Component.translatableWithFallback(subjectLangKey, fallback), payload);
     }
 
+    public static MutableComponent buildInfoComponent(MutableComponent subject, MutableComponent info, MutableComponent actions) {
+        return Messages.substitutable("%s: %s | %s", subject, info, actions);
+    }
+
+    public static MutableComponent buildInfoComponent(MutableComponent subject, MutableComponent content) {
+        return Messages.substitutable("%s: %s ", subject, content);
+    }
 
     public static String buildExecuteCommandString(ResourceKey<Level> dim, String command) {
         return "/execute in " + dim.location() + " run " + command;
