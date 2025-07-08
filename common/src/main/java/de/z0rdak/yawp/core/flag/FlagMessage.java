@@ -14,8 +14,7 @@ import java.util.*;
 
 import static de.z0rdak.yawp.constants.serialization.RegionNbtKeys.*;
 import static de.z0rdak.yawp.core.flag.FlagCategory.PLAYER;
-import static de.z0rdak.yawp.util.ChatComponentBuilder.shortBlockPos;
-import static de.z0rdak.yawp.util.ChatComponentBuilder.tinyBlockPos;
+import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
 
 public class FlagMessage implements INbtSerializable<CompoundTag> {
 
@@ -72,7 +71,7 @@ public class FlagMessage implements INbtSerializable<CompoundTag> {
     public static Map<String, String> defaultSubstitutes(RegionFlag flag, IProtectedRegion region, BlockPos pos, @Nullable Player player) {
         Map<String, String> substituteMap = new HashMap<>();
         substituteMap.put(FLAG_TEMPLATE, flag.name);
-        substituteMap.put(POS_TEMPLATE, shortBlockPos(pos));
+        substituteMap.put(POS_TEMPLATE, shortBlockPosBracketed(pos));
         substituteMap.put(REGION_TEMPLATE, region.getName());
         substituteMap.put(DIM_TEMPLATE, region.getDim().location().toString());
         if (player != null && flag.categories.contains(PLAYER)) {
