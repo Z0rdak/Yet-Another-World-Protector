@@ -146,6 +146,6 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
 
     @Override
     public TeleportAnchors getTpAnchors() {
-        return null;
+        return this.tpAnchors;
     }
 }
