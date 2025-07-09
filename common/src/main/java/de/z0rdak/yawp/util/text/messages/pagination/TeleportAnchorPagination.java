@@ -8,7 +8,6 @@ import de.z0rdak.yawp.util.text.Messages;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
 import java.util.List;
@@ -35,8 +34,8 @@ public class TeleportAnchorPagination extends BasePaginationMessage<TeleportAnch
         return buildHeader(Component.translatableWithFallback("cli.msg.info.header.in", "== %s in %s ==", flagListLink, buildRegionInfoLink(region)));
     }
 
-    public static List<Component> buildTeleportAnchorEntries(IMarkableRegion region, List<TeleportAnchor> selectedFlags) {
-        List<TeleportAnchor> alphabeticAnchors = selectedFlags.stream()
+    public static List<Component> buildTeleportAnchorEntries(IMarkableRegion region, List<TeleportAnchor> tpAnchors) {
+        List<TeleportAnchor> alphabeticAnchors = tpAnchors.stream()
                 .sorted(Comparator.comparing(TeleportAnchor::getName))
                 .toList();
         return alphabeticAnchors.stream()
@@ -51,8 +50,8 @@ public class TeleportAnchorPagination extends BasePaginationMessage<TeleportAnch
     public static Component buildRemoveTeleportAnchorEntry(IMarkableRegion region, TeleportAnchor tpAnchor) {
         var teleportAnchorRemoveLink = buildRemoveTeleportAnchorLink(region, tpAnchor);
         var anchorNameText = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.text", "%s", tpAnchor.getName());
-        var anchorNameHover = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.hover", "Teleport Anchor %s in at %s", tpAnchor.getName(), shortBlockPosBracketed(tpAnchor.getPos()));
-        var anchorName = buildTextWithHoverMsg(anchorNameText, anchorNameHover, LIGHT_PURPLE);
+        var anchorNameHover = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.hover", "Anchor '%s' @ %s", tpAnchor.getName(), shortBlockPosBracketed(tpAnchor.getPos()));
+        var anchorName = buildTextWithHoverMsg(anchorNameText, anchorNameHover, GREEN);
 
         var tpLink = buildTeleportToAnchorLink(region, tpAnchor);
 
@@ -61,51 +60,50 @@ public class TeleportAnchorPagination extends BasePaginationMessage<TeleportAnch
         var renameLink = buildRenameTeleportAnchorLink(region, tpAnchor);
         var updateLink = buildUpdateTeleportAnchorLink(region, tpAnchor);
 
-        return Messages.substitutable(" - %s %s @ %s | %s %s",
+        return Messages.substitutable(" - %s %s @ %s | %s %s %s %s",
                 teleportAnchorRemoveLink, anchorName, tpLink, showLink, hideLink, updateLink, renameLink);
     }
 
     public static Component buildShowTeleportAnchorLink(IMarkableRegion region, TeleportAnchor tpAnchor) {
         var cmd = buildShowTpAnchorCommand(region, tpAnchor.getName());
-        var text = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.show.link.text", "show");
-        var hover = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.show.link.hover", "Click to show teleport anchor '%s' in %s", tpAnchor.getName(), region.getName());
-        return buildExecuteCmdComponent(text, hover, cmd, RUN_COMMAND, LINK_COLOR);
+        var text = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.show.link.text", "s");
+        var hover = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.show.link.hover", "Click to show teleport anchor");
+        return buildExecuteCmdLinkWithBrackets(text, hover, cmd, RUN_COMMAND, LINK_COLOR);
     }
 
     public static Component buildHideTeleportAnchorLink(IMarkableRegion region, TeleportAnchor tpAnchor) {
         var cmd = buildHideTpAnchorCommand(region, tpAnchor.getName());
-        var text = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.hide.link.text", "hide");
-        var hover = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.hide.link.hover", "Click to hide teleport anchor '%s' in %s", tpAnchor.getName(), region.getName());
-        return buildExecuteCmdComponent(text, hover, cmd, RUN_COMMAND, LINK_COLOR);
+        var text = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.hide.link.text", "h");
+        var hover = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.hide.link.hover", "Click to hide teleport anchor");
+        return buildExecuteCmdLinkWithBrackets(text, hover, cmd, RUN_COMMAND, LINK_COLOR);
     }
-
 
     public static Component buildRemoveTeleportAnchorLink(IMarkableRegion region, TeleportAnchor tpAnchor) {
         var rmCmd = buildRemoveTeleportAnchorCommand(region, tpAnchor.getName());
-        var hover = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.remove.link.hover", "Click to remove teleport anchor '%s' from region %s", tpAnchor.getName(), region.getName());
+        var hover = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.remove.link.hover", "Click to remove '%s' from region %s", tpAnchor.getName(), region.getName());
         var text = Component.translatableWithFallback("cli.link.remove", "x");
         return buildExecuteCmdComponent(text, hover, rmCmd, RUN_COMMAND, REMOVE_CMD_COLOR);
     }
 
     public static Component buildTeleportToAnchorLink(IMarkableRegion region, TeleportAnchor tpAnchor) {
         var cmd = buildTeleportTpAnchorCommand(region, tpAnchor.getName());
-        var text = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.tp.link.text", "%s", shortBlockPos(tpAnchor.getPos()));
-        var hover = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.tp.link.hover", "Click to teleport to %s in '%s'", tpAnchor.getName(), region.getName());
-        return buildExecuteCmdComponent(text, hover, cmd, RUN_COMMAND, LINK_COLOR);
+        var text = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.tp.link.text", "%s", commandBlockPosStr(tpAnchor.getPos()));
+        var hover = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.tp.link.hover", "Click to teleport to '%s' @ %s", tpAnchor.getName(), shortBlockPosBracketed(tpAnchor.getPos()));
+        return buildExecuteCmdLinkWithBrackets(text, hover, cmd, RUN_COMMAND, LINK_COLOR);
     }
 
     public static Component buildRenameTeleportAnchorLink(IMarkableRegion region, TeleportAnchor tpAnchor) {
         String renameCmd = Commands.buildSuggestRenameTpAnchorCommand(region, tpAnchor.getName());
-        var hover = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.rename.link.hover", "Click to rename teleport anchor '%s' in region %s", tpAnchor.getName(), region.getName());
-        var text = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.rename.link.text", "rename");
-        return buildExecuteCmdComponent(text, hover, renameCmd, SUGGEST_COMMAND, LINK_COLOR);
+        var hover = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.rename.link.hover", "Click to rename '%s'", tpAnchor.getName());
+        var text = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.rename.link.text", "r");
+        return buildExecuteCmdLinkWithBrackets(text, hover, renameCmd, SUGGEST_COMMAND, LINK_COLOR);
     }
 
     public static Component buildUpdateTeleportAnchorLink(IMarkableRegion region, TeleportAnchor tpAnchor) {
         String renameCmd = Commands.buildSuggestUpdateTpAnchorCommand(region, tpAnchor.getName());
-        var hover = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.update.link.hover", "Click to set new teleport position for '%s' in region %s", tpAnchor.getName(), region.getName());
-        var text = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.update.link.text", "set");
-        return buildExecuteCmdComponent(text, hover, renameCmd, SUGGEST_COMMAND, LINK_COLOR);
+        var hover = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.update.link.hover", "Click to set new teleport position");
+        var text = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.update.link.text", "p");
+        return buildExecuteCmdLinkWithBrackets(text, hover, renameCmd, SUGGEST_COMMAND, LINK_COLOR);
     }
 
     @Override
@@ -128,23 +126,24 @@ public class TeleportAnchorPagination extends BasePaginationMessage<TeleportAnch
         return Messages.substitutable(" - %s", buildSuggestAddTeleportAnchorLink(region, "tpAnchor", BlockPos.ZERO));
     }
 
-
     /**
      * [m] teleport anchor(s) [+]
      */
     public static MutableComponent buildRegionTeleportAnchorListLink(IMarkableRegion region) {
-        MutableComponent regionTpAnchorAmount = buildTextWithHoverMsg(Messages.substitutable("%s", region.getTpAnchors().getAnchors().size()), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.number.hover", "%s teleport anchor(s) defined in", region.getTpAnchors().getAnchors().size(), region.getName()), LINK_COLOR);
-        MutableComponent tpAnchorHoverText = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.link.hover", "%s teleport anchor(s)", region.getName());
-        String regionFlagListCmd = buildListRegionFlagsCommand(region);
-        MutableComponent tpAnchorListLink = buildExecuteCmdComponent(regionTpAnchorAmount, tpAnchorHoverText, regionFlagListCmd, RUN_COMMAND, LINK_COLOR);
-        MutableComponent tpAnchorComp = region.getTpAnchors().getAnchors().isEmpty() ? regionTpAnchorAmount : tpAnchorListLink;
+        MutableComponent numberHover = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.link.hover", "%s teleport anchor(s) defined in %s", region.getTpAnchors().getAnchors().size(), region.getName());
+        MutableComponent regionTpAnchorAmountPlain = buildTextWithHoverMsg(Messages.substitutable("%s", region.getTpAnchors().getAnchors().size()), numberHover, LINK_COLOR);
+        MutableComponent regionTpAnchorAmount = buildTextWithHoverMsg(Messages.substitutable("%s", region.getTpAnchors().getAnchors().size()), numberHover, LINK_COLOR);
+        MutableComponent tpAnchorHoverText = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.link.hover", "%s teleport anchor(s) defined in %s", region.getTpAnchors().getAnchors().size(), region.getName());
+        String listAnchorCmd = buildTeleportAnchorListCommand(region);
+        MutableComponent tpAnchorListLink = buildExecuteCmdComponent(regionTpAnchorAmount, tpAnchorHoverText, listAnchorCmd, RUN_COMMAND, LINK_COLOR);
+        MutableComponent tpAnchorComp = region.getTpAnchors().getAnchors().isEmpty() ? regionTpAnchorAmountPlain : tpAnchorListLink;
         return Messages.substitutable("%s %s",
                 Component.translatableWithFallback("cli.msg.info.region.tp-anchor.link.text", "%s teleport anchor(s)", tpAnchorComp),
                 buildSuggestAddTeleportAnchorLink(region, "tpAnchor-name", BlockPos.ZERO));
     }
 
     public static MutableComponent buildSuggestAddTeleportAnchorLink(IMarkableRegion region, String name, BlockPos pos) {
-        MutableComponent hoverText = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.add.link.hover", "Click to create new teleport anchor in region %s", region.getName());
+        MutableComponent hoverText = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.add.link.hover", "Click to create new teleport anchor in %s", region.getName());
         MutableComponent linkText = Component.translatableWithFallback("cli.link.add", "+");
         String cmd = buildAddTeleportAnchorCommand(region, name, pos);
         return buildExecuteCmdComponent(linkText, hoverText, cmd, SUGGEST_COMMAND, ADD_CMD_COLOR);
