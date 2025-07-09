@@ -30,7 +30,11 @@ import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -69,6 +73,10 @@ class DimensionCommands {
                         .then(buildAddSubCommand((ctx) -> getDimCacheArgument(ctx).getDimensionalRegion()))
                         .then(buildRemoveSubCommand((ctx) -> getDimCacheArgument(ctx).getDimensionalRegion()))
                         .then(buildCopySubCommand((ctx) -> getDimCacheArgument(ctx).getDimensionalRegion()))
+                        .then(literal(NUKE_DISPLAY_ENTITIES)
+                                .executes(ctx -> nukeDisplayEntities(ctx, ctx.getSource().getLevel()))
+                                .then(Commands.argument(DIM.toString(), DimensionArgument.dimension())
+                                        .executes(ctx -> nukeDisplayEntities(ctx, DimensionArgument.getDimension(ctx, DIM.toString())))))
                         .then(literal(LIST)
                                 .then(literal(LOCAL)
                                         .executes(ctx -> promptDimensionRegionList(ctx, getDimCacheArgument(ctx), 0))
@@ -164,6 +172,22 @@ class DimensionCommands {
                                         .executes(ctx -> resetLocalRegions(ctx, getDimCacheArgument(ctx))))
                         )
                 );
+    }
+
+    private static int nukeDisplayEntities(CommandContext<CommandSourceStack> ctx, ServerLevel level) {
+        var entities = level.getEntities(EntityTypeTest.forClass(Entity.class),
+                (entity) -> {
+            // TODO: Filter for tag with 'yawp_display'
+                    return entity instanceof Display.BlockDisplay;
+
+
+        });
+
+        var entityAmount = entities.size();
+        entities.forEach(e -> e.remove(Entity.RemovalReason.DISCARDED));
+        // TODO: I18n
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Nuked all (%s) yawp entities in '%s'", "Nuked all (%s) yawp entities in '%s'", entityAmount, level.dimension().location()));
+        return 0;
     }
 
 
