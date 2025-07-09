@@ -45,7 +45,7 @@ public abstract class AbstractArea implements IMarkableArea {
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
-        this.displayProperties = new BlockDisplayProperties(nbt);
+        this.displayProperties = new BlockDisplayProperties(nbt.getCompound("display"));
         this.areaType = AreaType.of(nbt.getString(RegionNbtKeys.AREA_TYPE));
     }
 }

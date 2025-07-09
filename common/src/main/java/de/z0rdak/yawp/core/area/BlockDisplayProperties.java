@@ -76,15 +76,15 @@ public final class BlockDisplayProperties implements INbtSerializable<CompoundTa
     }
 
     public ResourceLocation blockRl() {
-        return blockRl;
+        return this.blockRl;
     }
 
     public boolean hasGlow() {
-        return hasGlow;
+        return this.hasGlow;
     }
 
     public int lightLevel() {
-        return lightLevel;
+        return this.lightLevel;
     }
 
     public void setBlockRl(ResourceLocation blockRl) {
