@@ -284,6 +284,21 @@ public final class Commands {
         return appendSubCommand(baseCmd, subCmd);
     }
 
+    public static String buildTeleportTpAnchorCommand(IMarkableRegion region, String name) {
+        String subCmd = buildSubCmdStr(TELEPORT.toString(), name);
+        return buildTeleportAnchorSubCommand(region, subCmd);
+    }
+
+    public static String buildShowTpAnchorCommand(IMarkableRegion region, String name) {
+        String subCmd = buildSubCmdStr(HIDE.toString(), name);
+        return buildTeleportAnchorSubCommand(region, subCmd);
+    }
+
+    public static String buildHideTpAnchorCommand(IMarkableRegion region, String name) {
+        String subCmd = buildSubCmdStr(SHOW.toString(), name);
+        return buildTeleportAnchorSubCommand(region, subCmd);
+    }
+
     public static String buildSuggestRenameTpAnchorCommand(IMarkableRegion region, String name) {
         String subCmd = buildSubCmdStr(RENAME.toString(), name, "");
         return buildTeleportAnchorSubCommand(region, subCmd);
