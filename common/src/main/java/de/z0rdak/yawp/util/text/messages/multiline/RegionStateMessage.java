@@ -40,14 +40,14 @@ public class RegionStateMessage implements MultiLineMessage<IProtectedRegion> {
         MutableComponent linkText = Component.translatableWithFallback("cli.msg.info.region.state.link.text", "State");
         MutableComponent hoverText = Component.translatableWithFallback("cli.msg.info.region.state.link.hover", "Show region state for %s", region.getName());
         String cmd = buildRegionStateCmd(region);
-        return buildExecuteCmdComponent(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
+        return buildExecuteCmdLink(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
     }
 
     public static MutableComponent buildRegionRenameLink(IMarkableRegion region) {
         String cmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), RENAME.toString(), "");
         MutableComponent text = Component.translatableWithFallback("cli.msg.info.region.state.rename.link.text", "rename");
         MutableComponent hover = Component.translatableWithFallback("cli.msg.info.region.state.rename.link.hover", "Rename region '%s'", region.getName());
-        return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, LINK_COLOR);
+        return buildExecuteCmdLink(text, hover, cmd, SUGGEST_COMMAND, LINK_COLOR);
     }
 
     public static MutableComponent buildRegionPriorityComponent(IMarkableRegion region) {
