@@ -130,7 +130,7 @@ public class RegionInfoMessage implements MultiLineMessage<IProtectedRegion> {
 
             // Visualization: [Visualization] [Settings]
             var subject = Component.translatableWithFallback("cli.msg.info.region.visualization", "Visualization");
-            var actions = Messages.substitutable("%s %s", buildRegionVisualizationLink(local), buildRegionDisplaySettingsLink(local));
+            var actions = Messages.substitutable("%s %s", buildRegionVisualizationLink(local), buildDisplaySettingsLink(local));
             var visualization = buildInfoComponent(subject, actions);
             regionInfoLines.add(visualization);
 
