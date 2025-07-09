@@ -54,6 +54,16 @@ public class PrismArea extends AbstractArea {
         throw new NotImplementedException("ChunkArea.getHull() not implemented yet");
     }
 
+    @Override
+    public Set<BlockPos> getFrame() {
+        return Set.of();
+    }
+
+    @Override
+    public Set<BlockPos> getMinimalOutline() {
+        return Set.of();
+    }
+
 
     @Override
     public boolean containsOther(IMarkableArea other) {
