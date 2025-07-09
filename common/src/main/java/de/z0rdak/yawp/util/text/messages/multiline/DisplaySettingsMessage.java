@@ -4,7 +4,9 @@ import de.z0rdak.yawp.core.area.BlockDisplayProperties;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.util.text.Messages;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.level.block.Block;
 
@@ -69,13 +71,13 @@ public class DisplaySettingsMessage implements MultiLineMessage<BlockDisplayProp
         var blockInfoHover = Component.literal(region.getArea().getDisplay().blockRl().toString());
         Block block = BuiltInRegistries.BLOCK.get(region.getArea().getDisplay().blockRl());
         var blockInfoText = block.getName();
-        return buildTextWithHoverAndBracketsMsg(blockInfoText, blockInfoHover, BLUE);
+        return buildTextWithWhiteBracketsAndHover(blockInfoText, blockInfoHover, BLUE);
     }
 
     public static MutableComponent buildSetDisplayBlockLink(IMarkableRegion region) {
         var text = Component.translatableWithFallback("cli.msg.info.region.display.block.link.text", "set");
         var hover = Component.translatableWithFallback("cli.msg.info.region.display.block.link.hover", "Set display block for area of %s", region.getName());
-        return buildExecuteCmdComponent(text, hover, buildSetDisplayBlockCommand(region), SUGGEST_COMMAND, LINK_COLOR);
+        return buildExecuteCmdLinkWithBrackets(text, hover, buildSetDisplayBlockCommand(region), SUGGEST_COMMAND, LINK_COLOR);
     }
 
     /**
@@ -101,18 +103,18 @@ public class DisplaySettingsMessage implements MultiLineMessage<BlockDisplayProp
     public static MutableComponent buildSetDisplayGlowOnLink(IMarkableRegion region) {
         var text = Component.translatableWithFallback("cli.msg.info.region.display.glow-on.link.text", "on");
         var hover = Component.translatableWithFallback("cli.msg.info.region.display.glow-on.link.hover", "Enable glow effect for block display");
-        return buildExecuteCmdComponent(text, hover, buildSetDisplayGlowCommand(region, true), RUN_COMMAND, LINK_COLOR);
+        return buildExecuteCmdLinkWithBrackets(text, hover, buildSetDisplayGlowCommand(region, true), RUN_COMMAND, LINK_COLOR);
     }
 
     public static MutableComponent buildSetDisplayGlowOffLink(IMarkableRegion region) {
         var text = Component.translatableWithFallback("cli.msg.info.region.display.glow-off.link.text", "off");
         var hover = Component.translatableWithFallback("cli.msg.info.region.display.glow-off.link.hover", "Disable glow effect for block display");
-        return buildExecuteCmdComponent(text, hover, buildSetDisplayGlowCommand(region, false), RUN_COMMAND, LINK_COLOR);
+        return buildExecuteCmdLinkWithBrackets(text, hover, buildSetDisplayGlowCommand(region, false), RUN_COMMAND, LINK_COLOR);
     }
 
     public static MutableComponent buildSetDisplayLightLevelLink(IMarkableRegion region) {
         var text = Component.translatableWithFallback("cli.msg.info.region.display.light-level.link.text", "set");
         var hover = Component.translatableWithFallback("cli.msg.info.region.display.light-level.link.hover", "Set light level for area display");
-        return buildExecuteCmdComponent(text, hover, buildSetDisplayLightLevelCommand(region), SUGGEST_COMMAND, LINK_COLOR);
+        return buildExecuteCmdLinkWithBrackets(text, hover, buildSetDisplayLightLevelCommand(region), SUGGEST_COMMAND, LINK_COLOR);
     }
 }
