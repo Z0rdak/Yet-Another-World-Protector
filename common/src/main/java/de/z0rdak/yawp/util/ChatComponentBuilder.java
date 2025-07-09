@@ -83,6 +83,21 @@ public class ChatComponentBuilder {
                 .withClickEvent(new ClickEvent(eventAction, command)));
     }
 
+    public static MutableComponent buildExecuteCmdLink(MutableComponent linkText, MutableComponent hoverText, String command, ClickEvent.Action eventAction, ChatFormatting color) {
+        return linkText.setStyle(linkText.getStyle()
+                .withColor(color)
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText))
+                .withClickEvent(new ClickEvent(eventAction, command)));
+    }
+
+    public static MutableComponent buildExecuteCmdLinkWithBrackets(MutableComponent linkText, MutableComponent hoverText, String command, ClickEvent.Action eventAction, ChatFormatting color) {
+        var cmdLink = linkText.setStyle(linkText.getStyle()
+                .withColor(color)
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText))
+                .withClickEvent(new ClickEvent(eventAction, command)));
+        return ComponentUtils.wrapInSquareBrackets(cmdLink);
+    }
+
     public static MutableComponent buildPlayerHoverComponent(Player player) {
         MutableComponent playerName = Component.literal(player.getScoreboardName());
         MutableComponent playerInfo = Messages.substitutable("%s (%s)", player.getDisplayName(), player.getUUID().toString());
@@ -152,6 +167,11 @@ public class ChatComponentBuilder {
         MutableComponent bracketedText = ComponentUtils.wrapInSquareBrackets(text);
         return buildTextWithHoverMsg(bracketedText, hoverText, color);
     }
+
+    public static MutableComponent buildTextWithWhiteBracketsAndHover(MutableComponent text, MutableComponent hoverText, ChatFormatting color) {
+        return ComponentUtils.wrapInSquareBrackets(buildTextWithHoverMsg(text, hoverText, color));
+    }
+
 
     public static MutableComponent buildTextWithHoverMsg(MutableComponent text, MutableComponent hoverText, ChatFormatting color) {
         text.setStyle(text.getStyle().withColor(color).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText)));
@@ -291,7 +311,7 @@ public class ChatComponentBuilder {
     }
 
     public static MutableComponent buildInfoComponent(MutableComponent subject, MutableComponent content) {
-        return Messages.substitutable("%s: %s ", subject, content);
+        return Messages.substitutable("%s: %s", subject, content);
     }
 
     public static String buildExecuteCommandString(ResourceKey<Level> dim, String command) {
