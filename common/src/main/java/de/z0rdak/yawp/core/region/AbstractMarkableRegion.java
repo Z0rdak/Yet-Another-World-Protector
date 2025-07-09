@@ -90,7 +90,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag nbt = super.serializeNBT();
-        nbt.put(TP_POS, this.tpAnchors.serializeNBT());
+        nbt.put("tp_anchors", this.tpAnchors.serializeNBT());
         nbt.putInt(PRIORITY, priority);
         nbt.putString(AREA_TYPE, this.areaType.areaType);
         nbt.put(AREA, this.area.serializeNBT());
@@ -101,7 +101,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
         try {
-            this.tpAnchors = new TeleportAnchors(nbt.getCompound("tpAnchors"));
+            this.tpAnchors = new TeleportAnchors(nbt.getCompound("tp_anchors"));
         } catch (Exception e) {
             this.tpAnchors = new TeleportAnchors();
         }
