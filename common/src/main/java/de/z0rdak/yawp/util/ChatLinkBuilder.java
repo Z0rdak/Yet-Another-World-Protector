@@ -416,34 +416,6 @@ public class ChatLinkBuilder {
         return buildExecuteCmdComponent(text, hover, teleportCmd, RUN_COMMAND, TP_COLOR);
     }
 
-    /**
-     * [region] @ [X,Y,Z]
-     */
-    public static MutableComponent buildRegionInfoAndTpLink(IMarkableRegion region) {
-        return Messages.substitutable("%s @ %s", buildRegionInfoLink(region), buildRegionTeleportLink(region, null));
-    }
-
-    public static MutableComponent buildRegionInfoAndTpLink(IMarkableRegion region, MutableComponent regionInfoLinkWithIndicator) {
-        return Messages.substitutable("%s @ %s", regionInfoLinkWithIndicator, buildRegionTeleportLink(region, null));
-    }
-
-    public static MutableComponent buildRegionTeleportLink(IMarkableRegion region, Player player) {
-        String regionTpCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), AREA.toString(), TELEPORT.toString());
-        if (player != null) {
-            regionTpCmd = appendSubCommand(regionTpCmd, player.getScoreboardName());
-        }
-        MutableComponent text = Component.translatableWithFallback("cli.msg.info.region.area.tp.link.text", "%s", buildBlockPosLinkText(region.getTpTarget()));
-        MutableComponent hover = Component.translatableWithFallback("cli.msg.info.region.area.tp.link.hover", "Teleport to region '%s' in dimension '%s", region.getName(), region.getDim().location().toString());
-        return buildExecuteCmdComponent(text, hover, regionTpCmd, RUN_COMMAND, TP_COLOR);
-    }
-
-    public static MutableComponent buildRegionSetTpLink(IMarkableRegion region) {
-        String setTpPosCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), AREA.toString(), TELEPORT.toString(), SET.toString(), "");
-        MutableComponent linkText = Component.translatableWithFallback("cli.msg.info.region.area.tp.set.link.text", "set TP");
-        MutableComponent hoverText = Component.translatableWithFallback("cli.msg.info.region.area.tp.set.link.hover", "Set new teleport anchor for '%s'", region.getName());
-        return buildExecuteCmdComponent(linkText, hoverText, setTpPosCmd, SUGGEST_COMMAND, LINK_COLOR);
-    }
-
     public static MutableComponent buildDimSuggestRegionRemovalLink(IMarkableRegion region) {
         String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), DELETE.toString(), region.getName());
         MutableComponent hover = Component.translatableWithFallback("cli.msg.info.dim.region.remove.link.hover", "Remove region %s", region.getName());
