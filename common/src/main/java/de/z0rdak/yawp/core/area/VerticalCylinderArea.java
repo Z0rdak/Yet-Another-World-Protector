@@ -67,6 +67,16 @@ public class VerticalCylinderArea extends CenteredArea {
         throw new NotImplementedException("CylinderArea.getFrame() not implemented yet");
     }
 
+    @Override
+    public Set<BlockPos> getFrame() {
+        return Set.of();
+    }
+
+    @Override
+    public Set<BlockPos> getMinimalOutline() {
+        return Set.of();
+    }
+
     public int getDistance() {
         return distance;
     }

@@ -39,8 +39,14 @@ public class PrismArea extends MarkedArea {
 
     @Override
     public Set<BlockPos> getFrame() {
-        throw new NotImplementedException("Prism.getFrame() not implemented yet");
+        return Set.of();
     }
+
+    @Override
+    public Set<BlockPos> getMinimalOutline() {
+        return Set.of();
+    }
+
 
     @Override
     public boolean containsOther(IMarkableArea other) {

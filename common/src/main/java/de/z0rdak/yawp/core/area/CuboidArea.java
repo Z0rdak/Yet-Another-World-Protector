@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.constants.Constants;
+import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import de.z0rdak.yawp.util.AreaUtil;
 import de.z0rdak.yawp.util.NbtCompatHelper;
@@ -266,6 +267,26 @@ public class CuboidArea extends MarkedArea {
         return Stream.of(p12, p34, p56, p78, p15, p26, p37, p48, p13, p24, p57, p68)
                 .flatMap(Set::stream)
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<BlockPos> getMinimalOutline() {
+        Set<BlockPos> corners = new HashSet<>();
+        int minX = this.area.minX();
+        int minY = this.area.minY();
+        int minZ = this.area.minZ();
+        int maxX = this.area.maxX();
+        int maxY = this.area.maxY();
+        int maxZ = this.area.maxZ();
+        corners.add(new BlockPos(minX, minY, minZ));
+        corners.add(new BlockPos(minX, minY, maxZ));
+        corners.add(new BlockPos(minX, maxY, minZ));
+        corners.add(new BlockPos(minX, maxY, maxZ));
+        corners.add(new BlockPos(maxX, minY, minZ));
+        corners.add(new BlockPos(maxX, minY, maxZ));
+        corners.add(new BlockPos(maxX, maxY, minZ));
+        corners.add(new BlockPos(maxX, maxY, maxZ));
+        return corners;
     }
 
     @Override

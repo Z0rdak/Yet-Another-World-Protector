@@ -29,6 +29,7 @@ public interface IMarkableArea {
      * The frame is the minimum required blocks to give a rough outline o the marked area
      */
     Set<BlockPos> getFrame();
+    Set<BlockPos> getMinimalOutline();
 
     boolean containsOther(IMarkableArea other);
 

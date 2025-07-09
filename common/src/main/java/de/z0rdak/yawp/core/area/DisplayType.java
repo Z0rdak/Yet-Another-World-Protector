@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 public enum DisplayType {
     FRAME("Frame"),
     HULL("Hull"),
-    CENTER("Center"),
     MINIMAL("Minimal"),
     MARKED("Marked");
 
@@ -27,7 +26,6 @@ public enum DisplayType {
         return switch (displayType.toLowerCase()) {
             case "frame" -> FRAME;
             case "hull" -> HULL;
-            case "center" -> CENTER;
             case "minimal" -> MINIMAL;
             case "marked" -> MARKED;
             default -> throw new IllegalStateException("Unexpected value: " + displayType.toLowerCase());

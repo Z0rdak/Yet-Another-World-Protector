@@ -70,10 +70,7 @@ public class SphereArea extends CenteredArea {
 
     @Override
     public Set<BlockPos> getFrame() {
-        Set<BlockPos> frameBlocks = new HashSet<>();
-        frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, 0, Direction.Axis.X, this::isHullBlock));
-        frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, 0, Direction.Axis.Y, this::isHullBlock));
-        frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, 0, Direction.Axis.Z, this::isHullBlock));
+        Set<BlockPos> frameBlocks = this.getMinimalOutline();
 
         int halfRadius = this.radius / 2;
         frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, halfRadius, Direction.Axis.X, this::isHullBlock));
@@ -82,6 +79,15 @@ public class SphereArea extends CenteredArea {
         frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, -halfRadius, Direction.Axis.Y, this::isHullBlock));
         frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, halfRadius, Direction.Axis.Z, this::isHullBlock));
         frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, -halfRadius, Direction.Axis.Z, this::isHullBlock));
+        return frameBlocks;
+    }
+
+    @Override
+    public Set<BlockPos> getMinimalOutline() {
+        Set<BlockPos> frameBlocks = new HashSet<>();
+        frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, 0, Direction.Axis.X, this::isHullBlock));
+        frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, 0, Direction.Axis.Y, this::isHullBlock));
+        frameBlocks.addAll(AreaUtil.getSliceBlocks(this.center, this.radius, 0, Direction.Axis.Z, this::isHullBlock));
         return frameBlocks;
     }
 
