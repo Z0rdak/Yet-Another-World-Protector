@@ -7,18 +7,18 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.api.core.IDimensionRegionApi;
 import de.z0rdak.yawp.api.core.RegionManager;
-import de.z0rdak.yawp.api.core.RegionVisualization;
+import de.z0rdak.yawp.api.core.VisualizationManager;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.core.area.DisplayType;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.util.text.messages.multiline.MultiLineMessage;
 import de.z0rdak.yawp.util.text.messages.pagination.InvalidPageNumberException;
 import de.z0rdak.yawp.util.text.messages.pagination.RegionsInDimensionPagination;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 
@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.api.MessageSender.sendError;
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
+import static de.z0rdak.yawp.commands.RegionCommands.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 
 
@@ -41,17 +42,22 @@ class PlayerCommands {
                 .then(literal(HULL)
                         .then(Commands.argument(LOCAL.toString(), StringArgumentType.word())
                                 .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestionsIn(ctx, builder, ctx.getSource().getLevel()))
-                                .executes(ctx -> RegionCommands.showRegionArea(ctx, getRegionIn(ctx, ctx.getSource().getLevel()), DisplayType.HULL)))
+                                .executes(ctx -> showRegion(ctx, getRegionIn(ctx, ctx.getSource().getLevel()), DisplayType.HULL)))
                 )
                 .then(literal(FRAME)
                         .then(Commands.argument(LOCAL.toString(), StringArgumentType.word())
                                 .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestionsIn(ctx, builder, ctx.getSource().getLevel()))
-                                .executes(ctx -> RegionCommands.showRegionArea(ctx, getRegionIn(ctx, ctx.getSource().getLevel()), DisplayType.FRAME)))
+                                .executes(ctx -> showRegion(ctx, getRegionIn(ctx, ctx.getSource().getLevel()), DisplayType.FRAME)))
                 )
                 .then(literal(HIDE)
                         .then(Commands.argument(LOCAL.toString(), StringArgumentType.word())
                                 .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestionsIn(ctx, builder, ctx.getSource().getLevel()))
-                                .executes(ctx -> RegionCommands.hideRegion(ctx, getRegionIn(ctx, ctx.getSource().getLevel()))))
+                                .executes(ctx -> hideRegion(ctx, getRegionIn(ctx, ctx.getSource().getLevel()), DisplayType.FRAME))
+                                .then(Commands.argument(STYLE.toString(), StringArgumentType.word())
+                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(DisplayType.entries(), builder))
+                                        .executes(ctx -> hideRegion(ctx, getRegionIn(ctx, ctx.getSource().getLevel()), getDisplayTypeArgument(ctx)))
+                                )
+                        )
                 )
                 .then(literal(HIDE_ALL).executes(PlayerCommands::hideRegions))
                 .then(literal(HIDE_NEAR)
@@ -110,9 +116,8 @@ class PlayerCommands {
         if (maybeDimRegionApi.isPresent()) {
             IDimensionRegionApi dimRegionApi = maybeDimRegionApi.get();
             List<IMarkableRegion> regionsAround = dimRegionApi.getRegionsAround(player.blockPosition(), blockRadius);
-            regionsAround.forEach(region -> {
-                RegionVisualization.show(level, region, displayType);
-            });
+            // TODO: Only show regions the players has permission for?
+            // regionsAround.forEach(region -> VisualizationManager.show(region, displayType));
             // TODO: cmd feedback
             return 0;
         } else {
@@ -127,7 +132,8 @@ class PlayerCommands {
         if (maybeDimRegionApi.isPresent()) {
             IDimensionRegionApi dimRegionApi = maybeDimRegionApi.get();
             List<IMarkableRegion> regionsAround = dimRegionApi.getAllLocalRegions().stream().toList();
-            regionsAround.forEach(region -> RegionVisualization.hide(level, region));
+
+            //regionsAround.forEach(region -> VisualizationManager.hide(level, region));
             // TODO: cmd feedback
             return 0;
         } else {
@@ -142,7 +148,7 @@ class PlayerCommands {
         if (maybeDimRegionApi.isPresent()) {
             IDimensionRegionApi dimRegionApi = maybeDimRegionApi.get();
             List<IMarkableRegion> regionsAround = dimRegionApi.getRegionsAround(player.blockPosition(), blockRadius);
-            regionsAround.forEach(region -> RegionVisualization.hide(level, region));
+            //regionsAround.forEach(region -> VisualizationManager.hide(level, region));
             // TODO: cmd feedback
             return 0;
         } else {
