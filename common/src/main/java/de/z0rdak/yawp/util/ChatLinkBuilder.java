@@ -17,12 +17,13 @@ import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.text.Messages;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.Collection;
@@ -413,6 +414,17 @@ public class ChatLinkBuilder {
         String teleportCmd = buildTeleportCmd(dim, "@s", target);
         MutableComponent text = Component.translatableWithFallback("cli.msg.info.region.area.tp.block.link.text", "%s", buildBlockPosLinkText(target));
         MutableComponent hover = Component.translatableWithFallback("cli.msg.info.region.area.tp.block.link.hover", "Teleport to block");
+        return buildExecuteCmdComponent(text, hover, teleportCmd, RUN_COMMAND, TP_COLOR);
+    }
+
+    public static MutableComponent buildDimensionalBlockTpLink(ResourceKey<Level> dim, BlockPos target, MutableComponent text) {
+        String teleportCmd = buildTeleportCmd(dim, "@s", target);
+        MutableComponent hover = Component.translatableWithFallback("cli.msg.info.region.area.tp.block.link.hover", "Teleport to block");
+        return buildExecuteCmdComponent(text, hover, teleportCmd, RUN_COMMAND, TP_COLOR);
+    }
+
+    public static MutableComponent buildDimensionalBlockTpLink(ResourceKey<Level> dim, BlockPos target, MutableComponent text, MutableComponent hover) {
+        String teleportCmd = buildTeleportCmd(dim, "@s", target);
         return buildExecuteCmdComponent(text, hover, teleportCmd, RUN_COMMAND, TP_COLOR);
     }
 
