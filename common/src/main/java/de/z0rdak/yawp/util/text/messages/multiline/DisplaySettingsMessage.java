@@ -1,8 +1,6 @@
 package de.z0rdak.yawp.util.text.messages.multiline;
 
-import de.z0rdak.yawp.api.commands.CommandConstants;
 import de.z0rdak.yawp.core.area.BlockDisplayProperties;
-import de.z0rdak.yawp.core.area.TeleportAnchors;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.util.text.Messages;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -42,7 +40,7 @@ public class DisplaySettingsMessage implements MultiLineMessage<BlockDisplayProp
     @Override
     public List<Component> getLines() {
         infoLines.clear();
-        var header = buildHeader(Component.translatableWithFallback("cli.msg.info.header.of", "== %s of %s ==", buildRegionDisplaySettingsLink(region), buildRegionInfoLink(region)));
+        var header = buildHeader(Component.translatableWithFallback("cli.msg.info.header.of", "== %s of %s ==", buildDisplaySettingsLink(region), buildRegionInfoLink(region)));
         var blockSubject = Component.translatableWithFallback("cli.msg.info.region.display.block", "Block");
         var glowSubject = Component.translatableWithFallback("cli.msg.info.region.display.glow", "Glow");
         var lightLevelSubject = Component.translatableWithFallback("cli.msg.info.region.display.light-level", "Light-Level");
