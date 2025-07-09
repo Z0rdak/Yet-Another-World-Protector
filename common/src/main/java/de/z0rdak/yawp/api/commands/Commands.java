@@ -1,16 +1,21 @@
 package de.z0rdak.yawp.api.commands;
 
 import de.z0rdak.yawp.constants.Constants;
+import de.z0rdak.yawp.core.area.DisplayType;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.group.GroupType;
+import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.platform.Services;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
+import static de.z0rdak.yawp.util.ChatComponentBuilder.commandBlockPosStr;
 
 public final class Commands {
 
@@ -116,6 +121,61 @@ public final class Commands {
         return buildRegionCmd(region, INFO.toString());
     }
 
+
+    public static String buildDisplayCommand(IProtectedRegion region) {
+        return buildRegionCmd(region, DISPLAY.toString());
+    }
+
+    public static String buildDisplaySubCommand(IProtectedRegion region, String subCmd) {
+        String baseCmd = buildDisplayCommand(region);
+        return appendSubCommand(baseCmd, subCmd);
+    }
+
+    public static String buildSetDisplayBlockCommand(IProtectedRegion region) {
+        String subCmd = buildSubCmdStr(BLOCK.toString(), "");
+        return buildDisplaySubCommand(region, subCmd);
+    }
+
+    public static String buildSetDisplayBlockCommand(IProtectedRegion region, ResourceLocation block) {
+        String subCmd = buildSubCmdStr(BLOCK.toString(), block.toString());
+        return buildDisplaySubCommand(region, subCmd);
+    }
+
+    public static String buildSetDisplayGlowCommand(IProtectedRegion region, boolean on) {
+        String subCmd = buildSubCmdStr(GLOW.toString(), Boolean.toString(on));
+        return buildDisplaySubCommand(region, subCmd);
+    }
+
+    public static String buildSetDisplayLightLevelCommand(IProtectedRegion region, int lightLevel) {
+        String subCmd = buildSubCmdStr(LIGHT_LEVEL.toString(), String.valueOf(lightLevel));
+        return buildDisplaySubCommand(region, subCmd);
+    }
+
+    public static String buildSetDisplayLightLevelCommand(IProtectedRegion region) {
+        String subCmd = buildSubCmdStr(LIGHT_LEVEL.toString(), "");
+        return buildDisplaySubCommand(region, subCmd);
+    }
+
+    public static String buildDisplayHideCommand(IProtectedRegion region) {
+        String subCmd = buildSubCmdStr(HIDE.toString());
+        return buildDisplaySubCommand(region, subCmd);
+    }
+
+    public static String buildDisplayHideChildrenCommand(IProtectedRegion region) {
+        String subCmd = buildSubCmdStr(HIDE.toString(), CHILDREN.toString());
+        return buildDisplaySubCommand(region, subCmd);
+    }
+
+    public static String buildDisplayHideIntersectingCommand(IProtectedRegion region) {
+        String subCmd = buildSubCmdStr(HIDE.toString(), INTERSECTING.toString());
+        return buildDisplaySubCommand(region, subCmd);
+    }
+
+    public static String buildDisplayShowCommand(IProtectedRegion region, DisplayType displayType) {
+        String subCmd = buildSubCmdStr(SHOW.toString(), displayType.name);
+        return buildDisplaySubCommand(region, subCmd);
+    }
+
     public static String buildRegionStateCmd(IProtectedRegion region) {
         return buildRegionCmd(region, STATE.toString());
     }
@@ -189,6 +249,52 @@ public final class Commands {
         String subCmd = buildSubCmdStr(FLAG.toString(), flag);
         return buildAddCommand(region, subCmd);
     }
+
+    public static String buildTeleportAnchorCommand(IProtectedRegion region) {
+        return buildRegionCmd(region, TP_ANCHOR.toString());
+    }
+
+    public static String buildTeleportAnchorSubCommand(IMarkableRegion region, String subCmd) {
+        String baseCmd = buildTeleportAnchorCommand(region);
+        return appendSubCommand(baseCmd, subCmd);
+    }
+
+    public static String buildSuggestRenameTpAnchorCommand(IMarkableRegion region, String name) {
+        String subCmd = buildSubCmdStr(RENAME.toString(), name, "");
+        return buildTeleportAnchorSubCommand(region, subCmd);
+    }
+
+    public static String buildRenameTpAnchorCommand(IMarkableRegion region, String name, String newName) {
+        String subCmd = buildSubCmdStr(RENAME.toString(), name, newName);
+        return buildTeleportAnchorSubCommand(region, subCmd);
+    }
+
+    public static String buildSuggestUpdateTpAnchorCommand(IMarkableRegion region, String name) {
+        String subCmd = buildSubCmdStr(SET.toString(), name, "");
+        return buildTeleportAnchorSubCommand(region, subCmd);
+    }
+
+    public static String buildUpdateTpAnchorCommand(IMarkableRegion region, String name, BlockPos pos) {
+        String subCmd = buildSubCmdStr(SET.toString(), name, commandBlockPosStr(pos));
+        return buildTeleportAnchorSubCommand(region, subCmd);
+    }
+
+    public static String buildAddTeleportAnchorCommand(IMarkableRegion region, String name, BlockPos pos) {
+        String subCmd = buildSubCmdStr(TP_ANCHOR.toString(), name, commandBlockPosStr(pos));
+        return buildAddCommand(region, subCmd);
+    }
+
+    public static String buildSuggestAddTeleportAnchorCommand(IMarkableRegion region) {
+        String subCmd = buildSubCmdStr(TP_ANCHOR.toString(), "");
+        return buildAddCommand(region, subCmd);
+    }
+
+    public static String buildRemoveTeleportAnchorCommand(IMarkableRegion region, String name) {
+        String subCmd = buildSubCmdStr(TP_ANCHOR.toString(), name);
+        return buildRemoveCommand(region, subCmd);
+    }
+
+
 
     public static String buildListLocalRegionCommand(ResourceKey<Level> dim) {
         return buildCommandStr(DIM.toString(), dim.location().toString(), LIST.toString(), LOCAL.toString());
