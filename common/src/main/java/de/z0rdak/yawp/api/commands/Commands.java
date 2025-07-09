@@ -127,12 +127,21 @@ public final class Commands {
         return buildRegionCmd(region, DISPLAY.toString());
     }
 
-    public static String buildVisualizationCommand(IMarkableRegion region) {
-        return buildRegionCmd(region, VISUALIZATION.toString());
+    public static String buildShowCommand(IMarkableRegion region) {
+        return buildRegionCmd(region, SHOW.toString());
     }
 
-    public static String buildVisualizationSubCommand(IMarkableRegion region, String subCmd) {
-        String baseCmd = buildVisualizationCommand(region);
+    public static String buildShowSubCommand(IMarkableRegion region, String subCmd) {
+        String baseCmd = buildShowCommand(region);
+        return appendSubCommand(baseCmd, subCmd);
+    }
+
+    public static String buildHideCommand(IMarkableRegion region) {
+        return buildRegionCmd(region, HIDE.toString());
+    }
+
+    public static String buildHideSubCommand(IMarkableRegion region, String subCmd) {
+        String baseCmd = buildHideCommand(region);
         return appendSubCommand(baseCmd, subCmd);
     }
 
@@ -167,38 +176,38 @@ public final class Commands {
     }
 
     public static String buildVisualizationHideCommand(IMarkableRegion region, DisplayType displayType) {
-        String subCmd = buildSubCmdStr(HIDE.toString(), displayType.name);
-        return buildVisualizationSubCommand(region, subCmd);
+        String subCmd = buildSubCmdStr(LOCAL.toString(), displayType.name);
+        return buildHideSubCommand(region, subCmd);
     }
 
     public static String buildVisualizationShowCommand(IMarkableRegion region, DisplayType displayType) {
-        String subCmd = buildSubCmdStr(SHOW.toString(), displayType.name);
-        return buildVisualizationSubCommand(region, subCmd);
+        String subCmd = buildSubCmdStr(LOCAL.toString(), displayType.name);
+        return buildShowSubCommand(region, subCmd);
     }
 
     public static String buildAdvancedVisualizationShowCommand(IMarkableRegion region, DisplayType displayType, ResourceLocation block, boolean glow, int lightLevel) {
-        String subCmd = buildSubCmdStr(SHOW.toString(), displayType.name, block.toString(), String.valueOf(glow), String.valueOf(lightLevel));
-        return buildVisualizationSubCommand(region, subCmd);
+        String subCmd = buildSubCmdStr(LOCAL.toString(), displayType.name, block.toString(), String.valueOf(glow), String.valueOf(lightLevel));
+        return buildShowSubCommand(region, subCmd);
     }
 
     public static String buildVisualizationHideHierarchyCommand(IMarkableRegion region) {
-        String subCmd = buildSubCmdStr(HIDE.toString(), HIERARCHY.toString());
-        return buildVisualizationSubCommand(region, subCmd);
+        String subCmd = buildSubCmdStr(HIERARCHY.toString());
+        return buildHideSubCommand(region, subCmd);
     }
 
     public static String buildVisualizationShowHierarchyCommand(IMarkableRegion region) {
-        String subCmd = buildSubCmdStr(SHOW.toString(), HIERARCHY.toString());
-        return buildVisualizationSubCommand(region, subCmd);
+        String subCmd = buildSubCmdStr(HIERARCHY.toString());
+        return buildShowSubCommand(region, subCmd);
     }
 
     public static String buildVisualizationHideIntersectingCommand(IMarkableRegion region) {
-        String subCmd = buildSubCmdStr(HIDE.toString(), INTERSECTING.toString());
-        return buildVisualizationSubCommand(region, subCmd);
+        String subCmd = buildSubCmdStr(INTERSECTING.toString());
+        return buildHideSubCommand(region, subCmd);
     }
 
     public static String buildVisualizationShowIntersectingCommand(IMarkableRegion region) {
-        String subCmd = buildSubCmdStr(SHOW.toString(), INTERSECTING.toString());
-        return buildVisualizationSubCommand(region, subCmd);
+        String subCmd = buildSubCmdStr(INTERSECTING.toString());
+        return buildShowSubCommand(region, subCmd);
     }
 
     public static String buildRegionStateCmd(IProtectedRegion region) {
@@ -275,12 +284,12 @@ public final class Commands {
         return buildAddCommand(region, subCmd);
     }
 
-    public static String buildTeleportAnchorCommand(IProtectedRegion region) {
+    public static String buildTeleportAnchorListCommand(IProtectedRegion region) {
         return buildRegionCmd(region, TP_ANCHOR.toString());
     }
 
     public static String buildTeleportAnchorSubCommand(IMarkableRegion region, String subCmd) {
-        String baseCmd = buildTeleportAnchorCommand(region);
+        String baseCmd = buildTeleportAnchorListCommand(region);
         return appendSubCommand(baseCmd, subCmd);
     }
 
