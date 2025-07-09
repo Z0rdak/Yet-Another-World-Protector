@@ -28,11 +28,12 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.commands.data.EntityDataAccessor;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import org.jetbrains.annotations.Nullable;
@@ -177,11 +178,11 @@ class DimensionCommands {
     private static int nukeDisplayEntities(CommandContext<CommandSourceStack> ctx, ServerLevel level) {
         var entities = level.getEntities(EntityTypeTest.forClass(Entity.class),
                 (entity) -> {
-            // TODO: Filter for tag with 'yawp_display'
-                    return entity instanceof Display.BlockDisplay;
-
-
-        });
+                    CompoundTag entityTag = new EntityDataAccessor(entity).getData();
+                    CompoundTag customDataTag = entityTag.getCompound("data");
+                    String string = customDataTag.getString("yawp_display");
+                    return !string.isEmpty();
+                });
 
         var entityAmount = entities.size();
         entities.forEach(e -> e.remove(Entity.RemovalReason.DISCARDED));
