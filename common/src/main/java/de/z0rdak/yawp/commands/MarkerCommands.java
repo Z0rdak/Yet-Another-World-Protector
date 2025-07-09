@@ -134,8 +134,8 @@ public final class MarkerCommands {
                     .forEach(flag -> region.addFlag(new BooleanFlag(flag)));
             dimCache.addLocal(parentRegion, region);
             LocalRegions.ensureHigherRegionPriorityFor(region, Services.REGION_CONFIG.getDefaultPriority());
-            RegionManager.get().save();
-            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.success", "Successfully created region %s (with parent %s)", buildRegionInfoLink(region), buildRegionInfoLink(parentRegion)));
+            RegionDataManager.save();
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.success", "Successfully created region %s (parent: %s)", buildRegionInfoLink(region), buildRegionInfoLink(parentRegion)));
             return 0;
         } else {
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.local.deny", "You don't have the permission to create a region in the region %s!", buildRegionInfoLink(parentRegion)));
@@ -176,7 +176,7 @@ public final class MarkerCommands {
                         BlockDisplayProperty glowingRedStainedGlassFrame = new BlockDisplayProperty("red_stained_glass", true, false);
                         CompoundTag displayTag = RegionOutlineBuilder.buildBlockDisplayTag(glowingRedStainedGlassFrame);
                         Entity entity = RegionOutlineBuilder.buildBlockDisplay(level, blockPos, displayTag);
-                        
+
                         if (entity != null) {
                             // TODO: region data in custom data
                             CustomData customData = entity.get(CUSTOM_DATA);
