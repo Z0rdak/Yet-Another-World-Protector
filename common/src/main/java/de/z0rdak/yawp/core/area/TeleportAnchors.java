@@ -70,11 +70,18 @@ public class TeleportAnchors implements INbtSerializable<CompoundTag> {
 
     @Override
     public CompoundTag serializeNBT() {
-        return null;
+        CompoundTag tag = new CompoundTag();
+        this.tpAnchors.forEach((k, v) -> {
+            tag.put(k, v.serializeNBT());
+        });
+        return tag;
     }
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
-
+        this.tpAnchors = new HashMap<>();
+        nbt.getAllKeys().forEach((k) -> {
+            this.tpAnchors.put(k, new TeleportAnchor(nbt.getCompound(k)));
+        });
     }
 }
