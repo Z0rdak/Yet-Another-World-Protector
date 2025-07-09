@@ -34,7 +34,6 @@ import static de.z0rdak.yawp.api.commands.Commands.*;
 import static de.z0rdak.yawp.handler.HandlerUtil.getFlagMapRecursive;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
 import static de.z0rdak.yawp.util.text.Messages.*;
-import static de.z0rdak.yawp.util.text.messages.multiline.DisplaySettingsMessage.buildRegionDisplaySettingsLink;
 import static net.minecraft.ChatFormatting.*;
 import static net.minecraft.network.chat.ClickEvent.Action.*;
 
@@ -109,7 +108,7 @@ public class ChatLinkBuilder {
     public static MutableComponent buildRegionAreaActionLinks(IMarkableRegion region) {
         // [set area] [show area] [<=expand=>] [<=max=>]
         MutableComponent text = Component.translatableWithFallback("cli.msg.info.region.area.show.link.text", "show area");
-        return Messages.substitutable("%s %s %s", buildAreaUpdateLink(region), buildRegionDisplaySettingsLink(region, text), buildRegionAreaExpandLink(region));
+        return Messages.substitutable("%s %s %s", buildAreaUpdateLink(region), buildRegionVisualizationLink(region, text), buildRegionAreaExpandLink(region));
     }
 
     public static MutableComponent buildWikiLink() {
@@ -137,6 +136,35 @@ public class ChatLinkBuilder {
         MutableComponent spatialPropLinkText = Component.translatableWithFallback("cli.msg.info.region.area.link.text", "Area Properties");
         MutableComponent spatialPropHoverText = Component.translatableWithFallback("cli.msg.info.region.area.link.hover", "Show region area properties for %s", region.getName());
         return buildExecuteCmdComponent(spatialPropLinkText, spatialPropHoverText, showSpatialPropLink, RUN_COMMAND, LINK_COLOR);
+    }
+
+    public static MutableComponent buildTeleportAnchorLink(IMarkableRegion region) {
+        String cmd = buildTeleportAnchorCommand(region);
+        MutableComponent text = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.link.text", "Teleport Anchors");
+        MutableComponent hover = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.link.hover", "Click to show list of teleport anchors in %s", region.getName());
+        return buildExecuteCmdComponent(text, hover, cmd, RUN_COMMAND, LINK_COLOR);
+    }
+
+    public static MutableComponent buildDisplaySettingsLink(IMarkableRegion region) {
+        MutableComponent text = Component.translatableWithFallback("cli.msg.info.region.display.link.text", "Display settings");
+        return buildDisplaySettingsLink(region, text);
+    }
+
+    public static MutableComponent buildRegionVisualizationLink(IMarkableRegion region) {
+        MutableComponent text = Component.translatableWithFallback("cli.msg.info.region.visualization.link.text", "Visualization");
+       return buildRegionVisualizationLink(region, text);
+    }
+
+    public static MutableComponent buildRegionVisualizationLink(IMarkableRegion region, MutableComponent text) {
+        String showDisplayPropLink = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), VISUALIZATION.toString());
+        MutableComponent hover = Component.translatableWithFallback("cli.msg.info.region.visualization.link.hover", "Click to show visualization options for '%s'", region.getName());
+        return buildExecuteCmdComponent(text, hover, showDisplayPropLink, RUN_COMMAND, LINK_COLOR);
+    }
+
+    public static MutableComponent buildDisplaySettingsLink(IMarkableRegion region, MutableComponent text) {
+        String showDisplayPropLink = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), DISPLAY.toString());
+        MutableComponent hover = Component.translatableWithFallback("cli.msg.info.region.display.link.hover", "Click to show display settings for '%s'", region.getName());
+        return buildExecuteCmdComponent(text, hover, showDisplayPropLink, RUN_COMMAND, LINK_COLOR);
     }
 
     public static MutableComponent buildGroupLink(IProtectedRegion region, String group, int groupSize) {
@@ -418,7 +446,7 @@ public class ChatLinkBuilder {
 
     public static MutableComponent buildDimensionalBlockTpLink(ResourceKey<Level> dim, BlockPos target, MutableComponent text) {
         String teleportCmd = buildTeleportCmd(dim, "@s", target);
-        MutableComponent hover = Component.translatableWithFallback("cli.msg.info.region.area.tp.block.link.hover", "Teleport to block");
+        MutableComponent hover = Component.translatableWithFallback("cli.msg.info.region.area.tp.block.link.hover", "Click to teleport to block");
         return buildExecuteCmdComponent(text, hover, teleportCmd, RUN_COMMAND, TP_COLOR);
     }
 
