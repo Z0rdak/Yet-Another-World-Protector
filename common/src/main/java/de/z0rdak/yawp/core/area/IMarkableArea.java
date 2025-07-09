@@ -22,6 +22,7 @@ public interface IMarkableArea extends INbtSerializable<CompoundTag> {
 
     Set<BlockPos> getHull();
     Set<BlockPos> getFrame();
+    Set<BlockPos> getMinimalOutline();
 
     boolean containsOther(IMarkableArea other);
 

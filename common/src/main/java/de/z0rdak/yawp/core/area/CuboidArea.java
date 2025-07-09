@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.core.area;
 
+import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import de.z0rdak.yawp.util.AreaUtil;
 import de.z0rdak.yawp.util.NbtCompatHelper;
@@ -10,10 +11,7 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.apache.commons.lang3.NotImplementedException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -268,9 +266,34 @@ public class CuboidArea extends AbstractArea {
         Set<BlockPos> p24 = blocksBetweenOnAxis(vertices.get(1), vertices.get(3), Direction.Axis.Z);
         Set<BlockPos> p57 = blocksBetweenOnAxis(vertices.get(4), vertices.get(6), Direction.Axis.Z);
         Set<BlockPos> p68 = blocksBetweenOnAxis(vertices.get(5), vertices.get(7), Direction.Axis.Z);
-        return Stream.of(p12, p34, p56, p78, p15, p26, p37, p48, p13, p24, p57, p68)
+        Set<BlockPos> frame = Stream.of(p12, p34, p56, p78, p15, p26, p37, p48, p13, p24, p57, p68)
                 .flatMap(Set::stream)
                 .collect(Collectors.toSet());
+
+        Set<BlockPos> boundingBoxFrame = AreaUtil.getBoundingBoxFrame(this.area);
+        Constants.LOGGER.info("Frame old: {}", frame);
+        Constants.LOGGER.info("Frame new: {}", boundingBoxFrame.size());
+        return frame;
+    }
+
+    @Override
+    public Set<BlockPos> getMinimalOutline() {
+        Set<BlockPos> corners = new HashSet<>();
+        int minX = this.area.minX();
+        int minY = this.area.minY();
+        int minZ = this.area.minZ();
+        int maxX = this.area.maxX();
+        int maxY = this.area.maxY();
+        int maxZ = this.area.maxZ();
+        corners.add(new BlockPos(minX, minY, minZ));
+        corners.add(new BlockPos(minX, minY, maxZ));
+        corners.add(new BlockPos(minX, maxY, minZ));
+        corners.add(new BlockPos(minX, maxY, maxZ));
+        corners.add(new BlockPos(maxX, minY, minZ));
+        corners.add(new BlockPos(maxX, minY, maxZ));
+        corners.add(new BlockPos(maxX, maxY, minZ));
+        corners.add(new BlockPos(maxX, maxY, maxZ));
+        return corners;
     }
 
     @Override
