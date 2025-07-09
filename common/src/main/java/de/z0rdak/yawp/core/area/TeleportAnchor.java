@@ -45,7 +45,7 @@ public class TeleportAnchor implements INbtSerializable<CompoundTag> {
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
-        tag.putString("name", name);
+        tag.putString("name", this.name);
         tag.put("pos",  NbtUtils.writeBlockPos(this.pos));
         return tag;
     }
@@ -54,6 +54,5 @@ public class TeleportAnchor implements INbtSerializable<CompoundTag> {
     public void deserializeNBT(CompoundTag nbt) {
         this.name = nbt.getString("name");
         this.pos = NbtCompatHelper.toBlockPos(nbt, "pos").orElseThrow();
-
     }
 }
