@@ -27,6 +27,8 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.TeamArgument;
 import net.minecraft.commands.arguments.UuidArgument;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
@@ -78,6 +80,18 @@ public class ArgumentUtil {
 
     public static ResourceLocation getDisplayBlockArgument(CommandContext<CommandSourceStack> ctx) {
         return ResourceLocationArgument.getId(ctx, CommandConstants.BLOCK.toString());
+    }
+
+    public static BlockPos getTeleportAnchorPosArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return BlockPosArgument.getSpawnablePos(ctx, TP_ANCHOR.toString());
+    }
+
+    public static String getTeleportAnchorNameArgument(CommandContext<CommandSourceStack> ctx) {
+        return StringArgumentType.getString(ctx, CommandConstants.NAME.toString());
+    }
+
+    public static String getNewTeleportAnchorNameArgument(CommandContext<CommandSourceStack> ctx) {
+        return StringArgumentType.getString(ctx, CommandConstants.RENAME.toString());
     }
 
     public static boolean getDisplayGlowArgument(CommandContext<CommandSourceStack> ctx) {
