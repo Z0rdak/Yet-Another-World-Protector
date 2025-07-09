@@ -19,6 +19,7 @@ import java.util.Optional;
 
 import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
 import static de.z0rdak.yawp.util.ChatLinkBuilder.*;
+
 import static de.z0rdak.yawp.util.text.messages.multiline.RegionStateMessage.buildRegionStateLink;
 import static net.minecraft.ChatFormatting.GOLD;
 
@@ -173,9 +174,20 @@ public class RegionInfoMessage implements MultiLineMessage<IProtectedRegion> {
         regionInfoLines.add(flagsText);
 
         if (region.getRegionType() == RegionType.LOCAL) {
+            var local = (IMarkableRegion) region;
             // Area: [Area]
-            MutableComponent areaText = buildInfoComponent("cli.msg.info.region.area", "Area", buildRegionAreaLink((IMarkableRegion) region));
+            MutableComponent areaText = buildInfoComponent("cli.msg.info.region.area", "Area", buildRegionAreaLink(local));
             regionInfoLines.add(areaText);
+
+            // Visualization: [Visualization] [Settings]
+            var subject = Component.translatableWithFallback("cli.msg.info.region.visualization", "Visualization");
+            var actions = Messages.substitutable("%s %s", buildRegionVisualizationLink(local), buildRegionDisplaySettingsLink(local));
+            var visualization = buildInfoComponent(subject, actions);
+            regionInfoLines.add(visualization);
+
+            // Teleport Anchors: [Teleport Anchors]
+            var tpAnchor = buildInfoComponent("cli.msg.info.region.tp-anchor", "Teleport Anchors", buildTeleportAnchorLink(local));
+            regionInfoLines.add(tpAnchor);
         }
 
         // Groups: [owners], [members], [<listGroups>]
