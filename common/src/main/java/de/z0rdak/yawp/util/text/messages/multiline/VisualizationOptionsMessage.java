@@ -74,8 +74,8 @@ public class VisualizationOptionsMessage implements MultiLineMessage<IMarkableAr
     public static MutableComponent buildShowAdvancedLink(IMarkableRegion region, DisplayType displayType, ResourceLocation block, boolean glow, int lightLevel) {
         var cmd = buildAdvancedVisualizationShowCommand(region, displayType, block, glow, lightLevel);
         var text = Component.translatableWithFallback("cli.msg.info.region.visualization.show.advanced.link.text", "custom");
-        var hover = Component.translatableWithFallback("cli.msg.info.region.visualization.show.advanced.link.hover", "Click to paste custom visualization command for '%s'", displayType.name, buildRegionInfoLink(region));
-        return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, LINK_COLOR);
+        var hover = Component.translatableWithFallback("cli.msg.info.region.visualization.show.advanced.link.hover", "Click to paste custom visualization command for '%s'", displayType.name, region.getName());
+        return buildExecuteCmdLinkWithBrackets(text, hover, cmd, SUGGEST_COMMAND, LINK_COLOR);
     }
 
     public static MutableComponent buildHideLinks(IMarkableRegion region) {
@@ -88,38 +88,38 @@ public class VisualizationOptionsMessage implements MultiLineMessage<IMarkableAr
 
     public static MutableComponent buildShowLink(IMarkableRegion region, DisplayType displayType) {
         var text = Component.translatableWithFallback("cli.msg.info.region.visualization.show.link.text", "%s", displayType.name);
-        var hover = Component.translatableWithFallback("cli.msg.info.region.visualization.show.link.hover", "Click to show %s-Visualization for '%s'", displayType.name, buildRegionInfoLink(region));
-        return buildExecuteCmdComponent(text, hover, buildVisualizationShowCommand(region, displayType), RUN_COMMAND, LINK_COLOR);
+        var hover = Component.translatableWithFallback("cli.msg.info.region.visualization.show.link.hover", "Click to show %s-Visualization for '%s'", displayType.name, region.getName());
+        return buildExecuteCmdLinkWithBrackets(text, hover, buildVisualizationShowCommand(region, displayType), RUN_COMMAND, LINK_COLOR);
     }
 
     public static MutableComponent buildHideLink(IMarkableRegion region, DisplayType displayType) {
         var text = Component.translatableWithFallback("cli.msg.info.region.visualization.hide.link.text", "%s", displayType.name);
-        var hover = Component.translatableWithFallback("cli.msg.info.region.visualization.hide.link.hover", "Click to hide %s-Visualization for '%s'", displayType.name, buildRegionInfoLink(region));
-        return buildExecuteCmdComponent(text, hover, buildVisualizationHideCommand(region, displayType), RUN_COMMAND, LINK_COLOR);
+        var hover = Component.translatableWithFallback("cli.msg.info.region.visualization.hide.link.hover", "Click to hide %s-Visualization for '%s'", displayType.name, region.getName());
+        return buildExecuteCmdLinkWithBrackets(text, hover, buildVisualizationHideCommand(region, displayType), RUN_COMMAND, LINK_COLOR);
     }
 
     public static MutableComponent buildHierarchyShowLink(IMarkableRegion region) {
         var text = Component.translatableWithFallback("cli.msg.info.region.visualization.hierarchy.show.link.text", "Show");
-        var hover = Component.translatableWithFallback("cli.msg.info.region.visualization.hierarchy.show.link.hover", "Click to show visualization for all child regions of '%s'", buildRegionInfoLink(region));
-        return buildExecuteCmdComponent(text, hover, buildVisualizationShowHierarchyCommand(region), RUN_COMMAND, LINK_COLOR);
+        var hover = Component.translatableWithFallback("cli.msg.info.region.visualization.hierarchy.show.link.hover", "Click to show visualization for all child regions of '%s'", region.getName());
+        return buildExecuteCmdLinkWithBrackets(text, hover, buildVisualizationShowHierarchyCommand(region), RUN_COMMAND, LINK_COLOR);
     }
 
     public static MutableComponent buildHierarchyHideLink(IMarkableRegion region) {
         var text = Component.translatableWithFallback("cli.msg.info.region.visualization.hierarchy.hide.link.text", "Hide");
-        var hover = Component.translatableWithFallback("cli.msg.info.region.visualization.hierarchy.hide.link.hover", "Click to hide visualization for all child regions of '%s'", buildRegionInfoLink(region));
-        return buildExecuteCmdComponent(text, hover, buildVisualizationHideHierarchyCommand(region), RUN_COMMAND, LINK_COLOR);
+        var hover = Component.translatableWithFallback("cli.msg.info.region.visualization.hierarchy.hide.link.hover", "Click to hide visualization for all child regions of '%s'", region.getName());
+        return buildExecuteCmdLinkWithBrackets(text, hover, buildVisualizationHideHierarchyCommand(region), RUN_COMMAND, LINK_COLOR);
     }
 
     public static MutableComponent buildIntersectingHideLink(IMarkableRegion region) {
         var text = Component.translatableWithFallback("cli.msg.info.region.visualization.intersecting.hide.link.text", "Hide");
-        var hover = Component.translatableWithFallback("cli.msg.info.region.visualization.intersecting.hide.link.hover", "Click to hide visualization of intersecting regions for '%s'", buildRegionInfoLink(region));
-        return buildExecuteCmdComponent(text, hover, buildVisualizationHideIntersectingCommand(region), RUN_COMMAND, LINK_COLOR);
+        var hover = Component.translatableWithFallback("cli.msg.info.region.visualization.intersecting.hide.link.hover", "Click to hide visualization of intersecting regions for '%s'", region.getName());
+        return buildExecuteCmdLinkWithBrackets(text, hover, buildVisualizationHideIntersectingCommand(region), RUN_COMMAND, LINK_COLOR);
     }
 
     public static MutableComponent buildIntersectingShowLink(IMarkableRegion region) {
         var text = Component.translatableWithFallback("cli.msg.info.region.visualization.intersecting.show.link.text", "Show");
-        var hover = Component.translatableWithFallback("cli.msg.info.region.visualization.intersecting.show.link.hover", "Click to show visualization of intersecting regions for '%s'", buildRegionInfoLink(region));
-        return buildExecuteCmdComponent(text, hover, buildVisualizationShowIntersectingCommand(region), RUN_COMMAND, LINK_COLOR);
+        var hover = Component.translatableWithFallback("cli.msg.info.region.visualization.intersecting.show.link.hover", "Click to show visualization of intersecting regions for '%s'", region.getName());
+        return buildExecuteCmdLinkWithBrackets(text, hover, buildVisualizationShowIntersectingCommand(region), RUN_COMMAND, LINK_COLOR);
     }
 
 
