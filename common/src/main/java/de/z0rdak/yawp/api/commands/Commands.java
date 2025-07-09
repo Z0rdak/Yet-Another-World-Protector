@@ -123,58 +123,82 @@ public final class Commands {
     }
 
 
-    public static String buildDisplayCommand(IProtectedRegion region) {
+    public static String buildDisplayCommand(IMarkableRegion region) {
         return buildRegionCmd(region, DISPLAY.toString());
     }
 
-    public static String buildDisplaySubCommand(IProtectedRegion region, String subCmd) {
+    public static String buildVisualizationCommand(IMarkableRegion region) {
+        return buildRegionCmd(region, VISUALIZATION.toString());
+    }
+
+    public static String buildVisualizationSubCommand(IMarkableRegion region, String subCmd) {
+        String baseCmd = buildVisualizationCommand(region);
+        return appendSubCommand(baseCmd, subCmd);
+    }
+
+    public static String buildDisplaySubCommand(IMarkableRegion region, String subCmd) {
         String baseCmd = buildDisplayCommand(region);
         return appendSubCommand(baseCmd, subCmd);
     }
 
-    public static String buildSetDisplayBlockCommand(IProtectedRegion region) {
+    public static String buildSetDisplayBlockCommand(IMarkableRegion region) {
         String subCmd = buildSubCmdStr(BLOCK.toString(), "");
         return buildDisplaySubCommand(region, subCmd);
     }
 
-    public static String buildSetDisplayBlockCommand(IProtectedRegion region, ResourceLocation block) {
+    public static String buildSetDisplayBlockCommand(IMarkableRegion region, ResourceLocation block) {
         String subCmd = buildSubCmdStr(BLOCK.toString(), block.toString());
         return buildDisplaySubCommand(region, subCmd);
     }
 
-    public static String buildSetDisplayGlowCommand(IProtectedRegion region, boolean on) {
+    public static String buildSetDisplayGlowCommand(IMarkableRegion region, boolean on) {
         String subCmd = buildSubCmdStr(GLOW.toString(), Boolean.toString(on));
         return buildDisplaySubCommand(region, subCmd);
     }
 
-    public static String buildSetDisplayLightLevelCommand(IProtectedRegion region, int lightLevel) {
+    public static String buildSetDisplayLightLevelCommand(IMarkableRegion region, int lightLevel) {
         String subCmd = buildSubCmdStr(LIGHT_LEVEL.toString(), String.valueOf(lightLevel));
         return buildDisplaySubCommand(region, subCmd);
     }
 
-    public static String buildSetDisplayLightLevelCommand(IProtectedRegion region) {
+    public static String buildSetDisplayLightLevelCommand(IMarkableRegion region) {
         String subCmd = buildSubCmdStr(LIGHT_LEVEL.toString(), "");
         return buildDisplaySubCommand(region, subCmd);
     }
 
-    public static String buildDisplayHideCommand(IProtectedRegion region) {
-        String subCmd = buildSubCmdStr(HIDE.toString());
-        return buildDisplaySubCommand(region, subCmd);
+    public static String buildVisualizationHideCommand(IMarkableRegion region, DisplayType displayType) {
+        String subCmd = buildSubCmdStr(HIDE.toString(), displayType.name);
+        return buildVisualizationSubCommand(region, subCmd);
     }
 
-    public static String buildDisplayHideChildrenCommand(IProtectedRegion region) {
-        String subCmd = buildSubCmdStr(HIDE.toString(), CHILDREN.toString());
-        return buildDisplaySubCommand(region, subCmd);
-    }
-
-    public static String buildDisplayHideIntersectingCommand(IProtectedRegion region) {
-        String subCmd = buildSubCmdStr(HIDE.toString(), INTERSECTING.toString());
-        return buildDisplaySubCommand(region, subCmd);
-    }
-
-    public static String buildDisplayShowCommand(IProtectedRegion region, DisplayType displayType) {
+    public static String buildVisualizationShowCommand(IMarkableRegion region, DisplayType displayType) {
         String subCmd = buildSubCmdStr(SHOW.toString(), displayType.name);
-        return buildDisplaySubCommand(region, subCmd);
+        return buildVisualizationSubCommand(region, subCmd);
+    }
+
+    public static String buildAdvancedVisualizationShowCommand(IMarkableRegion region, DisplayType displayType, ResourceLocation block, boolean glow, int lightLevel) {
+        String subCmd = buildSubCmdStr(SHOW.toString(), displayType.name, block.toString(), String.valueOf(glow), String.valueOf(lightLevel));
+        return buildVisualizationSubCommand(region, subCmd);
+    }
+
+    public static String buildVisualizationHideHierarchyCommand(IMarkableRegion region) {
+        String subCmd = buildSubCmdStr(HIDE.toString(), HIERARCHY.toString());
+        return buildVisualizationSubCommand(region, subCmd);
+    }
+
+    public static String buildVisualizationShowHierarchyCommand(IMarkableRegion region) {
+        String subCmd = buildSubCmdStr(SHOW.toString(), HIERARCHY.toString());
+        return buildVisualizationSubCommand(region, subCmd);
+    }
+
+    public static String buildVisualizationHideIntersectingCommand(IMarkableRegion region) {
+        String subCmd = buildSubCmdStr(HIDE.toString(), INTERSECTING.toString());
+        return buildVisualizationSubCommand(region, subCmd);
+    }
+
+    public static String buildVisualizationShowIntersectingCommand(IMarkableRegion region) {
+        String subCmd = buildSubCmdStr(SHOW.toString(), INTERSECTING.toString());
+        return buildVisualizationSubCommand(region, subCmd);
     }
 
     public static String buildRegionStateCmd(IProtectedRegion region) {
