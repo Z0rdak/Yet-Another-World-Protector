@@ -11,7 +11,7 @@ public abstract class AbstractArea implements IMarkableArea {
     protected AbstractArea(AreaType areaType) {
         this.areaType = areaType;
         this.displayProperties = new BlockDisplayProperties(
-                BlockDisplayProperties.DEFAULT_BLOCK,
+                BlockDisplayProperties.randomFromDefault(),
                 BlockDisplayProperties.DEFAULT_GLOW,
                 BlockDisplayProperties.DEFAULT_LIGHT_LEVEL
         );
