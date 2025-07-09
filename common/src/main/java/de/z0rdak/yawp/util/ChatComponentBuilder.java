@@ -252,8 +252,8 @@ public class ChatComponentBuilder {
                 break;
             }
             case DIMENSION: {
-                MutableComponent removeLink = Component.empty();
-                MutableComponent regionInfoLinkWithIndicator = Component.empty();
+                MutableComponent removeLink;
+                MutableComponent regionInfoLinkWithIndicator;
                 MutableComponent childCompInfo = Component.translatableWithFallback("cli.msg.info.dim.region.child.hover", "This is a direct child region of the Dimensional Region");
                 MutableComponent childIndicator = buildTextWithHoverAndBracketsMsg(Component.literal("*"), childCompInfo, GOLD);
                 if (parent.hasChild(region)) {
@@ -262,7 +262,7 @@ public class ChatComponentBuilder {
                     regionInfoLinkWithIndicator = Messages.substitutable("%s", buildRegionInfoLink(region));
                 }
                 removeLink = buildDimSuggestRegionRemovalLink((IMarkableRegion) region);
-                regionRemoveLink = Messages.substitutable("%s %s", removeLink, buildRegionInfoAndTpLink((IMarkableRegion) region, regionInfoLinkWithIndicator));
+                regionRemoveLink = Messages.substitutable("%s %s", removeLink, regionInfoLinkWithIndicator);
                 break;
             }
             case LOCAL: {

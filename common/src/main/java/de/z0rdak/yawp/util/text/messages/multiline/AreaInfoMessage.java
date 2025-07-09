@@ -34,18 +34,15 @@ public class AreaInfoMessage implements MultiLineMessage<IMarkableArea> {
     @Override
     public List<Component> getLines() {
         // == Area for [<region>]  ==
-        // Location: [region] @ [X,Y,Z]
         // AreaType: Cuboid, Size: X=69, Y=10, Z=42
         // Marked Blocks: [X,Y,Z], ..., [X,Y,Z]
-        // Actions: [set area] [set TP] [show area] [<=expand=>] [<=max=>]
+        // Actions: [set area] [show area] [<=expand=>] [<=max=>]
         regionInfoLines.clear();
         MutableComponent header = buildHeader(Component.translatableWithFallback("cli.msg.info.header.of", "== %s of %s ==", buildRegionAreaLink(region), buildRegionInfoLink(region)));
-        MutableComponent location = buildInfoComponent("cli.msg.info.region.area.location", "Location", buildRegionTeleportLink(region, null));
         MutableComponent area = buildInfoComponent("cli.msg.info.region.area.area", "Area", buildRegionAreaDetailComponent(region));
         MutableComponent blocks = buildInfoComponent("cli.msg.info.region.area.marked", "Marked Blocks", buildAreaMarkedBlocksTpLinks(region));
         MutableComponent actions = buildInfoComponent("cli.msg.info.region.area.actions", "Actions", buildRegionAreaActionLinks(region));
         regionInfoLines.add(header);
-        regionInfoLines.add(location);
         regionInfoLines.add(area);
         regionInfoLines.add(blocks);
         regionInfoLines.add(actions);
