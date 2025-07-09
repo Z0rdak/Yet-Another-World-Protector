@@ -17,13 +17,11 @@ import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.text.Messages;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.Collection;
@@ -36,6 +34,7 @@ import static de.z0rdak.yawp.api.commands.Commands.*;
 import static de.z0rdak.yawp.handler.HandlerUtil.getFlagMapRecursive;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
 import static de.z0rdak.yawp.util.text.Messages.*;
+import static de.z0rdak.yawp.util.text.messages.multiline.DisplaySettingsMessage.buildRegionDisplaySettingsLink;
 import static net.minecraft.ChatFormatting.*;
 import static net.minecraft.network.chat.ClickEvent.Action.*;
 
@@ -102,15 +101,15 @@ public class ChatLinkBuilder {
     public static MutableComponent buildAreaUpdateLink(IMarkableRegion region) {
         MutableComponent setAreaLinkText = Component.translatableWithFallback("cli.msg.info.region.area.area.set.link", "set area");
         MutableComponent setAreaLinkHover = Component.translatableWithFallback("cli.msg.info.region.area.area.set.hover", "Update area of region '%s'", region.getName());
-        String blocks = String.join(" ", region.getArea().markedBlocks().stream().map(ChatComponentBuilder::buildBlockCoordinateStr).collect(Collectors.toSet()));
+        String blocks = String.join(" ", region.getArea().markedBlocks().stream().map(ChatComponentBuilder::commandBlockPosStr).collect(Collectors.toSet()));
         String setAreaCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), AREA.toString(), SET.toString(), region.getArea().getAreaType().areaType, blocks);
         return buildExecuteCmdComponent(setAreaLinkText, setAreaLinkHover, setAreaCmd, SUGGEST_COMMAND, LINK_COLOR);
     }
     
     public static MutableComponent buildRegionAreaActionLinks(IMarkableRegion region) {
-        // [set area] [set TP] [show area] [<=expand=>] [<=max=>]
-        return Messages.substitutable("%s %s %s", buildAreaUpdateLink(region), buildRegionSetTpLink(region), buildRegionAreaExpandLink(region));
-        // buildShowAreaToggleLink(region)
+        // [set area] [show area] [<=expand=>] [<=max=>]
+        MutableComponent text = Component.translatableWithFallback("cli.msg.info.region.area.show.link.text", "show area");
+        return Messages.substitutable("%s %s %s", buildAreaUpdateLink(region), buildRegionDisplaySettingsLink(region, text), buildRegionAreaExpandLink(region));
     }
 
     public static MutableComponent buildWikiLink() {
