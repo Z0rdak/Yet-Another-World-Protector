@@ -81,7 +81,6 @@ public enum CommandConstants {
     FRAME("frame"),
     SHOW_NEAR("show-near"),
     DISPLAY("display"),
-    VISUALIZATION("visualization"),
     BLOCK("block"),
     BLOCK_ID("block-id"),
     GLOW("glow"),
