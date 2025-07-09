@@ -25,6 +25,7 @@ public interface IMarkableRegion extends IProtectedRegion {
 
     boolean contains(BlockPos position);
 
+    // TODO: Limit priority overall to [0...1000]
     int getPriority();
 
     AreaType getAreaType();
