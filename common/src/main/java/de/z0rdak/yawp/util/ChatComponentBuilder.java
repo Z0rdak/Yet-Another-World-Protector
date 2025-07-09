@@ -45,7 +45,10 @@ public class ChatComponentBuilder {
     private ChatComponentBuilder() {
     }
 
-    public static String buildBlockCoordinateStr(BlockPos target) {
+    /**
+     * Builds a string from the given block pos which can be used in commands
+     */
+    public static String commandBlockPosStr(BlockPos target) {
         return target.getX() + " " + target.getY() + " " + target.getZ();
     }
 
@@ -58,7 +61,7 @@ public class ChatComponentBuilder {
     }
 
     public static String tinyBlockPos(BlockPos target) {
-        return "[" + buildBlockCoordinateStr(target) + "]";
+        return "[" + commandBlockPosStr(target) + "]";
     }
 
     public static String buildBlockPosLinkText(BlockPos target) {
@@ -294,7 +297,7 @@ public class ChatComponentBuilder {
     }
 
     public static String buildTeleportCmd(ResourceKey<Level> dim, String tpSource, BlockPos target) {
-        return buildExecuteCommandString(dim, "tp " + tpSource + " " + buildBlockCoordinateStr(target));
+        return buildExecuteCommandString(dim, "tp " + tpSource + " " + commandBlockPosStr(target));
     }
 
     /**
