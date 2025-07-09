@@ -22,6 +22,10 @@ public interface MultiLineMessage<T> {
         return new DisplaySettingsMessage(region);
     }
 
+    static VisualizationOptionsMessage visualizationOptions(IMarkableRegion region) {
+        return new VisualizationOptionsMessage(region);
+    }
+
     static RegionInfoMessage regionInfo(IProtectedRegion region) {
         return new RegionInfoMessage(region);
     }
