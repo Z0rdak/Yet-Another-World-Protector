@@ -48,6 +48,54 @@ public final class AreaUtil {
         return pos1.getZ() > pos2.getZ() ? pos1 : pos2;
     }
 
+    public static Set<BlockPos> getBoundingBoxFrame(BoundingBox box) {
+        BlockPos[] corners = new BlockPos[]{
+                new BlockPos(box.minX(), box.minY(), box.minZ()),
+                new BlockPos(box.minX(), box.minY(), box.maxZ()),
+                new BlockPos(box.minX(), box.maxY(), box.minZ()),
+                new BlockPos(box.minX(), box.maxY(), box.maxZ()),
+                new BlockPos(box.maxX(), box.minY(), box.minZ()),
+                new BlockPos(box.maxX(), box.minY(), box.maxZ()),
+                new BlockPos(box.maxX(), box.maxY(), box.minZ()),
+                new BlockPos(box.maxX(), box.maxY(), box.maxZ())
+        };
+
+        int[][] edgePairs = {
+                {0, 1}, {0, 2}, {0, 4},
+                {1, 3}, {1, 5},
+                {2, 3}, {2, 6},
+                {3, 7},
+                {4, 5}, {4, 6},
+                {5, 7},
+                {6, 7}
+        };
+
+        Set<BlockPos> frame = new HashSet<>();
+        for (int[] pair : edgePairs) {
+            frame.addAll(getEdge(corners[pair[0]], corners[pair[1]]));
+        }
+
+        return frame;
+    }
+
+    public static Set<BlockPos> getEdge(BlockPos a, BlockPos b) {
+        Set<BlockPos> result = new HashSet<>();
+
+        int dx = Integer.compare(b.getX(), a.getX());
+        int dy = Integer.compare(b.getY(), a.getY());
+        int dz = Integer.compare(b.getZ(), a.getZ());
+
+        BlockPos current = a;
+        result.add(current);
+
+        while (!current.equals(b)) {
+            current = current.offset(dx, dy, dz);
+            result.add(current);
+        }
+
+        return result;
+    }
+
     public static Set<BlockPos> blocksBetweenOnAxis(BlockPos p1, BlockPos p2, Direction.Axis axis) {
         BoundingBox blockLine = BoundingBox.fromCorners(p1, p2);
         Set<BlockPos> blocks = new HashSet<>();
