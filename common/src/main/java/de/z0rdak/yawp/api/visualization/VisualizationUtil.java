@@ -37,10 +37,24 @@ public final class VisualizationUtil {
         return entity;
     }
 
+    public static Optional<Entity> createTextDisplayEntity(ServerLevel level, String regionName, BlockPos pos, TextDisplayProperties displayProperties) {
+        var entityTag = buildTeleportAnchorTextDisplayTag(regionName, displayProperties);
+        var maybeEntity = EntityType.create(entityTag, level);
+        maybeEntity.ifPresent(e -> e.moveTo(pos.getX(), pos.getY(), pos.getZ(), e.yRotO, e.xRotO));
+        return maybeEntity;
+    }
+
+    public static Optional<Entity> createBlockDisplayEntity(ServerLevel level, String regionName, BlockPos pos, BlockDisplayProperties displayProperties) {
+        var entityTag = buildBlockDisplayTag(regionName, displayProperties);
+        var maybeEntity = EntityType.create(entityTag, level);
+        maybeEntity.ifPresent(e -> e.moveTo(pos.getX(), pos.getY(), pos.getZ(), e.yRotO, e.xRotO));
+        return maybeEntity;
+    }
+
     /**
      * SEE: https://minecraft.wiki/w/Display#Data_values
      */
-    public static CompoundTag buildTeleportAnchorTextDisplayTag(String regionName, String tpAnchorName, TextDisplayProperties properties) {
+    public static CompoundTag buildTeleportAnchorTextDisplayTag(String regionName, TextDisplayProperties properties) {
         var textDisplayTag = new CompoundTag();
 
         // General Entity Tags
@@ -52,7 +66,7 @@ public final class VisualizationUtil {
         CompoundTag data = new CompoundTag();
         data.putString("yawp_display", "text");
         data.putString("region", regionName);
-        data.putString("tpAnchor", tpAnchorName);
+        data.putString("tpAnchor", properties.getText());
         textDisplayTag.put("data", data);
 
         // Display Entity Tags
