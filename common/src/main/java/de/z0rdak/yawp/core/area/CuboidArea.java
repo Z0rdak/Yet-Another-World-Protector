@@ -287,7 +287,20 @@ public class CuboidArea extends AbstractArea {
         corners.add(new BlockPos(maxX, minY, maxZ));
         corners.add(new BlockPos(maxX, maxY, minZ));
         corners.add(new BlockPos(maxX, maxY, maxZ));
-        return corners;
+        Set<BlockPos> result = new HashSet<>();
+        for (BlockPos corner : corners) {
+            result.add(corner);
+            int dx = corner.getX() == minX ? 1 : -1;
+            int dy = corner.getY() == minY ? 1 : -1;
+            int dz = corner.getZ() == minZ ? 1 : -1;
+            BlockPos outX = corner.offset(dx, 0, 0);
+            BlockPos outY = corner.offset(0, dy, 0);
+            BlockPos outZ = corner.offset(0, 0, dz);
+            result.add(outX);
+            result.add(outY);
+            result.add(outZ);
+        }
+        return result;
     }
 
     @Override
