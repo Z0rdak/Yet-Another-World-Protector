@@ -635,7 +635,7 @@ class RegionCommands {
     }
 
     private static int updateTeleportAnchor(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, BlockPos pos, String name) {
-        TeleportAnchors tpAnchors = region.getTpAnchors();
+        RegionAnchors tpAnchors = region.getTpAnchors();
         var hasAnchor = tpAnchors.hasAnchor(name);
         if (!hasAnchor && !isValidName(name)) {
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.fail-msg.invalid-name", "Teleport Anchor name is invalid. Must be alphanumeric and between 3 and 50 letters.", name, buildRegionInfoLink(region)));
@@ -656,7 +656,7 @@ class RegionCommands {
     }
 
     private static int removeTeleportAnchor(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, String name) {
-        TeleportAnchors tpAnchors = region.getTpAnchors();
+        RegionAnchors tpAnchors = region.getTpAnchors();
         if (!tpAnchors.hasAnchor(name)) {
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.fail-msg.not-existent", "Teleport anchor '%s' does not exist in %s", name, buildRegionInfoLink(region)));
             return -1;
@@ -679,7 +679,7 @@ class RegionCommands {
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.fail-msg.invalid-name", "Teleport Anchor name is invalid. Must be alphanumeric and between 3 and 50 letters.", name, buildRegionInfoLink(region)));
             return -1;
         }
-        TeleportAnchors tpAnchors = region.getTpAnchors();
+        RegionAnchors tpAnchors = region.getTpAnchors();
         if (!tpAnchors.hasAnchor(name)) {
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.fail-msg.not-existent", "Teleport anchor '%s' does not exist in %s", name, buildRegionInfoLink(region)));
             return -1;
