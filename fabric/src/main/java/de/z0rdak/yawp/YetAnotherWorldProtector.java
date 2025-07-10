@@ -1,5 +1,6 @@
 package de.z0rdak.yawp;
 
+import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.api.events.flag.FabricFlagEvents;
 import de.z0rdak.yawp.api.events.flag.FlagEvent;
 import de.z0rdak.yawp.commands.CommandRegistry;
@@ -11,6 +12,7 @@ import de.z0rdak.yawp.platform.Services;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
@@ -48,6 +50,7 @@ public class YetAnotherWorldProtector implements ModInitializer, YAWPModInitiali
     public void setupRegionDataLifecycleHooks() {
         ServerLifecycleEvents.SERVER_STARTING.register(RegionDataManager::onServerStarting);
         ServerLifecycleEvents.SERVER_STARTING.register(PlayerManager::onServerStart);
+        ServerLifecycleEvents.SERVER_STARTING.register(VisualizationManager::initServerInstance);
         ServerWorldEvents.LOAD.register((server, level) -> {
             if (level.dimension().equals(ServerLevel.OVERWORLD)) {
                 RegionDataManager.loadLevelListData(server);
