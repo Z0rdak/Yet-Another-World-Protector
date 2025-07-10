@@ -212,7 +212,7 @@ public final class RegionManager implements IRegionManager {
         public List<IMarkableRegion> getRegionsAround(BlockPos pos, int radius) {
             SphereArea predicateArea = new SphereArea(pos, radius);
             return getAllLocalRegions().stream()
-                    .filter(r -> predicateArea.containsOther(r.getArea()))
+                    .filter(r -> predicateArea.intersects(r.getArea()))
                     .toList();
         }
 
