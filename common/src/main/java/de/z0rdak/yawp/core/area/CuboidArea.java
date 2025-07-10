@@ -1,6 +1,5 @@
 package de.z0rdak.yawp.core.area;
 
-import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import de.z0rdak.yawp.util.AreaUtil;
 import net.minecraft.core.BlockPos;
@@ -265,14 +264,9 @@ public class CuboidArea extends AbstractArea {
         Set<BlockPos> p24 = blocksBetweenOnAxis(vertices.get(1), vertices.get(3), Direction.Axis.Z);
         Set<BlockPos> p57 = blocksBetweenOnAxis(vertices.get(4), vertices.get(6), Direction.Axis.Z);
         Set<BlockPos> p68 = blocksBetweenOnAxis(vertices.get(5), vertices.get(7), Direction.Axis.Z);
-        Set<BlockPos> frame = Stream.of(p12, p34, p56, p78, p15, p26, p37, p48, p13, p24, p57, p68)
+        return Stream.of(p12, p34, p56, p78, p15, p26, p37, p48, p13, p24, p57, p68)
                 .flatMap(Set::stream)
                 .collect(Collectors.toSet());
-
-        Set<BlockPos> boundingBoxFrame = AreaUtil.getBoundingBoxFrame(this.area);
-        Constants.LOGGER.info("Frame old: {}", frame);
-        Constants.LOGGER.info("Frame new: {}", boundingBoxFrame.size());
-        return frame;
     }
 
     @Override
