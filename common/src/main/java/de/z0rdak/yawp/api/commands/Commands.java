@@ -283,12 +283,16 @@ public final class Commands {
         return buildAddCommand(region, subCmd);
     }
 
-    public static String buildTeleportAnchorListCommand(IProtectedRegion region) {
+    public static String buildListTeleportAnchorCommand(IProtectedRegion region) {
+        return buildListCommand(region, TP_ANCHOR.toString());
+    }
+
+    public static String buildTeleportAnchorCommand(IProtectedRegion region) {
         return buildRegionCmd(region, TP_ANCHOR.toString());
     }
 
     public static String buildTeleportAnchorSubCommand(IMarkableRegion region, String subCmd) {
-        String baseCmd = buildTeleportAnchorListCommand(region);
+        String baseCmd = buildTeleportAnchorCommand(region);
         return appendSubCommand(baseCmd, subCmd);
     }
 

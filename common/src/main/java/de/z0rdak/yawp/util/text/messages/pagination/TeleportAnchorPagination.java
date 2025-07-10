@@ -134,7 +134,7 @@ public class TeleportAnchorPagination extends BasePaginationMessage<TeleportAnch
         MutableComponent regionTpAnchorAmountPlain = buildTextWithHoverMsg(Messages.substitutable("%s", region.getTpAnchors().getAnchors().size()), numberHover, LINK_COLOR);
         MutableComponent regionTpAnchorAmount = buildTextWithHoverMsg(Messages.substitutable("%s", region.getTpAnchors().getAnchors().size()), numberHover, LINK_COLOR);
         MutableComponent tpAnchorHoverText = Component.translatableWithFallback("cli.msg.info.region.tp-anchor.link.hover", "%s teleport anchor(s) defined in %s", region.getTpAnchors().getAnchors().size(), region.getName());
-        String listAnchorCmd = buildTeleportAnchorListCommand(region);
+        String listAnchorCmd = buildListTeleportAnchorCommand(region);
         MutableComponent tpAnchorListLink = buildExecuteCmdComponent(regionTpAnchorAmount, tpAnchorHoverText, listAnchorCmd, RUN_COMMAND, LINK_COLOR);
         MutableComponent tpAnchorComp = region.getTpAnchors().getAnchors().isEmpty() ? regionTpAnchorAmountPlain : tpAnchorListLink;
         return Messages.substitutable("%s %s",
