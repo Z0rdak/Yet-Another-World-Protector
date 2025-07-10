@@ -49,7 +49,9 @@ public final class CommandRegistry {
                 .then(GlobalCommands.build())
                 .then(DimensionCommands.build())
                 .then(RegionCommands.build())
-                .then(PlayerCommands.build());
+                .then(PlayerCommands.buildShow())
+                .then(PlayerCommands.buildHide());
+
     }
 
     private static int promptHelp(CommandSourceStack src) {
