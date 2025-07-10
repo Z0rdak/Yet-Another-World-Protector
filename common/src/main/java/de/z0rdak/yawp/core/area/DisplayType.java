@@ -18,7 +18,7 @@ public enum DisplayType {
 
     public static Set<String> entries(){
         return Arrays.stream(values())
-                .map(DisplayType::name)
+                .map(DisplayType::toString)
                 .collect(Collectors.toSet());
     }
 
