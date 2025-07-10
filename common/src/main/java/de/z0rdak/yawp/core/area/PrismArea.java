@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -45,8 +46,8 @@ public class PrismArea extends AbstractArea {
     }
 
     @Override
-    public List<BlockPos> markedBlocks() {
-        return this.blockNodes;
+    public Set<BlockPos> markedBlocks() {
+        return new HashSet<>(this.blockNodes);
     }
 
     @Override

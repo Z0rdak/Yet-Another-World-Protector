@@ -18,8 +18,7 @@ public interface IMarkableArea extends INbtSerializable<CompoundTag> {
 
     AreaType getAreaType();
 
-    List<BlockPos> markedBlocks();
-
+    Set<BlockPos> markedBlocks();
     Set<BlockPos> getHull();
     Set<BlockPos> getFrame();
     Set<BlockPos> getMinimalOutline();
