@@ -65,6 +65,7 @@ public class RegionVisualizationManager {
                     var maybeEntity = createBlockDisplayEntity(level, region.getName(), pos, displayProperties);
                     if (maybeEntity.isPresent()) {
                         var entity = maybeEntity.get();
+                        entity.addTag(VisualizationManager.REGION_BLOCK_DISPLAY_TAG.toString());
                         switch (displayType) {
                             case FRAME -> this.frame.trackBlockDisplay(pos, entity);
                             case HULL -> this.hull.trackBlockDisplay(pos, entity);
