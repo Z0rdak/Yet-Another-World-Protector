@@ -226,13 +226,21 @@ class RegionCommands {
                                             )
                                         )
                                         .then(literal(HIERARCHY)
-                                                .executes(ctx -> showRegionHierarchy(ctx, getRegionArgument(ctx), false))
-                                                .then(Commands.argument(RECURSIVE.toString(), BoolArgumentType.bool())
-                                                        .executes(ctx -> showRegionHierarchy(ctx, getRegionArgument(ctx), BoolArgumentType.getBool(ctx, RECURSIVE.toString())))
+                                                .executes(ctx -> showRegionHierarchy(ctx, getRegionArgument(ctx), DisplayType.FRAME, false))
+                                                .then(Commands.argument(STYLE.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(DisplayType.entries(), builder))
+                                                        .executes(ctx -> showRegionHierarchy(ctx, getRegionArgument(ctx), getDisplayTypeArgument(ctx), false))
+                                                        .then(Commands.argument(RECURSIVE.toString(), BoolArgumentType.bool())
+                                                                .executes(ctx -> showRegionHierarchy(ctx, getRegionArgument(ctx), getDisplayTypeArgument(ctx), BoolArgumentType.getBool(ctx, RECURSIVE.toString())))
+                                                        )
                                                 )
                                         )
                                         .then(literal(INTERSECTING)
-                                                .executes(ctx -> showRegionsIntersecting(ctx, getRegionArgument(ctx)))
+                                                .executes(ctx -> showRegionsIntersecting(ctx, getRegionArgument(ctx), DisplayType.FRAME))
+                                                .then(Commands.argument(STYLE.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(DisplayType.entries(), builder))
+                                                        .executes(ctx -> showRegionsIntersecting(ctx, getRegionArgument(ctx), getDisplayTypeArgument(ctx)))
+                                                )
                                         )
                                 )
                                 .then(literal(HIDE)
@@ -244,13 +252,21 @@ class RegionCommands {
                                                 )
                                         )
                                         .then(literal(HIERARCHY)
-                                                .executes(ctx -> hideRegionHierarchy(ctx, getRegionArgument(ctx), false))
-                                                .then(Commands.argument(RECURSIVE.toString(), BoolArgumentType.bool())
-                                                                .executes(ctx -> showRegionHierarchy(ctx, getRegionArgument(ctx), BoolArgumentType.getBool(ctx, RECURSIVE.toString())))
+                                                .executes(ctx -> hideRegionHierarchy(ctx, getRegionArgument(ctx), DisplayType.FRAME, false))
+                                                .then(Commands.argument(STYLE.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(DisplayType.entries(), builder))
+                                                        .executes(ctx -> hideRegionHierarchy(ctx, getRegionArgument(ctx), getDisplayTypeArgument(ctx), false))
+                                                        .then(Commands.argument(RECURSIVE.toString(), BoolArgumentType.bool())
+                                                                .executes(ctx -> hideRegionHierarchy(ctx, getRegionArgument(ctx), getDisplayTypeArgument(ctx), BoolArgumentType.getBool(ctx, RECURSIVE.toString())))
+                                                        )
                                                 )
                                         )
                                         .then(literal(INTERSECTING)
-                                                .executes(ctx -> hideRegionsIntersecting(ctx, getRegionArgument(ctx)))
+                                                .executes(ctx -> hideRegionsIntersecting(ctx, getRegionArgument(ctx), DisplayType.FRAME))
+                                                .then(Commands.argument(STYLE.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(DisplayType.entries(), builder))
+                                                        .executes(ctx -> hideRegionsIntersecting(ctx, getRegionArgument(ctx), getDisplayTypeArgument(ctx)))
+                                                )
                                         )
                                 )
                                 .then(literal(DISPLAY)
@@ -576,23 +592,23 @@ class RegionCommands {
         return 0;
     }
 
-    public static int showRegionsIntersecting(CommandContext<CommandSourceStack> ctx, IMarkableRegion region) {
-        VisualizationManager.showIntersecting(region);
+    public static int showRegionsIntersecting(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, DisplayType  displayType) {
+        VisualizationManager.showIntersecting(region, displayType);
         return 0;
     }
 
-    public static int showRegionHierarchy(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, boolean recursive) {
-        VisualizationManager.showHierarchy(region, recursive);
+    public static int showRegionHierarchy(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, DisplayType displayType, boolean recursive) {
+        VisualizationManager.showHierarchy(region, displayType, recursive);
         return 0;
     }
 
-    public static int hideRegionHierarchy(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, boolean recursive) {
-        VisualizationManager.hideHierarchy(region, recursive);
+    public static int hideRegionHierarchy(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, DisplayType displayType, boolean recursive) {
+        VisualizationManager.hideHierarchy(region, displayType, recursive);
         return 0;
     }
 
-    public static int hideRegionsIntersecting(CommandContext<CommandSourceStack> ctx, IMarkableRegion region) {
-        VisualizationManager.hideIntersecting(region);
+    public static int hideRegionsIntersecting(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, DisplayType displayType) {
+        VisualizationManager.hideIntersecting(region, displayType);
         return 0;
     }
 

@@ -8,6 +8,7 @@ import de.z0rdak.yawp.core.area.DisplayType;
 import de.z0rdak.yawp.core.area.TeleportAnchor;
 import de.z0rdak.yawp.core.area.TextDisplayProperties;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
+import de.z0rdak.yawp.core.region.IProtectedRegion;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -118,7 +119,9 @@ public class VisualizationManager {
         }
     }
 
-    public static void show(IMarkableRegion region, TeleportAnchor tpAnchor, TextDisplayProperties textDisplayProperties) {}
+    public static void show(IMarkableRegion region, TeleportAnchor tpAnchor, TextDisplayProperties textDisplayProperties) {
+        // TODO:
+    }
 
     public static void show(IMarkableRegion region, TeleportAnchor tpAnchor) {
         // TODO: Just go with a default TextDisplayProperties for now
@@ -133,6 +136,18 @@ public class VisualizationManager {
 
     public static void hide(IMarkableRegion region, TeleportAnchor tpAnchor) {
         // TODO:
+    }
+
+    public static void showTeleportAnchors(IMarkableRegion region) {
+        region.getTpAnchors().getAnchors().forEach(
+                anchor -> show(region, anchor)
+        );
+    }
+
+    public static void hideTeleportAnchors(IMarkableRegion region) {
+        region.getTpAnchors().getAnchors().forEach(
+                anchor -> hide(region, anchor)
+        );
     }
 
     public static void show(IMarkableRegion region, DisplayType displayType, BlockDisplayProperties displayProperties) {
@@ -167,49 +182,61 @@ public class VisualizationManager {
         ResourceLocation levelRl = region.getDim().location();
         VisualizationManager vm = getOrCreateVisualizationManager(levelRl);
         RegionVisualizationManager rvm = getOrCreateRegionVisualizationManager(vm, region);
-
         rvm.hide(displayType);
     }
 
 
     public static void update(IMarkableRegion region) {
-
+        // TODO:
     }
 
-    private static Set<BlockPos> getDisplayPositions(IMarkableRegion region, DisplayType displayType) {
-        return switch (displayType) {
-            case FRAME -> region.getArea().getFrame();
-            case HULL -> region.getArea().getHull();
-            case MARKED -> new HashSet<>(region.getArea().markedBlocks());
-            case MINIMAL -> new HashSet<>(region.getArea().getMinimalOutline());
-        };
+    public static void showHierarchy(IMarkableRegion region, DisplayType displayType, boolean recursive) {
+        Optional<IDimensionRegionApi> maybeApi = RegionManager.get().getDimRegionApi(region.getDim());
+        if (maybeApi.isEmpty()) return;
+        Collection<IProtectedRegion> children = region.getChildren().values();
+        for (IProtectedRegion child : children) {
+            if (child instanceof IMarkableRegion childRegion) {
+                show(childRegion, displayType);
+                if (recursive) {
+                    showHierarchy(childRegion, displayType, recursive);
+                }
+            }
+        }
     }
 
-    public static void showHierarchy(IMarkableRegion region, boolean recursive) {
-
+    public static void showIntersecting(IMarkableRegion region, DisplayType displayType) {
+        Optional<IDimensionRegionApi> maybeApi = RegionManager.get().getDimRegionApi(region.getDim());
+        if (maybeApi.isPresent()) {
+            var dimApi = maybeApi.get();
+            List<IMarkableRegion> intersectingRegions = dimApi.getIntersectingRegions(region);
+            intersectingRegions.forEach(intersectingRegion -> {
+                show(intersectingRegion, displayType);
+            });
+        }
     }
 
-    public static void showIntersecting(IMarkableRegion region) {
-
+    public static void hideHierarchy(IMarkableRegion region, DisplayType displayType, boolean recursive) {
+        Optional<IDimensionRegionApi> maybeApi = RegionManager.get().getDimRegionApi(region.getDim());
+        if (maybeApi.isEmpty()) return;
+        Collection<IProtectedRegion> children = region.getChildren().values();
+        for (IProtectedRegion child : children) {
+            if (child instanceof IMarkableRegion childRegion) {
+                hide(childRegion, displayType);
+                if (recursive) {
+                    hideHierarchy(childRegion, displayType, recursive);
+                }
+            }
+        }
     }
 
-    public static void hideHierarchy(IMarkableRegion region, boolean recursive) {
-
-    }
-
-    public static void hideIntersecting(IMarkableRegion region) {
-
-    }
-
-    public static void showTeleportAnchors(IMarkableRegion region) {
-        region.getTpAnchors().getAnchors().forEach(
-                anchor -> show(region, anchor)
-        );
-    }
-
-    public static void hideTeleportAnchors(IMarkableRegion region) {
-        region.getTpAnchors().getAnchors().forEach(
-                anchor -> hide(region, anchor)
-        );
+    public static void hideIntersecting(IMarkableRegion region, DisplayType displayType) {
+        Optional<IDimensionRegionApi> maybeApi = RegionManager.get().getDimRegionApi(region.getDim());
+        if (maybeApi.isPresent()) {
+            var dimApi = maybeApi.get();
+            List<IMarkableRegion> intersectingRegions = dimApi.getIntersectingRegions(region);
+            intersectingRegions.forEach(intersectingRegion -> {
+                hide(intersectingRegion, displayType);
+            });
+        }
     }
 }
