@@ -16,7 +16,7 @@ public interface IMarkableArea {
 
     AreaType getAreaType();
 
-    List<BlockPos> markedBlocks();
+    Set<BlockPos> markedBlocks();
 
     /**
      * Set containing all block positions which represent the outer hull of the marked area.

@@ -6,10 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import org.apache.commons.lang3.NotImplementedException;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Polygon3DArea extends MarkedArea {
 
@@ -71,8 +68,8 @@ public class Polygon3DArea extends MarkedArea {
     }
 
     @Override
-    public List<BlockPos> markedBlocks() {
-        return this.positions;
+    public Set<BlockPos> markedBlocks() {
+        return new HashSet<>(this.positions);
     }
 
     @Override
