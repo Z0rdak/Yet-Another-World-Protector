@@ -2,7 +2,6 @@ package de.z0rdak.yawp.api.visualization;
 
 import de.z0rdak.yawp.api.core.IDimensionRegionApi;
 import de.z0rdak.yawp.api.core.RegionManager;
-import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.area.BlockDisplayProperties;
 import de.z0rdak.yawp.core.area.DisplayType;
 import de.z0rdak.yawp.core.area.TeleportAnchor;
@@ -186,8 +185,20 @@ public class VisualizationManager {
     }
 
 
-    public static void update(IMarkableRegion region) {
-        // TODO:
+    public static void refreshDisplay(IMarkableRegion region, DisplayType displayType) {
+        ResourceLocation levelRl = region.getDim().location();
+        VisualizationManager vm = getOrCreateVisualizationManager(levelRl);
+        RegionVisualizationManager rvm = getOrCreateRegionVisualizationManager(vm, region);
+
+        rvm.updateDisplay(region.getArea().getDisplay(), displayType);
+    }
+
+    public static void refreshDisplay(IMarkableRegion region) {
+        ResourceLocation levelRl = region.getDim().location();
+        VisualizationManager vm = getOrCreateVisualizationManager(levelRl);
+        RegionVisualizationManager rvm = getOrCreateRegionVisualizationManager(vm, region);
+
+        rvm.updateDisplay(region.getArea().getDisplay(), true);
     }
 
     public static void showHierarchy(IMarkableRegion region, DisplayType displayType, boolean recursive) {

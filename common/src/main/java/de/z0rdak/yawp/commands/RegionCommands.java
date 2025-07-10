@@ -297,6 +297,7 @@ class RegionCommands {
         area.getDisplay().setLightLevel(lightLevel);
         RegionManager.get().save();
         // TODO: Trigger update
+        VisualizationManager.refreshDisplay(region);
         // TODO: I18n
         sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Set light level for area display for region %s to '%s'", "Set display light level for %s to '%s'", buildRegionInfoLink(region), lightLevel));
         return 0;
@@ -308,6 +309,7 @@ class RegionCommands {
         area.getDisplay().setLightLevel(BlockDisplayProperties.DEFAULT_LIGHT_LEVEL);
         RegionManager.get().save();
         // TODO: Trigger update
+        VisualizationManager.refreshDisplay(region);
         // TODO: I18n
         sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Reset display settings for region %s", "Reset display settings for %s", buildRegionInfoLink(region)));
         return 0;
@@ -319,9 +321,8 @@ class RegionCommands {
         if (display.hasGlow() != hasGlow) {
             display.setHasGlow(hasGlow);
             RegionManager.get().save();
-            // TODO: Trigger update - if any visualization for region is shown, it should be removed and displayed again with new glow settings
-            // TODO: Even better would be just updating the properties of the entity... it this possible and will be reflected immediately?
-            // TODO: But this would only be an optimization for large regions, since the removal and creation of entities is saved
+            // TODO: Trigger update
+            VisualizationManager.refreshDisplay(region);
             // TODO: I18n
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Set display glow effect for region %s to '%s'", "Set display glow effect for %s to '%s'", buildRegionInfoLink(region), Boolean.toString(hasGlow)));
             return 0;
@@ -342,6 +343,7 @@ class RegionCommands {
         area.getDisplay().setBlockRl(blockRl);
         RegionManager.get().save();
         // TODO: Trigger update
+        VisualizationManager.refreshDisplay(region);
         // TODO: I18n
         sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Set display block for region %s to '%s'", "Set display block for %s to '%s'", buildRegionInfoLink(region), blockRl.toString()));
         return 0;
