@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.commands;
 
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -7,7 +8,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.api.core.IDimensionRegionApi;
 import de.z0rdak.yawp.api.core.RegionManager;
-import de.z0rdak.yawp.api.core.VisualizationManager;
+import de.z0rdak.yawp.api.permission.Permissions;
+import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.core.area.DisplayType;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
@@ -37,19 +39,9 @@ class PlayerCommands {
     private PlayerCommands() {
     }
 
-    static LiteralArgumentBuilder<CommandSourceStack> build() {
-        return literal(SHOW)
-                .then(literal(HULL)
-                        .then(Commands.argument(LOCAL.toString(), StringArgumentType.word())
-                                .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestionsIn(ctx, builder, ctx.getSource().getLevel()))
-                                .executes(ctx -> showRegion(ctx, getRegionIn(ctx, ctx.getSource().getLevel()), DisplayType.HULL)))
-                )
-                .then(literal(FRAME)
-                        .then(Commands.argument(LOCAL.toString(), StringArgumentType.word())
-                                .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestionsIn(ctx, builder, ctx.getSource().getLevel()))
-                                .executes(ctx -> showRegion(ctx, getRegionIn(ctx, ctx.getSource().getLevel()), DisplayType.FRAME)))
-                )
-                .then(literal(HIDE)
+    static LiteralArgumentBuilder<CommandSourceStack> buildHide() {
+        return literal(HIDE)
+                .then(literal(LOCAL)
                         .then(Commands.argument(LOCAL.toString(), StringArgumentType.word())
                                 .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestionsIn(ctx, builder, ctx.getSource().getLevel()))
                                 .executes(ctx -> hideRegion(ctx, getRegionIn(ctx, ctx.getSource().getLevel()), DisplayType.FRAME))
@@ -58,26 +50,59 @@ class PlayerCommands {
                                         .executes(ctx -> hideRegion(ctx, getRegionIn(ctx, ctx.getSource().getLevel()), getDisplayTypeArgument(ctx)))
                                 )
                         )
-                )
-                .then(literal(HIDE_ALL).executes(PlayerCommands::hideRegions))
-                .then(literal(HIDE_NEAR)
-                        .executes(ctx -> hideRegionsAroundPlayer(ctx, 192))
-                        .then(Commands.argument(RADIUS.toString(), IntegerArgumentType.integer(10, 800))
-                                .executes(ctx -> hideRegionsAroundPlayer(ctx, IntegerArgumentType.getInteger(ctx, RADIUS.toString())))))
-                .then(literal(SHOW_NEAR)
-                        .then(literal(LIST)
-                                .executes(ctx -> promptRegionsAroundPlayer(ctx, 192))
-                                .then(Commands.argument(RADIUS.toString(), IntegerArgumentType.integer(10, 800))
-                                        .executes(ctx -> promptRegionsAroundPlayer(ctx, IntegerArgumentType.getInteger(ctx, RADIUS.toString())))))
-                        .then(literal(HULL)
-                                .executes(ctx -> showRegionsAroundPlayer(ctx, DisplayType.HULL, 100))
-                                .then(Commands.argument(RADIUS.toString(), IntegerArgumentType.integer(10, 800))
-                                        .executes(ctx -> showRegionsAroundPlayer(ctx, DisplayType.HULL, IntegerArgumentType.getInteger(ctx, RADIUS.toString())))))
-                        .then(literal(FRAME)
-                                .executes(ctx -> showRegionsAroundPlayer(ctx, DisplayType.FRAME, 100))
-                                .then(Commands.argument(RADIUS.toString(), IntegerArgumentType.integer(10, 800))
-                                        .executes(ctx -> showRegionsAroundPlayer(ctx, DisplayType.FRAME, IntegerArgumentType.getInteger(ctx, RADIUS.toString())))))
+                ).then(buildHideAll())
+                .then(buildHideNear());
+    }
+
+    private static LiteralArgumentBuilder<CommandSourceStack> buildHideAll() {
+        return literal(ALL)
+                .executes(PlayerCommands::hideRegions)
+                .then(Commands.argument(UNTRACKED.toString(), BoolArgumentType.bool())
+                        .executes(ctx -> hideRegions(ctx, BoolArgumentType.getBool(ctx, UNTRACKED.toString())))
                 );
+    }
+
+    private static LiteralArgumentBuilder<CommandSourceStack> buildHideNear() {
+        return literal(NEAR)
+                .executes(ctx -> hideRegionsAroundPlayer(ctx, 192))
+                .then(Commands.argument(RADIUS.toString(), IntegerArgumentType.integer(0, 800))
+                        .executes(ctx -> hideRegionsAroundPlayer(ctx, IntegerArgumentType.getInteger(ctx, RADIUS.toString())))
+                );
+    }
+
+    private static LiteralArgumentBuilder<CommandSourceStack> buildShowNear() {
+        return literal(NEAR)
+                // TODO: Region pagination list something thing
+                //.then(literal(LIST)
+                //        .executes(ctx -> promptRegionsAroundPlayer(ctx, 192))
+                //        .then(Commands.argument(RADIUS.toString(), IntegerArgumentType.integer(10, 800))
+                //                .executes(ctx -> promptRegionsAroundPlayer(ctx, IntegerArgumentType.getInteger(ctx, RADIUS.toString())))))
+                //.then(literal(DISPLAY)
+                .executes(ctx -> showRegionsAroundPlayer(ctx, DisplayType.FRAME, 100))
+                .then(Commands.argument(STYLE.toString(), StringArgumentType.word())
+                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(DisplayType.entries(), builder))
+                        .executes(ctx -> showRegionsAroundPlayer(ctx, getDisplayTypeArgument(ctx), 100))
+                        .then(Commands.argument(RADIUS.toString(), IntegerArgumentType.integer(0, 800))
+                                .executes(ctx -> showRegionsAroundPlayer(ctx, getDisplayTypeArgument(ctx), IntegerArgumentType.getInteger(ctx, RADIUS.toString())))
+                        )
+                );
+        //)
+
+    }
+
+    static LiteralArgumentBuilder<CommandSourceStack> buildShow() {
+        return literal(SHOW)
+                .then(literal(LOCAL)
+                        .then(Commands.argument(LOCAL.toString(), StringArgumentType.word())
+                                .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestionsIn(ctx, builder, ctx.getSource().getLevel()))
+                                .executes(ctx -> showRegion(ctx, getRegionIn(ctx, ctx.getSource().getLevel()), DisplayType.FRAME))
+                                .then(Commands.argument(STYLE.toString(), StringArgumentType.word())
+                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(DisplayType.entries(), builder))
+                                        .executes(ctx -> showRegion(ctx, getRegionIn(ctx, ctx.getSource().getLevel()), getDisplayTypeArgument(ctx)))
+                                )
+                        )
+                )
+                .then(buildShowNear());
     }
 
     private static int promptRegionsAroundPlayer(CommandContext<CommandSourceStack> ctx, int blockRadius) throws CommandSyntaxException {
@@ -100,59 +125,37 @@ class PlayerCommands {
                 sendError(ctx.getSource(), e.getError());
                 return -1;
             }
-
-
             return 0;
         } else {
             return -1;
         }
     }
 
-
     private static int showRegionsAroundPlayer(CommandContext<CommandSourceStack> ctx, DisplayType displayType, int blockRadius) throws CommandSyntaxException {
-        Level level = ctx.getSource().getLevel();
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        Optional<IDimensionRegionApi> maybeDimRegionApi = RegionManager.get().getDimRegionApi(level.dimension());
-        if (maybeDimRegionApi.isPresent()) {
-            IDimensionRegionApi dimRegionApi = maybeDimRegionApi.get();
-            List<IMarkableRegion> regionsAround = dimRegionApi.getRegionsAround(player.blockPosition(), blockRadius);
-            // TODO: Only show regions the players has permission for?
-            // regionsAround.forEach(region -> VisualizationManager.show(region, displayType));
-            // TODO: cmd feedback
-            return 0;
-        } else {
-            return -1;
-        }
+        VisualizationManager.showRegionsAround(player, blockRadius, displayType);
+        // TODO: cmd feedback
+        return 0;
     }
 
     private static int hideRegions(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        Level level = ctx.getSource().getLevel();
-        ServerPlayer player = ctx.getSource().getPlayerOrException();
-        Optional<IDimensionRegionApi> maybeDimRegionApi = RegionManager.get().getDimRegionApi(level.dimension());
-        if (maybeDimRegionApi.isPresent()) {
-            IDimensionRegionApi dimRegionApi = maybeDimRegionApi.get();
-            List<IMarkableRegion> regionsAround = dimRegionApi.getAllLocalRegions().stream().toList();
+        return hideRegions(ctx, false);
+    }
 
-            //regionsAround.forEach(region -> VisualizationManager.hide(level, region));
-            // TODO: cmd feedback
-            return 0;
-        } else {
-            return -1;
+    private static int hideRegions(CommandContext<CommandSourceStack> ctx, boolean untracked) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        boolean hasConfigPerm = Permissions.get().hasConfigPermission(player);
+        if (hasConfigPerm) {
+            VisualizationManager.hideAllRegions(player.level(), untracked);
         }
+        // TODO: cmd feedback
+        return 0;
     }
 
     private static int hideRegionsAroundPlayer(CommandContext<CommandSourceStack> ctx, int blockRadius) throws CommandSyntaxException {
-        Level level = ctx.getSource().getLevel();
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        Optional<IDimensionRegionApi> maybeDimRegionApi = RegionManager.get().getDimRegionApi(level.dimension());
-        if (maybeDimRegionApi.isPresent()) {
-            IDimensionRegionApi dimRegionApi = maybeDimRegionApi.get();
-            List<IMarkableRegion> regionsAround = dimRegionApi.getRegionsAround(player.blockPosition(), blockRadius);
-            //regionsAround.forEach(region -> VisualizationManager.hide(level, region));
-            // TODO: cmd feedback
-            return 0;
-        } else {
-            return -1;
-        }
+        VisualizationManager.hideRegionsAround(player, blockRadius);
+        // TODO: cmd feedback
+        return 0;
     }
 }
