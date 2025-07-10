@@ -37,6 +37,10 @@ public final class VisualizationUtil {
         return entity;
     }
 
+    /**
+     *
+     * @param regionName a marker, stored in custom entity data for identification later
+     */
     public static Optional<Entity> createTextDisplayEntity(ServerLevel level, String regionName, BlockPos pos, TextDisplayProperties displayProperties) {
         var entityTag = buildTeleportAnchorTextDisplayTag(regionName, displayProperties);
         var maybeEntity = EntityType.create(entityTag, level);
@@ -44,6 +48,10 @@ public final class VisualizationUtil {
         return maybeEntity;
     }
 
+    /**
+     *
+     * @param regionName a marker, stored in custom entity data for identification later
+     */
     public static Optional<Entity> createBlockDisplayEntity(ServerLevel level, String regionName, BlockPos pos, BlockDisplayProperties displayProperties) {
         var entityTag = buildBlockDisplayTag(regionName, displayProperties);
         var maybeEntity = EntityType.create(entityTag, level);
