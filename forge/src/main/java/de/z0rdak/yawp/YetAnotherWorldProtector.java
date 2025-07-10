@@ -1,6 +1,7 @@
 package de.z0rdak.yawp;
 
 import de.z0rdak.yawp.api.events.flag.ForgeFlagEvent;
+import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.commands.CommandRegistry;
 import de.z0rdak.yawp.config.ConfigRegistry;
 import de.z0rdak.yawp.constants.Constants;
@@ -71,6 +72,7 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
 
     public void initServerInstanceForge(ServerStartingEvent event) {
         RegionDataManager.initServerInstance(event.getServer());
+        VisualizationManager.initServerInstance(event.getServer());
     }
 
     @Override
