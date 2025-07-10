@@ -8,13 +8,13 @@ import java.util.*;
 
 import static de.z0rdak.yawp.util.ChatComponentBuilder.tinyBlockPos;
 
-public class TeleportAnchors implements INbtSerializable<CompoundTag> {
+public class RegionAnchors implements INbtSerializable<CompoundTag> {
 
-    public TeleportAnchors() {
+    public RegionAnchors() {
         this.tpAnchors = new HashMap<>();
     }
 
-    public TeleportAnchors(CompoundTag tag) {
+    public RegionAnchors(CompoundTag tag) {
         this.deserializeNBT(tag);
     }
 

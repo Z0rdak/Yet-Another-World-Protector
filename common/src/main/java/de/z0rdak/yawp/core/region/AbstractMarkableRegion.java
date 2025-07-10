@@ -3,21 +3,15 @@ package de.z0rdak.yawp.core.region;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.IMarkableArea;
-import de.z0rdak.yawp.core.area.TeleportAnchor;
-import de.z0rdak.yawp.core.area.TeleportAnchors;
+import de.z0rdak.yawp.core.area.RegionAnchors;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static de.z0rdak.yawp.constants.serialization.RegionNbtKeys.*;
-import static de.z0rdak.yawp.util.ChatComponentBuilder.tinyBlockPos;
 
 /**
  * The AbstractMarkableRegion represents an abstract implementation for a markable region.
@@ -28,7 +22,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     protected int priority;
     protected IMarkableArea area;
     protected AreaType areaType;
-    protected TeleportAnchors tpAnchors;
+    protected RegionAnchors tpAnchors;
 
     public AbstractMarkableRegion(String name, IMarkableArea area, Player owner, ResourceKey<Level> dimension, AbstractRegion parent) {
         super(name, dimension, RegionType.LOCAL, owner);
@@ -38,7 +32,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
         if (parent != null) {
             this.setParent(parent);
         }
-        this.tpAnchors = new TeleportAnchors();
+        this.tpAnchors = new RegionAnchors();
     }
 
     public AbstractMarkableRegion(String name, IMarkableArea area, Player owner, ResourceKey<Level> dimension) {
@@ -100,9 +94,9 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     public void deserializeNBT(CompoundTag nbt) {
         super.deserializeNBT(nbt);
         try {
-            this.tpAnchors = new TeleportAnchors(nbt.getCompound("tp_anchors"));
+            this.tpAnchors = new RegionAnchors(nbt.getCompound("tp_anchors"));
         } catch (Exception e) {
-            this.tpAnchors = new TeleportAnchors();
+            this.tpAnchors = new RegionAnchors();
         }
         this.priority = nbt.getInt(PRIORITY);
         AreaType areaType = AreaType.of(nbt.getString(AREA_TYPE));
@@ -144,7 +138,7 @@ public abstract class AbstractMarkableRegion extends AbstractRegion implements I
     }
 
     @Override
-    public TeleportAnchors getTpAnchors() {
+    public RegionAnchors getTpAnchors() {
         return this.tpAnchors;
     }
 }
