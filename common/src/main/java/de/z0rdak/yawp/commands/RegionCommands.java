@@ -134,7 +134,7 @@ class RegionCommands {
                                 )
                                 .then(literal(LIST)
                                         .then(literal(TP_ANCHOR)
-                                                .executes(ctx -> promptFlagList(ctx, getRegionArgument(ctx), 0))
+                                                .executes(ctx -> promptTeleportAnchorPagination(ctx, getRegionArgument(ctx), 0))
                                                 .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
                                                         .executes(ctx -> promptTeleportAnchorPagination(ctx, getRegionArgument(ctx), getPageNoArgument(ctx)))
                                                 )

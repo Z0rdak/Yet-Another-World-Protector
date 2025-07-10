@@ -135,7 +135,7 @@ public class RegionInfoMessage implements MultiLineMessage<IProtectedRegion> {
             var visualization = buildInfoComponent(subject, actions);
             regionInfoLines.add(visualization);
 
-            // Teleport Anchors: [Teleport Anchors]
+            // Teleport Anchors: [m] teleport anchor(s) [+]
             var tpAnchorSubject = Component.translatableWithFallback("cli.msg.info.region.tp-anchor", "Teleport Anchors");
             var tpAnchor = buildInfoComponent(tpAnchorSubject, buildRegionTeleportAnchorListLink(local));
             regionInfoLines.add(tpAnchor);
