@@ -99,7 +99,7 @@ public final class VisualizationUtil {
 
         // General Entity Tags
         ResourceLocation blockDisplayRl = ResourceLocation.withDefaultNamespace("block_display");
-        blockDisplayTag.putString("id", blockDisplayRl.toString());
+        blockDisplayTag.putString("id", blockDisplayRl.getPath());
         blockDisplayTag.putBoolean("Glowing", properties.hasGlow());
 
         // custom data
