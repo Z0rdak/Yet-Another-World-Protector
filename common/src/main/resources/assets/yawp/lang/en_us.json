@@ -182,7 +182,7 @@
   "cli.msg.info.region.area.area.show.link": "Show",
   "cli.msg.info.region.area.area.size.text.cuboid": "Size: %s %s %s",
   "cli.msg.info.region.area.area.size.text.sphere": "Center: %s, Radius: %s, Diameter: %s",
-  "cli.msg.info.region.area.area.update": "Updated %s for region %s",
+  "cli.msg.info.region.area.area.update": "Updated %s for %s",
   "cli.msg.info.region.area.area.update.fail": "Failed to update %s for region %s",
   "cli.msg.info.region.area.area.update.fail.boundaries": "Parent region %s does not fully contain new are for region %s",
   "cli.msg.info.region.area.link.hover": "Show region area properties for %s",
