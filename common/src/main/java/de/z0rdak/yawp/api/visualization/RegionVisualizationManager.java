@@ -24,6 +24,7 @@ public class RegionVisualizationManager {
     private final RegionVisualization frame;
     private final RegionVisualization minimalOutline;
     private final RegionVisualization marked;
+    // TODO:
     private final Map<String, TpAnchorVisualization> tpAnchorVisualizations;
 
     public RegionVisualizationManager(IMarkableRegion region) {
@@ -96,5 +97,25 @@ public class RegionVisualizationManager {
 
     public void hide(TeleportAnchor anchor) {
         var tpAnchorVisualization = this.tpAnchorVisualizations.get(anchor.getName());
+    }
+
+    public void updateDisplay(BlockDisplayProperties displayProperties, DisplayType displayType) {
+        this.frame.updateDisplay(displayProperties, false);
+        this.hull.updateDisplay(displayProperties, false);
+        this.minimalOutline.updateDisplay(displayProperties, false);
+        this.marked.updateDisplay(displayProperties, false);
+        switch (displayType) {
+            case FRAME -> this.frame.updateDisplay(displayProperties, true);
+            case HULL -> this.hull.updateDisplay(displayProperties, true);
+            case MINIMAL -> this.minimalOutline.updateDisplay(displayProperties, true);
+            case MARKED -> this.marked.updateDisplay(displayProperties, true);
+        }
+    }
+
+    public void updateDisplay(BlockDisplayProperties displayProperties, boolean refresh) {
+        this.frame.updateDisplay(displayProperties, refresh);
+        this.hull.updateDisplay(displayProperties, refresh);
+        this.minimalOutline.updateDisplay(displayProperties, refresh);
+        this.marked.updateDisplay(displayProperties, refresh);
     }
 }
