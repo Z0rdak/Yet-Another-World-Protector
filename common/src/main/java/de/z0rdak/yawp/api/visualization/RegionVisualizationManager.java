@@ -1,0 +1,84 @@
+package de.z0rdak.yawp.api.visualization;
+
+import de.z0rdak.yawp.core.area.BlockDisplayProperties;
+import de.z0rdak.yawp.core.area.DisplayType;
+import de.z0rdak.yawp.core.area.TeleportAnchor;
+import de.z0rdak.yawp.core.area.TextDisplayProperties;
+import de.z0rdak.yawp.core.region.IMarkableRegion;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import static de.z0rdak.yawp.api.visualization.VisualizationUtil.*;
+
+public class RegionVisualizationManager {
+
+    private final IMarkableRegion region;
+    private final RegionVisualization hull;
+    private final RegionVisualization frame;
+    private final RegionVisualization minimalOutline;
+    private final RegionVisualization marked;
+    private final Map<String, TpAnchorVisualization> tpAnchorVisualizations;
+
+    public RegionVisualizationManager(IMarkableRegion region) {
+        this.region = region;
+        var blockDisplayProperties = region.getArea().getDisplay();
+        this.hull = new RegionVisualization(blockDisplayProperties);
+        this.frame = new RegionVisualization(blockDisplayProperties);
+        this.minimalOutline = new RegionVisualization(blockDisplayProperties);
+        this.marked = new RegionVisualization(blockDisplayProperties);
+        this.tpAnchorVisualizations = new HashMap<>();
+        // Creates entries for each anchor present in region, BUT
+        // TODO: Needs to be updated when an anchor is added, removed, updated -> event
+        region.getTpAnchors().getAnchors().forEach(anchor -> {
+            TextDisplayProperties textDisplayProperties = new TextDisplayProperties(anchor.getName());
+            TpAnchorVisualization tpAnchorVisualization = new TpAnchorVisualization(anchor, blockDisplayProperties, textDisplayProperties);
+            this.tpAnchorVisualizations.put(anchor.getName(), tpAnchorVisualization);
+        });
+    }
+
+    public void show(DisplayType displayType, BlockDisplayProperties displayProperties, ServerLevel level) {
+        Set<BlockPos> blocks = switch (displayType) {
+            case FRAME -> region.getArea().getFrame();
+            case HULL -> region.getArea().getHull();
+            case MINIMAL -> region.getArea().getMinimalOutline();
+            case MARKED -> region.getArea().markedBlocks();
+        };
+        blocks.forEach(pos -> {
+            var maybeEntity = createBlockDisplayEntity(level, region.getName(), pos, displayProperties);
+            maybeEntity.ifPresent(entity -> {
+                switch (displayType) {
+                    case FRAME -> this.frame.trackBlockDisplay(pos, entity);
+                    case HULL -> this.hull.trackBlockDisplay(pos, entity);
+                    case MINIMAL -> this.minimalOutline.trackBlockDisplay(pos, entity);
+                    case MARKED -> this.marked.trackBlockDisplay(pos, entity);
+                }
+                level.addFreshEntity(entity);
+            });
+        });
+    }
+
+    public void show(DisplayType displayType, ServerLevel level) {
+        show(displayType, region.getArea().getDisplay(), level);
+    }
+
+    public void hide(DisplayType displayType) {
+        switch (displayType) {
+            case FRAME -> this.frame.discardEntities();
+            case HULL -> this.hull.discardEntities();
+            case MINIMAL -> this.minimalOutline.discardEntities();
+            case MARKED -> this.marked.discardEntities();
+        }
+    }
+
+    public void show(TeleportAnchor anchor, BlockDisplayProperties displayProperties, TextDisplayProperties textDisplayProperties, ServerLevel level) {
+        var tpAnchorVisualization = this.tpAnchorVisualizations.get(anchor.getName());
+    }
+
+    public void hide(TeleportAnchor anchor) {
+        var tpAnchorVisualization = this.tpAnchorVisualizations.get(anchor.getName());
+    }
+}
