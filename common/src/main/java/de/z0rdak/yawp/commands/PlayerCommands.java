@@ -39,6 +39,7 @@ class PlayerCommands {
     private PlayerCommands() {
     }
 
+    // TODO: HIDE LOCAL HIERARCHY/INTERSECTING
     static LiteralArgumentBuilder<CommandSourceStack> buildHide() {
         return literal(HIDE)
                 .then(literal(LOCAL)
@@ -90,6 +91,7 @@ class PlayerCommands {
 
     }
 
+    // TODO: SHOW LOCAL HIERARCHY/INTERSECTING
     static LiteralArgumentBuilder<CommandSourceStack> buildShow() {
         return literal(SHOW)
                 .then(literal(LOCAL)
