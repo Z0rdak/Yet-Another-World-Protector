@@ -7,10 +7,13 @@ import de.z0rdak.yawp.core.area.TextDisplayProperties;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.api.visualization.VisualizationUtil.*;
 
@@ -40,25 +43,37 @@ public class RegionVisualizationManager {
         });
     }
 
-    public void show(DisplayType displayType, BlockDisplayProperties displayProperties, ServerLevel level) {
-        Set<BlockPos> blocks = switch (displayType) {
+    public Set<BlockPos> blocksForDisplayType(DisplayType type) {
+        return switch (type) {
             case FRAME -> region.getArea().getFrame();
             case HULL -> region.getArea().getHull();
             case MINIMAL -> region.getArea().getMinimalOutline();
             case MARKED -> region.getArea().markedBlocks();
         };
-        blocks.forEach(pos -> {
-            var maybeEntity = createBlockDisplayEntity(level, region.getName(), pos, displayProperties);
-            maybeEntity.ifPresent(entity -> {
-                switch (displayType) {
-                    case FRAME -> this.frame.trackBlockDisplay(pos, entity);
-                    case HULL -> this.hull.trackBlockDisplay(pos, entity);
-                    case MINIMAL -> this.minimalOutline.trackBlockDisplay(pos, entity);
-                    case MARKED -> this.marked.trackBlockDisplay(pos, entity);
-                }
-                level.addFreshEntity(entity);
-            });
-        });
+    }
+
+    public void show(DisplayType displayType, BlockDisplayProperties displayProperties, ServerLevel level) {
+        Set<BlockPos> blocks = blocksForDisplayType(displayType);
+        blocks.stream()
+                .filter(pos -> ! switch (displayType) {
+                    case FRAME -> this.frame.doesTrackEntityAt(pos);
+                    case HULL -> this.hull.doesTrackEntityAt(pos);
+                    case MINIMAL -> this.minimalOutline.doesTrackEntityAt(pos);
+                    case MARKED -> this.marked.doesTrackEntityAt(pos);
+                })
+                .forEach(pos -> {
+                    var maybeEntity = createBlockDisplayEntity(level, region.getName(), pos, displayProperties);
+                    if (maybeEntity.isPresent()) {
+                        var entity = maybeEntity.get();
+                        switch (displayType) {
+                            case FRAME -> this.frame.trackBlockDisplay(pos, entity);
+                            case HULL -> this.hull.trackBlockDisplay(pos, entity);
+                            case MINIMAL -> this.minimalOutline.trackBlockDisplay(pos, entity);
+                            case MARKED -> this.marked.trackBlockDisplay(pos, entity);
+                        }
+                        level.addFreshEntity(entity);
+                    }
+                });
     }
 
     public void show(DisplayType displayType, ServerLevel level) {

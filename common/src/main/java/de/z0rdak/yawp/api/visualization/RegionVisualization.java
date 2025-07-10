@@ -8,6 +8,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.commands.data.EntityDataAccessor;
 import net.minecraft.world.entity.Entity;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +21,10 @@ public class RegionVisualization {
     public RegionVisualization(BlockDisplayProperties properties) {
         this.displayEntities = new HashMap<>();
         this.properties = properties;
+    }
+
+    public boolean doesTrackEntityAt(BlockPos pos) {
+        return displayEntities.containsKey(pos);
     }
 
     public void trackBlockDisplay(BlockPos pos, Entity entity) {
