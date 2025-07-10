@@ -242,8 +242,8 @@ public class CuboidArea extends AbstractArea {
     }
 
     @Override
-    public List<BlockPos> markedBlocks() {
-        return Arrays.asList(this.p1, this.p2);
+    public Set<BlockPos> markedBlocks() {
+        return Set.of(this.p1, this.p2);
     }
 
     /**

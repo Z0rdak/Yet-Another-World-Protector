@@ -8,10 +8,7 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import org.apache.commons.lang3.NotImplementedException;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Polygon3DArea extends AbstractArea {
 
@@ -101,8 +98,8 @@ public class Polygon3DArea extends AbstractArea {
     }
 
     @Override
-    public List<BlockPos> markedBlocks() {
-        return this.positions;
+    public Set<BlockPos> markedBlocks() {
+        return new HashSet<>(this.positions);
     }
 
     @Override
