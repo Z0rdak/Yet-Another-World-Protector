@@ -41,6 +41,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Relative;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.level.block.AirBlock;
 import net.minecraft.world.level.block.Block;
@@ -569,46 +570,45 @@ class RegionCommands {
         return 0;
     }
 
-    private static int teleport(CommandContext<CommandSourceStack> ctx, IMarkableRegion region) {
+    private static int teleport(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, String tpAnchorName) {
+        if (!region.getTpAnchors().hasAnchor(tpAnchorName)) {
+            // TODO
+            sendCmdFeedback(ctx.getSource(), Component.literal("TODO"));
+            return -1;
+        }
         try {
-            ServerPlayer player = ctx.getSource().getPlayerOrException();
-            return teleport(ctx, region, player);
+            ServerPlayer self = ctx.getSource().getPlayerOrException();
+            return teleport(ctx, region, tpAnchorName, self);
         } catch (CommandSyntaxException e) {
-            Constants.LOGGER.warn("Unable to teleport command source to region. Most likely not a player");
+            Constants.LOGGER.warn("Unable to teleport command source to region. Can only be executed by a player");
+            sendCmdFeedback(ctx.getSource(), Component.literal("TODO"));
             return -1;
         }
     }
 
-    private static int teleport(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, ServerPlayer playerToTeleport) {
+    private static int teleport(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, String tpAnchorName, ServerPlayer playerToTeleport) {
+        TeleportAnchor tpAnchor = region.getTpAnchors().getTpAnchor(tpAnchorName);
+        BlockPos tpPos = tpAnchor.getPos();
         try {
             ServerPlayer player = ctx.getSource().getPlayerOrException();
             ServerLevel level = ctx.getSource().getServer().getLevel(region.getDim());
             if (level != null) {
-                player.teleportTo(level, region.getTpTarget().getX(), region.getTpTarget().getY(), region.getTpTarget().getZ(), Relative.ROTATION, player.getYRot(), player.getXRot(), true);
+                player.teleportTo(level, tpPos.getX(), tpPos.getY(), tpPos.getZ(), RelativeMovement.ROTATION, player.getYRot(), player.getXRot());
                 return 0;
             } else {
                 Constants.LOGGER.error("Error executing teleport command. Level is null.");
+                sendCmdFeedback(ctx.getSource(), Component.literal("TODO"));
                 return -1;
             }
         } catch (CommandSyntaxException e) {
             ServerLevel level = ctx.getSource().getServer().getLevel(region.getDim());
             if (level != null) {
-                playerToTeleport.teleportTo(level, region.getTpTarget().getX(), region.getTpTarget().getY(), region.getTpTarget().getZ(), Relative.ROTATION, playerToTeleport.getYRot(), playerToTeleport.getXRot(), true);
+                playerToTeleport.teleportTo(level, tpPos.getX(), tpPos.getY(), tpPos.getZ(), Relative.ROTATION, playerToTeleport.getYRot(), playerToTeleport.getXRot(), true);
                 return 0;
             }
             Constants.LOGGER.warn("Error executing teleport command.");
+            sendCmdFeedback(ctx.getSource(), Component.literal("TODO"));
             return -1;
         }
-    }
-
-    private static int setTeleportPos(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, BlockPos target) {
-        if (!region.getTpTarget().equals(target)) {
-            region.setTpTarget(target);
-            RegionManager.get().save();
-            MutableComponent newTpTargetLink = buildDimensionalBlockTpLink(region.getDim(), target);
-            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.area.tp.set.msg", "Set new teleport anchor for %s to %s", buildRegionInfoLink(region), newTpTargetLink));
-            return 0;
-        }
-        return 1;
     }
 }
