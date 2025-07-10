@@ -1,5 +1,7 @@
 package de.z0rdak.yawp.api.visualization;
 
+import de.z0rdak.yawp.api.core.IDimensionRegionApi;
+import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.area.BlockDisplayProperties;
 import de.z0rdak.yawp.core.area.DisplayType;
@@ -11,7 +13,12 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.entity.EntityTypeTest;
 
 import java.util.*;
 
@@ -22,6 +29,22 @@ public class VisualizationManager {
 
     public static void initServerInstance(MinecraftServer server) {
         serverInstance = server;
+    }
+
+    public final static ResourceLocation REGION_BLOCK_DISPLAY_TAG = ResourceLocation.parse("yawp:region_block_display");
+    public final static ResourceLocation REGION_TEXT_DISPLAY_TAG = ResourceLocation.parse("yawp:region_text_display");
+
+    public static void nukeDisplayEntities(ServerLevel level) {
+        var entities = level.getEntities(EntityTypeTest.forClass(Display.class), (entity) -> {
+            boolean containsTextTag = entity.getTags().contains(REGION_TEXT_DISPLAY_TAG.toString());
+            boolean containsBlockTag = entity.getTags().contains(REGION_BLOCK_DISPLAY_TAG.toString());
+            return containsTextTag || containsBlockTag;
+        });
+        var entityAmount = entities.size();
+        entities.forEach(e -> e.remove(Entity.RemovalReason.DISCARDED));
+        if (entityAmount > 0) {
+            Constants.LOGGER.info("Nuked {} region display entities in level {} on startup.", entityAmount, level.dimension().location().toString());
+        }
     }
 
     private static MinecraftServer serverInstance;
