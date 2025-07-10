@@ -8,6 +8,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.api.commands.CommandConstants;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
+import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.commands.arguments.region.ContainingOwnedRegionArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.core.area.AreaType;
@@ -34,6 +35,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.commands.data.EntityDataAccessor;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import org.jetbrains.annotations.Nullable;
@@ -41,6 +43,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
+import static de.z0rdak.yawp.api.visualization.VisualizationManager.REGION_BLOCK_DISPLAY_TAG;
+import static de.z0rdak.yawp.api.visualization.VisualizationManager.REGION_TEXT_DISPLAY_TAG;
 import static de.z0rdak.yawp.commands.CommandUtil.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
@@ -176,18 +180,15 @@ class DimensionCommands {
     }
 
     private static int nukeDisplayEntities(CommandContext<CommandSourceStack> ctx, ServerLevel level) {
-        var entities = level.getEntities(EntityTypeTest.forClass(Entity.class),
-                (entity) -> {
-                    CompoundTag entityTag = new EntityDataAccessor(entity).getData();
-                    CompoundTag customDataTag = entityTag.getCompound("data");
-                    String string = customDataTag.getString("yawp_display");
-                    return !string.isEmpty();
-                });
-
+        var entities = level.getEntities(EntityTypeTest.forClass(Display.class), (entity) -> {
+            boolean containsTextTag = entity.getTags().contains(REGION_TEXT_DISPLAY_TAG.toString());
+            boolean containsBlockTag = entity.getTags().contains(REGION_BLOCK_DISPLAY_TAG.toString());
+            return containsTextTag || containsBlockTag;
+        });
         var entityAmount = entities.size();
         entities.forEach(e -> e.remove(Entity.RemovalReason.DISCARDED));
         // TODO: I18n
-        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Nuked all (%s) yawp entities in '%s'", "Nuked all (%s) yawp entities in '%s'", entityAmount, level.dimension().location()));
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Nuked all (%s) yawp entities in '%s'", "Nuked all (%s) yawp entities in '%s'", entityAmount, level.dimension().location().toString()));
         return 0;
     }
 
