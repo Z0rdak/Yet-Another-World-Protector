@@ -17,15 +17,28 @@ import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.entity.EntityTypeTest;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
 import static de.z0rdak.yawp.api.visualization.VisualizationUtil.buildTeleportAnchorTextDisplayTag;
 import static de.z0rdak.yawp.api.visualization.VisualizationUtil.createDisplayEntity;
+import static de.z0rdak.yawp.constants.Constants.MOD_ID;
 
+/*
+- TODO: Event for filtering tracking for players? -> separately in next patch (most likely with luckperms)
+    -> when tracking other player is added?... kill entities and add tracking for other player or how doesi t work?
+-TODO: Show teleport anchors
+-TODO: Remove entities on server-stop
+-Note: Remove on start not possible due to events fired by entities not yet loaded?
+-TODO: permission for commands in CommandInterceptor
+ */
 public class VisualizationManager {
+
+    // TODO: MOAR logging
+    public static final Logger VISUALIZATION_LOGGER = LogManager.getLogger(MOD_ID.toUpperCase() + "-Visualization");
 
     public static void initServerInstance(MinecraftServer server) {
         serverInstance = server;
@@ -43,7 +56,7 @@ public class VisualizationManager {
         var entityAmount = entities.size();
         entities.forEach(e -> e.remove(Entity.RemovalReason.DISCARDED));
         if (entityAmount > 0) {
-            Constants.LOGGER.info("Nuked {} region display entities in level {} on startup.", entityAmount, level.dimension().location().toString());
+            VISUALIZATION_LOGGER.info("Nuked all ({}) untracked region display entities in level {}.", entityAmount, level.dimension().location().toString());
         }
     }
 
@@ -56,6 +69,53 @@ public class VisualizationManager {
 
     private VisualizationManager() {
         this.regionDisplayManagers = new HashMap<>();
+    }
+
+    public static void hideRegionsAround(Player player, int radius) {
+        Level level = player.getCommandSenderWorld();
+        BlockPos playerPos = player.blockPosition();
+        Optional<IDimensionRegionApi> maybeApi = RegionManager.get().getDimRegionApi(level.dimension());
+        if (maybeApi.isPresent()) {
+            var dimApi = maybeApi.get();
+            List<IMarkableRegion> regionsAround = dimApi.getRegionsAround(playerPos, radius);
+            regionsAround.forEach(region -> {
+                hide(region, DisplayType.FRAME);
+                hide(region, DisplayType.HULL);
+                hide(region, DisplayType.MINIMAL);
+                hide(region, DisplayType.MARKED);
+            });
+        }
+    }
+
+    public static void showRegionsAround(Player player, int radius, DisplayType displayType) {
+        Level level = player.getCommandSenderWorld();
+        BlockPos playerPos = player.blockPosition();
+        Optional<IDimensionRegionApi> maybeApi = RegionManager.get().getDimRegionApi(level.dimension());
+        if (maybeApi.isPresent()) {
+            var dimApi = maybeApi.get();
+            List<IMarkableRegion> regionsAround = dimApi.getRegionsAround(playerPos, radius);
+            regionsAround.forEach(region -> {
+                show(region, displayType);
+            });
+        }
+    }
+
+    public static void hideAllRegions(Level level, boolean untracked) {
+        Optional<IDimensionRegionApi> maybeApi = RegionManager.get().getDimRegionApi(level.dimension());
+        if (maybeApi.isPresent()) {
+            var dimApi = maybeApi.get();
+            Collection<IMarkableRegion> regions = dimApi.getAllLocalRegions();
+            regions.forEach(region -> {
+                hide(region, DisplayType.FRAME);
+                hide(region, DisplayType.HULL);
+                hide(region, DisplayType.MINIMAL);
+                hide(region, DisplayType.MARKED);
+            });
+
+        }
+        if (untracked) {
+            nukeDisplayEntities((ServerLevel) level);
+        }
     }
 
     public static void show(IMarkableRegion region, TeleportAnchor tpAnchor, TextDisplayProperties textDisplayProperties) {}
@@ -88,7 +148,6 @@ public class VisualizationManager {
         if (!dimVisualizationManagers.containsKey(levelRl)) {
             VisualizationManager dimVm = new VisualizationManager();
             dimVisualizationManagers.put(levelRl, dimVm);
-            Constants.LOGGER.info("Init VM for {}", levelRl.toString());
         }
         return dimVisualizationManagers.get(levelRl);
     }
@@ -96,7 +155,6 @@ public class VisualizationManager {
     private static RegionVisualizationManager getOrCreateRegionVisualizationManager(VisualizationManager vm, IMarkableRegion region) {
         if (!vm.regionDisplayManagers.containsKey(region.getName())) {
             vm.regionDisplayManagers.put(region.getName(), new RegionVisualizationManager(region));
-            Constants.LOGGER.info("Init RVM for {}", region.getName());
         }
         return vm.regionDisplayManagers.get(region.getName());
     }
@@ -154,25 +212,4 @@ public class VisualizationManager {
                 anchor -> hide(region, anchor)
         );
     }
-
-
-    /*
-    TODO:
-    - Track entities for region
-    - Event for filtering tracking for players?
-    -> when tracking other player is added?... kill entities and add tracking for other player or how doesi t work?
-
-    - Show area for region
-    - Show area for region and children
-    - Show areas at blockpos
-    - Show area and intersecting
-- Show teleport anchors
-- Remove non-persistent entities after unload/restart...
-
-
-
-     */
-
-
-
 }
