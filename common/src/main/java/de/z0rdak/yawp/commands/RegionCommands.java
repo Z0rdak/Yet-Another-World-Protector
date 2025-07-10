@@ -203,7 +203,7 @@ class RegionCommands {
                                             .then(Commands.argument(STYLE.toString(), StringArgumentType.word())
                                                     .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(DisplayType.entries(), builder))
                                                     .executes(ctx -> showRegion(ctx, getRegionArgument(ctx), getDisplayTypeArgument(ctx)))
-                                                    .then(Commands.argument(BLOCK_ID.toString(), ResourceLocationArgument.id())
+                                                    .then(Commands.argument(BLOCK.toString(), ResourceLocationArgument.id())
                                                             .executes(ctx -> showRegion(ctx, getRegionArgument(ctx),
                                                                     getDisplayTypeArgument(ctx),
                                                                     getDisplayBlockArgument(ctx)))
