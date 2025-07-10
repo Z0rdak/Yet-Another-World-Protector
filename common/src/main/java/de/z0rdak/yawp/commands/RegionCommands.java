@@ -8,7 +8,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.core.RegionManager;
-import de.z0rdak.yawp.api.core.VisualizationManager;
+import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.commands.arguments.region.AddRegionChildArgumentType;
@@ -35,10 +35,8 @@ import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -46,7 +44,7 @@ import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.level.block.AirBlock;
 import net.minecraft.world.level.block.Block;
-import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 
@@ -153,6 +151,61 @@ class RegionCommands {
                                 )
                         )
                 );
+    }
+
+    private static int setDisplayLightLevel(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, int lightLevel) {
+        IMarkableArea area = region.getArea();
+        area.getDisplay().setLightLevel(lightLevel);
+        RegionManager.get().save();
+        // TODO: Trigger update
+        // TODO: I18n
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Set light level for area display for region %s to '%s'", "Set display light level for %s to '%s'", buildRegionInfoLink(region), lightLevel));
+        return 0;
+    }
+
+    public static int resetDisplaySettings(CommandContext<CommandSourceStack> ctx, IMarkableRegion region) {
+        IMarkableArea area = region.getArea();
+        area.getDisplay().setHasGlow(BlockDisplayProperties.DEFAULT_GLOW);
+        area.getDisplay().setLightLevel(BlockDisplayProperties.DEFAULT_LIGHT_LEVEL);
+        RegionManager.get().save();
+        // TODO: Trigger update
+        // TODO: I18n
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Reset display settings for region %s", "Reset display settings for %s", buildRegionInfoLink(region)));
+        return 0;
+    }
+
+    public static int setDisplayGlow(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, boolean hasGlow) {
+        IMarkableArea area = region.getArea();
+        BlockDisplayProperties display = area.getDisplay();
+        if (display.hasGlow() != hasGlow) {
+            display.setHasGlow(hasGlow);
+            RegionManager.get().save();
+            // TODO: Trigger update - if any visualization for region is shown, it should be removed and displayed again with new glow settings
+            // TODO: Even better would be just updating the properties of the entity... it this possible and will be reflected immediately?
+            // TODO: But this would only be an optimization for large regions, since the removal and creation of entities is saved
+            // TODO: I18n
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Set display glow effect for region %s to '%s'", "Set display glow effect for %s to '%s'", buildRegionInfoLink(region), Boolean.toString(hasGlow)));
+            return 0;
+        }
+        // else silently just do nothing :-)
+        return 1;
+    }
+
+
+    public static int setDisplayBlock(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, ResourceLocation blockRl) {
+        Block block = BuiltInRegistries.BLOCK.get(blockRl);
+        if (block instanceof AirBlock) {
+            // TODO: I18n
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Not found", "Not found", buildRegionInfoLink(region), blockRl.toString()));
+            return -1;
+        }
+        IMarkableArea area = region.getArea();
+        area.getDisplay().setBlockRl(blockRl);
+        RegionManager.get().save();
+        // TODO: Trigger update
+        // TODO: I18n
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Set display block for region %s to '%s'", "Set display block for %s to '%s'", buildRegionInfoLink(region), blockRl.toString()));
+        return 0;
     }
 
     private static int expandSphere(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, int expansion) {
@@ -371,6 +424,136 @@ class RegionCommands {
                 return 1;
             }
         }
+    }
+
+    public static int showRegion(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, DisplayType displayType) {
+        return showRegion(ctx, region, displayType, region.getArea().getDisplay().blockRl());
+    }
+
+    public static int showRegion(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, DisplayType displayType, ResourceLocation blockRl) {
+        return showRegion(ctx, region, displayType, blockRl, region.getArea().getDisplay().hasGlow());
+    }
+
+    public static int showRegion(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, DisplayType displayType, ResourceLocation blockRl, boolean glow) {
+        return showRegion(ctx, region, displayType, blockRl, glow, region.getArea().getDisplay().lightLevel());
+    }
+
+    public static int showRegion(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, DisplayType displayType, ResourceLocation blockRl, boolean glow, int lightLevel) {
+        BlockDisplayProperties displayProperties = new BlockDisplayProperties(blockRl, glow, lightLevel);
+        VisualizationManager.show(region, displayType, displayProperties);
+        // TODO: Feedback?
+        return 0;
+    }
+
+    public static int hideRegion(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, DisplayType displayType) {
+        VisualizationManager.hide(region, displayType);
+        // TODO: Feedback?
+        return 0;
+    }
+
+    public static int showRegionsIntersecting(CommandContext<CommandSourceStack> ctx, IMarkableRegion region) {
+        VisualizationManager.showIntersecting(region);
+        return 0;
+    }
+
+    public static int showRegionHierarchy(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, boolean recursive) {
+        VisualizationManager.showHierarchy(region, recursive);
+        return 0;
+    }
+
+    public static int hideRegionHierarchy(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, boolean recursive) {
+        VisualizationManager.hideHierarchy(region, recursive);
+        return 0;
+    }
+
+    public static int hideRegionsIntersecting(CommandContext<CommandSourceStack> ctx, IMarkableRegion region) {
+        VisualizationManager.hideIntersecting(region);
+        return 0;
+    }
+
+    private static int promptDisplaySettings(CommandContext<CommandSourceStack> ctx, IMarkableRegion region) {
+        MultiLineMessage.send(ctx.getSource(), MultiLineMessage.displaySettingsInfo(region));
+        return 0;
+    }
+
+    private static int promptVisualizationOptions(CommandContext<CommandSourceStack> ctx, IMarkableRegion region) {
+        MultiLineMessage.send(ctx.getSource(), MultiLineMessage.visualizationOptions(region));
+        return 0;
+    }
+
+    private static int promptTeleportAnchorPagination(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, int pageNo) {
+        try {
+            int paginationSize = Services.REGION_CONFIG.getPaginationSize();
+            TeleportAnchorPagination tpAnchorPagination = new TeleportAnchorPagination(region, pageNo, paginationSize);
+            MultiLineMessage.send(ctx.getSource(), tpAnchorPagination);
+        } catch (InvalidPageNumberException e) {
+            sendError(ctx.getSource(), e.getError());
+            return -1;
+        }
+        return 0;
+    }
+
+    private static int updateTeleportAnchor(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, BlockPos pos, String name) {
+        TeleportAnchors tpAnchors = region.getTpAnchors();
+        var hasAnchor = tpAnchors.hasAnchor(name);
+        if (!hasAnchor && !isValidName(name)) {
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.fail-msg.invalid-name", "Teleport Anchor name is invalid. Must be alphanumeric and between 3 and 50 letters.", name, buildRegionInfoLink(region)));
+            return -1;
+        }
+        tpAnchors.addOrUpdate(name, pos);
+        RegionManager.get().save();
+        // TODO: Trigger update - if tpAnchor is currently visualized, it should be removed and displayed at new position
+        var anchor = tpAnchors.getTpAnchor(name);
+        var blockTpLink = TeleportAnchorPagination.buildTeleportToAnchorLink(region, anchor);
+
+        if (hasAnchor) {
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.updated.msg", "Updated position of '%s' to %s", name, blockTpLink));
+        } else {
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.added.msg", "Added new anchor '%s' at %s", name, blockTpLink));
+        }
+        return 0;
+    }
+
+    private static int removeTeleportAnchor(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, String name) {
+        TeleportAnchors tpAnchors = region.getTpAnchors();
+        if (!tpAnchors.hasAnchor(name)) {
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.fail-msg.not-existent", "Teleport anchor '%s' does not exist in %s", name, buildRegionInfoLink(region)));
+            return -1;
+        }
+        TeleportAnchor anchor = tpAnchors.getTpAnchor(name);
+        tpAnchors.removeTpAnchor(name);
+        RegionManager.get().save();
+        // TODO: Trigger update - if tpAnchor is currently visualized, it should be removed
+        var blockTpLink = ChatLinkBuilder.buildDimensionalBlockTpLink(region.getDim(), anchor.getPos(), Component.literal(shortBlockPos(anchor.getPos())));
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.removed.msg", "Removed teleport anchor '%s' (at %s ) from %s", name, blockTpLink, buildRegionInfoLink(region)));
+        return 0;
+    }
+
+    public static boolean isValidName(String name) {
+        return StringUtils.isAlphanumeric(name) && name.length() >= 4 && name.length() <= 50;
+    }
+
+    private static int renameTeleportAnchor(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, String name, String newName) {
+        if (!isValidName(name) || !isValidName(newName)) {
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.fail-msg.invalid-name", "Teleport Anchor name is invalid. Must be alphanumeric and between 3 and 50 letters.", name, buildRegionInfoLink(region)));
+            return -1;
+        }
+        TeleportAnchors tpAnchors = region.getTpAnchors();
+        if (!tpAnchors.hasAnchor(name)) {
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.fail-msg.not-existent", "Teleport anchor '%s' does not exist in %s", name, buildRegionInfoLink(region)));
+            return -1;
+        }
+        if (tpAnchors.hasAnchor(newName)) {
+            TeleportAnchor anchor = tpAnchors.getTpAnchor(newName);
+            var blockTpLink = ChatLinkBuilder.buildDimensionalBlockTpLink(region.getDim(), anchor.getPos(), Component.literal(shortBlockPos(anchor.getPos())));
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.fail-msg.already-present", "Teleport anchor '%s' %s is already defined in %s", name, blockTpLink, buildRegionInfoLink(region)));
+            return 1;
+        }
+        tpAnchors.rename(name, newName);
+        RegionManager.get().save();
+        // TODO: Trigger update - if tpAnchor is currently visualized, it should be removed and displayed with new name
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.renamed.msg", "Renamed teleport anchor '%s' to '%s'", name, newName));
+        return 0;
     }
 
     /**
