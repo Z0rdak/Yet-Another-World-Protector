@@ -192,6 +192,14 @@ public class VisualizationManager {
         rvm.hide(displayType);
     }
 
+    public static void updateRegionDisplay(IMarkableRegion region) {
+        ResourceLocation levelRl = region.getDim().location();
+        VisualizationManager vm = getOrCreateVisualizationManager(levelRl);
+        RegionVisualizationManager rvm = getOrCreateRegionVisualizationManager(vm, region);
+        ServerLevel level = serverInstance.getLevel(region.getDim());
+        rvm.updateDisplay(region.getArea(), level);
+    }
+
 
     public static void refreshDisplay(IMarkableRegion region, DisplayType displayType) {
         ResourceLocation levelRl = region.getDim().location();
