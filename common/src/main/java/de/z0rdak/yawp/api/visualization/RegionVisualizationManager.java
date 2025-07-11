@@ -157,7 +157,6 @@ public class RegionVisualizationManager {
     }
 
     public void updateDisplay(BlockDisplayProperties displayProperties, boolean refresh) {
-        this.region.getArea().updateDisplay(displayProperties);
         this.frame.updateDisplay(displayProperties, refresh);
         this.hull.updateDisplay(displayProperties, refresh);
         this.minimalOutline.updateDisplay(displayProperties, refresh);
