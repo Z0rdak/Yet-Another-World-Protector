@@ -27,4 +27,12 @@ public class BlockVisualization {
             this.entity = null;
         }
     }
+
+    public boolean doesTrack() {
+        return this.entity != null;
+    }
+
+    public void move(BlockPos pos) {
+        this.entity.moveTo(pos.getX(), pos.getY(), pos.getZ());
+    }
 }
