@@ -3,6 +3,7 @@ package de.z0rdak.yawp.core.area;
 import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import de.z0rdak.yawp.util.AreaUtil;
 import de.z0rdak.yawp.util.NbtCompatHelper;
+import it.unimi.dsi.fastutil.Hash;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -243,7 +244,10 @@ public class CuboidArea extends AbstractArea {
 
     @Override
     public Set<BlockPos> markedBlocks() {
-        return Set.of(this.p1, this.p2);
+        var set = new HashSet<BlockPos>();
+        set.add(this.p1);
+        set.add(this.p2);
+        return set;
     }
 
     /**
@@ -290,15 +294,19 @@ public class CuboidArea extends AbstractArea {
         Set<BlockPos> result = new HashSet<>();
         for (BlockPos corner : corners) {
             result.add(corner);
-            int dx = corner.getX() == minX ? 1 : -1;
-            int dy = corner.getY() == minY ? 1 : -1;
-            int dz = corner.getZ() == minZ ? 1 : -1;
-            BlockPos outX = corner.offset(dx, 0, 0);
-            BlockPos outY = corner.offset(0, dy, 0);
-            BlockPos outZ = corner.offset(0, 0, dz);
-            result.add(outX);
-            result.add(outY);
-            result.add(outZ);
+            // For each axis, determine if there's room to offset
+            if (minX != maxX) {
+                int dx = (corner.getX() == minX) ? 1 : -1;
+                result.add(corner.offset(dx, 0, 0));
+            }
+            if (minY != maxY) {
+                int dy = (corner.getY() == minY) ? 1 : -1;
+                result.add(corner.offset(0, dy, 0));
+            }
+            if (minZ != maxZ) {
+                int dz = (corner.getZ() == minZ) ? 1 : -1;
+                result.add(corner.offset(0, 0, dz));
+            }
         }
         return result;
     }
