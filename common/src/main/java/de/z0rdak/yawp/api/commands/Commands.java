@@ -301,12 +301,12 @@ public final class Commands {
     }
 
     public static String buildShowTpAnchorCommand(IMarkableRegion region, String name) {
-        String subCmd = buildSubCmdStr(HIDE.toString(), name);
+        String subCmd = buildSubCmdStr(SHOW.toString(), name);
         return buildTeleportAnchorSubCommand(region, subCmd);
     }
 
     public static String buildHideTpAnchorCommand(IMarkableRegion region, String name) {
-        String subCmd = buildSubCmdStr(SHOW.toString(), name);
+        String subCmd = buildSubCmdStr(HIDE.toString(), name);
         return buildTeleportAnchorSubCommand(region, subCmd);
     }
 

@@ -118,34 +118,42 @@ public class VisualizationManager {
         }
     }
 
-    public static void show(IMarkableRegion region, TeleportAnchor tpAnchor, TextDisplayProperties textDisplayProperties) {
-        // TODO:
+    public static void showTpAnchor(IMarkableRegion region, TeleportAnchor tpAnchor) {
+        ResourceLocation levelRl = region.getDim().location();
+        VisualizationManager vm = getOrCreateVisualizationManager(levelRl);
+        RegionVisualizationManager rvm = getOrCreateRegionVisualizationManager(vm, region);
+
+        ServerLevel level = serverInstance.getLevel(region.getDim());
+        rvm.showTpAnchor(tpAnchor, level);
     }
 
-    public static void show(IMarkableRegion region, TeleportAnchor tpAnchor) {
-        // TODO: Just go with a default TextDisplayProperties for now
-        var defaultProperties = new TextDisplayProperties(tpAnchor.getName());
-        CompoundTag compoundTag = buildTeleportAnchorTextDisplayTag(region.getName(), defaultProperties);
-        Optional<Entity> displayEntity = createDisplayEntity(serverInstance.getLevel(region.getDim()), tpAnchor.getPos(), compoundTag);
-        if (displayEntity.isPresent()) {
+    public static void hideTpAnchor(IMarkableRegion region, TeleportAnchor tpAnchor) {
+        ResourceLocation levelRl = region.getDim().location();
+        VisualizationManager vm = getOrCreateVisualizationManager(levelRl);
+        RegionVisualizationManager rvm = getOrCreateRegionVisualizationManager(vm, region);
 
-        }
-        show(region, tpAnchor, defaultProperties);
+        ServerLevel level = serverInstance.getLevel(region.getDim());
+        rvm.hideTpAnchor(tpAnchor, level);
     }
 
-    public static void hide(IMarkableRegion region, TeleportAnchor tpAnchor) {
-        // TODO:
+    public static void updateTpAnchor(IMarkableRegion region, TeleportAnchor tpAnchor) {
+        ResourceLocation levelRl = region.getDim().location();
+        VisualizationManager vm = getOrCreateVisualizationManager(levelRl);
+        RegionVisualizationManager rvm = getOrCreateRegionVisualizationManager(vm, region);
+
+        rvm.updateTpAnchor(tpAnchor);
     }
 
+    // Note: Not useful, since tp anchor don't have a text component yet to distinguish them
     public static void showTeleportAnchors(IMarkableRegion region) {
         region.getTpAnchors().getAnchors().forEach(
-                anchor -> show(region, anchor)
+                anchor -> showTpAnchor(region, anchor)
         );
     }
 
     public static void hideTeleportAnchors(IMarkableRegion region) {
         region.getTpAnchors().getAnchors().forEach(
-                anchor -> hide(region, anchor)
+                anchor -> hideTpAnchor(region, anchor)
         );
     }
 
