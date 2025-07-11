@@ -47,11 +47,11 @@ public final class CommandRegistry {
                 .then(GlobalCommands.build())
                 .then(DimensionCommands.build())
                 .then(RegionCommands.build())
-                .then(PlayerCommands.buildShow())
-                .then(PlayerCommands.buildHide())
-                .then(PlayerCommands.buildInfoLocal())
-                .then(PlayerCommands.buildCreateLocal())
-                .then(PlayerCommands.buildDeleteLocal());
+                .then(ShortCutCommands.buildShow())
+                .then(ShortCutCommands.buildHide())
+                .then(ShortCutCommands.buildInfoLocal())
+                .then(ShortCutCommands.buildCreateLocal())
+                .then(ShortCutCommands.buildDeleteLocal());
     }
 
     private static int promptHelp(CommandSourceStack src) {
