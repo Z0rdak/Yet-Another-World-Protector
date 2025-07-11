@@ -7,10 +7,11 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.api.commands.CommandConstants;
+import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
-import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.commands.arguments.region.ContainingOwnedRegionArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
+import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.SphereArea;
@@ -126,9 +127,6 @@ class DimensionCommands {
                                 .then(literal(CommandConstants.LOCAL)
                                         .then(Commands.argument(CommandConstants.NAME.toString(), StringArgumentType.word())
                                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Collections.singletonList(getRandomExample()), builder))
-                                                //.then(Commands.argument(AREA.toString(), StringArgumentType.word())
-                                                //        .suggests((ctx, builder) -> AreaArgumentType.areaType().listSuggestions(ctx, builder))
-                                                //        .executes(ctx -> createRegion(ctx.getSource(), getRegionNameArgument(ctx), getDimCacheArgument(ctx), getAreaTypeArgument(ctx))))
                                                 .then(Commands.literal(AreaType.CUBOID.areaType)
                                                         .then(Commands.argument(POS1.toString(), BlockPosArgument.blockPos())
                                                                 .then(Commands.argument(POS2.toString(), BlockPosArgument.blockPos())
@@ -141,20 +139,6 @@ class DimensionCommands {
                                                                                         BlockPosArgument.getSpawnablePos(ctx, POS1.toString()),
                                                                                         BlockPosArgument.getSpawnablePos(ctx, POS2.toString()), getContainingOwnedRegionArgument(ctx))))))
                                                 )
-                                                /* Note: Disabled for now because in conflicts with the 2nd option where only the radius is provided.
-                                                .then(Commands.literal(AreaType.SPHERE.areaType)
-                                                        .then(Commands.argument(CENTER_POS.toString(), BlockPosArgument.blockPos())
-                                                                .then(Commands.argument(RADIUS_POS.toString(), BlockPosArgument.blockPos())
-                                                                        .executes(ctx -> createSphereRegion(ctx, getRegionNameArgument(ctx), getDimCacheArgument(ctx),
-                                                                                BlockPosArgument.getSpawnablePos(ctx, CENTER_POS.toString()),
-                                                                                BlockPosArgument.getSpawnablePos(ctx, RADIUS_POS.toString()), null))
-                                                                        .then(Commands.argument(CommandConstants.PARENT.toString(), StringArgumentType.word())
-                                                                                .suggests((ctx, builder) -> ContainingOwnedRegionArgumentType.owningRegions().listSuggestions(ctx, builder))
-                                                                                .executes(ctx -> createSphereRegion(ctx, getRegionNameArgument(ctx), getDimCacheArgument(ctx),
-                                                                                        BlockPosArgument.getSpawnablePos(ctx, CENTER_POS.toString()),
-                                                                                        BlockPosArgument.getSpawnablePos(ctx, RADIUS_POS.toString()), getContainingOwnedRegionArgument(ctx))))))
-                                                )
-                                                */
                                                 .then(Commands.literal(AreaType.SPHERE.areaType)
                                                         .then(Commands.argument(CENTER_POS.toString(), BlockPosArgument.blockPos())
                                                                 .then(Commands.argument(RADIUS.toString(), IntegerArgumentType.integer(0))
@@ -284,7 +268,25 @@ class DimensionCommands {
         return 0;
     }
 
-    private static int createCuboidRegion(CommandContext<CommandSourceStack> ctx, String regionName, DimensionRegionCache dimCache, BlockPos pos1, BlockPos pos2, @Nullable IProtectedRegion parentRegion) {
+    public static int createCuboidRegion(CommandContext<CommandSourceStack> ctx, String regionName, BlockPos pos1, BlockPos pos2, @Nullable IProtectedRegion parentRegion) {
+        Optional<DimensionRegionCache> dimCache = RegionManager.get().getDimensionCache(ctx.getSource().getLevel().dimension());
+        if (dimCache.isPresent()) {
+            return createCuboidRegion(ctx, regionName, dimCache.get(), pos1, pos2, parentRegion);
+        }
+        Constants.LOGGER.error("Error getting dimension cache for {}", ctx.getSource().getLevel().dimension().location().toString());
+        return -1;
+    }
+
+    public static int createSphereRegion(CommandContext<CommandSourceStack> ctx, String regionName, BlockPos centerPos, int radius, @Nullable IProtectedRegion parentRegion) {
+        Optional<DimensionRegionCache> dimCache = RegionManager.get().getDimensionCache(ctx.getSource().getLevel().dimension());
+        if (dimCache.isPresent()) {
+            return createSphereRegion(ctx, regionName, dimCache.get(), centerPos, radius, parentRegion);
+        }
+        Constants.LOGGER.error("Error getting dimension cache for {}", ctx.getSource().getLevel().dimension().location().toString());
+        return -1;
+    }
+
+    public static int createCuboidRegion(CommandContext<CommandSourceStack> ctx, String regionName, DimensionRegionCache dimCache, BlockPos pos1, BlockPos pos2, @Nullable IProtectedRegion parentRegion) {
         CuboidRegion region = new CuboidRegion(regionName, new CuboidArea(pos1, pos2), null, dimCache.dimensionKey());
         IProtectedRegion parent = parentRegion == null ? dimCache.getDimensionalRegion() : parentRegion;
         return createRegion(ctx, regionName, dimCache, region, parent);
@@ -296,7 +298,7 @@ class DimensionCommands {
         return createRegion(ctx, regionName, dimCache, region, parent);
     }
 
-    private static int createSphereRegion(CommandContext<CommandSourceStack> ctx, String regionName, DimensionRegionCache dimCache, BlockPos centerPos, int radius, @Nullable IProtectedRegion parentRegion) {
+    public static int createSphereRegion(CommandContext<CommandSourceStack> ctx, String regionName, DimensionRegionCache dimCache, BlockPos centerPos, int radius, @Nullable IProtectedRegion parentRegion) {
         SphereRegion region = new SphereRegion(regionName, new SphereArea(centerPos, radius), null, dimCache.dimensionKey());
         IProtectedRegion parent = parentRegion == null ? dimCache.getDimensionalRegion() : parentRegion;
         return createRegion(ctx, regionName, dimCache, region, parent);
@@ -310,6 +312,15 @@ class DimensionCommands {
             return 0;
         }
         return 1;
+    }
+
+    public static int deleteRegion(CommandContext<CommandSourceStack> ctx, IMarkableRegion region) {
+        Optional<DimensionRegionCache> dimCache = RegionManager.get().getDimensionCache(region.getDim());
+        if (dimCache.isPresent()) {
+            return deleteRegion(ctx, dimCache.get(), region);
+        }
+        Constants.LOGGER.error("Error getting dimension cache for region {} in {}", region.getName(), region.getDim().location().toString());
+        return -1;
     }
 
     public static int deleteRegion(CommandContext<CommandSourceStack> ctx, DimensionRegionCache dim, IMarkableRegion region) {
