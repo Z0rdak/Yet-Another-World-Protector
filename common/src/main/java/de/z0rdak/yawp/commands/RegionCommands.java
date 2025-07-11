@@ -122,8 +122,8 @@ class RegionCommands {
                                         .then(literal(EXPAND)
                                                 .then(Commands.literal(AreaType.CUBOID.areaType)
                                                         .executes(ctx -> expandCuboid(ctx, getRegionArgument(ctx), MIN_BUILD_LIMIT, MAX_BUILD_LIMIT))
-                                                        .then(Commands.argument(Y_MIN.toString(), IntegerArgumentType.integer(MIN_BUILD_LIMIT, MAX_BUILD_LIMIT))
-                                                                .then(Commands.argument(Y_MAX.toString(), IntegerArgumentType.integer(MIN_BUILD_LIMIT, MAX_BUILD_LIMIT))
+                                                        .then(Commands.argument(Y_MIN.toString(), IntegerArgumentType.integer())
+                                                                .then(Commands.argument(Y_MAX.toString(), IntegerArgumentType.integer())
                                                                         .executes(ctx -> expandCuboid(ctx, getRegionArgument(ctx), IntegerArgumentType.getInteger(ctx, Y_MIN.toString()), IntegerArgumentType.getInteger(ctx, Y_MAX.toString()))))))
                                                 .then(Commands.literal(AreaType.SPHERE.areaType)
                                                         .executes(ctx -> expandSphere(ctx, getRegionArgument(ctx), 1))
@@ -296,7 +296,7 @@ class RegionCommands {
         IMarkableArea area = region.getArea();
         area.getDisplay().setLightLevel(lightLevel);
         RegionManager.get().save();
-        // TODO: Trigger update
+        // TODO: Trigger update event instead
         VisualizationManager.refreshDisplay(region);
         // TODO: I18n
         sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Set light level for area display for region %s to '%s'", "Set display light level for %s to '%s'", buildRegionInfoLink(region), lightLevel));
@@ -308,7 +308,7 @@ class RegionCommands {
         area.getDisplay().setHasGlow(BlockDisplayProperties.DEFAULT_GLOW);
         area.getDisplay().setLightLevel(BlockDisplayProperties.DEFAULT_LIGHT_LEVEL);
         RegionManager.get().save();
-        // TODO: Trigger update
+        // TODO: Trigger update event instead
         VisualizationManager.refreshDisplay(region);
         // TODO: I18n
         sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Reset display settings for region %s", "Reset display settings for %s", buildRegionInfoLink(region)));
@@ -321,7 +321,7 @@ class RegionCommands {
         if (display.hasGlow() != hasGlow) {
             display.setHasGlow(hasGlow);
             RegionManager.get().save();
-            // TODO: Trigger update
+            // TODO: Trigger update event instead
             VisualizationManager.refreshDisplay(region);
             // TODO: I18n
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Set display glow effect for region %s to '%s'", "Set display glow effect for %s to '%s'", buildRegionInfoLink(region), Boolean.toString(hasGlow)));
