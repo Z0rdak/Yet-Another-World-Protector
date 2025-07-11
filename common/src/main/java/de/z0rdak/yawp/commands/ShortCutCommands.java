@@ -132,16 +132,14 @@ class ShortCutCommands {
                 //        .then(Commands.argument(RADIUS.toString(), IntegerArgumentType.integer(10, 800))
                 //                .executes(ctx -> promptRegionsAroundPlayer(ctx, IntegerArgumentType.getInteger(ctx, RADIUS.toString())))))
                 //.then(literal(DISPLAY)
-                .executes(ctx -> showRegionsAroundPlayer(ctx, DisplayType.FRAME, 100))
-                .then(Commands.argument(STYLE.toString(), StringArgumentType.word())
-                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(DisplayType.entries(), builder))
-                        .executes(ctx -> showRegionsAroundPlayer(ctx, getDisplayTypeArgument(ctx), 100))
-                        .then(Commands.argument(RADIUS.toString(), IntegerArgumentType.integer(0, 800))
-                                .executes(ctx -> showRegionsAroundPlayer(ctx, getDisplayTypeArgument(ctx), IntegerArgumentType.getInteger(ctx, RADIUS.toString())))
-                        )
+                .executes(ctx -> showRegionsAroundPlayer(ctx, DisplayType.FRAME, 192))
+                .then(Commands.argument(RADIUS.toString(), IntegerArgumentType.integer(0, 800))
+                                .executes(ctx -> showRegionsAroundPlayer(ctx, DisplayType.FRAME, IntegerArgumentType.getInteger(ctx, RADIUS.toString())))
+                                .then(Commands.argument(STYLE.toString(), StringArgumentType.word())
+                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(DisplayType.entries(), builder))
+                                        .executes(ctx -> showRegionsAroundPlayer(ctx, getDisplayTypeArgument(ctx), IntegerArgumentType.getInteger(ctx, RADIUS.toString())))
+                                )
                 );
-        //)
-
     }
 
     // TODO: SHOW LOCAL HIERARCHY/INTERSECTING
