@@ -44,6 +44,42 @@ public class RegionVisualizationManager {
         });
     }
 
+    public void showTpAnchor(TeleportAnchor tpAnchor, ServerLevel level, BlockDisplayProperties displayProperties, TextDisplayProperties textDisplayProperties) {
+        if (!tpAnchorVisualizations.containsKey(tpAnchor.getName())) {
+            var tpAnchorVisualization = new TpAnchorVisualization(tpAnchor, displayProperties, textDisplayProperties);
+            tpAnchorVisualizations.put(tpAnchor.getName(), tpAnchorVisualization);
+        }
+        TpAnchorVisualization tpVis = tpAnchorVisualizations.get(tpAnchor.getName());
+        var maybeEntity = createBlockDisplayEntity(level, region.getName(), tpAnchor.getPos(), displayProperties);
+        if (maybeEntity.isPresent()) {
+            var entity = maybeEntity.get();
+            entity.addTag(VisualizationManager.REGION_BLOCK_DISPLAY_TAG.toString());
+            tpVis.trackTpAnchorBlockDisplay(entity);
+            level.addFreshEntity(entity);
+        }
+    }
+
+    public void showTpAnchor(TeleportAnchor tpAnchor, ServerLevel level) {
+        var blockPorps = new BlockDisplayProperties(ResourceLocation.parse("minecraft:cyan_stained_glass_pane"), true, 15);
+        var textProps = new TextDisplayProperties(tpAnchor.getName());
+            showTpAnchor(tpAnchor, level, blockPorps, textProps);
+    }
+
+    public void hideTpAnchor(TeleportAnchor tpAnchor, ServerLevel level) {
+        if (tpAnchorVisualizations.containsKey(tpAnchor.getName())) {
+            TpAnchorVisualization tpVis = tpAnchorVisualizations.get(tpAnchor.getName());
+            tpVis.discardTpAnchorDisplay();
+        }
+    }
+
+    public void updateTpAnchor(TeleportAnchor anchor) {
+        if (tpAnchorVisualizations.containsKey(anchor.getName())) {
+            TpAnchorVisualization tpVis = tpAnchorVisualizations.get(anchor.getName());
+            tpVis.updateBlockPosition(anchor);
+            // tpVis.updateText(anchor); // TODO:
+        }
+    }
+
     public Set<BlockPos> blocksForDisplayType(DisplayType type) {
         return switch (type) {
             case FRAME -> region.getArea().getFrame();
