@@ -48,8 +48,10 @@ public final class CommandRegistry {
                 .then(DimensionCommands.build())
                 .then(RegionCommands.build())
                 .then(PlayerCommands.buildShow())
-                .then(PlayerCommands.buildHide());
-
+                .then(PlayerCommands.buildHide())
+                .then(PlayerCommands.buildInfoLocal())
+                .then(PlayerCommands.buildCreateLocal())
+                .then(PlayerCommands.buildDeleteLocal());
     }
 
     private static int promptHelp(CommandSourceStack src) {
