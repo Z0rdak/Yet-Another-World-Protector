@@ -431,6 +431,10 @@ class RegionCommands {
             }
             region.setArea(area);
             RegionManager.get().save();
+
+            // TODO: Use event to update visualization. But I am currently to lazy to add event handlers for each modloader platform
+            VisualizationManager.updateRegionDisplay(region);
+
             MutableComponent updateAreaMsg = Component.translatableWithFallback("cli.msg.info.region.area.area.update", "Updated %s for %s", buildRegionAreaLink(region), buildRegionInfoLink(region));
             sendCmdFeedback(ctx.getSource(), updateAreaMsg);
             return 0;
@@ -681,7 +685,10 @@ class RegionCommands {
     }
 
     public static boolean isValidName(String name) {
-        return StringUtils.isAlphanumeric(name) && name.length() >= 4 && name.length() <= 50;
+        return name != null
+                && name.length() >= 4
+                && name.length() <= 50
+                && name.matches("^[a-zA-Z0-9][a-zA-Z0-9_-]*$");
     }
 
     private static int renameTeleportAnchor(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, String name, String newName) {
