@@ -1,11 +1,9 @@
 package de.z0rdak.yawp.api.visualization;
 
-import de.z0rdak.yawp.core.area.BlockDisplayProperties;
-import de.z0rdak.yawp.core.area.DisplayType;
-import de.z0rdak.yawp.core.area.TeleportAnchor;
-import de.z0rdak.yawp.core.area.TextDisplayProperties;
+import de.z0rdak.yawp.core.area.*;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 
@@ -35,8 +33,6 @@ public class RegionVisualizationManager {
         this.minimalOutline = new RegionVisualization(blockDisplayProperties);
         this.marked = new RegionVisualization(blockDisplayProperties);
         this.tpAnchorVisualizations = new HashMap<>();
-        // Creates entries for each anchor present in region, BUT
-        // TODO: Needs to be updated when an anchor is added, removed, updated -> event
         region.getTpAnchors().getAnchors().forEach(anchor -> {
             TextDisplayProperties textDisplayProperties = new TextDisplayProperties(anchor.getName());
             TpAnchorVisualization tpAnchorVisualization = new TpAnchorVisualization(anchor, blockDisplayProperties, textDisplayProperties);
@@ -127,12 +123,24 @@ public class RegionVisualizationManager {
         }
     }
 
-    public void show(TeleportAnchor anchor, BlockDisplayProperties displayProperties, TextDisplayProperties textDisplayProperties, ServerLevel level) {
-        var tpAnchorVisualization = this.tpAnchorVisualizations.get(anchor.getName());
-    }
-
-    public void hide(TeleportAnchor anchor) {
-        var tpAnchorVisualization = this.tpAnchorVisualizations.get(anchor.getName());
+    public void updateDisplay(IMarkableArea area, ServerLevel level) {
+        this.region.setArea(area); // just to be sure
+        if (this.frame.hasEntitiesTracked()) {
+            this.frame.discardEntities();
+            this.show(DisplayType.FRAME, this.frame.getProperties(), level);
+        }
+        if (this.hull.hasEntitiesTracked()) {
+            this.hull.discardEntities();
+            this.show(DisplayType.HULL, this.hull.getProperties(), level);
+        }
+        if (this.minimalOutline.hasEntitiesTracked()) {
+            this.minimalOutline.discardEntities();
+            this.show(DisplayType.MINIMAL, this.minimalOutline.getProperties(), level);
+        }
+        if (this.marked.hasEntitiesTracked()) {
+            this.marked.discardEntities();
+            this.show(DisplayType.MARKED, this.marked.getProperties(), level);
+        }
     }
 
     public void updateDisplay(BlockDisplayProperties displayProperties, DisplayType displayType) {
@@ -149,6 +157,7 @@ public class RegionVisualizationManager {
     }
 
     public void updateDisplay(BlockDisplayProperties displayProperties, boolean refresh) {
+        this.region.getArea().updateDisplay(displayProperties);
         this.frame.updateDisplay(displayProperties, refresh);
         this.hull.updateDisplay(displayProperties, refresh);
         this.minimalOutline.updateDisplay(displayProperties, refresh);

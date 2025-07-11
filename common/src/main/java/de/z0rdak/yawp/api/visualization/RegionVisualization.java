@@ -15,6 +15,10 @@ public class RegionVisualization {
     private final Map<BlockPos, Entity> displayEntities;
     private BlockDisplayProperties properties;
 
+    public BlockDisplayProperties getProperties() {
+        return properties;
+    }
+
     public RegionVisualization(BlockDisplayProperties properties) {
         this.displayEntities = new HashMap<>();
         this.properties = properties;
@@ -39,6 +43,10 @@ public class RegionVisualization {
         this.displayEntities.forEach((pos, entity) -> {
             updateDisplayProperties(entity, properties);
         });
+    }
+
+    public boolean hasEntitiesTracked(){
+        return !this.displayEntities.isEmpty();
     }
 
     public void discardEntities(){
