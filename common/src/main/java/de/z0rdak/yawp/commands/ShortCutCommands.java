@@ -9,12 +9,12 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.api.commands.CommandConstants;
 import de.z0rdak.yawp.api.core.IDimensionRegionApi;
 import de.z0rdak.yawp.api.core.RegionManager;
-import de.z0rdak.yawp.api.permission.Permissions;
 import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.commands.arguments.region.ContainingOwnedRegionArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.DisplayType;
+import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.util.text.messages.multiline.MultiLineMessage;
@@ -24,6 +24,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 
@@ -39,9 +40,9 @@ import static de.z0rdak.yawp.commands.RegionCommands.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 
 
-class PlayerCommands {
+class ShortCutCommands {
 
-    private PlayerCommands() {
+    private ShortCutCommands() {
     }
 
     static LiteralArgumentBuilder<CommandSourceStack> buildInfoLocal() {
@@ -109,7 +110,7 @@ class PlayerCommands {
 
     private static LiteralArgumentBuilder<CommandSourceStack> buildHideAll() {
         return literal(ALL)
-                .executes(PlayerCommands::hideRegions)
+                .executes(ShortCutCommands::hideRegions)
                 .then(Commands.argument(UNTRACKED.toString(), BoolArgumentType.bool())
                         .executes(ctx -> hideRegions(ctx, BoolArgumentType.getBool(ctx, UNTRACKED.toString())))
                 );
@@ -188,28 +189,30 @@ class PlayerCommands {
     private static int showRegionsAroundPlayer(CommandContext<CommandSourceStack> ctx, DisplayType displayType, int blockRadius) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         VisualizationManager.showRegionsAround(player, blockRadius, displayType);
-        // TODO: cmd feedback
+
+        Level level = player.getCommandSenderWorld();
+        BlockPos playerPos = player.blockPosition();
+        Optional<IDimensionRegionApi> maybeApi = RegionManager.get().getDimRegionApi(level.dimension());
+        if (maybeApi.isPresent()) {
+            var dimApi = maybeApi.get();
+            List<IMarkableRegion> regionsAround = dimApi.getRegionsAround(playerPos, blockRadius);
+            // TODO: build pagination list of regions visualized and prompt info links for them
+        }
         return 0;
     }
 
-    private static int hideRegions(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+    private static int hideRegions(CommandContext<CommandSourceStack> ctx) {
         return hideRegions(ctx, false);
     }
 
-    private static int hideRegions(CommandContext<CommandSourceStack> ctx, boolean untracked) throws CommandSyntaxException {
-        ServerPlayer player = ctx.getSource().getPlayerOrException();
-        boolean hasConfigPerm = Permissions.get().hasConfigPermission(player);
-        if (hasConfigPerm) {
-            VisualizationManager.hideAllRegions(player.level(), untracked);
-        }
-        // TODO: cmd feedback
+    private static int hideRegions(CommandContext<CommandSourceStack> ctx, boolean untracked) {
+        VisualizationManager.hideAllRegions(ctx.getSource().getLevel(), untracked);
         return 0;
     }
 
     private static int hideRegionsAroundPlayer(CommandContext<CommandSourceStack> ctx, int blockRadius) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         VisualizationManager.hideRegionsAround(player, blockRadius);
-        // TODO: cmd feedback
         return 0;
     }
 }
