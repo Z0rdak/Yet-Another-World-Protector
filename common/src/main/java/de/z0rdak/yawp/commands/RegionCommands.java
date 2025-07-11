@@ -175,12 +175,12 @@ class RegionCommands {
                                         )
                                         .then(literal(HIDE)
                                                 .then(Commands.argument(TP_ANCHOR.toString(), StringArgumentType.word())
-                                                        .executes(ctx -> teleport(ctx, getRegionArgument(ctx), StringArgumentType.getString(ctx, TP_ANCHOR.toString())))
+                                                        .executes(ctx -> hideTpAnchor(ctx, getRegionArgument(ctx), StringArgumentType.getString(ctx, TP_ANCHOR.toString())))
                                                 )
                                         )
                                         .then(literal(SHOW)
                                                 .then(Commands.argument(TP_ANCHOR.toString(), StringArgumentType.word())
-                                                        .executes(ctx -> teleport(ctx, getRegionArgument(ctx), StringArgumentType.getString(ctx, TP_ANCHOR.toString())))
+                                                        .executes(ctx -> showTpAnchor(ctx, getRegionArgument(ctx), StringArgumentType.getString(ctx, TP_ANCHOR.toString())))
                                                 )
                                         )
                                         .then(literal(TELEPORT)
@@ -643,12 +643,20 @@ class RegionCommands {
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.fail-msg.invalid-name", "Teleport Anchor name is invalid. Must be alphanumeric and between 3 and 50 letters.", name, buildRegionInfoLink(region)));
             return -1;
         }
+        if (!region.getArea().contains(pos)) {
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.fail-msg.not-contained", "Teleport Anchor pos must be inside the region.", name, buildRegionInfoLink(region)));
+            return -1;
+        }
+        if (tpAnchors.getTpAnchor(name).getPos().equals(pos)) {
+            // they are the same
+            return 0;
+        }
         tpAnchors.addOrUpdate(name, pos);
         RegionManager.get().save();
-        // TODO: Trigger update - if tpAnchor is currently visualized, it should be removed and displayed at new position
-        var anchor = tpAnchors.getTpAnchor(name);
-        var blockTpLink = TeleportAnchorPagination.buildTeleportToAnchorLink(region, anchor);
 
+        var anchor = tpAnchors.getTpAnchor(name);
+        VisualizationManager.updateTpAnchor(region, anchor);
+        var blockTpLink = TeleportAnchorPagination.buildTeleportToAnchorLink(region, anchor);
         if (hasAnchor) {
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.updated.msg", "Updated position of '%s' to %s", name, blockTpLink));
         } else {
@@ -752,5 +760,27 @@ class RegionCommands {
             sendCmdFeedback(ctx.getSource(), Component.literal("TODO"));
             return -1;
         }
+    }
+
+    private static int showTpAnchor(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, String tpAnchorName) {
+        if (!region.getTpAnchors().hasAnchor(tpAnchorName)) {
+            // TODO
+            sendCmdFeedback(ctx.getSource(), Component.literal("TODO"));
+            return -1;
+        }
+        TeleportAnchor tpAnchor = region.getTpAnchors().getTpAnchor(tpAnchorName);
+        VisualizationManager.showTpAnchor(region, tpAnchor);
+        return 0;
+    }
+
+    private static int hideTpAnchor(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, String tpAnchorName) {
+        if (!region.getTpAnchors().hasAnchor(tpAnchorName)) {
+            // TODO
+            sendCmdFeedback(ctx.getSource(), Component.literal("TODO"));
+            return -1;
+        }
+        TeleportAnchor tpAnchor = region.getTpAnchors().getTpAnchor(tpAnchorName);
+        VisualizationManager.hideTpAnchor(region, tpAnchor);
+        return 0;
     }
 }
