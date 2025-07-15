@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 import static de.z0rdak.yawp.constants.serialization.RegionNbtKeys.*;
-import static de.z0rdak.yawp.core.flag.FlagCategory.PLAYER;
+import static de.z0rdak.yawp.core.flag.FlagTag.PLAYER;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
 
 public class FlagMessage implements INbtSerializable<CompoundTag> {
