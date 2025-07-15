@@ -4,6 +4,7 @@ import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.*;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -11,8 +12,8 @@ import java.util.stream.Collectors;
 
 public class FlagRegister {
 
-    private FlagRegister() {}
-
+    private FlagRegister() {
+    }
 
     private static final Map<ResourceLocation, Flag> flagRegister = new HashMap<>();
 
@@ -55,13 +56,13 @@ public class FlagRegister {
     }
 
     /**
-     * Registers a flag in the internal flag registry if it is not already registered.
+     * Registers a flag in the flag registry if it is not already registered.
      * The flag's resource location should follow the format {@code modId:flagId} to ensure uniqueness.
      *
      * @param flag The flag to register.
      * @return {@code true} if the flag was successfully registered, {@code false} if it was already registered.
      */
-    public static boolean registerFlag(Flag flag) {
+    private static boolean registerFlag(Flag flag) {
         if (isFlagRegistered(flag.id())) {
             return false;
         }
@@ -73,11 +74,14 @@ public class FlagRegister {
      * Registers a flag in the internal flag registry using a {@link ResourceLocation} and {@link FlagMetaInfo}.
      * If a flag with the same resource location already exists, registration is skipped.
      *
-     * @param flagRl The unique resource location of the flag.
+     * @param flagRl       The unique resource location of the flag.
      * @param flagMetaInfo The metadata associated with the flag.
      * @return {@code true} if the flag was successfully registered, {@code false} if it was already registered.
      */
-    public static boolean registerFlag(ResourceLocation flagRl, FlagMetaInfo flagMetaInfo) {
+    public static boolean registerFlag(@NotNull ResourceLocation flagRl, @NotNull FlagMetaInfo flagMetaInfo) {
+        if (flagRl.getNamespace().equalsIgnoreCase(Constants.MOD_ID)) {
+            throw new IllegalArgumentException("You are not permitted to register flags with the YAWP namespace!");
+        }
         return registerFlag(new Flag(flagRl, flagMetaInfo));
     }
 
@@ -85,14 +89,14 @@ public class FlagRegister {
      * Registers a flag in the internal flag registry using the modId of the registering mod and a flagId.
      * If a flag with the same resource location already exists, registration is skipped.
      *
-     * @param modId The namespace of the mod defining the flag.
-     * @param flagId The unique identifier of the flag within the mod's namespace.
+     * @param modId        The namespace of the mod defining the flag.
+     * @param flagId       The unique identifier of the flag within the mod's namespace.
      * @param flagMetaInfo The metadata associated with the flag.
      * @return {@code true} if the flag was successfully registered, {@code false} if it was already registered.
      */
-    public static boolean registerFlag(String modId, String flagId, FlagMetaInfo flagMetaInfo) {
+    public static boolean registerFlag(@NotNull String modId, @NotNull String flagId, @NotNull FlagMetaInfo flagMetaInfo) {
         var rl = ResourceLocation.fromNamespaceAndPath(modId, flagId);
-        return registerFlag(new Flag(rl, flagMetaInfo));
+        return registerFlag(rl, flagMetaInfo);
     }
 
     /**
@@ -235,219 +239,259 @@ public class FlagRegister {
         return tags.stream().anyMatch(flagTags::contains);
     }
 
-
-    /* Flags defined by YAWP */
-    public static final Flag ANIMAL_BREEDING = new Flag(flagId("animal_breeding"),
+    public static final Flag PLAYER_BREED_ANIMAL = new Flag(flagId("player/breed_animals"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENTITY, FlagTag.PLAYER), FlagFrequency.LOW));
-    public static final Flag ANIMAL_MOUNTING = new Flag(flagId("animal_mounting"),
+    public static final Flag PLAYER_MOUNT = new Flag(flagId("player/mount"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENTITY, FlagTag.PLAYER), FlagFrequency.NEGLIGIBLE));
-    public static final Flag ANIMAL_TAMING = new Flag(flagId("animal_taming"),
+    public static final Flag PLAYER_TAME_ANIMAL = new Flag(flagId("player/tame_animals"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENTITY, FlagTag.PLAYER), FlagFrequency.NEGLIGIBLE));
-    public static final Flag ANIMAL_UNMOUNTING = new Flag(flagId("animal_unmounting"),
+    public static final Flag PLAYER_UNMOUNTING = new Flag(flagId("player/unmount"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENTITY, FlagTag.PLAYER), FlagFrequency.NEGLIGIBLE));
-    public static final Flag AXE_STRIP = new Flag(flagId("strip_wood"),
+    public static final Flag PLAYER_STRIP_WOOD = new Flag(flagId("player/strip_wood"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.BLOCK), FlagFrequency.LOW));
-    public static final Flag BREAK_BLOCKS = new Flag(flagId("break_blocks"),
+    public static final Flag PLAYER_BREAK_BLOCKS = new Flag(flagId("player/break_blocks"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.BLOCK, FlagTag.PLAYER), FlagFrequency.NORMAL));
-    public static final Flag CONTAINER_ACCESS = new Flag(flagId("access_container"),
+    public static final Flag PLAYER_USE_CONTAINER = new Flag(flagId("player/use_container"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.BLOCK, FlagTag.PLAYER), FlagFrequency.NORMAL));
-    public static final Flag DRAGON_BLOCK_PROT = new Flag(flagId("dragon_destruction"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.BLOCK), FlagFrequency.NORMAL));
-    public static final Flag DROP_LOOT_ALL = new Flag(flagId("drop_loot"),
+    public static final Flag PLAYER_GAIN_LOOT = new Flag(flagId("player/gain_loot"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(), FlagFrequency.LOW));
-    public static final Flag DROP_LOOT_PLAYER = new Flag(flagId("drop_loot_player"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(), FlagFrequency.LOW));
-    public static final Flag ENDERMAN_GRIEFING = new Flag(flagId("enderman_griefing"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(), FlagFrequency.LOW));
-    public static final Flag ENDERMAN_TELEPORT_FROM_REGION = new Flag(flagId("enderman_tp_from"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(), FlagFrequency.LOW));
-    public static final Flag ENDER_CHEST_ACCESS = new Flag(flagId("access_enderchest"),
+    public static final Flag PLAYER_USE_CHEST_ACCESS = new Flag(flagId("player/use_enderchest"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.BLOCK), FlagFrequency.LOW));
-    public static final Flag ENTER_DIM = new Flag(flagId("enter_dim"),
+    public static final Flag PLAYER_ENTER_LEVEL = new Flag(flagId("player/enter_level"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER), FlagFrequency.LOW));
-    public static final Flag EXECUTE_COMMAND = new Flag(flagId("exec_command"),
+    public static final Flag PLAYER_USE_COMMANDS = new Flag(flagId("player/use_commands"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER), FlagFrequency.LOW));
-    public static final Flag EXPLOSION_BLOCK = new Flag(flagId("explosions_blocks"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(), FlagFrequency.NORMAL));
-    public static final Flag EXPLOSION_ENTITY = new Flag(flagId("explosions_entities"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(), FlagFrequency.NORMAL));
-    public static final Flag EXPLOSION_CREEPER_BLOCK = new Flag(flagId("creeper_explosion_blocks"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(), FlagFrequency.NORMAL));
-    public static final Flag EXPLOSION_CREEPER_ENTITY = new Flag(flagId("creeper_explosion_entities"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(), FlagFrequency.NORMAL));
-    public static final Flag FALL_DAMAGE = new Flag(flagId("fall_damage"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PROTECTION), FlagFrequency.NORMAL));
-    public static final Flag FALL_DAMAGE_ANIMALS = new Flag(flagId("fall_damage_animals"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PROTECTION), FlagFrequency.LOW));
-    public static final Flag FALL_DAMAGE_MONSTERS = new Flag(flagId("fall_damage_monsters"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PROTECTION), FlagFrequency.LOW));
-    public static final Flag FALL_DAMAGE_PLAYERS = new Flag(flagId("fall_damage_players"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PROTECTION), FlagFrequency.NORMAL));
-    public static final Flag FALL_DAMAGE_VILLAGERS = new Flag(flagId("fall_damage_villagers"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PROTECTION), FlagFrequency.NEGLIGIBLE));
-    public static final Flag FLUID_FLOW = new Flag(flagId("fluid_flow"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.HIGH_FREQUENCY, FlagTag.ENVIRONMENT), FlagFrequency.VERY_HIGH));
-    public static final Flag HOE_TILL = new Flag(flagId("till_farmland"),
+    public static final Flag PLAYER_TILL = new Flag(flagId("player/till_farmland"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.BLOCK, FlagTag.PLAYER), FlagFrequency.NORMAL));
-    public static final Flag IGNITE_EXPLOSIVES = new Flag(flagId("ignite_explosives"),
+    public static final Flag PLAYER_IGNITE_EXPLOSIVES = new Flag(flagId("player/ignite_explosives"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.BLOCK, FlagTag.PLAYER), FlagFrequency.LOW));
-    public static final Flag INVINCIBLE = new Flag(flagId("invincible"),
+    public static final Flag PLAYER_HURT = new Flag(flagId("player/hurt"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PROTECTION), FlagFrequency.NORMAL));
-    public static final Flag ITEM_DROP = new Flag(flagId("item_drop"),
+    public static final Flag PLAYER_DROP_ITEM = new Flag(flagId("player/drop_item"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER), FlagFrequency.NORMAL));
-    public static final Flag ITEM_PICKUP = new Flag(flagId("item_pickup"),
+    public static final Flag PLAYER_PICKUP_ITEM = new Flag(flagId("player/item_pickup"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER), FlagFrequency.NORMAL));
-    public static final Flag KNOCKBACK_PLAYERS = new Flag(flagId("knockback_players"),
+    public static final Flag PLAYER_APPLY_KNOCKBACK = new Flag(flagId("player/apply_knockback"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.ENTITY), FlagFrequency.NORMAL));
-    public static final Flag LAVA_FLOW = new Flag(flagId("lava_flow"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.HIGH_FREQUENCY, FlagTag.ENVIRONMENT), FlagFrequency.VERY_HIGH));
-    public static final Flag LEVEL_FREEZE = new Flag(flagId("level_freeze"),
+    public static final Flag PLAYER_KNOCKBACK = new Flag(flagId("player/knockback"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.ENTITY), FlagFrequency.NORMAL));
+    public static final Flag PLAYER_GAIN_LEVEL = new Flag(flagId("player/gain_level"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER), FlagFrequency.NORMAL));
-    public static final Flag LIGHTNING_PROT = new Flag(flagId("lightning"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT), FlagFrequency.TICK));
-    public static final Flag NO_WALKER_FREEZE = new Flag(flagId("walker_freeze"),
+    public static final Flag PLAYER_WALKER_FREEZE = new Flag(flagId("player/walker_freeze"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.BLOCK), FlagFrequency.NORMAL));
-    public static final Flag LEAF_DECAY = new Flag(flagId("leaf_decay"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT), FlagFrequency.TICK));
-    public static final Flag FIRE_TICK = new Flag(flagId("fire_tick"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT), FlagFrequency.TICK));
-    public static final Flag FIRE_BOW = new Flag(flagId("fire_bow"),
+    public static final Flag PLAYER_FALL_DAMAGE = new Flag(flagId("player/fall_damage"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PROTECTION, FlagTag.PLAYER), FlagFrequency.NORMAL));
+    public static final Flag PLAYER_FIRE_BOW = new Flag(flagId("player/fire_bow"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.ENTITY), FlagFrequency.NORMAL));
-    public static final Flag MELEE_ANIMALS = new Flag(flagId("melee_animals"),
+    public static final Flag PLAYER_MELEE_ANIMALS = new Flag(flagId("player/melee_animals"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.ENTITY), FlagFrequency.NORMAL));
-    public static final Flag MELEE_MONSTERS = new Flag(flagId("melee_monsters"),
+    public static final Flag PLAYER_MELEE_MONSTERS = new Flag(flagId("player/melee_monsters"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.ENTITY), FlagFrequency.NORMAL));
-    public static final Flag MELEE_PLAYERS = new Flag(flagId("melee_players"),
+    public static final Flag PLAYER_MELEE_PLAYERS = new Flag(flagId("player/melee_players"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.ENTITY), FlagFrequency.NORMAL));
-    public static final Flag MELEE_VILLAGERS = new Flag(flagId("melee_villagers"),
+    public static final Flag PLAYER_MELEE_VILLAGERS = new Flag(flagId("player/melee_villagers"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.ENTITY), FlagFrequency.NORMAL));
-    public static final Flag MELEE_WANDERING_TRADER = new Flag(flagId("melee_wtrader"),
+    public static final Flag PLAYER_MELEE_WANDERING_TRADER = new Flag(flagId("player/melee_wtrader"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.ENTITY), FlagFrequency.NEGLIGIBLE));
-    public static final Flag MOB_GRIEFING = new Flag(flagId("mob_griefing"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT), FlagFrequency.TICK));
-    public static final Flag NO_FLIGHT = new Flag(flagId("no_flight"),
+    public static final Flag PLAYER_FLIGHT = new Flag(flagId("player/flight"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER), FlagFrequency.NORMAL));
-    public static final Flag NO_ITEM_DESPAWN = new Flag(flagId("no_item_despawn"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ITEM, FlagTag.PROTECTION), FlagFrequency.NORMAL));
-    public static final Flag NO_PVP = new Flag(flagId("no_pvp"),
+    public static final Flag PLAYER_PVP = new Flag(flagId("player/pvp"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.ENTITY), FlagFrequency.NORMAL));
-    public static final Flag NO_SIGN_EDIT = new Flag(flagId("no_sign_edit"),
+    public static final Flag PLAYER_EDIT_SIGNS = new Flag(flagId("player/edit_signs"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.BLOCK), FlagFrequency.LOW));
-    public static final Flag PLACE_BLOCKS = new Flag(flagId("place_blocks"),
+    public static final Flag PLAYER_PLACE_BLOCKS = new Flag(flagId("player/place_blocks"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.BLOCK), FlagFrequency.NORMAL));
-    public static final Flag PLACE_FLUIDS = new Flag(flagId("place_fluids"),
+    public static final Flag PLAYER_PLACE_FLUIDS = new Flag(flagId("player/place_fluids"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.BLOCK), FlagFrequency.NORMAL));
-    public static final Flag SCOOP_FLUIDS = new Flag(flagId("scoop_fluids"),
+    public static final Flag PLAYER_SCOOP_FLUIDS = new Flag(flagId("player/scoop_fluids"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.BLOCK), FlagFrequency.NORMAL));
-    public static final Flag SEND_MESSAGE = new Flag(flagId("send_chat"),
+    public static final Flag PLAYER_CHAT = new Flag(flagId("player/chat"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER), FlagFrequency.NORMAL));
-    public static final Flag SET_SPAWN = new Flag(flagId("set_spawn"),
+    public static final Flag PLAYER_SET_SPAWN = new Flag(flagId("player/set_spawn"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.BLOCK), FlagFrequency.LOW));
-    public static final Flag SHOVEL_PATH = new Flag(flagId("shovel_path"),
+    public static final Flag PLAYER_SHOVEL_PATH = new Flag(flagId("player/shovel_path"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.BLOCK), FlagFrequency.LOW));
-    public static final Flag SHULKER_TELEPORT_FROM_REGION = new Flag(flagId("shulker_tp_from"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENTITY), FlagFrequency.LOW));
-    public static final Flag SLEEP = new Flag(flagId("sleep"),
+    public static final Flag PLAYER_CREATE_PORTAL = new Flag(flagId("player/create_portal"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.BLOCK), FlagFrequency.LOW));
-    public static final Flag SNOW_FALL = new Flag(flagId("snow_fall"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.BLOCK, FlagTag.ENVIRONMENT), FlagFrequency.TICK));
-    public static final Flag SNOW_MELTING = new Flag(flagId("snow_melting"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.BLOCK, FlagTag.ENVIRONMENT), FlagFrequency.TICK));
-    public static final Flag SPAWNING_ALL = new Flag(flagId("spawning_all"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.TICK));
-    public static final Flag SPAWNING_ANIMAL = new Flag(flagId("spawning_animal"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.NORMAL));
-    public static final Flag SPAWNING_GOLEM = new Flag(flagId("spawning_golem"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.LOW));
-    public static final Flag SPAWNING_MONSTER = new Flag(flagId("spawning_monster"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.NORMAL));
-    public static final Flag SPAWNING_SLIME = new Flag(flagId("spawning_slime"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.NORMAL));
-    public static final Flag SPAWNING_TRADER = new Flag(flagId("spawning_trader"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.LOW));
-    public static final Flag SPAWNING_VILLAGER = new Flag(flagId("spawning_villager"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.LOW));
-    public static final Flag SPAWNING_XP = new Flag(flagId("spawning_xp"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.NORMAL));
-    public static final Flag SPAWN_PORTAL = new Flag(flagId("spawn_portal"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.BLOCK), FlagFrequency.LOW));
-    public static final Flag TOOL_SECONDARY_USE = new Flag(flagId("tools_secondary"),
+    public static final Flag PLAYER_TOOL_SECONDARY = new Flag(flagId("player/tools_secondary"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.ITEM), FlagFrequency.NORMAL));
-    public static final Flag TRAMPLE_FARMLAND = new Flag(flagId("trample_farmland"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.BLOCK), FlagFrequency.LOW));
-    public static final Flag TRAMPLE_FARMLAND_OTHER = new Flag(flagId("trample_farmland_other"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.BLOCK, FlagTag.ENTITY), FlagFrequency.LOW));
-    public static final Flag TRAMPLE_FARMLAND_PLAYER = new Flag(flagId("trample_farmland_player"),
+    public static final Flag PLAYER_TRAMPLE_FARMLAND = new Flag(flagId("player/trample_farmland"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.BLOCK), FlagFrequency.LOW));
-    public static final Flag USE_BLOCKS = new Flag(flagId("use_blocks"),
+    public static final Flag PLAYER_USE_BLOCKS = new Flag(flagId("player/use_blocks"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.BLOCK), FlagFrequency.NORMAL));
-    public static final Flag USE_BONEMEAL = new Flag(flagId("use_bonemeal"),
+    public static final Flag PLAYER_USE_BONEMEAL = new Flag(flagId("player/use_bonemeal"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.BLOCK), FlagFrequency.NORMAL));
-    public static final Flag USE_ELYTRA = new Flag(flagId("use_elytra"),
+    public static final Flag PLAYER_USE_ELYTRA = new Flag(flagId("player/use_elytra"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER), FlagFrequency.NORMAL));
-    public static final Flag USE_ENDERPEARL_FROM_REGION = new Flag(flagId("enderpearl_from"),
+    public static final Flag PLAYER_USE_ENDERPEARL = new Flag(flagId("player/use_enderpearl"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.BLOCK), FlagFrequency.LOW));
-    public static final Flag USE_ENDERPEARL_TO_REGION = new Flag(flagId("enderpearl_to"),
+    public static final Flag PLAYER_ENDERPEARL_AWAY = new Flag(flagId("player/enderpearl_away"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.BLOCK), FlagFrequency.LOW));
-    public static final Flag USE_ENTITIES = new Flag(flagId("use_entities"),
+    public static final Flag PLAYER_INTERACT = new Flag(flagId("player/interact"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.ENTITY), FlagFrequency.NORMAL));
-    public static final Flag USE_ITEMS = new Flag(flagId("use_items"),
+    public static final Flag PLAYER_USE_ITEMS = new Flag(flagId("player/use_items"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.ITEM), FlagFrequency.NORMAL));
-    public static final Flag USE_PORTAL = new Flag(flagId("use_portal"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.NORMAL));
-    public static final Flag USE_PORTAL_ANIMALS = new Flag(flagId("use_portal_animals"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.NORMAL));
-    public static final Flag USE_PORTAL_ITEMS = new Flag(flagId("use_portal_items"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.NORMAL));
-    public static final Flag USE_PORTAL_MINECARTS = new Flag(flagId("use_portal_minecarts"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.NORMAL));
-    public static final Flag USE_PORTAL_MONSTERS = new Flag(flagId("use_portal_monsters"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.NORMAL));
-    public static final Flag USE_PORTAL_PLAYERS = new Flag(flagId("use_portal_players"),
+    public static final Flag PLAYER_SLEEP = new Flag(flagId("player/sleep"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER, FlagTag.BLOCK), FlagFrequency.LOW));
+    public static final Flag PLAYER_ENTER_PORTAL = new Flag(flagId("player/enter_portal"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER), FlagFrequency.NORMAL));
-    public static final Flag USE_PORTAL_VILLAGERS = new Flag(flagId("use_portal_villagers"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.NORMAL));
-    public static final Flag WATER_FLOW = new Flag(flagId("water_flow"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.HIGH_FREQUENCY, FlagTag.ENVIRONMENT), FlagFrequency.VERY_HIGH));
-    public static final Flag WITHER_BLOCK_PROT = new Flag(flagId("wither_destruction"),
+    public static final Flag PLAYER_KEEP_XP = new Flag(flagId("player/keep_xp"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PROTECTION, FlagTag.PLAYER), FlagFrequency.NORMAL));
+    public static final Flag PLAYER_KEEP_INV = new Flag(flagId("player/keep_inv"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PROTECTION, FlagTag.PLAYER), FlagFrequency.NORMAL));
+    public static final Flag PLAYER_APPLY_HUNGER = new Flag(flagId("player/apply_hunger"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PROTECTION, FlagTag.PLAYER), FlagFrequency.NORMAL));
+    public static final Flag PLAYER_DROP_XP = new Flag(flagId("player/drop_xp"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(), FlagFrequency.NORMAL));
+    public static final Flag PLAYER_GAIN_XP = new Flag(flagId("player/gain_xp"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER), FlagFrequency.NORMAL));
+    public static final Flag PLAYER_PICKUP_XP = new Flag(flagId("player/pickup_xp"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER), FlagFrequency.NORMAL));
+    public static final Flag DRAGON_BLOCK_PROT = new Flag(flagId("env/dragon_destruction"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.BLOCK), FlagFrequency.NORMAL));
-    public static final Flag KEEP_XP = new Flag(flagId("keep_xp"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PROTECTION, FlagTag.PLAYER), FlagFrequency.NORMAL));
-    public static final Flag KEEP_INV = new Flag(flagId("keep_inv"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PROTECTION, FlagTag.PLAYER), FlagFrequency.NORMAL));
-    public static final Flag NO_HUNGER = new Flag(flagId("no_hunger"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PROTECTION, FlagTag.PLAYER), FlagFrequency.NORMAL));
-    public static final Flag XP_DROP_ALL = new Flag(flagId("xp_drop_all"),
+    public static final Flag DROP_LOOT_ALL = new Flag(flagId("entity/drop_loot"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(), FlagFrequency.NORMAL));
-    public static final Flag XP_DROP_MONSTER = new Flag(flagId("xp_drop_monsters"),
+    public static final Flag ENDERMAN_GRIEFING = new Flag(flagId("griefing/enderman"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(), FlagFrequency.LOW));
+    public static final Flag ENDERMAN_TELEPORT = new Flag(flagId("mob/enderman_tp"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(), FlagFrequency.LOW));
+    public static final Flag EXPLOSION_BLOCK = new Flag(flagId("explosion/blocks"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(), FlagFrequency.NORMAL));
-    public static final Flag XP_DROP_OTHER = new Flag(flagId("xp_drop_other"),
+    public static final Flag EXPLOSION_ENTITY = new Flag(flagId("explosion/entities"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(), FlagFrequency.NORMAL));
-    public static final Flag XP_DROP_PLAYER = new Flag(flagId("xp_drop_player"),
+    public static final Flag EXPLOSION_CREEPER_BLOCK = new Flag(flagId("griefing/creeper_explosion_blocks"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(), FlagFrequency.NORMAL));
-    public static final Flag XP_FREEZE = new Flag(flagId("xp_freeze"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER), FlagFrequency.NORMAL));
-    public static final Flag XP_PICKUP = new Flag(flagId("xp_pickup"),
-            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PLAYER), FlagFrequency.NORMAL));
-    public static final Flag ZOMBIE_DOOR_PROT = new Flag(flagId("zombie_destruction"),
+    public static final Flag EXPLOSION_CREEPER_ENTITY = new Flag(flagId("griefing/creeper_explosion_entities"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(), FlagFrequency.NORMAL));
+    public static final Flag TRAMPLE_FARMLAND = new Flag(flagId("griefing/trample_farmland"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.BLOCK), FlagFrequency.LOW));
+    public static final Flag FALL_DAMAGE = new Flag(flagId("entity/fall_damage"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PROTECTION), FlagFrequency.NORMAL));
+    public static final Flag FALL_DAMAGE_ANIMALS = new Flag(flagId("entity/fall_damage_animals"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PROTECTION), FlagFrequency.LOW));
+    public static final Flag FALL_DAMAGE_MONSTERS = new Flag(flagId("entity/fall_damage_monsters"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PROTECTION), FlagFrequency.LOW));
+    public static final Flag SHULKER_TELEPORT = new Flag(flagId("entity/shulker_tp"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENTITY), FlagFrequency.LOW));
+    public static final Flag FALL_DAMAGE_VILLAGERS = new Flag(flagId("entity/fall_damage_villagers"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.PROTECTION), FlagFrequency.NEGLIGIBLE));
+    public static final Flag LAVA_FLOW = new Flag(flagId("env/lava_flow"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.HIGH_FREQUENCY, FlagTag.ENVIRONMENT), FlagFrequency.VERY_HIGH));
+    public static final Flag LIGHTNING_PROT = new Flag(flagId("env/lightning"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT), FlagFrequency.TICK));
+    public static final Flag FLUID_FLOW = new Flag(flagId("env/fluid_flow"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.HIGH_FREQUENCY, FlagTag.ENVIRONMENT), FlagFrequency.VERY_HIGH));
+    public static final Flag LEAF_DECAY = new Flag(flagId("env/leaf_decay"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT), FlagFrequency.TICK));
+    public static final Flag FIRE_TICK = new Flag(flagId("env/fire_tick"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT), FlagFrequency.TICK));
+    public static final Flag NO_ITEM_DESPAWN = new Flag(flagId("item/despawn"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ITEM, FlagTag.PROTECTION), FlagFrequency.NORMAL));
+
+    public static final Flag MOB_GRIEFING = new Flag(flagId("mob/griefing"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT), FlagFrequency.TICK));
+    public static final Flag SNOW_FALL = new Flag(flagId("env/snow_fall"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.BLOCK, FlagTag.ENVIRONMENT), FlagFrequency.TICK));
+    public static final Flag SNOW_MELTING = new Flag(flagId("env/snow_melting"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.BLOCK, FlagTag.ENVIRONMENT), FlagFrequency.TICK));
+    public static final Flag SPAWNING_ALL = new Flag(flagId("spawning/all"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.TICK));
+    public static final Flag SPAWNING_ANIMAL = new Flag(flagId("spawning/animals"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.NORMAL));
+    public static final Flag SPAWNING_GOLEM = new Flag(flagId("spawning/golems"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.LOW));
+    public static final Flag SPAWNING_MONSTER = new Flag(flagId("spawning/monsters"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.NORMAL));
+    public static final Flag SPAWNING_SLIME = new Flag(flagId("spawning/slimes"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.NORMAL));
+    public static final Flag SPAWNING_TRADER = new Flag(flagId("spawning/traders"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.LOW));
+    public static final Flag SPAWNING_VILLAGER = new Flag(flagId("spawning/villagers"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.LOW));
+    public static final Flag SPAWNING_XP = new Flag(flagId("spawning/xp"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.NORMAL));
+    public static final Flag USE_PORTAL = new Flag(flagId("env/enter_portal"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.NORMAL));
+    public static final Flag USE_PORTAL_ANIMALS = new Flag(flagId("env/enter_portal_animals"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.NORMAL));
+    public static final Flag USE_PORTAL_ITEMS = new Flag(flagId("env/enter_portal_items"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.NORMAL));
+    public static final Flag USE_PORTAL_MINECARTS = new Flag(flagId("env/enter_portal_minecarts"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.NORMAL));
+    public static final Flag USE_PORTAL_MONSTERS = new Flag(flagId("env/enter_portal_monsters"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.NORMAL));
+    public static final Flag USE_PORTAL_VILLAGERS = new Flag(flagId("env/enter_portal_villagers"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.NORMAL));
+    public static final Flag WATER_FLOW = new Flag(flagId("env/water_flow"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.HIGH_FREQUENCY, FlagTag.ENVIRONMENT), FlagFrequency.VERY_HIGH));
+    public static final Flag WITHER_BLOCK_PROT = new Flag(flagId("griefing/wither_destruction"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.BLOCK), FlagFrequency.NORMAL));
+    public static final Flag XP_DROP_ALL = new Flag(flagId("env/drop_xp"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(), FlagFrequency.NORMAL));
+    public static final Flag XP_DROP_MONSTER = new Flag(flagId("entity/drop_xp_monsters"),
+            new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(), FlagFrequency.NORMAL));
+    public static final Flag ZOMBIE_DOOR_PROT = new Flag(flagId("griefing/break_doors"),
             new FlagMetaInfo(FlagType.BOOLEAN_FLAG, Set.of(FlagTag.ENVIRONMENT, FlagTag.ENTITY), FlagFrequency.LOW));
 
     static {
-        registerFlag(ANIMAL_BREEDING);
-        registerFlag(ANIMAL_MOUNTING);
-        registerFlag(ANIMAL_TAMING);
-        registerFlag(ANIMAL_UNMOUNTING);
-        registerFlag(AXE_STRIP);
-        registerFlag(BREAK_BLOCKS);
-        registerFlag(CONTAINER_ACCESS);
+        registerFlag(PLAYER_BREED_ANIMAL);
+        registerFlag(PLAYER_MOUNT);
+        registerFlag(PLAYER_TAME_ANIMAL);
+        registerFlag(PLAYER_UNMOUNTING);
+        registerFlag(PLAYER_STRIP_WOOD);
+        registerFlag(PLAYER_BREAK_BLOCKS);
+        registerFlag(PLAYER_USE_CONTAINER);
+        registerFlag(PLAYER_GAIN_LOOT);
+        registerFlag(PLAYER_USE_CHEST_ACCESS);
+        registerFlag(PLAYER_ENTER_LEVEL);
+        registerFlag(PLAYER_USE_COMMANDS);
+        registerFlag(PLAYER_TILL);
+        registerFlag(PLAYER_IGNITE_EXPLOSIVES);
+        registerFlag(PLAYER_HURT);
+        registerFlag(PLAYER_DROP_ITEM);
+        registerFlag(PLAYER_PICKUP_ITEM);
+        registerFlag(PLAYER_APPLY_KNOCKBACK);
+        registerFlag(PLAYER_KNOCKBACK);
+        registerFlag(PLAYER_GAIN_LEVEL);
+        registerFlag(PLAYER_WALKER_FREEZE);
+        registerFlag(PLAYER_FALL_DAMAGE);
+        registerFlag(PLAYER_FIRE_BOW);
+        registerFlag(PLAYER_MELEE_ANIMALS);
+        registerFlag(PLAYER_MELEE_MONSTERS);
+        registerFlag(PLAYER_MELEE_PLAYERS);
+        registerFlag(PLAYER_MELEE_VILLAGERS);
+        registerFlag(PLAYER_MELEE_WANDERING_TRADER);
+        registerFlag(PLAYER_FLIGHT);
+        registerFlag(PLAYER_PVP);
+        registerFlag(PLAYER_EDIT_SIGNS);
+        registerFlag(PLAYER_PLACE_BLOCKS);
+        registerFlag(PLAYER_PLACE_FLUIDS);
+        registerFlag(PLAYER_SCOOP_FLUIDS);
+        registerFlag(PLAYER_CHAT);
+        registerFlag(PLAYER_SET_SPAWN);
+        registerFlag(PLAYER_SHOVEL_PATH);
+        registerFlag(PLAYER_CREATE_PORTAL);
+        registerFlag(PLAYER_TOOL_SECONDARY);
+        registerFlag(PLAYER_TRAMPLE_FARMLAND);
+        registerFlag(PLAYER_USE_BLOCKS);
+        registerFlag(PLAYER_USE_BONEMEAL);
+        registerFlag(PLAYER_USE_ELYTRA);
+        registerFlag(PLAYER_USE_ENDERPEARL);
+        registerFlag(PLAYER_ENDERPEARL_AWAY);
+        registerFlag(PLAYER_INTERACT);
+        registerFlag(PLAYER_USE_ITEMS);
+        registerFlag(PLAYER_SLEEP);
+        registerFlag(PLAYER_ENTER_PORTAL);
+        registerFlag(PLAYER_KEEP_XP);
+        registerFlag(PLAYER_KEEP_INV);
+        registerFlag(PLAYER_APPLY_HUNGER);
+        registerFlag(PLAYER_DROP_XP);
+        registerFlag(PLAYER_GAIN_XP);
+        registerFlag(PLAYER_PICKUP_XP);
         registerFlag(DRAGON_BLOCK_PROT);
         registerFlag(DROP_LOOT_ALL);
-        registerFlag(DROP_LOOT_PLAYER);
         registerFlag(ENDERMAN_GRIEFING);
-        registerFlag(ENDERMAN_TELEPORT_FROM_REGION);
-        registerFlag(ENDER_CHEST_ACCESS);
-        registerFlag(ENTER_DIM);
-        registerFlag(EXECUTE_COMMAND);
+        registerFlag(ENDERMAN_TELEPORT);
         registerFlag(EXPLOSION_BLOCK);
         registerFlag(EXPLOSION_CREEPER_BLOCK);
         registerFlag(EXPLOSION_CREEPER_ENTITY);
@@ -455,39 +499,15 @@ public class FlagRegister {
         registerFlag(FALL_DAMAGE);
         registerFlag(FALL_DAMAGE_ANIMALS);
         registerFlag(FALL_DAMAGE_MONSTERS);
-        registerFlag(FALL_DAMAGE_PLAYERS);
         registerFlag(FALL_DAMAGE_VILLAGERS);
         registerFlag(FLUID_FLOW);
-        registerFlag(HOE_TILL);
-        registerFlag(IGNITE_EXPLOSIVES);
-        registerFlag(INVINCIBLE);
-        registerFlag(ITEM_DROP);
-        registerFlag(ITEM_PICKUP);
-        registerFlag(KNOCKBACK_PLAYERS);
         registerFlag(LAVA_FLOW);
-        registerFlag(LEVEL_FREEZE);
         registerFlag(LIGHTNING_PROT);
-        registerFlag(NO_WALKER_FREEZE);
         registerFlag(LEAF_DECAY);
         registerFlag(FIRE_TICK);
-        registerFlag(MELEE_ANIMALS);
-        registerFlag(MELEE_MONSTERS);
-        registerFlag(MELEE_PLAYERS);
-        registerFlag(MELEE_VILLAGERS);
-        registerFlag(MELEE_WANDERING_TRADER);
         registerFlag(MOB_GRIEFING);
-        registerFlag(NO_FLIGHT);
         registerFlag(NO_ITEM_DESPAWN);
-        registerFlag(NO_PVP);
-        registerFlag(NO_SIGN_EDIT);
-        registerFlag(PLACE_BLOCKS);
-        registerFlag(PLACE_FLUIDS);
-        registerFlag(SCOOP_FLUIDS);
-        registerFlag(SEND_MESSAGE);
-        registerFlag(SET_SPAWN);
-        registerFlag(SHOVEL_PATH);
-        registerFlag(SHULKER_TELEPORT_FROM_REGION);
-        registerFlag(SLEEP);
+        registerFlag(SHULKER_TELEPORT);
         registerFlag(SNOW_FALL);
         registerFlag(SNOW_MELTING);
         registerFlag(SPAWNING_ALL);
@@ -498,36 +518,17 @@ public class FlagRegister {
         registerFlag(SPAWNING_TRADER);
         registerFlag(SPAWNING_VILLAGER);
         registerFlag(SPAWNING_XP);
-        registerFlag(SPAWN_PORTAL);
-        registerFlag(TOOL_SECONDARY_USE);
         registerFlag(TRAMPLE_FARMLAND);
-        registerFlag(TRAMPLE_FARMLAND_OTHER);
-        registerFlag(TRAMPLE_FARMLAND_PLAYER);
-        registerFlag(USE_BLOCKS);
-        registerFlag(USE_BONEMEAL);
-        registerFlag(USE_ELYTRA);
-        registerFlag(USE_ENDERPEARL_FROM_REGION);
-        registerFlag(USE_ENDERPEARL_TO_REGION);
-        registerFlag(USE_ENTITIES);
-        registerFlag(USE_ITEMS);
         registerFlag(USE_PORTAL);
         registerFlag(USE_PORTAL_ANIMALS);
         registerFlag(USE_PORTAL_ITEMS);
         registerFlag(USE_PORTAL_MINECARTS);
         registerFlag(USE_PORTAL_MONSTERS);
-        registerFlag(USE_PORTAL_PLAYERS);
         registerFlag(USE_PORTAL_VILLAGERS);
         registerFlag(WATER_FLOW);
         registerFlag(WITHER_BLOCK_PROT);
-        registerFlag(KEEP_XP);
-        registerFlag(KEEP_INV);
-        registerFlag(NO_HUNGER);
         registerFlag(XP_DROP_ALL);
         registerFlag(XP_DROP_MONSTER);
-        registerFlag(XP_DROP_OTHER);
-        registerFlag(XP_DROP_PLAYER);
-        registerFlag(XP_FREEZE);
-        registerFlag(XP_PICKUP);
         registerFlag(ZOMBIE_DOOR_PROT);
     }
 
