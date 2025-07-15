@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.platform.services.config;
 
+import de.z0rdak.yawp.api.Flag;
 import de.z0rdak.yawp.commands.CommandSourceType;
 import net.minecraft.commands.CommandSourceStack;
 
@@ -10,4 +11,5 @@ public interface IFlagConfigHelper {
     Set<String> getCoveredBlockEntities();
     Set<String> getCoveredBlockEntityTags();
     boolean removeEntitiesEnabled();
+    boolean isDisabledByConfig(Flag flag);
 }
