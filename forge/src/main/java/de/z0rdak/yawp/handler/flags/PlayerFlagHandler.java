@@ -8,6 +8,7 @@ import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.data.region.DimensionRegionCache;
 import de.z0rdak.yawp.data.region.RegionDataManager;
+import de.z0rdak.yawp.handler.HandlerUtil;
 import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.api.MessageSender;
 import net.minecraft.core.BlockPos;
@@ -23,6 +24,7 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
@@ -40,6 +42,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.event.CommandEvent;
@@ -47,6 +50,7 @@ import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.EntityTeleportEvent;
+import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.*;
@@ -77,6 +81,54 @@ import static net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE;
 public final class PlayerFlagHandler {
 
     private PlayerFlagHandler() {
+    }
+
+    @SubscribeEvent
+    public static void onLooseArrow(ArrowLooseEvent event){
+        if (!HandlerUtil.isServerSide(event.getLevel())) return;
+        if (event.getEntity() instanceof Player shooter) {
+            FlagCheckEvent checkEvent = new FlagCheckEvent(shooter.blockPosition(), FIRE_BOW, getDimKey(event.getLevel()), shooter);
+            if (Services.EVENT.post(checkEvent)) {
+                return;
+            }
+            FlagEvaluator.processCheck(checkEvent, onDeny -> {
+                event.setCanceled(true);
+                event.setCharge(0);
+                sendFlagMsg(onDeny);
+            });
+        }
+    }
+
+    @SubscribeEvent
+    public static void onProjectileHitPlayer(ProjectileImpactEvent event){
+        Projectile projectile = event.getProjectile();
+        if (!HandlerUtil.isServerSide(projectile)) return;
+        Entity shooter = projectile.getOwner();
+        /* Note: only consider these types of projectile here to keep parity with fabric
+        Fabric has dedicated mixins for FireWorkRocketEntity, Arrow, and one for the other thrown projectiles
+         */
+        boolean isTypeOf = projectile instanceof FireworkRocketEntity
+                || projectile instanceof AbstractArrow
+                || projectile instanceof Snowball
+                || projectile instanceof ThrownEgg
+                || projectile instanceof ThrownEnderpearl;
+        if  (!isTypeOf)
+            return;
+        boolean wasShotByPlayer = shooter instanceof Player;
+        boolean wasHit = event.getRayTraceResult().getType() == HitResult.Type.ENTITY;
+        if (wasShotByPlayer && wasHit && event.getRayTraceResult() instanceof EntityHitResult entityHitRes) {
+            Entity hitEntity = entityHitRes.getEntity();
+            if (hitEntity instanceof Player hitPlayer) {
+                FlagCheckEvent checkEvent = new FlagCheckEvent(hitPlayer.blockPosition(), NO_PVP, getDimKey(hitPlayer), (Player) shooter);
+                if (Services.EVENT.post(checkEvent)) {
+                    return;
+                }
+                FlagEvaluator.processCheck(checkEvent, onDeny -> {
+                    event.setCanceled(true);
+                    sendFlagMsg(onDeny);
+                });
+            }
+        }
     }
 
     @SubscribeEvent
