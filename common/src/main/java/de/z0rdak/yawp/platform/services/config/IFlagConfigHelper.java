@@ -11,5 +11,5 @@ public interface IFlagConfigHelper {
     Set<String> getCoveredBlockEntities();
     Set<String> getCoveredBlockEntityTags();
     boolean removeEntitiesEnabled();
-    boolean isDisabledByConfig(Flag flag);
+    boolean isDisabledByConfig(String flag);
 }
