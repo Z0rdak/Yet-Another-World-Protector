@@ -3,7 +3,7 @@ package de.z0rdak.yawp.core.flag;
 import java.util.Arrays;
 import java.util.List;
 
-public enum FlagCategory {
+public enum FlagTag {
     /**
      * Flags in this category involve preventing a certain event for the player.
      * E.g. gaining XP/levels without reporting it to the player
@@ -19,21 +19,23 @@ public enum FlagCategory {
      * Flags related to actions directly targeting blocks
      */
     BLOCK("block"),
+    ITEM("item"),
     /**
      * Flags related to actions directly targeting entities
      */
     ENTITY("entity"),
     ENVIRONMENT("environment"),
+    HIGH_FREQUENCY("high-frequency"),
     PROTECTION("protection");
 
     public final String name;
 
-    FlagCategory(String name) {
+    FlagTag(String name) {
         this.name = name;
     }
 
-    public static FlagCategory from(String category) throws IllegalArgumentException {
-        List<FlagCategory> categories = Arrays.stream(values())
+    public static FlagTag from(String category) throws IllegalArgumentException {
+        List<FlagTag> categories = Arrays.stream(values())
                 .filter(flag -> flag.name.equalsIgnoreCase(category))
                 .toList();
         if (categories.isEmpty()) {
