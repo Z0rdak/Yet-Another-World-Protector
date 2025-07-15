@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static de.z0rdak.yawp.core.flag.FlagCategory.PLAYER;
+import static de.z0rdak.yawp.core.flag.FlagTag.PLAYER;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
 
 public class FlagMessage {
