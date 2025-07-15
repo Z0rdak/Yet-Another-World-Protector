@@ -1,6 +1,5 @@
 package de.z0rdak.yawp.platform.config;
 
-import de.z0rdak.yawp.api.Flag;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.platform.services.config.IFlagConfigHelper;
 
