@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.platform.config;
 
+import de.z0rdak.yawp.api.Flag;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.platform.services.config.IFlagConfigHelper;
 
@@ -20,5 +21,10 @@ public class FabricFlagConfigHelper implements IFlagConfigHelper {
     @Override
     public boolean removeEntitiesEnabled() {
         return FlagConfig.removeEntitiesEnabled();
+    }
+
+    @Override
+    public boolean isDisabledByConfig(Flag flag) {
+        return FlagConfig.isDisabledByConfig(flag);
     }
 }

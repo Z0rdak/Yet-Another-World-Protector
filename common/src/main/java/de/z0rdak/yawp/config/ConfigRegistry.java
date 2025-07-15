@@ -4,6 +4,7 @@ import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.config.server.LoggingConfig;
 import de.z0rdak.yawp.config.server.PermissionConfig;
 import de.z0rdak.yawp.config.server.RegionConfig;
+import de.z0rdak.yawp.core.flag.FlagFrequency;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -66,6 +67,12 @@ public final class ConfigRegistry {
                         : "");
                 FLAG_CONFIG_LOGGER.info("{} Block Entity tag entries read from config{}", numBreakEntityTagEntries, loadedBreakEntityTags);
                 FLAG_CONFIG_LOGGER.info("Remove entities when enabling spawning flags: {}", FlagConfig.removeEntitiesEnabled() ? "enabled" : "disabled");
+
+                int amountOfDisabledFlags = FlagConfig.getDisabledFrequencyFlags(FlagFrequency.VERY_HIGH).size();
+                String disabledFlagsStr = (amountOfDisabledFlags > 0
+                        ? ": " + String.join(", ", FlagConfig.getDisabledFrequencyFlags(FlagFrequency.VERY_HIGH))
+                        : "");
+                FLAG_CONFIG_LOGGER.info("{} Disabled high frequency flags{}", disabledFlagsStr, disabledFlagsStr);
                 break;
             }
             case LoggingConfig.CONFIG_NAME: {
