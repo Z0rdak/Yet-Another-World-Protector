@@ -79,8 +79,8 @@ public class FlagConfig {
         return Set.of();
     }
 
-    public static boolean isDisabledByConfig(Flag flag) {
-        return getDisabledFrequencyFlags(FlagFrequency.VERY_HIGH).contains(flag.name());
+    public static boolean isDisabledByConfig(String flag) {
+        return getDisabledFrequencyFlags(FlagFrequency.VERY_HIGH).contains(flag);
     }
 
 
