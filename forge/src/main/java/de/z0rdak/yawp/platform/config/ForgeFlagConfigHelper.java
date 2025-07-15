@@ -24,7 +24,7 @@ public class ForgeFlagConfigHelper implements IFlagConfigHelper {
     }
 
     @Override
-    public boolean isDisabledByConfig(Flag flag) {
+    public boolean isDisabledByConfig(String flag) {
         return FlagConfig.isDisabledByConfig(flag);
     }
 }
