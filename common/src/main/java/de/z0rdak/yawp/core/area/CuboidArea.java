@@ -35,8 +35,14 @@ public class CuboidArea extends MarkedArea {
             BlockPos.CODEC.fieldOf("p2")
                     .forGetter(CuboidArea::getAreaP2),
             Codec.STRING.fieldOf("areaType")
-                    .forGetter(r -> MarkedAreaTypes.areaIdentifier(r.getAreaType()).toString())
-            ).apply(instance, (p1, p2, area) -> new CuboidArea(p1, p2))
+                    .forGetter(r -> MarkedAreaTypes.areaIdentifier(r.getAreaType()).toString()),
+            BlockDisplayProperties.CODEC.fieldOf("display")
+                    .forGetter(MarkedArea::getDisplay)
+            ).apply(instance, (p1, p2, area, display) -> {
+                var cuboid = new CuboidArea(p1, p2);
+                cuboid.updateDisplay(display);
+                return cuboid;
+            })
     );
 
     @Override
@@ -62,8 +68,10 @@ public class CuboidArea extends MarkedArea {
     public static CuboidArea expand(CuboidArea area, int min, int max) {
         BlockPos p1 = area.getAreaP1();
         BlockPos p2 = area.getAreaP2();
-        return new CuboidArea(new BlockPos(p1.getX(), min, p1.getZ()),
+        var expanded = new CuboidArea(new BlockPos(p1.getX(), min, p1.getZ()),
                 new BlockPos(p2.getX(), max, p2.getZ()));
+        expanded.updateDisplay(area.getDisplay());
+        return expanded;
     }
 
     private static boolean isInFacePlane(BlockPos point, BlockPos corner1, BlockPos corner2, BlockPos corner3, BlockPos corner4) {

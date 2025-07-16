@@ -26,8 +26,14 @@ public class SphereArea extends CenteredArea {
                     Codec.INT.fieldOf("radius")
                             .forGetter(SphereArea::getRadius),
                     Codec.STRING.fieldOf("areaType")
-                            .forGetter(r -> MarkedAreaTypes.areaIdentifier(r.getAreaType()).toString())
-            ).apply(instance, (center, radius, area) -> new SphereArea(center, radius))
+                            .forGetter(r -> MarkedAreaTypes.areaIdentifier(r.getAreaType()).toString()),
+                    BlockDisplayProperties.CODEC.fieldOf("display")
+                            .forGetter(MarkedArea::getDisplay)
+            ).apply(instance, (center, radius, area, display) -> {
+                var sphere = new SphereArea(center, radius);
+                sphere.updateDisplay(display);
+                return sphere;
+            })
     );
 
     private final int radius;
@@ -42,7 +48,9 @@ public class SphereArea extends CenteredArea {
     }
 
     public static SphereArea expand(SphereArea area, int expansion) {
-        return new SphereArea(area.center, Math.max(area.radius + expansion, 0));
+        var expanded = new SphereArea(area.center, Math.max(area.radius + expansion, 0));
+        expanded.updateDisplay(area.getDisplay());
+        return expanded;
     }
 
     public int getRadius() {

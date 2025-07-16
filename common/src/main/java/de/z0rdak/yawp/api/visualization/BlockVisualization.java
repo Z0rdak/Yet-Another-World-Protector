@@ -3,6 +3,7 @@ package de.z0rdak.yawp.api.visualization;
 import de.z0rdak.yawp.core.area.BlockDisplayProperties;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class BlockVisualization {
@@ -33,6 +34,8 @@ public class BlockVisualization {
     }
 
     public void move(BlockPos pos) {
-        this.entity.moveTo(pos.getX(), pos.getY(), pos.getZ());
+        if (this.entity != null) {
+            this.entity.moveOrInterpolateTo(new Vec3(pos),0, 0);
+        }
     }
 }

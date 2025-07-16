@@ -83,7 +83,7 @@ class DimensionCommands {
                         .then(literal(NUKE_DISPLAY_ENTITIES)
                                 .executes(ctx -> nukeDisplayEntities(ctx, ctx.getSource().getLevel()))
                                 .then(Commands.argument(DIM.toString(), DimensionArgument.dimension())
-                                        .executes(ctx -> nukeDisplayEntities(ctx, getLevelDataArgument(ctx)))))
+                                        .executes(ctx -> nukeDisplayEntities(ctx, DimensionArgument.getDimension(ctx, DIM.toString())))))
                         .then(literal(LIST)
                                 .then(literal(LOCAL)
                                         .executes(ctx -> promptDimensionRegionList(ctx, getLevelDataArgument(ctx), 0))
@@ -272,7 +272,7 @@ class DimensionCommands {
     }
 
     public static int createCuboidRegion(CommandContext<CommandSourceStack> ctx, String regionName, BlockPos pos1, BlockPos pos2, @Nullable IProtectedRegion parentRegion) {
-        Optional<DimensionRegionCache> dimCache = RegionManager.get().getDimensionCache(ctx.getSource().getLevel().dimension());
+        var dimCache = RegionManager.get().getLevelRegionData(ctx.getSource().getLevel().dimension());
         if (dimCache.isPresent()) {
             return createCuboidRegion(ctx, regionName, dimCache.get(), pos1, pos2, parentRegion);
         }
@@ -281,7 +281,7 @@ class DimensionCommands {
     }
 
     public static int createSphereRegion(CommandContext<CommandSourceStack> ctx, String regionName, BlockPos centerPos, int radius, @Nullable IProtectedRegion parentRegion) {
-        Optional<DimensionRegionCache> dimCache = RegionManager.get().getDimensionCache(ctx.getSource().getLevel().dimension());
+        var dimCache = RegionManager.get().getLevelRegionData(ctx.getSource().getLevel().dimension());
         if (dimCache.isPresent()) {
             return createSphereRegion(ctx, regionName, dimCache.get(), centerPos, radius, parentRegion);
         }
@@ -318,7 +318,7 @@ class DimensionCommands {
     }
 
     public static int deleteRegion(CommandContext<CommandSourceStack> ctx, IMarkableRegion region) {
-        Optional<DimensionRegionCache> dimCache = RegionManager.get().getDimensionCache(region.getDim());
+        var dimCache = RegionManager.get().getLevelRegionData(region.getDim());
         if (dimCache.isPresent()) {
             return deleteRegion(ctx, dimCache.get(), region);
         }

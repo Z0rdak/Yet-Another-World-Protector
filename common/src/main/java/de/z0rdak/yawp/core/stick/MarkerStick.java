@@ -1,7 +1,6 @@
 package de.z0rdak.yawp.core.stick;
 
 import de.z0rdak.yawp.constants.serialization.ItemNbtKeys;
-import de.z0rdak.yawp.core.INbtSerializable;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.util.NbtCompatHelper;
 import de.z0rdak.yawp.util.StickType;
@@ -16,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class MarkerStick extends AbstractStick implements INbtSerializable<CompoundTag> {
+public class MarkerStick extends AbstractStick {
 
     private ResourceKey<Level> dimension;
     private AreaType areaType;

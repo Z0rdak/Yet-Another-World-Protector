@@ -112,18 +112,15 @@ public class ChatComponentBuilder {
     }
 
     public static MutableComponent buildExecuteCmdLink(MutableComponent linkText, MutableComponent hoverText, String command, ClickEvent.Action eventAction, ChatFormatting color) {
+        ClickEvent clickEvent = mapActionToClickEvent(eventAction, command);
         return linkText.setStyle(linkText.getStyle()
                 .withColor(color)
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText))
-                .withClickEvent(new ClickEvent(eventAction, command)));
+                .withHoverEvent(new HoverEvent.ShowText(hoverText))
+                .withClickEvent(clickEvent));
     }
 
     public static MutableComponent buildExecuteCmdLinkWithBrackets(MutableComponent linkText, MutableComponent hoverText, String command, ClickEvent.Action eventAction, ChatFormatting color) {
-        var cmdLink = linkText.setStyle(linkText.getStyle()
-                .withColor(color)
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText))
-                .withClickEvent(new ClickEvent(eventAction, command)));
-        return ComponentUtils.wrapInSquareBrackets(cmdLink);
+        return ComponentUtils.wrapInSquareBrackets(buildExecuteCmdLink(linkText, hoverText, command, eventAction, color));
     }
 
     public static MutableComponent buildPlayerHoverComponent(Player player) {

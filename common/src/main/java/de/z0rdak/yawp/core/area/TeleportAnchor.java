@@ -1,16 +1,23 @@
 package de.z0rdak.yawp.core.area;
 
-import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
-import de.z0rdak.yawp.core.INbtSerializable;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.util.NbtCompatHelper;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.resources.ResourceLocation;
 
-import static de.z0rdak.yawp.util.ChatComponentBuilder.tinyBlockPos;
+public class TeleportAnchor {
 
-public class TeleportAnchor implements INbtSerializable<CompoundTag> {
+    public static Codec<TeleportAnchor> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                    BlockPos.CODEC.fieldOf("pos")
+                            .forGetter(TeleportAnchor::getPos),
+                    Codec.STRING.fieldOf("name")
+                            .forGetter(TeleportAnchor::getName)
+            ).apply(instance, TeleportAnchor::new)
+    );
 
     public BlockPos getPos() {
         return pos;
@@ -36,23 +43,5 @@ public class TeleportAnchor implements INbtSerializable<CompoundTag> {
     public TeleportAnchor(BlockPos pos, String name) {
         this.pos = pos;
         this.name = name;
-    }
-
-    public TeleportAnchor(CompoundTag tag) {
-        this.deserializeNBT(tag);
-    }
-
-    @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag tag = new CompoundTag();
-        tag.putString("name", this.name);
-        tag.put("pos",  NbtUtils.writeBlockPos(this.pos));
-        return tag;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        this.name = nbt.getString("name");
-        this.pos = NbtCompatHelper.toBlockPos(nbt, "pos").orElseThrow();
     }
 }

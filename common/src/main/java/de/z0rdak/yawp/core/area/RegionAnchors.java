@@ -1,21 +1,36 @@
 package de.z0rdak.yawp.core.area;
 
-import de.z0rdak.yawp.core.INbtSerializable;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.Lifecycle;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import de.z0rdak.yawp.core.group.PlayerContainer;
+import de.z0rdak.yawp.core.region.IMarkableRegion;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.*;
 
 import static de.z0rdak.yawp.util.ChatComponentBuilder.tinyBlockPos;
 
-public class RegionAnchors implements INbtSerializable<CompoundTag> {
+public class RegionAnchors {
 
     public RegionAnchors() {
         this.tpAnchors = new HashMap<>();
     }
 
-    public RegionAnchors(CompoundTag tag) {
-        this.deserializeNBT(tag);
+    public RegionAnchors(Map<String, TeleportAnchor> tpAnchors) {
+        this.tpAnchors = tpAnchors;
+    }
+
+    public Map<String, TeleportAnchor> getTpAnchors() {
+        return tpAnchors;
+    }
+
+    public void setTpAnchors(Map<String, TeleportAnchor> tpAnchors) {
+        this.tpAnchors = tpAnchors;
     }
 
     protected Map<String, TeleportAnchor> tpAnchors;
@@ -66,22 +81,5 @@ public class RegionAnchors implements INbtSerializable<CompoundTag> {
 
     public List<TeleportAnchor> getAnchors() {
         return new ArrayList<>(this.tpAnchors.values());
-    }
-
-    @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag tag = new CompoundTag();
-        this.tpAnchors.forEach((k, v) -> {
-            tag.put(k, v.serializeNBT());
-        });
-        return tag;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        this.tpAnchors = new HashMap<>();
-        nbt.getAllKeys().forEach((k) -> {
-            this.tpAnchors.put(k, new TeleportAnchor(nbt.getCompound(k)));
-        });
     }
 }

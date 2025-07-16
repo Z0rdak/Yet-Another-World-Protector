@@ -66,17 +66,6 @@ public final class LocalRegions {
         return new CuboidRegion(regionName, cuboidArea, player, dim);
     }
 
-    public static IMarkableRegion regionFromArea(IMarkableArea area, BlockPos tpTarget, String regionName, ResourceKey<Level> dim) {
-        switch (area.getAreaType()) {
-            case CUBOID:
-                return new CuboidRegion(regionName, (CuboidArea) area, tpTarget, null, dim);
-            case SPHERE:
-                return new SphereRegion(regionName, (SphereArea) area, tpTarget, null, dim);
-            default:
-                throw new NotImplementedException("Area type not implemented yet");
-        }
-    }
-
     public static boolean hasAnyRegionWithSamePriority(IMarkableRegion region, int priority) {
         return hasAnyRegionWithSamePriority(getIntersectingRegionsFor(region), priority);
     }

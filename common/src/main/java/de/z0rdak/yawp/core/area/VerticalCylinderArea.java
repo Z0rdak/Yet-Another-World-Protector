@@ -64,11 +64,6 @@ public class VerticalCylinderArea extends CenteredArea {
 
     @Override
     public Set<BlockPos> getFrame() {
-        throw new NotImplementedException("CylinderArea.getFrame() not implemented yet");
-    }
-
-    @Override
-    public Set<BlockPos> getFrame() {
         return Set.of();
     }
 

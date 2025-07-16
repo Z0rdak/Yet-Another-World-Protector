@@ -74,18 +74,18 @@ public class RegionArgumentType implements ArgumentType<String> {
 
     public static IMarkableRegion getRegionIn(CommandContext<CommandSourceStack> context, String argName, Level level) throws CommandSyntaxException {
         String regionName = context.getArgument(argName, String.class);
-        Optional<DimensionRegionCache> dimensionCache = RegionManager.get().getDimensionCache(level.dimension());
+        var dimensionCache = RegionManager.get().getLevelRegionData(level.dimension());
         if (dimensionCache.isPresent()) {
             var dimCache = dimensionCache.get();
-            if (!dimCache.contains(regionName)) {
-                sendCmdFeedback(context.getSource(), Component.literal("No region with name '" + regionName + "' defined in dim '" + dimCache.getDimensionalRegion().getName() + "'"));
+            if (!dimCache.hasLocal(regionName)) {
+                sendCmdFeedback(context.getSource(), Component.literal("No region with name '" + regionName + "' defined in dim '" + dimCache.getDim().getName() + "'"));
                 throw ERROR_INVALID_VALUE.create(regionName);
             }
-            IMarkableRegion region = dimCache.getRegion(regionName);
+            IMarkableRegion region = dimCache.getLocal(regionName);
             if (region != null) {
                 return region;
             } else {
-                sendCmdFeedback(context.getSource(), Component.literal("No regions defined in dim '" + dimCache.getDimensionalRegion().getName() + "'"));
+                sendCmdFeedback(context.getSource(), Component.literal("No regions defined in dim '" + dimCache.getDim().getName() + "'"));
                 throw ERROR_INVALID_VALUE.create(regionName);
             }
         } else {
@@ -216,7 +216,7 @@ public class RegionArgumentType implements ArgumentType<String> {
 
     public <S> CompletableFuture<Suggestions> listSuggestionsIn(CommandContext<S> ctx, SuggestionsBuilder builder, Level level) {
         if (ctx.getSource() instanceof CommandSourceStack src) {
-            Optional<DimensionRegionCache> dimensionCache = RegionManager.get().getDimensionCache(level.dimension());
+            var dimensionCache = RegionManager.get().getLevelRegionData(level.dimension());
             if (dimensionCache.isPresent()) {
                 return suggestRegionsForOwner(builder, src, dimensionCache.get());
             } else {

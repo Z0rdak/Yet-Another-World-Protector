@@ -151,7 +151,7 @@ public class CommandInterceptor {
         }
         try {
             var dimApi = maybeDimApi.get();
-            IProtectedRegion region = dimApi.getCache().getDimensionalRegion();
+            IProtectedRegion region = dimApi.getCache().getDim();
             boolean hasPermission = hasCmdPermission(cmdContext, cmdSrcType, Permissions.OWNER, region);
             handlePermission(src, region, hasPermission);
             return hasPermission ? ALLOW_CMD : CANCEL_CMD;
@@ -413,14 +413,14 @@ public class CommandInterceptor {
         ParsedArgument<CommandSourceStack, ?> regionArg = cmdContext.getArguments().get(argumentKey.toString());
         if (regionArg != null && regionArg.getResult() instanceof String regionName) {
             ServerLevel level = cmdContext.getSource().getLevel();
-            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(level.dimension());
-                if (!dimCache.contains(regionName)) {
-                    sendCmdFeedback(cmdContext.getSource(), Component.literal("No region with name '" + regionName + "' defined in dim '" + dimCache.getDimensionalRegion().getName() + "'"));
+            LevelRegionData dimCache = RegionDataManager.getOrCreate(level.dimension());
+                if (!dimCache.hasLocal(regionName)) {
+                    sendCmdFeedback(cmdContext.getSource(), Component.literal("No region with name '" + regionName + "' defined in dim '" + dimCache.getDim().getName() + "'"));
                     return null;
                 }
-                IMarkableRegion region = dimCache.getRegion(regionName);
+                IMarkableRegion region = dimCache.getLocal(regionName);
                 if (region == null) {
-                    sendCmdFeedback(cmdContext.getSource(), Component.literal("No region with name '" + regionName + "' defined in dim '" + dimCache.getDimensionalRegion().getName() + "'"));
+                    sendCmdFeedback(cmdContext.getSource(), Component.literal("No region with name '" + regionName + "' defined in dim '" + dimCache.getDim().getName() + "'"));
                     return null;
                 }
                 return region;

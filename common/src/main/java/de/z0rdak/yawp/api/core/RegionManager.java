@@ -140,8 +140,8 @@ public final class RegionManager implements IRegionManager {
         }
 
         @Override
-        public DimensionRegionCache getCache() {
-            return cache;
+        public LevelRegionData getCache() {
+            return levelData;
         }
 
         @Override

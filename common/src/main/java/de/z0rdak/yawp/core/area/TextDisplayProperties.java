@@ -1,12 +1,13 @@
 package de.z0rdak.yawp.core.area;
 
-import de.z0rdak.yawp.core.INbtSerializable;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 
-public final class TextDisplayProperties implements INbtSerializable<CompoundTag> {
+public final class TextDisplayProperties {
 
     public static int BG_TRANSPARENT = 0x10_00_00_00;
 
@@ -45,11 +46,6 @@ public final class TextDisplayProperties implements INbtSerializable<CompoundTag
         this.lightLevel = 15;
     }
 
-    public TextDisplayProperties(CompoundTag nbt) {
-        this.deserializeNBT(nbt);
-    }
-
-    @Override
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
         tag.putString("text", this.text);
@@ -62,14 +58,13 @@ public final class TextDisplayProperties implements INbtSerializable<CompoundTag
 
     public static final int DEFAULT_BACKGROUND = 0x1A_00_00_00;
 
-    @Override
     public void deserializeNBT(CompoundTag nbt) {
-        this.text = nbt.getString("text");
-        this.alignment = nbt.getString("alignment");
-        this.backgroundColor = nbt.getInt("backgroundColor");
+        this.text = nbt.getString("text").get();
+        this.alignment = nbt.getString("alignment").get();
+        this.backgroundColor = nbt.getInt("backgroundColor").get();
         var colorFormat = ChatFormatting.getByName(color);
         this.color = colorFormat == null ? ChatFormatting.WHITE.getName() : colorFormat.getName();
-        this.lightLevel = nbt.getInt("lightLevel");
+        this.lightLevel = nbt.getInt("lightLevel").get();
     }
 
     public String getText() {

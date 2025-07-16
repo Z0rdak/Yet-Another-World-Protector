@@ -1,12 +1,25 @@
 package de.z0rdak.yawp.core.area;
 
-import de.z0rdak.yawp.core.INbtSerializable;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.*;
 
-public final class BlockDisplayProperties implements INbtSerializable<CompoundTag> {
+public final class BlockDisplayProperties {
+
+    public static MapCodec<BlockDisplayProperties> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            ResourceLocation.CODEC.fieldOf("block")
+                            .forGetter(BlockDisplayProperties::blockRl),
+            Codec.BOOL.fieldOf("hasGlow")
+                            .forGetter(BlockDisplayProperties::hasGlow),
+                    Codec.INT.fieldOf("lightLevel")
+                            .forGetter(BlockDisplayProperties::lightLevel)
+            ).apply(instance, BlockDisplayProperties::new)
+    );
 
     private ResourceLocation blockRl;
     private boolean hasGlow;
@@ -20,18 +33,6 @@ public final class BlockDisplayProperties implements INbtSerializable<CompoundTa
         //this.persistent = true;
     }
 
-    public BlockDisplayProperties(CompoundTag nbt) {
-        this.deserializeNBT(nbt);
-    }
-
-    @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag tag = new CompoundTag();
-        tag.putString("block", blockRl.toString());
-        tag.putBoolean("hasGlow", hasGlow);
-        tag.putInt("lightLevel", lightLevel);
-        return tag;
-    }
 
     public static final List<ResourceLocation> DEFAULT_BLOCKS = new ArrayList<>();
     static {
@@ -60,20 +61,6 @@ public final class BlockDisplayProperties implements INbtSerializable<CompoundTa
 
     public static final boolean DEFAULT_GLOW = true;
     public static final int DEFAULT_LIGHT_LEVEL = 15;
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        String string = nbt.getString("block");
-        try {
-            this.blockRl = ResourceLocation.parse(string);
-        } catch (Exception _e) {
-            Random rand = new Random();
-            int randomNum = rand.nextInt(0, DEFAULT_BLOCKS.size());
-            this.blockRl = DEFAULT_BLOCKS.get(randomNum);
-        }
-        this.hasGlow = nbt.getBoolean("hasGlow");
-        this.lightLevel = nbt.getInt("lightLevel");
-    }
 
     public ResourceLocation blockRl() {
         return this.blockRl;

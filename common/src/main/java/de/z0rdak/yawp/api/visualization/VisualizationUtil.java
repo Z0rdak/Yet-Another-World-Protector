@@ -15,6 +15,7 @@ import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Optional;
 
@@ -26,13 +27,12 @@ public final class VisualizationUtil {
         if (!(blockDisplayEntity instanceof Display.BlockDisplay)) {
             throw new IllegalArgumentException("BlockDisplay entity is not a Display.BlockDisplay");
         }
-        var entityDataAccessor = new EntityDataAccessor(blockDisplayEntity);
-        CompoundTag entityTag = entityDataAccessor.getData();
-        CompoundTag blockState = entityTag.getCompound("block_state");
-        blockState.putString("Name", blockRl.toString());
-        entityTag.put("block_state", blockState);
         try {
-            entityDataAccessor.setData(entityTag);
+            var entityDataAccessor = new EntityDataAccessor(blockDisplayEntity);
+            CompoundTag entityTag = entityDataAccessor.getData();
+            CompoundTag blockState = entityTag.getCompound("block_state").get();
+            blockState.putString("Name", blockRl.toString());
+            entityTag.put("block_state", blockState);            entityDataAccessor.setData(entityTag);
         } catch (CommandSyntaxException e) {
             Constants.LOGGER.error("Should not happend - what did you do?!", e);
             throw new RuntimeException(e);
@@ -88,11 +88,11 @@ public final class VisualizationUtil {
         try {
             var blockDisplayTag = buildBlockDisplayTag(regionName, properties);
             CompoundTag existingTag = entityDataAccessor.getData();
-            existingTag.put("block_state", blockDisplayTag.getCompound("block_state"));
-            existingTag.put("brightness", blockDisplayTag.getCompound("brightness"));
-            existingTag.put("data", blockDisplayTag.getCompound("data"));
-            existingTag.putString("id", blockDisplayTag.getString("id"));
-            existingTag.putBoolean("Glowing", blockDisplayTag.getBoolean("Glowing"));
+            existingTag.put("block_state", blockDisplayTag.getCompound("block_state").get());
+            existingTag.put("brightness", blockDisplayTag.getCompound("brightness").get());
+            existingTag.put("data", blockDisplayTag.getCompound("data").get());
+            existingTag.putString("id", blockDisplayTag.getString("id").get());
+            existingTag.putBoolean("Glowing", blockDisplayTag.getBoolean("Glowing").get());
             entityDataAccessor.setData(existingTag);
         } catch (CommandSyntaxException e) {
             Constants.LOGGER.error("Should not happend - what did you do?!", e);
@@ -101,17 +101,17 @@ public final class VisualizationUtil {
     }
 
     public static void updateDisplayProperties(Entity blockDisplayEntity, BlockDisplayProperties properties) {
-        var entityDataAccessor = new EntityDataAccessor(blockDisplayEntity);
-        CompoundTag entityTag = entityDataAccessor.getData();
-        CompoundTag blockState = entityTag.getCompound("block_state");
-        blockState.putString("Name", properties.blockRl().toString());
-        entityTag.put("block_state", blockState);
-        entityTag.putBoolean("Glowing", properties.hasGlow());
-        var brightnessTag = new CompoundTag();
-        brightnessTag.putInt("sky", properties.lightLevel());
-        brightnessTag.putInt("block", properties.lightLevel());
-        entityTag.put("brightness", brightnessTag);
         try {
+            var entityDataAccessor = new EntityDataAccessor(blockDisplayEntity);
+            CompoundTag entityTag = entityDataAccessor.getData();
+            CompoundTag blockState = entityTag.getCompound("block_state").get();
+            blockState.putString("Name", properties.blockRl().toString());
+            entityTag.put("block_state", blockState);
+            entityTag.putBoolean("Glowing", properties.hasGlow());
+            var brightnessTag = new CompoundTag();
+            brightnessTag.putInt("sky", properties.lightLevel());
+            brightnessTag.putInt("block", properties.lightLevel());
+            entityTag.put("brightness", brightnessTag);
             entityDataAccessor.setData(entityTag);
         } catch (CommandSyntaxException e) {
             Constants.LOGGER.error("Should not happend - what did you do?!", e);
@@ -137,7 +137,7 @@ public final class VisualizationUtil {
     public static Optional<Entity> createBlockDisplayEntity(ServerLevel level, String regionName, BlockPos pos, BlockDisplayProperties displayProperties) {
         Entity blockDisplay = EntityType.BLOCK_DISPLAY.create(level, (e) -> {
             VisualizationUtil.initBlockDisplayProperties(e, regionName, displayProperties);
-            e.moveTo(pos.getX(), pos.getY(), pos.getZ(), 0, 0);
+            e.moveOrInterpolateTo(new Vec3(pos), 0, 0);
         }, pos, EntitySpawnReason.COMMAND, false, false);
         return blockDisplay == null ? Optional.empty() : Optional.of(blockDisplay);
     }
