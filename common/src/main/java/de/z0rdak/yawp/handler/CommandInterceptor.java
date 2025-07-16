@@ -22,6 +22,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
@@ -95,6 +96,27 @@ public class CommandInterceptor {
                         }
                         cancelExecutionResultCode = verifyMarkerCommandPermission(cmdContext, nodeNames, cmdSrcType);
                         break;
+                    case "info":
+                        if (!nodeNames.contains(CommandConstants.INFO.toString())) {
+                            cancelExecutionResultCode = CANCEL_CMD;
+                            break;
+                        }
+                        cancelExecutionResultCode = handleShortcutCmdExecution(cmdContext, cmdSrcType);
+                        break;
+                    case "create":
+                        if (!nodeNames.contains(CommandConstants.CREATE.toString())) {
+                            cancelExecutionResultCode = CANCEL_CMD;
+                            break;
+                        }
+                        cancelExecutionResultCode = handleCreateShortcutCmdExecution(cmdContext, nodeNames, cmdSrcType);
+                        break;
+                    case "delete":
+                        if (!nodeNames.contains(CommandConstants.DELETE.toString())) {
+                            cancelExecutionResultCode = CANCEL_CMD;
+                            break;
+                        }
+                        cancelExecutionResultCode = handleShortcutCmdExecution(cmdContext, cmdSrcType);
+                        break;
                 }
                 return cancelExecutionResultCode;
             }
@@ -103,6 +125,40 @@ public class CommandInterceptor {
             return CANCEL_CMD;
         }
         return ALLOW_CMD;
+    }
+
+    private static int handleShortcutCmdExecution(CommandContextBuilder<CommandSourceStack> cmdContext, CommandSourceType cmdSrcType) {
+        CommandSourceStack src = cmdContext.getSource();
+        IProtectedRegion region = checkValidLocalRegionShortcut(cmdContext, LOCAL);
+        if (region == null) {
+            return CANCEL_CMD;
+        }
+        try {
+            boolean hasPermission = hasCmdPermission(cmdContext, cmdSrcType, Permissions.OWNER, region);
+            handlePermission(src, region, hasPermission);
+            return hasPermission ? ALLOW_CMD : CANCEL_CMD;
+        } catch (CommandSyntaxException e) {
+            Constants.LOGGER.error(e);
+            return CANCEL_CMD;
+        }
+    }
+
+    private static int handleCreateShortcutCmdExecution(CommandContextBuilder<CommandSourceStack> cmdContext, List<String> nodeNames, CommandSourceType cmdSrcType) {
+        CommandSourceStack src = cmdContext.getSource();
+        var maybeDimApi = RegionManager.get().getDimRegionApi(src.getLevel().dimension());
+        if (maybeDimApi.isEmpty()) {
+            return CANCEL_CMD;
+        }
+        try {
+            var dimApi = maybeDimApi.get();
+            IProtectedRegion region = dimApi.getCache().getDimensionalRegion();
+            boolean hasPermission = hasCmdPermission(cmdContext, cmdSrcType, Permissions.OWNER, region);
+            handlePermission(src, region, hasPermission);
+            return hasPermission ? ALLOW_CMD : CANCEL_CMD;
+        } catch (CommandSyntaxException e) {
+            Constants.LOGGER.error(e);
+            return CANCEL_CMD;
+        }
     }
 
     /**
@@ -260,10 +316,6 @@ public class CommandInterceptor {
             return CANCEL_CMD;
         }
         try {
-            /* TODO:
-                Check if tp is outside region and inside parent region for permission to tp ?
-                This is a valid concern, but it is not considered and up to the user to manage this for now.
-            */
             int subCmdIndex = nodeNames.indexOf(AREA.toString());
             subCmdIndex = 4;
             Function<List<String>, Boolean> subCmdPermission = (nodes) -> {
@@ -352,6 +404,26 @@ public class CommandInterceptor {
                 return null;
             }
             return levelData.get();
+        }
+        return null;
+    }
+
+    @Nullable
+    private static IProtectedRegion checkValidLocalRegionShortcut(CommandContextBuilder<CommandSourceStack> cmdContext, CommandConstants argumentKey) {
+        ParsedArgument<CommandSourceStack, ?> regionArg = cmdContext.getArguments().get(argumentKey.toString());
+        if (regionArg != null && regionArg.getResult() instanceof String regionName) {
+            ServerLevel level = cmdContext.getSource().getLevel();
+            DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(level.dimension());
+                if (!dimCache.contains(regionName)) {
+                    sendCmdFeedback(cmdContext.getSource(), Component.literal("No region with name '" + regionName + "' defined in dim '" + dimCache.getDimensionalRegion().getName() + "'"));
+                    return null;
+                }
+                IMarkableRegion region = dimCache.getRegion(regionName);
+                if (region == null) {
+                    sendCmdFeedback(cmdContext.getSource(), Component.literal("No region with name '" + regionName + "' defined in dim '" + dimCache.getDimensionalRegion().getName() + "'"));
+                    return null;
+                }
+                return region;
         }
         return null;
     }
