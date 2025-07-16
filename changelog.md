@@ -1,4 +1,80 @@
-# [0.5.2-beta5] - unreleased
+# [0.6.0-beta1] - 2025-07-16
+
+## Added
+
+- Add new flag `fire-bow`, which prevents players from shooting bows/crossbows in the region. This flag does not protect form being shot form outside the region.
+- The `no-pvp` flag no protects against a selected set of projectiles:
+  - arrows
+  - firework rockets
+  - thrown tridents
+  - thrown ender pearls
+  - thrown eggs
+  - thrown snowballs 
+- Add new config to disable flags impacting performance in `yawp-flags.toml`: `disabled_flags` by default this list is empty. Any flag added to this list will be completely disabled by default. _Implementation note: This means the check for regions containing those flags in event handlers or mixins are skipped in the first place. This does not prevent the mixins from being applied or the event handlers from being registered. This is planned for the future though.
+
+### Multiple, named teleport anchors for Local Regions. 
+
+This replaces the old teleport position for regions. In turn the old position has been removed from the RegionMarker, the CLI and commands.
+- Add commands and CLI support to manage teleport anchors.
+- Add command `/yawp local <dim> <local> list tp-anchor [<page>]` show the pagination of all defined tp anchors in the region. 
+- Add command `/yawp local <dim> <local> add tp-anchor <name> <pos>` to add a new teleport anchor. The name must be alphanumeric and have between 3 and 50 letters.
+- Add command `/yawp local <dim> <local> remove tp-anchor <name>` remove an existing teleport anchor. The name must be alphanumeric and have between 3 and 50 letters.
+- Add command `/yawp local <dim> <local> tp-anchor` to show the list of teleport anchors defined in the region.
+- Add command `/yawp local <dim> <local> tp-anchor set <name> <pos>` to update the position of a teleport anchor.
+- Add command `/yawp local <dim> <local> tp-anchor rename <name> <newName>` to rename a teleport anchor.
+- Add command `/yawp local <dim> <local> tp-anchor show <name>` to show the visualization of the specified teleport anchor.
+- Add command `/yawp local <dim> <local> tp-anchor hide <name>` to hide the visualization of the specified teleport anchor.
+- Add command `/yawp local <dim> <local> tp-anchor tp <name> [<player>]` to teleport to the specific teleport anchor.
+
+### Region Visualization
+
+Local Regions can now be visualized in your world. This is done using Display Entities (see: https://minecraft.wiki/w/Display#Block_Displays).
+The properties of these entities (e.g. which block to show, etc.) can be configured for each region.
+
+Those display entities are not currently tracked between server restarts. This means you might need to nuke those entities from time to time when they can't be removed/hidden by the commands provided below. A future update will bring per-player tracking of display entities for a more streamlined experience.
+Use the following command to nuke them easily:
+- Add command `/yawp dim <dim> nuke-display-entities` - removes all display entities created by YAWP for the dimension.
+
+- Add commands and CLI support to manage the display settings and show/hide the visualization
+- Regions have, depending on the shape, different visualization styles (display types). Those are
+  - Hull: which shows the couple outer hull of the area - the limits of the regions
+  - Frame: an outer frame of the area, which is more resource friendly for bigger versions but still shows a good outline
+  - Minimal: a minimal outline of the area
+  - Marked: shows only the marked blocks of the area
+- Add command `/yawp local <dim> <local> display` to show the display settings page.
+- Add command `/yawp local <dim> <local> display block <block-id>` to show the display settings page.
+- Add command `/yawp local <dim> <local> display glow <true|false>` to show the display settings page.
+- Add command `/yawp local <dim> <local> display light-level <0-15>` to show the display settings page.
+- Add command `/yawp local <dim> <local> display show..` to show the display settings page.
+- Add command `/yawp local <dim> <local> show local` show the visualization of the region.
+- Add command `/yawp local <dim> <local> show local [Hull|Frame|Minimal|Marked] [<block>] [<glow>] [<light-level]` show the visualization with the specified display type and additional options.  
+- Add command `/yawp local <dim> <local> show hierarchy` show the visualization of the region hierarchy.
+- Add command `/yawp local <dim> <local> show hierarchy [Hull|Frame|Minimal|Marked] [<recursive>]` show the visualization of the region hierarchy with the specified display type.
+- Add command `/yawp local <dim> <local> show intersecting` show the visualization regions intersecting with this region.
+- Add command `/yawp local <dim> <local> show intersecting [Hull|Frame|Minimal|Marked]` show the visualization regions intersecting with this region with the specified display type.
+
+### Shortcut commands
+
+Additionally, there are new shortcut commands for usage in the current dimension. Some of those commands can not be used through the console or command blocks.
+
+- Add command `/yawp info <region-name>` - to show info about the specified region.
+- Add command `/yawp delete <region-name>` - to delete the specified region.
+- Add command `/yawp create <region-name> ...` - to create region with specified name and area (see dimension commands).
+- Add command `/yawp hide local <region-name> [<frame|hull|marked|minmal>]` - hide local region with specified name and optional display style.
+- Add command `/yawp hide near [<radius>]` - hide all regions within the given radius with the executor as origin position. Radius defaults to 192.
+- Add command `/yawp hide all [true|false]` - hide all visualized regions - add true to nuke all untracked entities as well.
+- Add command `/yawp show local <region-name> [<frame|hull|marked|minmal>]` - show local region with specified name and optional display style.
+- Add command `/yawp show near [<radius>] [<frame|hull|marked|minmal>]` - show all regions within the given radius and display style, with the executor as origin position. Radius defaults to 192 and display type defaults to frame.
+
+## Changed
+
+- Overhauled some visual aspects of the CLI. This does not impact the functionality.
+
+## Removed
+
+- Removed the command to update a sphere are by providing two block positions. Its now done by providing a new radius only.
+
+# [0.5.2-beta5] - 2025-07-07
 
 ## Changed
 
