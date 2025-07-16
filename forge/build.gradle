@@ -72,13 +72,12 @@ sourceSets.main.resources.srcDir 'src/generated/resources'
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-    annotationProcessor('net.minecraftforge:eventbus-validator:7.0-beta.7')
     annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT:processor")
 
     // Forge's hack fix
     implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
         
-    api(fg.deobf("fuzs.forgeconfigapiport:forgeconfigapiport-forge:21.7.0"))
+    api(fg.deobf("fuzs.forgeconfigapiport:forgeconfigapiport-forge:21.6.4"))
 }
 
 publishing {
