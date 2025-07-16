@@ -17,6 +17,7 @@ import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -55,7 +56,6 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
 
     @Override
     public void registerCommands() {
-        //VisualizationManager.initServerInstance(event.getServer());
         MinecraftForge.EVENT_BUS.addListener((RegisterCommandsEvent event) -> CommandRegistry.registerCommands(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection()));
     }
 
@@ -65,6 +65,8 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
                 (ServerAboutToStartEvent startEvent) -> RegionDataManager.onServerStarting(startEvent.getServer()));
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
                 (ServerAboutToStartEvent startEvent) -> PlayerManager.onServerStart(startEvent.getServer()));
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
+                (ServerAboutToStartEvent startEvent) -> VisualizationManager.initServerInstance(startEvent.getServer()));
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
                 (LevelEvent.Load event) -> {
             if (event.getLevel() instanceof ServerLevel serverLevel) {

@@ -60,6 +60,8 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
     public void setupRegionDataLifecycleHooks() {
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true, (ServerAboutToStartEvent startEvent) -> RegionDataManager.onServerStarting(startEvent.getServer()));
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true, (ServerAboutToStartEvent startEvent) -> PlayerManager.onServerStart(startEvent.getServer()));
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true, (ServerAboutToStartEvent startEvent) -> VisualizationManager.initServerInstance(startEvent.getServer()));
+
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true, (LevelEvent.Load event) -> {
             if (event.getLevel() instanceof ServerLevel serverLevel)
                 RegionDataManager.worldLoad(serverLevel.getServer(), serverLevel);
@@ -81,8 +83,6 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
             }
         });
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true, (ServerStoppingEvent stoppingEvent) -> RegionDataManager.saveOnStop(stoppingEvent.getServer()));
-        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true, (ServerStartingEvent startingEvent) -> VisualizationManager.initServerInstance(event.getServer()));
-
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true, (LevelEvent.Unload unloadEvent) -> {
             if (unloadEvent.getLevel() instanceof ServerLevel serverLevel)
                 RegionDataManager.saveOnUnload(unloadEvent.getLevel().getServer(), serverLevel);
