@@ -40,9 +40,9 @@ import static de.z0rdak.yawp.commands.RegionCommands.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 
 
-class ShortCutCommands {
+class ShortcutCommands {
 
-    private ShortCutCommands() {
+    private ShortcutCommands() {
     }
 
     static LiteralArgumentBuilder<CommandSourceStack> buildInfoLocal() {
@@ -110,7 +110,7 @@ class ShortCutCommands {
 
     private static LiteralArgumentBuilder<CommandSourceStack> buildHideAll() {
         return literal(ALL)
-                .executes(ShortCutCommands::hideRegions)
+                .executes(ShortcutCommands::hideRegions)
                 .then(Commands.argument(UNTRACKED.toString(), BoolArgumentType.bool())
                         .executes(ctx -> hideRegions(ctx, BoolArgumentType.getBool(ctx, UNTRACKED.toString())))
                 );
