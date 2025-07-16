@@ -23,8 +23,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
-import static de.z0rdak.yawp.api.visualization.VisualizationUtil.buildTeleportAnchorTextDisplayTag;
-import static de.z0rdak.yawp.api.visualization.VisualizationUtil.createDisplayEntity;
 import static de.z0rdak.yawp.constants.Constants.MOD_ID;
 
 /*

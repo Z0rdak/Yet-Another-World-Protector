@@ -10,6 +10,7 @@ import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
+import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.commands.arguments.region.AddRegionChildArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
@@ -34,6 +35,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -41,14 +43,14 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Relative;
-import net.minecraft.world.entity.Relative;
-import net.minecraft.world.entity.*;
 import net.minecraft.world.level.block.AirBlock;
 import net.minecraft.world.level.block.Block;
-import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
+import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 import static de.z0rdak.yawp.api.MessageSender.sendError;
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.CommandUtil.*;
@@ -57,7 +59,6 @@ import static de.z0rdak.yawp.constants.Constants.MAX_BUILD_LIMIT;
 import static de.z0rdak.yawp.constants.Constants.MIN_BUILD_LIMIT;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.shortBlockPos;
 import static de.z0rdak.yawp.util.ChatLinkBuilder.*;
-import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 
 
 class RegionCommands {
@@ -335,8 +336,8 @@ class RegionCommands {
 
 
     public static int setDisplayBlock(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, ResourceLocation blockRl) {
-        Block block = BuiltInRegistries.BLOCK.get(blockRl);
-        if (block instanceof AirBlock) {
+        Optional<Holder.Reference<Block>> block = BuiltInRegistries.BLOCK.get(blockRl);
+        if (block.isPresent() && block.get().value() instanceof AirBlock) {
             // TODO: I18n
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Not found", "Not found", buildRegionInfoLink(region), blockRl.toString()));
             return -1;
@@ -750,7 +751,7 @@ class RegionCommands {
             ServerPlayer player = ctx.getSource().getPlayerOrException();
             ServerLevel level = ctx.getSource().getServer().getLevel(region.getDim());
             if (level != null) {
-                player.teleportTo(level, tpPos.getX(), tpPos.getY(), tpPos.getZ(), RelativeMovement.ROTATION, player.getYRot(), player.getXRot());
+                player.teleportTo(level, tpPos.getX(), tpPos.getY(), tpPos.getZ(), Relative.ROTATION, player.getYRot(), player.getXRot(), true);
                 return 0;
             } else {
                 Constants.LOGGER.error("Error executing teleport command. Level is null.");
