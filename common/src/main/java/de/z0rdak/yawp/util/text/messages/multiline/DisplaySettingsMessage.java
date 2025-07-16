@@ -3,6 +3,7 @@ package de.z0rdak.yawp.util.text.messages.multiline;
 import de.z0rdak.yawp.core.area.BlockDisplayProperties;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.util.text.Messages;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -12,6 +13,7 @@ import net.minecraft.world.level.block.Block;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static de.z0rdak.yawp.api.commands.Commands.*;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
@@ -69,9 +71,12 @@ public class DisplaySettingsMessage implements MultiLineMessage<BlockDisplayProp
      */
     public static MutableComponent buildDisplayBlockInfo(IMarkableRegion region) {
         var blockInfoHover = Component.literal(region.getArea().getDisplay().blockRl().toString());
-        Block block = BuiltInRegistries.BLOCK.get(region.getArea().getDisplay().blockRl());
-        var blockInfoText = block.getName();
-        return buildTextWithWhiteBracketsAndHover(blockInfoText, blockInfoHover, BLUE);
+        Optional<Holder.Reference<Block>> block = BuiltInRegistries.BLOCK.get(region.getArea().getDisplay().blockRl());
+        if (block.isPresent()) {
+            var blockInfoText = block.get().value().getName();
+            return buildTextWithWhiteBracketsAndHover(blockInfoText, blockInfoHover, BLUE);
+        }
+        throw new IllegalStateException("BlockRl '" + region.getArea().getDisplay().blockRl().toString() + "' in region " + region.getName() + " is invalid.");
     }
 
     public static MutableComponent buildSetDisplayBlockLink(IMarkableRegion region) {

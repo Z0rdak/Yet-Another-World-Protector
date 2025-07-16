@@ -6,12 +6,14 @@ import de.z0rdak.yawp.core.area.BlockDisplayProperties;
 import de.z0rdak.yawp.core.area.TextDisplayProperties;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.commands.data.EntityDataAccessor;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 
 import java.util.Optional;
@@ -70,6 +72,34 @@ public final class VisualizationUtil {
         }
     }
 
+    public static void initTextDisplayProperties(Entity blockDisplayEntity, String regionName, TextDisplayProperties properties) {
+        var entityDataAccessor = new EntityDataAccessor(blockDisplayEntity);
+        try {
+            var entityTag = buildTeleportAnchorTextDisplayTag(regionName, properties);
+            entityDataAccessor.setData(entityTag);
+        } catch (CommandSyntaxException e) {
+            Constants.LOGGER.error("Should not happend - what did you do?!", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void initBlockDisplayProperties(Entity blockDisplayEntity, String regionName, BlockDisplayProperties properties) {
+        var entityDataAccessor = new EntityDataAccessor(blockDisplayEntity);
+        try {
+            var blockDisplayTag = buildBlockDisplayTag(regionName, properties);
+            CompoundTag existingTag = entityDataAccessor.getData();
+            existingTag.put("block_state", blockDisplayTag.getCompound("block_state"));
+            existingTag.put("brightness", blockDisplayTag.getCompound("brightness"));
+            existingTag.put("data", blockDisplayTag.getCompound("data"));
+            existingTag.putString("id", blockDisplayTag.getString("id"));
+            existingTag.putBoolean("Glowing", blockDisplayTag.getBoolean("Glowing"));
+            entityDataAccessor.setData(existingTag);
+        } catch (CommandSyntaxException e) {
+            Constants.LOGGER.error("Should not happend - what did you do?!", e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public static void updateDisplayProperties(Entity blockDisplayEntity, BlockDisplayProperties properties) {
         var entityDataAccessor = new EntityDataAccessor(blockDisplayEntity);
         CompoundTag entityTag = entityDataAccessor.getData();
@@ -89,38 +119,15 @@ public final class VisualizationUtil {
         }
     }
 
-
-
-    @Deprecated
-    public static Entity createBlockDisplayRecursive(ServerLevel level, BlockPos pos, CompoundTag displayTag) {
-        return EntityType.loadEntityRecursive(displayTag, level, p_396566_ -> {
-            p_396566_.moveTo(pos.getX(), pos.getY(), pos.getZ(), p_396566_.getYRot(), p_396566_.getXRot());
-            return p_396566_;
-        });
-    }
-
-    /**
-     * Creates an entity in the level at the specified position with the provided tag.
-     * @param level level in which to spawn the entity
-     * @param pos position at which to spawn the display entity
-     * @param displayTag tag which provides data about the entity (e.g. text or block display entity)
-     * @return an optional with the entity inside if spawning was successfully, empty otherwise
-     */
-    public static Optional<Entity> createDisplayEntity(ServerLevel level, BlockPos pos, CompoundTag displayTag) {
-        Optional<Entity> entity = EntityType.create(displayTag, level);
-        entity.ifPresent(e -> e.moveTo(pos.getX(), pos.getY(), pos.getZ(), e.yRotO, e.xRotO));
-        return entity;
-    }
-
     /**
      *
      * @param regionName a marker, stored in custom entity data for identification later
      */
     public static Optional<Entity> createTextDisplayEntity(ServerLevel level, String regionName, BlockPos pos, TextDisplayProperties displayProperties) {
-        var entityTag = buildTeleportAnchorTextDisplayTag(regionName, displayProperties);
-        var maybeEntity = EntityType.create(entityTag, level);
-        maybeEntity.ifPresent(e -> e.moveTo(pos.getX(), pos.getY(), pos.getZ(), e.yRotO, e.xRotO));
-        return maybeEntity;
+        var textDisplay = EntityType.BLOCK_DISPLAY.create(level, (e) -> {
+            VisualizationUtil.initTextDisplayProperties(e, regionName, displayProperties);
+        }, pos, EntitySpawnReason.COMMAND, false, false);
+        return textDisplay == null ? Optional.empty() : Optional.of(textDisplay);
     }
 
     /**
@@ -128,10 +135,11 @@ public final class VisualizationUtil {
      * @param regionName a marker, stored in custom entity data for identification later
      */
     public static Optional<Entity> createBlockDisplayEntity(ServerLevel level, String regionName, BlockPos pos, BlockDisplayProperties displayProperties) {
-        var entityTag = buildBlockDisplayTag(regionName, displayProperties);
-        var maybeEntity = EntityType.create(entityTag, level);
-        maybeEntity.ifPresent(e -> e.moveTo(pos.getX(), pos.getY(), pos.getZ(), e.yRotO, e.xRotO));
-        return maybeEntity;
+        Entity blockDisplay = EntityType.BLOCK_DISPLAY.create(level, (e) -> {
+            VisualizationUtil.initBlockDisplayProperties(e, regionName, displayProperties);
+            e.moveTo(pos.getX(), pos.getY(), pos.getZ(), 0, 0);
+        }, pos, EntitySpawnReason.COMMAND, false, false);
+        return blockDisplay == null ? Optional.empty() : Optional.of(blockDisplay);
     }
 
     /**

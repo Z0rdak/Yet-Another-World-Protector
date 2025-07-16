@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 import static de.z0rdak.yawp.core.flag.RegionFlag.FIRE_BOW;
@@ -23,7 +24,7 @@ import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
 public abstract class BowItemMixin {
     
     @Inject(method = "releaseUsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/BowItem;getPowerForTime(I)F"), allow = 1, cancellable = true)
-    void onLooseArrow(ItemStack stack, Level level, LivingEntity entityLiving, int timeLeft, CallbackInfo ci) {
+    void onLooseArrow(ItemStack stack, Level level, LivingEntity entityLiving, int timeLeft, CallbackInfoReturnable<Boolean> cir) {
         Player player = (Player) entityLiving;
         if (isServerSide(player.level())) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), FIRE_BOW, getDimKey(player), player);
@@ -31,7 +32,7 @@ public abstract class BowItemMixin {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, denyResult -> {
-                ci.cancel();
+                cir.setReturnValue(false);
                 sendFlagMsg(denyResult);
             });
         }
