@@ -4,9 +4,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.constants.Constants;
+import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import de.z0rdak.yawp.util.AreaUtil;
 import de.z0rdak.yawp.util.NbtCompatHelper;
+import it.unimi.dsi.fastutil.Hash;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -33,8 +35,14 @@ public class CuboidArea extends MarkedArea {
             BlockPos.CODEC.fieldOf("p2")
                     .forGetter(CuboidArea::getAreaP2),
             Codec.STRING.fieldOf("areaType")
-                    .forGetter(r -> MarkedAreaTypes.areaIdentifier(r.getAreaType()).toString())
-            ).apply(instance, (p1, p2, area) -> new CuboidArea(p1, p2))
+                    .forGetter(r -> MarkedAreaTypes.areaIdentifier(r.getAreaType()).toString()),
+            BlockDisplayProperties.CODEC.fieldOf("display")
+                    .forGetter(MarkedArea::getDisplay)
+            ).apply(instance, (p1, p2, area, display) -> {
+                var cuboid = new CuboidArea(p1, p2);
+                cuboid.updateDisplay(display);
+                return cuboid;
+            })
     );
 
     @Override
@@ -60,8 +68,10 @@ public class CuboidArea extends MarkedArea {
     public static CuboidArea expand(CuboidArea area, int min, int max) {
         BlockPos p1 = area.getAreaP1();
         BlockPos p2 = area.getAreaP2();
-        return new CuboidArea(new BlockPos(p1.getX(), min, p1.getZ()),
+        var expanded = new CuboidArea(new BlockPos(p1.getX(), min, p1.getZ()),
                 new BlockPos(p2.getX(), max, p2.getZ()));
+        expanded.updateDisplay(area.getDisplay());
+        return expanded;
     }
 
     private static boolean isInFacePlane(BlockPos point, BlockPos corner1, BlockPos corner2, BlockPos corner3, BlockPos corner4) {
@@ -240,8 +250,11 @@ public class CuboidArea extends MarkedArea {
     }
 
     @Override
-    public List<BlockPos> markedBlocks() {
-        return Arrays.asList(this.p1, this.p2);
+    public Set<BlockPos> markedBlocks() {
+        var set = new HashSet<BlockPos>();
+        set.add(this.p1);
+        set.add(this.p2);
+        return set;
     }
 
     /**
@@ -266,6 +279,43 @@ public class CuboidArea extends MarkedArea {
         return Stream.of(p12, p34, p56, p78, p15, p26, p37, p48, p13, p24, p57, p68)
                 .flatMap(Set::stream)
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<BlockPos> getMinimalOutline() {
+        Set<BlockPos> corners = new HashSet<>();
+        int minX = this.area.minX();
+        int minY = this.area.minY();
+        int minZ = this.area.minZ();
+        int maxX = this.area.maxX();
+        int maxY = this.area.maxY();
+        int maxZ = this.area.maxZ();
+        corners.add(new BlockPos(minX, minY, minZ));
+        corners.add(new BlockPos(minX, minY, maxZ));
+        corners.add(new BlockPos(minX, maxY, minZ));
+        corners.add(new BlockPos(minX, maxY, maxZ));
+        corners.add(new BlockPos(maxX, minY, minZ));
+        corners.add(new BlockPos(maxX, minY, maxZ));
+        corners.add(new BlockPos(maxX, maxY, minZ));
+        corners.add(new BlockPos(maxX, maxY, maxZ));
+        Set<BlockPos> result = new HashSet<>();
+        for (BlockPos corner : corners) {
+            result.add(corner);
+            // For each axis, determine if there's room to offset
+            if (minX != maxX) {
+                int dx = (corner.getX() == minX) ? 1 : -1;
+                result.add(corner.offset(dx, 0, 0));
+            }
+            if (minY != maxY) {
+                int dy = (corner.getY() == minY) ? 1 : -1;
+                result.add(corner.offset(0, dy, 0));
+            }
+            if (minZ != maxZ) {
+                int dz = (corner.getZ() == minZ) ? 1 : -1;
+                result.add(corner.offset(0, 0, dz));
+            }
+        }
+        return result;
     }
 
     @Override

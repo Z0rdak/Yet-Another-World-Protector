@@ -21,4 +21,9 @@ public class ForgeFlagConfigHelper implements IFlagConfigHelper {
     public boolean removeEntitiesEnabled() {
         return FlagConfig.removeEntitiesEnabled();
     }
+
+    @Override
+    public boolean isDisabledByConfig(String flag) {
+        return FlagConfig.isDisabledByConfig(flag);
+    }
 }

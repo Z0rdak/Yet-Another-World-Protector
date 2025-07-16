@@ -1,7 +1,6 @@
 package de.z0rdak.yawp.core.stick;
 
 import de.z0rdak.yawp.constants.serialization.ItemNbtKeys;
-import de.z0rdak.yawp.core.INbtSerializable;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.util.NbtCompatHelper;
 import de.z0rdak.yawp.util.StickType;
@@ -16,9 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class MarkerStick extends AbstractStick implements INbtSerializable<CompoundTag> {
+public class MarkerStick extends AbstractStick {
 
-    private BlockPos teleportPos;
     private ResourceKey<Level> dimension;
     private AreaType areaType;
     private boolean isValidArea;
@@ -30,7 +28,6 @@ public class MarkerStick extends AbstractStick implements INbtSerializable<Compo
         this.isValidArea = false;
         this.markedBlocks = new ArrayList<>(this.areaType.maxBlocks);
         this.dimension = dim;
-        this.teleportPos = null;
     }
 
     public MarkerStick(CompoundTag nbt) {
@@ -46,15 +43,6 @@ public class MarkerStick extends AbstractStick implements INbtSerializable<Compo
     public void reset() {
         this.markedBlocks = new ArrayList<>(this.areaType.maxBlocks);
         this.isValidArea = false;
-        this.teleportPos = null;
-    }
-
-    public BlockPos getTeleportPos() {
-        return teleportPos;
-    }
-
-    public void setTeleportPos(BlockPos teleportPos) {
-        this.teleportPos = teleportPos;
     }
 
     public ResourceKey<Level> getDimension() {
@@ -105,10 +93,6 @@ public class MarkerStick extends AbstractStick implements INbtSerializable<Compo
         nbt.putBoolean(ItemNbtKeys.VALID_AREA, this.isValidArea);
         nbt.putString(ItemNbtKeys.AREA_TYPE, this.areaType.areaType);
         nbt.putString(ItemNbtKeys.DIM, this.dimension.location().toString());
-        nbt.putBoolean(ItemNbtKeys.IS_TP_SET, this.teleportPos != null);
-        if (this.teleportPos != null) {
-            nbt.put(ItemNbtKeys.TP_POS, NbtCompatHelper.asInts(this.teleportPos));
-        }
         ListTag blocks = new ListTag();
         this.markedBlocks.forEach(block -> blocks.add(NbtCompatHelper.asInts(block)));
         nbt.put(ItemNbtKeys.MARKED_BLOCKS, blocks);
@@ -120,10 +104,6 @@ public class MarkerStick extends AbstractStick implements INbtSerializable<Compo
         super.deserializeNBT(nbt);
         this.isValidArea = nbt.getBoolean(ItemNbtKeys.VALID_AREA).orElseThrow();
         this.areaType = AreaType.of(nbt.getString(ItemNbtKeys.AREA_TYPE).orElseThrow());
-        boolean isTpSet = nbt.getBoolean(ItemNbtKeys.IS_TP_SET).orElseThrow();
-        if (isTpSet) {
-            this.teleportPos = NbtCompatHelper.asBlockPos(nbt, ItemNbtKeys.TP_POS).orElse(null);
-        }
         this.dimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(nbt.getString(ItemNbtKeys.DIM).orElseThrow()));
         ListTag markedBlocksNBT = (ListTag) nbt.get(ItemNbtKeys.MARKED_BLOCKS);
         if (markedBlocksNBT != null) {

@@ -16,7 +16,7 @@ public interface IMarkableArea {
 
     AreaType getAreaType();
 
-    List<BlockPos> markedBlocks();
+    Set<BlockPos> markedBlocks();
 
     /**
      * Set containing all block positions which represent the outer hull of the marked area.
@@ -29,6 +29,7 @@ public interface IMarkableArea {
      * The frame is the minimum required blocks to give a rough outline o the marked area
      */
     Set<BlockPos> getFrame();
+    Set<BlockPos> getMinimalOutline();
 
     boolean containsOther(IMarkableArea other);
 
@@ -36,4 +37,8 @@ public interface IMarkableArea {
 
     MarkedAreaType<?> getType();
 
+
+    BlockDisplayProperties getDisplay();
+
+    void updateDisplay(BlockDisplayProperties properties);
 }

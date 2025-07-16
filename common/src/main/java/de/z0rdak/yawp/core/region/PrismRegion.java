@@ -2,6 +2,7 @@ package de.z0rdak.yawp.core.region;
 
 import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import de.z0rdak.yawp.core.area.PrismArea;
+import de.z0rdak.yawp.core.area.RegionAnchors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
@@ -14,7 +15,7 @@ public final class PrismRegion extends MarkedRegion {
         super(name, area, owner, dimension);
     }
 
-    public PrismRegion(String name, PrismArea area, BlockPos tpTarget, Player owner, ResourceKey<Level> dimension) {
-        super(name, area, tpTarget, owner, dimension);
+    public PrismRegion(String name, PrismArea area, RegionAnchors anchors, Player owner, ResourceKey<Level> dimension) {
+        super(name, area, anchors, owner, dimension);
     }
 }

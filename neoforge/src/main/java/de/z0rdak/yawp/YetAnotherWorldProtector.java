@@ -1,6 +1,7 @@
 package de.z0rdak.yawp;
 
 import de.z0rdak.yawp.api.events.flag.NeoForgeFlagEvent;
+import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.commands.CommandRegistry;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.RegionFlag;
@@ -22,6 +23,7 @@ import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 
 import static de.z0rdak.yawp.handler.YawpEventHandler.removeInvolvedEntities;
@@ -79,6 +81,7 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
             }
         });
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true, (ServerStoppingEvent stoppingEvent) -> RegionDataManager.saveOnStop(stoppingEvent.getServer()));
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true, (ServerStartingEvent startingEvent) -> VisualizationManager.initServerInstance(startingEvent.getServer()));
 
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true, (LevelEvent.Unload unloadEvent) -> {
             if (unloadEvent.getLevel() instanceof ServerLevel serverLevel)

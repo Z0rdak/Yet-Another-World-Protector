@@ -40,7 +40,7 @@ public class PermissionConfig {
         COMMAND_BLOCK_EXECUTION = BUILDER.comment("Permission for command blocks to execute mod commands")
                 .define("command_block_execution", true);
         
-        REQUIRED_OP_LEVEL = BUILDER.comment("Minimum OP level to use mod commands.\n 0 -> everyone can use the commands.\n 1-4 -> OP with specific level can use the commands.\n 5 -> no operator can use the commands.\n Defaults to 5.")
+        REQUIRED_OP_LEVEL = BUILDER.comment("Minimum OP level to use mod commands.\n 0 -> everyone can use the commands.\n 1-4 -> OP with specific level can use the commands.\n 5 -> no operator can use the commands.\n Defaults to 4.")
                 .defineInRange("command_op_level", 4, 0, 5);
 
         ALLOW_READ_ONLY_CMDS = BUILDER.comment("Defines whether info commands for regions can be used by every player.")
@@ -62,7 +62,7 @@ public class PermissionConfig {
                 .define("enable_marker_creation", true);
         
         PLAYERS_WITH_PERMISSION = BUILDER.comment("Player UUIDs with permission to use mod commands.\n Make sure to put the UUIDs in parentheses, just like a normal string.\n Example: players_with_permission = [\"614c9eac-11c9-3ca6-b697-938355fa8235\", \"b9f5e998-520a-3fa2-8208-0c20f22aa20f\"]")
-                .defineListAllowEmpty(Collections.singletonList("players_with_permission"), ArrayList::new, PermissionConfig::validateUuid);
+                .defineListAllowEmpty(Collections.singletonList("players_with_permission"), ArrayList::new, null, PermissionConfig::validateUuid);
         BUILDER.pop();
         CONFIG_SPEC = BUILDER.build();
     }

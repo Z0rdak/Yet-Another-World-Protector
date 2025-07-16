@@ -46,16 +46,23 @@ public class ChatComponentBuilder {
     private ChatComponentBuilder() {
     }
 
-    public static String buildBlockCoordinateStr(BlockPos target) {
+    /**
+     * Builds a string from the given block pos which can be used in commands
+     */
+    public static String commandBlockPosStr(BlockPos target) {
         return target.getX() + " " + target.getY() + " " + target.getZ();
     }
 
+    public static String shortBlockPosBracketed(BlockPos target) {
+        return "[" + shortBlockPos(target) + "]";
+    }
+
     public static String shortBlockPos(BlockPos target) {
-        return "[X=" + target.getX() + ", Y=" + target.getY() + ", Z=" + target.getZ() + "]";
+        return "X=" + target.getX() + ", Y=" + target.getY() + ", Z=" + target.getZ();
     }
 
     public static String tinyBlockPos(BlockPos target) {
-        return "[" + buildBlockCoordinateStr(target) + "]";
+        return "[" + commandBlockPosStr(target) + "]";
     }
 
     public static String buildBlockPosLinkText(BlockPos target) {
@@ -102,6 +109,18 @@ public class ChatComponentBuilder {
             throw new IllegalArgumentException("Unknown click action: " + clickAction);
         }
         throw new IllegalArgumentException("Unknown click action: " + clickAction);
+    }
+
+    public static MutableComponent buildExecuteCmdLink(MutableComponent linkText, MutableComponent hoverText, String command, ClickEvent.Action eventAction, ChatFormatting color) {
+        ClickEvent clickEvent = mapActionToClickEvent(eventAction, command);
+        return linkText.setStyle(linkText.getStyle()
+                .withColor(color)
+                .withHoverEvent(new HoverEvent.ShowText(hoverText))
+                .withClickEvent(clickEvent));
+    }
+
+    public static MutableComponent buildExecuteCmdLinkWithBrackets(MutableComponent linkText, MutableComponent hoverText, String command, ClickEvent.Action eventAction, ChatFormatting color) {
+        return ComponentUtils.wrapInSquareBrackets(buildExecuteCmdLink(linkText, hoverText, command, eventAction, color));
     }
 
     public static MutableComponent buildPlayerHoverComponent(Player player) {
@@ -173,6 +192,11 @@ public class ChatComponentBuilder {
         MutableComponent bracketedText = ComponentUtils.wrapInSquareBrackets(text);
         return buildTextWithHoverMsg(bracketedText, hoverText, color);
     }
+
+    public static MutableComponent buildTextWithWhiteBracketsAndHover(MutableComponent text, MutableComponent hoverText, ChatFormatting color) {
+        return ComponentUtils.wrapInSquareBrackets(buildTextWithHoverMsg(text, hoverText, color));
+    }
+
 
     public static MutableComponent buildTextWithHoverMsg(MutableComponent text, MutableComponent hoverText, ChatFormatting color) {
         text.setStyle(text.getStyle()
@@ -275,8 +299,8 @@ public class ChatComponentBuilder {
                 break;
             }
             case DIMENSION: {
-                MutableComponent removeLink = Component.empty();
-                MutableComponent regionInfoLinkWithIndicator = Component.empty();
+                MutableComponent removeLink;
+                MutableComponent regionInfoLinkWithIndicator;
                 MutableComponent childCompInfo = Component.translatableWithFallback("cli.msg.info.dim.region.child.hover", "This is a direct child region of the Dimensional Region");
                 MutableComponent childIndicator = buildTextWithHoverAndBracketsMsg(Component.literal("*"), childCompInfo, GOLD);
                 if (parent.hasChild(region)) {
@@ -285,7 +309,7 @@ public class ChatComponentBuilder {
                     regionInfoLinkWithIndicator = Messages.substitutable("%s", buildRegionInfoLink(region));
                 }
                 removeLink = buildDimSuggestRegionRemovalLink((IMarkableRegion) region);
-                regionRemoveLink = Messages.substitutable("%s %s", removeLink, buildRegionInfoAndTpLink((IMarkableRegion) region, regionInfoLinkWithIndicator));
+                regionRemoveLink = Messages.substitutable("%s %s", removeLink, regionInfoLinkWithIndicator);
                 break;
             }
             case LOCAL: {
@@ -309,13 +333,20 @@ public class ChatComponentBuilder {
         return Messages.substitutable("%s: %s", Component.translatableWithFallback(subjectLangKey, fallback), payload);
     }
 
+    public static MutableComponent buildInfoComponent(MutableComponent subject, MutableComponent info, MutableComponent actions) {
+        return Messages.substitutable("%s: %s | %s", subject, info, actions);
+    }
+
+    public static MutableComponent buildInfoComponent(MutableComponent subject, MutableComponent content) {
+        return Messages.substitutable("%s: %s", subject, content);
+    }
 
     public static String buildExecuteCommandString(ResourceKey<Level> dim, String command) {
         return "/execute in " + dim.location() + " run " + command;
     }
 
     public static String buildTeleportCmd(ResourceKey<Level> dim, String tpSource, BlockPos target) {
-        return buildExecuteCommandString(dim, "tp " + tpSource + " " + buildBlockCoordinateStr(target));
+        return buildExecuteCommandString(dim, "tp " + tpSource + " " + commandBlockPosStr(target));
     }
 
     /**

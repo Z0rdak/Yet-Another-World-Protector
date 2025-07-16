@@ -18,6 +18,14 @@ public interface MultiLineMessage<T> {
         return new AreaInfoMessage(region);
     }
 
+    static DisplaySettingsMessage displaySettingsInfo(IMarkableRegion region) {
+        return new DisplaySettingsMessage(region);
+    }
+
+    static VisualizationOptionsMessage visualizationOptions(IMarkableRegion region) {
+        return new VisualizationOptionsMessage(region);
+    }
+
     static RegionInfoMessage regionInfo(IProtectedRegion region) {
         return new RegionInfoMessage(region);
     }

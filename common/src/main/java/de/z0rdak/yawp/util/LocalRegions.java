@@ -57,30 +57,13 @@ public final class LocalRegions {
     private static SphereRegion sphericalRegionFrom(MarkerStick marker, String regionName, Player player, ResourceKey<Level> dim) {
         List<BlockPos> blocks = marker.getMarkedBlocks();
         SphereArea sphereArea = new SphereArea(blocks.get(0), blocks.get(1));
-        if (marker.getTeleportPos() != null) {
-            return new SphereRegion(regionName, sphereArea, marker.getTeleportPos(), player, dim);
-        }
         return new SphereRegion(regionName, sphereArea, player, dim);
     }
 
     private static CuboidRegion cuboidRegionFrom(MarkerStick marker, String regionName, Player player, ResourceKey<Level> dim) {
         List<BlockPos> blocks = marker.getMarkedBlocks();
         CuboidArea cuboidArea = new CuboidArea(blocks.get(0), blocks.get(1));
-        if (marker.getTeleportPos() != null) {
-            return new CuboidRegion(regionName, cuboidArea, marker.getTeleportPos(), player, dim);
-        }
         return new CuboidRegion(regionName, cuboidArea, player, dim);
-    }
-
-    public static IMarkableRegion regionFromArea(IMarkableArea area, BlockPos tpTarget, String regionName, ResourceKey<Level> dim) {
-        switch (area.getAreaType()) {
-            case CUBOID:
-                return new CuboidRegion(regionName, (CuboidArea) area, tpTarget, null, dim);
-            case SPHERE:
-                return new SphereRegion(regionName, (SphereArea) area, tpTarget, null, dim);
-            default:
-                throw new NotImplementedException("Area type not implemented yet");
-        }
     }
 
     public static boolean hasAnyRegionWithSamePriority(IMarkableRegion region, int priority) {

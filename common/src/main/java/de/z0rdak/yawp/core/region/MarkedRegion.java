@@ -53,8 +53,9 @@ public abstract class MarkedRegion extends ProtectedRegion implements IMarkableR
                                     .forGetter(r -> MarkedAreaTypes.areaIdentifier(r.getAreaType()).toString()),
                             MarkedAreaTypes.MARKED_AREA_CODEC.fieldOf("area")
                                     .forGetter(IMarkableRegion::getArea),
-                            BlockPos.CODEC.fieldOf("tpTarget")
-                                    .forGetter(IMarkableRegion::getTpTarget),
+                            Codec.unboundedMap(Codec.STRING, TeleportAnchor.CODEC)
+                                    .optionalFieldOf("tpAnchors", Lifecycle.stable(), new HashMap<>(), Lifecycle.stable())
+                                    .forGetter(r -> r.getTpAnchors().getTpAnchors()),
                             Codec.unboundedMap(Codec.STRING, PlayerContainer.CODEC)
                                     .optionalFieldOf("groups", Lifecycle.stable(), new HashMap<>(), Lifecycle.stable())
                                     .forGetter(IMarkableRegion::getGroups),
@@ -63,15 +64,15 @@ public abstract class MarkedRegion extends ProtectedRegion implements IMarkableR
                                     .forGetter(r -> new ArrayList<>(r.getChildrenNames()))
                     )
                     .apply(instance, (name, dim, parentName, regionType, flags, isActive, isMuted,
-                                      priority, areaType, area, blockPos, groups, childrenNames) -> {
+                                      priority, areaType, area, anchors, groups, childrenNames) -> {
                         String lowerCase = areaType.toLowerCase(Locale.ROOT);
                         var areaT = AreaType.of(ResourceLocation.parse(lowerCase).getPath());
                         switch (areaT) {
                             case CUBOID -> {
-                                return new CuboidRegion(name, dim, parentName, flags, isActive, isMuted, priority, area, blockPos, groups, childrenNames);
+                                return new CuboidRegion(name, dim, parentName, flags, isActive, isMuted, priority, area, new RegionAnchors(anchors), groups, childrenNames);
                             }
                             case SPHERE -> {
-                                return new SphereRegion(name, dim, parentName, flags, isActive, isMuted, priority, area, blockPos, groups, childrenNames);
+                                return new SphereRegion(name, dim, parentName, flags, isActive, isMuted, priority, area, new RegionAnchors(anchors), groups, childrenNames);
                             }
                             default -> throw new IllegalStateException("Unexpected value: " + areaT);
                         }
@@ -82,21 +83,21 @@ public abstract class MarkedRegion extends ProtectedRegion implements IMarkableR
     protected int priority;
     protected IMarkableArea area;
     protected AreaType areaType;
-    protected BlockPos tpTarget;
+    protected RegionAnchors anchors;
 
     protected MarkedRegion(String name, ResourceKey<Level> dim, String parentName,
                            Map<String, IFlag> flags, boolean isActive, boolean isMuted,
-                           int priority, String areaType, IMarkableArea area, BlockPos blockPos,
+                           int priority, String areaType, IMarkableArea area, RegionAnchors anchors,
                            Map<String, PlayerContainer> groups, List<String> childrenNames) {
         super(name, dim, RegionType.LOCAL, null);
         this.setArea(area);
         this.setPriority(priority);
         this.areaType = AreaType.of(areaType);
         this.parentName = parentName;
+        this.anchors = anchors;
         this.setFlags(new RegionFlags(flags));
         this.setIsActive(isActive);
         this.setIsMuted(isMuted);
-        this.setTpTarget(blockPos);
         this.setGroups(groups);
         this.setChildrenNames(childrenNames);
     }
@@ -107,6 +108,7 @@ public abstract class MarkedRegion extends ProtectedRegion implements IMarkableR
         this.area = area;
         this.areaType = area.getAreaType();
         this.priority = Services.REGION_CONFIG.getDefaultPriority();
+        this.anchors = new RegionAnchors();
         if (parent != null) {
             this.setParent(parent);
         }
@@ -116,9 +118,9 @@ public abstract class MarkedRegion extends ProtectedRegion implements IMarkableR
         this(name, area, owner, dimension, null);
     }
 
-    public MarkedRegion(String name, IMarkableArea area, BlockPos tpTarget, Player owner, ResourceKey<Level> dimension) {
+    public MarkedRegion(String name, IMarkableArea area, RegionAnchors anchors, Player owner, ResourceKey<Level> dimension) {
         this(name, area, owner, dimension, null);
-        this.tpTarget = tpTarget;
+        this.anchors = anchors;
     }
 
     @Override
@@ -185,12 +187,7 @@ public abstract class MarkedRegion extends ProtectedRegion implements IMarkableR
     }
 
     @Override
-    public BlockPos getTpTarget() {
-        return tpTarget;
-    }
-
-    @Override
-    public void setTpTarget(BlockPos tpTarget) {
-        this.tpTarget = tpTarget;
+    public RegionAnchors getTpAnchors() {
+        return anchors;
     }
 }

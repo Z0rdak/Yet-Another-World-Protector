@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.api.core;
 
 import de.z0rdak.yawp.core.area.CuboidArea;
+import de.z0rdak.yawp.core.area.SphereArea;
 import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
@@ -139,6 +140,11 @@ public final class RegionManager implements IRegionManager {
         }
 
         @Override
+        public LevelRegionData getCache() {
+            return levelData;
+        }
+
+        @Override
         public boolean hasLocal(String name) {
             return levelData.hasLocal(name);
         }
@@ -201,6 +207,15 @@ public final class RegionManager implements IRegionManager {
                     .filter(r -> predicateArea.containsOther(r.getArea()))
                     .toList();
         }
+
+        @Override
+        public List<IMarkableRegion> getRegionsAround(BlockPos pos, int radius) {
+            SphereArea predicateArea = new SphereArea(pos, radius);
+            return getAllLocalRegions().stream()
+                    .filter(r -> predicateArea.intersects(r.getArea()))
+                    .toList();
+        }
+
 
         @Override
         public List<IMarkableRegion> getIntersectingRegions(BoundingBox blockBox) {

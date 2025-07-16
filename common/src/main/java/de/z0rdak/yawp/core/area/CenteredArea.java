@@ -5,8 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.*;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public abstract class CenteredArea extends MarkedArea {
 
@@ -35,7 +34,7 @@ public abstract class CenteredArea extends MarkedArea {
     }
 
     @Override
-    public List<BlockPos> markedBlocks() {
-        return Collections.singletonList(this.center);
+    public Set<BlockPos> markedBlocks() {
+        return Set.of(this.center);
     }
 }

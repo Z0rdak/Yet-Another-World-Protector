@@ -4,6 +4,7 @@ import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
+import de.z0rdak.yawp.core.area.RegionAnchors;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.group.PlayerContainer;
 import net.minecraft.core.BlockPos;
@@ -23,20 +24,16 @@ import java.util.Optional;
 public final class CuboidRegion extends MarkedRegion {
 
     public CuboidRegion(String name, CuboidArea area, ResourceKey<Level> dim) {
-        super(name, area, area.getArea().getCenter(), null, dim);
+        super(name, area, new RegionAnchors(), null, dim);
     }
 
     public CuboidRegion(String name, CuboidArea area, Player owner, ResourceKey<Level> dimension) {
-        super(name, area, area.getArea().getCenter(), owner, dimension);
-    }
-
-    public CuboidRegion(String name, CuboidArea area, BlockPos tpPos, Player owner, ResourceKey<Level> dimension) {
-        super(name, area, tpPos, owner, dimension);
+        super(name, area, new RegionAnchors(), owner, dimension);
     }
 
     public CuboidRegion(String name, ResourceKey<Level> dim, String parentName, Map<String, IFlag> flags,
-                        boolean isActive, boolean isMuted, int priority, IMarkableArea area, BlockPos blockPos,
+                        boolean isActive, boolean isMuted, int priority, IMarkableArea area, RegionAnchors anchors,
                         Map<String, PlayerContainer> groups, List<String> childrenNames){
-        super(name, dim, parentName, flags, isActive, isMuted, priority, AreaType.CUBOID.areaType, area, blockPos, groups, childrenNames);
+        super(name, dim, parentName, flags, isActive, isMuted, priority, AreaType.CUBOID.areaType, area, anchors, groups, childrenNames);
     }
 }

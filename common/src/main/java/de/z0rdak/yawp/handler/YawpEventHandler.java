@@ -99,6 +99,8 @@ public class YawpEventHandler {
 
     private static List<Entity> getEntitiesToRemove(ServerLevel level, Predicate<? super Entity> entityFilter, RegionFlag flag) {
         List<? extends Entity> entities = level.getEntities(EntityTypeTest.forClass(Entity.class), entityFilter);
+        // TODO: EntityTypeTest static where possible, to reduce load
+        // for monsters that could be Enemy.class i guess
         return entities.stream()
                 .filter(e -> !isProtectedByRegion(level, flag, e)) // That's O(enemyCount * regionCount) complexity, not considering the recursion for the flag check
                 .filter(YawpEventHandler::isNotPersistent)

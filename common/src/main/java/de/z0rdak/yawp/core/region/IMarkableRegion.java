@@ -2,6 +2,7 @@ package de.z0rdak.yawp.core.region;
 
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.IMarkableArea;
+import de.z0rdak.yawp.core.area.RegionAnchors;
 import net.minecraft.core.BlockPos;
 
 /**
@@ -21,10 +22,7 @@ public interface IMarkableRegion extends IProtectedRegion {
 
     boolean contains(BlockPos position);
 
-    BlockPos getTpTarget();
-
-    void setTpTarget(BlockPos pos);
-
+    // TODO: Limit priority overall to [0...1000]
     int getPriority();
 
     AreaType getAreaType();
@@ -33,4 +31,5 @@ public interface IMarkableRegion extends IProtectedRegion {
 
     void rename(String newName);
 
+    RegionAnchors getTpAnchors();
 }

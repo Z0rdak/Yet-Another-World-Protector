@@ -19,7 +19,9 @@ import java.util.Optional;
 
 import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
 import static de.z0rdak.yawp.util.ChatLinkBuilder.*;
+
 import static de.z0rdak.yawp.util.text.messages.multiline.RegionStateMessage.buildRegionStateLink;
+import static de.z0rdak.yawp.util.text.messages.pagination.TeleportAnchorPagination.buildRegionTeleportAnchorListLink;
 import static net.minecraft.ChatFormatting.GOLD;
 
 public class RegionInfoMessage implements MultiLineMessage<IProtectedRegion> {
@@ -168,14 +170,26 @@ public class RegionInfoMessage implements MultiLineMessage<IProtectedRegion> {
         MutableComponent header = buildRegionOverviewHeader(region);
         regionInfoLines.add(header);
 
-        // Flags: [n] | [m] flag(s)] [+]
+        // Flags: [n] responsible flag(s) | [m] flag(s)] [+]
         MutableComponent flagsText = buildInfoComponent("cli.msg.info.region.flag", "Flags", buildFlagsListLink(region));
         regionInfoLines.add(flagsText);
 
         if (region.getRegionType() == RegionType.LOCAL) {
+            var local = (IMarkableRegion) region;
             // Area: [Area]
-            MutableComponent areaText = buildInfoComponent("cli.msg.info.region.area", "Area", buildRegionAreaLink((IMarkableRegion) region));
+            MutableComponent areaText = buildInfoComponent("cli.msg.info.region.area", "Area", buildRegionAreaLink(local));
             regionInfoLines.add(areaText);
+
+            // Visualization: [Visualization] | [Settings]
+            var subject = Component.translatableWithFallback("cli.msg.info.region.visualization", "Visualization");
+            var actions = Messages.substitutable("%s | %s", buildRegionVisualizationLink(local), buildDisplaySettingsLink(local));
+            var visualization = buildInfoComponent(subject, actions);
+            regionInfoLines.add(visualization);
+
+            // Teleport Anchors: [m] teleport anchor(s) [+]
+            var tpAnchorSubject = Component.translatableWithFallback("cli.msg.info.region.tp-anchor", "Teleport Anchors");
+            var tpAnchor = buildInfoComponent(tpAnchorSubject, buildRegionTeleportAnchorListLink(local));
+            regionInfoLines.add(tpAnchor);
         }
 
         // Groups: [owners], [members], [<listGroups>]

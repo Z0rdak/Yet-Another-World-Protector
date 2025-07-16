@@ -1,6 +1,7 @@
 package de.z0rdak.yawp;
 
 import de.z0rdak.yawp.api.events.flag.ForgeFlagEvent;
+import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.commands.CommandRegistry;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.RegionFlag;
@@ -54,6 +55,7 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
 
     @Override
     public void registerCommands() {
+        //VisualizationManager.initServerInstance(event.getServer());
         MinecraftForge.EVENT_BUS.addListener((RegisterCommandsEvent event) -> CommandRegistry.registerCommands(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection()));
     }
 

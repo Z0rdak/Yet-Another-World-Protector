@@ -7,45 +7,58 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.api.core.RegionManager;
+import de.z0rdak.yawp.api.core.RegionManager;
+import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
+import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.commands.arguments.region.AddRegionChildArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RemoveRegionChildArgumentType;
 import de.z0rdak.yawp.constants.Constants;
-import de.z0rdak.yawp.core.area.AreaType;
-import de.z0rdak.yawp.core.area.CuboidArea;
-import de.z0rdak.yawp.core.area.IMarkableArea;
-import de.z0rdak.yawp.core.area.SphereArea;
+import de.z0rdak.yawp.core.area.*;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.data.region.LevelRegionData;
 import de.z0rdak.yawp.platform.Services;
+import de.z0rdak.yawp.util.ChatLinkBuilder;
 import de.z0rdak.yawp.util.LocalRegions;
 import de.z0rdak.yawp.util.text.messages.multiline.MultiLineMessage;
+import de.z0rdak.yawp.util.text.messages.pagination.InvalidPageNumberException;
+import de.z0rdak.yawp.util.text.messages.pagination.TeleportAnchorPagination;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Relative;
+import net.minecraft.world.level.block.AirBlock;
+import net.minecraft.world.level.block.Block;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
+import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
+import static de.z0rdak.yawp.api.MessageSender.sendError;
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.CommandUtil.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.constants.Constants.MAX_BUILD_LIMIT;
 import static de.z0rdak.yawp.constants.Constants.MIN_BUILD_LIMIT;
+import static de.z0rdak.yawp.util.ChatComponentBuilder.shortBlockPos;
 import static de.z0rdak.yawp.util.ChatLinkBuilder.*;
-import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 
 
 class RegionCommands {
@@ -106,40 +119,237 @@ class RegionCommands {
                                                                         .executes(ctx -> setCuboidArea(ctx, getRegionArgument(ctx), BlockPosArgument.getSpawnablePos(ctx, POS1.toString()), BlockPosArgument.getSpawnablePos(ctx, POS2.toString()))))))
                                                 .then(Commands.literal(AreaType.SPHERE.areaType)
                                                         .then(Commands.argument(CENTER_POS.toString(), BlockPosArgument.blockPos())
-                                                                .then(Commands.argument(RADIUS_POS.toString(), BlockPosArgument.blockPos())
-                                                                        .executes(ctx -> setSphereArea(ctx, getRegionArgument(ctx), BlockPosArgument.getSpawnablePos(ctx, CENTER_POS.toString()), BlockPosArgument.getSpawnablePos(ctx, RADIUS_POS.toString()))))))
-                                                .then(Commands.literal(AreaType.SPHERE.areaType)
-                                                        .then(Commands.argument(CENTER_POS.toString(), BlockPosArgument.blockPos())
                                                                 .then(Commands.argument(RADIUS.toString(), IntegerArgumentType.integer(0))
                                                                         .executes(ctx -> setSphereArea(ctx, getRegionArgument(ctx), BlockPosArgument.getSpawnablePos(ctx, CENTER_POS.toString()), IntegerArgumentType.getInteger(ctx, RADIUS.toString()))))))
                                         )
                                         .then(literal(EXPAND)
                                                 .then(Commands.literal(AreaType.CUBOID.areaType)
                                                         .executes(ctx -> expandCuboid(ctx, getRegionArgument(ctx), MIN_BUILD_LIMIT, MAX_BUILD_LIMIT))
-                                                        .then(Commands.argument(Y_MIN.toString(), IntegerArgumentType.integer(MIN_BUILD_LIMIT, MAX_BUILD_LIMIT))
-                                                                .then(Commands.argument(Y_MAX.toString(), IntegerArgumentType.integer(MIN_BUILD_LIMIT, MAX_BUILD_LIMIT))
+                                                        .then(Commands.argument(Y_MIN.toString(), IntegerArgumentType.integer())
+                                                                .then(Commands.argument(Y_MAX.toString(), IntegerArgumentType.integer())
                                                                         .executes(ctx -> expandCuboid(ctx, getRegionArgument(ctx), IntegerArgumentType.getInteger(ctx, Y_MIN.toString()), IntegerArgumentType.getInteger(ctx, Y_MAX.toString()))))))
                                                 .then(Commands.literal(AreaType.SPHERE.areaType)
                                                         .executes(ctx -> expandSphere(ctx, getRegionArgument(ctx), 1))
                                                         .then(Commands.argument(EXPANSION.toString(), IntegerArgumentType.integer())
-                                                                .executes(ctx -> expandSphere(ctx, getRegionArgument(ctx), IntegerArgumentType.getInteger(ctx, EXPANSION.toString())))))
+                                                               .executes(ctx -> expandSphere(ctx, getRegionArgument(ctx), IntegerArgumentType.getInteger(ctx, EXPANSION.toString())))))                                        )
+                                )
+                                .then(literal(LIST)
+                                        .then(literal(TP_ANCHOR)
+                                                .executes(ctx -> promptTeleportAnchorPagination(ctx, getRegionArgument(ctx), 0))
+                                                .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
+                                                        .executes(ctx -> promptTeleportAnchorPagination(ctx, getRegionArgument(ctx), getPageNoArgument(ctx)))
+                                                )
+                                        )
+                                )
+                                .then(literal(ADD)
+                                        .then(literal(TP_ANCHOR)
+                                                .then(Commands.argument(NAME.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(List.of("tpAnchor-name"), builder))
+                                                        .then(Commands.argument(TP_ANCHOR.toString(), BlockPosArgument.blockPos())
+                                                                .executes(ctx -> updateTeleportAnchor(ctx, getRegionArgument(ctx), getTeleportAnchorPosArgument(ctx), getTeleportAnchorNameArgument(ctx)))
+                                                        )
+                                                )
+                                        )
+                                )
+                                .then(literal(REMOVE)
+                                        .then(literal(TP_ANCHOR)
+                                                .then(Commands.argument(NAME.toString(), StringArgumentType.word())
+                                                        .executes(ctx -> removeTeleportAnchor(ctx, getRegionArgument(ctx), getTeleportAnchorNameArgument(ctx)))
+                                                )
+                                        )
+                                )
+                                .then(literal(TP_ANCHOR)
+                                        .then(literal(RENAME)
+                                                .then(Commands.argument(NAME.toString(), StringArgumentType.word())
+                                                        .then(Commands.argument(RENAME.toString(), StringArgumentType.word())
+                                                                .executes(ctx -> renameTeleportAnchor(ctx, getRegionArgument(ctx), getTeleportAnchorNameArgument(ctx), getNewTeleportAnchorNameArgument(ctx)))
+                                                        )
+                                                )
+                                        )
+                                        .then(literal(SET)
+                                                .then(Commands.argument(NAME.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(List.of("tpAnchor-name"), builder))
+                                                        .then(Commands.argument(TP_ANCHOR.toString(), BlockPosArgument.blockPos())
+                                                                .executes(ctx -> updateTeleportAnchor(ctx, getRegionArgument(ctx), getTeleportAnchorPosArgument(ctx), getTeleportAnchorNameArgument(ctx)))
+                                                        )
+                                                )
+                                        )
+                                        .then(literal(HIDE)
+                                                .then(Commands.argument(TP_ANCHOR.toString(), StringArgumentType.word())
+                                                        .executes(ctx -> hideTpAnchor(ctx, getRegionArgument(ctx), StringArgumentType.getString(ctx, TP_ANCHOR.toString())))
+                                                )
+                                        )
+                                        .then(literal(SHOW)
+                                                .then(Commands.argument(TP_ANCHOR.toString(), StringArgumentType.word())
+                                                        .executes(ctx -> showTpAnchor(ctx, getRegionArgument(ctx), StringArgumentType.getString(ctx, TP_ANCHOR.toString())))
+                                                )
                                         )
                                         .then(literal(TELEPORT)
-                                                .then(Commands.literal(SET.toString())
-                                                        .then(Commands.argument(TARGET.toString(), BlockPosArgument.blockPos())
-                                                                .executes(ctx -> setTeleportPos(ctx, getRegionArgument(ctx), BlockPosArgument.getSpawnablePos(ctx, TARGET.toString())))))
+                                                .then(Commands.argument(TP_ANCHOR.toString(), StringArgumentType.word())
+                                                        .executes(ctx -> teleport(ctx, getRegionArgument(ctx), StringArgumentType.getString(ctx, TP_ANCHOR.toString())))
+                                                        .then(Commands.argument(PLAYER.toString(), EntityArgument.player())
+                                                                .executes(ctx -> teleport(ctx, getRegionArgument(ctx), StringArgumentType.getString(ctx, TP_ANCHOR.toString()), getPlayerArgument(ctx)))
+                                                        )
+                                                )
                                         )
-                                        .then(literal(TELEPORT)
-                                                .executes(ctx -> teleport(ctx, getRegionArgument(ctx)))
-                                                .then(Commands.argument(PLAYER.toString(), EntityArgument.player())
-                                                        .executes(ctx -> teleport(ctx, getRegionArgument(ctx), getPlayerArgument(ctx)))))
-                                ).then(literal(RENAME)
+                                )
+                                .then(literal(RENAME)
                                         .then(Commands.argument(NAME.toString(), StringArgumentType.word())
                                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Collections.singletonList(getRegionArgument(ctx).getName()), builder))
-                                                .executes(ctx -> renameRegion(ctx, getRegionArgument(ctx), getRegionNameArgument(ctx), getLevelDataArgument(ctx))))
+                                                .executes(ctx -> renameRegion(ctx, getRegionArgument(ctx), getRegionNameArgument(ctx), getLevelDataArgument(ctx)))
+                                        )
+                                )
+                                .then(literal(SHOW)
+                                        .executes(ctx -> promptVisualizationOptions(ctx, getRegionArgument(ctx)))
+                                        .then(literal(LOCAL)
+                                            .executes(ctx -> showRegion(ctx, getRegionArgument(ctx), DisplayType.FRAME))
+                                            .then(Commands.argument(STYLE.toString(), StringArgumentType.word())
+                                                    .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(DisplayType.entries(), builder))
+                                                    .executes(ctx -> showRegion(ctx, getRegionArgument(ctx), getDisplayTypeArgument(ctx)))
+                                                    .then(Commands.argument(BLOCK.toString(), ResourceLocationArgument.id())
+                                                            .executes(ctx -> showRegion(ctx, getRegionArgument(ctx),
+                                                                    getDisplayTypeArgument(ctx),
+                                                                    getDisplayBlockArgument(ctx)))
+                                                            .then(Commands.argument(GLOW.toString(), BoolArgumentType.bool())
+                                                                    .executes(ctx -> showRegion(ctx, getRegionArgument(ctx),
+                                                                            getDisplayTypeArgument(ctx),
+                                                                            getDisplayBlockArgument(ctx),
+                                                                            getDisplayGlowArgument(ctx)))
+                                                                    .then(Commands.argument(LIGHT_LEVEL.toString(), IntegerArgumentType.integer(0, 15))
+                                                                            .executes(ctx -> showRegion(ctx, getRegionArgument(ctx),
+                                                                                    getDisplayTypeArgument(ctx),
+                                                                                    getDisplayBlockArgument(ctx),
+                                                                                    getDisplayGlowArgument(ctx),
+                                                                                    IntegerArgumentType.getInteger(ctx, LIGHT_LEVEL.toString())))
+                                                                    )
+                                                            )
+                                                    )
+                                            )
+                                        )
+                                        .then(literal(HIERARCHY)
+                                                .executes(ctx -> showRegionHierarchy(ctx, getRegionArgument(ctx), DisplayType.FRAME, true))
+                                                .then(Commands.argument(STYLE.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(DisplayType.entries(), builder))
+                                                        .executes(ctx -> showRegionHierarchy(ctx, getRegionArgument(ctx), getDisplayTypeArgument(ctx), false))
+                                                        .then(Commands.argument(RECURSIVE.toString(), BoolArgumentType.bool())
+                                                                .executes(ctx -> showRegionHierarchy(ctx, getRegionArgument(ctx), getDisplayTypeArgument(ctx), BoolArgumentType.getBool(ctx, RECURSIVE.toString())))
+                                                        )
+                                                )
+                                        )
+                                        .then(literal(INTERSECTING)
+                                                .executes(ctx -> showRegionsIntersecting(ctx, getRegionArgument(ctx), DisplayType.FRAME))
+                                                .then(Commands.argument(STYLE.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(DisplayType.entries(), builder))
+                                                        .executes(ctx -> showRegionsIntersecting(ctx, getRegionArgument(ctx), getDisplayTypeArgument(ctx)))
+                                                )
+                                        )
+                                )
+                                .then(literal(HIDE)
+                                        .then(literal(LOCAL)
+                                                .executes(ctx -> hideRegion(ctx, getRegionArgument(ctx), DisplayType.FRAME))
+                                                .then(Commands.argument(STYLE.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(DisplayType.entries(), builder))
+                                                        .executes(ctx -> hideRegion(ctx, getRegionArgument(ctx), getDisplayTypeArgument(ctx)))
+                                                )
+                                        )
+                                        .then(literal(HIERARCHY)
+                                                .executes(ctx -> hideRegionHierarchy(ctx, getRegionArgument(ctx), DisplayType.FRAME, true))
+                                                .then(Commands.argument(STYLE.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(DisplayType.entries(), builder))
+                                                        .executes(ctx -> hideRegionHierarchy(ctx, getRegionArgument(ctx), getDisplayTypeArgument(ctx), false))
+                                                        .then(Commands.argument(RECURSIVE.toString(), BoolArgumentType.bool())
+                                                                .executes(ctx -> hideRegionHierarchy(ctx, getRegionArgument(ctx), getDisplayTypeArgument(ctx), BoolArgumentType.getBool(ctx, RECURSIVE.toString())))
+                                                        )
+                                                )
+                                        )
+                                        .then(literal(INTERSECTING)
+                                                .executes(ctx -> hideRegionsIntersecting(ctx, getRegionArgument(ctx), DisplayType.FRAME))
+                                                .then(Commands.argument(STYLE.toString(), StringArgumentType.word())
+                                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(DisplayType.entries(), builder))
+                                                        .executes(ctx -> hideRegionsIntersecting(ctx, getRegionArgument(ctx), getDisplayTypeArgument(ctx)))
+                                                )
+                                        )
+                                )
+                                .then(literal(DISPLAY)
+                                        .executes(ctx -> promptDisplaySettings(ctx, getRegionArgument(ctx)))
+                                        .then(literal(BLOCK)
+                                                .then(Commands.argument(BLOCK.toString(), ResourceLocationArgument.id())
+                                                        .executes(ctx -> setDisplayBlock(ctx, getRegionArgument(ctx), getDisplayBlockArgument(ctx)))
+                                                )
+                                        )
+                                        .then(literal(GLOW)
+                                                .then(Commands.argument(GLOW.toString(), BoolArgumentType.bool())
+                                                        .executes(ctx -> setDisplayGlow(ctx, getRegionArgument(ctx), getDisplayGlowArgument(ctx)))
+                                                )
+                                        )
+                                        .then(literal(LIGHT_LEVEL)
+                                                .then(Commands.argument(LIGHT_LEVEL.toString(), IntegerArgumentType.integer(0, 15))
+                                                         .executes(ctx -> setDisplayLightLevel(ctx, getRegionArgument(ctx), IntegerArgumentType.getInteger(ctx, LIGHT_LEVEL.toString())))
+                                                )
+                                        )
+                                        .then(literal(RESET)
+                                                .executes(ctx -> resetDisplaySettings(ctx, getRegionArgument(ctx)))
+                                        )
                                 )
                         )
                 );
+    }
+
+    private static int setDisplayLightLevel(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, int lightLevel) {
+        IMarkableArea area = region.getArea();
+        area.getDisplay().setLightLevel(lightLevel);
+        RegionManager.get().save();
+        // TODO: Trigger update event instead
+        VisualizationManager.refreshDisplay(region);
+        // TODO: I18n
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Set light level for area display for region %s to '%s'", "Set display light level for %s to '%s'", buildRegionInfoLink(region), lightLevel));
+        return 0;
+    }
+
+    public static int resetDisplaySettings(CommandContext<CommandSourceStack> ctx, IMarkableRegion region) {
+        IMarkableArea area = region.getArea();
+        area.getDisplay().setHasGlow(BlockDisplayProperties.DEFAULT_GLOW);
+        area.getDisplay().setLightLevel(BlockDisplayProperties.DEFAULT_LIGHT_LEVEL);
+        RegionManager.get().save();
+        // TODO: Trigger update event instead
+        VisualizationManager.refreshDisplay(region);
+        // TODO: I18n
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Reset display settings for region %s", "Reset display settings for %s", buildRegionInfoLink(region)));
+        return 0;
+    }
+
+    public static int setDisplayGlow(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, boolean hasGlow) {
+        IMarkableArea area = region.getArea();
+        BlockDisplayProperties display = area.getDisplay();
+        if (display.hasGlow() != hasGlow) {
+            display.setHasGlow(hasGlow);
+            RegionManager.get().save();
+            // TODO: Trigger update event instead
+            VisualizationManager.refreshDisplay(region);
+            // TODO: I18n
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Set display glow effect for region %s to '%s'", "Set display glow effect for %s to '%s'", buildRegionInfoLink(region), Boolean.toString(hasGlow)));
+            return 0;
+        }
+        // else silently just do nothing :-)
+        return 1;
+    }
+
+
+    public static int setDisplayBlock(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, ResourceLocation blockRl) {
+        Optional<Holder.Reference<Block>> block = BuiltInRegistries.BLOCK.get(blockRl);
+        if (block.isPresent() && block.get().value() instanceof AirBlock) {
+            // TODO: I18n
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Not found", "Not found", buildRegionInfoLink(region), blockRl.toString()));
+            return -1;
+        }
+        IMarkableArea area = region.getArea();
+        area.getDisplay().setBlockRl(blockRl);
+        RegionManager.get().save();
+        // TODO: Trigger update
+        VisualizationManager.refreshDisplay(region);
+        // TODO: I18n
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Set display block for region %s to '%s'", "Set display block for %s to '%s'", buildRegionInfoLink(region), blockRl.toString()));
+        return 0;
     }
 
     private static int expandSphere(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, int expansion) {
@@ -222,7 +432,11 @@ class RegionCommands {
             }
             region.setArea(area);
             RegionManager.get().save();
-            MutableComponent updateAreaMsg = Component.translatableWithFallback("cli.msg.info.region.area.area.update", "Updated %s for region %s", buildRegionAreaLink(region), buildRegionInfoLink(region));
+
+            // TODO: Use event to update visualization. But I am currently to lazy to add event handlers for each modloader platform
+            VisualizationManager.updateRegionDisplay(region);
+
+            MutableComponent updateAreaMsg = Component.translatableWithFallback("cli.msg.info.region.area.area.update", "Updated %s for %s", buildRegionAreaLink(region), buildRegionInfoLink(region));
             sendCmdFeedback(ctx.getSource(), updateAreaMsg);
             return 0;
         } catch (Exception ex) {
@@ -360,6 +574,147 @@ class RegionCommands {
         }
     }
 
+    public static int showRegion(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, DisplayType displayType) {
+        return showRegion(ctx, region, displayType, region.getArea().getDisplay().blockRl());
+    }
+
+    public static int showRegion(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, DisplayType displayType, ResourceLocation blockRl) {
+        return showRegion(ctx, region, displayType, blockRl, region.getArea().getDisplay().hasGlow());
+    }
+
+    public static int showRegion(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, DisplayType displayType, ResourceLocation blockRl, boolean glow) {
+        return showRegion(ctx, region, displayType, blockRl, glow, region.getArea().getDisplay().lightLevel());
+    }
+
+    public static int showRegion(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, DisplayType displayType, ResourceLocation blockRl, boolean glow, int lightLevel) {
+        BlockDisplayProperties displayProperties = new BlockDisplayProperties(blockRl, glow, lightLevel);
+        VisualizationManager.show(region, displayType, displayProperties);
+        // TODO: Feedback?
+        return 0;
+    }
+
+    public static int hideRegion(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, DisplayType displayType) {
+        VisualizationManager.hide(region, displayType);
+        // TODO: Feedback?
+        return 0;
+    }
+
+    public static int showRegionsIntersecting(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, DisplayType  displayType) {
+        VisualizationManager.showIntersecting(region, displayType);
+        return 0;
+    }
+
+    public static int showRegionHierarchy(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, DisplayType displayType, boolean recursive) {
+        VisualizationManager.showHierarchy(region, displayType, recursive);
+        return 0;
+    }
+
+    public static int hideRegionHierarchy(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, DisplayType displayType, boolean recursive) {
+        VisualizationManager.hideHierarchy(region, displayType, recursive);
+        return 0;
+    }
+
+    public static int hideRegionsIntersecting(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, DisplayType displayType) {
+        VisualizationManager.hideIntersecting(region, displayType);
+        return 0;
+    }
+
+    private static int promptDisplaySettings(CommandContext<CommandSourceStack> ctx, IMarkableRegion region) {
+        MultiLineMessage.send(ctx.getSource(), MultiLineMessage.displaySettingsInfo(region));
+        return 0;
+    }
+
+    private static int promptVisualizationOptions(CommandContext<CommandSourceStack> ctx, IMarkableRegion region) {
+        MultiLineMessage.send(ctx.getSource(), MultiLineMessage.visualizationOptions(region));
+        return 0;
+    }
+
+    private static int promptTeleportAnchorPagination(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, int pageNo) {
+        try {
+            int paginationSize = Services.REGION_CONFIG.getPaginationSize();
+            TeleportAnchorPagination tpAnchorPagination = new TeleportAnchorPagination(region, pageNo, paginationSize);
+            MultiLineMessage.send(ctx.getSource(), tpAnchorPagination);
+        } catch (InvalidPageNumberException e) {
+            sendError(ctx.getSource(), e.getError());
+            return -1;
+        }
+        return 0;
+    }
+
+    private static int updateTeleportAnchor(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, BlockPos pos, String name) {
+        RegionAnchors tpAnchors = region.getTpAnchors();
+        var hasAnchor = tpAnchors.hasAnchor(name);
+        if (!hasAnchor && !isValidName(name)) {
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.fail-msg.invalid-name", "Teleport Anchor name is invalid. Must be alphanumeric and between 3 and 50 letters.", name, buildRegionInfoLink(region)));
+            return -1;
+        }
+        if (!region.getArea().contains(pos)) {
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.fail-msg.not-contained", "Teleport Anchor pos must be inside the region.", name, buildRegionInfoLink(region)));
+            return -1;
+        }
+        if (tpAnchors.getTpAnchor(name).getPos().equals(pos)) {
+            // they are the same
+            return 0;
+        }
+        tpAnchors.addOrUpdate(name, pos);
+        RegionManager.get().save();
+
+        var anchor = tpAnchors.getTpAnchor(name);
+        VisualizationManager.updateTpAnchor(region, anchor);
+        var blockTpLink = TeleportAnchorPagination.buildTeleportToAnchorLink(region, anchor);
+        if (hasAnchor) {
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.updated.msg", "Updated position of '%s' to %s", name, blockTpLink));
+        } else {
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.added.msg", "Added new anchor '%s' at %s", name, blockTpLink));
+        }
+        return 0;
+    }
+
+    private static int removeTeleportAnchor(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, String name) {
+        RegionAnchors tpAnchors = region.getTpAnchors();
+        if (!tpAnchors.hasAnchor(name)) {
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.fail-msg.not-existent", "Teleport anchor '%s' does not exist in %s", name, buildRegionInfoLink(region)));
+            return -1;
+        }
+        TeleportAnchor anchor = tpAnchors.getTpAnchor(name);
+        tpAnchors.removeTpAnchor(name);
+        RegionManager.get().save();
+        // TODO: Trigger update - if tpAnchor is currently visualized, it should be removed
+        var blockTpLink = ChatLinkBuilder.buildDimensionalBlockTpLink(region.getDim(), anchor.getPos(), Component.literal(shortBlockPos(anchor.getPos())));
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.removed.msg", "Removed teleport anchor '%s' (at %s ) from %s", name, blockTpLink, buildRegionInfoLink(region)));
+        return 0;
+    }
+
+    public static boolean isValidName(String name) {
+        return name != null
+                && name.length() >= 4
+                && name.length() <= 50
+                && name.matches("^[a-zA-Z0-9][a-zA-Z0-9_-]*$");
+    }
+
+    private static int renameTeleportAnchor(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, String name, String newName) {
+        if (!isValidName(name) || !isValidName(newName)) {
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.fail-msg.invalid-name", "Teleport Anchor name is invalid. Must be alphanumeric and between 3 and 50 letters.", name, buildRegionInfoLink(region)));
+            return -1;
+        }
+        RegionAnchors tpAnchors = region.getTpAnchors();
+        if (!tpAnchors.hasAnchor(name)) {
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.fail-msg.not-existent", "Teleport anchor '%s' does not exist in %s", name, buildRegionInfoLink(region)));
+            return -1;
+        }
+        if (tpAnchors.hasAnchor(newName)) {
+            TeleportAnchor anchor = tpAnchors.getTpAnchor(newName);
+            var blockTpLink = ChatLinkBuilder.buildDimensionalBlockTpLink(region.getDim(), anchor.getPos(), Component.literal(shortBlockPos(anchor.getPos())));
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.fail-msg.already-present", "Teleport anchor '%s' %s is already defined in %s", name, blockTpLink, buildRegionInfoLink(region)));
+            return 1;
+        }
+        tpAnchors.rename(name, newName);
+        RegionManager.get().save();
+        // TODO: Trigger update - if tpAnchor is currently visualized, it should be removed and displayed with new name
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.renamed.msg", "Renamed teleport anchor '%s' to '%s'", name, newName));
+        return 0;
+    }
+
     /**
      * Prompt region area properties like teleport location and area.
      * == Area for [<region>]  ==
@@ -373,46 +728,67 @@ class RegionCommands {
         return 0;
     }
 
-    private static int teleport(CommandContext<CommandSourceStack> ctx, IMarkableRegion region) {
+    private static int teleport(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, String tpAnchorName) {
+        if (!region.getTpAnchors().hasAnchor(tpAnchorName)) {
+            // TODO
+            sendCmdFeedback(ctx.getSource(), Component.literal("TODO"));
+            return -1;
+        }
         try {
-            ServerPlayer player = ctx.getSource().getPlayerOrException();
-            return teleport(ctx, region, player);
+            ServerPlayer self = ctx.getSource().getPlayerOrException();
+            return teleport(ctx, region, tpAnchorName, self);
         } catch (CommandSyntaxException e) {
-            Constants.LOGGER.warn("Unable to teleport command source to region. Most likely not a player");
+            Constants.LOGGER.warn("Unable to teleport command source to region. Can only be executed by a player");
+            sendCmdFeedback(ctx.getSource(), Component.literal("TODO"));
             return -1;
         }
     }
 
-    private static int teleport(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, ServerPlayer playerToTeleport) {
+    private static int teleport(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, String tpAnchorName, ServerPlayer playerToTeleport) {
+        TeleportAnchor tpAnchor = region.getTpAnchors().getTpAnchor(tpAnchorName);
+        BlockPos tpPos = tpAnchor.getPos();
         try {
             ServerPlayer player = ctx.getSource().getPlayerOrException();
             ServerLevel level = ctx.getSource().getServer().getLevel(region.getDim());
             if (level != null) {
-                player.teleportTo(level, region.getTpTarget().getX(), region.getTpTarget().getY(), region.getTpTarget().getZ(), Relative.ROTATION, player.getYRot(), player.getXRot(), true);
+                player.teleportTo(level, tpPos.getX(), tpPos.getY(), tpPos.getZ(), Relative.ROTATION, player.getYRot(), player.getXRot(), true);
                 return 0;
             } else {
                 Constants.LOGGER.error("Error executing teleport command. Level is null.");
+                sendCmdFeedback(ctx.getSource(), Component.literal("TODO"));
                 return -1;
             }
         } catch (CommandSyntaxException e) {
             ServerLevel level = ctx.getSource().getServer().getLevel(region.getDim());
             if (level != null) {
-                playerToTeleport.teleportTo(level, region.getTpTarget().getX(), region.getTpTarget().getY(), region.getTpTarget().getZ(), Relative.ROTATION, playerToTeleport.getYRot(), playerToTeleport.getXRot(), true);
+                playerToTeleport.teleportTo(level, tpPos.getX(), tpPos.getY(), tpPos.getZ(), Relative.ROTATION, playerToTeleport.getYRot(), playerToTeleport.getXRot(), true);
                 return 0;
             }
             Constants.LOGGER.warn("Error executing teleport command.");
+            sendCmdFeedback(ctx.getSource(), Component.literal("TODO"));
             return -1;
         }
     }
 
-    private static int setTeleportPos(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, BlockPos target) {
-        if (!region.getTpTarget().equals(target)) {
-            region.setTpTarget(target);
-            RegionManager.get().save();
-            MutableComponent newTpTargetLink = buildDimensionalBlockTpLink(region.getDim(), target);
-            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.area.tp.set.msg", "Set new teleport anchor for %s to %s", buildRegionInfoLink(region), newTpTargetLink));
-            return 0;
+    private static int showTpAnchor(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, String tpAnchorName) {
+        if (!region.getTpAnchors().hasAnchor(tpAnchorName)) {
+            // TODO
+            sendCmdFeedback(ctx.getSource(), Component.literal("TODO"));
+            return -1;
         }
-        return 1;
+        TeleportAnchor tpAnchor = region.getTpAnchors().getTpAnchor(tpAnchorName);
+        VisualizationManager.showTpAnchor(region, tpAnchor);
+        return 0;
+    }
+
+    private static int hideTpAnchor(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, String tpAnchorName) {
+        if (!region.getTpAnchors().hasAnchor(tpAnchorName)) {
+            // TODO
+            sendCmdFeedback(ctx.getSource(), Component.literal("TODO"));
+            return -1;
+        }
+        TeleportAnchor tpAnchor = region.getTpAnchors().getTpAnchor(tpAnchorName);
+        VisualizationManager.hideTpAnchor(region, tpAnchor);
+        return 0;
     }
 }

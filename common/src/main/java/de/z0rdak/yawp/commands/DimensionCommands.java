@@ -11,6 +11,7 @@ import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
 import de.z0rdak.yawp.commands.arguments.region.ContainingOwnedRegionArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
+import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.SphereArea;
@@ -30,14 +31,22 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.commands.data.EntityDataAccessor;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
+import static de.z0rdak.yawp.api.visualization.VisualizationManager.REGION_BLOCK_DISPLAY_TAG;
+import static de.z0rdak.yawp.api.visualization.VisualizationManager.REGION_TEXT_DISPLAY_TAG;
 import static de.z0rdak.yawp.commands.CommandUtil.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
@@ -71,6 +80,10 @@ class DimensionCommands {
                         .then(buildAddSubCommand((ctx) -> getLevelDataArgument(ctx).getDim()))
                         .then(buildRemoveSubCommand((ctx) -> getLevelDataArgument(ctx).getDim()))
                         .then(buildCopySubCommand((ctx) -> getLevelDataArgument(ctx).getDim()))
+                        .then(literal(NUKE_DISPLAY_ENTITIES)
+                                .executes(ctx -> nukeDisplayEntities(ctx, ctx.getSource().getLevel()))
+                                .then(Commands.argument(DIM.toString(), DimensionArgument.dimension())
+                                        .executes(ctx -> nukeDisplayEntities(ctx, DimensionArgument.getDimension(ctx, DIM.toString())))))
                         .then(literal(LIST)
                                 .then(literal(LOCAL)
                                         .executes(ctx -> promptDimensionRegionList(ctx, getLevelDataArgument(ctx), 0))
@@ -115,9 +128,6 @@ class DimensionCommands {
                                 .then(literal(CommandConstants.LOCAL)
                                         .then(Commands.argument(CommandConstants.NAME.toString(), StringArgumentType.word())
                                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Collections.singletonList(getRandomExample()), builder))
-                                                //.then(Commands.argument(AREA.toString(), StringArgumentType.word())
-                                                //        .suggests((ctx, builder) -> AreaArgumentType.areaType().listSuggestions(ctx, builder))
-                                                //        .executes(ctx -> createRegion(ctx.getSource(), getRegionNameArgument(ctx), getDimCacheArgument(ctx), getAreaTypeArgument(ctx))))
                                                 .then(Commands.literal(AreaType.CUBOID.areaType)
                                                         .then(Commands.argument(POS1.toString(), BlockPosArgument.blockPos())
                                                                 .then(Commands.argument(POS2.toString(), BlockPosArgument.blockPos())
@@ -130,20 +140,6 @@ class DimensionCommands {
                                                                                         BlockPosArgument.getSpawnablePos(ctx, POS1.toString()),
                                                                                         BlockPosArgument.getSpawnablePos(ctx, POS2.toString()), getContainingOwnedRegionArgument(ctx))))))
                                                 )
-                                                /* Note: Disabled for now because in conflicts with the 2nd option where only the radius is provided.
-                                                .then(Commands.literal(AreaType.SPHERE.areaType)
-                                                        .then(Commands.argument(CENTER_POS.toString(), BlockPosArgument.blockPos())
-                                                                .then(Commands.argument(RADIUS_POS.toString(), BlockPosArgument.blockPos())
-                                                                        .executes(ctx -> createSphereRegion(ctx, getRegionNameArgument(ctx), getDimCacheArgument(ctx),
-                                                                                BlockPosArgument.getSpawnablePos(ctx, CENTER_POS.toString()),
-                                                                                BlockPosArgument.getSpawnablePos(ctx, RADIUS_POS.toString()), null))
-                                                                        .then(Commands.argument(CommandConstants.PARENT.toString(), StringArgumentType.word())
-                                                                                .suggests((ctx, builder) -> ContainingOwnedRegionArgumentType.owningRegions().listSuggestions(ctx, builder))
-                                                                                .executes(ctx -> createSphereRegion(ctx, getRegionNameArgument(ctx), getDimCacheArgument(ctx),
-                                                                                        BlockPosArgument.getSpawnablePos(ctx, CENTER_POS.toString()),
-                                                                                        BlockPosArgument.getSpawnablePos(ctx, RADIUS_POS.toString()), getContainingOwnedRegionArgument(ctx))))))
-                                                )
-                                                */
                                                 .then(Commands.literal(AreaType.SPHERE.areaType)
                                                         .then(Commands.argument(CENTER_POS.toString(), BlockPosArgument.blockPos())
                                                                 .then(Commands.argument(RADIUS.toString(), IntegerArgumentType.integer(0))
@@ -166,6 +162,19 @@ class DimensionCommands {
                                         .executes(ctx -> resetLocalRegions(ctx, getLevelDataArgument(ctx))))
                         )
                 );
+    }
+
+    private static int nukeDisplayEntities(CommandContext<CommandSourceStack> ctx, ServerLevel level) {
+        var entities = level.getEntities(EntityTypeTest.forClass(Display.class), (entity) -> {
+            boolean containsTextTag = entity.getTags().contains(REGION_TEXT_DISPLAY_TAG.toString());
+            boolean containsBlockTag = entity.getTags().contains(REGION_BLOCK_DISPLAY_TAG.toString());
+            return containsTextTag || containsBlockTag;
+        });
+        var entityAmount = entities.size();
+        entities.forEach(e -> e.remove(Entity.RemovalReason.DISCARDED));
+        // TODO: I18n
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Nuked all (%s) yawp entities in '%s'", "Nuked all (%s) yawp entities in '%s'", entityAmount, level.dimension().location().toString()));
+        return 0;
     }
 
 
@@ -258,11 +267,29 @@ class DimensionCommands {
         levelData.addLocal(parent, region);
         LocalRegions.ensureHigherRegionPriorityFor(region, Services.REGION_CONFIG.getDefaultPriority());
         RegionManager.get().save();
-        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.success", "Successfully created region %s (with parent %s)", ChatLinkBuilder.buildRegionInfoLink(region), ChatLinkBuilder.buildRegionInfoLink(parent)));
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.success", "Successfully created region %s (parent: %s)", ChatLinkBuilder.buildRegionInfoLink(region), ChatLinkBuilder.buildRegionInfoLink(parent)));
         return 0;
     }
 
-    private static int createCuboidRegion(CommandContext<CommandSourceStack> ctx, String regionName, LevelRegionData levelData, BlockPos pos1, BlockPos pos2, @Nullable IProtectedRegion parentRegion) {
+    public static int createCuboidRegion(CommandContext<CommandSourceStack> ctx, String regionName, BlockPos pos1, BlockPos pos2, @Nullable IProtectedRegion parentRegion) {
+        var dimCache = RegionManager.get().getLevelRegionData(ctx.getSource().getLevel().dimension());
+        if (dimCache.isPresent()) {
+            return createCuboidRegion(ctx, regionName, dimCache.get(), pos1, pos2, parentRegion);
+        }
+        Constants.LOGGER.error("Error getting dimension cache for {}", ctx.getSource().getLevel().dimension().location().toString());
+        return -1;
+    }
+
+    public static int createSphereRegion(CommandContext<CommandSourceStack> ctx, String regionName, BlockPos centerPos, int radius, @Nullable IProtectedRegion parentRegion) {
+        var dimCache = RegionManager.get().getLevelRegionData(ctx.getSource().getLevel().dimension());
+        if (dimCache.isPresent()) {
+            return createSphereRegion(ctx, regionName, dimCache.get(), centerPos, radius, parentRegion);
+        }
+        Constants.LOGGER.error("Error getting dimension cache for {}", ctx.getSource().getLevel().dimension().location().toString());
+        return -1;
+    }
+
+    public static int createCuboidRegion(CommandContext<CommandSourceStack> ctx, String regionName, LevelRegionData levelData, BlockPos pos1, BlockPos pos2, @Nullable IProtectedRegion parentRegion) {
         CuboidRegion region = new CuboidRegion(regionName, new CuboidArea(pos1, pos2), null, levelData.getDimKey());
         IProtectedRegion parent = parentRegion == null ? levelData.getDim() : parentRegion;
         return createRegion(ctx, regionName, levelData, region, parent);
@@ -274,7 +301,7 @@ class DimensionCommands {
         return createRegion(ctx, regionName, levelData, region, parent);
     }
 
-    private static int createSphereRegion(CommandContext<CommandSourceStack> ctx, String regionName, LevelRegionData levelData, BlockPos centerPos, int radius, @Nullable IProtectedRegion parentRegion) {
+    public static int createSphereRegion(CommandContext<CommandSourceStack> ctx, String regionName, LevelRegionData levelData, BlockPos centerPos, int radius, @Nullable IProtectedRegion parentRegion) {
         SphereRegion region = new SphereRegion(regionName, new SphereArea(centerPos, radius), null, levelData.getDimKey());
         IProtectedRegion parent = parentRegion == null ? levelData.getDim() : parentRegion;
         return createRegion(ctx, regionName, levelData, region, parent);
@@ -288,6 +315,15 @@ class DimensionCommands {
             return 0;
         }
         return 1;
+    }
+
+    public static int deleteRegion(CommandContext<CommandSourceStack> ctx, IMarkableRegion region) {
+        var dimCache = RegionManager.get().getLevelRegionData(region.getDim());
+        if (dimCache.isPresent()) {
+            return deleteRegion(ctx, dimCache.get(), region);
+        }
+        Constants.LOGGER.error("Error getting dimension cache for region {} in {}", region.getName(), region.getDim().location().toString());
+        return -1;
     }
 
     public static int deleteRegion(CommandContext<CommandSourceStack> ctx, LevelRegionData levelData, IMarkableRegion region) {

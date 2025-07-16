@@ -2,6 +2,7 @@ package de.z0rdak.yawp.core.region;
 
 import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import de.z0rdak.yawp.core.area.Polygon3DArea;
+import de.z0rdak.yawp.core.area.RegionAnchors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
@@ -14,7 +15,7 @@ public final class PolygonRegion extends MarkedRegion {
         super(name, area, owner, dimension);
     }
 
-    public PolygonRegion(String name, Polygon3DArea area, BlockPos tpTarget, Player owner, ResourceKey<Level> dimension) {
-        super(name, area, tpTarget, owner, dimension);
+    public PolygonRegion(String name, Polygon3DArea area, RegionAnchors anchors, Player owner, ResourceKey<Level> dimension) {
+        super(name, area, anchors, owner, dimension);
     }
 }

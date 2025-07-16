@@ -23,7 +23,6 @@ import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.util.LocalRegions;
 import de.z0rdak.yawp.util.StickUtil;
 import de.z0rdak.yawp.util.visualization.BlockDisplayProperty;
-import de.z0rdak.yawp.util.visualization.RegionOutlineBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -134,8 +133,8 @@ public final class MarkerCommands {
                     .forEach(flag -> region.addFlag(new BooleanFlag(flag)));
             dimCache.addLocal(parentRegion, region);
             LocalRegions.ensureHigherRegionPriorityFor(region, Services.REGION_CONFIG.getDefaultPriority());
-            RegionManager.get().save();
-            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.success", "Successfully created region %s (with parent %s)", buildRegionInfoLink(region), buildRegionInfoLink(parentRegion)));
+            RegionDataManager.save();
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.success", "Successfully created region %s (parent: %s)", buildRegionInfoLink(region), buildRegionInfoLink(parentRegion)));
             return 0;
         } else {
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.local.deny", "You don't have the permission to create a region in the region %s!", buildRegionInfoLink(parentRegion)));
@@ -163,29 +162,6 @@ public final class MarkerCommands {
 
     private static int giveMarkerStick(CommandContext<CommandSourceStack> ctx) {
         try {
-            ServerLevel level = ctx.getSource().getLevel();
-            ResourceLocation levelRl = level.dimension().location();
-            Optional<LevelRegionData> optLrd = RegionDataManager.getLevelRegionData(levelRl);
-            if (optLrd.isPresent()) {
-                LevelRegionData levelRegionData = optLrd.get();
-                var displayTestRegion = "display-test";
-                if (levelRegionData.hasLocal(displayTestRegion)) {
-                    IMarkableRegion displayTest = levelRegionData.getLocal(displayTestRegion);
-                    Set<BlockPos> frame =  displayTest.getArea().getFrame();
-                    for (BlockPos blockPos : frame) {
-                        BlockDisplayProperty glowingRedStainedGlassFrame = new BlockDisplayProperty("red_stained_glass", true, false);
-                        CompoundTag displayTag = RegionOutlineBuilder.buildBlockDisplayTag(glowingRedStainedGlassFrame);
-                        Entity entity = RegionOutlineBuilder.buildBlockDisplay(level, blockPos, displayTag);
-                        
-                        if (entity != null) {
-                            // TODO: region data in custom data
-                            CustomData customData = entity.get(CUSTOM_DATA);
-                            level.addFreshEntity(entity);
-                        }
-                    }
-                }
-            }
-
             Player targetPlayer = ctx.getSource().getPlayerOrException();
             ItemStack marker = Items.STICK.getDefaultInstance();
             StickUtil.initMarkerNbt(marker, targetPlayer.level().dimension());
