@@ -49,11 +49,11 @@ public final class CommandRegistry {
                 .then(GlobalCommands.build())
                 .then(DimensionCommands.build())
                 .then(RegionCommands.build())
-                .then(ShortCutCommands.buildShow())
-                .then(ShortCutCommands.buildHide())
-                .then(ShortCutCommands.buildInfoLocal())
-                .then(ShortCutCommands.buildCreateLocal())
-                .then(ShortCutCommands.buildDeleteLocal());
+                .then(ShortcutCommands.buildShow())
+                .then(ShortcutCommands.buildHide())
+                .then(ShortcutCommands.buildInfoLocal())
+                .then(ShortcutCommands.buildCreateLocal())
+                .then(ShortcutCommands.buildDeleteLocal());
     }
 
     private static int promptHelp(CommandSourceStack src) {
