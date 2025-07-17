@@ -44,7 +44,7 @@ public class VisualizationOptionsMessage implements MultiLineMessage<IMarkableAr
         var hierarchySubject = Component.translatableWithFallback("cli.msg.info.region.visualization.hierarchy", "Hierarchy");
         var intersectingSubject = Component.translatableWithFallback("cli.msg.info.region.visualization.intersecting", "Intersecting");
 
-        var customShowLink = buildShowAdvancedLink(region, DisplayType.FRAME, ResourceLocation.withDefaultNamespace("cyan_stained_glass"), true, 15);
+        var customShowLink = buildShowAdvancedLink(region, DisplayType.FRAME, ResourceLocation.tryBuild(ResourceLocation.DEFAULT_NAMESPACE, "cyan_stained_glass"), true, 15);
         var displayActions = buildInfoComponent(showSubject, buildShowLinks(region), customShowLink);
         var hideActions = buildInfoComponent(hideSubject, buildHideLinks(region));
         var hierarchy = buildInfoComponent(hierarchySubject, buildHierarchyShowLink(region), buildHierarchyHideLink(region));

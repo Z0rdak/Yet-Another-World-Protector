@@ -86,7 +86,8 @@ public final class PlayerFlagHandler {
     @SubscribeEvent
     public static void onLooseArrow(ArrowLooseEvent event){
         if (!HandlerUtil.isServerSide(event.getLevel())) return;
-        if (event.getEntity() instanceof Player shooter) {
+        if (event.getEntity() != null) {
+            Player shooter = event.getEntity();
             FlagCheckEvent checkEvent = new FlagCheckEvent(shooter.blockPosition(), FIRE_BOW, getDimKey(event.getLevel()), shooter);
             if (Services.EVENT.post(checkEvent)) {
                 return;

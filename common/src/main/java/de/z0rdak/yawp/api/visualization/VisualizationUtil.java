@@ -141,7 +141,7 @@ public final class VisualizationUtil {
         var textDisplayTag = new CompoundTag();
 
         // General Entity Tags
-        ResourceLocation blockDisplayRl = ResourceLocation.withDefaultNamespace("text_display");
+        ResourceLocation blockDisplayRl = ResourceLocation.tryBuild(ResourceLocation.DEFAULT_NAMESPACE, "text_display");
         textDisplayTag.putString("id", blockDisplayRl.toString());
         // textDisplayTag.putBoolean("Glowing", properties.hasGlow());
 
@@ -173,7 +173,7 @@ public final class VisualizationUtil {
         var blockDisplayTag = new CompoundTag();
 
         // General Entity Tags
-        ResourceLocation blockDisplayRl = ResourceLocation.withDefaultNamespace("block_display");
+        ResourceLocation blockDisplayRl = ResourceLocation.tryBuild(ResourceLocation.DEFAULT_NAMESPACE, "block_display");
         blockDisplayTag.putString("id", blockDisplayRl.getPath());
         blockDisplayTag.putBoolean("Glowing", properties.hasGlow());
 

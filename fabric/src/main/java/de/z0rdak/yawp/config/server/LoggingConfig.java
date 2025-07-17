@@ -47,13 +47,13 @@ public class LoggingConfig {
                 .define("log_empty_results", false);
 
         LOG_RESULT_VALUES = BUILDER.comment("List of flags result states which shall be logged. By default only denied results will be logged.\n Valid FlagStates are: allowed and denied")
-                .defineListAllowEmpty(List.of("log_result_values"), () -> Collections.singletonList(FlagState.DENIED.name), null, LoggingConfig::isValidFlagState);
+                .defineListAllowEmpty(List.of("log_result_values"), () -> Collections.singletonList(FlagState.DENIED.name), LoggingConfig::isValidFlagState);
 
         LOG_FLAG_CATEGORIES = BUILDER.comment("List of flag categories which shall be logged.\nValid categories are: player, block, entity, item, environment, protection and * (for all).")
-                .defineListAllowEmpty(List.of("log_flag_categories"), () -> Collections.singletonList(FlagTag.PLAYER.name), null, LoggingConfig::isValidCategory);
+                .defineListAllowEmpty(List.of("log_flag_categories"), () -> Collections.singletonList(FlagTag.PLAYER.name), LoggingConfig::isValidCategory);
 
         LOG_FLAGS = BUILDER.comment("List of flags which shall be logged.")
-                .defineListAllowEmpty(List.of("log_flags"), () -> Arrays.asList(RegionFlag.BREAK_BLOCKS.name, RegionFlag.PLACE_BLOCKS.name), null, LoggingConfig::isValidFlag);
+                .defineListAllowEmpty(List.of("log_flags"), () -> Arrays.asList(RegionFlag.BREAK_BLOCKS.name, RegionFlag.PLACE_BLOCKS.name), LoggingConfig::isValidFlag);
 
         // DETAILED_PLAYER_FLAG_LOG = BUILDER.comment("Enable logging of detailed flag checks for player related flags.").define("log_detailed_player_flags", false);
 

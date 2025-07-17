@@ -2,7 +2,6 @@ package de.z0rdak.yawp.core.area;
 
 import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import de.z0rdak.yawp.core.INbtSerializable;
-import de.z0rdak.yawp.util.NbtCompatHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -53,6 +52,6 @@ public class TeleportAnchor implements INbtSerializable<CompoundTag> {
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         this.name = nbt.getString("name");
-        this.pos = NbtCompatHelper.toBlockPos(nbt, "pos").orElseThrow();
+        this.pos = NbtUtils.readBlockPos(nbt.getCompound("pos"));
     }
 }

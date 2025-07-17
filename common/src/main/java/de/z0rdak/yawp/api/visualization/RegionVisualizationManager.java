@@ -56,7 +56,7 @@ public class RegionVisualizationManager {
     }
 
     public void showTpAnchor(TeleportAnchor tpAnchor, ServerLevel level) {
-        var blockPorps = new BlockDisplayProperties(ResourceLocation.parse("minecraft:cyan_stained_glass_pane"), true, 15);
+        var blockPorps = new BlockDisplayProperties(ResourceLocation.tryBuild(ResourceLocation.DEFAULT_NAMESPACE, "cyan_stained_glass_pane"), true, 15);
         var textProps = new TextDisplayProperties(tpAnchor.getName());
             showTpAnchor(tpAnchor, level, blockPorps, textProps);
     }

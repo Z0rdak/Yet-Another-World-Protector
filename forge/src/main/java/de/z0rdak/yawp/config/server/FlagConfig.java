@@ -22,7 +22,7 @@ public class FlagConfig {
     private static final ForgeConfigSpec.ConfigValue<Boolean> REMOVE_ENTITIES_FOR_SPAWNING_FLAGS;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> COVERED_BLOCK_ENTITIES;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> COVERED_BLOCK_ENTITY_TAGS;
-    private static final ModConfigSpec.ConfigValue<List<? extends String>> DISABLED_FLAGS;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> DISABLED_FLAGS;
 
     static {
         final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
@@ -31,11 +31,11 @@ public class FlagConfig {
 
         COVERED_BLOCK_ENTITIES = BUILDER
                 .comment("Entities included/protected by the break-block and place-blocks flags. Includes entities like armor stands and pictures by default")
-                .defineListAllowEmpty(List.of("covered_block_entities"), FlagConfig::defaultCoveredBlockEntityEntries, null, FlagConfig::isValidEntityEntry);
+                .defineListAllowEmpty(List.of("covered_block_entities"), FlagConfig::defaultCoveredBlockEntityEntries, FlagConfig::isValidEntityEntry);
 
         COVERED_BLOCK_ENTITY_TAGS = BUILDER
                 .comment("Entity tags included/protected by the break-block and place-blocks flags.")
-                .defineListAllowEmpty(List.of("covered_block_entity_tags"), ArrayList::new, null, FlagConfig::isValidTagEntry);
+                .defineListAllowEmpty(List.of("covered_block_entity_tags"), ArrayList::new, FlagConfig::isValidTagEntry);
 
         REMOVE_ENTITIES_FOR_SPAWNING_FLAGS = BUILDER
                 .comment("Toggle to remove entities when adding spawning-* flags.\nEntities with the PersistenceRequired tag will not be removed.\n true -> remove entities related to this flag\n false -> don't remove entities")
@@ -43,7 +43,7 @@ public class FlagConfig {
 
         DISABLED_FLAGS = BUILDER
                 .comment("Flags which are disabled to reduce performance impact. This is currently limited to the following flags: `fluid_flow`, `water_flow` and `lava_flow`")
-                .defineListAllowEmpty("disabled_flags", ArrayList::new, null, FlagConfig::isValidFlagEntry);
+                .defineListAllowEmpty("disabled_flags", ArrayList::new, FlagConfig::isValidFlagEntry);
 
         BUILDER.pop();
 

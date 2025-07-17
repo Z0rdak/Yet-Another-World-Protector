@@ -1,5 +1,9 @@
 package de.z0rdak.yawp.config.server;
 
+import de.z0rdak.yawp.api.Flag;
+import de.z0rdak.yawp.api.FlagRegister;
+import de.z0rdak.yawp.constants.Constants;
+import de.z0rdak.yawp.core.flag.FlagFrequency;
 import net.minecraftforge.common.ForgeConfigSpec;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -8,17 +12,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.constants.Constants.MOD_ID;
-import static de.z0rdak.yawp.constants.Constants.MOD_ID;
 
 public class FlagConfig {
 
     public static final ForgeConfigSpec CONFIG_SPEC;
-    public static final String CONFIG_NAME = MOD_ID + "-flags.toml";
+    public static final String CONFIG_NAME = Constants.MOD_ID + "-flags.toml";
     public static final Logger FLAG_CONFIG_LOGGER = LogManager.getLogger(MOD_ID.toUpperCase() + "-Flag-Config");
 
     private static final ForgeConfigSpec.ConfigValue<Boolean> REMOVE_ENTITIES_FOR_SPAWNING_FLAGS;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> COVERED_BLOCK_ENTITIES;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> COVERED_BLOCK_ENTITY_TAGS;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> DISABLED_FLAGS;
 
     static {
         final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
@@ -37,10 +41,13 @@ public class FlagConfig {
                 .comment("Toggle to remove entities when adding spawning-* flags.\nEntities with the PersistenceRequired tag will not be removed.\n true -> remove entities related to this flag\n false -> don't remove entities")
                 .define(Collections.singletonList("remove_entities_for_spawning_flags"), true);
 
+        DISABLED_FLAGS = BUILDER
+                .comment("Flags which are disabled to reduce performance impact. This is currently limited to the following flags: `fluid_flow`, `water_flow` and `lava_flow`")
+                .defineListAllowEmpty(List.of("disabled_flags"), ArrayList::new, FlagConfig::isValidFlagEntry);
 
         BUILDER.pop();
-        CONFIG_SPEC = BUILDER.build();
 
+        CONFIG_SPEC = BUILDER.build();
     }
 
     private static List<String> defaultCoveredBlockEntityEntries() {
@@ -48,17 +55,34 @@ public class FlagConfig {
     }
 
     public static Set<String> getCoveredBlockEntities() {
-        return FlagConfig.COVERED_BLOCK_ENTITIES.get().stream()
+        return COVERED_BLOCK_ENTITIES.get().stream()
                 .filter(Objects::nonNull)
                 .map(String::toString).collect(Collectors.toSet());
     }
 
     public static Set<String> getCoveredBlockEntityTags() {
-        return FlagConfig.COVERED_BLOCK_ENTITY_TAGS.get().stream()
+        return COVERED_BLOCK_ENTITY_TAGS.get().stream()
                 .filter(Objects::nonNull)
-                .map(String::toString)
-                .collect(Collectors.toSet());
+                .map(String::toString).collect(Collectors.toSet());
     }
+
+    /**
+     *
+     * @param frequency this is currently only for VERY_HIGH, but can be expanded later when the config is more fine grained
+     */
+    public static Set<String> getDisabledFrequencyFlags(FlagFrequency frequency) {
+        if (frequency == FlagFrequency.VERY_HIGH) {
+            return DISABLED_FLAGS.get().stream()
+                    .filter(Objects::nonNull)
+                    .map(String::toString).collect(Collectors.toSet());
+        }
+        return Set.of();
+    }
+
+    public static boolean isDisabledByConfig(String flag) {
+        return getDisabledFrequencyFlags(FlagFrequency.VERY_HIGH).contains(flag);
+    }
+
 
     public static boolean removeEntitiesEnabled() {
         return REMOVE_ENTITIES_FOR_SPAWNING_FLAGS.get();
@@ -69,8 +93,23 @@ public class FlagConfig {
             boolean isNotEmptyAndContainsColon = !str.isEmpty() && !str.isBlank() && str.contains(":");
             if (!isNotEmptyAndContainsColon) {
                 FLAG_CONFIG_LOGGER.warn("Invalid block tile resource key supplied for 'break_flag_entities': {}", entity);
+                return false;
             }
-            return isNotEmptyAndContainsColon;
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean isValidFlagEntry(Object entity) {
+        if (entity instanceof String str) {
+            boolean isNotEmptyAndContainsColon = !str.isEmpty() && !str.isBlank() && str.contains(":");
+            if (!isNotEmptyAndContainsColon) {
+                FLAG_CONFIG_LOGGER.warn("Invalid flag supplied for 'disabled_flags': {}", entity);
+                return false;
+            }
+            return str.equals(FlagRegister.FLUID_FLOW.name())
+                    || str.equals(FlagRegister.WATER_FLOW.name())
+                    || str.equals(FlagRegister.LAVA_FLOW.name());
         }
         return false;
     }

@@ -37,10 +37,10 @@ public class RegionConfig {
                 .defineInRange("default_region_priority", 10, 0, Integer.MAX_VALUE);
 
         REGION_DEFAULT_FLAGS = BUILDER.comment("Default flags for new local regions.\n Make sure to put the flags in double-quites, just like a normal string.\n Example: default_flags = [\"no-pvp\", \"no-flight\"])")
-                .defineListAllowEmpty("default_flags", new ArrayList<>(), null, RegionConfig::isValidLocalFlag);
+                .defineListAllowEmpty("default_flags", new ArrayList<>(), RegionConfig::isValidLocalFlag);
 
         DIM_REGION_DEFAULT_FLAGS = BUILDER.comment("Default flags for new dimensional regions.\n Make sure to put the flags in double-quites, just like a normal string.\n Example: dim_default_flags = [\"invincible\", \"sleep\", \"spawning-all\"])")
-                .defineListAllowEmpty("dim_default_flags", new ArrayList<>(), null, RegionConfig::isValidDimFlag);
+                .defineListAllowEmpty("dim_default_flags", new ArrayList<>(), RegionConfig::isValidDimFlag);
 
         CLI_REGION_DEFAULT_PRIORITY_INC = BUILDER.comment("Default region priority increment/decrement.")
                 .defineInRange("default_region_priority_inc", 5, 1, 1000);

@@ -107,15 +107,9 @@ public class MarkerStick extends AbstractStick implements INbtSerializable<Compo
         super.deserializeNBT(nbt);
         this.isValidArea = nbt.getBoolean(ItemNbtKeys.VALID_AREA);
         this.areaType = AreaType.of(nbt.getString(ItemNbtKeys.AREA_TYPE));
-        this.dimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(nbt.getString(ItemNbtKeys.DIM)));
-        ListTag markedBlocksNBT = (ListTag) nbt.get(ItemNbtKeys.MARKED_BLOCKS);
-        if (markedBlocksNBT != null) {
-            this.markedBlocks = new ArrayList<>(this.areaType.maxBlocks);
-            for (int i = 0; i < markedBlocksNBT.size(); i++) {
-                int[] intArray = markedBlocksNBT.getIntArray(i);
-                IntArrayTag intArrayTag = new IntArrayTag(intArray);
-                NbtCompatHelper.toBlockPos(intArrayTag).ifPresent(pos -> this.markedBlocks.add(pos));
-            }
-        }      
+        this.dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(nbt.getString(ItemNbtKeys.DIM)));
+        ListTag markedBlocksNBT = nbt.getList(ItemNbtKeys.MARKED_BLOCKS, Tag.TAG_COMPOUND);
+        this.markedBlocks = new ArrayList<>(this.areaType.maxBlocks);
+        markedBlocksNBT.forEach(block -> this.markedBlocks.add(NbtUtils.readBlockPos((CompoundTag) block)));
     }
 }

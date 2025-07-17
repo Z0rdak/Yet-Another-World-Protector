@@ -42,11 +42,6 @@ public class MarkerStickHandler {
                         Constants.LOGGER.warn("Unknown area type on marking - should really not happening");
                         return;
                     }
-                    if (player.isShiftKeyDown()) {
-                        marker.setTeleportPos(target);
-                        involvedItem.getTag().put(ItemNbtKeys.STICK, marker.serializeNBT());
-                        return;
-                    }
                     // add block to NBT list
                     marker.addMarkedBlock(target);
                     // check whether marked blocks form a valid marked area

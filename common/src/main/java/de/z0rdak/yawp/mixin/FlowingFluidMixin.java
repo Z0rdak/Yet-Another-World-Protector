@@ -26,7 +26,7 @@ public class FlowingFluidMixin {
             return;
         }
 
-if (!Services.FLAG_CONFIG.isDisabledByConfig(FLUID_FLOW.name)) {
+        if (!Services.FLAG_CONFIG.isDisabledByConfig(FLUID_FLOW.name)) {
             FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, FLUID_FLOW, level.dimension());
             if (Services.EVENT.post(checkEvent)) {
                 return;
@@ -40,19 +40,19 @@ if (!Services.FLAG_CONFIG.isDisabledByConfig(FLUID_FLOW.name)) {
         }
 
         if (!Services.FLAG_CONFIG.isDisabledByConfig(WATER_FLOW.name)) {
-            if ( fluidState.getType() instanceof WaterFluid) {
-                FlagCheckEvent specificFluidCheckEvent = new FlagCheckEvent(pos, WATER_FLOW, level.dimension());
+            if (fluidState.getType() instanceof WaterFluid) {
+                FlagCheckEvent specificFluidCheckEvent = new FlagCheckEvent(blockPos, WATER_FLOW, level.dimension());
                 if (Services.EVENT.post(specificFluidCheckEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(specificFluidCheckEvent, deny -> {
-                    ci.cancel();
+                    cir.setReturnValue(false);
                 });
             }
         }
         if (!Services.FLAG_CONFIG.isDisabledByConfig(LAVA_FLOW.name)) {
-            if ( fluidState.getType() instanceof LavaFluid) {
-                FlagCheckEvent specificFluidCheckEvent = new FlagCheckEvent(pos, LAVA_FLOW, level.dimension());
+            if (fluidState.getType() instanceof LavaFluid) {
+                FlagCheckEvent specificFluidCheckEvent = new FlagCheckEvent(blockPos, LAVA_FLOW, level.dimension());
                 if (Services.EVENT.post(specificFluidCheckEvent)) {
                     return;
                 }

@@ -4,6 +4,7 @@ import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.api.events.flag.FabricFlagEvents;
 import de.z0rdak.yawp.api.events.flag.FlagEvent;
 import de.z0rdak.yawp.commands.CommandRegistry;
+import de.z0rdak.yawp.config.ConfigRegistry;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.handler.flags.PlayerFlagHandler;

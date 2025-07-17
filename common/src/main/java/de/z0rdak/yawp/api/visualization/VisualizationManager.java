@@ -44,8 +44,8 @@ public class VisualizationManager {
         serverInstance = server;
     }
 
-    public final static ResourceLocation REGION_BLOCK_DISPLAY_TAG = ResourceLocation.parse("yawp:region_block_display");
-    public final static ResourceLocation REGION_TEXT_DISPLAY_TAG = ResourceLocation.parse("yawp:region_text_display");
+    public final static ResourceLocation REGION_BLOCK_DISPLAY_TAG = ResourceLocation.tryParse("yawp:region_block_display");
+    public final static ResourceLocation REGION_TEXT_DISPLAY_TAG = ResourceLocation.tryParse("yawp:region_text_display");
 
     public static void nukeDisplayEntities(ServerLevel level) {
         var entities = level.getEntities(EntityTypeTest.forClass(Display.class), (entity) -> {

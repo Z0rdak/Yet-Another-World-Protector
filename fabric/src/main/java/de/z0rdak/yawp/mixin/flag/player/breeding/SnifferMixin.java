@@ -22,7 +22,8 @@ public abstract class SnifferMixin {
     public void spawnChildFromBreeding(ServerLevel world, Animal parentB, CallbackInfo ci) {
         if (isServerSide(world)) {
             Sniffer parentA = (Sniffer) (Object) this;
-            if (parentA.getLoveCause() instanceof Player breeder) {
+            if (parentA.getLoveCause()  != null) {
+                Player breeder = parentA.getLoveCause();
                 FlagCheckEvent checkEvent = new FlagCheckEvent(parentA.blockPosition(), ANIMAL_BREEDING, world.dimension(), breeder);
                 if (Services.EVENT.post(checkEvent)) {
                     return;

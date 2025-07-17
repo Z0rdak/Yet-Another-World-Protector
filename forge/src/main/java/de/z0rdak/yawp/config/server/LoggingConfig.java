@@ -3,8 +3,8 @@ package de.z0rdak.yawp.config.server;
 import de.z0rdak.yawp.api.events.region.ForgeFlagCheckEvent;
 import de.z0rdak.yawp.api.events.region.ForgeFlagCheckResult;
 import de.z0rdak.yawp.constants.Constants;
-import de.z0rdak.yawp.core.flag.FlagCategory;
 import de.z0rdak.yawp.core.flag.FlagState;
+import de.z0rdak.yawp.core.flag.FlagTag;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.RegionType;
@@ -50,7 +50,7 @@ public class LoggingConfig {
                 .defineListAllowEmpty(List.of("log_result_values"), () -> Collections.singletonList(FlagState.DENIED.name), LoggingConfig::isValidFlagState);
 
         LOG_FLAG_CATEGORIES = BUILDER.comment("List of flag categories which shall be logged.\nValid categories are: player, block, entity, item, environment, protection and * (for all).")
-                .defineListAllowEmpty(List.of("log_flag_categories"), () -> Collections.singletonList(FlagCategory.PLAYER.name), LoggingConfig::isValidCategory);
+                .defineListAllowEmpty(List.of("log_flag_categories"), () -> Collections.singletonList(FlagTag.PLAYER.name), LoggingConfig::isValidCategory);
 
         LOG_FLAGS = BUILDER.comment("List of flags which shall be logged.")
                 .defineListAllowEmpty(List.of("log_flags"), () -> Arrays.asList(RegionFlag.BREAK_BLOCKS.name, RegionFlag.PLACE_BLOCKS.name), LoggingConfig::isValidFlag);
@@ -86,7 +86,7 @@ public class LoggingConfig {
     private static boolean isValidCategory(Object entity) {
         if (entity instanceof String str) {
             try {
-                FlagCategory category = FlagCategory.from(str);
+                FlagTag category = FlagTag.from(str);
                 return category != null || str.equalsIgnoreCase("*");
             } catch (IllegalArgumentException e) {
                 LOGGING_CONFIG_LOGGER.warn("Invalid flag category supplied for 'log_flag_categories': {}", entity);
