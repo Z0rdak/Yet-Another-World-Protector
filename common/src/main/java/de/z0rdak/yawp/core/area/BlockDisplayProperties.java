@@ -64,15 +64,14 @@ public final class BlockDisplayProperties implements INbtSerializable<CompoundTa
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         String string = nbt.getString("block");
-        try {
-            this.blockRl = ResourceLocation.parse(string);
-        } catch (Exception _e) {
+        var res = ResourceLocation.tryParse(string);
+        if (res == null) {
             Random rand = new Random();
             int randomNum = rand.nextInt(0, DEFAULT_BLOCKS.size());
             this.blockRl = DEFAULT_BLOCKS.get(randomNum);
         }
-        this.hasGlow = nbt.getBoolean("hasGlow");
-        this.lightLevel = nbt.getInt("lightLevel");
+        this.hasGlow = nbt.contains("hasGlow") ?  nbt.getBoolean("hasGlow") : DEFAULT_GLOW;
+        this.lightLevel = nbt.contains("lightLevel") ? nbt.getInt("lightLevel") : DEFAULT_LIGHT_LEVEL;
     }
 
     public ResourceLocation blockRl() {
