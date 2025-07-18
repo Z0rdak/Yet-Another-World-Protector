@@ -11,28 +11,8 @@ import java.util.*;
 
 public final class BlockDisplayProperties {
 
-    public static MapCodec<BlockDisplayProperties> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            ResourceLocation.CODEC.fieldOf("block")
-                            .forGetter(BlockDisplayProperties::blockRl),
-            Codec.BOOL.fieldOf("hasGlow")
-                            .forGetter(BlockDisplayProperties::hasGlow),
-                    Codec.INT.fieldOf("lightLevel")
-                            .forGetter(BlockDisplayProperties::lightLevel)
-            ).apply(instance, BlockDisplayProperties::new)
-    );
-
-    private ResourceLocation blockRl;
-    private boolean hasGlow;
-    private int lightLevel;
-    // private boolean persistent;
-
-    public BlockDisplayProperties(ResourceLocation blockRl, boolean hasGlow, int lightLevel) {
-        this.blockRl = blockRl;
-        this.hasGlow = hasGlow;
-        this.lightLevel = lightLevel;
-        //this.persistent = true;
-    }
-
+    public static final boolean DEFAULT_GLOW = true;
+    public static final int DEFAULT_LIGHT_LEVEL = 15;
 
     public static final List<ResourceLocation> DEFAULT_BLOCKS = new ArrayList<>();
     static {
@@ -59,8 +39,27 @@ public final class BlockDisplayProperties {
         return BlockDisplayProperties.DEFAULT_BLOCKS.get(randomNum);
     }
 
-    public static final boolean DEFAULT_GLOW = true;
-    public static final int DEFAULT_LIGHT_LEVEL = 15;
+    public static MapCodec<BlockDisplayProperties> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                    ResourceLocation.CODEC.optionalFieldOf("block", randomFromDefault())
+                            .forGetter(BlockDisplayProperties::blockRl),
+                    Codec.BOOL.optionalFieldOf("hasGlow", DEFAULT_GLOW)
+                            .forGetter(BlockDisplayProperties::hasGlow),
+                    Codec.INT.optionalFieldOf("lightLevel", DEFAULT_LIGHT_LEVEL)
+                            .forGetter(BlockDisplayProperties::lightLevel)
+            ).apply(instance, BlockDisplayProperties::new)
+    );
+
+    private ResourceLocation blockRl;
+    private boolean hasGlow;
+    private int lightLevel;
+    // private boolean persistent;
+
+    public BlockDisplayProperties(ResourceLocation blockRl, boolean hasGlow, int lightLevel) {
+        this.blockRl = blockRl;
+        this.hasGlow = hasGlow;
+        this.lightLevel = lightLevel;
+        //this.persistent = true;
+    }
 
     public ResourceLocation blockRl() {
         return this.blockRl;
