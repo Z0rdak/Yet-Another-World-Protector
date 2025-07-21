@@ -1,4 +1,4 @@
-# [0.5.2-beta4] - 2025-05-14
+# [0.5.3-beta1] - 2025-05-14
 
 This version states the changes need for the YAWP port for Minecraft 1.21.5.
 

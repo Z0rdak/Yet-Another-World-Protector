@@ -1,15 +1,25 @@
+# [0.6.1-beta1] - 2025-07-18
+
+## Changed
+
+- Backport region saving changes from 0.5.3-beta1 to 1.20.1, 1.21.1 and 1.21.4. Note: This is a breaking change for those versions and will result in region data loss. 
+
+## Fixed
+
+- Fix broken default values for region display data.
+
 # [0.6.0-beta1] - 2025-07-16
 
 ## Added
 
 - Add new flag `fire-bow`, which prevents players from shooting bows/crossbows in the region. This flag does not protect form being shot form outside the region.
 - The `no-pvp` flag no protects against a selected set of projectiles:
-    - arrows
-    - firework rockets
-    - thrown tridents
-    - thrown ender pearls
-    - thrown eggs
-    - thrown snowballs
+  - arrows
+  - firework rockets
+  - thrown tridents
+  - thrown ender pearls
+  - thrown eggs
+  - thrown snowballs
 - Add new config to disable flags impacting performance in `yawp-flags.toml`: `disabled_flags` by default this list is empty. Any flag added to this list will be completely disabled by default. _Implementation note: This means the check for regions containing those flags in event handlers or mixins are skipped in the first place. This does not prevent the mixins from being applied or the event handlers from being registered. This is planned for the future though.
 
 ### Multiple, named teleport anchors for Local Regions.
@@ -37,10 +47,10 @@ Use the following command to nuke them easily:
 
 - Add commands and CLI support to manage the display settings and show/hide the visualization
 - Regions have, depending on the shape, different visualization styles (display types). Those are
-    - Hull: which shows the couple outer hull of the area - the limits of the regions
-    - Frame: an outer frame of the area, which is more resource friendly for bigger versions but still shows a good outline
-    - Minimal: a minimal outline of the area
-    - Marked: shows only the marked blocks of the area
+  - Hull: which shows the couple outer hull of the area - the limits of the regions
+  - Frame: an outer frame of the area, which is more resource friendly for bigger versions but still shows a good outline
+  - Minimal: a minimal outline of the area
+  - Marked: shows only the marked blocks of the area
 - Add command `/yawp local <dim> <local> display` to show the display settings page.
 - Add command `/yawp local <dim> <local> display block <block-id>` to show the display settings page.
 - Add command `/yawp local <dim> <local> display glow <true|false>` to show the display settings page.
