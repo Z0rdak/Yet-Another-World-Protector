@@ -40,11 +40,14 @@ public final class BlockDisplayProperties {
     }
 
     public static MapCodec<BlockDisplayProperties> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-                    ResourceLocation.CODEC.optionalFieldOf("block", randomFromDefault())
+                    ResourceLocation.CODEC.fieldOf("block")
+                            .orElse(randomFromDefault())
                             .forGetter(BlockDisplayProperties::blockRl),
-                    Codec.BOOL.optionalFieldOf("hasGlow", DEFAULT_GLOW)
+                    Codec.BOOL.fieldOf("hasGlow")
+                            .orElse(DEFAULT_GLOW)
                             .forGetter(BlockDisplayProperties::hasGlow),
-                    Codec.INT.optionalFieldOf("lightLevel", DEFAULT_LIGHT_LEVEL)
+                    Codec.INT.fieldOf("lightLevel")
+                            .orElse(DEFAULT_LIGHT_LEVEL)
                             .forGetter(BlockDisplayProperties::lightLevel)
             ).apply(instance, BlockDisplayProperties::new)
     );
