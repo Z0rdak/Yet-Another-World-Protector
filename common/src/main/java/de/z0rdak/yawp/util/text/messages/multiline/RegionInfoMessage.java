@@ -1,19 +1,21 @@
 package de.z0rdak.yawp.util.text.messages.multiline;
 
-import de.z0rdak.yawp.core.region.IMarkableRegion;
-import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.core.region.RegionType;
-import de.z0rdak.yawp.data.region.DimensionRegionCache;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
+import de.z0rdak.yawp.core.region.*;
+import de.z0rdak.yawp.data.region.LevelRegionData;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.text.Messages;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
 import static de.z0rdak.yawp.util.ChatLinkBuilder.*;
@@ -32,30 +34,79 @@ public class RegionInfoMessage implements MultiLineMessage<IProtectedRegion> {
         this.regionInfoLines = new ArrayList<>();
     }
 
+    // approximation to the real maximum value
     private final static int MAX_ENCODER_LIMIT = 30000;
-    
+
+    private static Optional<JsonObject> regionJson(IProtectedRegion region) {
+        switch (region.getRegionType()) {
+            case GLOBAL -> {
+                GlobalRegion global = (GlobalRegion) region;
+                var json = new JsonObject();
+                DataResult<JsonElement> jsonResult = GlobalRegion.CODEC.encode(global, JsonOps.INSTANCE, json);
+                if (jsonResult.result().isPresent()) {
+                    JsonElement orThrow = jsonResult.result().get();
+                    return Optional.ofNullable(orThrow.getAsJsonObject());
+                }
+                return Optional.of(json);
+            }
+            case DIMENSION -> {
+                DimensionalRegion dim = (DimensionalRegion) region;
+                var json = new JsonObject();
+                DataResult<JsonElement> jsonResult = DimensionalRegion.CODEC.encode(dim, JsonOps.INSTANCE, json);
+                if (jsonResult.result().isPresent()) {
+                    JsonElement orThrow = jsonResult.result().get();
+                    return Optional.ofNullable(orThrow.getAsJsonObject());
+                }
+                return Optional.of(json);
+            }
+            case LOCAL -> {
+                MarkedRegion local = (MarkedRegion) region;
+                var json = new JsonObject();
+                DataResult<JsonElement> jsonResult = MarkedRegion.CODEC.encode(local, JsonOps.INSTANCE, json);
+                if (jsonResult.result().isPresent()) {
+                    JsonElement orThrow = jsonResult.result().get();
+                    return Optional.ofNullable(orThrow.getAsJsonObject());
+                }
+                return Optional.of(json);
+            }
+        }
+        return Optional.empty();
+    }
+
     public static MutableComponent buildRegionOverviewHeader(IProtectedRegion region) {
-        CompoundTag regionNbt = region.serializeNBT();
-        String nbtClipBoardText = regionNbt.sizeInBytes() > MAX_ENCODER_LIMIT 
-                ? "Sorry, region data is too big. I am working on a fix." 
-                : NbtUtils.prettyPrint(regionNbt, true);
+        Optional<JsonObject> jsonObject = regionJson(region);
+        String clipBoardText = "";
+        if (jsonObject.isPresent()) {
+            JsonObject regionJson = jsonObject.get();
+            var jsonStr = regionJson.toString();
+            clipBoardText = jsonStr.getBytes(StandardCharsets.UTF_8).length > MAX_ENCODER_LIMIT
+                    ? "Region data to big to send to client, sorry"
+                    : regionJson.toString();
+        }
         switch (region.getRegionType()) {
             case GLOBAL: {
-                MutableComponent dumpLinkText = Component.translatableWithFallback("cli.msg.global.overview.header.dump.link.text", "Global overview");
-                MutableComponent dumpLinkHover = Component.translatableWithFallback("cli.msg.global.overview.header.dump.link.hover", "Copy Global Region NBT to clipboard");
-                MutableComponent clipBoardDumpLink = buildExecuteCmdComponent(dumpLinkText, dumpLinkHover, nbtClipBoardText, ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
-                return buildHeader(Component.translatableWithFallback("cli.msg.info.header.for", "== %s for %s ==", clipBoardDumpLink, buildRegionInfoLink(region)));
+                GlobalRegion global = (GlobalRegion) region;
+                var json = new JsonObject();
+                DataResult<JsonElement> jsonResult = GlobalRegion.CODEC.encode(global, JsonOps.INSTANCE, json);
+                if (jsonResult.result().isPresent()) {
+                    JsonElement orThrow = jsonResult.result().get();
+                    int length = orThrow.toString().getBytes(StandardCharsets.UTF_8).length;
+                    MutableComponent dumpLinkText = Component.translatableWithFallback("cli.msg.global.overview.header.dump.link.text", "Global overview");
+                    MutableComponent dumpLinkHover = Component.translatableWithFallback("cli.msg.global.overview.header.dump.link.hover", "Copy Global Region NBT to clipboard");
+                    MutableComponent clipBoardDumpLink = buildExecuteCmdComponent(dumpLinkText, dumpLinkHover, clipBoardText, ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
+                    return buildHeader(Component.translatableWithFallback("cli.msg.info.header.for", "== %s for %s ==", clipBoardDumpLink, buildRegionInfoLink(region)));
+                }
             }
             case DIMENSION: {
                 MutableComponent dumpLinkText = Component.translatableWithFallback("cli.msg.dim.overview.header.dump.link.text", "Dimension overview");
                 MutableComponent dumpLinkHover = Component.translatableWithFallback("cli.msg.dim.overview.header.dump.link.hover", "Copy Dimensional Region NBT to clipboard");
-                MutableComponent clipBoardDumpLink = buildExecuteCmdComponent(dumpLinkText, dumpLinkHover, nbtClipBoardText, ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
+                MutableComponent clipBoardDumpLink = buildExecuteCmdComponent(dumpLinkText, dumpLinkHover,  clipBoardText, ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
                 return buildHeader(Component.translatableWithFallback("cli.msg.info.header.for", "== %s for %s ==", clipBoardDumpLink, buildRegionInfoLink(region)));
             }
             case LOCAL: {
                 MutableComponent dumpLinkText = Component.translatableWithFallback("cli.msg.local.overview.header.dump.link.text", "Region overview");
                 MutableComponent dumpLinkHover = Component.translatableWithFallback("cli.msg.local.overview.header.dump.link.hover", "Copy Local Region NBT to clipboard");
-                MutableComponent clipBoardDumpLink = buildExecuteCmdComponent(dumpLinkText, dumpLinkHover, nbtClipBoardText, ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
+                MutableComponent clipBoardDumpLink = buildExecuteCmdComponent(dumpLinkText, dumpLinkHover, clipBoardText, ClickEvent.Action.COPY_TO_CLIPBOARD, GOLD);
                 return buildHeader(Component.translatableWithFallback("cli.msg.info.header.for", "== %s for %s ==", clipBoardDumpLink, buildRegionInfoLink(region)));
             }
             default:
@@ -86,8 +137,8 @@ public class RegionInfoMessage implements MultiLineMessage<IProtectedRegion> {
             case DIMENSION: {
                 // Parent: [global], [n children], [n regions] [+]
                 MutableComponent globalRegionLink = buildRegionInfoLink(region.getParent(), Component.translatableWithFallback("cli.msg.info.region.global.link.hover", "Show global region info"));
-                DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(region.getDim());
-                MutableComponent hierarchyLinks = Messages.substitutable("%s, %s, %s", globalRegionLink, buildDimRegionsLink(dimCache), listChildrenLink);
+                LevelRegionData levelData = RegionDataManager.getOrCreate(region.getDim());
+                MutableComponent hierarchyLinks = Messages.substitutable("%s, %s, %s", globalRegionLink, buildDimRegionsLink(levelData), listChildrenLink);
                 return buildInfoComponent("cli.msg.info.region.hierarchy", "Hierarchy", hierarchyLinks);
             }
             case LOCAL: {

@@ -6,8 +6,6 @@ import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.FlagState;
-import de.z0rdak.yawp.data.region.DimensionRegionCache;
-import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.handler.HandlerUtil;
 import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.api.MessageSender;
@@ -843,8 +841,6 @@ public final class PlayerFlagHandler {
         // Note: FilledBucket seems to always be null. use maxStackSize to determine bucket state (empty or filled)
         if (notServerSideOrPlayerNull(event.getEntity())) return;
         Player player = event.getEntity();
-
-        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getDimKey(event.getEntity()));
         if (event.getTarget() != null) {
             HitResult pos = event.getTarget();
             BlockPos targetPos = new BlockPos((int) event.getTarget().getLocation().x, (int) event.getTarget().getLocation().y, (int) event.getTarget().getLocation().z);

@@ -7,6 +7,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.api.commands.CommandConstants;
+import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.commands.arguments.flag.IFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.flag.RegionFlagArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.ContainingOwnedRegionArgumentType;
@@ -19,8 +20,7 @@ import de.z0rdak.yawp.core.flag.FlagType;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.*;
-import de.z0rdak.yawp.data.region.DimensionRegionCache;
-import de.z0rdak.yawp.data.region.RegionDataManager;
+import de.z0rdak.yawp.data.region.LevelRegionData;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -48,9 +48,9 @@ public class ArgumentUtil {
         return Commands.literal(constant.toString());
     }
 
-    public static DimensionRegionCache getDimCacheArgument(CommandContext<CommandSourceStack> ctx) {
+    public static LevelRegionData getLevelDataArgument(CommandContext<CommandSourceStack> ctx) {
         try {
-            return DimensionCacheArgumentType.getDimRegion(ctx, CommandConstants.DIM.toString());
+            return LevelRegionDataArgumentType.getDimRegion(ctx, CommandConstants.DIM.toString());
         } catch (CommandSyntaxException e) {
             Constants.LOGGER.error(e.getMessage());
             throw new RuntimeException(e);
@@ -58,11 +58,11 @@ public class ArgumentUtil {
     }
 
     public static DimensionalRegion getDimRegionFromArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        return DimensionCacheArgumentType.getDimRegion(ctx, CommandConstants.DIM.toString()).getDimensionalRegion();
+        return LevelRegionDataArgumentType.getDimRegion(ctx, CommandConstants.DIM.toString()).getDim();
     }
 
     public static GlobalRegion getGlobalRegion() {
-        return RegionDataManager.get().getGlobalRegion();
+        return RegionManager.get().getGlobalRegion();
     }
 
     public static AreaType getAreaTypeArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
@@ -123,8 +123,8 @@ public class ArgumentUtil {
         return RegionArgumentType.getTargetRegion(ctx, TARGET_REGION.toString());
     }
 
-    public static DimensionRegionCache getTargetDimRegionArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        return DimensionCacheArgumentType.getDimRegion(ctx, TARGET_DIM.toString());
+    public static LevelRegionData getTargetDimRegionArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return LevelRegionDataArgumentType.getDimRegion(ctx, TARGET_DIM.toString());
     }
 
 

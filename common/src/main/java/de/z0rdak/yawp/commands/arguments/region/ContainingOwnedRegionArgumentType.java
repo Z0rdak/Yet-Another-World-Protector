@@ -19,7 +19,7 @@ import de.z0rdak.yawp.core.area.SphereArea;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.stick.MarkerStick;
-import de.z0rdak.yawp.data.region.DimensionRegionCache;
+import de.z0rdak.yawp.data.region.LevelRegionData;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
 import de.z0rdak.yawp.util.StickUtil;
@@ -71,8 +71,8 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
     public static IMarkableRegion getRegion(CommandContext<CommandSourceStack> context, String argName) throws CommandSyntaxException {
         String containingRegionName = context.getArgument(argName, String.class);
         String containedRegionName = context.getArgument(NAME.toString(), String.class);
-        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(context.getSource().getLevel().dimension());
-        IMarkableRegion parent = dimCache.getRegion(containingRegionName);
+        LevelRegionData levelRegionData = RegionDataManager.getOrCreate(context.getSource().getLevel());
+        IMarkableRegion parent = levelRegionData.getLocal(containingRegionName);
 
         IMarkableArea markedArea = markableArea(context);
         if (markedArea == null) {
@@ -99,8 +99,8 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
     public static IMarkableRegion getRegionWithMarker(CommandContext<CommandSourceStack> context, String argName) throws CommandSyntaxException {
         String containingRegionName = context.getArgument(argName, String.class);
         String containedRegionName = context.getArgument(NAME.toString(), String.class);
-        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(context.getSource().getLevel().dimension());
-        IMarkableRegion parent = dimCache.getRegion(containingRegionName);
+        LevelRegionData levelData = RegionDataManager.getOrCreate(context.getSource().getLevel());
+        IMarkableRegion parent = levelData.getLocal(containingRegionName);
 
         ServerPlayer player = context.getSource().getPlayerOrException();
         IMarkableRegion markedRegion = fromMarkedBlocks(context, player, containedRegionName);

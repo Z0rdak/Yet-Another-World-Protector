@@ -1,7 +1,5 @@
 package de.z0rdak.yawp.core.flag;
 
-import de.z0rdak.yawp.core.INbtSerializable;
-import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -23,7 +21,7 @@ import java.util.Set;
  * </pre>
  * This interface allows for checking flag existence, retrieving active flags, and filtering by {@link FlagState}.
  */
-public interface IFlagContainer extends INbtSerializable<CompoundTag> {
+public interface IFlagContainer {
 
     void put(IFlag flag);
 

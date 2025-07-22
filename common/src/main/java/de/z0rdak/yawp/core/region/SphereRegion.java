@@ -1,35 +1,35 @@
 package de.z0rdak.yawp.core.region;
 
-import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
+import de.z0rdak.yawp.core.area.AreaType;
+import de.z0rdak.yawp.core.area.IMarkableArea;
+import de.z0rdak.yawp.core.area.RegionAnchors;
 import de.z0rdak.yawp.core.area.SphereArea;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
+import de.z0rdak.yawp.core.flag.IFlag;
+import de.z0rdak.yawp.core.group.PlayerContainer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
-public final class SphereRegion extends AbstractMarkableRegion {
+import java.util.List;
+import java.util.Map;
 
-    public SphereRegion(CompoundTag nbt) {
-        super(nbt);
-        this.deserializeNBT(nbt);
-    }
+public final class SphereRegion extends MarkedRegion {
 
     public SphereRegion(String name, SphereArea area, ResourceKey<Level> dimension) {
-        this(name, area, area.getCenterPos(), null, dimension);
+        this(name, area, new RegionAnchors(), null, dimension);
     }
 
     public SphereRegion(String name, SphereArea area, Player owner, ResourceKey<Level> dimension) {
-        super(name, area, area.getCenterPos(), owner, dimension);
+        super(name, area, new RegionAnchors(), owner, dimension);
     }
 
-    public SphereRegion(String name, SphereArea area, BlockPos tpPos, Player player, ResourceKey<Level> dimension) {
-        super(name, area, tpPos, player, dimension);
+    public SphereRegion(String name, SphereArea area, RegionAnchors anchors, Player player, ResourceKey<Level> dimension) {
+        super(name, area, anchors, player, dimension);
     }
 
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
-        this.area = new SphereArea(nbt.getCompound(RegionNbtKeys.AREA));
+    public SphereRegion(String name, ResourceKey<Level> dim, String parentName, Map<String, IFlag> flags,
+                        boolean isActive, boolean isMuted, int priority, IMarkableArea area, RegionAnchors anchors,
+                        Map<String, PlayerContainer> groups, List<String> childrenNames){
+        super(name, dim, parentName, flags, isActive, isMuted, priority, AreaType.SPHERE.areaType, area, anchors, groups, childrenNames);
     }
 }

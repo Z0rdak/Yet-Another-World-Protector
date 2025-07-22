@@ -1,37 +1,18 @@
 package de.z0rdak.yawp.core.area;
 
-import de.z0rdak.yawp.core.INbtSerializable;
-import net.minecraft.nbt.CompoundTag;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
-public final class BlockDisplayProperties implements INbtSerializable<CompoundTag> {
+public final class BlockDisplayProperties {
 
-    private ResourceLocation blockRl;
-    private boolean hasGlow;
-    private int lightLevel;
-    // private boolean persistent;
-
-    public BlockDisplayProperties(ResourceLocation blockRl, boolean hasGlow, int lightLevel) {
-        this.blockRl = blockRl;
-        this.hasGlow = hasGlow;
-        this.lightLevel = lightLevel;
-        //this.persistent = true;
-    }
-
-    public BlockDisplayProperties(CompoundTag nbt) {
-        this.deserializeNBT(nbt);
-    }
-
-    @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag tag = new CompoundTag();
-        tag.putString("block", blockRl.toString());
-        tag.putBoolean("hasGlow", hasGlow);
-        tag.putInt("lightLevel", lightLevel);
-        return tag;
-    }
+    public static final boolean DEFAULT_GLOW = true;
+    public static final int DEFAULT_LIGHT_LEVEL = 15;
 
     public static final List<ResourceLocation> DEFAULT_BLOCKS = new ArrayList<>();
     static {
@@ -58,21 +39,29 @@ public final class BlockDisplayProperties implements INbtSerializable<CompoundTa
         return BlockDisplayProperties.DEFAULT_BLOCKS.get(randomNum);
     }
 
-    public static final boolean DEFAULT_GLOW = true;
-    public static final int DEFAULT_LIGHT_LEVEL = 15;
+    public static MapCodec<BlockDisplayProperties> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                    ResourceLocation.CODEC.fieldOf("block")
+                            .orElse(randomFromDefault())
+                            .forGetter(BlockDisplayProperties::blockRl),
+                    Codec.BOOL.fieldOf("hasGlow")
+                            .orElse(DEFAULT_GLOW)
+                            .forGetter(BlockDisplayProperties::hasGlow),
+                    Codec.INT.fieldOf("lightLevel")
+                            .orElse(DEFAULT_LIGHT_LEVEL)
+                            .forGetter(BlockDisplayProperties::lightLevel)
+            ).apply(instance, BlockDisplayProperties::new)
+    );
 
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        String string = nbt.getString("block");
-        var res = ResourceLocation.tryParse(string);
-        if (res == null) {
-            Random rand = new Random();
-            int randomNum = rand.nextInt(0, DEFAULT_BLOCKS.size());
-            this.blockRl = randomFromDefault();
-        } else
-            this.blockRl = res;
-        this.hasGlow = nbt.contains("hasGlow") ?  nbt.getBoolean("hasGlow") : DEFAULT_GLOW;
-        this.lightLevel = nbt.contains("lightLevel") ? nbt.getInt("lightLevel") : DEFAULT_LIGHT_LEVEL;
+    private ResourceLocation blockRl;
+    private boolean hasGlow;
+    private int lightLevel;
+    // private boolean persistent;
+
+    public BlockDisplayProperties(ResourceLocation blockRl, boolean hasGlow, int lightLevel) {
+        this.blockRl = blockRl;
+        this.hasGlow = hasGlow;
+        this.lightLevel = lightLevel;
+        //this.persistent = true;
     }
 
     public ResourceLocation blockRl() {

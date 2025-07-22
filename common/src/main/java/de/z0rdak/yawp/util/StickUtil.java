@@ -58,8 +58,11 @@ public final class StickUtil {
 
     public static void initMarkerNbt(ItemStack stack, ResourceKey<Level> dim) {
         stack.setCount(1);
-        initStickTag(stack, dim, false);
-        updateStickMetadata(stack);
+        initStickTag(stack, StickType.MARKER, dim);
+        setStickName(stack, StickType.MARKER);
+        setStickToolTip(stack, StickType.MARKER);
+        applyEnchantmentGlint(stack);
+        return stack;
     }
 
     public static void resetMarkerNbt(ItemStack stack, ResourceKey<Level> dim) {
@@ -115,7 +118,7 @@ public final class StickUtil {
                     .append(" ")
                     .append(markerIndicators);
             stick.set(DataComponents.CUSTOM_NAME, markerHoverName);
-        }      
+        }
     }
 
     private static MutableComponent buildStickName(MarkerStick marker) {
@@ -164,7 +167,7 @@ public final class StickUtil {
             CompoundTag compoundTag = itemStack.get(CUSTOM_DATA).copyTag();
             compoundTag.put(ItemNbtKeys.STICK, markerTag);
             itemStack.set(CUSTOM_DATA, CustomData.of(compoundTag));
-        }       
+        }
     }
 
 

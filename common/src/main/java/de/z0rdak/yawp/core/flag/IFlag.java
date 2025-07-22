@@ -1,9 +1,6 @@
 package de.z0rdak.yawp.core.flag;
 
-import de.z0rdak.yawp.core.INbtSerializable;
-import net.minecraft.nbt.CompoundTag;
-
-public interface IFlag extends INbtSerializable<CompoundTag>, Comparable<IFlag> {
+public interface IFlag extends Comparable<IFlag> {
 
     /**
      * Get the unique identifier for the flag. <br>

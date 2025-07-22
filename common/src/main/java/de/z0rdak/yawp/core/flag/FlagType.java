@@ -27,7 +27,7 @@ public enum FlagType {
             case "IntFlag":
                 return INT_FLAG;
             default:
-                return null;
+                throw new IllegalArgumentException("Unknown FlagType: " + name);
         }
     }
 

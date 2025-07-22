@@ -1,57 +1,36 @@
 package de.z0rdak.yawp.core.region;
 
 import de.z0rdak.yawp.api.permission.Permissions;
-import de.z0rdak.yawp.core.flag.RegionFlags;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
+import de.z0rdak.yawp.core.flag.RegionFlags;
 import de.z0rdak.yawp.core.group.PlayerContainer;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.stream.Collectors;
-
-import static de.z0rdak.yawp.constants.serialization.RegionNbtKeys.*;
 
 /**
  * An abstract region represents the basic implementation of a IProtectedRegion.
  * This abstraction can be used for markable regions as well as regions without
  * an area (dimensions). <br>
  */
-public abstract class AbstractRegion implements IProtectedRegion {
+public abstract class ProtectedRegion implements IProtectedRegion {
+
     protected ResourceKey<Level> dimension;
     protected IProtectedRegion parent;
     protected String parentName;
     private String name;
-    private RegionType regionType;
+    private final RegionType regionType;
     private RegionFlags flags;
-    private Map<String, PlayerContainer> groups;
+    private final Map<String, PlayerContainer> groups;
     private boolean isActive;
     private boolean isMuted;
-    private Map<String, IProtectedRegion> children;
-    private Set<String> childrenNames;
+    private final Map<String, IProtectedRegion> children;
+    private final Set<String> childrenNames;
 
-    protected AbstractRegion(CompoundTag nbt) {
-        this.childrenNames = new HashSet<>(0);
-        this.children = new HashMap<>(0);
-        this.parentName = null;
-        this.parent = null;
-        this.flags = new RegionFlags();
-        this.groups = new HashMap<>();
-        this.groups.put(Permissions.MEMBER, new PlayerContainer(Permissions.MEMBER));
-        this.groups.put(Permissions.OWNER, new PlayerContainer(Permissions.OWNER));
-        this.deserializeNBT(nbt);
-    }
-
-    protected AbstractRegion(String name, ResourceKey<Level> dimension, RegionType type) {
+    protected ProtectedRegion(String name, ResourceKey<Level> dimension, RegionType type) {
         this.name = name;
         this.dimension = dimension;
         this.regionType = type;
@@ -64,7 +43,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.childrenNames = new HashSet<>();
     }
 
-    protected AbstractRegion(String name, ResourceKey<Level> dimension, RegionType regionType, Player owner) {
+    protected ProtectedRegion(String name, ResourceKey<Level> dimension, RegionType regionType, Player owner) {
         this(name, dimension, regionType);
         if (owner != null) {
             this.groups.get(Permissions.OWNER).addPlayer(owner.getUUID(), owner.getScoreboardName());
@@ -86,7 +65,11 @@ public abstract class AbstractRegion implements IProtectedRegion {
     }
 
     public void setGroups(Map<String, PlayerContainer> groups) {
-        this.groups = groups;
+        this.groups.putAll(groups);
+    }
+
+    public Map<String, PlayerContainer> getGroups() {
+        return Collections.unmodifiableMap(groups);
     }
 
     @Override
@@ -247,6 +230,11 @@ public abstract class AbstractRegion implements IProtectedRegion {
         this.childrenNames.clear();
     }
 
+    public void setChildrenNames(List<String> childrenNames) {
+        this.childrenNames.clear();
+        this.childrenNames.addAll(childrenNames);
+    }
+
     @Override
     public Map<String, IProtectedRegion> getChildren() {
         return Collections.unmodifiableMap(this.children);
@@ -266,7 +254,7 @@ public abstract class AbstractRegion implements IProtectedRegion {
     public boolean addChild(IProtectedRegion child) {
         this.children.put(child.getName(), child);
         this.childrenNames.add(child.getName());
-        ((AbstractRegion) child).setParent(this);
+        ((ProtectedRegion) child).setParent(this);
         return true;
     }
 
@@ -281,62 +269,4 @@ public abstract class AbstractRegion implements IProtectedRegion {
         return parent;
     }
 
-    @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = new CompoundTag();
-        nbt.putString(NAME, this.name);
-        nbt.putString(DIM, dimension.location().toString());
-        nbt.putString(REGION_TYPE, this.regionType.type);
-        nbt.putBoolean(ACTIVE, this.isActive);
-        nbt.putBoolean(MUTED, this.isMuted);
-        nbt.put(FLAGS, this.flags.serializeNBT());
-        nbt.put(OWNERS, this.groups.get(OWNERS).serializeNBT());
-        nbt.put(MEMBERS, this.groups.get(MEMBERS).serializeNBT());
-        if (this.parent != null) {
-            nbt.putString(PARENT, this.parent.getName());
-        } else {
-            nbt.putString(PARENT, "");
-        }
-        if (this.children != null) {
-            ListTag childrenList = new ListTag();
-            childrenList.addAll(this.children.keySet().stream().map(StringTag::valueOf).collect(Collectors.toSet()));
-            nbt.put(CHILDREN, childrenList);
-        } else {
-            nbt.put(CHILDREN, new ListTag());
-        }
-        return nbt;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        this.name = nbt.getString(NAME);
-        this.dimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(nbt.getString(DIM)));
-        this.isActive = nbt.getBoolean(ACTIVE);
-        this.isMuted = nbt.getBoolean(MUTED);
-        this.regionType = RegionType.of(nbt.getString(REGION_TYPE));
-        this.flags = new RegionFlags(nbt.getCompound(FLAGS));
-        this.groups = new HashMap<>();
-        this.groups.put(OWNERS, new PlayerContainer(nbt.getCompound(OWNERS)));
-        this.groups.put(MEMBERS, new PlayerContainer(nbt.getCompound(MEMBERS)));
-        if (this.parent == null && nbt.contains(PARENT, Tag.TAG_STRING)) {
-            String parentName = nbt.getString(PARENT);
-            if (!parentName.isEmpty()) {
-                this.parentName = nbt.getString(PARENT);
-            } else {
-                this.parentName = null;
-            }
-        }
-        if (this.children != null && this.children.isEmpty()) {
-            if (nbt.contains(CHILDREN, Tag.TAG_LIST)) {
-                ListTag childrenNbt = nbt.getList(CHILDREN, Tag.TAG_STRING);
-                if (!childrenNbt.isEmpty()) {
-                    this.children = new HashMap<>(childrenNbt.size());
-                    this.childrenNames = new HashSet<>(childrenNbt.size());
-                    for (int i = 0; i < childrenNbt.size(); i++) {
-                        this.childrenNames.add(childrenNbt.getString(i));
-                    }
-                }
-            }
-        }
-    }
 }

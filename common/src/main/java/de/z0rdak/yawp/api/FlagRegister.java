@@ -18,7 +18,7 @@ public class FlagRegister {
     private static final Map<ResourceLocation, Flag> flagRegister = new HashMap<>();
 
     private static ResourceLocation flagId(final String flagName) {
-        return ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, flagName);
+        return new ResourceLocation(Constants.MOD_ID, flagName);
     }
 
     /**
@@ -29,8 +29,8 @@ public class FlagRegister {
      * @return True if the flag ID matches the flag's ResourceLocation, false otherwise.
      */
     public static boolean isSame(String flagId, Flag flag) {
-        ResourceLocation left = ResourceLocation.parse(flagId);
-        return left.equals(flag.id());
+        ResourceLocation left = ResourceLocation.tryParse(flagId);
+        return left != null && left.equals(flag.id());
     }
 
     /**
@@ -95,7 +95,10 @@ public class FlagRegister {
      * @return {@code true} if the flag was successfully registered, {@code false} if it was already registered.
      */
     public static boolean registerFlag(@NotNull String modId, @NotNull String flagId, @NotNull FlagMetaInfo flagMetaInfo) {
-        var rl = ResourceLocation.fromNamespaceAndPath(modId, flagId);
+        var rl = ResourceLocation.tryBuild(modId, flagId);
+        if (rl == null) {
+            return  false;
+        }
         return registerFlag(rl, flagMetaInfo);
     }
 
@@ -129,7 +132,10 @@ public class FlagRegister {
      */
     public static boolean isRegistered(String flagIdentifier) {
         try {
-            ResourceLocation rl = ResourceLocation.parse(flagIdentifier);
+            ResourceLocation rl = ResourceLocation.tryParse(flagIdentifier);
+            if (rl == null) {
+                return false;
+            }
             return isFlagRegistered(rl);
         } catch (ResourceLocationException rle) {
             return false;
@@ -145,7 +151,11 @@ public class FlagRegister {
      */
     public static Flag byId(String flagIdentifier) throws IllegalArgumentException {
         if (isRegistered(flagIdentifier)) {
-            return flagRegister.get(ResourceLocation.parse(flagIdentifier));
+            ResourceLocation rl = ResourceLocation.tryParse(flagIdentifier);
+            if (rl == null) {
+                throw new IllegalArgumentException("Invalid region flag identifier supplied");
+            }
+            return flagRegister.get(rl);
         }
         throw new IllegalArgumentException("Invalid region flag identifier supplied");
     }

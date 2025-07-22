@@ -4,22 +4,15 @@ import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import de.z0rdak.yawp.util.NbtCompatHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 
-import java.util.*;
+import java.util.Set;
 
-public abstract class CenteredArea extends AbstractArea {
+public abstract class CenteredArea extends MarkedArea {
 
     protected BlockPos center;
 
     public CenteredArea(AreaType areaType) {
         super(areaType);
-    }
-
-    public CenteredArea(CompoundTag nbt) {
-        super(nbt);
-        this.deserializeNBT(nbt);
     }
 
     public CenteredArea(BlockPos center, AreaType areaType) {

@@ -2,8 +2,9 @@ package de.z0rdak.yawp.api.core;
 
 import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.data.region.DimensionRegionCache;
+import de.z0rdak.yawp.data.region.LevelRegionData;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
 import java.util.Optional;
@@ -21,17 +22,17 @@ public interface IRegionManager {
     /**
      * You can safely cast the returned instance of to DimensionalRegion, but it doesn't provide any benefit.
      * @param dim the resource key of the dimension/level
-     *      * @return the DimensionRegionCache corresponding to dim
+     *      * @return the LevelRegionData corresponding to dim
      */
     Optional<IProtectedRegion> getDimensionalRegion(ResourceKey<Level> dim);
 
     /**
-     * Gets the DimensionRegionCache for the specified dimension. 
-     * A DimensionRegionCache manages the DimensionalRegion and all Local Regions of the corresponding dimensions.
+     * Gets the LevelRegionData for the specified dimension.
+     * A LevelRegionData manages the DimensionalRegion and all Local Regions of the corresponding dimensions.
      * @param dim the resource key of the dimension/level
-     * @return the DimensionRegionCache corresponding to dim
+     * @return the LevelRegionData corresponding to dim
      */
-    Optional<DimensionRegionCache> getDimensionCache(ResourceKey<Level> dim);
+    Optional<LevelRegionData> getLevelRegionData(ResourceKey<Level> dim);
 
     /**
      * Flag the scheduler to save the region data. This usually happens either 
@@ -72,7 +73,7 @@ public interface IRegionManager {
      * @param dim the dimension key to check for
      * @return true if a DimensionalRegion exists, false otherwise
      */
-    boolean hasRegionFor(ResourceKey<Level> dim);
+    boolean hasLevelData(ResourceKey<Level> dim);
 
     /**
      * Creates a new DimensionalRegionCache (and DimensionalRegion) for the specified dimension.
@@ -86,11 +87,11 @@ public interface IRegionManager {
      * Returns a set of resource keys for all created Dimensional Regions
      * @return a set of resource keys corresponding to registered DimensionalRegions
      */
-    Set<ResourceKey<Level>> getDimensions();
+    Set<ResourceLocation> getLevels();
 
     /**
      * Resets the DimensionalRegion as well as all LocalRegions of the corresponding level.
      * @param dim the resource key of the level/dimension you want to reset its corresponding data for.
      */
-    void resetDimension(ResourceKey<Level> dim);
+    void resetLevelData(ResourceKey<Level> dim);
 }
