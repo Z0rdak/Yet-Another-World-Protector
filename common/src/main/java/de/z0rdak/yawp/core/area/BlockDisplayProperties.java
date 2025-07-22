@@ -1,12 +1,56 @@
 package de.z0rdak.yawp.core.area;
 
-import de.z0rdak.yawp.core.INbtSerializable;
-import net.minecraft.nbt.CompoundTag;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
-public final class BlockDisplayProperties implements INbtSerializable<CompoundTag> {
+public final class BlockDisplayProperties {
+
+    public static final boolean DEFAULT_GLOW = true;
+    public static final int DEFAULT_LIGHT_LEVEL = 15;
+
+    public static final List<ResourceLocation> DEFAULT_BLOCKS = new ArrayList<>();
+    static {
+        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "white_stained_glass"));
+        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "orange_stained_glass"));
+        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "magenta_sta0ined_glass"));
+        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "light_blue_stained_glass"));
+        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "yellow_stained_glass"));
+        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "lime_stained_glass"));
+        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "pink_stained_glass"));
+        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "gray_stained_glass"));
+        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "light_gray_stained_glass"));
+        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "cyan_stained_glass"));
+        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "purple_stained_glass"));
+        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "blue_stained_glass"));
+        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "brown_stained_glass"));
+        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "green_stained_glass"));
+        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "red_stained_glass"));
+        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "black_stained_glass"));
+    }
+
+    public static ResourceLocation randomFromDefault() {
+        int randomNum = new Random().nextInt(0, 16);
+        return BlockDisplayProperties.DEFAULT_BLOCKS.get(randomNum);
+    }
+
+    public static MapCodec<BlockDisplayProperties> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                    ResourceLocation.CODEC.fieldOf("block")
+                            .orElse(randomFromDefault())
+                            .forGetter(BlockDisplayProperties::blockRl),
+                    Codec.BOOL.fieldOf("hasGlow")
+                            .orElse(DEFAULT_GLOW)
+                            .forGetter(BlockDisplayProperties::hasGlow),
+                    Codec.INT.fieldOf("lightLevel")
+                            .orElse(DEFAULT_LIGHT_LEVEL)
+                            .forGetter(BlockDisplayProperties::lightLevel)
+            ).apply(instance, BlockDisplayProperties::new)
+    );
 
     private ResourceLocation blockRl;
     private boolean hasGlow;
@@ -18,60 +62,6 @@ public final class BlockDisplayProperties implements INbtSerializable<CompoundTa
         this.hasGlow = hasGlow;
         this.lightLevel = lightLevel;
         //this.persistent = true;
-    }
-
-    public BlockDisplayProperties(CompoundTag nbt) {
-        this.deserializeNBT(nbt);
-    }
-
-    @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag tag = new CompoundTag();
-        tag.putString("block", blockRl.toString());
-        tag.putBoolean("hasGlow", hasGlow);
-        tag.putInt("lightLevel", lightLevel);
-        return tag;
-    }
-
-    public static final List<ResourceLocation> DEFAULT_BLOCKS = new ArrayList<>();
-    static {
-        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("white_stained_glass"));
-        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("orange_stained_glass"));
-        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("magenta_stained_glass"));
-        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("light_blue_stained_glass"));
-        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("yellow_stained_glass"));
-        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("lime_stained_glass"));
-        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("pink_stained_glass"));
-        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("gray_stained_glass"));
-        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("light_gray_stained_glass"));
-        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("cyan_stained_glass"));
-        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("purple_stained_glass"));
-        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("blue_stained_glass"));
-        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("brown_stained_glass"));
-        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("green_stained_glass"));
-        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("red_stained_glass"));
-        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("black_stained_glass"));
-    }
-
-    public static ResourceLocation randomFromDefault() {
-        int randomNum = new Random().nextInt(0, 16);
-        return BlockDisplayProperties.DEFAULT_BLOCKS.get(randomNum);
-    }
-
-    public static final boolean DEFAULT_GLOW = true;
-    public static final int DEFAULT_LIGHT_LEVEL = 15;
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        String string = nbt.getString("block");
-        var res = ResourceLocation.tryParse(string);
-        if (res == null) {
-            Random rand = new Random();
-            int randomNum = rand.nextInt(0, DEFAULT_BLOCKS.size());
-            this.blockRl = DEFAULT_BLOCKS.get(randomNum);
-        }
-        this.hasGlow = nbt.contains("hasGlow") ?  nbt.getBoolean("hasGlow") : DEFAULT_GLOW;
-        this.lightLevel = nbt.contains("lightLevel") ? nbt.getInt("lightLevel") : DEFAULT_LIGHT_LEVEL;
     }
 
     public ResourceLocation blockRl() {

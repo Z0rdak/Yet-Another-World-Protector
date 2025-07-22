@@ -5,11 +5,9 @@ import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.core.area.BlockDisplayProperties;
 import de.z0rdak.yawp.core.area.DisplayType;
 import de.z0rdak.yawp.core.area.TeleportAnchor;
-import de.z0rdak.yawp.core.area.TextDisplayProperties;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -23,8 +21,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
-import static de.z0rdak.yawp.api.visualization.VisualizationUtil.buildTeleportAnchorTextDisplayTag;
-import static de.z0rdak.yawp.api.visualization.VisualizationUtil.createDisplayEntity;
 import static de.z0rdak.yawp.constants.Constants.MOD_ID;
 
 /*

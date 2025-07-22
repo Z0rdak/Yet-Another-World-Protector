@@ -84,7 +84,7 @@ public abstract class EntityMixin {
     public void onChangeDimension(DimensionTransition transition, CallbackInfoReturnable<Boolean> cir) {
         Entity self = (Entity) (Object) this;
         if (isServerSide(self.level())) {
-            RegionDataManager.addDimKeyOnDimensionChange(null, self.level(), transition.newLevel());
+            RegionDataManager.initLevelDataOnChangeWorld(null, self.level(), destination);
             FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL, getDimKey(self));
             if (Services.EVENT.post(checkEvent)) {
                 return;

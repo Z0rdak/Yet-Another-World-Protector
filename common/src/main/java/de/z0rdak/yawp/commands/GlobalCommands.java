@@ -3,6 +3,7 @@ package de.z0rdak.yawp.commands;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -44,7 +45,7 @@ public class GlobalCommands {
     }
 
     public static int resetGlobalRegion(CommandContext<CommandSourceStack> ctx) {
-        RegionDataManager.get().resetGlobalRegion();
+        RegionManager.get().resetGlobal();
         sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.global.reset", "Successfully reset global region", buildRegionInfoLink(getGlobalRegion())));
         return 0;
     }

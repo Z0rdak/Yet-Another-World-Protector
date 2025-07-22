@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.util;
 
+import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.permission.Permissions;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
@@ -65,17 +66,6 @@ public final class LocalRegions {
         return new CuboidRegion(regionName, cuboidArea, player, dim);
     }
 
-    public static IMarkableRegion regionFromArea(IMarkableArea area, BlockPos tpTarget, String regionName, ResourceKey<Level> dim) {
-        switch (area.getAreaType()) {
-            case CUBOID:
-                return new CuboidRegion(regionName, (CuboidArea) area, tpTarget, null, dim);
-            case SPHERE:
-                return new SphereRegion(regionName, (SphereArea) area, tpTarget, null, dim);
-            default:
-                throw new NotImplementedException("Area type not implemented yet");
-        }
-    }
-
     public static boolean hasAnyRegionWithSamePriority(IMarkableRegion region, int priority) {
         return hasAnyRegionWithSamePriority(getIntersectingRegionsFor(region), priority);
     }
@@ -129,7 +119,7 @@ public final class LocalRegions {
     }
 
     public static RegionOverlappingInfo getOverlappingRegions(IMarkableRegion region) {
-        Collection<IMarkableRegion> regionsInDim = RegionDataManager.get().getRegionsFor(region.getDim()).stream()
+        Collection<IMarkableRegion> regionsInDim = RegionDataManager.getLocalsFor(region.getDim()).stream()
                 .filter(r -> !r.equals(region))
                 .collect(Collectors.toList());
         List<IMarkableRegion> intersectingRegions = regionsInDim.stream()
@@ -142,7 +132,7 @@ public final class LocalRegions {
     }
 
     public static RegionOverlappingInfo getOverlappingRegions(IMarkableArea area, ResourceKey<Level> dim) {
-        Collection<IMarkableRegion> regionsInDim = RegionDataManager.get().getRegionsFor(dim);
+        Collection<IMarkableRegion> regionsInDim = RegionDataManager.getLocalsFor(dim);
         List<IMarkableRegion> intersectingRegions = regionsInDim.stream()
                 .filter(r -> r.getArea().intersects(area))
                 .collect(Collectors.toList());

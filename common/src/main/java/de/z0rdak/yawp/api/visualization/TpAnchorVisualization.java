@@ -3,7 +3,6 @@ package de.z0rdak.yawp.api.visualization;
 import de.z0rdak.yawp.core.area.BlockDisplayProperties;
 import de.z0rdak.yawp.core.area.TeleportAnchor;
 import de.z0rdak.yawp.core.area.TextDisplayProperties;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import org.apache.commons.lang3.NotImplementedException;
 

@@ -86,7 +86,7 @@ public abstract class ForgeRegionEvent extends Event {
          * Otherwise, you may cause inconsistencies and break your whole region definition.
          *
          * @param newName The new name of the region - be sure to validate it before
-         * @see de.z0rdak.yawp.data.region.RegionDataManager#isValidRegionName(ResourceKey, String)
+         * @see de.z0rdak.yawp.data.region.LevelRegionData#isValidRegionName(String)
          */
         public void setNewName(String newName) {
             this.newName = newName;

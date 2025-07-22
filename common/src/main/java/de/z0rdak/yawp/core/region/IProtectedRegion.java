@@ -1,11 +1,9 @@
 package de.z0rdak.yawp.core.region;
 
-import de.z0rdak.yawp.core.INbtSerializable;
-import de.z0rdak.yawp.core.flag.RegionFlags;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
+import de.z0rdak.yawp.core.flag.RegionFlags;
 import de.z0rdak.yawp.core.group.PlayerContainer;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -28,7 +26,7 @@ import java.util.UUID;
  * Classes which implement this interface must also provide a way
  * to serialize the region data into a CompoundNBT.
  */
-public interface IProtectedRegion extends INbtSerializable<CompoundTag> {
+public interface IProtectedRegion{
 
     String getName();
 
@@ -68,6 +66,8 @@ public interface IProtectedRegion extends INbtSerializable<CompoundTag> {
     boolean hasPlayer(UUID playerUuid, String group);
 
     PlayerContainer getGroup(String group);
+
+    Map<String, PlayerContainer> getGroups();
 
     boolean permits(Player player);
 

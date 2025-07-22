@@ -12,7 +12,7 @@ import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
-import de.z0rdak.yawp.data.region.DimensionRegionCache;
+import de.z0rdak.yawp.data.region.LevelRegionData;
 import de.z0rdak.yawp.util.ChatLinkBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -77,8 +77,8 @@ public class AddRegionChildArgumentType implements ArgumentType<String> {
     // TODO: Extend suggestions for any region and check if their parents are dim or local regions
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         if (context.getSource() instanceof CommandSourceStack src) {
-            DimensionRegionCache dimCache = ArgumentUtil.getDimCacheArgument((CommandContext<CommandSourceStack>) context);
-            DimensionalRegion dimRegion = dimCache.getDimensionalRegion();
+            LevelRegionData levelData = ArgumentUtil.getLevelDataArgument((CommandContext<CommandSourceStack>) context);
+            DimensionalRegion dimRegion = levelData.getDim();
             IMarkableRegion region = ArgumentUtil.getRegionArgument((CommandContext<CommandSourceStack>) context);
             List<String> potentialChildrenNames = dimRegion.getChildren().values()
                     .stream()
