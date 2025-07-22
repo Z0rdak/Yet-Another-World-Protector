@@ -1,11 +1,11 @@
 package de.z0rdak.yawp.core.area;
 
-import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.util.AreaUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -20,7 +20,28 @@ import static de.z0rdak.yawp.util.AreaUtil.distanceManhattan;
  * Represents and wraps a simple AxisAlignedBB.
  * This area is marked by two positions and thus spans a cuboid shape
  */
-public class CuboidArea extends AbstractArea {
+public class CuboidArea extends MarkedArea {
+
+    public static Codec<CuboidArea> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            BlockPos.CODEC.fieldOf("p1")
+                    .forGetter(CuboidArea::getAreaP1),
+            BlockPos.CODEC.fieldOf("p2")
+                    .forGetter(CuboidArea::getAreaP2),
+            Codec.STRING.fieldOf("areaType")
+                    .forGetter(r -> MarkedAreaTypes.areaIdentifier(r.getAreaType()).toString()),
+            BlockDisplayProperties.CODEC.fieldOf("display")
+                    .forGetter(MarkedArea::getDisplay)
+            ).apply(instance, (p1, p2, area, display) -> {
+                var cuboid = new CuboidArea(p1, p2);
+                cuboid.updateDisplay(display);
+                return cuboid;
+            })
+    );
+
+    @Override
+    public MarkedAreaType<?> getType() {
+        return MarkedAreaTypes.CUBOID_AREA;
+    }
 
     private BoundingBox area;
     private BlockPos p1;
@@ -37,16 +58,13 @@ public class CuboidArea extends AbstractArea {
         this.p2 = AreaUtil.getHigherPos(p1, p2);
     }
 
-    public CuboidArea(CompoundTag nbt) {
-        super(nbt);
-        this.deserializeNBT(nbt);
-    }
-
     public static CuboidArea expand(CuboidArea area, int min, int max) {
         BlockPos p1 = area.getAreaP1();
         BlockPos p2 = area.getAreaP2();
-        return new CuboidArea(new BlockPos(p1.getX(), min, p1.getZ()),
+        var expanded = new CuboidArea(new BlockPos(p1.getX(), min, p1.getZ()),
                 new BlockPos(p2.getX(), max, p2.getZ()));
+        expanded.updateDisplay(area.getDisplay());
+        return expanded;
     }
 
     private static boolean isInFacePlane(BlockPos point, BlockPos corner1, BlockPos corner2, BlockPos corner3, BlockPos corner4) {
@@ -215,22 +233,6 @@ public class CuboidArea extends AbstractArea {
 
     public BlockPos getAreaP2() {
         return this.p2;
-    }
-
-    @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
-        nbt.put(RegionNbtKeys.P1, NbtUtils.writeBlockPos(this.p1));
-        nbt.put(RegionNbtKeys.P2, NbtUtils.writeBlockPos(this.p2));
-        return nbt;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
-        this.p1 = NbtUtils.readBlockPos(nbt.getCompound(RegionNbtKeys.P1));
-        this.p2 = NbtUtils.readBlockPos(nbt.getCompound(RegionNbtKeys.P2));
-        this.area = BoundingBox.fromCorners(p1, p2);
     }
 
     @Override

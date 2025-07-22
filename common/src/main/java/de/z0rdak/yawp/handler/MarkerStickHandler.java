@@ -27,7 +27,7 @@ public class MarkerStickHandler {
         input.setCount(output.getCount() - 1);
         player.addItem(input);
         player.giveExperienceLevels(1);
-        StickUtil.initMarkerNbt(output, type, player.level().dimension());
+        StickUtil.initMarkerNbt(output, player.level().dimension());
     }
 
     public static void onMarkBlock(Player player, ItemStack involvedItem, BlockPos target) {

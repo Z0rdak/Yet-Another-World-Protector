@@ -20,16 +20,14 @@ import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 
 public final class CommandRegistry {
 
-    private static CommandDispatcher<CommandSourceStack> dispatcher;
     private CommandRegistry() {
     }
 
     public static void registerCommands(CommandDispatcher<CommandSourceStack> cmdDispatcher, CommandBuildContext registryAccess, Commands.CommandSelection env) {
-        dispatcher = cmdDispatcher;
         if (env == Commands.CommandSelection.DEDICATED || env == Commands.CommandSelection.INTEGRATED) {
             try {
                 LiteralArgumentBuilder<CommandSourceStack> modCmds = buildCommands();
-                cmdDispatcher.register(modCmds);      
+                cmdDispatcher.register(modCmds);
             }
             catch (Exception e) {
                 // Nothing to do here. Since multi project structure was introduced,

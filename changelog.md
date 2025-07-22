@@ -1,3 +1,13 @@
+# [0.6.1-beta1] - 2025-07-18
+
+## Changed
+
+- Backport codec based region data serialization from 0.5.3-beta1 to 1.20.1, 1.21.1 and 1.21.4. Note: This is a breaking change for those versions and will result in region data loss.
+
+## Fixed
+
+- Fix broken default values for region display data.
+
 # [0.6.0-beta1] - 2025-07-16
 
 ## Added

@@ -18,7 +18,7 @@ public class FlagRegister {
     private static final Map<ResourceLocation, Flag> flagRegister = new HashMap<>();
 
     private static ResourceLocation flagId(final String flagName) {
-        return ResourceLocation.tryBuild(Constants.MOD_ID, flagName);
+        return new ResourceLocation(Constants.MOD_ID, flagName);
     }
 
     /**
@@ -95,10 +95,7 @@ public class FlagRegister {
      * @return {@code true} if the flag was successfully registered, {@code false} if it was already registered.
      */
     public static boolean registerFlag(@NotNull String modId, @NotNull String flagId, @NotNull FlagMetaInfo flagMetaInfo) {
-        var rl = ResourceLocation.tryBuild(modId, flagId);
-        if (rl == null) {
-            return  false;
-        }
+        var rl = new ResourceLocation(modId, flagId);
         return registerFlag(rl, flagMetaInfo);
     }
 
@@ -152,9 +149,8 @@ public class FlagRegister {
     public static Flag byId(String flagIdentifier) throws IllegalArgumentException {
         if (isRegistered(flagIdentifier)) {
             ResourceLocation rl = ResourceLocation.tryParse(flagIdentifier);
-            if (rl == null) {
+            if (rl == null)
                 throw new IllegalArgumentException("Invalid region flag identifier supplied");
-            }
             return flagRegister.get(rl);
         }
         throw new IllegalArgumentException("Invalid region flag identifier supplied");

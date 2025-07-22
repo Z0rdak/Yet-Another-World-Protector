@@ -57,6 +57,8 @@ public final class Permissions {
         return Services.PERMISSION_CONFIG.hasConfigPermission(player);
     }
 
+
+
     public boolean hasOwnerPermission(IProtectedRegion region, Player player) {
         return hasGroupPermission(region, player, OWNER);
     }

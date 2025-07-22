@@ -1,16 +1,11 @@
 package de.z0rdak.yawp.core.area;
 
-import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.nbt.Tag;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.*;
 
-public class Polygon3DArea extends AbstractArea {
+public class Polygon3DArea extends MarkedArea {
 
     private List<BlockPos> positions;
 
@@ -22,11 +17,6 @@ public class Polygon3DArea extends AbstractArea {
     public Polygon3DArea(List<BlockPos> positions) {
         this();
         this.positions = positions;
-    }
-
-    public Polygon3DArea(CompoundTag nbt) {
-        super(nbt);
-        this.deserializeNBT(nbt);
     }
 
     /**
@@ -70,29 +60,6 @@ public class Polygon3DArea extends AbstractArea {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
-        ListTag pointList = new ListTag();
-        this.positions.forEach((point) -> {
-            CompoundTag pointNbt = NbtUtils.writeBlockPos(point);
-            pointList.add(pointNbt);
-        });
-        nbt.put(RegionNbtKeys.BLOCKS, pointList);
-        return nbt;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        this.positions.clear();
-        this.deserializeNBT(nbt);
-        ListTag pointList = nbt.getList(RegionNbtKeys.BLOCKS, Tag.TAG_COMPOUND);
-        for (int i = 0; i < pointList.size(); i++) {
-            BlockPos pos = NbtUtils.readBlockPos(pointList.getCompound(i));
-            this.positions.add(pos);
-        }
-    }
-
-    @Override
     public String toString() {
         throw new NotImplementedException("Missing toString");
     }
@@ -104,7 +71,7 @@ public class Polygon3DArea extends AbstractArea {
 
     @Override
     public Set<BlockPos> getHull() {
-        throw new NotImplementedException("ChunkArea.getHull() not implemented yet");
+        throw new NotImplementedException("Polygon3DArea.getHull() not implemented yet");
     }
 
     @Override
@@ -126,5 +93,10 @@ public class Polygon3DArea extends AbstractArea {
     @Override
     public boolean intersects(IMarkableArea other) {
         throw new NotImplementedException("Not yet implemented");
+    }
+
+    @Override
+    public MarkedAreaType<?> getType() {
+        return null;
     }
 }

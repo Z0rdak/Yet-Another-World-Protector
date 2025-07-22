@@ -5,15 +5,12 @@ import de.z0rdak.yawp.core.region.IMarkableRegion;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import static de.z0rdak.yawp.api.visualization.VisualizationUtil.*;
+import static de.z0rdak.yawp.api.visualization.VisualizationUtil.createBlockDisplayEntity;
 
 public class RegionVisualizationManager {
 

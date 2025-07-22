@@ -1,10 +1,11 @@
 package de.z0rdak.yawp.core.area;
 
-import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.util.AreaUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -17,12 +18,23 @@ import static de.z0rdak.yawp.util.AreaUtil.distanceManhattan;
 
 public class SphereArea extends CenteredArea {
 
-    private int radius;
+    public static Codec<SphereArea> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                    BlockPos.CODEC.fieldOf("center")
+                            .forGetter(SphereArea::getCenterPos),
+                    Codec.INT.fieldOf("radius")
+                            .forGetter(SphereArea::getRadius),
+                    Codec.STRING.fieldOf("areaType")
+                            .forGetter(r -> MarkedAreaTypes.areaIdentifier(r.getAreaType()).toString()),
+                    BlockDisplayProperties.CODEC.fieldOf("display")
+                            .forGetter(MarkedArea::getDisplay)
+            ).apply(instance, (center, radius, area, display) -> {
+                var sphere = new SphereArea(center, radius);
+                sphere.updateDisplay(display);
+                return sphere;
+            })
+    );
 
-    public SphereArea(CompoundTag nbt) {
-        super(nbt);
-        this.deserializeNBT(nbt);
-    }
+    private final int radius;
 
     public SphereArea(BlockPos centerPos, BlockPos scopePos) {
         super(centerPos, AreaType.SPHERE);
@@ -34,7 +46,9 @@ public class SphereArea extends CenteredArea {
     }
 
     public static SphereArea expand(SphereArea area, int expansion) {
-        return new SphereArea(area.center, Math.max(area.radius + expansion, 0));
+        var expanded = new SphereArea(area.center, Math.max(area.radius + expansion, 0));
+        expanded.updateDisplay(area.getDisplay());
+        return expanded;
     }
 
     public int getRadius() {
@@ -142,16 +156,8 @@ public class SphereArea extends CenteredArea {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
-        nbt.putInt(RegionNbtKeys.RADIUS, this.radius);
-        return nbt;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
-        this.radius = nbt.getInt(RegionNbtKeys.RADIUS);
+    public MarkedAreaType<?> getType() {
+        return MarkedAreaTypes.SPHERE_AREA;
     }
 
     @Override

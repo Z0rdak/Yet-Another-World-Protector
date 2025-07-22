@@ -1,10 +1,8 @@
 package de.z0rdak.yawp.core.area;
 
-import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import de.z0rdak.yawp.util.AreaUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.nbt.CompoundTag;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.Set;
@@ -18,9 +16,9 @@ import static de.z0rdak.yawp.util.AreaUtil.length;
  */
 public class VerticalCylinderArea extends CenteredArea {
 
-    private BlockPos centerTopPos;
-    private int distance;
-    private int radius;
+    private final BlockPos centerTopPos;
+    private final int distance;
+    private final int radius;
 
     public VerticalCylinderArea(BlockPos centerBottomPos, BlockPos scopePos) {
         super(centerBottomPos, AreaType.CYLINDER);
@@ -34,11 +32,6 @@ public class VerticalCylinderArea extends CenteredArea {
         this.centerTopPos = centerBottomPos.offset(0, distance, 0);
         this.radius = radius;
         this.distance = distance;
-    }
-
-    public VerticalCylinderArea(CompoundTag nbt) {
-        super(nbt);
-        this.deserializeNBT(nbt);
     }
 
     public Vec3i getCenter() {
@@ -64,7 +57,7 @@ public class VerticalCylinderArea extends CenteredArea {
 
     @Override
     public Set<BlockPos> getHull() {
-        throw new NotImplementedException("ChunkArea.getHull() not implemented yet");
+        throw new NotImplementedException("CylinderArea.getHull() not implemented yet");
     }
 
     @Override
@@ -90,22 +83,6 @@ public class VerticalCylinderArea extends CenteredArea {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
-        nbt.putInt(RegionNbtKeys.RADIUS, this.radius);
-        nbt.putInt(RegionNbtKeys.HEIGHT, this.distance);
-        return nbt;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
-        this.distance = nbt.getInt(RegionNbtKeys.RADIUS);
-        this.radius = nbt.getInt(RegionNbtKeys.HEIGHT);
-    }
-
-
-    @Override
     public boolean containsOther(IMarkableArea other) {
         throw new NotImplementedException("Not yet implemented");
     }
@@ -113,6 +90,11 @@ public class VerticalCylinderArea extends CenteredArea {
     @Override
     public boolean intersects(IMarkableArea other) {
         throw new NotImplementedException("Not yet implemented");
+    }
+
+    @Override
+    public MarkedAreaType<?> getType() {
+        return null;
     }
 
     // Cylinder [x,y,z] with radius r and height h

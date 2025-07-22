@@ -7,6 +7,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import de.z0rdak.yawp.api.commands.CommandConstants;
+import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.events.flag.FlagEvent;
 import de.z0rdak.yawp.api.permission.Permissions;
 import de.z0rdak.yawp.commands.arguments.flag.IFlagArgumentType;
@@ -19,13 +20,11 @@ import de.z0rdak.yawp.core.group.GroupType;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
-import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.util.ChatLinkBuilder;
 import de.z0rdak.yawp.util.MojangApiHelper;
 import de.z0rdak.yawp.util.text.Messages;
 import de.z0rdak.yawp.util.text.messages.multiline.MultiLineMessage;
-import de.z0rdak.yawp.util.text.messages.multiline.RegionInfoMessage;
 import de.z0rdak.yawp.util.text.messages.pagination.*;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -40,6 +39,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.scores.Team;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -198,7 +198,7 @@ public class CommandUtil {
                                                 .executes(ctx -> copyRegionFlags(ctx, srcSupplier.apply(ctx), getTargetLocalRegionArgument(ctx))))))
                         .then(literal(TO_DIM)
                                 .then(Commands.argument(TARGET_DIM.toString(), DimensionArgument.dimension())
-                                        .executes(ctx -> copyRegionFlags(ctx, srcSupplier.apply(ctx), getTargetDimRegionArgument(ctx).getDimensionalRegion()))))
+                                        .executes(ctx -> copyRegionFlags(ctx, srcSupplier.apply(ctx), getTargetDimRegionArgument(ctx).getDim()))))
                 )
                 .then(literal(PLAYERS)
                         .then(literal(TO_LOCAL)
@@ -212,7 +212,7 @@ public class CommandUtil {
                                 .then(Commands.argument(TARGET_DIM.toString(), DimensionArgument.dimension())
                                         .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
                                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Permissions.GROUP_LIST, builder))
-                                                .executes(ctx -> copyRegionPlayers(ctx, srcSupplier.apply(ctx), getTargetDimRegionArgument(ctx).getDimensionalRegion(), getGroupArgument(ctx)))))))
+                                                .executes(ctx -> copyRegionPlayers(ctx, srcSupplier.apply(ctx), getTargetDimRegionArgument(ctx).getDim(), getGroupArgument(ctx)))))))
                 .then(literal(STATE)
                         .then(literal(TO_LOCAL)
                                 .then(Commands.argument(TARGET_DIM.toString(), DimensionArgument.dimension())
@@ -221,12 +221,12 @@ public class CommandUtil {
                                                 .executes(ctx -> copyRegionState(ctx, srcSupplier.apply(ctx), getTargetLocalRegionArgument(ctx))))))
                         .then(literal(TO_DIM)
                                 .then(Commands.argument(TARGET_DIM.toString(), DimensionArgument.dimension())
-                                        .executes(ctx -> copyRegionState(ctx, srcSupplier.apply(ctx), getTargetDimRegionArgument(ctx).getDimensionalRegion()))))
+                                        .executes(ctx -> copyRegionState(ctx, srcSupplier.apply(ctx), getTargetDimRegionArgument(ctx).getDim()))))
                 );
     }
 
     public static int promptRegionInfo(CommandContext<CommandSourceStack> ctx, IProtectedRegion region) {
-        MultiLineMessage.send(ctx.getSource(), new RegionInfoMessage(region));
+        MultiLineMessage.send(ctx.getSource(),  MultiLineMessage.regionInfo(region));
         return 0;
     }
 
@@ -313,7 +313,7 @@ public class CommandUtil {
 
     public static int setActiveState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, boolean activate) {
         region.setIsActive(activate);
-        RegionDataManager.save();
+        RegionManager.get().save();
         MutableComponent undoLink = ChatLinkBuilder.buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!activate), String.valueOf(activate));
         MutableComponent msg = Component.translatableWithFallback("cli.msg.info.region.state.enable.set.value", "Region state of %s is now: %s",
                 ChatLinkBuilder.buildRegionInfoLink(region), region.isActive() ? "active" : "inactive");
@@ -323,7 +323,7 @@ public class CommandUtil {
 
     public static int setAlertState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, boolean showAlert) {
         region.setIsMuted(!showAlert);
-        RegionDataManager.save();
+        RegionManager.get().save();
         MutableComponent undoLink = ChatLinkBuilder.buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!showAlert), String.valueOf(showAlert));
         MutableComponent msg = Component.translatableWithFallback("cli.msg.info.state.alert.set.value", "Flag messages of %s are now: %s",
                 ChatLinkBuilder.buildRegionInfoLink(region), region.isMuted() ? "muted" : "active");
@@ -344,7 +344,7 @@ public class CommandUtil {
         MutableComponent teamInfo = buildGroupInfo(region, team.getName(), GroupType.TEAM);
         if (region.getGroup(group).hasTeam(team.getName())) {
             region.removeTeam(team.getName(), group);
-            RegionDataManager.save();
+            RegionManager.get().save();
             MutableComponent msg = Component.translatableWithFallback("cli.msg.info.region.group.team.removed", "Removed team '%s' (group '%s') from %s", teamInfo, group,
                     ChatLinkBuilder.buildRegionInfoLink(region));
             sendCmdFeedback(ctx.getSource(), Messages.substitutable("%s %s", msg, undoLink));
@@ -412,7 +412,7 @@ public class CommandUtil {
             MutableComponent msg = Component.translatableWithFallback("cli.msg.info.region.group.player.removed", "Removed player '%s' (group '%s') from %s", playerInfo, group,
                     ChatLinkBuilder.buildRegionInfoLink(region));
             sendCmdFeedback(ctx.getSource(), Messages.substitutable("%s %s", msg, undoLink));
-            RegionDataManager.save();
+            RegionManager.get().save();
             return 0;
         }
 
@@ -430,7 +430,8 @@ public class CommandUtil {
         Optional<GameProfile> cachedProfile = MojangApiHelper.lookupGameProfileInCache(ctx, playerUuid);
         if (cachedProfile.isPresent()) {
             GameProfile profile = cachedProfile.get();
-            if (profile.isComplete()) {
+            var isComplete = profile.getId() != null && StringUtils.isNotBlank(profile.getName());
+            if (isComplete) {
                 MutableComponent cacheSuccess = Component.translatableWithFallback("cli.msg.info.player.lookup.cache.success", "Found entry for '%s' in the cache", playerUuid.toString());
                 sendCmdFeedback(ctx.getSource(), cacheSuccess);
                 return addPlayer(ctx, profile.getId(), profile.getName(), region, group);
@@ -467,7 +468,8 @@ public class CommandUtil {
         Optional<GameProfile> cachedProfile = MojangApiHelper.lookupGameProfileInCache(ctx, playerName);
         if (cachedProfile.isPresent()) {
             GameProfile profile = cachedProfile.get();
-            if (profile.isComplete()) {
+            var isComplete = profile.getId() != null && StringUtils.isNotBlank(profile.getName());
+            if (isComplete) {
                 MutableComponent cacheSuccess = Component.translatableWithFallback("cli.msg.info.player.lookup.cache.success", "Found entry for '%s' in the cache", playerName);
                 sendCmdFeedback(ctx.getSource(), cacheSuccess);
                 return addPlayer(ctx, profile.getId(), profile.getName(), region, group);
@@ -509,7 +511,7 @@ public class CommandUtil {
         MutableComponent undoLink = ChatLinkBuilder.buildRegionActionUndoLink(ctx.getInput(), ADD, REMOVE);
         if (!region.hasPlayer(uuid, group)) {
             region.addPlayer(uuid, name, group);
-            RegionDataManager.save();
+            RegionManager.get().save();
             MutableComponent msg = Component.translatableWithFallback("cli.msg.info.region.group.player.added", "Added player '%s' as '%s' to %s", name, group, regionInfoLink);
             sendCmdFeedback(ctx.getSource(), Messages.substitutable("%s %s", msg, undoLink));
             return 0;
@@ -528,7 +530,7 @@ public class CommandUtil {
         MutableComponent teamHoverInfo = buildTeamHoverComponent(team);
         if (!region.hasTeam(team.getName(), group)) {
             region.addTeam(team.getName(), group);
-            RegionDataManager.save();
+            RegionManager.get().save();
             MutableComponent undoLink = ChatLinkBuilder.buildRegionActionUndoLink(ctx.getInput(), ADD, REMOVE);
             MutableComponent msg = Component.translatableWithFallback("cli.msg.info.region.group.team.added", "Added team '%s' as '%s' to region %s",
                     teamHoverInfo, group, regionInfoLink);
@@ -552,7 +554,7 @@ public class CommandUtil {
             FlagEvent.RemoveFlagEvent removeFlagEvent = new FlagEvent.RemoveFlagEvent(ctx.getSource(), region, iFlag);
             Services.EVENT.post(removeFlagEvent);
             region.removeFlag(flag.name);
-            RegionDataManager.save();
+            RegionManager.get().save();
             MutableComponent msg = Component.translatableWithFallback("cli.msg.flag.removed", "Removed flag '%s' from %s", flag.name,
                     ChatLinkBuilder.buildRegionInfoLink(region));
             MutableComponent undoLink = ChatLinkBuilder.buildRegionActionUndoLink(ctx.getInput(), REMOVE, ADD);
@@ -577,7 +579,7 @@ public class CommandUtil {
                 .collect(Collectors.toSet());
         // flagsToCopy.forEach(region::addFlag);
         srcRegion.getFlags().flags().forEach(targetRegion::addFlag);
-        RegionDataManager.save();
+        RegionManager.get().save();
         sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.copy.region.flags", "Copied %s flag(s) from region %s to %s", flagsToCopy.size(), ChatLinkBuilder.buildRegionInfoLink(srcRegion), ChatLinkBuilder.buildRegionInfoLink(targetRegion)));
         return 0;
     }
@@ -588,7 +590,7 @@ public class CommandUtil {
         if (srcRegion instanceof IMarkableRegion regionSource && targetRegion instanceof IMarkableRegion regionTarget) {
             regionTarget.setPriority(regionSource.getPriority());
         }
-        RegionDataManager.save();
+        RegionManager.get().save();
         sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.copy.region.state", "Copied state from region %s to %s", ChatLinkBuilder.buildRegionInfoLink(srcRegion), ChatLinkBuilder.buildRegionInfoLink(targetRegion)));
         return 0;
     }
@@ -602,7 +604,7 @@ public class CommandUtil {
             //playerEntriesToCopy.forEach(entry -> region.getGroup(group).addPlayer(entry.getKey(), entry.getValue()));
 
             srcRegion.getGroup(group).getPlayers().forEach((uuid, name) -> targetRegion.getGroup(group).addPlayer(uuid, name));
-            RegionDataManager.save();
+            RegionManager.get().save();
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.copy.region.players", "Copied %s player(s) of group '%s' from %s to %s", playerEntriesToCopy.size(), group, ChatLinkBuilder.buildRegionInfoLink(srcRegion), ChatLinkBuilder.buildRegionInfoLink(targetRegion)));
             return 0;
         }
@@ -626,7 +628,7 @@ public class CommandUtil {
         region.getFlags().clear();
         MutableComponent feedbackMsg = Component.translatableWithFallback("cli.msg.info.region.flag.cleared", "Removed %s flag(s) from %s", amount, ChatLinkBuilder.buildRegionInfoLink(region));
         sendCmdFeedback(ctx.getSource(), feedbackMsg);
-        RegionDataManager.save();
+        RegionManager.get().save();
         return 0;
     }
 
@@ -644,7 +646,7 @@ public class CommandUtil {
         region.getGroup(groupName).clearPlayers();
         MutableComponent feedbackMsg = Component.translatableWithFallback("cli.msg.info.region.players.cleared", "Cleared %s players of group '%s' for %s\",", ChatLinkBuilder.buildRegionInfoLink(region), amount, groupName);
         sendCmdFeedback(ctx.getSource(), feedbackMsg);
-        RegionDataManager.save();
+        RegionManager.get().save();
         return 0;
     }
 
@@ -662,7 +664,7 @@ public class CommandUtil {
         region.getGroup(groupName).clearTeams();
         MutableComponent feedbackMsg = Component.translatableWithFallback("cli.msg.info.region.teams.cleared", "Cleared %s teams of group '%s' for %s", ChatLinkBuilder.buildRegionInfoLink(region), amount, groupName);
         sendCmdFeedback(ctx.getSource(), feedbackMsg);
-        RegionDataManager.save();
+        RegionManager.get().save();
         return 0;
     }
 
@@ -710,7 +712,7 @@ public class CommandUtil {
             FlagEvent.AddFlagEvent addFlagEvent = new FlagEvent.AddFlagEvent(ctx.getSource(), region, iFlag);
             Services.EVENT.post(addFlagEvent);
             region.addFlag(iFlag);
-            RegionDataManager.save();
+            RegionManager.get().save();
             MutableComponent flagLink = ChatLinkBuilder.buildFlagInfoLink(region, iFlag);
             MutableComponent msg = Component.translatableWithFallback("cli.msg.flag.added", "Added flag '%s' to %s",
                     flagLink, ChatLinkBuilder.buildRegionInfoLink(region));

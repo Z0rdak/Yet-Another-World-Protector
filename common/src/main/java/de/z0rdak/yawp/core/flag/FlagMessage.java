@@ -1,10 +1,10 @@
 package de.z0rdak.yawp.core.flag;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
-import de.z0rdak.yawp.core.INbtSerializable;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Player;
@@ -12,11 +12,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static de.z0rdak.yawp.constants.serialization.RegionNbtKeys.*;
 import static de.z0rdak.yawp.core.flag.FlagTag.PLAYER;
-import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
+import static de.z0rdak.yawp.util.ChatComponentBuilder.shortBlockPosBracketed;
+import static de.z0rdak.yawp.util.ChatComponentBuilder.tinyBlockPos;
 
-public class FlagMessage implements INbtSerializable<CompoundTag> {
+public class FlagMessage {
 
     public static final String FLAG_TEMPLATE = "{flag}";
     public static final String POS_TEMPLATE = "{pos}";
@@ -41,6 +41,16 @@ public class FlagMessage implements INbtSerializable<CompoundTag> {
         MSG_TOKEN.add("{block}");
     }
 
+    public static Codec<FlagMessage> CODEC = RecordCodecBuilder.create(
+            instance -> instance.group(
+                    Codec.STRING.fieldOf("msg")
+                            .forGetter(FlagMessage::msg),
+                    Codec.BOOL.fieldOf("muted")
+                            .forGetter(FlagMessage::isMuted),
+                    Codec.BOOL.fieldOf("default")
+                            .forGetter(FlagMessage::isDefault)
+                    ).apply(instance, FlagMessage::new));
+
     private String msg;
     private boolean muted;
     private boolean isDefault;
@@ -55,8 +65,9 @@ public class FlagMessage implements INbtSerializable<CompoundTag> {
         this.muted = muted;
     }
 
-    public FlagMessage(CompoundTag msgNbt) {
-        this.deserializeNBT(msgNbt);
+    public FlagMessage(String msg, boolean muted, boolean isDefault) {
+        this(msg, muted);
+        this.isDefault = isDefault;
     }
 
     /**
@@ -177,21 +188,4 @@ public class FlagMessage implements INbtSerializable<CompoundTag> {
     public String toString() {
         return msg;
     }
-
-    @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = new CompoundTag();
-        nbt.putString(MSG, this.msg);
-        nbt.putBoolean(DEFAULT, this.isDefault);
-        nbt.putBoolean(MUTED, this.muted);
-        return nbt;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        this.msg = nbt.getString(MSG);
-        this.muted = nbt.getBoolean(MUTED);
-        this.isDefault = nbt.getBoolean(DEFAULT);
-    }
-
 }

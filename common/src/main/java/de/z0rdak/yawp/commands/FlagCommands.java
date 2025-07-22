@@ -6,6 +6,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import de.z0rdak.yawp.api.commands.CommandConstants;
+import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.events.flag.FlagEvent;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.commands.arguments.flag.IFlagArgumentType;
@@ -14,7 +15,6 @@ import de.z0rdak.yawp.core.flag.FlagMessage;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.util.text.Messages;
 import de.z0rdak.yawp.util.text.messages.multiline.MultiLineMessage;
@@ -53,15 +53,15 @@ final class FlagCommands {
 
     private static RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> flagDimSubCommands() {
         return Commands.argument(DIM.toString(), DimensionArgument.dimension())
-                .executes(ctx -> CommandUtil.promptRegionFlagList(ctx, getDimCacheArgument(ctx).getDimensionalRegion(), 0))
-                .then(flagSubCmd((ctx) -> getDimCacheArgument(ctx).getDimensionalRegion()));
+                .executes(ctx -> CommandUtil.promptRegionFlagList(ctx, getLevelDataArgument(ctx).getDim(), 0))
+                .then(flagSubCmd((ctx) -> getLevelDataArgument(ctx).getDim()));
     }
 
     private static RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> flagLocalSubCommands() {
         return Commands.argument(DIM.toString(), DimensionArgument.dimension())
                 .then(Commands.argument(CommandConstants.LOCAL.toString(), StringArgumentType.word())
                         .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestions(ctx, builder))
-                        .executes(ctx -> CommandUtil.promptRegionFlagList(ctx, getDimCacheArgument(ctx).getDimensionalRegion(), 0))
+                        .executes(ctx -> CommandUtil.promptRegionFlagList(ctx, getLevelDataArgument(ctx).getDim(), 0))
                         .then(flagSubCmd(ArgumentUtil::getRegionArgument))
                 );
     }
@@ -138,7 +138,7 @@ final class FlagCommands {
         MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!setMuted), String.valueOf(setMuted));
         MutableComponent msg = Messages.substitutable("%s %s", infoMsg, undoLink);
         sendCmdFeedback(ctx.getSource(), msg);
-        RegionDataManager.save();
+        RegionManager.get().save();
         return 0;
 
     }
@@ -149,7 +149,7 @@ final class FlagCommands {
 
         FlagEvent.UpdateFlagMessageEvent editMsgEvent = new FlagEvent.UpdateFlagMessageEvent(ctx.getSource(), region, flag, flagMsgStr);
         Services.EVENT.post(editMsgEvent);
-        
+
         FlagMessage flagMsg = new FlagMessage(flagMsgStr, flag.getFlagMsg().isMuted());
         flag.setFlagMsg(flagMsg);
         MutableComponent infoMsg = Component.translatableWithFallback("cli.flag.msg.msg.success.text", "Set message of %s to: '%s'",
@@ -157,7 +157,7 @@ final class FlagCommands {
         MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), flagMsgStr, oldFlagMsg);
         MutableComponent msg = Messages.substitutable("%s %s", infoMsg, undoLink);
         sendCmdFeedback(ctx.getSource(), msg);
-        RegionDataManager.save();
+        RegionManager.get().save();
         return 0;
     }
 
@@ -189,7 +189,7 @@ final class FlagCommands {
                 buildFlagInfoLink(region, flag), flag.getState().name);
         MutableComponent msg = Messages.substitutable("%s %s", infoMsg, undoLink);
         sendCmdFeedback(ctx.getSource(), msg);
-        RegionDataManager.save();
+        RegionManager.get().save();
         return 0;
 
     }
@@ -216,7 +216,7 @@ final class FlagCommands {
         MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!override), String.valueOf(override));
         MutableComponent msg = Messages.substitutable("%s %s", infoMsg, undoLink);
         sendCmdFeedback(ctx.getSource(), msg);
-        RegionDataManager.save();
+        RegionManager.get().save();
         return 0;
     }
 

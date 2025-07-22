@@ -8,11 +8,8 @@ import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.group.GroupType;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
 
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.commandBlockPosStr;
@@ -346,8 +343,8 @@ public final class Commands {
         return buildRemoveCommand(region, subCmd);
     }
 
-    public static String buildListLocalRegionCommand(ResourceKey<Level> dim) {
-        return buildCommandStr(DIM.toString(), dim.location().toString(), LIST.toString(), LOCAL.toString());
+    public static String buildListLocalRegionCommand(ResourceLocation levelRl) {
+        return buildCommandStr(DIM.toString(), levelRl.toString(), LIST.toString(), LOCAL.toString());
     }
 
     public static String buildListGroupMemberCommand(IProtectedRegion region, String group, GroupType groupType) {

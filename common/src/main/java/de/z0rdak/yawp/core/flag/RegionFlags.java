@@ -1,53 +1,28 @@
 package de.z0rdak.yawp.core.flag;
 
-import de.z0rdak.yawp.constants.Constants;
-import net.minecraft.nbt.CompoundTag;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-import static de.z0rdak.yawp.constants.serialization.RegionNbtKeys.FLAG_TYPE;
-
 public class RegionFlags implements IFlagContainer {
+    public static Codec<RegionFlags> CODEC = RecordCodecBuilder.create(
+            instance -> instance.group(
+                    Codec.unboundedMap(Codec.STRING, Flag.CODEC)
+                            .optionalFieldOf("flags", new HashMap<>())
+                            .forGetter(a -> a.flags)
+            ).apply(instance, RegionFlags::new)
+    );
 
-    private final Map<String, IFlag> flags = new HashMap<>();
+    private final Map<String, IFlag> flags;
 
-    public RegionFlags() {}
-
-    public RegionFlags(CompoundTag nbt) {
-        this.deserializeNBT(nbt);
+    public RegionFlags() {
+        this.flags = new HashMap<>();
     }
 
-    @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = new CompoundTag();
-        flags.forEach((flagName, iFlag) -> {
-            if (RegionFlag.contains(flagName)) {
-                nbt.put(flagName, iFlag.serializeNBT());
-            }
-        });
-        return nbt;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        flags.clear();
-        for (String key : nbt.getAllKeys()) {
-            if (RegionFlag.contains(key)) {
-                CompoundTag flagNbt = nbt.getCompound(key);
-                FlagType flagType = FlagType.of(flagNbt.getString(FLAG_TYPE));
-                if (flagType != null) {
-                    IFlag flag = switch (flagType) {
-                        case BOOLEAN_FLAG -> new BooleanFlag(flagNbt);
-                        case LIST_FLAG -> new ListFlag(flagNbt);
-                        case INT_FLAG -> new IntFlag(flagNbt);
-                    };
-                    flags.put(key, flag);
-                } else {
-                    Constants.LOGGER.warn("Error reading entry for flag '{}'.", key);
-                }
-            }
-        }
+    public RegionFlags(Map<String, IFlag> flags) {
+        this.flags = new HashMap<>(flags);
     }
 
     @Override
@@ -130,10 +105,6 @@ public class RegionFlags implements IFlagContainer {
         return flagState == FlagState.ALLOWED || flagState == FlagState.DENIED;
     }
 
-    public RegionFlags deepCopy() {
-        return new RegionFlags(this.serializeNBT());
-    }
-
     public Map<String, IFlag> getActiveFlags() {
         Map<String, IFlag> activeFlags = new HashMap<>();
         flags.forEach((k, v) -> {
@@ -142,5 +113,9 @@ public class RegionFlags implements IFlagContainer {
             }
         });
         return activeFlags;
+    }
+
+    public Map<String, IFlag> getFlagMap() {
+        return this.flags;
     }
 }

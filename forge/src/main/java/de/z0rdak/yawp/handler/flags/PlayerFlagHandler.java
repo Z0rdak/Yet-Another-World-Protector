@@ -6,8 +6,6 @@ import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.FlagState;
-import de.z0rdak.yawp.data.region.DimensionRegionCache;
-import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.handler.HandlerUtil;
 import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.api.MessageSender;
@@ -441,14 +439,15 @@ public final class PlayerFlagHandler {
             if (event.getTarget() == null || event.getEntity() == null) return;
             Entity target = event.getTarget();
             Player player = event.getEntity();
+            // TODO: This is done on forge, fabric and neoforge - write helper to reduce duplicate code
             Set<String> entityTags = Services.FLAG_CONFIG.getCoveredBlockEntityTags();
             boolean isCoveredByTag = entityTags.stream().anyMatch(entityTag -> {
-                ResourceLocation tagRl = new ResourceLocation(entityTag);
+                ResourceLocation tagRl = ResourceLocation.parse(entityTag);
                 return target.getTags().contains(tagRl.getPath());
             });
             Set<String> entities = Services.FLAG_CONFIG.getCoveredBlockEntities();
             boolean isBlockEntityCovered = entities.stream().anyMatch(entity -> {
-                ResourceLocation entityRl = new ResourceLocation(entity);
+                ResourceLocation entityRl = ResourceLocation.parse(entity);
                 ResourceLocation targetRl = ForgeRegistries.ENTITY_TYPES.getKey(target.getType());
                 return targetRl != null && targetRl.equals(entityRl);
             });
@@ -465,7 +464,6 @@ public final class PlayerFlagHandler {
         }
     }
 
-    // TODO: TEST
     @SubscribeEvent
     public static void onExplosionStarted(ExplosionEvent.Start event) {
         if (isServerSide(event.getLevel())) {
@@ -663,12 +661,14 @@ public final class PlayerFlagHandler {
             ResourceLocation itemRl = ForgeRegistries.ITEMS.getKey(itemInHand.getItem());
             Set<String> entities = Services.FLAG_CONFIG.getCoveredBlockEntities();
             Set<String> entityTags = Services.FLAG_CONFIG.getCoveredBlockEntityTags();
+            // TODO: This is done on forge, fabric and neoforge - write helper to reduce duplicate code
+            // TODO: Unify the way this is handled across all flags (flag flattening update)
             boolean isCoveredByTag = entityTags.stream().anyMatch(tag -> {
-                ResourceLocation tagRl = new ResourceLocation(tag);
+                ResourceLocation tagRl = ResourceLocation.parse(tag);
                 return itemInHand.getTags().anyMatch(itemTagKey -> itemTagKey.location().equals(tagRl));
             });
             boolean isBlockCovered = entities.stream().anyMatch(entity -> {
-                ResourceLocation entityRl = new ResourceLocation(entity);
+                ResourceLocation entityRl = ResourceLocation.parse(entity);
                 return itemRl != null && itemRl.equals(entityRl);
             });
 
@@ -842,8 +842,6 @@ public final class PlayerFlagHandler {
         // Note: FilledBucket seems to always be null. use maxStackSize to determine bucket state (empty or filled)
         if (notServerSideOrPlayerNull(event.getEntity())) return;
         Player player = event.getEntity();
-
-        DimensionRegionCache dimCache = RegionDataManager.get().cacheFor(getDimKey(event.getEntity()));
         if (event.getTarget() != null) {
             HitResult pos = event.getTarget();
             BlockPos targetPos = new BlockPos((int) event.getTarget().getLocation().x, (int) event.getTarget().getLocation().y, (int) event.getTarget().getLocation().z);

@@ -2,8 +2,8 @@ package de.z0rdak.yawp.api.core.region;
 
 import de.z0rdak.yawp.api.permission.Permissions;
 import de.z0rdak.yawp.core.area.AreaType;
-import de.z0rdak.yawp.core.flag.RegionFlags;
 import de.z0rdak.yawp.core.flag.IFlag;
+import de.z0rdak.yawp.core.flag.RegionFlags;
 import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.platform.Services;
