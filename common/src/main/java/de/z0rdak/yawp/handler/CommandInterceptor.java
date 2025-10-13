@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.handler;
 
 import com.mojang.brigadier.ParseResults;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.context.ParsedCommandNode;
@@ -9,7 +10,9 @@ import de.z0rdak.yawp.api.commands.CommandConstants;
 import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.permission.Permissions;
 import de.z0rdak.yawp.commands.CommandSourceType;
+import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.constants.Constants;
+import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
@@ -18,6 +21,7 @@ import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -44,7 +48,7 @@ public class CommandInterceptor {
     /**
      * Handler for managing different command permissions.
      */
-    public static int handleModCommands(ParseResults<CommandSourceStack> parseResults, String command) {
+    public static int handleModCommands(ParseResults<CommandSourceStack> parseResults, String command) throws CommandSyntaxException {
         CommandContextBuilder<CommandSourceStack> cmdContext = parseResults.getContext();
         CommandSourceStack src = cmdContext.getSource();
         List<ParsedCommandNode<CommandSourceStack>> cmdNodes = cmdContext.getNodes();

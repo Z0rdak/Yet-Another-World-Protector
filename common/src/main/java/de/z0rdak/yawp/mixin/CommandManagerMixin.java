@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.mixin;
 
 import com.mojang.brigadier.ParseResults;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.handler.CommandInterceptor;
 import de.z0rdak.yawp.platform.Services;
@@ -23,7 +24,12 @@ public abstract class CommandManagerMixin {
     @Inject(method = "performCommand", at = @At(value = "HEAD"), cancellable = true)
     public void execute(ParseResults<CommandSourceStack> parseResults, String command, CallbackInfoReturnable<Integer> cir) {
         // check mod command permissions
-        int result = CommandInterceptor.handleModCommands(parseResults, command);
+        int result = 0;
+        try {
+            result = CommandInterceptor.handleModCommands(parseResults, command);
+        } catch (CommandSyntaxException e) {
+            throw new RuntimeException(e);
+        }
         if (result != 0) {
             cir.setReturnValue(1);
         }

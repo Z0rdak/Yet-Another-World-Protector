@@ -47,17 +47,17 @@ public class LevelListData extends SavedData {
         return tag;
     }
 
-    public static LevelListData load(CompoundTag tag) {
-        return LevelListData.CODEC.parse(NbtOps.INSTANCE, tag)
-                .resultOrPartial(Constants.LOGGER::warn)
-                .orElse(new LevelListData());
-    }
-
     public static LevelListData get(DimensionDataStorage storage, @Nullable Supplier<LevelListData> defaultSupplier) {
         return storage.computeIfAbsent(
                 LevelListData::load,
                 defaultSupplier == null ? LevelListData::new : defaultSupplier,
                 LevelListData.TYPE);
+    }
+
+    public static LevelListData load(CompoundTag tag) {
+        return LevelListData.CODEC.parse(NbtOps.INSTANCE, tag)
+                .resultOrPartial(Constants.LOGGER::warn)
+                .orElse(new LevelListData());
     }
 
     public List<ResourceLocation> getLevels() {
