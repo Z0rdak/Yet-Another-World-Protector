@@ -68,8 +68,9 @@ public final class BlockDisplayProperties implements INbtSerializable<CompoundTa
         if (res == null) {
             Random rand = new Random();
             int randomNum = rand.nextInt(0, DEFAULT_BLOCKS.size());
-            this.blockRl = DEFAULT_BLOCKS.get(randomNum);
-        }
+            this.blockRl = randomFromDefault();
+        } else
+            this.blockRl = res;
         this.hasGlow = nbt.contains("hasGlow") ?  nbt.getBoolean("hasGlow") : DEFAULT_GLOW;
         this.lightLevel = nbt.contains("lightLevel") ? nbt.getInt("lightLevel") : DEFAULT_LIGHT_LEVEL;
     }
