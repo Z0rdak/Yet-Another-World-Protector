@@ -6,6 +6,7 @@ import de.z0rdak.yawp.commands.CommandRegistry;
 import de.z0rdak.yawp.config.ConfigRegistry;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.RegionFlag;
+import de.z0rdak.yawp.data.PlayerManager;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.NeoForgeConfigHelper;
 import de.z0rdak.yawp.platform.Services;
@@ -13,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -24,23 +26,23 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
+import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 
 import static de.z0rdak.yawp.handler.YawpEventHandler.removeInvolvedEntities;
 
 @Mod(Constants.MOD_ID)
 public class YetAnotherWorldProtector implements YAWPModInitializer {
-    
+
     private static IEventBus yawpEventBus;
     public YetAnotherWorldProtector(IEventBus modEventBus) {
         yawpEventBus = modEventBus;
-        yawpEventBus.addListener((FMLCommonSetupEvent event) -> registerConfig());
         YAWPCommon.init();
 
-        initServerInstance();
-        loadRegionData();
-        addDimKeyOnPlayerLogin();
-        addDimKeyOnDimensionChange();
+        registerConfig();
+        setupRegionDataLifecycleHooks();
         registerCommands();
 
         NeoForge.EVENT_BUS.register(YetAnotherWorldProtector.class);
@@ -58,59 +60,57 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
             removeInvolvedEntities(event.getSrc(), event.getRegion(), RegionFlag.fromId(event.getFlag().getName()));
         }
     }
-    
+
     @Override
     public void registerCommands() {
         NeoForge.EVENT_BUS.addListener(this::registerCommandsForge);
     }
 
+    @Override
+    public void setupRegionDataLifecycleHooks() {
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
+                (ServerAboutToStartEvent startEvent) -> RegionDataManager.onServerStarting(startEvent.getServer()));
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
+                (ServerAboutToStartEvent startEvent) -> PlayerManager.onServerStart(startEvent.getServer()));
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
+                (ServerAboutToStartEvent startEvent) -> VisualizationManager.initServerInstance(startEvent.getServer()));
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
+                (LevelEvent.Load event) -> {
+                    if (event.getLevel() instanceof ServerLevel serverLevel) {
+                        RegionDataManager.worldLoad(serverLevel.getServer(), serverLevel);
+                    }
+                });
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
+                (PlayerEvent.PlayerLoggedInEvent event) -> {
+                    if (event.getEntity().getCommandSenderWorld() instanceof ServerLevel serverLevel) {
+                        RegionDataManager.initLevelDataOnLogin(event.getEntity(), serverLevel);
+                    }
+                });
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
+                (LevelEvent.Save saveEvent) -> {
+                    if (saveEvent.getLevel() instanceof ServerLevel serverLevel) {
+                        RegionDataManager.save(serverLevel.getServer(), false, false);
+                    }
+                });
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
+                (EntityTravelToDimensionEvent event) -> {
+                    if (event.getEntity() instanceof Player player && event.getEntity().getServer() != null) {
+                        Level targetLevel = event.getEntity().getServer().getLevel(event.getDimension());
+                        RegionDataManager.initLevelDataOnChangeWorld(player, player.level(), targetLevel);
+                    }
+                });
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
+                (ServerStoppingEvent stoppingEvent) -> RegionDataManager.saveOnStop(stoppingEvent.getServer()));
+
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
+                (LevelEvent.Unload unloadEvent) -> {
+                    if (unloadEvent.getLevel() instanceof ServerLevel serverLevel) {
+                        RegionDataManager.saveOnUnload(serverLevel.getServer(), serverLevel);
+                    }
+                });
+    }
+
     private void registerCommandsForge(RegisterCommandsEvent event) {
         CommandRegistry.registerCommands(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection());
-    }
-
-    @Override
-    public void initServerInstance() {
-        NeoForge.EVENT_BUS.addListener(this::initServerInstanceForge);
-    }
-
-    public void initServerInstanceForge(ServerStartingEvent event) {
-        RegionDataManager.initServerInstance(event.getServer());
-        VisualizationManager.initServerInstance(event.getServer());
-    }
-
-    @Override
-    public void loadRegionData() {
-        NeoForge.EVENT_BUS.addListener(this::loadRegionDataForge);
-    }
-
-    private void loadRegionDataForge(ServerStartingEvent event) {
-        MinecraftServer server = event.getServer();
-        ResourceLocation levelRl = ServerLevel.OVERWORLD.location();
-        server.getAllLevels().forEach(level -> {
-            if (level.dimension().location().equals(levelRl)) {
-                RegionDataManager.loadRegionDataForWorld(server, level);
-            }
-        });
-    }
-
-    @Override
-    public void addDimKeyOnPlayerLogin() {
-        NeoForge.EVENT_BUS.addListener(this::addDimKeyOnPlayerLoginForge);
-    }
-
-    private void addDimKeyOnPlayerLoginForge(PlayerEvent.PlayerLoggedInEvent event) {
-        RegionDataManager.addDimKeyOnPlayerLogin(event.getEntity(), event.getEntity().level());
-    }
-
-    @Override
-    public void addDimKeyOnDimensionChange() {
-        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true, this::addDimKeyOnDimensionChangeForge);
-    }
-
-    private void addDimKeyOnDimensionChangeForge(EntityTravelToDimensionEvent event) {
-        if (event.getEntity() instanceof Player && event.getEntity().getServer() != null) {
-            ServerLevel level = event.getEntity().getServer().getLevel(event.getDimension());
-            RegionDataManager.addDimKeyOnDimensionChange((Player) event.getEntity(), event.getEntity().level(), level);
-        }
     }
 }
