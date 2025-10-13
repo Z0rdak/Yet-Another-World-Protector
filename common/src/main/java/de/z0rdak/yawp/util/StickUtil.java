@@ -58,11 +58,8 @@ public final class StickUtil {
 
     public static void initMarkerNbt(ItemStack stack, ResourceKey<Level> dim) {
         stack.setCount(1);
-        initStickTag(stack, StickType.MARKER, dim);
-        setStickName(stack, StickType.MARKER);
-        setStickToolTip(stack, StickType.MARKER);
-        applyEnchantmentGlint(stack);
-        return stack;
+        initStickTag(stack, dim, false);
+        updateStickMetadata(stack);
     }
 
     public static void resetMarkerNbt(ItemStack stack, ResourceKey<Level> dim) {

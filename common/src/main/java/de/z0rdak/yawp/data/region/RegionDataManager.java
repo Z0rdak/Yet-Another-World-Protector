@@ -14,9 +14,11 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.level.storage.LevelResource;
 import org.apache.logging.log4j.LogManager;
@@ -37,7 +39,7 @@ public class RegionDataManager {
 
     public static final Logger LOGGER = LogManager.getLogger(Constants.MOD_ID.toUpperCase(Locale.ROOT) + "-DataManager");
     private static MinecraftServer serverInstance;
-    private static LevelListData savedLevelData;
+    private static LevelListData savedLevelData = new LevelListData();
     private static GlobalRegionData globalRegionData = new GlobalRegionData();
     private static final Map<ResourceLocation, LevelRegionData> dimRegionStorage = new  HashMap<>();
 
@@ -87,10 +89,11 @@ public class RegionDataManager {
 
     public static LevelListData getSavedDims(@Nullable Supplier<LevelListData> defaultSupplier) {
         var overworld = serverInstance.overworld();
+        Supplier<LevelListData> supplier = defaultSupplier == null ? LevelListData::new : defaultSupplier;
         DimensionDataStorage storage = overworld.getDataStorage();
+
         savedLevelData = storage.computeIfAbsent(
-                LevelListData::load,
-                defaultSupplier == null ? LevelListData::new : defaultSupplier,
+                new SavedData.Factory<LevelListData>(supplier, LevelListData::load, DataFixTypes.SAVED_DATA_MAP_DATA),
                 LevelListData.TYPE);
         return savedLevelData;
     }

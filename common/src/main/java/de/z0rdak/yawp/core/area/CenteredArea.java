@@ -4,6 +4,8 @@ import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import de.z0rdak.yawp.util.NbtCompatHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 
 import java.util.Set;
 
@@ -31,19 +33,6 @@ public abstract class CenteredArea extends MarkedArea {
     @Override
     public boolean contains(BlockPos pos) {
         return false;
-    }
-
-    @Override
-    public CompoundTag serializeNBT() {
-        CompoundTag nbt = super.serializeNBT();
-        nbt.put("center", NbtUtils.writeBlockPos(this.center));
-        return nbt;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        super.deserializeNBT(nbt);
-        this.center = NbtCompatHelper.toBlockPos(nbt, "center").orElseThrow();
     }
 
     @Override

@@ -16,22 +16,22 @@ public final class BlockDisplayProperties {
 
     public static final List<ResourceLocation> DEFAULT_BLOCKS = new ArrayList<>();
     static {
-        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "white_stained_glass"));
-        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "orange_stained_glass"));
-        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "magenta_sta0ined_glass"));
-        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "light_blue_stained_glass"));
-        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "yellow_stained_glass"));
-        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "lime_stained_glass"));
-        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "pink_stained_glass"));
-        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "gray_stained_glass"));
-        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "light_gray_stained_glass"));
-        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "cyan_stained_glass"));
-        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "purple_stained_glass"));
-        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "blue_stained_glass"));
-        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "brown_stained_glass"));
-        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "green_stained_glass"));
-        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "red_stained_glass"));
-        DEFAULT_BLOCKS.add(new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "black_stained_glass"));
+        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("white_stained_glass"));
+        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("orange_stained_glass"));
+        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("magenta_sta0ined_glass"));
+        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("light_blue_stained_glass"));
+        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("yellow_stained_glass"));
+        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("lime_stained_glass"));
+        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("pink_stained_glass"));
+        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("gray_stained_glass"));
+        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("light_gray_stained_glass"));
+        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("cyan_stained_glass"));
+        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("purple_stained_glass"));
+        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("blue_stained_glass"));
+        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("brown_stained_glass"));
+        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("green_stained_glass"));
+        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("red_stained_glass"));
+        DEFAULT_BLOCKS.add(ResourceLocation.withDefaultNamespace("black_stained_glass"));
     }
 
     public static ResourceLocation randomFromDefault() {

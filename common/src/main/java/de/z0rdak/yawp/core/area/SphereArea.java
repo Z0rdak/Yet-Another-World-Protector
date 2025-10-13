@@ -18,7 +18,7 @@ import static de.z0rdak.yawp.util.AreaUtil.distanceManhattan;
 
 public class SphereArea extends CenteredArea {
 
-    public static Codec<SphereArea> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static MapCodec<SphereArea> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                     BlockPos.CODEC.fieldOf("center")
                             .forGetter(SphereArea::getCenterPos),
                     Codec.INT.fieldOf("radius")

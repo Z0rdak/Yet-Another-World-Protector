@@ -43,7 +43,7 @@ public abstract class ServerPlayerMixin {
     private void onchangeDimension(DimensionTransition transition, CallbackInfoReturnable<Entity> cir) {
         Player player = (Player) (Object) this;
         if (isServerSide(player)) {
-            RegionDataManager.initLevelDataOnChangeWorld(player, player.level(), destination);
+            RegionDataManager.initLevelDataOnChangeWorld(player, player.level(), transition.newLevel());
 
             FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), USE_PORTAL_PLAYERS, getDimKey(player), player);
             if (Services.EVENT.post(checkEvent))

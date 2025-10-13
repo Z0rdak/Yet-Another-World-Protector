@@ -4,11 +4,13 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.region.GlobalRegion;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import org.jetbrains.annotations.NotNull;
@@ -43,14 +45,14 @@ public class GlobalRegionData extends SavedData {
         this.globalRegion = region;
     }
 
-    public static GlobalRegionData load(CompoundTag tag) {
+    public static GlobalRegionData load(CompoundTag tag, HolderLookup.Provider provider) {
         return GlobalRegionData.CODEC.parse(NbtOps.INSTANCE, tag)
                 .resultOrPartial(Constants.LOGGER::warn)
                 .orElse(new GlobalRegionData());
     }
 
     @Override
-    public @NotNull CompoundTag save(@NotNull CompoundTag tag) {
+    public @NotNull CompoundTag save(@NotNull CompoundTag tag, HolderLookup.Provider provider) {
         Optional<Tag> nbt = GlobalRegionData.CODEC.encodeStart(NbtOps.INSTANCE, this)
                 .resultOrPartial(Constants.LOGGER::warn);
         if (nbt.isPresent()) {
@@ -68,11 +70,9 @@ public class GlobalRegionData extends SavedData {
     }
 
     public static GlobalRegionData get(DimensionDataStorage dataStorage, @Nullable Supplier<GlobalRegionData> globalRegionDataSupplier) {
-        return dataStorage.computeIfAbsent(
-                GlobalRegionData::load,
-                globalRegionDataSupplier != null ? globalRegionDataSupplier : GlobalRegionData::new,
-                GlobalRegionData.TYPE
-        );
+        Supplier<GlobalRegionData> supplier = globalRegionDataSupplier != null ? globalRegionDataSupplier : GlobalRegionData::new;
+        var factory = new SavedData.Factory<GlobalRegionData>(supplier, GlobalRegionData::load, DataFixTypes.SAVED_DATA_MAP_DATA);
+        return dataStorage.computeIfAbsent(factory, GlobalRegionData.TYPE);
     }
 }
 

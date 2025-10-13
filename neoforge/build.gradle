@@ -7,8 +7,8 @@ dependencies {
     api "fuzs.forgeconfigapiport:forgeconfigapiport-neoforge:21.1.3"
 
     // Snow Real Magic
-    // implementation "maven.modrinth:kiwi:M8h5uYyf" // Snow Real Magic dependency
-    api "maven.modrinth:snow-real-magic:Dc0gkbuC"
+    //implementation "maven.modrinth:kiwi:M8h5uYyf" // Snow Real Magic dependency
+    // api "maven.modrinth:snow-real-magic:Dc0gkbuC"
 }
 
 neoForge {
