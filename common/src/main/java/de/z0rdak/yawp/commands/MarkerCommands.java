@@ -25,6 +25,7 @@ import de.z0rdak.yawp.util.StickUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -33,16 +34,19 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
 
 import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
 
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.DimensionCommands.getRandomExample;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.ChatLinkBuilder.buildRegionInfoLink;
 import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
-import static de.z0rdak.yawp.util.StickUtil.getStickType;
 import static net.minecraft.ChatFormatting.RED;
+import static net.minecraft.core.component.DataComponents.CUSTOM_DATA;
 
 public final class MarkerCommands {
 
@@ -79,6 +83,7 @@ public final class MarkerCommands {
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.invalid", "Invalid RegionMarker data, sorry. Get a new one and try again."));
                 return null;
             }
+
         } else {
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.missing", "Put a valid(*) RegionMarker in your main hand to create a region!").withStyle(RED));
             return null;
@@ -140,20 +145,10 @@ public final class MarkerCommands {
         try {
             Player player = ctx.getSource().getPlayerOrException();
             ItemStack mainHandItem = player.getMainHandItem();
-            // is valid stick
-            if (!mainHandItem.equals(ItemStack.EMPTY)
-                    && StickUtil.hasNonNullTag(mainHandItem)
-                    && mainHandItem.getTag().contains(STICK)) {
-                StickType stickType = getStickType(mainHandItem);
-                if (Objects.requireNonNull(stickType) == StickType.MARKER) {
-                    mainHandItem = StickUtil.initMarkerNbt(mainHandItem, player.level().dimension());
-                    // Note: When different area types are available: Get stick, reset it, and save it back.
-                    sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.reset", "RegionMarker successfully reset!"));
-                    return 0;
-                } else {
-                    sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.missing", "Put a valid(*) RegionMarker in your main hand to create a region!").withStyle(RED));
-                    return 1;
-                }
+            if (!mainHandItem.equals(ItemStack.EMPTY) && StickUtil.isMarker(mainHandItem)) {
+                StickUtil.resetMarkerNbt(mainHandItem, player.level().dimension());
+                sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.reset", "RegionMarker successfully reset!"));
+                return 0;
             } else {
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.missing", "Put a valid(*) RegionMarker in your main hand to create a region!").withStyle(RED));
                 return 1;

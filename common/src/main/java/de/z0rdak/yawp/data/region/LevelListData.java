@@ -3,10 +3,12 @@ package de.z0rdak.yawp.data.region;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.constants.Constants;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import org.jetbrains.annotations.NotNull;
@@ -38,7 +40,7 @@ public class LevelListData extends SavedData {
     }
 
     @Override
-    public @NotNull CompoundTag save(@NotNull CompoundTag tag) {
+    public @NotNull CompoundTag save(@NotNull CompoundTag tag, HolderLookup.Provider provider) {
         Optional<Tag> nbt = LevelListData.CODEC.encodeStart(NbtOps.INSTANCE, this)
                 .resultOrPartial(Constants.LOGGER::warn);
         if (nbt.isPresent()) {
@@ -47,17 +49,16 @@ public class LevelListData extends SavedData {
         return tag;
     }
 
-    public static LevelListData load(CompoundTag tag) {
+    public static LevelListData get(DimensionDataStorage storage, @Nullable Supplier<LevelListData> defaultSupplier) {
+        Supplier<LevelListData> supplier = defaultSupplier == null ? LevelListData::new : defaultSupplier;
+        var factory = new Factory<>(supplier, LevelListData::load, DataFixTypes.SAVED_DATA_MAP_DATA);
+        return storage.computeIfAbsent(factory, LevelListData.TYPE);
+    }
+
+    public static LevelListData load(CompoundTag tag, HolderLookup.Provider provider) {
         return LevelListData.CODEC.parse(NbtOps.INSTANCE, tag)
                 .resultOrPartial(Constants.LOGGER::warn)
                 .orElse(new LevelListData());
-    }
-
-    public static LevelListData get(DimensionDataStorage storage, @Nullable Supplier<LevelListData> defaultSupplier) {
-        return storage.computeIfAbsent(
-                LevelListData::load,
-                defaultSupplier == null ? LevelListData::new : defaultSupplier,
-                LevelListData.TYPE);
     }
 
     public List<ResourceLocation> getLevels() {

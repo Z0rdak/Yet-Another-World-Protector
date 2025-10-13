@@ -18,7 +18,7 @@ public class FlagRegister {
     private static final Map<ResourceLocation, Flag> flagRegister = new HashMap<>();
 
     private static ResourceLocation flagId(final String flagName) {
-        return new ResourceLocation(Constants.MOD_ID, flagName);
+        return ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, flagName);
     }
 
     /**

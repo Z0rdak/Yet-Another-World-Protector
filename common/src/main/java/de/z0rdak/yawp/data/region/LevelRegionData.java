@@ -8,12 +8,14 @@ import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.region.*;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
@@ -45,15 +47,13 @@ public class LevelRegionData extends SavedData {
 
     public static LevelRegionData get(DimensionDataStorage storage, ResourceLocation dimRl, @Nullable Supplier<LevelRegionData> defaultSupplier) {
         String levelFileLoc = LevelRegionData.buildSavedDataType(dimRl);
-        return storage.computeIfAbsent(
-                LevelRegionData::load,
-                defaultSupplier == null ? () -> new LevelRegionData(dimRl) : defaultSupplier,
-                levelFileLoc
-        );
+        Supplier<LevelRegionData> supplier = defaultSupplier == null ? () -> new LevelRegionData(dimRl) : defaultSupplier;
+        Factory<LevelRegionData> factory = new Factory<>(supplier, LevelRegionData::load, DataFixTypes.SAVED_DATA_MAP_DATA);
+        return storage.computeIfAbsent(factory, levelFileLoc);
     }
 
     @Override
-    public @NotNull CompoundTag save(@NotNull CompoundTag tag) {
+    public @NotNull CompoundTag save(@NotNull CompoundTag tag, HolderLookup.Provider provider) {
         Optional<Tag> nbt = LevelRegionData.CODEC.encodeStart(NbtOps.INSTANCE, this)
                 .resultOrPartial(Constants.LOGGER::warn);
         if (nbt.isPresent()) {
@@ -63,7 +63,7 @@ public class LevelRegionData extends SavedData {
     }
 
     @Nullable
-    public static LevelRegionData load(CompoundTag tag) {
+    public static LevelRegionData load(CompoundTag tag, HolderLookup.Provider provider) {
         return LevelRegionData.CODEC.parse(NbtOps.INSTANCE, tag)
                 .resultOrPartial(Constants.LOGGER::warn)
                 .orElse(null);

@@ -7,6 +7,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.entity.TadpoleRenderer;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
@@ -58,11 +59,8 @@ public final class StickUtil {
 
     public static void initMarkerNbt(ItemStack stack, ResourceKey<Level> dim) {
         stack.setCount(1);
-        initStickTag(stack, StickType.MARKER, dim);
-        setStickName(stack, StickType.MARKER);
-        setStickToolTip(stack, StickType.MARKER);
-        applyEnchantmentGlint(stack);
-        return stack;
+        initStickTag(stack, dim, false);
+        updateStickMetadata(stack);
     }
 
     public static void resetMarkerNbt(ItemStack stack, ResourceKey<Level> dim) {
