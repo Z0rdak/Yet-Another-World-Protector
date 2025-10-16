@@ -20,7 +20,7 @@ import static de.z0rdak.yawp.api.FlagEvaluator.processCheck;
 public class CropBlockMixin {
 
     @Inject(method = "entityInside", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;destroyBlock(Lnet/minecraft/core/BlockPos;ZLnet/minecraft/world/entity/Entity;)Z"), cancellable = true, allow = 1)
-    public void onEntityCollision(BlockState blockState, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier insideBlockEffectApplier, CallbackInfo ci) {
+    public void onEntityCollision(BlockState blockState, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier insideBlockEffectApplier, boolean bl, CallbackInfo ci) {
         FlagCheckEvent checkEvent = new FlagCheckEvent(pos, MOB_GRIEFING, level.dimension(), null);
         if (Services.EVENT.post(checkEvent))
             return;
