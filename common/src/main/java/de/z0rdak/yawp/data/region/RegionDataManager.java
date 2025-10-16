@@ -82,7 +82,7 @@ public class RegionDataManager {
         if (savedLevelData == null) {
             if (serverInstance != null) {
                 ServerLevel overworld = serverInstance.overworld();
-                if (!overworld.isClientSide) {
+                if (!overworld.isClientSide()) {
                     DimensionDataStorage storage = overworld.getDataStorage();
                     savedLevelData = storage.computeIfAbsent(LevelListData.TYPE);
                 }

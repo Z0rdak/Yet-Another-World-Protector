@@ -24,8 +24,8 @@ import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 @Mixin(Entity.class)
 public abstract class EntityMixin {
 
-    @Inject(method = "startRiding(Lnet/minecraft/world/entity/Entity;Z)Z", at = @At(value = "HEAD"), cancellable = true, allow = 1)
-    public void spawnChildFromBreeding(Entity vehicle, boolean force, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "startRiding(Lnet/minecraft/world/entity/Entity;ZZ)Z", at = @At(value = "HEAD"), cancellable = true, allow = 1)
+    public void spawnChildFromBreeding(Entity vehicle, boolean force, boolean ignore, CallbackInfoReturnable<Boolean> cir) {
         Entity rider = (Entity) (Object) this;
         if (isServerSide(rider)) {
             if (rider instanceof Player player) {

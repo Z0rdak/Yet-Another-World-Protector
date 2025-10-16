@@ -47,7 +47,7 @@ public final class HandlerUtil {
         return !world.isClientSide();
     }
     public static boolean isServerSide(Level world) {
-        return !world.isClientSide;
+        return !world.isClientSide();
     }
 
     public static boolean isVillager(Entity entity) {

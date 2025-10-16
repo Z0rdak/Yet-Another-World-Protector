@@ -11,7 +11,7 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
-    modApi "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:21.8.0"
+    modApi "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:21.9.0"
     
     // WorldEdit API for optional WorldEdit integration
     // modCompileOnlyApi "com.sk89q.worldedit:worldedit-fabric-mc${project.minecraft_version}:7.3.10-SNAPSHOT"

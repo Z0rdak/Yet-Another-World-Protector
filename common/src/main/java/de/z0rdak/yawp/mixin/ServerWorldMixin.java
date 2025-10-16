@@ -6,10 +6,12 @@ import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ExplosionParticleInfo;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -59,7 +61,8 @@ public class ServerWorldMixin {
             double x, double y, double z, 
             float power, boolean createFire, 
             Level.ExplosionInteraction explosionMode, 
-            ParticleOptions small, ParticleOptions big, 
+            ParticleOptions small, ParticleOptions big,
+            WeightedList<ExplosionParticleInfo> weightedList,
             Holder<SoundEvent> soundEvent, 
             CallbackInfo ci) {
         ServerLevel world = (ServerLevel) (Object) this;

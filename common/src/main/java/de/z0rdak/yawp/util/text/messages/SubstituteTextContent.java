@@ -31,7 +31,6 @@ public class SubstituteTextContent implements ComponentContents {
     private static final Pattern SUBSTITUTE_PATTERN;
     private static final Codec<Object> PRIMITIVE_ARG_CODEC;
     private static final Codec<Object> ARG_CODEC;
-    public static final Type<SubstituteTextContent> TYPE;
     public static final MapCodec<SubstituteTextContent> CODEC;
     
     private final String pattern;
@@ -81,7 +80,6 @@ public class SubstituteTextContent implements ComponentContents {
                                 .optionalFieldOf("args")
                                 .forGetter(stc -> adjustArgs(stc.args)))
                 .apply(stcInstance, SubstituteTextContent::create));
-        TYPE = new Type<>(CODEC, "substitutable");
         TEXT_PERCENT = FormattedText.of("%");
         TEXT_NULL = FormattedText.of("null");
         SUBSTITUTE_PATTERN = Pattern.compile("%(?:(\\d+)\\$)?([A-Za-z%]|$)");
@@ -201,8 +199,8 @@ public class SubstituteTextContent implements ComponentContents {
     }
 
     @Override
-    public Type<SubstituteTextContent> type() {
-        return TYPE;
+    public MapCodec<? extends ComponentContents> codec() {
+        return CODEC;
     }
 
     /*
