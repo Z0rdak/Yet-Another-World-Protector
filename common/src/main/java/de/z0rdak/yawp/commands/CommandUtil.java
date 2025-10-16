@@ -430,11 +430,11 @@ public class CommandUtil {
         Optional<GameProfile> cachedProfile = MojangApiHelper.lookupGameProfileInCache(ctx, playerUuid);
         if (cachedProfile.isPresent()) {
             GameProfile profile = cachedProfile.get();
-            var isComplete = profile.getId() != null && StringUtils.isNotBlank(profile.getName());
+            var isComplete = profile.id() != null && StringUtils.isNotBlank(profile.name());
             if (isComplete) {
                 MutableComponent cacheSuccess = Component.translatableWithFallback("cli.msg.info.player.lookup.cache.success", "Found entry for '%s' in the cache", playerUuid.toString());
                 sendCmdFeedback(ctx.getSource(), cacheSuccess);
-                return addPlayer(ctx, profile.getId(), profile.getName(), region, group);
+                return addPlayer(ctx, profile.id(), profile.name(), region, group);
             }
             return -1;
         } else {
@@ -445,7 +445,7 @@ public class CommandUtil {
                 if (gameProfile != null) {
                     MutableComponent lookupSuccess = Component.translatableWithFallback("cli.msg.info.player.lookup.api.success", "Successfully retrieved game profile info for '%s' from Mojang", playerUuid.toString());
                     sendCmdFeedback(ctx.getSource(), lookupSuccess);
-                    addPlayer(ctx, gameProfile.getId(), gameProfile.getName(), region, group);
+                    addPlayer(ctx, gameProfile.id(), gameProfile.name(), region, group);
                 } else {
                     MutableComponent lookupFailed = Component.translatableWithFallback("cli.msg.info.player.lookup.api.failed", "Unable to retrieve game profile info for '%s' from Mojang", playerUuid.toString());
                     sendCmdFeedback(ctx.getSource(), lookupFailed);
@@ -468,11 +468,11 @@ public class CommandUtil {
         Optional<GameProfile> cachedProfile = MojangApiHelper.lookupGameProfileInCache(ctx, playerName);
         if (cachedProfile.isPresent()) {
             GameProfile profile = cachedProfile.get();
-            var isComplete = profile.getId() != null && StringUtils.isNotBlank(profile.getName());
+            var isComplete = profile.id() != null && StringUtils.isNotBlank(profile.name());
             if (isComplete) {
                 MutableComponent cacheSuccess = Component.translatableWithFallback("cli.msg.info.player.lookup.cache.success", "Found entry for '%s' in the cache", playerName);
                 sendCmdFeedback(ctx.getSource(), cacheSuccess);
-                return addPlayer(ctx, profile.getId(), profile.getName(), region, group);
+                return addPlayer(ctx, profile.id(), profile.name(), region, group);
             }
             return -1;
         } else {
@@ -483,7 +483,7 @@ public class CommandUtil {
                 if (gameProfile != null) {
                     MutableComponent lookupSuccess = Component.translatableWithFallback("cli.msg.info.player.lookup.api.success", "Successfully retrieved game profile info for '%s' from Mojang", playerName);
                     sendCmdFeedback(ctx.getSource(), lookupSuccess);
-                    addPlayer(ctx, gameProfile.getId(), gameProfile.getName(), region, group);
+                    addPlayer(ctx, gameProfile.id(), gameProfile.name(), region, group);
                 } else {
                     MutableComponent lookupFailed = Component.translatableWithFallback("cli.msg.info.player.lookup.api.failed", "Unable to retrieve game profile info for '%s' from Mojang", playerName);
                     sendCmdFeedback(ctx.getSource(), lookupFailed);

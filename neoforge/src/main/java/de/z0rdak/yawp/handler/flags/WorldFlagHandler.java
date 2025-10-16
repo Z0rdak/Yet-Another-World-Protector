@@ -22,6 +22,9 @@ import net.neoforged.neoforge.event.level.BlockEvent;
 
 import javax.annotation.Nullable;
 
+import java.io.IOException;
+import java.util.Optional;
+
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
@@ -155,11 +158,17 @@ public class WorldFlagHandler {
     }
 
     @SubscribeEvent
-    public static void onTravelToDim(EntityTravelToDimensionEvent event) {
+    public static void onTravelToDim(EntityTravelToDimensionEvent event) throws IOException {
         if (isServerSide(event.getEntity())) {
             if (event.getEntity() instanceof Player player) {
                 ResourceKey<Level> dim = event.getDimension();
-                ServerLevel targetServerLevel = player.getServer().getLevel(dim);
+                ServerLevel targetServerLevel = null;
+                try (Level level = player.level()) {
+                    var server = level.getServer();
+                    if (server != null) {
+                        targetServerLevel = server.getLevel(dim);
+                    }
+                }
                 if (targetServerLevel != null) {
                   /*
                     TODO: Get target position correctly - until then flag only works for dimension

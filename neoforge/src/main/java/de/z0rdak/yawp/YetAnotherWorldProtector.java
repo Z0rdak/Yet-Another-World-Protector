@@ -23,7 +23,6 @@ import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
-import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 
 import static de.z0rdak.yawp.handler.YawpEventHandler.removeInvolvedEntities;
@@ -76,8 +75,8 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
             }
         });
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true, (EntityTravelToDimensionEvent event) -> {
-            if (event.getEntity() instanceof Player player && event.getEntity().getServer() != null) {
-                Level targetLevel = event.getEntity().getServer().getLevel(event.getDimension());
+            if (event.getEntity() instanceof Player player && event.getEntity().level().getServer() != null) {
+                Level targetLevel = event.getEntity().level().getServer().getLevel(event.getDimension());
                 RegionDataManager.initLevelDataOnChangeWorld(player, player.level(), targetLevel);
             }
         });

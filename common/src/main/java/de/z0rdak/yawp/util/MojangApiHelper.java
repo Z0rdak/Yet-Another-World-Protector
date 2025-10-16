@@ -1,6 +1,5 @@
 package de.z0rdak.yawp.util;
 
-import com.google.gson.annotations.SerializedName;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.exceptions.MinecraftClientException;
 import com.mojang.authlib.exceptions.MinecraftClientHttpException;
@@ -8,7 +7,7 @@ import com.mojang.authlib.minecraft.client.ObjectMapper;
 import com.mojang.authlib.yggdrasil.response.ErrorResponse;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.server.players.GameProfileCache;
+import net.minecraft.server.players.ProfileResolver;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -98,18 +97,18 @@ public class MojangApiHelper {
     }
 
     public static Optional<GameProfile> lookupGameProfileInCache(CommandContext<CommandSourceStack> ctx, String playerName) {
-        GameProfileCache profileCache = ctx.getSource().getServer().getProfileCache();
+        ProfileResolver profileResolver = ctx.getSource().getServer().services().profileResolver();
         // Uses Mojang's API to retrieve info from player repo. It invokes
         // YggdrasilGameProfileRepository.findProfilesByNames through the PlayerProfileCache
         // which itself makes an HTTP request to Mojang's API
-        return profileCache.get(playerName);
+        return profileResolver.fetchByName(playerName);
     }
 
     public static Optional<GameProfile> lookupGameProfileInCache(CommandContext<CommandSourceStack> ctx, UUID uuid) {
-        GameProfileCache profileCache = ctx.getSource().getServer().getProfileCache();
+        ProfileResolver profileResolver = ctx.getSource().getServer().services().profileResolver();
         // This in contrast to the name search does not make an HTTP request
         // It just looks up the profile in the cache
-        return profileCache.get(uuid);
+        return profileResolver.fetchById(uuid);
     }
 
     /**
