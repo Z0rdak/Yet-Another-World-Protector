@@ -26,6 +26,7 @@ public class SphereArea extends CenteredArea {
                     Codec.STRING.fieldOf("areaType")
                             .forGetter(r -> MarkedAreaTypes.areaIdentifier(r.getAreaType()).toString()),
                     BlockDisplayProperties.CODEC.fieldOf("display")
+                            .orElse(BlockDisplayProperties.createRndDefault())
                             .forGetter(MarkedArea::getDisplay)
             ).apply(instance, (center, radius, area, display) -> {
                 var sphere = new SphereArea(center, radius);
