@@ -39,6 +39,14 @@ public final class BlockDisplayProperties {
         return BlockDisplayProperties.DEFAULT_BLOCKS.get(randomNum);
     }
 
+    public static BlockDisplayProperties createRndDefault() {
+        return new BlockDisplayProperties(
+                randomFromDefault(),
+                DEFAULT_GLOW,
+                DEFAULT_LIGHT_LEVEL
+        );
+    }
+
     public static MapCodec<BlockDisplayProperties> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                     ResourceLocation.CODEC.fieldOf("block").orElse(randomFromDefault())
                             .forGetter(BlockDisplayProperties::blockRl),
