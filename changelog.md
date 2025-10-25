@@ -1,12 +1,14 @@
-# [0.6.1-beta1] - 2025-07-18
+# [0.6.1-beta1] - 2025-10-26
 
 ## Changed
 
 - Backport region saving changes from 0.5.3-beta1 to 1.20.1, 1.21.1 and 1.21.4. Note: This is a breaking change for those versions and will result in region data loss.
+- Placeholders for FlagMessages have changed to use position arguments: `%1$s` instead of `{flag}`. Refer to the wiki for more information.
 
 ## Fixed
 
 - Fix broken default values for region display data.
+- Fix serialization issue causing region data loss
 
 # [0.6.0-beta1] - 2025-07-16
 
