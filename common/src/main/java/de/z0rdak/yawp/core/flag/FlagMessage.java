@@ -3,6 +3,7 @@ package de.z0rdak.yawp.core.flag;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
+import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -11,17 +12,22 @@ import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.Map.Entry;
 
 import static de.z0rdak.yawp.core.flag.FlagTag.PLAYER;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
 
 public class FlagMessage {
 
-    public static final String FLAG_TEMPLATE = "{flag}";
-    public static final String POS_TEMPLATE = "{pos}";
-    public static final String REGION_TEMPLATE = "{region}";
-    public static final String DIM_TEMPLATE = "{dim}";
-    public static final String PLAYER_TEMPLATE = "{player}";
+    public static final String FLAG_TEMPLATE = "{flag}";// %1$s
+    public static final String POS_TEMPLATE = "{pos}";// %2$s
+    public static final String REGION_TEMPLATE = "{region}";// %3$s
+    public static final String DIM_TEMPLATE = "{dim}";// %4$s
+    public static final String PLAYER_TEMPLATE = "{player}";// %5$s
+    public static final String TEAM_TEMPLATE = "{team}";// %6$s
+    public static final String GROUP_TEMPLATE = "{group}";// %7$s
+    public static final String ENTITY_TEMPLATE = "{entity}";// %8$s
+    public static final String BLOCK_ENTITY = "{block}";// %9$s
 
     public static final String CONFIG_MSG = "config";
     public static final Set<String> MSG_TOKEN;
@@ -29,26 +35,45 @@ public class FlagMessage {
 
     static {
         MSG_TOKEN = new HashSet<>();
-        MSG_TOKEN.add("{flag}");
-        MSG_TOKEN.add("{region}");
-        MSG_TOKEN.add("{dimension}");
-        MSG_TOKEN.add("{pos}");
-        MSG_TOKEN.add("{player}");
-        MSG_TOKEN.add("{team}");
-        MSG_TOKEN.add("{group}");
-        MSG_TOKEN.add("{entity}");
-        MSG_TOKEN.add("{block}");
+        MSG_TOKEN.add(FLAG_TEMPLATE);
+        MSG_TOKEN.add(REGION_TEMPLATE);
+        MSG_TOKEN.add(DIM_TEMPLATE);
+        MSG_TOKEN.add(POS_TEMPLATE);
+        MSG_TOKEN.add(PLAYER_TEMPLATE);
+        MSG_TOKEN.add(TEAM_TEMPLATE);
+        MSG_TOKEN.add(GROUP_TEMPLATE);
+        MSG_TOKEN.add(ENTITY_TEMPLATE);
+        MSG_TOKEN.add(BLOCK_ENTITY);
     }
+
+    private static final Map<String, Integer> TOKEN_INDEX;
+    static {
+
+        TOKEN_INDEX = Map.of(
+                FLAG_TEMPLATE, 1,   // %1$s
+                REGION_TEMPLATE, 2, // %2$s
+                DIM_TEMPLATE, 3,    // %3$s
+                POS_TEMPLATE, 4,    // %4$s
+                PLAYER_TEMPLATE, 5, // %5$s
+                TEAM_TEMPLATE, 6,   // %6$s
+                GROUP_TEMPLATE, 7,  // %7$s
+                ENTITY_TEMPLATE, 8, // %8$s
+                BLOCK_ENTITY, 9);   // %9$s
+    }
+
 
     public static Codec<FlagMessage> CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
                     Codec.STRING.fieldOf("msg")
+                            .orElse(FlagMessage.CONFIG_MSG)
                             .forGetter(FlagMessage::msg),
                     Codec.BOOL.fieldOf("muted")
+                            .orElse(false)
                             .forGetter(FlagMessage::isMuted),
                     Codec.BOOL.fieldOf("default")
+                            .orElse(true)
                             .forGetter(FlagMessage::isDefault)
-                    ).apply(instance, FlagMessage::new));
+            ).apply(instance, FlagMessage::new));
 
     private String msg;
     private boolean muted;
@@ -121,12 +146,18 @@ public class FlagMessage {
      * @return the flag message for the given flag check result and substitutes
      */
     public static MutableComponent buildFrom(FlagCheckResult result, Map<String, String> substitutes) {
-        String flagMsgTemplate = result.getFlag().getFlagMsg().isDefault()
-                ? getI18nFlagMsgTemplate(result)
-                : result.getFlag().getFlagMsg().msg();
-        String flagMsg = replaceMatches(flagMsgTemplate, substitutes);
-        return Component.literal(flagMsg);
+        String key = "flag.msg.deny." + result.getFlag().getName();
+        Object[] args = new Object[9]; // always 9 slots
+        for (var entry : TOKEN_INDEX.entrySet()) {
+            String token = entry.getKey();
+            int idx = entry.getValue() - 1; // zero-based for array
+            args[idx] = substitutes.getOrDefault(token, "");
+        }
+
+        return Component.translatable(key, args);
     }
+
+
 
     /**
      * Returns the flag message template for the given flag from the I18n keys. <br>
@@ -152,7 +183,7 @@ public class FlagMessage {
      */
     private static String replaceMatches(String flagMsgTemplate, Map<String, String> substitutes) {
         String flagMsg = flagMsgTemplate;
-        for (Map.Entry<String, String> entry : substitutes.entrySet()) {
+        for (Entry<String, String> entry : substitutes.entrySet()) {
             flagMsg = flagMsg.replace(entry.getKey(), entry.getValue());
         }
         return flagMsg;
