@@ -38,7 +38,7 @@ public class CuboidArea extends MarkedArea {
                     .forGetter(r -> MarkedAreaTypes.areaIdentifier(r.getAreaType()).toString()),
             BlockDisplayProperties.CODEC.fieldOf("display")
                     .orElse(BlockDisplayProperties.createRndDefault())
-                    .forGetter(MarkedArea::getDisplay)
+                    .forGetter(CuboidArea::getDisplay)
             ).apply(instance, (p1, p2, area, display) -> {
                 var cuboid = new CuboidArea(p1, p2);
                 cuboid.updateDisplay(display);
