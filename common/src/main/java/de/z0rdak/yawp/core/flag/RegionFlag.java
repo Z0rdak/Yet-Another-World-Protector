@@ -1,116 +1,119 @@
 package de.z0rdak.yawp.core.flag;
 
+import de.z0rdak.yawp.api.FlagTagRegister;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
 public enum RegionFlag {
 
-    ANIMAL_BREEDING("animal-breeding", FlagTag.ENTITY, FlagTag.PLAYER),
-    ANIMAL_MOUNTING("animal-mounting", FlagTag.ENTITY, FlagTag.PLAYER),
-    ANIMAL_TAMING("animal-taming", FlagTag.ENTITY, FlagTag.PLAYER),
-    ANIMAL_UNMOUNTING("animal-unmounting", FlagTag.ENTITY, FlagTag.PLAYER),
-    AXE_STRIP("strip-wood", FlagTag.PLAYER, FlagTag.BLOCK),
-    BREAK_BLOCKS("break-blocks", FlagTag.BLOCK, FlagTag.PLAYER),
-    CONTAINER_ACCESS("access-container", FlagTag.BLOCK, FlagTag.PLAYER),
-    DRAGON_BLOCK_PROT("dragon-destruction", FlagTag.ENVIRONMENT, FlagTag.BLOCK),
-    DROP_LOOT_ALL("drop-loot", FlagTag.PLAYER_PREVENTION),
-    DROP_LOOT_PLAYER("drop-loot-player", FlagTag.PLAYER, FlagTag.PLAYER_PREVENTION),
-    ENDERMAN_GRIEFING("enderman-griefing", FlagTag.PROTECTION),
-    ENDERMAN_TELEPORT_FROM_REGION("enderman-tp-from", FlagTag.PROTECTION),
-    ENDER_CHEST_ACCESS("access-enderchest", FlagTag.PLAYER, FlagTag.BLOCK),
-    ENTER_DIM("enter-dim", FlagTag.PLAYER),
-    EXECUTE_COMMAND("exec-command", FlagTag.PLAYER),
-    EXPLOSION_BLOCK("explosions-blocks", FlagTag.PROTECTION),
-    EXPLOSION_CREEPER_BLOCK("creeper-explosion-blocks", FlagTag.PROTECTION),
-    EXPLOSION_CREEPER_ENTITY("creeper-explosion-entities", FlagTag.PROTECTION),
-    EXPLOSION_ENTITY("explosions-entities", FlagTag.PROTECTION),
-    FALL_DAMAGE("fall-damage", FlagTag.PROTECTION, FlagTag.BENEFICIAL),
-    FALL_DAMAGE_ANIMALS("fall-damage-animals", FlagTag.PROTECTION),
-    FALL_DAMAGE_MONSTERS("fall-damage-monsters", FlagTag.PROTECTION),
-    FALL_DAMAGE_PLAYERS("fall-damage-players", FlagTag.PROTECTION, FlagTag.PLAYER),
-    FALL_DAMAGE_VILLAGERS("fall-damage-villagers", FlagTag.PROTECTION),
-    FLUID_FLOW("fluid-flow", FlagTag.ENVIRONMENT),
-    HOE_TILL("till-farmland", FlagTag.BLOCK, FlagTag.PLAYER_PREVENTION),
-    IGNITE_EXPLOSIVES("ignite-explosives", FlagTag.BLOCK, FlagTag.PLAYER_PREVENTION),
-    INVINCIBLE("invincible", FlagTag.BENEFICIAL),
-    ITEM_DROP("item-drop", FlagTag.PLAYER_PREVENTION),
-    ITEM_PICKUP("item-pickup", FlagTag.PLAYER_PREVENTION),
-    KNOCKBACK_PLAYERS("knockback-players", FlagTag.PLAYER, FlagTag.BENEFICIAL, FlagTag.ENTITY),
-    LAVA_FLOW("lava-flow", FlagTag.ENVIRONMENT),
-    LEVEL_FREEZE("level-freeze", FlagTag.PLAYER),
-    LIGHTNING_PROT("lightning", FlagTag.ENVIRONMENT),
-    NO_WALKER_FREEZE("walker-freeze", FlagTag.PLAYER, FlagTag.BLOCK),
-    LEAF_DECAY("leaf-decay", FlagTag.ENVIRONMENT),
-    FIRE_TICK("fire-tick", FlagTag.ENVIRONMENT),
-    MELEE_ANIMALS("melee-animals", FlagTag.PLAYER, FlagTag.ENTITY),
-    MELEE_MONSTERS("melee-monsters", FlagTag.PLAYER, FlagTag.ENTITY),
-    MELEE_PLAYERS("melee-players", FlagTag.PLAYER, FlagTag.ENTITY),
-    MELEE_VILLAGERS("melee-villagers", FlagTag.PLAYER, FlagTag.ENTITY),
-    MELEE_WANDERING_TRADER("melee-wtrader", FlagTag.PLAYER, FlagTag.ENTITY),
-    MOB_GRIEFING("mob-griefing", FlagTag.ENVIRONMENT),
-    NO_FLIGHT("no-flight", FlagTag.PLAYER),
-    NO_ITEM_DESPAWN("no-item-despawn", FlagTag.PROTECTION),
-    NO_PVP("no-pvp", FlagTag.PLAYER, FlagTag.ENTITY),
-    FIRE_BOW("fire-bow", FlagTag.PLAYER, FlagTag.ENTITY),
-    NO_SIGN_EDIT("no-sign-edit", FlagTag.PLAYER, FlagTag.BLOCK),
-    PLACE_BLOCKS("place-blocks", FlagTag.PLAYER, FlagTag.BLOCK),
-    PLACE_FLUIDS("place-fluids", FlagTag.PLAYER, FlagTag.BLOCK),
-    SCOOP_FLUIDS("scoop-fluids", FlagTag.PLAYER, FlagTag.BLOCK),
-    SEND_MESSAGE("send-chat", FlagTag.PLAYER),
-    SET_SPAWN("set-spawn", FlagTag.PLAYER, FlagTag.BLOCK),
-    SHOVEL_PATH("shovel-path", FlagTag.PLAYER, FlagTag.BLOCK),
-    SHULKER_TELEPORT_FROM_REGION("shulker-tp-from", FlagTag.ENTITY),
-    SLEEP("sleep", FlagTag.PLAYER, FlagTag.BLOCK),
-    SNOW_FALL("snow-fall", FlagTag.BLOCK, FlagTag.ENVIRONMENT),
-    SNOW_MELTING("snow-melting", FlagTag.BLOCK, FlagTag.ENVIRONMENT),
-    SPAWNING_ALL("spawning-all", FlagTag.ENVIRONMENT, FlagTag.ENTITY),
-    SPAWNING_ANIMAL("spawning-animal", FlagTag.ENVIRONMENT, FlagTag.ENTITY),
-    SPAWNING_GOLEM("spawning-golem", FlagTag.ENVIRONMENT, FlagTag.ENTITY),
-    SPAWNING_MONSTER("spawning-monster", FlagTag.ENVIRONMENT, FlagTag.ENTITY),
-    SPAWNING_SLIME("spawning-slime", FlagTag.ENVIRONMENT, FlagTag.ENTITY),
-    SPAWNING_TRADER("spawning-trader", FlagTag.ENVIRONMENT, FlagTag.ENTITY),
-    SPAWNING_VILLAGER("spawning-villager", FlagTag.ENVIRONMENT, FlagTag.ENTITY),
-    SPAWNING_XP("spawning-xp", FlagTag.ENVIRONMENT, FlagTag.ENTITY),
-    SPAWN_PORTAL("spawn-portal", FlagTag.PLAYER, FlagTag.BLOCK),
-    TOOL_SECONDARY_USE("tools-secondary", FlagTag.PLAYER_PREVENTION),
-    TRAMPLE_FARMLAND("trample-farmland", FlagTag.ENVIRONMENT, FlagTag.BLOCK),
-    TRAMPLE_FARMLAND_OTHER("trample-farmland-other", FlagTag.BLOCK, FlagTag.ENTITY),
-    TRAMPLE_FARMLAND_PLAYER("trample-farmland-player", FlagTag.PLAYER, FlagTag.BLOCK),
-    USE_BLOCKS("use-blocks", FlagTag.PLAYER, FlagTag.BLOCK),
-    USE_BONEMEAL("use-bonemeal", FlagTag.PLAYER, FlagTag.BLOCK),
-    USE_ELYTRA("use-elytra", FlagTag.PLAYER),
-    USE_ENDERPEARL_FROM_REGION("enderpearl-from", FlagTag.PLAYER, FlagTag.BLOCK),
-    USE_ENDERPEARL_TO_REGION("enderpearl-to", FlagTag.PLAYER, FlagTag.BLOCK),
-    USE_ENTITIES("use-entities", FlagTag.PLAYER, FlagTag.ENTITY),
-    USE_ITEMS("use-items", FlagTag.PLAYER_PREVENTION),
-    USE_PORTAL("use-portal", FlagTag.ENVIRONMENT, FlagTag.ENTITY),
-    USE_PORTAL_ANIMALS("use-portal-animals", FlagTag.ENVIRONMENT, FlagTag.ENTITY),
-    USE_PORTAL_ITEMS("use-portal-items", FlagTag.ENVIRONMENT, FlagTag.ENTITY),
-    USE_PORTAL_MINECARTS("use-portal-minecarts", FlagTag.ENVIRONMENT, FlagTag.ENTITY),
-    USE_PORTAL_MONSTERS("use-portal-monsters", FlagTag.ENVIRONMENT, FlagTag.ENTITY),
-    USE_PORTAL_PLAYERS("use-portal-players", FlagTag.PLAYER),
-    USE_PORTAL_VILLAGERS("use-portal-villagers", FlagTag.ENVIRONMENT, FlagTag.ENTITY),
-    WATER_FLOW("water-flow", FlagTag.ENVIRONMENT),
-    WITHER_BLOCK_PROT("wither-destruction", FlagTag.ENVIRONMENT, FlagTag.BLOCK),
-    KEEP_XP("keep-xp", FlagTag.BENEFICIAL, FlagTag.PLAYER),
-    //KEEP_INV("keep-inv", FlagCategory.BENEFICIAL, FlagCategory.PLAYER),
-    //NO_HUNGER("no-hunger", FlagCategory.BENEFICIAL, FlagCategory.PLAYER),
-    XP_DROP_ALL("xp-drop-all", FlagTag.PLAYER_PREVENTION),
-    XP_DROP_MONSTER("xp-drop-monsters", FlagTag.PLAYER_PREVENTION),
-    XP_DROP_OTHER("xp-drop-other", FlagTag.PLAYER_PREVENTION),
-    XP_DROP_PLAYER("xp-drop-player", FlagTag.PLAYER, FlagTag.PLAYER_PREVENTION),
-    XP_FREEZE("xp-freeze", FlagTag.PLAYER),
-    XP_PICKUP("xp-pickup", FlagTag.PLAYER),
-    ZOMBIE_DOOR_PROT("zombie-destruction", FlagTag.ENVIRONMENT, FlagTag.PROTECTION);
+    ANIMAL_BREEDING("animal-breeding", FlagTagRegister.ENTITY, FlagTagRegister.PLAYER),
+    ANIMAL_MOUNTING("animal-mounting", FlagTagRegister.ENTITY, FlagTagRegister.PLAYER),
+    ANIMAL_TAMING("animal-taming", FlagTagRegister.ENTITY, FlagTagRegister.PLAYER),
+    ANIMAL_UNMOUNTING("animal-unmounting", FlagTagRegister.ENTITY, FlagTagRegister.PLAYER),
+    AXE_STRIP("strip-wood", FlagTagRegister.PLAYER, FlagTagRegister.BLOCK),
+    BREAK_BLOCKS("break-blocks", FlagTagRegister.BLOCK, FlagTagRegister.PLAYER),
+    CONTAINER_ACCESS("access-container", FlagTagRegister.BLOCK, FlagTagRegister.PLAYER),
+    DRAGON_BLOCK_PROT("dragon-destruction", FlagTagRegister.ENVIRONMENT, FlagTagRegister.BLOCK),
+    DROP_LOOT_ALL("drop-loot", FlagTagRegister.PLAYER_PREVENTION),
+    DROP_LOOT_PLAYER("drop-loot-player", FlagTagRegister.PLAYER, FlagTagRegister.PLAYER_PREVENTION),
+    ENDERMAN_GRIEFING("enderman-griefing", FlagTagRegister.PROTECTION),
+    ENDERMAN_TELEPORT_FROM_REGION("enderman-tp-from", FlagTagRegister.PROTECTION),
+    ENDER_CHEST_ACCESS("access-enderchest", FlagTagRegister.PLAYER, FlagTagRegister.BLOCK),
+    ENTER_DIM("enter-dim", FlagTagRegister.PLAYER),
+    EXECUTE_COMMAND("exec-command", FlagTagRegister.PLAYER),
+    EXPLOSION_BLOCK("explosions-blocks", FlagTagRegister.PROTECTION),
+    EXPLOSION_CREEPER_BLOCK("creeper-explosion-blocks", FlagTagRegister.PROTECTION),
+    EXPLOSION_CREEPER_ENTITY("creeper-explosion-entities", FlagTagRegister.PROTECTION),
+    EXPLOSION_ENTITY("explosions-entities", FlagTagRegister.PROTECTION),
+    FALL_DAMAGE_ANIMALS("fall-damage-animals", FlagTagRegister.PROTECTION),
+    FALL_DAMAGE_MONSTERS("fall-damage-monsters", FlagTagRegister.PROTECTION),
+    FALL_DAMAGE_VILLAGERS("fall-damage-villagers", FlagTagRegister.PROTECTION),
+    FLUID_FLOW("fluid-flow", FlagTagRegister.ENVIRONMENT, FlagTagRegister.HIGH_FREQUENCY),
+    HOE_TILL("till-farmland", FlagTagRegister.BLOCK, FlagTagRegister.PLAYER_PREVENTION),
+    IGNITE_EXPLOSIVES("ignite-explosives", FlagTagRegister.BLOCK, FlagTagRegister.PLAYER_PREVENTION),
+    FALL_DAMAGE("fall-damage", FlagTagRegister.PROTECTION, FlagTagRegister.BENEFICIAL),
+    FALL_DAMAGE_PLAYERS("fall-damage-players", FlagTagRegister.BENEFICIAL, FlagTagRegister.PLAYER),
+    INVINCIBLE("invincible", FlagTagRegister.BENEFICIAL, FlagTagRegister.PLAYER),
+    KEEP_XP("keep-xp", FlagTagRegister.BENEFICIAL, FlagTagRegister.PLAYER),
+    KEEP_INV("keep-inv", FlagTagRegister.BENEFICIAL, FlagTagRegister.PLAYER),
+    // Naming consistent with beneficial tag?
+    KNOCKBACK_PLAYERS("knockback-players", FlagTagRegister.PLAYER, FlagTagRegister.BENEFICIAL, FlagTagRegister.ENTITY),
+    NO_HUNGER("no-hunger", FlagTagRegister.BENEFICIAL, FlagTagRegister.PLAYER),
+    ITEM_DROP("item-drop", FlagTagRegister.PLAYER_PREVENTION),
+    ITEM_PICKUP("item-pickup", FlagTagRegister.PLAYER_PREVENTION),
+    LAVA_FLOW("lava-flow", FlagTagRegister.ENVIRONMENT, FlagTagRegister.HIGH_FREQUENCY),
+    LEVEL_FREEZE("level-freeze", FlagTagRegister.PLAYER),
+    LIGHTNING_PROT("lightning", FlagTagRegister.ENVIRONMENT),
+    NO_WALKER_FREEZE("walker-freeze", FlagTagRegister.PLAYER, FlagTagRegister.BLOCK),
+    LEAF_DECAY("leaf-decay", FlagTagRegister.ENVIRONMENT),
+    FIRE_TICK("fire-tick", FlagTagRegister.ENVIRONMENT),
+    MELEE_ANIMALS("melee-animals", FlagTagRegister.PLAYER, FlagTagRegister.ENTITY),
+    MELEE_MONSTERS("melee-monsters", FlagTagRegister.PLAYER, FlagTagRegister.ENTITY),
+    MELEE_PLAYERS("melee-players", FlagTagRegister.PLAYER, FlagTagRegister.ENTITY),
+    MELEE_VILLAGERS("melee-villagers", FlagTagRegister.PLAYER, FlagTagRegister.ENTITY),
+    MELEE_WANDERING_TRADER("melee-wtrader", FlagTagRegister.PLAYER, FlagTagRegister.ENTITY),
+    MOB_GRIEFING("mob-griefing", FlagTagRegister.ENVIRONMENT),
+    NO_FLIGHT("no-flight", FlagTagRegister.PLAYER),
+    NO_ITEM_DESPAWN("no-item-despawn", FlagTagRegister.PROTECTION),
+    NO_PVP("no-pvp", FlagTagRegister.PLAYER, FlagTagRegister.ENTITY),
+    FIRE_BOW("fire-bow", FlagTagRegister.PLAYER, FlagTagRegister.ENTITY),
+    NO_SIGN_EDIT("no-sign-edit", FlagTagRegister.PLAYER, FlagTagRegister.BLOCK),
+    PLACE_BLOCKS("place-blocks", FlagTagRegister.PLAYER, FlagTagRegister.BLOCK),
+    PLACE_FLUIDS("place-fluids", FlagTagRegister.PLAYER, FlagTagRegister.BLOCK),
+    SCOOP_FLUIDS("scoop-fluids", FlagTagRegister.PLAYER, FlagTagRegister.BLOCK),
+    SEND_MESSAGE("send-chat", FlagTagRegister.PLAYER),
+    SET_SPAWN("set-spawn", FlagTagRegister.PLAYER, FlagTagRegister.BLOCK),
+    SHOVEL_PATH("shovel-path", FlagTagRegister.PLAYER, FlagTagRegister.BLOCK),
+    SHULKER_TELEPORT_FROM_REGION("shulker-tp-from", FlagTagRegister.ENTITY),
+    SLEEP("sleep", FlagTagRegister.PLAYER, FlagTagRegister.BLOCK),
+    SNOW_FALL("snow-fall", FlagTagRegister.BLOCK, FlagTagRegister.ENVIRONMENT),
+    SNOW_MELTING("snow-melting", FlagTagRegister.BLOCK, FlagTagRegister.ENVIRONMENT),
+    SPAWNING_ALL("spawning-all", FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY),
+    SPAWNING_ANIMAL("spawning-animal", FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY),
+    SPAWNING_GOLEM("spawning-golem", FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY),
+    SPAWNING_MONSTER("spawning-monster", FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY),
+    SPAWNING_SLIME("spawning-slime", FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY),
+    SPAWNING_TRADER("spawning-trader", FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY),
+    SPAWNING_VILLAGER("spawning-villager", FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY),
+    SPAWNING_XP("spawning-xp", FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY),
+    SPAWN_PORTAL("spawn-portal", FlagTagRegister.PLAYER, FlagTagRegister.BLOCK),
+    TOOL_SECONDARY_USE("tools-secondary", FlagTagRegister.PLAYER_PREVENTION),
+    TRAMPLE_FARMLAND("trample-farmland", FlagTagRegister.ENVIRONMENT, FlagTagRegister.BLOCK),
+    TRAMPLE_FARMLAND_OTHER("trample-farmland-other", FlagTagRegister.BLOCK, FlagTagRegister.ENTITY),
+    TRAMPLE_FARMLAND_PLAYER("trample-farmland-player", FlagTagRegister.PLAYER, FlagTagRegister.BLOCK),
+    USE_BLOCKS("use-blocks", FlagTagRegister.PLAYER, FlagTagRegister.BLOCK),
+    USE_BONEMEAL("use-bonemeal", FlagTagRegister.PLAYER, FlagTagRegister.BLOCK),
+    USE_ELYTRA("use-elytra", FlagTagRegister.PLAYER),
+    USE_ENDERPEARL_FROM_REGION("enderpearl-from", FlagTagRegister.PLAYER, FlagTagRegister.BLOCK),
+    USE_ENDERPEARL_TO_REGION("enderpearl-to", FlagTagRegister.PLAYER, FlagTagRegister.BLOCK),
+    USE_ENTITIES("use-entities", FlagTagRegister.PLAYER, FlagTagRegister.ENTITY),
+    USE_ITEMS("use-items", FlagTagRegister.PLAYER_PREVENTION),
+    USE_PORTAL("use-portal", FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY),
+    USE_PORTAL_ANIMALS("use-portal-animals", FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY),
+    USE_PORTAL_ITEMS("use-portal-items", FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY),
+    USE_PORTAL_MINECARTS("use-portal-minecarts", FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY),
+    USE_PORTAL_MONSTERS("use-portal-monsters", FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY),
+    USE_PORTAL_PLAYERS("use-portal-players", FlagTagRegister.PLAYER),
+    USE_PORTAL_VILLAGERS("use-portal-villagers", FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY),
+    WATER_FLOW("water-flow", FlagTagRegister.ENVIRONMENT, FlagTagRegister.HIGH_FREQUENCY),
+    WITHER_BLOCK_PROT("wither-destruction", FlagTagRegister.ENVIRONMENT, FlagTagRegister.BLOCK),
+    XP_DROP_ALL("xp-drop-all", FlagTagRegister.PLAYER_PREVENTION),
+    XP_DROP_MONSTER("xp-drop-monsters", FlagTagRegister.PLAYER_PREVENTION),
+    XP_DROP_OTHER("xp-drop-other", FlagTagRegister.PLAYER_PREVENTION),
+    XP_DROP_PLAYER("xp-drop-player", FlagTagRegister.PLAYER, FlagTagRegister.PLAYER_PREVENTION),
+    XP_FREEZE("xp-freeze", FlagTagRegister.PLAYER),
+    XP_PICKUP("xp-pickup", FlagTagRegister.PLAYER),
+    ZOMBIE_DOOR_PROT("zombie-destruction", FlagTagRegister.ENVIRONMENT, FlagTagRegister.PROTECTION);
 
     public final String name;
     public final FlagType type;
-    public final List<FlagTag> categories;
+    public final List<FlagTag> tags;
 
-    RegionFlag(String name, FlagTag...categories) {
+    RegionFlag(String name, FlagTag... tags) {
         this.name = name;
         this.type = FlagType.BOOLEAN_FLAG;
-        this.categories = Arrays.asList(categories);
+        this.tags = Arrays.asList(tags);
     }
 
     /**
@@ -160,26 +163,28 @@ public enum RegionFlag {
 
     public static Set<RegionFlag> getFlagsMatchingCategory(FlagTag category) {
         return getFlags().stream()
-                .filter(flag -> flag.categories.contains(category))
+                .filter(flag -> flag.tags.contains(category))
                 .collect(Collectors.toSet());
     }
 
     public static boolean hasPlayerCategory(IFlag flag) {
-        Set<RegionFlag> flagsMatchingCategory = getFlagsMatchingCategory(FlagTag.PLAYER);
+        Set<RegionFlag> flagsMatchingCategory = getFlagsMatchingCategory(FlagTagRegister.PLAYER);
         RegionFlag regionFlag = RegionFlag.fromId(flag.getName());
         return flagsMatchingCategory.contains(regionFlag);
     }
 
     public static boolean hasPlayerCategory(RegionFlag regionFlag) {
-        return regionFlag.categories.contains(FlagTag.PLAYER);
+        return regionFlag.tags.contains(FlagTagRegister.PLAYER);
     }
 
     public static boolean hasCategory(RegionFlag regionFlag, FlagTag category) {
-        return regionFlag.categories.contains(category);
+        return regionFlag.tags.contains(category);
     }
 
     public static boolean matchesCategory(RegionFlag regionFlag, Set<String> categories) {
-        Set<String> flagCategories = regionFlag.categories.stream().map(c -> c.name).collect(Collectors.toSet());
+        var flagCategories = regionFlag.tags.stream()
+                .map(c -> c.tagRl().toString())
+                .collect(Collectors.toSet());
         return categories.stream().anyMatch(flagCategories::contains);
     }
 
@@ -199,6 +204,14 @@ public enum RegionFlag {
     }
 
     public boolean isBeneficial() {
-        return this.categories.contains(FlagTag.BENEFICIAL);
+        return this.is(FlagTagRegister.BENEFICIAL);
+    }
+
+    public boolean is(FlagTag flagTag) {
+        return this.tags.contains(flagTag);
+    }
+
+    public boolean isPlayerFlag() {
+        return this.is(FlagTagRegister.PLAYER);
     }
 }
