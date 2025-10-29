@@ -23,59 +23,86 @@ public record FlagContext(
         @Nullable Player player) {
 
     /**
-     * Determines the flag resolution for this context.
+     * Resolves the effective {@link FlagState} for this context, accounting for whether the flag
+     * is player-specific, beneficial, and whether the player has a bypass permission.
      *
-     * <p>If the player has bypass permissions in the region, the flag state is set to {@code ALLOWED}.
-     * Otherwise, the flag state is determined by the region's flag settings.</p>
+     * <p>The resolution logic is as follows:</p>
+     * <ul>
+     *   <li>If the flag is {@code null}, the result is {@link FlagState#UNDEFINED}.</li>
+     *   <li>If the flag is <strong>not</strong> player-specific, the result is taken directly
+     *       from the region’s flag configuration via {@link RegionFlags#flagState(String)}.</li>
+     *   <li>If the flag <strong>is</strong> player-specific:
+     *     <ul>
+     *       <li>If the flag is beneficial and the player has a bypass permission:
+     *         <ul>
+     *           <li>If the region’s flag state is {@link FlagState#ALLOWED} or {@link FlagState#DENIED},
+     *               the result is {@link FlagState#ALLOWED}.</li>
+     *           <li>Otherwise, the result is {@link FlagState#DISABLED}.</li>
+     *         </ul>
+     *       </li>
+     *       <li>If the flag is beneficial and the player lacks a bypass permission,
+     *           the result is the region’s defined {@link FlagState}.</li>
+     *       <li>If the flag is non-beneficial and the player has a bypass permission,
+     *           the result is {@link FlagState#DISABLED}.</li>
+     *       <li>If the flag is non-beneficial and the player lacks a bypass permission,
+     *           the result is the region’s defined {@link FlagState}.</li>
+     *     </ul>
+     *   </li>
+     * </ul>
      *
-     * @return The {@link FlagState} representing the resolved flag and its state.
+     * <p>This method ensures that bypass permissions never result in a denied outcome,
+     * and that beneficial flags are treated permissively for players with bypass privileges.</p>
+     *
+     * @return the resolved {@link FlagState}, reflecting region configuration,
+     *         flag characteristics, and player permissions
      */
     public FlagState resultingState() {
+        if (flag == null) {
+            return FlagState.UNDEFINED;
+        }
+        boolean playerPerm = Permissions.playerHasBypassPermission(region, player);
         var flagState = region.getFlags().flagState(regionFlag.name);
-        return Permissions.playerHasBypassPermission(region, player) 
-                ? FlagState.ALLOWED 
-                : flagState;
+        if (!regionFlag.isPlayerFlag()) {
+            return flagState;
+        }
+        if (regionFlag.isBeneficial()) {
+            if (playerPerm) {
+                return switch (flagState) {
+                    case ALLOWED, DENIED -> FlagState.ALLOWED;
+                    default -> FlagState.DISABLED;
+                };
+            }
+            return flagState;
+        } else
+            return playerPerm ? FlagState.DISABLED : flagState;
     }
 
     /**
-     * Resolves the effective {@link FlagContext} by considering whether this context should be overridden
-     * by a parent context.
-     * <p>
-     * This method resolves flag inheritance based on the following rules:
-     * <ul>
-     *   <li>If the parent flag has an override, the parent context is returned.</li>
-     *   <li>If the parent flag is set, the child flag is not set, and the player does not have a bypass permission, the parent context is returned.</li>
-     *   <li>Otherwise, the current context is retained.</li>
-     * </ul>
-     * <p> This method is typically used in recursive flag resolution, ensuring that higher-priority 
-     * regions or inherited flag settings take effect when applicable.
+     * Determines which {@link FlagContext} should take effect by applying inheritance logic
+     * between this context and a given parent context.
      *
-     * @param parent the parent {@link FlagContext} to inherit from, must not be {@code null}
+     * <p>The resolution follows these rules:</p>
+     * <ul>
+     *   <li>If the parent context’s flag exists, is set, and is marked as overriding
+     *       ({@code flag.doesOverride()}), the parent context takes precedence.</li>
+     *   <li>If the parent’s flag is set but the child’s flag is not set, the parent context takes precedence.</li>
+     *   <li>In all other cases (including when neither flag is set), the current context is retained.</li>
+     * </ul>
+     *
+     * <p>This method is used during recursive flag resolution to ensure that inherited or
+     * overriding flag values from parent regions take effect only when explicitly allowed.</p>
+     *
+     * @param parent the parent {@link FlagContext} to compare against, must not be {@code null}
      * @return the effective {@link FlagContext} after applying inheritance rules
      */
-    public FlagContext inheritContext(FlagContext parent) {         
-        var playerBypass = Permissions.playerHasBypassPermission(region, player);
-        var cFlagSet = region.getFlags().isAllowedOrDenied(regionFlag.name);
-        var pFlagSet = parent.region.getFlags().isAllowedOrDenied(regionFlag.name);
-        var parentOverrides = parent.flag != null && parent.flag.doesOverride();
-        if (!parentOverrides) {
-            if (pFlagSet && !cFlagSet && !playerBypass) return parent;
-            if (playerBypass || (cFlagSet && pFlagSet)) return this;
-            return this;
-        } else 
-            return parent;
-    }
-
-    private FlagContext inheritContext2(FlagContext parent) {
-        boolean playerBypass = Permissions.playerHasBypassPermission(region, player);
-        boolean childFlagSet = region.getFlags().isAllowedOrDenied(regionFlag.name);
-        boolean parentFlagSet = parent.region.getFlags().isAllowedOrDenied(regionFlag.name);
-        boolean parentOverrides = parent.flag != null && parent.flag.doesOverride();
-
-        if (parentOverrides || (parentFlagSet && !childFlagSet && !playerBypass)) {
-            return parent;
-        }
-        return this;
+    public FlagContext inheritContext(FlagContext parent) {
+        boolean childFlagSet = region.getFlags().isSet(regionFlag.name);
+        boolean parentFlagSet = parent.region.getFlags().isSet(regionFlag.name);
+        boolean parentOverrides = parent.flag != null && parentFlagSet && parent.flag.doesOverride();
+        boolean parentSetButNotChild = parentFlagSet && !childFlagSet;
+        return (parentOverrides || parentSetButNotChild)
+                ? parent
+                : this; // what about none set? -> keep current
     }
 
     /**
