@@ -2,7 +2,7 @@ package de.z0rdak.yawp.core.region;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.z0rdak.yawp.core.flag.Flag;
+import de.z0rdak.yawp.core.flag.FlagValue;
 import de.z0rdak.yawp.core.flag.RegionFlags;
 import de.z0rdak.yawp.core.group.PlayerContainer;
 import net.minecraft.core.registries.Registries;
@@ -25,7 +25,7 @@ public class GlobalRegion extends ProtectedRegion {
                                     .forGetter(ProtectedRegion::getParentName),
                             Codec.STRING.fieldOf("type")
                                     .forGetter(r -> r.getRegionType().type),
-                            Codec.unboundedMap(Codec.STRING, Flag.CODEC)
+                            Codec.unboundedMap(Codec.STRING, FlagValue.CODEC)
                                     .fieldOf("flags")
                                     .forGetter(r -> r.getFlags().getFlagMap()),
                             Codec.BOOL.fieldOf("isActive")
