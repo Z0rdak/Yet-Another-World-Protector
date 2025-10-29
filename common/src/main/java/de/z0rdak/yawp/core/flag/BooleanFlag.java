@@ -3,7 +3,7 @@ package de.z0rdak.yawp.core.flag;
 /**
  * A simple boolean state flag.
  */
-public class BooleanFlag extends Flag {
+public class BooleanFlag extends FlagValue {
 
     public BooleanFlag(RegionFlag flag, FlagState state, boolean override) {
         super(flag.name, flag.type, override, state);
