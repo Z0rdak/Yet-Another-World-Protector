@@ -9,6 +9,7 @@ import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.animal.SnowGolem;
+import net.minecraft.world.entity.animal.horse.TraderLlama;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.npc.WanderingTrader;
@@ -55,7 +56,7 @@ public class ServerWorldMixin {
                 }
                 FlagEvaluator.processCheck(checkEvent, deny -> cir.setReturnValue(false));
             }
-            if (entity instanceof WanderingTrader) {
+            if (entity instanceof WanderingTrader || entity instanceof TraderLlama) {
                 checkEvent = new FlagCheckEvent(entity.blockPosition(), SPAWNING_TRADER, getDimKey(entity));
                 if (Services.EVENT.post(checkEvent)) {
                     return;
