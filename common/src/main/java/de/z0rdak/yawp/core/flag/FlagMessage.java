@@ -2,6 +2,7 @@ package de.z0rdak.yawp.core.flag;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import de.z0rdak.yawp.api.FlagTagRegister;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
@@ -14,7 +15,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.Map.Entry;
 
-import static de.z0rdak.yawp.core.flag.FlagTag.PLAYER;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
 
 public class FlagMessage {
@@ -109,7 +109,7 @@ public class FlagMessage {
         substituteMap.put(POS_TEMPLATE, shortBlockPosBracketed(pos));
         substituteMap.put(REGION_TEMPLATE, region.getName());
         substituteMap.put(DIM_TEMPLATE, region.getDim().location().toString());
-        if (player != null && flag.categories.contains(PLAYER)) {
+        if (player != null && flag.tags.contains(FlagTagRegister.PLAYER)) {
             substituteMap.put(PLAYER_TEMPLATE, player.getScoreboardName());
         }
         return substituteMap;
