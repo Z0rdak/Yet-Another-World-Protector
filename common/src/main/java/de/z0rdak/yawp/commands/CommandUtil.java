@@ -702,9 +702,6 @@ public class CommandUtil {
                 case BOOLEAN_FLAG:
                     iFlag = new BooleanFlag(flag, state, override);
                     break;
-                case LIST_FLAG:
-                case INT_FLAG:
-                    throw new NotImplementedException("Not yet implemented = " + flag.name);
                 default:
                     throw new IllegalArgumentException("Unexpected value = " + flag.getClass().getName());
             }
