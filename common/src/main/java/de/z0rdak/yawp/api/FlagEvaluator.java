@@ -49,11 +49,9 @@ public class FlagEvaluator {
         FlagCheckResult result = evaluate(checkEvent);
         result = Services.EVENT.post(result);
         var state = result.getFlagState();
-        if (state == FlagState.ALLOWED && onAllow != null) {
-            onAllow.accept(result);
-        }
-        if (state == FlagState.DENIED && onDeny != null) {
-            onDeny.accept(result);
+        switch (state) {
+            case ALLOWED -> { if (onAllow != null) onAllow.accept(result); }
+            case DENIED  -> { if (onDeny  != null) onDeny.accept(result); }
         }
         return state;
     }
@@ -120,7 +118,7 @@ public class FlagEvaluator {
         var regionFlag = checkEvent.getRegionFlag();
         var flagContext = new FlagContext(targetRegion, regionFlag, targetRegion.getFlag(regionFlag.name), checkEvent.getPlayer());
         var resultingContext = resolveFlag(targetRegion, flagContext);
-        return new FlagCheckResult(checkEvent, resultingContext.resultingState(), resultingContext.region(), resultingContext.flag());
+        return new FlagCheckResult(checkEvent, resultingContext);
     }
 
     /**
