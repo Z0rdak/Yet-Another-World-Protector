@@ -3,7 +3,7 @@ package de.z0rdak.yawp.core.flag;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-public abstract class Flag implements IFlag {
+public abstract class FlagValue implements IFlag {
 
     public static Codec<IFlag> CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
@@ -34,11 +34,11 @@ public abstract class Flag implements IFlag {
     protected boolean doesOverride;
     protected FlagMessage msg;
 
-    public Flag(String name, FlagType type, boolean override) {
+    public FlagValue(String name, FlagType type, boolean override) {
         this(name, type, override, FlagState.DENIED);
     }
 
-    public Flag(String name, FlagType type, boolean override, FlagState state) {
+    public FlagValue(String name, FlagType type, boolean override, FlagState state) {
         this.name = name;
         this.type = type;
         this.state = state;
@@ -46,16 +46,16 @@ public abstract class Flag implements IFlag {
         this.msg = FlagMessage.DEFAULT_FLAG_MSG;
     }
 
-    public Flag(String name, FlagType type) {
+    public FlagValue(String name, FlagType type) {
         this(name, type, false, FlagState.DENIED);
     }
 
-    public Flag(String name, FlagType type, boolean override, FlagState state, String msg) {
+    public FlagValue(String name, FlagType type, boolean override, FlagState state, String msg) {
         this(name, type, override, state);
         this.msg = new FlagMessage(msg);
     }
 
-    public Flag(String name, FlagType type, boolean override, FlagState state, FlagMessage msg) {
+    public FlagValue(String name, FlagType type, boolean override, FlagState state, FlagMessage msg) {
         this(name, type, override, state);
         this.msg = msg;
     }
