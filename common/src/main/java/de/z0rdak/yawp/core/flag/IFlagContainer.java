@@ -58,7 +58,13 @@ public interface IFlagContainer {
      */
     FlagState flagState(String flag);
 
-    boolean isAllowedOrDenied(@NotNull String flagName);
+    /**
+     * Checks if a flag with the given name is set
+     * (i.e., its state is either {@code FlagState.ALLOWED} or {@code FlagState.DENIED}).
+     * @param flagName the name of the flag to check
+     * @return {@code true} if the flag is set, otherwise {@code false}
+     */
+    boolean isSet(@NotNull String flagName);
 
     /**
      * Checks whether the specified flag is defined (i.e., not {@code UNDEFINED}).

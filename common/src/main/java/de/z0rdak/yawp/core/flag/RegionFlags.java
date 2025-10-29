@@ -2,18 +2,14 @@ package de.z0rdak.yawp.core.flag;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.z0rdak.yawp.constants.Constants;
-import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-import static de.z0rdak.yawp.constants.serialization.RegionNbtKeys.FLAG_TYPE;
-
 public class RegionFlags implements IFlagContainer {
     public static Codec<RegionFlags> CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
-                    Codec.unboundedMap(Codec.STRING, Flag.CODEC)
+                    Codec.unboundedMap(Codec.STRING, FlagValue.CODEC)
                             .optionalFieldOf("flags", new HashMap<>())
                             .forGetter(a -> a.flags)
             ).apply(instance, RegionFlags::new)
@@ -104,7 +100,7 @@ public class RegionFlags implements IFlagContainer {
     }
 
     @Override
-    public boolean isAllowedOrDenied(@NotNull String flagName) {
+    public boolean isSet(@NotNull String flagName) {
         FlagState flagState = flagState(flagName);
         return flagState == FlagState.ALLOWED || flagState == FlagState.DENIED;
     }
