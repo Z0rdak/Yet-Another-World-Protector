@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.core.area.*;
-import de.z0rdak.yawp.core.flag.Flag;
+import de.z0rdak.yawp.core.flag.FlagValue;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlags;
 import de.z0rdak.yawp.core.group.PlayerContainer;
@@ -17,8 +17,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 import java.util.*;
-
-import static de.z0rdak.yawp.core.area.AreaType.CUBOID;
 
 /**
  * The MarkedRegion represents an abstract implementation for a markable region.
@@ -37,7 +35,7 @@ public abstract class MarkedRegion extends ProtectedRegion implements IMarkableR
                                     .forGetter(IMarkableRegion::getParentName),
                             Codec.STRING.fieldOf("type")
                                     .forGetter(r -> r.getRegionType().type),
-                            Codec.unboundedMap(Codec.STRING, Flag.CODEC)
+                            Codec.unboundedMap(Codec.STRING, FlagValue.CODEC)
                                     .optionalFieldOf("flags", Lifecycle.stable(), new HashMap<>(), Lifecycle.stable())
                                     .forGetter(r -> r.getFlags().getFlagMap()),
                             Codec.BOOL.optionalFieldOf("isActive", true)
