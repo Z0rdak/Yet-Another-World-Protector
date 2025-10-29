@@ -16,6 +16,7 @@ import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.animal.SnowGolem;
+import net.minecraft.world.entity.animal.horse.TraderLlama;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.npc.WanderingTrader;
@@ -73,7 +74,7 @@ public class YawpEventHandler {
             case SPAWNING_GOLEM:
                 return e -> e instanceof SnowGolem || e instanceof IronGolem;
             case SPAWNING_TRADER:
-                return e -> e instanceof WanderingTrader;
+                return e -> e instanceof WanderingTrader || e instanceof TraderLlama;
             case SPAWNING_SLIME:
                 return e -> e instanceof Slime;
             case SPAWNING_VILLAGER:
