@@ -16,6 +16,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.animal.SnowGolem;
+import net.minecraft.world.entity.animal.horse.TraderLlama;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.monster.Slime;
@@ -155,7 +156,7 @@ public class EntityFlagHandler {
                     return;
                 }
             }
-            if (entity instanceof WanderingTrader) {
+            if (entity instanceof WanderingTrader || entity instanceof TraderLlama) {
                 checkEvent = new FlagCheckEvent(target, RegionFlag.SPAWNING_TRADER, dim);
                 if (Services.EVENT.post(checkEvent)) {
                     return;
