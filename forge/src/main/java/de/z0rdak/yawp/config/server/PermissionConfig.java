@@ -50,7 +50,7 @@ public class PermissionConfig {
                 .define("disable_cmd_for_non_op", false);
 
         OP_BYPASS_FLAGS = BUILDER.comment("Defines whether OPs/permitted players are allowed to bypass flags set in regions.")
-                .define("op_bypass_flags", true);
+                .define("op_bypass_flags", false);
 
         ENABLE_HIERARCHY_OWNERSHIP = BUILDER.comment("Defines whether owners of parent regions have implicit ownership rights for child regions as well")
                 .define("hierarchy_ownership", true);
