@@ -3,25 +3,20 @@ package de.z0rdak.yawp.core.region;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.area.*;
-import de.z0rdak.yawp.core.flag.Flag;
+import de.z0rdak.yawp.core.flag.FlagValue;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlags;
 import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.platform.Services;
-import de.z0rdak.yawp.util.NbtCompatHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 import java.util.*;
-
-import static de.z0rdak.yawp.constants.serialization.RegionNbtKeys.*;
 
 /**
  * The MarkedRegion represents an abstract implementation for a markable region.
@@ -40,7 +35,7 @@ public abstract class MarkedRegion extends ProtectedRegion implements IMarkableR
                                     .forGetter(IMarkableRegion::getParentName),
                             Codec.STRING.fieldOf("type")
                                     .forGetter(r -> r.getRegionType().type),
-                            Codec.unboundedMap(Codec.STRING, Flag.CODEC)
+                            Codec.unboundedMap(Codec.STRING, FlagValue.CODEC)
                                     .optionalFieldOf("flags", Lifecycle.stable(), new HashMap<>(), Lifecycle.stable())
                                     .forGetter(r -> r.getFlags().getFlagMap()),
                             Codec.BOOL.optionalFieldOf("isActive", true)
