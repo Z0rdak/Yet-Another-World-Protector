@@ -2,8 +2,6 @@ package de.z0rdak.yawp.platform.config;
 
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
-import de.z0rdak.yawp.api.events.region.NeoForgeFlagCheckEvent;
-import de.z0rdak.yawp.api.events.region.NeoForgeFlagCheckResult;
 import de.z0rdak.yawp.config.server.LoggingConfig;
 import de.z0rdak.yawp.platform.services.config.ILoggingConfigHelper;
 
@@ -18,7 +16,7 @@ public class NeoForgeLoggingConfigHelper implements ILoggingConfigHelper {
 
     @Override
     public Set<String> getFlagCategories() {
-        return LoggingConfig.getFlagCategories();
+        return LoggingConfig.getFlagTags();
     }
 
     @Override

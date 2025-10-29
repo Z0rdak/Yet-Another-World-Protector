@@ -1,14 +1,13 @@
 package de.z0rdak.yawp.config.server;
 
+import de.z0rdak.yawp.api.FlagTagRegister;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
 import de.z0rdak.yawp.constants.Constants;
-import de.z0rdak.yawp.core.flag.FlagTag;
-import de.z0rdak.yawp.core.flag.FlagState;
-import de.z0rdak.yawp.core.flag.IFlag;
-import de.z0rdak.yawp.core.flag.RegionFlag;
+import de.z0rdak.yawp.core.flag.*;
 import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.util.AreaUtil;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,7 +28,7 @@ public class LoggingConfig {
     private static final ModConfigSpec.ConfigValue<Boolean> LOG_EMPTY_RESULTS;
     // private static final ModConfigSpec.ConfigValue<Boolean> DETAILED_PLAYER_FLAG_LOG;
     private static final ModConfigSpec.ConfigValue<List<? extends String>> LOG_RESULT_VALUES;
-    private static final ModConfigSpec.ConfigValue<List<? extends String>> LOG_FLAG_CATEGORIES;
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> LOG_FLAG_TAGS;
     private static final ModConfigSpec.ConfigValue<List<? extends String>> LOG_FLAGS;
 
     static {
@@ -49,8 +48,8 @@ public class LoggingConfig {
         LOG_RESULT_VALUES = BUILDER.comment("List of flags result states which shall be logged. By default only denied results will be logged.\n Valid FlagStates are: allowed and denied")
                 .defineListAllowEmpty(List.of("log_result_values"), () -> Collections.singletonList(FlagState.DENIED.name), null, LoggingConfig::isValidFlagState);
 
-        LOG_FLAG_CATEGORIES = BUILDER.comment("List of flag categories which shall be logged.\nValid categories are: player, block, entity, item, environment, protection and * (for all).")
-                .defineListAllowEmpty(List.of("log_flag_categories"), () -> Collections.singletonList(FlagTag.PLAYER.name), null, LoggingConfig::isValidCategory);
+        LOG_FLAG_TAGS = BUILDER.comment("List of flag tags which shall be logged.\nValid tags are: player, beneficial, block, entity, item, environment, protection, high-frequency and * (for all).")
+                .defineListAllowEmpty(List.of("log_flag_tags"), () -> Collections.singletonList(FlagTagRegister.PLAYER.tagRl().toString()), null, LoggingConfig::isValidTag);
 
         LOG_FLAGS = BUILDER.comment("List of flags which shall be logged.")
                 .defineListAllowEmpty(List.of("log_flags"), () -> Arrays.asList(RegionFlag.BREAK_BLOCKS.name, RegionFlag.PLACE_BLOCKS.name), null, LoggingConfig::isValidFlag);
@@ -62,8 +61,8 @@ public class LoggingConfig {
 
     }
 
-    public static Set<String> getFlagCategories() {
-        return LOG_FLAG_CATEGORIES.get().stream()
+    public static Set<String> getFlagTags() {
+        return LOG_FLAG_TAGS.get().stream()
                 .filter(Objects::nonNull)
                 .map(String::toString)
                 .collect(Collectors.toSet());
@@ -83,11 +82,13 @@ public class LoggingConfig {
                 .collect(Collectors.toSet());
     }
 
-    private static boolean isValidCategory(Object entity) {
+    private static boolean isValidTag(Object entity) {
         if (entity instanceof String str) {
             try {
-                FlagTag category = FlagTag.from(str);
-                return category != null || str.equalsIgnoreCase("*");
+                FlagTag tag = FlagTagRegister.from(ResourceLocation.tryParse(str));
+                // if no exception was thrown, it's a valid tag
+                // special case for wildcard
+                return str.equalsIgnoreCase("*");
             } catch (IllegalArgumentException e) {
                 LOGGING_CONFIG_LOGGER.warn("Invalid flag category supplied for 'log_flag_categories': {}", entity);
                 return false;
@@ -187,7 +188,7 @@ public class LoggingConfig {
     }
 
     public static boolean flagMatchesCategory(FlagCheckEvent check) {
-        return RegionFlag.matchesCategory(check.getRegionFlag(), getFlagCategories());
+        return RegionFlag.matchesCategory(check.getRegionFlag(), getFlagTags());
     }
 
     public static boolean matchesFlag(FlagCheckEvent check) {
