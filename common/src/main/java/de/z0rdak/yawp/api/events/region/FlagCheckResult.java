@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.api.events.region;
 
+import de.z0rdak.yawp.core.flag.FlagContext;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
@@ -26,6 +27,13 @@ public final class FlagCheckResult {
         this.responsibleRegion = responsibleRegion;
         this.result = state;
         this.flag = flag;
+    }
+
+    public FlagCheckResult(FlagCheckEvent flagCheck, FlagContext flagContext) {
+        this.flagCheck = flagCheck;
+        this.responsibleRegion = flagContext.region();
+        this.flag = flagContext.flag();
+        this.result = flagContext.resultingState();
     }
 
     public static FlagCheckResult Undefined(FlagCheckEvent flagCheck) {
