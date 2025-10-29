@@ -6,11 +6,7 @@ import java.util.stream.Collectors;
 
 public enum FlagType {
 
-    BOOLEAN_FLAG("BooleanFlag"),
-    @Deprecated
-    LIST_FLAG("ListFlag"),
-    @Deprecated
-    INT_FLAG("IntFlag");
+    BOOLEAN_FLAG("BooleanFlag");
 
     public final String flagType;
 
@@ -22,10 +18,6 @@ public enum FlagType {
         switch (name) {
             case "BooleanFlag":
                 return BOOLEAN_FLAG;
-            case "ListFlag":
-                return LIST_FLAG;
-            case "IntFlag":
-                return INT_FLAG;
             default:
                 throw new IllegalArgumentException("Unknown FlagType: " + name);
         }
