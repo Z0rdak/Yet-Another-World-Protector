@@ -9,7 +9,7 @@ import java.util.*;
 public class RegionFlags implements IFlagContainer {
     public static Codec<RegionFlags> CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
-                    Codec.unboundedMap(Codec.STRING, Flag.CODEC)
+                    Codec.unboundedMap(Codec.STRING, FlagValue.CODEC)
                             .optionalFieldOf("flags", new HashMap<>())
                             .forGetter(a -> a.flags)
             ).apply(instance, RegionFlags::new)
@@ -100,7 +100,7 @@ public class RegionFlags implements IFlagContainer {
     }
 
     @Override
-    public boolean isAllowedOrDenied(@NotNull String flagName) {
+    public boolean isSet(@NotNull String flagName) {
         FlagState flagState = flagState(flagName);
         return flagState == FlagState.ALLOWED || flagState == FlagState.DENIED;
     }
