@@ -18,7 +18,7 @@ public class ForgeLoggingConfigHelper implements ILoggingConfigHelper {
 
     @Override
     public Set<String> getFlagCategories() {
-        return LoggingConfig.getFlagCategories();
+        return LoggingConfig.getFlagTags();
     }
 
     @Override
