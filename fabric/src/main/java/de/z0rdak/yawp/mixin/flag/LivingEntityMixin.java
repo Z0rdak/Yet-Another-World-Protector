@@ -38,15 +38,15 @@ public abstract class LivingEntityMixin {
 
     @Inject(method = "knockback", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onKnockback(double strength, double x, double z, CallbackInfo ci) {
-        LivingEntity target = (LivingEntity) (Object) this;
-        if (isServerSide(target)) {
-            if (target instanceof Player player) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), KNOCKBACK_PLAYERS, getDimKey(player), attackingPlayer);
+        LivingEntity self = (LivingEntity) (Object) this;
+        if (isServerSide(self)) {
+            if (self instanceof Player player) {
+                FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), NO_KNOCKBACK, getDimKey(player), player);
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.process(checkEvent)
-                        .onDenyWithMsg(res -> ci.cancel());
+                        .onAllow(res -> ci.cancel());
                 checkEvent = new FlagCheckEvent(player.blockPosition(), INVINCIBLE, getDimKey(player), player);
                 if (Services.EVENT.post(checkEvent)) {
                     return;
