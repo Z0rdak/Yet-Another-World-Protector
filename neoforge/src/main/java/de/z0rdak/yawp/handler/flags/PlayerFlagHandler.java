@@ -332,10 +332,9 @@ public final class PlayerFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                FlagEvaluator.processCheck(checkEvent, onDeny -> {
+                FlagEvaluator.process(checkEvent).onAllow( res -> {
                     event.setCanceled(true);
-                    event.setAmount(0f);
-                    sendFlagMsg(onDeny);
+                    event.setAmount(0);
                 });
             }
         }
