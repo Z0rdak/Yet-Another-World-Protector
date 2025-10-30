@@ -202,9 +202,8 @@ public class GrievingFlagHandler {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(xpDroppingPlayer.blockPosition(), RegionFlag.KEEP_XP, getDimKey(xpDroppingPlayer), xpDroppingPlayer);
                 if (Services.EVENT.post(checkEvent))
                     return;
-                FlagEvaluator.processCheck(checkEvent, deny -> {
-                    event.setCanceled(true);
-                });
+                FlagEvaluator.process(checkEvent)
+                        .onAllow( res -> event.setCanceled(true));
             }
         }
     }
