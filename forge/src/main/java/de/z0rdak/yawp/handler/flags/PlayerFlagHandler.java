@@ -338,10 +338,9 @@ public final class PlayerFlagHandler {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                FlagEvaluator.processCheck(checkEvent, onDeny -> {
+                FlagEvaluator.process(checkEvent).onAllow( res -> {
                     event.setCanceled(true);
-                    event.setAmount(0f);
-                    sendFlagMsg(onDeny);
+                    event.setAmount(0);
                 });
             }
         }
@@ -375,23 +374,21 @@ public final class PlayerFlagHandler {
     public static void onPlayerKnockback(LivingKnockBackEvent event) {
         if (ForgeHandlerUtil.isServerSide(event)) {
             if (event.getEntity() instanceof Player dmgTarget) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(dmgTarget.blockPosition(), KNOCKBACK_PLAYERS, getDimKey(dmgTarget), dmgTarget);
+                FlagCheckEvent checkEvent = new FlagCheckEvent(dmgTarget.blockPosition(), NO_KNOCKBACK, getDimKey(dmgTarget), dmgTarget);
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                FlagEvaluator.processCheck(checkEvent, onDeny -> {
+                FlagEvaluator.process(checkEvent).onAllow( res -> {
                     event.setCanceled(true);
                     event.setStrength(0);
-                    sendFlagMsg(onDeny);
                 });
                 checkEvent = new FlagCheckEvent(dmgTarget.blockPosition(), INVINCIBLE, getDimKey(dmgTarget), dmgTarget);
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                FlagEvaluator.processCheck(checkEvent, onDeny -> {
+                FlagEvaluator.process(checkEvent).onAllow( res -> {
                     event.setCanceled(true);
                     event.setStrength(0);
-                    sendFlagMsg(onDeny);
                 });
             }
         }
