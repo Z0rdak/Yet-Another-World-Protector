@@ -1,3 +1,26 @@
+# [0.6.2-beta1] - 2025-10-30
+
+## Added
+
+- Add flag `no-hunger` and `keep-inv` back.
+
+## Changed
+
+- Set default value for `op_bypass_flags` to `false` in `yawp-common.toml` to prevent unexpected behavior for server operators. 
+- Add flag command no longer supports the override argument. This caused confusion when adding flags.
+- Rename flag `knockback-players` to `no-knockback`. Clarification: It prevents players from being knocked back.
+
+## Fixed
+
+- Fix issues loading region data (again) causing region data loss.
+- Fix flags considered _beneficial_ for players not working as intended. This includes, beside others:
+  - `keep-inv`
+  - `no-hunger`
+  - `keep-xp`
+  - `invincible`
+  - `no-knockback`
+- Fix `spawning-trader` flag not preventing wandering trader llamas from spawning.
+
 # [0.6.1-beta1] - 2025-10-26
 
 ## Changed
