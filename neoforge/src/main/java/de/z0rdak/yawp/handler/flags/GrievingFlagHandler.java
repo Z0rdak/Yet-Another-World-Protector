@@ -200,9 +200,8 @@ public class GrievingFlagHandler {
                 FlagCheckEvent checkEvent = new FlagCheckEvent(targetPlayer.blockPosition(), RegionFlag.KEEP_XP, getDimKey(targetPlayer), targetPlayer);
                 if (Services.EVENT.post(checkEvent))
                     return;
-                FlagEvaluator.processCheck(checkEvent, deny -> {
-                    event.setCanceled(true);
-                });
+                FlagEvaluator.process(checkEvent)
+                        .onAllow( res -> event.setCanceled(true));
             }
         }
     }
