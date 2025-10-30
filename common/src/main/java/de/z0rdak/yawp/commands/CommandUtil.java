@@ -140,9 +140,7 @@ public class CommandUtil {
                                 .executes(ctx -> addFlag(ctx, regionSupplier.apply(ctx), getFlagArgument(ctx)))
                                 .then(Commands.argument(STATE.toString(), StringArgumentType.word())
                                         .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(FlagState.ValidFlagStates(), builder))
-                                        .executes(ctx -> addFlag(ctx, regionSupplier.apply(ctx), getFlagArgument(ctx), getFlagStateArgument(ctx), false))
-                                        .then(Commands.argument(OVERRIDE.toString(), BoolArgumentType.bool())
-                                                .executes(ctx -> addFlag(ctx, regionSupplier.apply(ctx), getFlagArgument(ctx), getFlagStateArgument(ctx), getOverrideArgument(ctx))))
+                                        .executes(ctx -> addFlag(ctx, regionSupplier.apply(ctx), getFlagArgument(ctx), getFlagStateArgument(ctx)))
                                 )
                         )
                 )
@@ -678,11 +676,11 @@ public class CommandUtil {
     }
 
     public static int addFlag(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, RegionFlag flag) {
-        return addFlag(ctx, region, flag, FlagState.DENIED, false);
+        return addFlag(ctx, region, flag, FlagState.DENIED);
     }
 
-    public static int addFlag(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, RegionFlag flag, FlagState state, boolean override) {
-        return addRegionFlag(ctx, region, flag, state, override);
+    public static int addFlag(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, RegionFlag flag, FlagState state) {
+        return addRegionFlag(ctx, region, flag, state);
     }
 
     public static int addFlags(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, Set<RegionFlag> flags) {
@@ -690,7 +688,7 @@ public class CommandUtil {
         return 0;
     }
 
-    public static int addRegionFlag(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, RegionFlag flag, FlagState state, boolean override) {
+    public static int addRegionFlag(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, RegionFlag flag, FlagState state) {
         if (region.getRegionType() == RegionType.LOCAL && flag == RegionFlag.ENTER_DIM) {
             MutableComponent msg = Component.literal("Flag 'enter-dim' is currently not supported for local regions.");
             sendCmdFeedback(ctx.getSource(), msg);
@@ -700,7 +698,7 @@ public class CommandUtil {
             IFlag iFlag;
             switch (flag.type) {
                 case BOOLEAN_FLAG:
-                    iFlag = new BooleanFlag(flag, state, override);
+                    iFlag = new BooleanFlag(flag, state, false);
                     break;
                 default:
                     throw new IllegalArgumentException("Unexpected value = " + flag.getClass().getName());
@@ -725,6 +723,6 @@ public class CommandUtil {
     }
 
     public static int addRegionFlag(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, RegionFlag flag) {
-        return addRegionFlag(ctx, region, flag, FlagState.DENIED, false);
+        return addRegionFlag(ctx, region, flag, FlagState.DENIED);
     }
 }
