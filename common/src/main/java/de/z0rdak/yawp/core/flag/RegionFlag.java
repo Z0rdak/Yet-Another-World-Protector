@@ -38,7 +38,7 @@ public enum RegionFlag {
     KEEP_XP("keep-xp", FlagTagRegister.BENEFICIAL, FlagTagRegister.PLAYER),
     KEEP_INV("keep-inv", FlagTagRegister.BENEFICIAL, FlagTagRegister.PLAYER),
     NO_HUNGER("no-hunger", FlagTagRegister.BENEFICIAL, FlagTagRegister.PLAYER),
-    KNOCKBACK_PLAYERS("knockback-players", FlagTagRegister.PLAYER, FlagTagRegister.ENTITY),
+    NO_KNOCKBACK("no-knockback", FlagTagRegister.BENEFICIAL, FlagTagRegister.PLAYER),
     ITEM_DROP("item-drop", FlagTagRegister.PLAYER_PREVENTION),
     ITEM_PICKUP("item-pickup", FlagTagRegister.PLAYER_PREVENTION),
     LAVA_FLOW("lava-flow", FlagTagRegister.ENVIRONMENT, FlagTagRegister.HIGH_FREQUENCY),
