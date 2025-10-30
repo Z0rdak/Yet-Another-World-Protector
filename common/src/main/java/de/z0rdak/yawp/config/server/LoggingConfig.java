@@ -85,10 +85,12 @@ public class LoggingConfig {
     private static boolean isValidTag(Object entity) {
         if (entity instanceof String str) {
             try {
+                if (str.equals("*")) {
+                    return true;
+                }
                 FlagTag tag = FlagTagRegister.from(ResourceLocation.tryParse(str));
                 // if no exception was thrown, it's a valid tag
-                // special case for wildcard
-                return str.equalsIgnoreCase("*");
+                return tag != null;
             } catch (IllegalArgumentException e) {
                 LOGGING_CONFIG_LOGGER.warn("Invalid flag category supplied for 'log_flag_categories': {}", entity);
                 return false;
