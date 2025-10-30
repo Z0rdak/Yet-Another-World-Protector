@@ -2,6 +2,7 @@ package de.z0rdak.yawp.mixin.flag;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
@@ -40,20 +41,18 @@ public abstract class LivingEntityMixin {
         LivingEntity target = (LivingEntity) (Object) this;
         if (isServerSide(target)) {
             if (target instanceof Player player) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), KNOCKBACK_PLAYERS, getDimKey(player), player);
+                FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), KNOCKBACK_PLAYERS, getDimKey(player), attackingPlayer);
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                FlagEvaluator.processCheck(checkEvent, deny -> {
-                    ci.cancel();
-                });
+                FlagEvaluator.process(checkEvent)
+                        .onDenyWithMsg(res -> ci.cancel());
                 checkEvent = new FlagCheckEvent(player.blockPosition(), INVINCIBLE, getDimKey(player), player);
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                FlagEvaluator.processCheck(checkEvent, deny -> {
-                    ci.cancel();
-                });
+                FlagEvaluator.process(checkEvent)
+                        .onAllow(res -> ci.cancel());
             }
         }
     }
@@ -126,10 +125,10 @@ public abstract class LivingEntityMixin {
                 if (Services.EVENT.post(checkEvent)) {
                     return;
                 }
-                FlagEvaluator.processCheck(checkEvent, deny -> {
-                    sendFlagMsg(deny);
+                FlagState result = FlagEvaluator.processCheck(checkEvent);
+                if (result == FlagState.ALLOWED) {
                     cir.setReturnValue(false);
-                });
+                }
             }
         }
     }
@@ -178,9 +177,8 @@ public abstract class LivingEntityMixin {
             FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), RegionFlag.KEEP_XP, getDimKey(self));
             if (Services.EVENT.post(checkEvent))
                 return;
-            FlagEvaluator.processCheck(checkEvent, deny -> {
-                ci.cancel();
-            });
+            FlagEvaluator.process(checkEvent)
+                    .onAllow( res -> ci.cancel());
         }
     }
 

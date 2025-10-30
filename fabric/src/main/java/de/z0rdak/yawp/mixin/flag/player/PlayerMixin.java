@@ -87,9 +87,8 @@ public abstract class PlayerMixin {
             FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), INVINCIBLE, getDimKey(self), self);
             if (Services.EVENT.post(checkEvent))
                 return;
-            FlagEvaluator.processCheck(checkEvent, deny -> {
-                ci.cancel();
-            });
+            FlagEvaluator.process(checkEvent)
+                    .onAllow(res -> ci.cancel());
         }
     }
 
