@@ -69,9 +69,12 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
                 (ServerAboutToStartEvent startEvent) -> VisualizationManager.initServerInstance(startEvent.getServer()));
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
                 (LevelEvent.Load event) -> {
-            if (event.getLevel() instanceof ServerLevel serverLevel) {
-                RegionDataManager.worldLoad(serverLevel.getServer(), serverLevel);
-            }
+                    if (event.getLevel() instanceof ServerLevel serverLevel) {
+                        if (serverLevel.dimension().equals(ServerLevel.OVERWORLD)) {
+                            RegionDataManager.loadLevelListData(serverLevel.getServer());
+                        }
+                        RegionDataManager.worldLoad(serverLevel.getServer(), serverLevel);
+                    }
                 });
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
                 (PlayerEvent.PlayerLoggedInEvent event) -> {
