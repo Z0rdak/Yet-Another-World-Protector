@@ -29,7 +29,33 @@ import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
 
-public class FlagEvaluator {
+public record FlagEvaluator(FlagCheckResult result) {
+
+    public FlagState state() {
+        return result.getFlagState();
+    }
+
+    public FlagEvaluator onAllow(Consumer<FlagCheckResult> action) {
+        if (state() == FlagState.ALLOWED && action != null) action.accept(result);
+        return this;
+    }
+
+    public FlagEvaluator onDeny(Consumer<FlagCheckResult> action) {
+        if (state() == FlagState.DENIED && action != null) action.accept(result);
+        return this;
+    }
+
+    public FlagEvaluator onDenyWithMsg(Consumer<FlagCheckResult> action) {
+        var isPlayerFlag = this.result.getFlagCheck().getRegionFlag().isPlayerFlag();
+        if (state() == FlagState.DENIED && isPlayerFlag && action != null)
+            action.andThen(MessageSender::sendFlagMsg).accept(result);
+        return this;
+    }
+
+    public FlagEvaluator onDefault(Consumer<FlagCheckResult> action) {
+        if ((state() == FlagState.DISABLED || state() == FlagState.UNDEFINED) && action != null) action.accept(result);
+        return this;
+    }
 
     /**
      * Processes a flag check event and executes the corresponding consumer based on the result.  
@@ -54,6 +80,12 @@ public class FlagEvaluator {
             case DENIED  -> { if (onDeny  != null) onDeny.accept(result); }
         }
         return state;
+    }
+
+    public static FlagEvaluator process(@NotNull FlagCheckEvent checkEvent) {
+        FlagCheckResult result = evaluate(checkEvent);
+        result = Services.EVENT.post(result);
+        return new FlagEvaluator(result);
     }
 
     public static FlagState processCheckF(@NotNull FlagCheckEvent checkEvent, @Nullable Function<FlagCheckResult, FlagState> handleResult) {
