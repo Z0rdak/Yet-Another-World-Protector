@@ -8,9 +8,15 @@ dependencies {
         officialMojangMappings()
         parchment("org.parchmentmc.data:parchment-${parchment_minecraft}:${parchment_version}@zip")
     }
+
+    // Approach #1: Ensure fabric-permissions-api is always available by including it within your own jar (it's only ~12KB!)
+    //include(modImplementation('me.lucko:fabric-permissions-api:0.5.0'))
+    // Approach #2: Depend on fabric-permissions-api, but require that users install it themselves
+    modImplementation 'me.lucko:fabric-permissions-api:0.5.0'
+
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
-
+    modImplementation "curse.maven:luckperms-431733:7094492"
     modApi "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:21.10.0"
     
     // WorldEdit API for optional WorldEdit integration
