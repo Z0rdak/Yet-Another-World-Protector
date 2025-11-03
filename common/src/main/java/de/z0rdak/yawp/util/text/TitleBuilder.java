@@ -88,6 +88,12 @@ public final class TitleBuilder {
         return this;
     }
 
+    public TitleBuilder subtitleBye() {
+        this.subtitle = Component.translatable("No leaving %s, bye %s!", region.getName(), player.getScoreboardName())
+                .withStyle(ChatFormatting.GOLD);
+        return this;
+    }
+
     public BuiltTitle build() {
         if (title == null)
             throw new IllegalStateException("Title needs to be present.");
