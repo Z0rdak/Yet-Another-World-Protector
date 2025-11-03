@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.mixin.flag;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.server.level.ServerLevel;
@@ -33,8 +33,8 @@ public abstract class EntityMixin {
         Entity rider = (Entity) (Object) this;
         if (isServerSide(rider)) {
             if (rider instanceof Player player) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(vehicle.blockPosition(), ANIMAL_MOUNTING, getDimKey(vehicle), player);
-                if (Services.EVENT.post(checkEvent)) {
+                FlagCheckRequest checkEvent = new FlagCheckRequest(vehicle.blockPosition(), ANIMAL_MOUNTING, getDimKey(vehicle), player);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, deny -> {
@@ -49,8 +49,8 @@ public abstract class EntityMixin {
     public void onHitByLightning(ServerLevel world, LightningBolt lightning, CallbackInfo ci) {
         Entity poorSoul = (Entity) (Object) this;
         if (isServerSide(poorSoul)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(poorSoul.blockPosition(), LIGHTNING_PROT, getDimKey(poorSoul), null);
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(poorSoul.blockPosition(), LIGHTNING_PROT, getDimKey(poorSoul), null);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, deny -> {
@@ -64,8 +64,8 @@ public abstract class EntityMixin {
         Entity rider = (Entity) (Object) this;
         if (isServerSide(rider)) {
             if (rider instanceof Player player) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), ANIMAL_UNMOUNTING, getDimKey(player), player);
-                if (Services.EVENT.post(checkEvent)) {
+                FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), ANIMAL_UNMOUNTING, getDimKey(player), player);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, deny -> {
@@ -85,16 +85,16 @@ public abstract class EntityMixin {
         Entity self = (Entity) (Object) this;
         if (isServerSide(self.level())) {
             RegionDataManager.initLevelDataOnChangeWorld(null, self.level(), transition.newLevel());
-            FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL, getDimKey(self));
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), USE_PORTAL, getDimKey(self));
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, deny -> {
                 cir.setReturnValue(null);
             });
             if (self instanceof Player player) {
-                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_PLAYERS, getDimKey(self), player);
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(self.blockPosition(), USE_PORTAL_PLAYERS, getDimKey(self), player);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, deny -> {
@@ -103,8 +103,8 @@ public abstract class EntityMixin {
                 });
             }
             if (self instanceof ItemEntity) {
-                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_ITEMS, getDimKey(self));
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(self.blockPosition(), USE_PORTAL_ITEMS, getDimKey(self));
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, deny -> {
@@ -112,8 +112,8 @@ public abstract class EntityMixin {
                 });
             }
             if (isAnimal(self)) {
-                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_ANIMALS, getDimKey(self));
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(self.blockPosition(), USE_PORTAL_ANIMALS, getDimKey(self));
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, deny -> {
@@ -121,8 +121,8 @@ public abstract class EntityMixin {
                 });
             }
             if (isMonster(self)) {
-                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_MONSTERS, getDimKey(self));
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(self.blockPosition(), USE_PORTAL_MONSTERS, getDimKey(self));
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, deny -> {
@@ -130,8 +130,8 @@ public abstract class EntityMixin {
                 });
             }
             if (self instanceof Merchant) {
-                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_VILLAGERS, getDimKey(self));
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(self.blockPosition(), USE_PORTAL_VILLAGERS, getDimKey(self));
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, deny -> {
@@ -139,8 +139,8 @@ public abstract class EntityMixin {
                 });
             }
             if (self instanceof AbstractMinecart) {
-                checkEvent = new FlagCheckEvent(self.blockPosition(), USE_PORTAL_MINECARTS, getDimKey(self));
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(self.blockPosition(), USE_PORTAL_MINECARTS, getDimKey(self));
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, deny -> {

@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
@@ -28,8 +28,8 @@ public abstract class ThrownEnderPearlMixin {
             Entity owner = pearl.getOwner();
             if (owner instanceof Player player) {
                 BlockPos targetBlockPos = new BlockPos(pearl.getBlockX(), pearl.getBlockY(), pearl.getBlockZ());
-                FlagCheckEvent checkEvent = new FlagCheckEvent(targetBlockPos, USE_ENDERPEARL_TO_REGION, getDimKey(player), player);
-                if (Services.EVENT.post(checkEvent))
+                FlagCheckRequest checkEvent = new FlagCheckRequest(targetBlockPos, USE_ENDERPEARL_TO_REGION, getDimKey(player), player);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                     return;
                 FlagEvaluator.processCheck(checkEvent, deny -> {
                     sendFlagMsg(deny);
@@ -46,8 +46,8 @@ public abstract class ThrownEnderPearlMixin {
         if (isServerSide(pearl.level())) {
             Entity owner = pearl.getOwner();
             if (owner instanceof Player player) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), USE_ENDERPEARL_FROM_REGION, getDimKey(player), player);
-                if (Services.EVENT.post(checkEvent))
+                FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), USE_ENDERPEARL_FROM_REGION, getDimKey(player), player);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                     return;
                 FlagEvaluator.processCheck(checkEvent, deny -> {
                     sendFlagMsg(deny);

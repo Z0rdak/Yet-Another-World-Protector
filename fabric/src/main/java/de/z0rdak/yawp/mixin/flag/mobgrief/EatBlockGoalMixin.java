@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Mob;
@@ -29,8 +29,8 @@ public class EatBlockGoalMixin {
     @Inject(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;destroyBlock(Lnet/minecraft/core/BlockPos;Z)Z"), cancellable = true, allow = 1)
     void onEatGrass(CallbackInfo ci) {
         BlockPos blockPos = mob.blockPosition();
-        FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, MOB_GRIEFING, level.dimension());
-        if (Services.EVENT.post(checkEvent))
+        FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, MOB_GRIEFING, level.dimension());
+        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
             return;
         processCheck(checkEvent, deny -> {
             // mob.onEatingGrass();
@@ -41,8 +41,8 @@ public class EatBlockGoalMixin {
     @Inject(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;levelEvent(ILnet/minecraft/core/BlockPos;I)V"), cancellable = true, allow = 1)
     void onEatGrassBlock(CallbackInfo ci) {
         BlockPos blockPos = mob.blockPosition().below();
-        FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, MOB_GRIEFING, level.dimension());
-        if (Services.EVENT.post(checkEvent))
+        FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, MOB_GRIEFING, level.dimension());
+        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
             return;
         processCheck(checkEvent, deny -> {
             // mob.onEatingGrass();  

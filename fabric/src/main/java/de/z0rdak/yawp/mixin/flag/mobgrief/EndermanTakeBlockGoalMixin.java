@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.world.entity.monster.EnderMan;
 import org.spongepowered.asm.mixin.Final;
@@ -29,16 +29,16 @@ public abstract class EndermanTakeBlockGoalMixin {
             cir.setReturnValue(false);
         }
         // TODO: Hook into tick method to get the position of the block, not the entity
-        FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), ENDERMAN_GRIEFING, getDimKey(self));
-        if (Services.EVENT.post(checkEvent)) {
+        FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), ENDERMAN_GRIEFING, getDimKey(self));
+        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
             return;
         }
         processCheck(checkEvent, deny -> {
             cir.setReturnValue(false);
         });
 
-        checkEvent = new FlagCheckEvent(self.blockPosition(), MOB_GRIEFING, getDimKey(self));
-        if (Services.EVENT.post(checkEvent)) {
+        checkEvent = new FlagCheckRequest(self.blockPosition(), MOB_GRIEFING, getDimKey(self));
+        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
             return;
         }
         processCheck(checkEvent, deny -> {
