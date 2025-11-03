@@ -67,15 +67,11 @@ public class RegionDataManager {
     }
 
     public static void save(boolean force) {
-        if (force) {
+
             saveDimList(serverInstance);
             saveGlobalData(serverInstance);
             saveTrackedLevels(serverInstance);
-        } else {
-            savedLevelData.setDirty();
-            globalRegionData.setDirty();
-            dimRegionStorage.forEach((key, value) -> value.setDirty());
-        }
+
     }
 
     public static LevelListData getSavedDims() {
@@ -128,7 +124,7 @@ public class RegionDataManager {
         LevelRegionData levelRegionData = dimRegionStorage.get(levelRl);
         LOGGER.info(Component.translatableWithFallback("data.region.level.save", "Saving region data for level '%s'", levelRl.toString()).getString());
         storage.set(LevelRegionData.buildSavedDataType(levelRl), levelRegionData);
-        levelRegionData.setDirty();
+
     }
 
     private static LevelRegionData loadLevelData(MinecraftServer server, Level level) {
