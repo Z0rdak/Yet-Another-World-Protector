@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.mixin;
 
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
@@ -24,8 +24,8 @@ public class SignBlockMixin {
 
     @Inject(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/SignBlock;openTextEdit(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/block/entity/SignBlockEntity;Z)V"), cancellable = true)
     public void use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult, CallbackInfoReturnable<InteractionResult> cir) {
-        FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, NO_SIGN_EDIT, level.dimension(), player);
-        if (Services.EVENT.post(checkEvent)) {
+        FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, NO_SIGN_EDIT, level.dimension(), player);
+        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
             return;
         }
         processCheck(checkEvent, deny -> {

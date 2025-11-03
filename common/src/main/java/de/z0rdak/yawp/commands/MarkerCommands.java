@@ -5,13 +5,10 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.api.commands.CommandConstants;
-import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
 import de.z0rdak.yawp.api.permission.Permissions;
 import de.z0rdak.yawp.commands.arguments.region.ContainingOwnedRegionArgumentType;
 import de.z0rdak.yawp.constants.Constants;
-import de.z0rdak.yawp.core.area.CuboidArea;
-import de.z0rdak.yawp.core.area.SphereArea;
 import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
@@ -26,20 +23,15 @@ import de.z0rdak.yawp.util.StickUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 import java.util.Collections;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
 
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.DimensionCommands.getRandomExample;
@@ -104,7 +96,7 @@ public final class MarkerCommands {
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.exists", "Dimension %s already contains region with name %s", buildRegionInfoLink(levelData.getDim()), buildRegionInfoLink(levelData.getLocal(regionName))));
                 return res;
             }
-            Player player = ctx.getSource().getPlayerOrException();
+            ServerPlayer player = ctx.getSource().getPlayerOrException();
             IMarkableRegion newRegion = fromMarkedBlocks(ctx, player, regionName);
             if (newRegion == null) {
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.area.invalid", "Marked area is not valid").withStyle(RED));
@@ -119,8 +111,8 @@ public final class MarkerCommands {
         }
     }
 
-    private static int createRegion(CommandContext<CommandSourceStack> ctx, Player player, LevelRegionData dimCache, IMarkableRegion region, IProtectedRegion parentRegion) {
-        if (Services.EVENT.post(new RegionEvent.Create(region, player)) ) {
+    private static int createRegion(CommandContext<CommandSourceStack> ctx, ServerPlayer player, LevelRegionData dimCache, IMarkableRegion region, IProtectedRegion parentRegion) {
+        if (Services.REGION_EVENT_DISPATCHER.post(new RegionEvent.Create(region, player)) ) {
             return 1;
         }
         //if (RegionEvents.CREATE_REGION.invoker().createRegion(new RegionEvent.CreateRegionEvent(region, player))) {

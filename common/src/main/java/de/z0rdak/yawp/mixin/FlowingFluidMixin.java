@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.mixin;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -27,8 +27,8 @@ public class FlowingFluidMixin {
         }
 
         if (!Services.FLAG_CONFIG.isDisabledByConfig(FLUID_FLOW.name)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, FLUID_FLOW, level.dimension());
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, FLUID_FLOW, level.dimension());
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, deny -> {
@@ -41,8 +41,8 @@ public class FlowingFluidMixin {
 
         if (!Services.FLAG_CONFIG.isDisabledByConfig(WATER_FLOW.name)) {
             if (fluidState.getType() instanceof WaterFluid) {
-                FlagCheckEvent specificFluidCheckEvent = new FlagCheckEvent(blockPos, WATER_FLOW, level.dimension());
-                if (Services.EVENT.post(specificFluidCheckEvent)) {
+                FlagCheckRequest specificFluidCheckEvent = new FlagCheckRequest(blockPos, WATER_FLOW, level.dimension());
+                if (Services.FLAG_EVENT_DISPATCHER.post(specificFluidCheckEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(specificFluidCheckEvent, deny -> {
@@ -52,8 +52,8 @@ public class FlowingFluidMixin {
         }
         if (!Services.FLAG_CONFIG.isDisabledByConfig(LAVA_FLOW.name)) {
             if (fluidState.getType() instanceof LavaFluid) {
-                FlagCheckEvent specificFluidCheckEvent = new FlagCheckEvent(blockPos, LAVA_FLOW, level.dimension());
-                if (Services.EVENT.post(specificFluidCheckEvent)) {
+                FlagCheckRequest specificFluidCheckEvent = new FlagCheckRequest(blockPos, LAVA_FLOW, level.dimension());
+                if (Services.FLAG_EVENT_DISPATCHER.post(specificFluidCheckEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(specificFluidCheckEvent, deny -> {

@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.mixin;
 
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
@@ -21,8 +21,8 @@ public class FrostWalkerEnchantmentMixin {
     @Inject(method = "onEntityMoved", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;setBlockAndUpdate(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)Z"), cancellable = true)
     private static void onEntityMoved(LivingEntity entity, Level world, BlockPos pos, int p_45022_, CallbackInfo info) {
         if (isServerSide(world)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, NO_WALKER_FREEZE, world.dimension(), null);
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(pos, NO_WALKER_FREEZE, world.dimension(), null);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             processCheck(checkEvent, denyResult -> {

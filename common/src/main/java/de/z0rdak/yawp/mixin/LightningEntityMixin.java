@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.mixin;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LightningBolt;
@@ -26,8 +26,8 @@ public abstract class LightningEntityMixin {
     @Inject(method = "clearCopperOnLightningStrike", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;setBlockAndUpdate(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)Z"), cancellable = true, allow = 1)
     private static void cleanOxidationOnHitBlock(Level world, BlockPos pos, CallbackInfo ci) {
         if (isServerSide(world)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, LIGHTNING_PROT, getDimKey(world));
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(pos, LIGHTNING_PROT, getDimKey(world));
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, deny -> {
@@ -44,8 +44,8 @@ public abstract class LightningEntityMixin {
     public void onSpawnFireFromLightning(int spreadAttempts, CallbackInfo ci, BlockPos blockPos) {
         LightningBolt lightningEntity = (LightningBolt) (Object) this;
         if (isServerSide(lightningEntity)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, LIGHTNING_PROT, getDimKey(lightningEntity), null);
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, LIGHTNING_PROT, getDimKey(lightningEntity), null);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, deny -> {

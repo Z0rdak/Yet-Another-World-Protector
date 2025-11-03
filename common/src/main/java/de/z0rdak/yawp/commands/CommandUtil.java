@@ -1,11 +1,11 @@
 package de.z0rdak.yawp.commands;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.api.commands.CommandConstants;
 import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.events.flag.FlagEvent;
@@ -38,7 +38,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.scores.Team;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
@@ -549,8 +548,16 @@ public class CommandUtil {
     public static int removeRegionFlag(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, RegionFlag flag) {
         if (region.containsFlag(flag)) {
             IFlag iFlag = region.getFlag(flag.name);
-            FlagEvent.RemoveFlagEvent removeFlagEvent = new FlagEvent.RemoveFlagEvent(ctx.getSource(), region, iFlag);
-            Services.EVENT.post(removeFlagEvent);
+
+            ServerPlayer player;
+            try {
+                player = ctx.getSource().getPlayerOrException();
+            } catch (CommandSyntaxException e) {
+                player = null;
+            }
+
+            FlagEvent.Remove remove = new FlagEvent.Remove(player, region, iFlag);
+            Services.FLAG_EVENT_DISPATCHER.post(remove);
             region.removeFlag(flag.name);
             RegionManager.get().save();
             MutableComponent msg = Component.translatableWithFallback("cli.msg.flag.removed", "Removed flag '%s' from %s", flag.name,
@@ -704,8 +711,15 @@ public class CommandUtil {
                     throw new IllegalArgumentException("Unexpected value = " + flag.getClass().getName());
             }
 
-            FlagEvent.AddFlagEvent addFlagEvent = new FlagEvent.AddFlagEvent(ctx.getSource(), region, iFlag);
-            Services.EVENT.post(addFlagEvent);
+            ServerPlayer player;
+            try {
+                player = ctx.getSource().getPlayerOrException();
+            } catch (CommandSyntaxException e) {
+                player = null;
+            }
+
+            FlagEvent.Add add = new FlagEvent.Add(player, region, iFlag);
+            Services.FLAG_EVENT_DISPATCHER.post(add);
             region.addFlag(iFlag);
             RegionManager.get().save();
             MutableComponent flagLink = ChatLinkBuilder.buildFlagInfoLink(region, iFlag);

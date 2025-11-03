@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.mixin;
 
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -22,8 +22,8 @@ public class LeavesBlockMixin {
     @Inject(method = "randomTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/LeavesBlock;dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)V"), cancellable = true)
     private void spread(BlockState state, ServerLevel level, BlockPos pos, RandomSource rnd, CallbackInfo ci) {
         if (isServerSide(level)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, LEAF_DECAY, level.dimension());
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(pos, LEAF_DECAY, level.dimension());
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             processCheck(checkEvent, denyResult -> {

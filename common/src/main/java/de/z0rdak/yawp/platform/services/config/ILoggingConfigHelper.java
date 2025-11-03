@@ -1,9 +1,7 @@
 package de.z0rdak.yawp.platform.services.config;
 
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
-import de.z0rdak.yawp.api.events.region.FlagCheckResult;
-import de.z0rdak.yawp.commands.CommandSourceType;
-import net.minecraft.commands.CommandSourceStack;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
+import de.z0rdak.yawp.api.events.flag.FlagCheckResult;
 
 import java.util.Set;
 
@@ -11,7 +9,7 @@ public interface ILoggingConfigHelper {
     Set<String> getFlagsToLog();
     Set<String> getFlagCategories();
     Set<String> getResultValuesToLog();
-    boolean logCheck(FlagCheckEvent check);
+    boolean logCheck(FlagCheckRequest check);
     FlagCheckResult logResult(FlagCheckResult result);
     boolean shouldLogFlagChecks();
     boolean shouldLogFlagCheckResults();
