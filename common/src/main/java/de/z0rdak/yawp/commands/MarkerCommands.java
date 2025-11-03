@@ -26,10 +26,12 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import java.util.Collections;
+import java.util.Objects;
 
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.DimensionCommands.getRandomExample;
@@ -92,7 +94,7 @@ public final class MarkerCommands {
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.exists", "Dimension %s already contains region with name %s", buildRegionInfoLink(levelData.getDim()), buildRegionInfoLink(levelData.getLocal(regionName))));
                 return res;
             }
-            Player player = ctx.getSource().getPlayerOrException();
+            ServerPlayer player = ctx.getSource().getPlayerOrException();
             IMarkableRegion newRegion = fromMarkedBlocks(ctx, player, regionName);
             if (newRegion == null) {
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.area.invalid", "Marked area is not valid").withStyle(RED));
@@ -107,8 +109,8 @@ public final class MarkerCommands {
         }
     }
 
-    private static int createRegion(CommandContext<CommandSourceStack> ctx, Player player, LevelRegionData dimCache, IMarkableRegion region, IProtectedRegion parentRegion) {
-        if (Services.EVENT.post(new RegionEvent.Create(region, player)) ) {
+    private static int createRegion(CommandContext<CommandSourceStack> ctx, ServerPlayer player, LevelRegionData dimCache, IMarkableRegion region, IProtectedRegion parentRegion) {
+        if (Services.REGION_EVENT_DISPATCHER.post(new RegionEvent.Create(region, player)) ) {
             return 1;
         }
         //if (RegionEvents.CREATE_REGION.invoker().createRegion(new RegionEvent.CreateRegionEvent(region, player))) {

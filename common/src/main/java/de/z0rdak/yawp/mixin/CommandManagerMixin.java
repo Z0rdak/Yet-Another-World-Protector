@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.mixin;
 
 import com.mojang.brigadier.ParseResults;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.handler.CommandInterceptor;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.commands.CommandSourceStack;
@@ -32,8 +32,8 @@ public abstract class CommandManagerMixin {
         if (cmdSource.isPlayer()) {
             ServerPlayer player = cmdSource.getPlayer();
             if (player != null) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), EXECUTE_COMMAND, getDimKey(player), player);
-                if (Services.EVENT.post(checkEvent)) {
+                FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), EXECUTE_COMMAND, getDimKey(player), player);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 processCheck(checkEvent, deny -> {

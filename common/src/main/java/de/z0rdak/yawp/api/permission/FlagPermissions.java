@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.api.permission;
 
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
-import de.z0rdak.yawp.api.events.region.FlagCheckResult;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
+import de.z0rdak.yawp.api.events.flag.FlagCheckResult;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.platform.Services;
@@ -26,16 +26,16 @@ public class FlagPermissions {
     }
 
     public static FlagState checkFlagPermission(BlockPos pos, RegionFlag flag, ResourceKey<Level> dim, @Nullable Consumer<FlagCheckResult> onAllow, @Nullable Consumer<FlagCheckResult> onDeny) {
-        FlagCheckEvent checkEvent = new FlagCheckEvent(pos, flag, dim);
-        if (Services.EVENT.post(checkEvent)) {
+        FlagCheckRequest checkEvent = new FlagCheckRequest(pos, flag, dim);
+        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
             return FlagState.UNDEFINED;
         }
         return processCheck(checkEvent, onAllow, onDeny);
     }
 
     public static FlagState checkPlayerFlagPermission(RegionFlag flag, BlockPos pos, ResourceKey<Level> dim, Player player, @Nullable Consumer<FlagCheckResult> onAllow, @Nullable Consumer<FlagCheckResult> onDeny) {
-        FlagCheckEvent checkEvent = new FlagCheckEvent(pos, flag, dim, player);
-        if (Services.EVENT.post(checkEvent)) {
+        FlagCheckRequest checkEvent = new FlagCheckRequest(pos, flag, dim, player);
+        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
             return FlagState.UNDEFINED;
         }
         return processCheck(checkEvent, onAllow, onDeny);

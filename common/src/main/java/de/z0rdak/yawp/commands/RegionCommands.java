@@ -390,7 +390,7 @@ class RegionCommands {
                 player = null;
             }
             RegionEvent.UpdateArea updateArea = new RegionEvent.UpdateArea(region, area, player);
-            updateArea = Services.EVENT.post(updateArea);
+            Services.REGION_EVENT_DISPATCHER.post(updateArea);
             area = updateArea.markedArea();
             // Note: this check can be remove once the area types are all implemented, it's just here to catch any errors
             switch (newAreaType) {
@@ -468,7 +468,7 @@ class RegionCommands {
             }
 
             RegionEvent.Rename renameRegion = new RegionEvent.Rename(region, region.getName(), regionName, player);
-            if (Services.EVENT.post(renameRegion)) {
+            if (Services.REGION_EVENT_DISPATCHER.post(renameRegion)) {
                 return 1;
             }
             //if (RegionEvents.RENAME_REGION.invoker().renameRegion(renameRegion)) {
