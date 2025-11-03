@@ -1,13 +1,20 @@
 package de.z0rdak.yawp.handler;
 
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.MessageSender;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
+import de.z0rdak.yawp.api.events.flag.FlagEvent;
+import de.z0rdak.yawp.api.events.region.RegionEvent;
+import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import net.minecraft.commands.CommandSourceStack;
+import de.z0rdak.yawp.platform.Services;
+import de.z0rdak.yawp.util.text.TitleBuilder;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -28,22 +35,33 @@ import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.api.FlagEvaluator.processCheck;
 
-public class YawpEventHandler {
+public final class YawpEventHandler {
 
-    public static void removeInvolvedEntities(CommandSourceStack src, IProtectedRegion region, RegionFlag flag) {
+    private static MinecraftServer minecraftServer;
+
+    public static void storeRef(MinecraftServer server) {
+        minecraftServer = server;
+    }
+
+    public static void onAddFlag(FlagEvent.Add event) {
+        if (event.getFlag().getName().contains("spawning") && Services.FLAG_CONFIG.removeEntitiesEnabled()) {
+            removeInvolvedEntities(event.getRegion(), RegionFlag.fromId(event.getFlag().getName()));
+        }
+    }
+
+    public static void removeInvolvedEntities(IProtectedRegion region, RegionFlag flag) {
         ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, region.getDim().identifier());
-        MinecraftServer server = src.getServer();
         Predicate<? super Entity> entityFilter = getEntityFilterForFlag(flag);
         switch (region.getRegionType()) {
             case GLOBAL: {
-                server.getAllLevels().forEach(world -> {
+                minecraftServer.getAllLevels().forEach(world -> {
                     List<Entity> entitiesToRemove = getEntitiesToRemove(world, entityFilter, flag);
                     entitiesToRemove.forEach(e -> e.setRemoved(Entity.RemovalReason.DISCARDED));
                 });
             }
             break;
             case DIMENSION: {
-                ServerLevel regionWorld = server.getLevel(dimKey);
+                ServerLevel regionWorld = minecraftServer.getLevel(dimKey);
                 if (regionWorld != null) {
                     List<Entity> entitiesToRemove = getEntitiesToRemove(regionWorld, entityFilter, flag);
                     entitiesToRemove.forEach(e -> e.setRemoved(Entity.RemovalReason.DISCARDED));
@@ -51,7 +69,7 @@ public class YawpEventHandler {
             }
             break;
             case LOCAL: {
-                ServerLevel regionWorld = server.getLevel(dimKey);
+                ServerLevel regionWorld = minecraftServer.getLevel(dimKey);
                 if (regionWorld != null) {
                     List<Entity> entitiesToRemove = getEntitiesToRemove(regionWorld, (IMarkableRegion) region, entityFilter);
                     entitiesToRemove.forEach(e -> e.setRemoved(Entity.RemovalReason.DISCARDED));
@@ -118,8 +136,28 @@ public class YawpEventHandler {
     }
 
     private static boolean isProtectedByRegion(ServerLevel level, RegionFlag flag, Entity e) {
-        FlagCheckEvent checkEvent = new FlagCheckEvent(e.blockPosition(), flag, level.dimension());
+        FlagCheckRequest checkEvent = new FlagCheckRequest(e.blockPosition(), flag, level.dimension());
         FlagState flagState = processCheck(checkEvent);
         return flagState == FlagState.ALLOWED;
+    }
+
+    public static void onPlayerEnterRegion(RegionEvent.PlayerEnter onEnter) {
+        var title = TitleBuilder.of(onEnter.getPlayer(), onEnter.getRegion())
+                .title(Component.literal(onEnter.getRegion().getName()).withStyle(ChatFormatting.AQUA))
+                .subtitleWelcome()
+                .actionbar(Component.literal("This feature is still WIP!").withStyle(ChatFormatting.RED))
+                .timings(10, 40, 15)
+                .build();
+        title.send();
+    }
+
+    public static void onPlayerLeaveRegion(RegionEvent.PlayerLeave onLeave) {
+        var title = TitleBuilder.of(onLeave.getPlayer(), onLeave.getRegion())
+                .title(Component.literal(onLeave.getRegion().getName()).withStyle(ChatFormatting.AQUA))
+                .subtitle(Component.literal("Come back soon! =)").withStyle(ChatFormatting.YELLOW))
+                .actionbar(Component.literal("This feature is still WIP!").withStyle(ChatFormatting.RED))
+                .timings(10, 40, 15)
+                .build();
+        title.send();
     }
 }
