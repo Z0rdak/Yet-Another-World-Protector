@@ -50,4 +50,3 @@ rootProject.name = 'YAWP-MultiLoader-1.21.11'
 include('common')
 include('fabric')
 include('neoforge')
-// include('forge')

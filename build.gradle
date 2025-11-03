@@ -45,6 +45,6 @@ tasks.register("deleteGitTagRemote", Exec) {
 
 tasks.register("deleteTag") {
     group = "release"
-    description = "Deletes the tag locally and remotely"
+    description = "Deletes the taggvnc locally and remotely"
     dependsOn "deleteGitTagRemote"
 }
