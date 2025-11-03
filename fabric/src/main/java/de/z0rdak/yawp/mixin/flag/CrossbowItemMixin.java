@@ -2,7 +2,7 @@
 package de.z0rdak.yawp.mixin.flag;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
@@ -28,8 +28,8 @@ public abstract class CrossbowItemMixin {
     @Inject(method = "performShooting", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;set(Lnet/minecraft/core/component/DataComponentType;Ljava/lang/Object;)Ljava/lang/Object;"), allow = 1, cancellable = true)
     void onLooseArrow(Level level, LivingEntity shooter, InteractionHand hand, ItemStack weapon, float velocity, float inaccuracy, @Nullable LivingEntity target, CallbackInfo ci) {
         if (shooter instanceof Player player) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), FIRE_BOW, getDimKey(player), player);
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), FIRE_BOW, getDimKey(player), player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, denyResult -> {

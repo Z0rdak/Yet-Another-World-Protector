@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.mixin.flag;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
@@ -26,8 +26,8 @@ public class FireworkRocketEntityMixin {
         if (isServerSide(result.getEntity().level())) {
             Projectile fwr = (Projectile) (Object) this;
             if (fwr.getOwner() instanceof Player shooter && result.getEntity() instanceof Player target) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(target.blockPosition(), NO_PVP, getDimKey(result.getEntity().level()), shooter);
-                if (Services.EVENT.post(checkEvent)) {
+                FlagCheckRequest checkEvent = new FlagCheckRequest(target.blockPosition(), NO_PVP, getDimKey(result.getEntity().level()), shooter);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, deny -> {

@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -27,8 +27,8 @@ public abstract class WitherEntityMixin {
     public void onWitherDestroyBlocks(ServerLevel level, CallbackInfo ci, boolean bl, int j, int k, Iterator var5, BlockPos blockPos, BlockState blockState) {
         WitherBoss self = (WitherBoss) (Object) this;
         if (isServerSide(self)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, WITHER_BLOCK_PROT, getDimKey(self));
-            if (Services.EVENT.post(checkEvent))
+            FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, WITHER_BLOCK_PROT, getDimKey(self));
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;
             FlagEvaluator.processCheck(checkEvent, deny -> ci.cancel());
         }
@@ -38,8 +38,8 @@ public abstract class WitherEntityMixin {
     public void onWitherAttemptGriefing(ServerLevel level, CallbackInfo ci) {
         WitherBoss self = (WitherBoss) (Object) this;
         if (isServerSide(self)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), MOB_GRIEFING, getDimKey(self));
-            if (Services.EVENT.post(checkEvent))
+            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), MOB_GRIEFING, getDimKey(self));
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;
             FlagEvaluator.processCheck(checkEvent, deny -> ci.cancel());
         }

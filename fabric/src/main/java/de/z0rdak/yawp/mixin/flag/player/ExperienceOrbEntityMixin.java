@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.player.Player;
@@ -22,8 +22,8 @@ public abstract class ExperienceOrbEntityMixin {
     public void onPickUpExperience(Player player, CallbackInfo ci) {
         ExperienceOrb xpOrb = (ExperienceOrb) (Object) this;
         if (isServerSide(xpOrb.level())) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(xpOrb.blockPosition(), XP_PICKUP, getDimKey(player), player);
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(xpOrb.blockPosition(), XP_PICKUP, getDimKey(player), player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, deny -> {

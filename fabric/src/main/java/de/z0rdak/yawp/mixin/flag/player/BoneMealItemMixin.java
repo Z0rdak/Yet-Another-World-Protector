@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
@@ -27,8 +27,8 @@ public abstract class BoneMealItemMixin {
         BlockPos pos = context.getClickedPos();
         Player player = context.getPlayer();
         if (isServerSide(world) && player != null) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, USE_BONEMEAL, getDimKey(world), player);
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(pos, USE_BONEMEAL, getDimKey(world), player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, deny -> {

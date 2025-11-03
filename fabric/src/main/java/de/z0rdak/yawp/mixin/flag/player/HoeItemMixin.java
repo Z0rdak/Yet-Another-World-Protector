@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
@@ -27,16 +27,16 @@ public abstract class HoeItemMixin {
         Player player = context.getPlayer();
         if (isServerSide(context.getLevel())) {
             if (player != null) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(pos, TOOL_SECONDARY_USE, getDimKey(player), player);
-                if (Services.EVENT.post(checkEvent)) {
+                FlagCheckRequest checkEvent = new FlagCheckRequest(pos, TOOL_SECONDARY_USE, getDimKey(player), player);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, deny -> {
                     sendFlagMsg(deny);
                     cir.setReturnValue(InteractionResult.PASS);
                 });
-                checkEvent = new FlagCheckEvent(pos, HOE_TILL, getDimKey(player), player);
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(pos, HOE_TILL, getDimKey(player), player);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, deny -> {

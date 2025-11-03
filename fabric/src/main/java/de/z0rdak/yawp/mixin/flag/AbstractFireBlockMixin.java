@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.mixin.flag;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -22,8 +22,8 @@ public abstract class AbstractFireBlockMixin {
             target = "Lnet/minecraft/world/level/portal/PortalShape;createPortalBlocks(Lnet/minecraft/world/level/LevelAccessor;)V"), cancellable = true)
     private void onSpawnPortal(BlockState state, Level world, BlockPos pos, BlockState oldState, boolean notify, CallbackInfo info) {
         if (isServerSide(world)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, SPAWN_PORTAL, getDimKey(world));
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(pos, SPAWN_PORTAL, getDimKey(world));
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, deny -> info.cancel());

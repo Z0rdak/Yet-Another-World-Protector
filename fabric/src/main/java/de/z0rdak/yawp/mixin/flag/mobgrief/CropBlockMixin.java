@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
@@ -21,8 +21,8 @@ public class CropBlockMixin {
 
     @Inject(method = "entityInside", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;destroyBlock(Lnet/minecraft/core/BlockPos;ZLnet/minecraft/world/entity/Entity;)Z"), cancellable = true, allow = 1)
     public void onEntityCollision(BlockState blockState, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier insideBlockEffectApplier, boolean bl, CallbackInfo ci) {
-        FlagCheckEvent checkEvent = new FlagCheckEvent(pos, MOB_GRIEFING, level.dimension(), null);
-        if (Services.EVENT.post(checkEvent))
+        FlagCheckRequest checkEvent = new FlagCheckRequest(pos, MOB_GRIEFING, world.dimension(), null);
+        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
             return;
         processCheck(checkEvent, deny -> ci.cancel());
     }
@@ -31,7 +31,7 @@ public class CropBlockMixin {
     @Inject(method = "growCrops", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onCropGrow(Level level, BlockPos blockPos, BlockState blockState, CallbackInfo ci) {
         FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, CROP_TICK, level.dimension());
-        if (Services.EVENT.post(checkEvent))
+        if (Services.FLAG_EVENT_DISPATCHER.postCheck(checkEvent))
             return;
         processCheck(checkEvent, deny -> ci.cancel());
     }

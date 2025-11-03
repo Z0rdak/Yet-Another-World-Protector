@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -24,8 +24,8 @@ public class HarvestFarmlandMixin {
      */
     @Inject(method = "validPos", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     void isBlockSuitableTarget(BlockPos pos, ServerLevel world, CallbackInfoReturnable<Boolean> cir) {
-        FlagCheckEvent checkEvent = new FlagCheckEvent(pos, MOB_GRIEFING, world.dimension(), null);
-        if (Services.EVENT.post(checkEvent))
+        FlagCheckRequest checkEvent = new FlagCheckRequest(pos, MOB_GRIEFING, world.dimension(), null);
+        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
             return;
         processCheck(checkEvent, deny -> {
             cir.setReturnValue(false);

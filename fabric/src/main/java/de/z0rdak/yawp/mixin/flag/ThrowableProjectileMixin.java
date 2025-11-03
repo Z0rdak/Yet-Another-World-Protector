@@ -2,6 +2,7 @@ package de.z0rdak.yawp.mixin.flag;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.golem.IronGolem;
@@ -11,6 +12,7 @@ import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.entity.projectile.throwableitemprojectile.Snowball;
 import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownEgg;
 import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownEnderpearl;
+import net.minecraft.world.entity.projectile.*;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,8 +41,8 @@ public class ThrowableProjectileMixin {
                 if (!isTypeOf)
                     return;
                 if (projectile.getOwner() instanceof Player shooter && entityHitResult.getEntity() instanceof IronGolem target) {
-                    FlagCheckEvent checkEvent = new FlagCheckEvent(target.blockPosition(), NO_PVP, getDimKey(target.level()), shooter);
-                    if (Services.EVENT.post(checkEvent)) {
+                    FlagCheckRequest checkEvent = new FlagCheckRequest(target.blockPosition(), NO_PVP, getDimKey(target.level()), shooter);
+                    if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                         return;
                     }
                     FlagEvaluator.processCheck(checkEvent, deny -> {
