@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.mixin;
 
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -22,8 +22,8 @@ public abstract class FireBlockMixin {
     @Inject(method = "tick", at = @At(value = "HEAD"), cancellable = true)
     private void onFireTick(BlockState state, ServerLevel world, BlockPos pos, RandomSource rand, CallbackInfo info) {
         if (isServerSide(world)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, FIRE_TICK, world.dimension());
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(pos, FIRE_TICK, world.dimension());
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             processCheck(checkEvent, denyResult -> {

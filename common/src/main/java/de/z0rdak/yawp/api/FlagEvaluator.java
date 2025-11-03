@@ -1,9 +1,10 @@
 package de.z0rdak.yawp.api;
 
 import de.z0rdak.yawp.api.core.RegionManager;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
-import de.z0rdak.yawp.api.events.region.FlagCheckResult;
-import de.z0rdak.yawp.core.flag.*;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
+import de.z0rdak.yawp.api.events.flag.FlagCheckResult;
+import de.z0rdak.yawp.core.flag.FlagContext;
+import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
@@ -70,9 +71,9 @@ public record FlagEvaluator(FlagCheckResult result) {
      * @param onDeny     the consumer to execute if the flag is denied, may be {@code null}
      * @return the resulting {@link FlagState} after processing the event
      */
-    public static FlagState processCheck(@NotNull FlagCheckEvent checkEvent, @Nullable Consumer<FlagCheckResult> onAllow, @Nullable Consumer<FlagCheckResult> onDeny) {
+    public static FlagState processCheck(@NotNull FlagCheckRequest checkEvent, @Nullable Consumer<FlagCheckResult> onAllow, @Nullable Consumer<FlagCheckResult> onDeny) {
         FlagCheckResult result = evaluate(checkEvent);
-        result = Services.EVENT.post(result);
+        result = Services.FLAG_EVENT_DISPATCHER.post(result);
         var state = result.getFlagState();
         switch (state) {
             case ALLOWED -> { if (onAllow != null) onAllow.accept(result); }
@@ -81,15 +82,15 @@ public record FlagEvaluator(FlagCheckResult result) {
         return state;
     }
 
-    public static FlagEvaluator process(@NotNull FlagCheckEvent checkEvent) {
+    public static FlagEvaluator process(@NotNull FlagCheckRequest checkEvent) {
         FlagCheckResult result = evaluate(checkEvent);
-        result = Services.EVENT.post(result);
+        result = Services.FLAG_EVENT_DISPATCHER.post(result);
         return new FlagEvaluator(result);
     }
 
-    public static FlagState processCheckF(@NotNull FlagCheckEvent checkEvent, @Nullable Function<FlagCheckResult, FlagState> handleResult) {
+    public static FlagState processCheckF(@NotNull FlagCheckRequest checkEvent, @Nullable Function<FlagCheckResult, FlagState> handleResult) {
         FlagCheckResult result = evaluate(checkEvent);
-        result = Services.EVENT.post(result);
+        result = Services.FLAG_EVENT_DISPATCHER.post(result);
         if (handleResult != null) return handleResult.apply(result);
         return result.getFlagState();
     }
@@ -97,31 +98,31 @@ public record FlagEvaluator(FlagCheckResult result) {
     /**
      * Processes the given flag check event and executes the given consumer if the flag is denied.
      * <p>
-     * This overload is equivalent to calling {@link #processCheck(FlagCheckEvent, Consumer, Consumer)}
+     * This overload is equivalent to calling {@link #processCheck(FlagCheckRequest, Consumer, Consumer)}
      * with {@code onAllow} set to {@code null}.
      * </p>
      *
      * @param checkEvent the flag check event to process, must not be {@code null}
      * @param onDeny     the consumer to execute if the flag is denied
      * @return the resulting {@link FlagState} after processing
-     * @see #processCheck(FlagCheckEvent, Consumer, Consumer)
+     * @see #processCheck(FlagCheckRequest, Consumer, Consumer)
      */
-    public static FlagState processCheck(@NotNull FlagCheckEvent checkEvent, @Nullable Consumer<FlagCheckResult> onDeny) {
+    public static FlagState processCheck(@NotNull FlagCheckRequest checkEvent, @Nullable Consumer<FlagCheckResult> onDeny) {
         return processCheck(checkEvent, null, onDeny);
     }
 
     /**
      * Processes the given flag check event with default behavior.
      * <p>
-     * This overload is equivalent to calling {@link #processCheck(FlagCheckEvent, Consumer, Consumer)}
+     * This overload is equivalent to calling {@link #processCheck(FlagCheckRequest, Consumer, Consumer)}
      * with both consumers set to {@code null}.
      * </p>
      *
      * @param checkEvent the flag check event to process, must not be {@code null}
      * @return the resulting {@link FlagState} after processing
-     * @see #processCheck(FlagCheckEvent, Consumer, Consumer)
+     * @see #processCheck(FlagCheckRequest, Consumer, Consumer)
      */
-    public static FlagState processCheck(@NotNull FlagCheckEvent checkEvent) {
+    public static FlagState processCheck(@NotNull FlagCheckRequest checkEvent) {
         return processCheck(checkEvent, null, null);
     }
 
@@ -141,7 +142,7 @@ public record FlagEvaluator(FlagCheckResult result) {
      * @param checkEvent the flag check event containing information about the target, dimension, and flag.
      * @return a {@link FlagCheckResult} representing the evaluated flag state and context.
      */
-    public static FlagCheckResult evaluate(FlagCheckEvent checkEvent) {
+    public static FlagCheckResult evaluate(FlagCheckRequest checkEvent) {
         var targetRegion = findResponsibleRegion(checkEvent.getTarget(), checkEvent.getDimension());
         if (targetRegion == null) {
             return FlagCheckResult.Undefined(checkEvent);
@@ -258,8 +259,8 @@ public record FlagEvaluator(FlagCheckResult result) {
 
     public static void checkMobGrief(Level world, BlockPos pos, CallbackInfo ci) {
         if (HandlerUtil.isServerSide(world)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, MOB_GRIEFING, world.dimension());
-            if (Services.EVENT.post(checkEvent))
+            FlagCheckRequest checkEvent = new FlagCheckRequest(pos, MOB_GRIEFING, world.dimension());
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;
             processCheck(checkEvent, deny -> ci.cancel());
         }
@@ -267,9 +268,10 @@ public record FlagEvaluator(FlagCheckResult result) {
 
     public static void checkMobGrief(Level world, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         if (HandlerUtil.isServerSide(world)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, MOB_GRIEFING, world.dimension());
-            if (Services.EVENT.post(checkEvent))
+            FlagCheckRequest checkEvent = new FlagCheckRequest(pos, MOB_GRIEFING, world.dimension());
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;
+
             processCheck(checkEvent, deny -> cir.setReturnValue(false));
         }
     }

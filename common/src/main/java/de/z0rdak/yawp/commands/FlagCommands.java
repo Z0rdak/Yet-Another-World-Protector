@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.api.commands.CommandConstants;
 import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.events.flag.FlagEvent;
@@ -25,7 +26,7 @@ import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
-
+import net.minecraft.server.level.ServerPlayer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -147,9 +148,16 @@ final class FlagCommands {
         if (flag == null) return 1;
         String oldFlagMsg = flag.getFlagMsg().msg();
 
-        FlagEvent.UpdateFlagMessageEvent editMsgEvent = new FlagEvent.UpdateFlagMessageEvent(ctx.getSource(), region, flag, flagMsgStr);
-        Services.EVENT.post(editMsgEvent);
-        
+        ServerPlayer player;
+        try {
+            player = ctx.getSource().getPlayerOrException();
+        } catch (CommandSyntaxException e) {
+            player = null;
+        }
+
+        FlagEvent.UpdateFlagMessage editMsgEvent = new FlagEvent.UpdateFlagMessage(player, region, flag, flagMsgStr);
+        Services.FLAG_EVENT_DISPATCHER.post(editMsgEvent);
+
         FlagMessage flagMsg = new FlagMessage(flagMsgStr, flag.getFlagMsg().isMuted());
         flag.setFlagMsg(flagMsg);
         MutableComponent infoMsg = Component.translatableWithFallback("cli.flag.msg.msg.success.text", "Set message of %s to: '%s'",

@@ -38,9 +38,10 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-
+import net.minecraft.server.level.ServerPlayer;
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.DimensionCommands.getRandomExample;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
@@ -84,7 +85,7 @@ public final class MarkerCommands {
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.invalid", "Invalid RegionMarker data, sorry. Get a new one and try again."));
                 return null;
             }
-            
+
         } else {
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.missing", "Put a valid(*) RegionMarker in your main hand to create a region!").withStyle(RED));
             return null;
@@ -103,7 +104,7 @@ public final class MarkerCommands {
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.exists", "Dimension %s already contains region with name %s", buildRegionInfoLink(levelData.getDim()), buildRegionInfoLink(levelData.getLocal(regionName))));
                 return res;
             }
-            Player player = ctx.getSource().getPlayerOrException();
+            ServerPlayer player = ctx.getSource().getPlayerOrException();
             IMarkableRegion newRegion = fromMarkedBlocks(ctx, player, regionName);
             if (newRegion == null) {
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.stick.area.invalid", "Marked area is not valid").withStyle(RED));
@@ -118,8 +119,8 @@ public final class MarkerCommands {
         }
     }
 
-    private static int createRegion(CommandContext<CommandSourceStack> ctx, Player player, LevelRegionData dimCache, IMarkableRegion region, IProtectedRegion parentRegion) {
-        if (Services.EVENT.post(new RegionEvent.Create(region, player)) ) {
+    private static int createRegion(CommandContext<CommandSourceStack> ctx, ServerPlayer player, LevelRegionData dimCache, IMarkableRegion region, IProtectedRegion parentRegion) {
+        if (Services.REGION_EVENT_DISPATCHER.post(new RegionEvent.Create(region, player)) ) {
             return 1;
         }
         //if (RegionEvents.CREATE_REGION.invoker().createRegion(new RegionEvent.CreateRegionEvent(region, player))) {

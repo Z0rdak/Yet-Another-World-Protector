@@ -31,10 +31,8 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.server.commands.data.EntityDataAccessor;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Display;
@@ -257,7 +255,11 @@ class DimensionCommands {
         } catch (CommandSyntaxException e) {
             player = null;
         }
-        if (Services.EVENT.post(new RegionEvent.Create(region, player))) {
+
+        var regionCreated = new RegionEvent.Create(region, player);
+        Constants.LOGGER.info("1 before post created region {}", regionName);
+        if (Services.REGION_EVENT_DISPATCHER.post(regionCreated)) {
+            Constants.LOGGER.info("LAst? {}", regionName);
             return 1;
         }
 
@@ -333,7 +335,7 @@ class DimensionCommands {
         } catch (CommandSyntaxException e) {
             player = null;
         }
-        if (Services.EVENT.post(new RegionEvent.Remove(region, player))) {
+        if (Services.REGION_EVENT_DISPATCHER.post(new RegionEvent.Remove(region, player))) {
             return 1;
         }
         if (levelData.hasLocal(region.getName())) {
