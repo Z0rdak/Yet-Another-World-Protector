@@ -1,18 +1,19 @@
 package de.z0rdak.yawp.config;
 
-import de.z0rdak.yawp.api.events.region.FabricRegionEvents;
-import de.z0rdak.yawp.commands.CommandRegistry;
-import de.z0rdak.yawp.config.server.FlagConfig;
-import de.z0rdak.yawp.config.server.LoggingConfig;
-import de.z0rdak.yawp.config.server.PermissionConfig;
-import de.z0rdak.yawp.config.server.RegionConfig;
-import de.z0rdak.yawp.platform.Services;
+import de.z0rdak.yawp.api.events.flag.FlagEvents;
+import de.z0rdak.yawp.api.events.region.YawpEvents;
+import de.z0rdak.yawp.config.server.*;
+import de.z0rdak.yawp.handler.PlayerPosTracker;
+import de.z0rdak.yawp.handler.RegionSpatialCache;
 import fuzs.forgeconfigapiport.api.config.v2.ForgeConfigRegistry;
 import fuzs.forgeconfigapiport.api.config.v2.ModConfigEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraftforge.fml.config.ModConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import static de.z0rdak.yawp.config.server.FeatureConfig.FEATURE_CONFIG_LOGGER;
 import static de.z0rdak.yawp.config.server.FlagConfig.FLAG_CONFIG_LOGGER;
 import static de.z0rdak.yawp.config.server.LoggingConfig.LOGGING_CONFIG_LOGGER;
 import static de.z0rdak.yawp.config.server.PermissionConfig.PERMISSION_CONFIG_LOGGER;
@@ -21,7 +22,7 @@ import static de.z0rdak.yawp.constants.Constants.MOD_ID;
 
 public final class ConfigRegistry {
 
-    public static final Logger CONFIG_LOGGER = LogManager.getLogger(MOD_ID.toUpperCase() + "-Config");
+    public static final Logger CONFIG_LOGGER = LogManager.getLogger(MOD_ID.toUpperCase() + "-Config-Event");
 
     private ConfigRegistry() {
     }
@@ -36,6 +37,7 @@ public final class ConfigRegistry {
         ForgeConfigRegistry.INSTANCE.register(MOD_ID, ModConfig.Type.SERVER, FlagConfig.CONFIG_SPEC, FlagConfig.CONFIG_NAME);
         ForgeConfigRegistry.INSTANCE.register(MOD_ID, ModConfig.Type.SERVER, RegionConfig.CONFIG_SPEC, RegionConfig.CONFIG_NAME);
         ForgeConfigRegistry.INSTANCE.register(MOD_ID, ModConfig.Type.SERVER, LoggingConfig.CONFIG_SPEC, LoggingConfig.CONFIG_NAME);
+        ForgeConfigRegistry.INSTANCE.register(MOD_ID, ModConfig.Type.SERVER, FeatureConfig.CONFIG_SPEC, FeatureConfig.CONFIG_NAME);
     }
 
     private static void onModReloading(ModConfig modConfig) {
@@ -47,6 +49,19 @@ public final class ConfigRegistry {
     private static void onModLoading(ModConfig modConfig) {
         if (modConfig.getModId().equals(MOD_ID)) {
             switch (modConfig.getFileName()) {
+                case FeatureConfig.CONFIG_NAME: {
+                    var enablePlayerTracker = FeatureConfig.enablePlayerTracker();
+                    FEATURE_CONFIG_LOGGER.info("Player tracking feature: {}", enablePlayerTracker ? "enabled" : "disabled" );
+
+                    if (enablePlayerTracker) {
+                        // Note: For now the spatial indexing is only used for this feature, so I guess it can stay here
+                        YawpEvents.ON_REGION_DATA_LOADED.register(RegionSpatialCache::initRegions);
+
+                        ServerTickEvents.START_WORLD_TICK.register(PlayerPosTracker::tickLevel);
+                        ServerPlayConnectionEvents.DISCONNECT.register(PlayerPosTracker::onPlayerDisc);
+                    }
+                }
+                break;
                 case PermissionConfig.CONFIG_NAME: {
                     int numOfUuidsWithPermission = PermissionConfig.UUIDsWithPermission().size();
                     String uuidsWithPermission = (numOfUuidsWithPermission > 0
@@ -103,10 +118,10 @@ public final class ConfigRegistry {
                     // LOGGING_CONFIG_LOGGER.info("Logging detailed player flag checks: {}", LoggingConfig.shouldLogDetailedPlayerFlags());
 
                     if (LoggingConfig.shouldLogFlagChecks()) {
-                        FabricRegionEvents.CHECK_FLAG.register(LoggingConfig::logCheck);
+                        FlagEvents.ON_FLAG_CHECK.register(LoggingConfig::logCheck);
                     }
                     if (LoggingConfig.shouldLogFlagCheckResults()) {
-                        FabricRegionEvents.FLAG_RESULT.register(LoggingConfig::logResult);
+                        FlagEvents.ON_FLAG_RESULT.register(LoggingConfig::logResult);
                     }
                 }
                 break;

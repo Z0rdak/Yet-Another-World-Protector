@@ -1,8 +1,8 @@
 package de.z0rdak.yawp.config.server;
 
 import de.z0rdak.yawp.api.FlagTagRegister;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
-import de.z0rdak.yawp.api.events.region.FlagCheckResult;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
+import de.z0rdak.yawp.api.events.flag.FlagCheckResult;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.*;
 import de.z0rdak.yawp.core.region.RegionType;
@@ -141,7 +141,7 @@ public class LoggingConfig {
     }
     */
 
-    public static boolean logCheck(FlagCheckEvent check) {
+    public static boolean logCheck(FlagCheckRequest check) {
         boolean matchesFlagOrCategory = (flagMatchesCategory(check) || matchesFlag(check));
         if (matchesFlagOrCategory) {
             LOGGING_CONFIG_LOGGER.info("[Check] {}, at {}, in '{}', Player={}, Id={}",
@@ -155,7 +155,7 @@ public class LoggingConfig {
     }
 
     public static FlagCheckResult logResult(FlagCheckResult result) {
-        FlagCheckEvent check = result.getFlagCheck();
+        FlagCheckRequest check = result.getFlagCheck();
         boolean matchesFlagOrCategory = (flagMatchesCategory(check) || matchesFlag(check));
         if (matchesFlagOrCategory && matchesResult(result)) {
             if (result.getResponsible() == null || result.getFlag() == null) {
@@ -189,11 +189,11 @@ public class LoggingConfig {
         return LoggingConfig.getResultValuesToLog().contains(result.getFlagState().name);
     }
 
-    public static boolean flagMatchesCategory(FlagCheckEvent check) {
+    public static boolean flagMatchesCategory(FlagCheckRequest check) {
         return RegionFlag.matchesCategory(check.getRegionFlag(), getFlagTags());
     }
 
-    public static boolean matchesFlag(FlagCheckEvent check) {
+    public static boolean matchesFlag(FlagCheckRequest check) {
         return LoggingConfig.getFlagsToLog().contains(check.getRegionFlag().name);
     }
 }
