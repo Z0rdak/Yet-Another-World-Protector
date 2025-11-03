@@ -2,16 +2,16 @@ package de.z0rdak.yawp.api.events.region;
 
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class RegionEvent {
 
     private final IMarkableRegion region;
-    @Nullable
-    private final Player player;
+    private final ServerPlayer player;
 
-    private RegionEvent(IMarkableRegion region, @Nullable Player player) {
+    private RegionEvent(final IMarkableRegion region, final ServerPlayer player) {
         this.region = region;
         this.player = player;
     }
@@ -20,8 +20,7 @@ public abstract class RegionEvent {
         return region;
     }
 
-    @Nullable
-    public Player getPlayer() {
+    public ServerPlayer getPlayer() {
         return player;
     }
 
@@ -32,10 +31,15 @@ public abstract class RegionEvent {
      */
     public final static class Create extends RegionEvent {
 
-        public Create(IMarkableRegion region, Player player) {
+        public Create(final IMarkableRegion region, final ServerPlayer player) {
             super(region, player);
         }
 
+        @Override
+        @Nullable
+        public ServerPlayer getPlayer() {
+            return super.getPlayer();
+        }
     }
 
     /**
@@ -47,10 +51,16 @@ public abstract class RegionEvent {
         private final String oldName;
         private String newName;
 
-        public Rename(IMarkableRegion region, String oldName, String newName, Player player) {
+        public Rename(final IMarkableRegion region, final String oldName, final String newName, final ServerPlayer player) {
             super(region, player);
             this.newName = newName;
             this.oldName = oldName;
+        }
+
+        @Override
+        @Nullable
+        public ServerPlayer getPlayer() {
+            return super.getPlayer();
         }
 
         public String getOldName() {
@@ -81,9 +91,15 @@ public abstract class RegionEvent {
 
         private IMarkableArea markedArea;
 
-        public UpdateArea(IMarkableRegion region, IMarkableArea area, Player player) {
+        public UpdateArea(final IMarkableRegion region, final IMarkableArea area, final ServerPlayer player) {
             super(region, player);
             this.markedArea = area;
+        }
+
+        @Override
+        @Nullable
+        public ServerPlayer getPlayer() {
+            return super.getPlayer();
         }
 
         public IMarkableArea markedArea() {
@@ -108,8 +124,46 @@ public abstract class RegionEvent {
      */
     public final static class Remove extends RegionEvent {
 
-        public Remove(IMarkableRegion region, Player player) {
+        @Override
+        @Nullable
+        public ServerPlayer getPlayer() {
+            return super.getPlayer();
+        }
+
+        public Remove(final IMarkableRegion region, final ServerPlayer player) {
             super(region, player);
+        }
+    }
+
+
+    public static abstract class PlayerMove extends RegionEvent {
+        private final BlockPos previousPos;
+        private final BlockPos currentPos;
+        public PlayerMove(final IMarkableRegion region, final ServerPlayer player, final BlockPos previousPos, final BlockPos currentPos) {
+            super(region, player);
+            this.previousPos = previousPos;
+            this.currentPos = currentPos;
+        }
+
+        public BlockPos previous() {
+            return previousPos;
+        }
+
+        public BlockPos current() {
+            return currentPos;
+        }
+    }
+
+    public final static class PlayerEnter extends PlayerMove {
+        public PlayerEnter(final IMarkableRegion region, final ServerPlayer player, final BlockPos oldPos, final BlockPos newPos) {
+            super(region, player, oldPos, newPos);
+        }
+
+    }
+
+    public final static class PlayerLeave extends PlayerMove {
+        public PlayerLeave(final IMarkableRegion region, final ServerPlayer player, final BlockPos oldPos, final BlockPos newPos) {
+            super(region, player, oldPos, newPos);
         }
     }
 }
