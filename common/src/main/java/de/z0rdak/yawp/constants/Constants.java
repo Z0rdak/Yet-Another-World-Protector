@@ -7,7 +7,7 @@ public class Constants {
 
 	public static final String MOD_ID = "yawp";
 	public static final String MOD_NAME = "YetAnotherWorldProtector";
-	public static final Logger LOGGER = LogManager.getLogger(MOD_NAME);
+	public static final Logger LOGGER = LogManager.getLogger(MOD_ID.toUpperCase());
 
 	public final static int MIN_BUILD_LIMIT = -64;
 	public final static int MAX_BUILD_LIMIT = 320;
