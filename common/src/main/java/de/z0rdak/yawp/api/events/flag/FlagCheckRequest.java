@@ -1,4 +1,4 @@
-package de.z0rdak.yawp.api.events.region;
+package de.z0rdak.yawp.api.events.flag;
 
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import net.minecraft.core.BlockPos;
@@ -12,9 +12,8 @@ import java.util.UUID;
 /**
  * Event that is fired before a flag is checked.
  * Can be used to cancel the flag check.
- * TODO: Dedicated event for player checks which requires non-null player instance to increase robustness
  */
-public final class FlagCheckEvent {
+public final class FlagCheckRequest {
 
     /**
      * The target position of the flag check. Depending on the flag this can be a block position or an entity position.
@@ -47,7 +46,7 @@ public final class FlagCheckEvent {
      * @param dimension dimension where to look for regions at the target pos
      * @param player the player to consider permissions for during check
      */
-    public FlagCheckEvent(BlockPos target, RegionFlag regionFlag, ResourceKey<Level> dimension, @Nullable Player player) {
+    public FlagCheckRequest(BlockPos target, RegionFlag regionFlag, ResourceKey<Level> dimension, @Nullable Player player) {
         this.player = player;
         this.target = target;
         this.dimension = dimension;
@@ -62,7 +61,7 @@ public final class FlagCheckEvent {
      * @param dimension dimension where to look for regions at the target pos
      * @param player to consider permissions for during check
      */
-    public FlagCheckEvent(BlockPos target, RegionFlag regionFlag, ResourceKey<Level> dimension, @Nullable Player player, String id) {
+    public FlagCheckRequest(BlockPos target, RegionFlag regionFlag, ResourceKey<Level> dimension, @Nullable Player player, String id) {
         this.player = player;
         this.target = target;
         this.dimension = dimension;
@@ -70,7 +69,7 @@ public final class FlagCheckEvent {
         this.id = id;
     }
 
-    public FlagCheckEvent(BlockPos target, RegionFlag regionFlag, ResourceKey<Level> dimension) {
+    public FlagCheckRequest(BlockPos target, RegionFlag regionFlag, ResourceKey<Level> dimension) {
         this(target, regionFlag, dimension, null);
     }
 
