@@ -28,7 +28,7 @@ import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
 
 public class RegionDataManager {
 
-    public static final Logger LOGGER = LogManager.getLogger(Constants.MOD_ID.toUpperCase(Locale.ROOT) + "-DataManager");
+    public static final Logger LOGGER = LogManager.getLogger(Constants.MOD_ID.toUpperCase() + "-RegionDataManager");
     private static MinecraftServer serverInstance;
     private static LevelListData savedLevelData = new LevelListData();
     private static GlobalRegionData globalRegionData = new GlobalRegionData();
@@ -203,6 +203,7 @@ public class RegionDataManager {
                     restoreHierarchy(dimRegionStorage.get(levelRl), region);
                 });
             }
+            Services.YAWP_EVENT_DISPATCHER.post(level);
         } catch (NullPointerException npe) {
             LOGGER.error(Component.translatableWithFallback("data.region.level.local.load.failed", "Loading regions failed!").getString(), npe);
         }
