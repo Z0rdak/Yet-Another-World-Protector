@@ -1,4 +1,4 @@
-package de.z0rdak.yawp.api.events.region;
+package de.z0rdak.yawp.api.events.flag;
 
 import de.z0rdak.yawp.core.flag.FlagContext;
 import de.z0rdak.yawp.core.flag.FlagState;
@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class FlagCheckResult {
 
-    private final FlagCheckEvent flagCheck;
+    private final FlagCheckRequest flagCheck;
 
     @Nullable
     private final IProtectedRegion responsibleRegion;
@@ -22,21 +22,21 @@ public final class FlagCheckResult {
 
     private FlagState result;
 
-    public FlagCheckResult(FlagCheckEvent flagCheck, FlagState state, @Nullable IProtectedRegion responsibleRegion, @Nullable IFlag flag) {
+    public FlagCheckResult(FlagCheckRequest flagCheck, FlagState state, @Nullable IProtectedRegion responsibleRegion, @Nullable IFlag flag) {
         this.flagCheck = flagCheck;
         this.responsibleRegion = responsibleRegion;
         this.result = state;
         this.flag = flag;
     }
 
-    public FlagCheckResult(FlagCheckEvent flagCheck, FlagContext flagContext) {
+    public FlagCheckResult(FlagCheckRequest flagCheck, FlagContext flagContext) {
         this.flagCheck = flagCheck;
         this.responsibleRegion = flagContext.region();
         this.flag = flagContext.flag();
         this.result = flagContext.resultingState();
     }
 
-    public static FlagCheckResult Undefined(FlagCheckEvent flagCheck) {
+    public static FlagCheckResult Undefined(FlagCheckRequest flagCheck) {
         return new FlagCheckResult(flagCheck, FlagState.UNDEFINED, null, null);
     }
 
@@ -45,7 +45,7 @@ public final class FlagCheckResult {
         return this.responsibleRegion;
     }
 
-    public FlagCheckEvent getFlagCheck() {
+    public FlagCheckRequest getFlagCheck() {
         return flagCheck;
     }
 

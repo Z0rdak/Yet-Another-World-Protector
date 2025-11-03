@@ -2,22 +2,23 @@ package de.z0rdak.yawp.api.events.flag;
 
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class FlagEvent {
 
     private final IProtectedRegion region;
     private final IFlag flag;
-    private final CommandSourceStack src;
+    private final ServerPlayer player;
 
-    private FlagEvent(final CommandSourceStack src, final IProtectedRegion region, final IFlag flag) {
-        this.src = src;
+    private FlagEvent(final ServerPlayer player, final IProtectedRegion region, final IFlag flag) {
+        this.player = player;
         this.region = region;
         this.flag = flag;
     }
 
-    public CommandSourceStack getSrc() {
-        return src;
+    public ServerPlayer getPlayer() {
+        return player;
     }
 
     public IFlag getFlag() {
@@ -28,27 +29,45 @@ public abstract class FlagEvent {
         return region;
     }
 
-    public static class AddFlagEvent extends FlagEvent {
+    public static class Add extends FlagEvent {
 
-        public AddFlagEvent(final CommandSourceStack src, final IProtectedRegion region, final IFlag flag) {
-            super(src, region, flag);
+        public Add(final ServerPlayer player, final IProtectedRegion region, final IFlag flag) {
+            super(player, region, flag);
+        }
+
+        @Override
+        @Nullable
+        public ServerPlayer getPlayer() {
+            return super.getPlayer();
         }
     }
 
-    public static class RemoveFlagEvent extends FlagEvent {
+    public static class Remove extends FlagEvent {
 
-        public RemoveFlagEvent(final CommandSourceStack src, final IProtectedRegion region, final IFlag flag) {
-            super(src, region, flag);
+        public Remove(final ServerPlayer player, final IProtectedRegion region, final IFlag flag) {
+            super(player, region, flag);
+        }
+
+        @Override
+        @Nullable
+        public ServerPlayer getPlayer() {
+            return super.getPlayer();
         }
     }
 
-    public static class UpdateFlagMessageEvent extends FlagEvent {
+    public static class UpdateFlagMessage extends FlagEvent {
 
         private String newMsg;
 
-        public UpdateFlagMessageEvent(final CommandSourceStack src, final IProtectedRegion region, final IFlag flag, String newMsg) {
-            super(src, region, flag);
+        public UpdateFlagMessage(final ServerPlayer player, final IProtectedRegion region, final IFlag flag, String newMsg) {
+            super(player, region, flag);
             this.newMsg = newMsg;
+        }
+
+        @Override
+        @Nullable
+        public ServerPlayer getPlayer() {
+            return super.getPlayer();
         }
 
         public String getNewMsg() {
