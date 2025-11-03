@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.player.breeding;
 
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.animal.Animal;
@@ -24,8 +24,8 @@ public abstract class SnifferMixin {
             Sniffer parentA = (Sniffer) (Object) this;
             if (parentA.getLoveCause()  != null) {
                 Player breeder = parentA.getLoveCause();
-                FlagCheckEvent checkEvent = new FlagCheckEvent(parentA.blockPosition(), ANIMAL_BREEDING, world.dimension(), breeder);
-                if (Services.EVENT.post(checkEvent)) {
+                FlagCheckRequest checkEvent = new FlagCheckRequest(parentA.blockPosition(), ANIMAL_BREEDING, world.dimension(), breeder);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 processCheck(checkEvent, deny -> {

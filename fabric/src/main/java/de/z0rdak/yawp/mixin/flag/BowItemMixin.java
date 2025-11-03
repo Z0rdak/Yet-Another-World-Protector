@@ -2,7 +2,7 @@
 package de.z0rdak.yawp.mixin.flag;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -26,8 +26,8 @@ public abstract class BowItemMixin {
     void onLooseArrow(ItemStack stack, Level level, LivingEntity entityLiving, int timeLeft, CallbackInfo ci) {
         Player player = (Player) entityLiving;
         if (isServerSide(player.level())) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), FIRE_BOW, getDimKey(player), player);
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), FIRE_BOW, getDimKey(player), player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, denyResult -> {

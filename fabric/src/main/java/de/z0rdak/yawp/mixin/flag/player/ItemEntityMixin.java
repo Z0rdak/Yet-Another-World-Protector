@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -27,8 +27,8 @@ public abstract class ItemEntityMixin {
     public void onPickUpItem(Player player, CallbackInfo ci) {
         ItemEntity itemToPickup = (ItemEntity) (Object) this;
         if (isServerSide(itemToPickup.level())) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(itemToPickup.blockPosition(), ITEM_PICKUP, getDimKey(player), player);
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(itemToPickup.blockPosition(), ITEM_PICKUP, getDimKey(player), player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, deny -> {
@@ -42,8 +42,8 @@ public abstract class ItemEntityMixin {
     @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;discard()V", ordinal = 1), cancellable = true)
     public void onTick(CallbackInfo ci) {
         ItemEntity itemToPickup = (ItemEntity) (Object) this;
-        FlagCheckEvent checkEvent = new FlagCheckEvent(itemToPickup.blockPosition(), RegionFlag.NO_ITEM_DESPAWN, getDimKey(itemToPickup.level()), null);
-        if (Services.EVENT.post(checkEvent)) {
+        FlagCheckRequest checkEvent = new FlagCheckRequest(itemToPickup.blockPosition(), RegionFlag.NO_ITEM_DESPAWN, getDimKey(itemToPickup.level()), null);
+        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
             return;
         }
 

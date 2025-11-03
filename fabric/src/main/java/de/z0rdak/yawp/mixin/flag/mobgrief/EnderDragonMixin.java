@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
@@ -25,14 +25,14 @@ public abstract class EnderDragonMixin {
     public void onDragonDestroyBlocks(AABB box, CallbackInfoReturnable<Boolean> cir, int i, int j, int k, int l, int m, int n, boolean bl, boolean bl2, int o, int p, int q, BlockPos blockPos) {
         EnderDragon self = (EnderDragon) (Object) this;
 
-        FlagCheckEvent checkEvent = new FlagCheckEvent(blockPos, DRAGON_BLOCK_PROT, getDimKey(self));
-        if (Services.EVENT.post(checkEvent)) {
+        FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, DRAGON_BLOCK_PROT, getDimKey(self));
+        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
             return;
         }
         FlagState flagStateDragonProt = processCheck(checkEvent);
 
-        checkEvent = new FlagCheckEvent(blockPos, MOB_GRIEFING, getDimKey(self));
-        if (Services.EVENT.post(checkEvent)) {
+        checkEvent = new FlagCheckRequest(blockPos, MOB_GRIEFING, getDimKey(self));
+        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
             return;
         }
         FlagState flagStateGriefing = processCheck(checkEvent);

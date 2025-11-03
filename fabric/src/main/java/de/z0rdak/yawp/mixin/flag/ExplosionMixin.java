@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.mixin.flag;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.platform.Services;
@@ -39,17 +39,17 @@ public abstract class ExplosionMixin {
 
     @Unique
     private static void filterExplosionTargets(Explosion explosion, Level world, List<Entity> affectedEntities) {
-        Predicate<FlagCheckEvent> isProtected = (fce) -> {
-            if (Services.EVENT.post(fce)) {
+        Predicate<FlagCheckRequest> isProtected = (fce) -> {
+            if (Services.FLAG_EVENT_DISPATCHER.post(fce)) {
                 return true;
             }
             return FlagEvaluator.processCheck(fce) == FlagState.DENIED;
         };
         BiFunction<List<BlockPos>, RegionFlag, Set<BlockPos>> filterBlocks = (in, flag) -> in.stream()
-                .filter(blockPos -> isProtected.test(new FlagCheckEvent(blockPos, flag, world.dimension())))
+                .filter(blockPos -> isProtected.test(new FlagCheckRequest(blockPos, flag, world.dimension())))
                 .collect(Collectors.toSet());
         BiFunction<List<Entity>, RegionFlag, Set<Entity>> filterEntities = (in, flag) -> in.stream()
-                .filter(entity -> isProtected.test(new FlagCheckEvent(entity.blockPosition(), flag, world.dimension())))
+                .filter(entity -> isProtected.test(new FlagCheckRequest(entity.blockPosition(), flag, world.dimension())))
                 .collect(Collectors.toSet());
 
         explosion.getToBlow().removeAll(filterBlocks.apply(explosion.getToBlow(), EXPLOSION_BLOCK));

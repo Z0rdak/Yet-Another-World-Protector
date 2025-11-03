@@ -1,9 +1,13 @@
 package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
+import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.Services;
+import de.z0rdak.yawp.util.text.TitleBuilder;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -11,6 +15,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -23,13 +28,15 @@ import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin {
 
+    @Shadow public abstract ServerLevel serverLevel();
+
     // This is preferred to forge ItemTossEvent, because the forge event does delete the stack
     @Inject(method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;", at = @At(value = "HEAD"), allow = 1, cancellable = true)
     private void onDropItem(ItemStack stack, boolean b1, boolean b2, CallbackInfoReturnable<ItemEntity> cir) {
         ServerPlayer player = (ServerPlayer) (Object) this;
         if (isServerSide(player)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), ITEM_DROP, getDimKey(player), player);
-            if (Services.EVENT.post(checkEvent))
+            FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), ITEM_DROP, getDimKey(player), player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;
             FlagEvaluator.processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
@@ -46,21 +53,36 @@ public abstract class ServerPlayerMixin {
         if (isServerSide(player)) {
             RegionDataManager.initLevelDataOnChangeWorld(player, player.level(), destination);
 
-            FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), USE_PORTAL_PLAYERS, getDimKey(player), player);
-            if (Services.EVENT.post(checkEvent))
+            FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), USE_PORTAL_PLAYERS, getDimKey(player), player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;
             FlagEvaluator.processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
                 cir.setReturnValue(null);
             });
 
-            checkEvent = new FlagCheckEvent(player.blockPosition(), ENTER_DIM, getDimKey(destination), player);
-            if (Services.EVENT.post(checkEvent))
+            checkEvent = new FlagCheckRequest(player.blockPosition(), ENTER_DIM, getDimKey(destination), player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;
-            FlagEvaluator.processCheck(checkEvent, deny -> {
-                sendFlagMsg(deny);
-                cir.setReturnValue(null);
-            });
+            var res = FlagEvaluator.process(checkEvent)
+                    .onDenyWithMsg(result -> cir.setReturnValue(null));
+
+
+            ServerPlayer serverPlayer = (ServerPlayer) player; // argument later
+            IProtectedRegion region = res.result().getResponsible(); // argument later
+
+            var title = Component.translatable("%s", region.getName()).withStyle(ChatFormatting.YELLOW);
+            var subtitle = Component.translatable("Hope you brought sunscreen, %s!", serverPlayer.getScoreboardName()).withStyle(ChatFormatting.RED);
+            var actionbar = Component.literal("You can't get mine!").withStyle(ChatFormatting.DARK_PURPLE);
+            TitleBuilder.BuiltTitle regionTitle = TitleBuilder.of(serverPlayer, region)
+                    .title(title)
+                    .subtitle(subtitle)
+                    .actionbar(actionbar)
+                    .fadeIn(10).stay(80).fadeOut(20)
+                    .build();
+
+            regionTitle.send();
+
         }
     }
 
@@ -69,8 +91,8 @@ public abstract class ServerPlayerMixin {
     private void onTeleportToDimension(ServerLevel destination, double x, double y, double z, float yaw, float pitch, CallbackInfo ci) {
         Player player = (Player) (Object) this;
         if (isServerSide(player)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), USE_PORTAL_PLAYERS, player.level().dimension(), player);
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), USE_PORTAL_PLAYERS, player.level().dimension(), player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, deny -> {

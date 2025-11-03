@@ -2,7 +2,7 @@ package de.z0rdak.yawp.mixin.flag.mobgrief;
 
 
 import de.z0rdak.yawp.api.FlagEvaluator;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.DoorInteractGoal;
@@ -25,16 +25,16 @@ public abstract class BreakDoorGoal extends DoorInteractGoal {
     @Inject(method = "canUse", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onCanStart(CallbackInfoReturnable<Boolean> cir) {
         if (isServerSide(mob.level())) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(mob.blockPosition(), ZOMBIE_DOOR_PROT, getDimKey(mob));
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(mob.blockPosition(), ZOMBIE_DOOR_PROT, getDimKey(mob));
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, deny -> {
                 cir.setReturnValue(false);
             });
 
-            checkEvent = new FlagCheckEvent(mob.blockPosition(), MOB_GRIEFING, getDimKey(mob));
-            if (Services.EVENT.post(checkEvent)) {
+            checkEvent = new FlagCheckRequest(mob.blockPosition(), MOB_GRIEFING, getDimKey(mob));
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, deny -> {
