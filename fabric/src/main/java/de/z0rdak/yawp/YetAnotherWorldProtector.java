@@ -1,14 +1,18 @@
 package de.z0rdak.yawp;
 
+import de.z0rdak.yawp.api.visualization.VisualizationManager;
+import de.z0rdak.yawp.api.events.flag.FabricFlagEvents;
+import de.z0rdak.yawp.api.events.flag.FlagEvent;
 import de.z0rdak.yawp.api.events.flag.FabricFlagEvents;
 import de.z0rdak.yawp.api.events.flag.FlagEvent;
 import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.commands.CommandRegistry;
+import de.z0rdak.yawp.config.ConfigRegistry;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.data.PlayerManager;
 import de.z0rdak.yawp.data.region.RegionDataManager;
+import de.z0rdak.yawp.handler.YawpEventHandler;
 import de.z0rdak.yawp.handler.flags.PlayerFlagHandler;
-import de.z0rdak.yawp.platform.Services;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityLevelChangeEvents;
@@ -16,8 +20,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLevelEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.level.ServerLevel;
-
-import static de.z0rdak.yawp.handler.YawpEventHandler.removeInvolvedEntities;
 
 public class YetAnotherWorldProtector implements ModInitializer, YAWPModInitializer {
 
@@ -31,7 +33,7 @@ public class YetAnotherWorldProtector implements ModInitializer, YAWPModInitiali
 
         // register flag handlers
         PlayerFlagHandler.register();
-        FabricFlagEvents.ADD_FLAG.register(YetAnotherWorldProtector::onAddFlag);
+        ServerLifecycleEvents.SERVER_STARTING.register(YawpEventHandler::storeRef);
     }
 
     private static void onAddFlag(FlagEvent.AddFlagEvent event) {
