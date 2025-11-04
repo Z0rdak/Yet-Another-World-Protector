@@ -15,6 +15,7 @@ import de.z0rdak.yawp.util.text.TitleBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -142,20 +143,22 @@ public final class YawpEventHandler {
     }
 
     public static void onPlayerEnterRegion(RegionEvent.PlayerEnter onEnter) {
+        var titleText = ComponentUtils.wrapInSquareBrackets(
+                Component.literal(onEnter.getRegion().getName()).withStyle(ChatFormatting.AQUA));
         var title = TitleBuilder.of(onEnter.getPlayer(), onEnter.getRegion())
-                .title(Component.literal(onEnter.getRegion().getName()).withStyle(ChatFormatting.AQUA))
+                .title(titleText)
                 .subtitleWelcome()
-                .actionbar(Component.literal("This feature is still WIP!").withStyle(ChatFormatting.RED))
                 .timings(10, 40, 15)
                 .build();
         title.send();
     }
 
     public static void onPlayerLeaveRegion(RegionEvent.PlayerLeave onLeave) {
+        var titleText = ComponentUtils.wrapInSquareBrackets(
+                Component.literal(onLeave.getRegion().getName()).withStyle(ChatFormatting.AQUA));
         var title = TitleBuilder.of(onLeave.getPlayer(), onLeave.getRegion())
-                .title(Component.literal(onLeave.getRegion().getName()).withStyle(ChatFormatting.AQUA))
-                .subtitle(Component.literal("Come back soon! =)").withStyle(ChatFormatting.YELLOW))
-                .actionbar(Component.literal("This feature is still WIP!").withStyle(ChatFormatting.RED))
+                .title(titleText)
+                .subtitleBye()
                 .timings(10, 40, 15)
                 .build();
         title.send();
