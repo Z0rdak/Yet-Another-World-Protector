@@ -7,7 +7,7 @@ body:
   - type: dropdown
     id: version-selector
     attributes:
-      label: "MC Version Selector"
+      label: "Used Minecraft Version"
       description: "Please choose your used MC version"
       options:
         - "<1.20.1"
@@ -26,7 +26,7 @@ body:
   - type: dropdown
     id: mod-loader-selector
     attributes:
-      label: "Modloader Selector"
+      label: "Used Modloader"
       description: "Please choose your used mod loader"
       options:
         - "Fabric"
