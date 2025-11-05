@@ -4,26 +4,6 @@ title: "bug: [your-bug-title]"
 labels: ["bug"]
 body:
 
-  - type: dropdown
-    id: mod-loader-selector
-    attributes:
-      label: "Modloader Selector"
-      description: "Please choose your used mod loader"
-      options:
-        - "Fabric"
-        - "Forge"
-        - "NeoForge"
-    validations:
-      required: true
-
-  - type: input
-    id: mod-loader-version
-    attributes:
-      label: "Modloader Version"
-      description: "Please provide the mod loader version info used"
-    validations:
-      required: false
-
   - type: textarea
     id: bug-description
     attributes:
@@ -31,28 +11,4 @@ body:
       description: "Describe the bug in detail"
     validations:
       required: true
-
-  - type: textarea
-    id: steps-to-reproduce
-    attributes:
-      label: "Steps to Reproduce"
-      description: "List the steps to reproduce the bug"
-    validations:
-      required: true
-
-  - type: textarea
-    id: additional-context
-    attributes:
-      label: "Additional Context"
-      description: "Optional: mockups, links, references, logs or extra info"
-    validations:
-      required: false
-
-  - type: issue
-    id: related-issue
-    attributes:
-      label: "Related Issue"
-      description: "Select related issue if applicable"
-    validations:
-      required: false
 
