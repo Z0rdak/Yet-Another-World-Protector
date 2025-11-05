@@ -48,26 +48,52 @@ public class CuboidArea extends MarkedArea {
         return MarkedAreaTypes.CUBOID_AREA;
     }
 
-    private BoundingBox area;
-    private BlockPos p1;
-    private BlockPos p2;
+    private final BoundingBox area;
+    private final BlockPos p1;
+    private final BlockPos p2;
 
-    public CuboidArea(BoundingBox area) {
+    public CuboidArea(final BoundingBox area) {
         super(AreaType.CUBOID);
-        this.area = area;
+        // Normalize once at construction
+        this.area = new BoundingBox(
+                Math.min(area.minX(), area.maxX()),
+                Math.min(area.minY(), area.maxY()),
+                Math.min(area.minZ(), area.maxZ()),
+                Math.max(area.minX(), area.maxX()),
+                Math.max(area.minY(), area.maxY()),
+                Math.max(area.minZ(), area.maxZ())
+        );
+        this.p1 = new BlockPos(this.area.minX(), this.area.minY(), this.area.minZ());
+        this.p2 = new BlockPos(this.area.maxX(), this.area.maxY(), this.area.maxZ());
     }
 
-    public CuboidArea(BlockPos p1, BlockPos p2) {
-        this(BoundingBox.fromCorners(p1, p2));
-        this.p1 = AreaUtil.getLowerPos(p1, p2);
-        this.p2 = AreaUtil.getHigherPos(p1, p2);
+    public CuboidArea(final BlockPos p1, final BlockPos p2) {
+        super(AreaType.CUBOID);
+        int minX = Math.min(p1.getX(), p2.getX());
+        int minY = Math.min(p1.getY(), p2.getY());
+        int minZ = Math.min(p1.getZ(), p2.getZ());
+        int maxX = Math.max(p1.getX(), p2.getX());
+        int maxY = Math.max(p1.getY(), p2.getY());
+        int maxZ = Math.max(p1.getZ(), p2.getZ());
+
+        this.p1 = new BlockPos(minX, minY, minZ);
+        this.p2 = new BlockPos(maxX, maxY, maxZ);
+        this.area = new BoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
-    public static CuboidArea expand(CuboidArea area, int min, int max) {
+    public static CuboidArea expand(final CuboidArea area, final int minY, final int maxY) {
         BlockPos p1 = area.getAreaP1();
         BlockPos p2 = area.getAreaP2();
-        var expanded = new CuboidArea(new BlockPos(p1.getX(), min, p1.getZ()),
-                new BlockPos(p2.getX(), max, p2.getZ()));
+
+        int minX = Math.min(p1.getX(), p2.getX());
+        int minZ = Math.min(p1.getZ(), p2.getZ());
+        int maxX = Math.max(p1.getX(), p2.getX());
+        int maxZ = Math.max(p1.getZ(), p2.getZ());
+
+        CuboidArea expanded = new CuboidArea(
+                new BlockPos(minX, minY, minZ),
+                new BlockPos(maxX, maxY, maxZ)
+        );
         expanded.updateDisplay(area.getDisplay());
         return expanded;
     }
