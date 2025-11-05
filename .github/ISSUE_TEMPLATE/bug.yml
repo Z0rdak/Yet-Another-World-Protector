@@ -12,3 +12,18 @@ body:
     validations:
       required: true
 
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: "Steps To Reproduce"
+      description: "Please provide a comprehensive list of steps to reproduce the bug"
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: "Additional Context"
+      description: "Optional: other used mods, links, logs, etc"
+    validations:
+      required: false
