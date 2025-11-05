@@ -23,7 +23,7 @@ body:
     validations:
       required: true
 
-  - type: dropdown
+  - type: radio
     id: mod-loader-selector
     attributes:
       label: "Used Modloader"
