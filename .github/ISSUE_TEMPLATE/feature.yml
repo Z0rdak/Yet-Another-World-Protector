@@ -1,0 +1,46 @@
+name: "Feature Request"
+description: "Suggest a new feature or improvement"
+title: "feat: [your-feature-here]"
+labels: ["enhancement"]
+body:
+      
+  - type: textarea
+    id: description
+    attributes:
+      label: "Feature Description"
+      description: "Describe the feature you'd like to see in YAWP =)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: "Problem / Motivation"
+      description: "What problem does this solve or why is it needed?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: "Proposed Solution"
+      description: "How would this feature work?"
+    validations:
+      required: false
+
+  - type: textarea
+    id: benefits
+    attributes:
+      label: "Benefits"
+      description: "List the benefits of adding this feature"
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: "Additional Context"
+      description: "Optional: mockups, links, references, logs or extra info"
+    validations:
+      required: false
+
