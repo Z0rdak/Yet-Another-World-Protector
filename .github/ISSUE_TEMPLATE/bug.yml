@@ -66,11 +66,3 @@ body:
       description: "Optional: other used mods, links, logs, etc"
     validations:
       required: false
-
-  - type: issue
-    id: link_to_related_issue
-    attributes:
-      label: "Related issue"
-      description: "Select related issue if applicable"
-    validations:
-      required: false
