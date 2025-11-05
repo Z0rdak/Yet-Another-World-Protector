@@ -1,5 +1,5 @@
 name: "Feature Request"
-description: "Suggest a new feature or improvement"
+description: "Suggest a new feature or improvement for YAWP"
 title: "feat: [your-feature-here]"
 labels: ["enhancement"]
 body:
