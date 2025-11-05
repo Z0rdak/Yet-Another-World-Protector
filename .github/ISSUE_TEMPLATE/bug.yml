@@ -4,22 +4,6 @@ title: "bug: [your-bug-title]"
 labels: ["bug"]
 body:
 
-  - type: textarea
-    id: bug-description
-    attributes:
-      label: "Bug Description"
-      description: "Describe the bug in detail"
-    validations:
-      required: true
-
-  - type: textarea
-    id: steps-to-reproduce
-    attributes:
-      label: "Steps To Reproduce"
-      description: "Please provide a comprehensive list of steps to reproduce the bug"
-    validations:
-      required: true
-
   - type: dropdown
     id: version-selector
     attributes:
@@ -58,6 +42,22 @@ body:
       description: "Please provide the mod loader version info used"
     validations:
       required: false
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: "Bug Description"
+      description: "Describe the bug in detail"
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: "Steps To Reproduce"
+      description: "Please provide a comprehensive list of steps to reproduce the bug"
+    validations:
+      required: true
 
   - type: textarea
     id: additional_context
