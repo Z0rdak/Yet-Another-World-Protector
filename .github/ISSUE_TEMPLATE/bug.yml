@@ -20,6 +20,45 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    id: version-selector
+    attributes:
+      label: "MC Version Selector"
+      description: "Please choose your used MC version"
+      options:
+        - ">1.20.1"
+        - "1.20.1"
+        - "1.21.1"
+        - "1.21.4"
+        - "1.21.5"
+        - "1.21.6"
+        - "1.21.7"
+        - "1.21.8"
+        - "1.21.10"
+        - ">1.21.10"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: mod-loader-selector
+    attributes:
+      label: "Modloader Selector"
+      description: "Please choose your used mod loader"
+      options:
+        - "Fabric"
+        - "Forge"
+        - "NeoForge"
+    validations:
+      required: true
+
+  - type: input
+    id: mod-loader-version
+    attributes:
+      label: "Modloader Version"
+      description: "Please provide the mod loader version info used"
+    validations:
+      required: false
+
   - type: textarea
     id: additional_context
     attributes:
