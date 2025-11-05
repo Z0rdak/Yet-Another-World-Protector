@@ -3,24 +3,22 @@ description: "Report a bug in the system"
 title: "bug: [your-bug-title]"
 labels: ["bug"]
 body:
-
-
   - type: dropdown
     id: version-selector
     attributes:
       label: "MC Version Selector"
       description: "Please choose your used MC version"
       options:
-      - ">1.20.1"
-      - "1.20.1"
-      - "1.21.1"
-      - "1.21.4"
-      - "1.21.5"
-      - "1.21.6"
-      - "1.21.7"
-      - "1.21.8"
-      - "1.21.10"
-      - ">1.21.10"
+        - ">1.20.1"
+        - "1.20.1"
+        - "1.21.1"
+        - "1.21.4"
+        - "1.21.5"
+        - "1.21.6"
+        - "1.21.7"
+        - "1.21.8"
+        - "1.21.10"
+        - ">1.21.10"
     validations:
       required: true
       
