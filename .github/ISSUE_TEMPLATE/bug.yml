@@ -10,7 +10,7 @@ body:
       label: "MC Version Selector"
       description: "Please choose your used MC version"
       options:
-        - ">1.20.1"
+        - "<1.20.1"
         - "1.20.1"
         - "1.21.1"
         - "1.21.4"
