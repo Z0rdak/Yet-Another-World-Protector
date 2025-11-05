@@ -21,21 +21,21 @@ body:
         - ">1.21.10"
     validations:
       required: true
-      
+
   - type: dropdown
     id: mod-loader-selector
     attributes:
       label: "Modloader Selector"
       description: "Please choose your used mod loader"
       options:
-      - "Fabric"
-      - "Forge"
-      - "NeoForge"
+        - "Fabric"
+        - "Forge"
+        - "NeoForge"
     validations:
       required: true
-      
+
   - type: input
-    id: mod-loader-version-input
+    id: mod-loader-version
     attributes:
       label: "Modloader Version"
       description: "Please provide the mod loader version info used"
@@ -43,7 +43,7 @@ body:
       required: false
 
   - type: textarea
-    id: description
+    id: bug-description
     attributes:
       label: "Bug Description"
       description: "Describe the bug in detail"
@@ -51,28 +51,26 @@ body:
       required: true
 
   - type: textarea
-    id: steps_to_reproduce
+    id: steps-to-reproduce
     attributes:
       label: "Steps to Reproduce"
       description: "List the steps to reproduce the bug"
     validations:
       required: true
-      
+
   - type: textarea
-    id: additional_context
+    id: additional-context
     attributes:
       label: "Additional Context"
       description: "Optional: mockups, links, references, logs or extra info"
     validations:
       required: false
-      
+
   - type: issue
-    id: link_to_related_issue
+    id: related-issue
     attributes:
-      label: "Related issue"
+      label: "Related Issue"
       description: "Select related issue if applicable"
     validations:
       required: false
-
-
 
