@@ -1,0 +1,80 @@
+name: "Bug Report"
+description: "Report a bug in the system"
+title: "bug: [your-bug-title]"
+labels: ["bug"]
+body:
+
+
+  - type: dropdown
+    id: version-selector
+    attributes:
+      label: "MC Version Selector"
+      description: "Please choose your used MC version"
+      options:
+      - ">1.20.1"
+      - "1.20.1"
+      - "1.21.1"
+      - "1.21.4"
+      - "1.21.5"
+      - "1.21.6"
+      - "1.21.7"
+      - "1.21.8"
+      - "1.21.10"
+      - ">1.21.10"
+    validations:
+      required: true
+      
+  - type: dropdown
+    id: mod-loader-selector
+    attributes:
+      label: "Modloader Selector"
+      description: "Please choose your used mod loader"
+      options:
+      - "Fabric"
+      - "Forge"
+      - "NeoForge"
+    validations:
+      required: true
+      
+  - type: input
+    id: mod-loader-version-input
+    attributes:
+      label: "Modloader Version"
+      description: "Please provide the mod loader version info used"
+    validations:
+      required: false
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Bug Description"
+      description: "Describe the bug in detail"
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps_to_reproduce
+    attributes:
+      label: "Steps to Reproduce"
+      description: "List the steps to reproduce the bug"
+    validations:
+      required: true
+      
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: "Additional Context"
+      description: "Optional: mockups, links, references, logs or extra info"
+    validations:
+      required: false
+      
+  - type: issue
+    id: link_to_related_issue
+    attributes:
+      label: "Related issue"
+      description: "Select related issue if applicable"
+    validations:
+      required: false
+
+
+
