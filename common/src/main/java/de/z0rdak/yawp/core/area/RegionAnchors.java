@@ -38,6 +38,15 @@ public class RegionAnchors {
         return this.tpAnchors.containsKey(name);
     }
 
+    public boolean hasAnchor(String name, BlockPos pos) {
+        return this.tpAnchors.containsKey(name)
+                && this.tpAnchors.get(name).getPos().equals(pos);
+    }
+
+    public boolean hasAnchorWithPos(BlockPos pos) {
+        return this.tpAnchors.values().stream()
+                .anyMatch(tpAnchor -> tpAnchor.getPos().equals(pos));
+    }
 
     public TeleportAnchor addTpAnchor(BlockPos pos, String name) {
         var anchor = new TeleportAnchor(pos, name);

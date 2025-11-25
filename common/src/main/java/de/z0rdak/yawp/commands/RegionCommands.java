@@ -57,6 +57,7 @@ import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.constants.Constants.MAX_BUILD_LIMIT;
 import static de.z0rdak.yawp.constants.Constants.MIN_BUILD_LIMIT;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.shortBlockPos;
+import static de.z0rdak.yawp.util.ChatComponentBuilder.shortBlockPosBracketed;
 import static de.z0rdak.yawp.util.ChatLinkBuilder.*;
 
 
@@ -648,10 +649,14 @@ class RegionCommands {
             return -1;
         }
         if (!region.getArea().contains(pos)) {
-            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.fail-msg.not-contained", "Teleport Anchor pos must be inside the region.", name, buildRegionInfoLink(region)));
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.fail-msg.not-contained", "Region %s doesn't contain %s - invalid position for teleport anchor supplied.", buildRegionInfoLink(region), shortBlockPosBracketed(pos), name));
             return -1;
         }
-        if (tpAnchors.getTpAnchor(name).getPos().equals(pos)) {
+        if (tpAnchors.hasAnchorWithPos(pos)) {
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.fail-msg.duplicate-pos", "Region %s already contains a Teleport Anchor with the same pos (%s).", buildRegionInfoLink(region), shortBlockPosBracketed(pos)));
+            return -1;
+        }
+        if (tpAnchors.hasAnchor(name, pos)) {
             // they are the same
             return 0;
         }
