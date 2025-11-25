@@ -4,3 +4,161 @@ plugins {
     // see https://projects.neoforged.net/neoforged/moddevgradle for new versions
     id 'net.neoforged.moddev' version '2.0.62-beta' apply false
 }
+
+subprojects {
+    apply plugin: 'java'
+
+    java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+    java.withSourcesJar()
+    java.withJavadocJar()
+
+    jar {
+        from(rootProject.file("LICENSE")) {
+            rename { "${it}" }
+        }
+        from(rootProject.file("CREDITS")) {
+            rename { "${it}" }
+        }
+        from(rootProject.file("README.md")) {
+            rename { "${it}" }
+        }
+        from(rootProject.file("changelog.md")) {
+            rename { "${it}" }
+        }
+        manifest {
+            attributes([
+                'Specification-Title'     : mod_name,
+                'Specification-Vendor'    : mod_author,
+                'Specification-Version'   : project.jar.archiveVersion,
+                'Implementation-Title'    : project.name,
+                'Implementation-Version'  : project.jar.archiveVersion,
+                'Implementation-Vendor'   : mod_author,
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                'Timestamp'               : System.currentTimeMillis(),
+                'Built-On-Java'           : "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
+                'Built-On-Minecraft'      : minecraft_version
+            ])
+        }
+    }
+
+    javadocJar {
+        from(rootProject.file("LICENSE")) {
+            rename { "${it}" }
+        }
+        from(rootProject.file("CREDITS")) {
+            rename { "${it}" }
+        }
+        from(rootProject.file("README.md")) {
+            rename { "${it}" }
+        }
+        from(rootProject.file("changelog.md")) {
+            rename { "${it}" }
+        }
+    }
+
+    sourcesJar {
+        from(rootProject.file("LICENSE")) {
+            rename { "${it}" }
+        }
+        from(rootProject.file("CREDITS")) {
+            rename { "${it}" }
+        }
+        from(rootProject.file("README.md")) {
+            rename { "${it}" }
+        }
+        from(rootProject.file("changelog.md")) {
+            rename { "${it}" }
+        }
+    }
+
+    repositories {
+        mavenCentral()
+        maven {
+            name = 'Sponge / Mixin'
+            url = 'https://repo.spongepowered.org/repository/maven-public/'
+        }
+        maven {
+            name = 'BlameJared Maven (JEI / CraftTweaker / Bookshelf)'
+            url = 'https://maven.blamejared.com'
+        }
+        maven {
+            name = "Fuzs Mod Resources"
+            url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
+        }
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        it.options.encoding = 'UTF-8'
+        it.options.getRelease().set(17)
+    }
+
+    processResources {
+        def expandProps = [
+                "version": version,
+                "group": project.group, //Else we target the task's group.
+                "minecraft_version": minecraft_version,
+                "forge_version": forge_version,
+                "forge_loader_version_range": forge_loader_version_range,
+                "forge_version_range": forge_version_range,
+                "minecraft_version_range": minecraft_version_range,
+                "fabric_version": fabric_version,
+                "fabric_loader_version": fabric_loader_version,
+                "mod_name": mod_name,
+                "mod_author": mod_author,
+                "mod_id": mod_id,
+                "license": license,
+                "description": project.description,
+                "resource_pack_desc":resource_pack_desc,
+                "credits": credits
+        ]
+
+        filesMatching(['pack.mcmeta', 'fabric.mod.json', 'META-INF/mods.toml', '*.mixins.json']) {
+            expand expandProps
+        }
+        inputs.properties(expandProps)
+    }
+}
+
+
+def mcVersion = project.findProperty("minecraft_version")
+def yawpVersion = project.findProperty("version")
+def tagName = "${mcVersion}-${yawpVersion}"
+
+tasks.register("createGitTag", Exec) {
+    group = "release"
+    description = "Creates git tag ${tagName}"
+    commandLine "git", "tag", tagName
+}
+
+tasks.register("pushGitTag", Exec) {
+    group = "release"
+    description = "Pushes git tag ${tagName} to origin"
+    commandLine "git", "push", "origin", tagName
+    dependsOn "createGitTag"
+}
+
+tasks.register("tagAndRelease") {
+    group = "release"
+    description = "Creates a git tag and pushes it (triggers GitHub Action)"
+    dependsOn "pushGitTag"
+}
+
+
+tasks.register("deleteGitTagLocal", Exec) {
+    group = "release"
+    description = "Deletes git tag ${tagName} locally"
+    commandLine "git", "tag", "-d", tagName
+}
+
+tasks.register("deleteGitTagRemote", Exec) {
+    group = "release"
+    description = "Deletes git tag ${tagName} on origin"
+    commandLine "git", "push", "origin", "--delete", tagName
+    dependsOn "deleteGitTagLocal"
+}
+
+tasks.register("deleteTag") {
+    group = "release"
+    description = "Deletes the tag locally and remotely"
+    dependsOn "deleteGitTagRemote"
+}
