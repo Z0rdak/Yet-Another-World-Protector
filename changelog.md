@@ -1,3 +1,30 @@
+# [0.6.3-beta1] - unreleased
+
+## Added
+
+- Add RegionSpatialCache to index regions in the world based on sub-chunks (sections).
+- Add PlayerPosTracker to track the position of players
+- Add RegionEvent.PlayerEnter. It is fired when a player enters a Local Region 
+- Add RegionEvent.PlayerLeave. It is fired when a player leaves a Local Region
+- Add default title message which is displayed when a player enters/leaves a Local Region. This will be customizable in the future.
+- Add `yawp-features.toml` config to enable/disable features.
+- Add config setting to enable player tracker in `yawp-features.toml`
+- 
+
+## Changed
+
+- Rename flag `xp-drop-all` to `drop-xp`. This now covers all xp dropping from players killing monsters.
+
+## Removed
+
+- Remove flags `xp-drop-player`, `xp-drop-other`, `xp-drop-monsters`. This is covered by `drop-xp`.
+- Remove flag `trample-farmland-other`. This is covered by `trample-farmland`.
+
+## Fixed
+
+- Fix NPE when updating tp anchor position
+- Fix cuboid area not being normalized causing issues with recognizing players entering/leaving 
+
 # [0.6.2-beta1] - 2025-10-30
 
 ## Added
