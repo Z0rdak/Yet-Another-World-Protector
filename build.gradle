@@ -118,3 +118,47 @@ subprojects {
         inputs.properties(expandProps)
     }
 }
+
+
+def mcVersion = project.findProperty("minecraft_version")
+def yawpVersion = project.findProperty("version")
+def tagName = "${mcVersion}-${yawpVersion}"
+
+tasks.register("createGitTag", Exec) {
+    group = "release"
+    description = "Creates git tag ${tagName}"
+    commandLine "git", "tag", tagName
+}
+
+tasks.register("pushGitTag", Exec) {
+    group = "release"
+    description = "Pushes git tag ${tagName} to origin"
+    commandLine "git", "push", "origin", tagName
+    dependsOn "createGitTag"
+}
+
+tasks.register("tagAndRelease") {
+    group = "release"
+    description = "Creates a git tag and pushes it (triggers GitHub Action)"
+    dependsOn "pushGitTag"
+}
+
+
+tasks.register("deleteGitTagLocal", Exec) {
+    group = "release"
+    description = "Deletes git tag ${tagName} locally"
+    commandLine "git", "tag", "-d", tagName
+}
+
+tasks.register("deleteGitTagRemote", Exec) {
+    group = "release"
+    description = "Deletes git tag ${tagName} on origin"
+    commandLine "git", "push", "origin", "--delete", tagName
+    dependsOn "deleteGitTagLocal"
+}
+
+tasks.register("deleteTag") {
+    group = "release"
+    description = "Deletes the tag locally and remotely"
+    dependsOn "deleteGitTagRemote"
+}
