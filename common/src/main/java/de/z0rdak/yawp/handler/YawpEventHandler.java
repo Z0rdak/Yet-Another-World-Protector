@@ -1,10 +1,9 @@
 package de.z0rdak.yawp.handler;
 
-import de.z0rdak.yawp.api.MessageSender;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.api.events.flag.FlagEvent;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
-import de.z0rdak.yawp.constants.Constants;
+import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.RegionFlag;
@@ -38,16 +37,27 @@ import static de.z0rdak.yawp.api.FlagEvaluator.processCheck;
 
 public final class YawpEventHandler {
 
+    private YawpEventHandler() {}
     private static MinecraftServer minecraftServer;
 
     public static void storeRef(MinecraftServer server) {
         minecraftServer = server;
     }
 
-    public static void onAddFlag(FlagEvent.Add event) {
+    public static boolean onAddFlag(FlagEvent.Add event) {
         if (event.getFlag().getName().contains("spawning") && Services.FLAG_CONFIG.removeEntitiesEnabled()) {
             removeInvolvedEntities(event.getRegion(), RegionFlag.fromId(event.getFlag().getName()));
         }
+        return true;
+    }
+    public static boolean onUpdateRegion(RegionEvent.UpdateArea areaUpdate) {
+        VisualizationManager.hide(areaUpdate.getRegion());
+        return true;
+    }
+
+    public static boolean onRemoveRegion(RegionEvent.Remove regionRemove) {
+        VisualizationManager.hide(regionRemove.getRegion());
+        return true;
     }
 
     public static void removeInvolvedEntities(IProtectedRegion region, RegionFlag flag) {
@@ -142,7 +152,7 @@ public final class YawpEventHandler {
         return flagState == FlagState.ALLOWED;
     }
 
-    public static void onPlayerEnterRegion(RegionEvent.PlayerEnter onEnter) {
+    public static boolean onPlayerEnterRegion(RegionEvent.PlayerEnter onEnter) {
         var titleText = ComponentUtils.wrapInSquareBrackets(
                 Component.literal(onEnter.getRegion().getName()).withStyle(ChatFormatting.AQUA));
         var title = TitleBuilder.of(onEnter.getPlayer(), onEnter.getRegion())
@@ -151,9 +161,10 @@ public final class YawpEventHandler {
                 .timings(10, 40, 15)
                 .build();
         title.send();
+        return true;
     }
 
-    public static void onPlayerLeaveRegion(RegionEvent.PlayerLeave onLeave) {
+    public static boolean onPlayerLeaveRegion(RegionEvent.PlayerLeave onLeave) {
         var titleText = ComponentUtils.wrapInSquareBrackets(
                 Component.literal(onLeave.getRegion().getName()).withStyle(ChatFormatting.AQUA));
         var title = TitleBuilder.of(onLeave.getPlayer(), onLeave.getRegion())
@@ -162,5 +173,6 @@ public final class YawpEventHandler {
                 .timings(10, 40, 15)
                 .build();
         title.send();
+        return true;
     }
 }
