@@ -1,10 +1,12 @@
 package de.z0rdak.yawp;
 
+import de.z0rdak.yawp.api.events.flag.FlagEvent;
 import de.z0rdak.yawp.api.events.flag.FlagEvents;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
 import de.z0rdak.yawp.api.events.region.RegionEvents;
 import de.z0rdak.yawp.constants.Constants;
 
+import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.handler.RegionSpatialCache;
 import de.z0rdak.yawp.handler.YawpEventHandler;
 import de.z0rdak.yawp.platform.Services;
@@ -13,10 +15,15 @@ import net.minecraft.server.level.ServerPlayer;
 
 public class YAWPCommon {
 
+    private YAWPCommon() {}
+
     public static void init() {
         Constants.LOGGER.debug("[{}] Loading {} in a {} environment!", Constants.MOD_ID, Services.PLATFORM.getPlatformName(), Services.PLATFORM.getEnvironmentName());
 
         FlagEvents.ON_ADD_FLAG.register(YawpEventHandler::onAddFlag);
+        RegionEvents.ON_UPDATE_AREA.register(YawpEventHandler::onUpdateRegion);
+        RegionEvents.ON_REMOVE.register(YawpEventHandler::onRemoveRegion);
+
         RegionEvents.ON_PLAYER_ENTER_REGION.register(YawpEventHandler::onPlayerEnterRegion);
         RegionEvents.ON_PLAYER_LEAVE_REGION.register(YawpEventHandler::onPlayerLeaveRegion);
 
