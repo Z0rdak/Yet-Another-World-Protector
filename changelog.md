@@ -23,7 +23,9 @@
 ## Fixed
 
 - Fix NPE when updating tp anchor position
-- Fix cuboid area not being normalized causing issues with recognizing players entering/leaving 
+- Fix cuboid area not being normalized causing issues with recognizing players entering/leaving
+- Fix visualization not being updated when updating region area
+- Fix visualization not being removed when removing regions
 
 # [0.6.2-beta1] - 2025-10-30
 
