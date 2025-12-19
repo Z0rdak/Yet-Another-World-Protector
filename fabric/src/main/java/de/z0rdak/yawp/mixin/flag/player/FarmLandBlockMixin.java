@@ -31,7 +31,7 @@ public abstract class FarmLandBlockMixin extends Block {
     @Inject(method = "fallOn", at = @At(value = "HEAD"), cancellable = true)
     private void onTrampleFarmland(Level world, BlockState state, BlockPos pos, Entity trampler, float fallDistance, CallbackInfo ci) {
         if (isServerSide(world)) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(pos, TRAMPLE_FARMLAND, getDimKey(world), null);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(pos, TRAMPLE_FARMLAND, getDimKey(world));
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
@@ -54,15 +54,7 @@ public abstract class FarmLandBlockMixin extends Block {
                     ci.cancel();
                 });
             } else {
-                checkEvent = new FlagCheckRequest(pos, TRAMPLE_FARMLAND_OTHER, getDimKey(world), null);
-                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
-                    return;
-                }
-                FlagEvaluator.processCheck(checkEvent, deny -> {
-                    super.fallOn(world, state, pos, trampler, fallDistance);
-                    ci.cancel();
-                });
-                checkEvent = new FlagCheckRequest(pos, MOB_GRIEFING, getDimKey(world), null);
+                checkEvent = new FlagCheckRequest(pos, MOB_GRIEFING, getDimKey(world));
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
