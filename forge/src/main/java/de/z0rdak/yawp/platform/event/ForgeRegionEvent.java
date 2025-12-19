@@ -1,9 +1,10 @@
-package de.z0rdak.yawp.api.events.region;
+package de.z0rdak.yawp.platform.event;
 
+import de.z0rdak.yawp.api.events.region.RegionEvent;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 
@@ -13,9 +14,9 @@ public abstract class ForgeRegionEvent extends Event {
 
     private final IMarkableRegion region;
     @Nullable
-    private final Player player;
+    private final ServerPlayer player;
 
-    private ForgeRegionEvent(IMarkableRegion region, @Nullable Player player) {
+    private ForgeRegionEvent(IMarkableRegion region, @Nullable ServerPlayer player) {
         this.region = region;
         this.player = player;
     }
@@ -25,7 +26,7 @@ public abstract class ForgeRegionEvent extends Event {
     }
 
     @Nullable
-    public Player getPlayer() {
+    public ServerPlayer getPlayer() {
         return player;
     }
 
@@ -36,16 +37,12 @@ public abstract class ForgeRegionEvent extends Event {
     @Cancelable
     public static class Create extends ForgeRegionEvent {
 
-        public Create(IMarkableRegion region, Player player) {
+        public Create(IMarkableRegion region, ServerPlayer player) {
             super(region, player);
         }
 
         public Create(RegionEvent.Create event) {
             this(event.getRegion(), event.getPlayer());
-        }
-
-        public static RegionEvent.Create asCommonEvent(Create event) {
-            return new RegionEvent.Create(event.getRegion(), event.getPlayer());
         }
     }
 
@@ -59,7 +56,7 @@ public abstract class ForgeRegionEvent extends Event {
         private final String oldName;
         private String newName;
 
-        public Rename(IMarkableRegion region, String oldName, String newName, Player player) {
+        public Rename(IMarkableRegion region, String oldName, String newName, ServerPlayer player) {
             super(region, player);
             this.newName = newName;
             this.oldName = oldName;
@@ -67,10 +64,6 @@ public abstract class ForgeRegionEvent extends Event {
 
         public Rename(RegionEvent.Rename event) {
             this(event.getRegion(), event.getOldName(), event.getNewName(), event.getPlayer());
-        }
-
-        public static RegionEvent.Rename asCommonEvent(Rename event) {
-            return new RegionEvent.Rename(event.getRegion(), event.getOldName(), event.getNewName(), event.getPlayer());
         }
 
         public String getOldName() {
@@ -102,25 +95,13 @@ public abstract class ForgeRegionEvent extends Event {
 
         private IMarkableArea markedArea;
 
-        public UpdateArea(IMarkableRegion region, IMarkableArea area, Player player) {
+        public UpdateArea(IMarkableRegion region, IMarkableArea area, ServerPlayer player) {
             super(region, player);
             this.markedArea = area;
         }
 
         public UpdateArea(RegionEvent.UpdateArea event) {
             this(event.getRegion(), event.markedArea(), event.getPlayer());
-        }
-
-        public static RegionEvent.UpdateArea asCommonEvent(ForgeRegionEvent.UpdateArea event) {
-            return new RegionEvent.UpdateArea(event.getRegion(), event.getMarkedArea(), event.getPlayer());
-        }
-
-        public static UpdateArea asEvent(RegionEvent.UpdateArea updateAreaEvent) {
-            return new UpdateArea(updateAreaEvent);
-        }
-
-        public static RegionEvent.UpdateArea asNonEvent(UpdateArea forgeAreaUpdate) {
-            return new RegionEvent.UpdateArea(forgeAreaUpdate.getRegion(), forgeAreaUpdate.getMarkedArea(), forgeAreaUpdate.getPlayer());
         }
 
         public IMarkableArea getMarkedArea() {
@@ -146,7 +127,7 @@ public abstract class ForgeRegionEvent extends Event {
     @Cancelable
     public static class Remove extends ForgeRegionEvent {
 
-        public Remove(IMarkableRegion region, Player player) {
+        public Remove(IMarkableRegion region, ServerPlayer player) {
             super(region, player);
         }
 
@@ -154,10 +135,42 @@ public abstract class ForgeRegionEvent extends Event {
             this(event.getRegion(), event.getPlayer());
         }
 
-        public static RegionEvent.Remove asCommonEvent(Remove event) {
-            return new RegionEvent.Remove(event.getRegion(), event.getPlayer());
-        }
     }
+
+    public static abstract class ForgePlayerMove extends ForgeRegionEvent {
+        private final BlockPos previousPos;
+        private final BlockPos currentPos;
+
+        public ForgePlayerMove(final IMarkableRegion region, final ServerPlayer player, final BlockPos previousPos, final BlockPos currentPos) {
+            super(region, player);
+            this.previousPos = previousPos;
+            this.currentPos = currentPos;
+        }
+
+        public BlockPos previous() { return previousPos; }
+        public BlockPos current() { return currentPos; }
+
+    }
+
+    public final static class ForgePlayerEnter extends ForgePlayerMove {
+        public ForgePlayerEnter(final IMarkableRegion region, final ServerPlayer player, final BlockPos oldPos, final BlockPos newPos) {
+            super(region, player, oldPos, newPos);
+        }
+        private boolean canceled;
+
+        @Override public boolean isCanceled() { return canceled; }
+        @Override public void setCanceled(boolean canceled) { this.canceled = canceled; }
+    }
+
+    public final static class ForgePlayerLeave extends ForgePlayerMove {
+        public ForgePlayerLeave(final IMarkableRegion region, final ServerPlayer player, final BlockPos oldPos, final BlockPos newPos) {
+            super(region, player, oldPos, newPos);
+        }
+        private boolean canceled;
+        @Override public boolean isCanceled() { return canceled; }
+        @Override public void setCanceled(boolean canceled) { this.canceled = canceled; }
+    }
+
 }
 
 

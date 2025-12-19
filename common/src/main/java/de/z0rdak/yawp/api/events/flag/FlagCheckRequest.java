@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.api.events.flag;
 
+import de.z0rdak.yawp.api.events.Cancelable;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
@@ -13,7 +14,7 @@ import java.util.UUID;
  * Event that is fired before a flag is checked.
  * Can be used to cancel the flag check.
  */
-public final class FlagCheckRequest {
+public final class FlagCheckRequest implements Cancelable {
 
     /**
      * The target position of the flag check. Depending on the flag this can be a block position or an entity position.
@@ -38,6 +39,7 @@ public final class FlagCheckRequest {
      * Internal Identifier to relate a flag check to its result.
      */
     private final String id;
+    private boolean canceled;
 
     /**
      *
@@ -92,5 +94,15 @@ public final class FlagCheckRequest {
     @Nullable
     public Player getPlayer() {
         return player;
+    }
+
+    @Override
+    public boolean isCanceled() {
+        return this.canceled;
+    }
+
+    @Override
+    public void setCanceled(boolean canceled) {
+        this.canceled = canceled;
     }
 }
