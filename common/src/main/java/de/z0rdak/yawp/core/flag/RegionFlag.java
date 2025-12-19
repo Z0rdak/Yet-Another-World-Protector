@@ -81,7 +81,6 @@ public enum RegionFlag {
     SPAWN_PORTAL("spawn-portal", FlagTagRegister.PLAYER, FlagTagRegister.BLOCK),
     TOOL_SECONDARY_USE("tools-secondary", FlagTagRegister.PLAYER_PREVENTION),
     TRAMPLE_FARMLAND("trample-farmland", FlagTagRegister.ENVIRONMENT, FlagTagRegister.BLOCK),
-    TRAMPLE_FARMLAND_OTHER("trample-farmland-other", FlagTagRegister.BLOCK, FlagTagRegister.ENTITY),
     TRAMPLE_FARMLAND_PLAYER("trample-farmland-player", FlagTagRegister.PLAYER, FlagTagRegister.BLOCK),
     USE_BLOCKS("use-blocks", FlagTagRegister.PLAYER, FlagTagRegister.BLOCK),
     USE_BONEMEAL("use-bonemeal", FlagTagRegister.PLAYER, FlagTagRegister.BLOCK),
