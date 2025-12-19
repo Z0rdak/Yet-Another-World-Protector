@@ -1,22 +1,11 @@
 package de.z0rdak.yawp.config;
 
-import de.z0rdak.yawp.YetAnotherWorldProtector;
-import de.z0rdak.yawp.api.events.region.YawpEvents;
-import de.z0rdak.yawp.commands.CommandRegistry;
 import de.z0rdak.yawp.config.server.*;
 import de.z0rdak.yawp.constants.Constants;
-import de.z0rdak.yawp.handler.PlayerPosTracker;
-import de.z0rdak.yawp.handler.RegionSpatialCache;
-import net.minecraft.client.telemetry.events.WorldLoadEvent;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
+import de.z0rdak.yawp.handler.YawpEventHandler;
+import de.z0rdak.yawp.platform.Services;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.level.LevelEvent;
-import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
@@ -57,18 +46,9 @@ public final class ConfigRegistry {
                     FEATURE_CONFIG_LOGGER.info("Player tracking feature: {}", enablePlayerTracker ? "enabled" : "disabled" );
 
                     if (enablePlayerTracker) {
-                        // Note: For now the spatial indexing is only used for this feature, so I guess it can stay here
-                        YawpEvents.ON_REGION_DATA_LOADED.register(RegionSpatialCache::initRegions);
-
-                        MinecraftForge.EVENT_BUS.addListener((TickEvent.LevelTickEvent e) -> {
-                            if (e.phase == TickEvent.Phase.START && e.level instanceof ServerLevel level)
-                                PlayerPosTracker.tickLevel(level);
-                        });
-                        MinecraftForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedOutEvent e) -> {
-                            if (!e.getEntity().level().isClientSide() && e.getEntity() instanceof ServerPlayer player) {
-                                PlayerPosTracker.onPlayerDisc(player);
-                            }
-                        });
+                        Services.FEATURE_MANAGER.enablePlayerTracker();
+                        YawpEventHandler.enableRegionSpatialCache();
+                        YawpEventHandler.enablePlayerRegionMessages();
                     }
                 }
                 break;
