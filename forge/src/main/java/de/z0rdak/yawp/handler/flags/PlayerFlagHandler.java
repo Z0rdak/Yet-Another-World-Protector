@@ -2,8 +2,8 @@ package de.z0rdak.yawp.handler.flags;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.api.FlagEvaluator;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
-import de.z0rdak.yawp.api.events.region.FlagCheckResult;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
+import de.z0rdak.yawp.api.events.flag.FlagCheckResult;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.handler.HandlerUtil;
@@ -86,8 +86,8 @@ public final class PlayerFlagHandler {
         if (!HandlerUtil.isServerSide(event.getLevel())) return;
         if (event.getEntity() != null) {
             Player shooter = event.getEntity();
-            FlagCheckEvent checkEvent = new FlagCheckEvent(shooter.blockPosition(), FIRE_BOW, getDimKey(event.getLevel()), shooter);
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(shooter.blockPosition(), FIRE_BOW, getDimKey(event.getLevel()), shooter);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -118,8 +118,8 @@ public final class PlayerFlagHandler {
         if (wasShotByPlayer && wasHit && event.getRayTraceResult() instanceof EntityHitResult entityHitRes) {
             Entity hitEntity = entityHitRes.getEntity();
             if (hitEntity instanceof Player hitPlayer) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(hitPlayer.blockPosition(), NO_PVP, getDimKey(hitPlayer), (Player) shooter);
-                if (Services.EVENT.post(checkEvent)) {
+                FlagCheckRequest checkEvent = new FlagCheckRequest(hitPlayer.blockPosition(), NO_PVP, getDimKey(hitPlayer), (Player) shooter);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -135,8 +135,8 @@ public final class PlayerFlagHandler {
         if (isServerSide(event.player) && event.phase == TickEvent.Phase.END) {
             ResourceKey<Level> dim = getDimKey(event.player);
             if (event.player.isFallFlying()) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(event.player.blockPosition(), NO_FLIGHT, dim, event.player);
-                if (Services.EVENT.post(checkEvent)) {
+                FlagCheckRequest checkEvent = new FlagCheckRequest(event.player.blockPosition(), NO_FLIGHT, dim, event.player);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -155,8 +155,8 @@ public final class PlayerFlagHandler {
         if (event.getTarget() instanceof Player target) {
             Player attacker = event.getEntity();
             ResourceKey<Level> dim = getDimKey(attacker);
-            FlagCheckEvent checkEvent = new FlagCheckEvent(target.blockPosition(), MELEE_PLAYERS, dim, attacker);
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(target.blockPosition(), MELEE_PLAYERS, dim, attacker);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -178,29 +178,29 @@ public final class PlayerFlagHandler {
         Entity eventEntity = event.getTarget();
         ResourceKey<Level> dim = getDimKey(event.getEntity());
         BlockPos entityPos = eventEntity.blockPosition();
-        FlagCheckEvent checkEvent = null;
+        FlagCheckRequest checkEvent = null;
 
         if (isAnimal(eventEntity)) {
-            checkEvent = new FlagCheckEvent(entityPos, MELEE_ANIMALS, dim, player);
-            if (Services.EVENT.post(checkEvent)) {
+            checkEvent = new FlagCheckRequest(entityPos, MELEE_ANIMALS, dim, player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
         }
         if (isMonster(eventEntity)) {
-            checkEvent = new FlagCheckEvent(entityPos, MELEE_MONSTERS, dim, player);
-            if (Services.EVENT.post(checkEvent)) {
+            checkEvent = new FlagCheckRequest(entityPos, MELEE_MONSTERS, dim, player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
         }
         if (event.getTarget() instanceof Villager) {
-            checkEvent = new FlagCheckEvent(entityPos, MELEE_VILLAGERS, dim, player);
-            if (Services.EVENT.post(checkEvent)) {
+            checkEvent = new FlagCheckRequest(entityPos, MELEE_VILLAGERS, dim, player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
         }
         if (event.getTarget() instanceof WanderingTrader) {
-            checkEvent = new FlagCheckEvent(entityPos, MELEE_WANDERING_TRADER, dim, player);
-            if (Services.EVENT.post(checkEvent)) {
+            checkEvent = new FlagCheckRequest(entityPos, MELEE_WANDERING_TRADER, dim, player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
         }
@@ -216,8 +216,8 @@ public final class PlayerFlagHandler {
     @SubscribeEvent
     public static void onPickupItem(EntityItemPickupEvent event) {
         if (ForgeHandlerUtil.notServerSideOrPlayerNull(event)) return;
-        FlagCheckEvent checkEvent = new FlagCheckEvent(event.getEntity().blockPosition(), ITEM_PICKUP, getDimKey(event.getEntity()), event.getEntity());
-        if (Services.EVENT.post(checkEvent)) {
+        FlagCheckRequest checkEvent = new FlagCheckRequest(event.getEntity().blockPosition(), ITEM_PICKUP, getDimKey(event.getEntity()), event.getEntity());
+        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
             return;
         }
         FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -234,8 +234,8 @@ public final class PlayerFlagHandler {
             return;
         }
         if (!player.getCommandSenderWorld().isClientSide) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(event.getParentB().blockPosition(), ANIMAL_BREEDING, getDimKey(player), event.getCausedByPlayer());
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(event.getParentB().blockPosition(), ANIMAL_BREEDING, getDimKey(player), event.getCausedByPlayer());
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -252,8 +252,8 @@ public final class PlayerFlagHandler {
             return;
         }
         if (!player.getCommandSenderWorld().isClientSide) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(event.getAnimal().blockPosition(), ANIMAL_TAMING, getDimKey(player), player);
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(event.getAnimal().blockPosition(), ANIMAL_TAMING, getDimKey(player), player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -267,8 +267,8 @@ public final class PlayerFlagHandler {
     public static void onPlayerLevelChange(PlayerXpEvent.LevelChange event) {
         if (ForgeHandlerUtil.notServerSideOrPlayerNull(event)) return;
         Player player = event.getEntity();
-        FlagCheckEvent checkEvent = new FlagCheckEvent(event.getEntity().blockPosition(), LEVEL_FREEZE, getDimKey(player), player);
-        if (Services.EVENT.post(checkEvent)) {
+        FlagCheckRequest checkEvent = new FlagCheckRequest(event.getEntity().blockPosition(), LEVEL_FREEZE, getDimKey(player), player);
+        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
             return;
         }
         FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -282,8 +282,8 @@ public final class PlayerFlagHandler {
     public static void onPlayerXPChange(PlayerXpEvent.XpChange event) {
         if (ForgeHandlerUtil.notServerSideOrPlayerNull(event)) return;
         Player player = event.getEntity();
-        FlagCheckEvent checkEvent = new FlagCheckEvent(event.getEntity().blockPosition(), XP_FREEZE, getDimKey(player), player);
-        if (Services.EVENT.post(checkEvent)) {
+        FlagCheckRequest checkEvent = new FlagCheckRequest(event.getEntity().blockPosition(), XP_FREEZE, getDimKey(player), player);
+        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
             return;
         }
         FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -298,8 +298,8 @@ public final class PlayerFlagHandler {
     public static void onPlayerXpPickup(PlayerXpEvent.PickupXp event) {
         if (ForgeHandlerUtil.notServerSideOrPlayerNull(event)) return;
         Player player = event.getEntity();
-        FlagCheckEvent checkEvent = new FlagCheckEvent(event.getEntity().blockPosition(), XP_PICKUP, getDimKey(player), player);
-        if (Services.EVENT.post(checkEvent)) {
+        FlagCheckRequest checkEvent = new FlagCheckRequest(event.getEntity().blockPosition(), XP_PICKUP, getDimKey(player), player);
+        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
             return;
         }
         FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -317,8 +317,8 @@ public final class PlayerFlagHandler {
             Entity dmgSourceEntity = event.getSource().getDirectEntity();
             Entity hurtEntity = event.getEntity();
             if (hurtEntity instanceof Player playerTarget && dmgSourceEntity instanceof Player playerSource) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(playerTarget.blockPosition(), NO_PVP, getDimKey(playerSource), playerSource);
-                if (Services.EVENT.post(checkEvent)) {
+                FlagCheckRequest checkEvent = new FlagCheckRequest(playerTarget.blockPosition(), NO_PVP, getDimKey(playerSource), playerSource);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -335,8 +335,8 @@ public final class PlayerFlagHandler {
         if (ForgeHandlerUtil.isServerSide(event)) {
             Entity hurtEntity = event.getEntity();
             if (hurtEntity instanceof Player playerTarget) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(playerTarget.blockPosition(), INVINCIBLE, getDimKey(playerTarget), playerTarget);
-                if (Services.EVENT.post(checkEvent)) {
+                FlagCheckRequest checkEvent = new FlagCheckRequest(playerTarget.blockPosition(), INVINCIBLE, getDimKey(playerTarget), playerTarget);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.process(checkEvent).onAllow( res -> {
@@ -357,8 +357,8 @@ public final class PlayerFlagHandler {
             if (event.getSource() == null || event.getEntity() == null) return;
             Entity dmgSourceEntity = event.getSource().getDirectEntity();
             if (dmgSourceEntity instanceof Player dmgSource && event.getEntity() instanceof Player dmgTarget) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(dmgTarget.blockPosition(), MELEE_PLAYERS, getDimKey(dmgSource), dmgSource);
-                if (Services.EVENT.post(checkEvent)) {
+                FlagCheckRequest checkEvent = new FlagCheckRequest(dmgTarget.blockPosition(), MELEE_PLAYERS, getDimKey(dmgSource), dmgSource);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 // another check for PVP - this does not prevent knock-back? but prevents dmg
@@ -375,16 +375,16 @@ public final class PlayerFlagHandler {
     public static void onPlayerKnockback(LivingKnockBackEvent event) {
         if (ForgeHandlerUtil.isServerSide(event)) {
             if (event.getEntity() instanceof Player dmgTarget) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(dmgTarget.blockPosition(), NO_KNOCKBACK, getDimKey(dmgTarget), dmgTarget);
-                if (Services.EVENT.post(checkEvent)) {
+                FlagCheckRequest checkEvent = new FlagCheckRequest(dmgTarget.blockPosition(), NO_KNOCKBACK, getDimKey(dmgTarget), dmgTarget);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.process(checkEvent).onAllow( res -> {
                     event.setCanceled(true);
                     event.setStrength(0);
                 });
-                checkEvent = new FlagCheckEvent(dmgTarget.blockPosition(), INVINCIBLE, getDimKey(dmgTarget), dmgTarget);
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(dmgTarget.blockPosition(), INVINCIBLE, getDimKey(dmgTarget), dmgTarget);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.process(checkEvent).onAllow( res -> {
@@ -400,8 +400,8 @@ public final class PlayerFlagHandler {
         if (ForgeHandlerUtil.isServerSide(event)) {
             if (event.getPlayer() == null) return;
             Player player = event.getPlayer();
-            FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPos(), BREAK_BLOCKS, getDimKey(player), player);
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(event.getPos(), BREAK_BLOCKS, getDimKey(player), player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -418,8 +418,8 @@ public final class PlayerFlagHandler {
             if (event.getEntity() == null || !(event.getEntity() instanceof Player player)) {
                 return;
             }
-            FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPos(), PLACE_BLOCKS, getDimKey(player), player);
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(event.getPos(), PLACE_BLOCKS, getDimKey(player), player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -449,8 +449,8 @@ public final class PlayerFlagHandler {
                 return targetRl != null && targetRl.equals(entityRl);
             });
             if (isBlockEntityCovered || isCoveredByTag) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(event.getTarget().blockPosition(), BREAK_BLOCKS, getDimKey(player), player);
-                if (Services.EVENT.post(checkEvent)) {
+                FlagCheckRequest checkEvent = new FlagCheckRequest(event.getTarget().blockPosition(), BREAK_BLOCKS, getDimKey(player), player);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -470,8 +470,8 @@ public final class PlayerFlagHandler {
             ResourceKey<Level> dim = event.getLevel().dimension();
             if (explosion.getIndirectSourceEntity() == null) {
                 // source entity is null, but we still want to cancel the ignition
-                FlagCheckEvent checkEvent = new FlagCheckEvent(explosionPos, IGNITE_EXPLOSIVES, dim);
-                if (Services.EVENT.post(checkEvent)) {
+                FlagCheckRequest checkEvent = new FlagCheckRequest(explosionPos, IGNITE_EXPLOSIVES, dim);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -479,8 +479,8 @@ public final class PlayerFlagHandler {
                 });
             } else {
                 if (explosion.getIndirectSourceEntity() instanceof Player player) {
-                    FlagCheckEvent checkEvent = new FlagCheckEvent(explosionPos, IGNITE_EXPLOSIVES, dim, player);
-                    if (Services.EVENT.post(checkEvent)) {
+                    FlagCheckRequest checkEvent = new FlagCheckRequest(explosionPos, IGNITE_EXPLOSIVES, dim, player);
+                    if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                         return;
                     }
                     FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -489,16 +489,16 @@ public final class PlayerFlagHandler {
                     });
                 }
                 if (explosion.getIndirectSourceEntity() instanceof Monster) {
-                    FlagCheckEvent checkEvent = new FlagCheckEvent(explosionPos, MOB_GRIEFING, dim);
-                    if (Services.EVENT.post(checkEvent)) {
+                    FlagCheckRequest checkEvent = new FlagCheckRequest(explosionPos, MOB_GRIEFING, dim);
+                    if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                         return;
                     }
                     FlagEvaluator.processCheck(checkEvent, onDeny -> {
                         event.setCanceled(true);
                     });
                 } else {
-                    FlagCheckEvent checkEvent = new FlagCheckEvent(explosionPos, IGNITE_EXPLOSIVES, dim);
-                    if (Services.EVENT.post(checkEvent)) {
+                    FlagCheckRequest checkEvent = new FlagCheckRequest(explosionPos, IGNITE_EXPLOSIVES, dim);
+                    if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                         return;
                     }
                     FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -513,8 +513,8 @@ public final class PlayerFlagHandler {
     public static void onBonemealUse(BonemealEvent event) {
         if (notServerSideOrPlayerNull(event.getEntity())) return;
         Player player = event.getEntity();
-        FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPos(), USE_BONEMEAL, getDimKey(player), player);
-        if (Services.EVENT.post(checkEvent)) {
+        FlagCheckRequest checkEvent = new FlagCheckRequest(event.getPos(), USE_BONEMEAL, getDimKey(player), player);
+        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
             return;
         }
         FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -532,8 +532,8 @@ public final class PlayerFlagHandler {
                 if (enderPearlEvent.getPlayer() == null) return;
                 Player player = enderPearlEvent.getPlayer();
                 BlockPos target = new BlockPos((int) event.getTarget().x, (int) event.getTarget().y, (int) event.getTarget().z);
-                FlagCheckEvent checkEvent = new FlagCheckEvent(target, USE_ENDERPEARL_TO_REGION, getDimKey(player), player);
-                if (Services.EVENT.post(checkEvent)) {
+                FlagCheckRequest checkEvent = new FlagCheckRequest(target, USE_ENDERPEARL_TO_REGION, getDimKey(player), player);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagState flagState = FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -543,8 +543,8 @@ public final class PlayerFlagHandler {
                 if (flagState == FlagState.DENIED) return;
 
                 target = new BlockPos((int) event.getTarget().x, (int) event.getTarget().y, (int) event.getTarget().z);
-                checkEvent = new FlagCheckEvent(target, USE_ENDERPEARL_FROM_REGION, getDimKey(player), player);
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(target, USE_ENDERPEARL_FROM_REGION, getDimKey(player), player);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -563,8 +563,8 @@ public final class PlayerFlagHandler {
             if (player == null) return;
             BlockPos target = event.getPos();
             ResourceKey<Level> dim = getDimKey(player);
-            FlagCheckEvent checkEvent = new FlagCheckEvent(target, TOOL_SECONDARY_USE, dim, player);
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(target, TOOL_SECONDARY_USE, dim, player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagState flagState = FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -574,20 +574,20 @@ public final class PlayerFlagHandler {
             if (flagState == FlagState.DENIED) return;
 
             if (event.getToolAction().equals(ToolActions.AXE_STRIP)) {
-                checkEvent = new FlagCheckEvent(target, AXE_STRIP, dim, player);
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(target, AXE_STRIP, dim, player);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
             }
             if (event.getToolAction().equals(ToolActions.HOE_TILL)) {
-                checkEvent = new FlagCheckEvent(target, HOE_TILL, dim, player);
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(target, HOE_TILL, dim, player);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
             }
             if (event.getToolAction().equals(ToolActions.SHOVEL_FLATTEN)) {
-                checkEvent = new FlagCheckEvent(target, SHOVEL_PATH, dim, player);
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(target, SHOVEL_PATH, dim, player);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
             }
@@ -620,8 +620,8 @@ public final class PlayerFlagHandler {
 
         // used to allow player to place blocks when shift clicking container on usable bock
         if (isSneakingWithEmptyHand || !player.isShiftKeyDown()) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(pos.getBlockPos(), USE_BLOCKS, getDimKey(player), player);
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(pos.getBlockPos(), USE_BLOCKS, getDimKey(player), player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -633,8 +633,8 @@ public final class PlayerFlagHandler {
             // Note: following flags are already covered with use_blocks
             // check for ender chest access
             if (isEnderChest) {
-                checkEvent = new FlagCheckEvent(event.getPos(), ENDER_CHEST_ACCESS, getDimKey(player), player);
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(event.getPos(), ENDER_CHEST_ACCESS, getDimKey(player), player);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -644,8 +644,8 @@ public final class PlayerFlagHandler {
             }
             // check for container access
             if (isContainer) {
-                checkEvent = new FlagCheckEvent(event.getPos(), CONTAINER_ACCESS, getDimKey(player), player);
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(event.getPos(), CONTAINER_ACCESS, getDimKey(player), player);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -676,15 +676,15 @@ public final class PlayerFlagHandler {
             };
 
             if (isBlockCovered || isCoveredByTag) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(placeBlockTarget, PLACE_BLOCKS, getDimKey(player), player);
-                if (Services.EVENT.post(checkEvent)) {
+                FlagCheckRequest checkEvent = new FlagCheckRequest(placeBlockTarget, PLACE_BLOCKS, getDimKey(player), player);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, onDenyAction);
             }
 
-            FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPos(), USE_ITEMS, getDimKey(player), player);
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(event.getPos(), USE_ITEMS, getDimKey(player), player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, onDenyAction);
@@ -698,8 +698,8 @@ public final class PlayerFlagHandler {
         Player player = event.getEntity();
         boolean hasInventory = event.getTarget() instanceof Container || event.getTarget() instanceof MenuProvider;
         if (hasInventory) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(event.getTarget().blockPosition(), CONTAINER_ACCESS, getDimKey(player), player);
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(event.getTarget().blockPosition(), CONTAINER_ACCESS, getDimKey(player), player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -713,8 +713,8 @@ public final class PlayerFlagHandler {
     public static void onEntityInteraction(PlayerInteractEvent.EntityInteractSpecific event) {
         if (notServerSideOrPlayerNull(event.getEntity())) return;
         Player player = event.getEntity();
-        FlagCheckEvent checkEvent = new FlagCheckEvent(event.getTarget().blockPosition(), USE_ENTITIES, getDimKey(player), player);
-        if (Services.EVENT.post(checkEvent)) {
+        FlagCheckRequest checkEvent = new FlagCheckRequest(event.getTarget().blockPosition(), USE_ENTITIES, getDimKey(player), player);
+        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
             return;
         }
         FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -723,8 +723,8 @@ public final class PlayerFlagHandler {
         });
         if (!hasEmptyHand(player, event.getHand())) {
 
-            checkEvent = new FlagCheckEvent(event.getPos(), USE_ITEMS, getDimKey(player), player);
-            if (Services.EVENT.post(checkEvent)) {
+            checkEvent = new FlagCheckRequest(event.getPos(), USE_ITEMS, getDimKey(player), player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -747,8 +747,8 @@ public final class PlayerFlagHandler {
     public static void onEntityInteraction(PlayerInteractEvent.EntityInteract event) {
         if (notServerSideOrPlayerNull(event.getEntity())) return;
         Player player = event.getEntity();
-        FlagCheckEvent checkEvent = new FlagCheckEvent(event.getTarget().blockPosition(), USE_ENTITIES, getDimKey(player), player);
-        if (Services.EVENT.post(checkEvent)) {
+        FlagCheckRequest checkEvent = new FlagCheckRequest(event.getTarget().blockPosition(), USE_ENTITIES, getDimKey(player), player);
+        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
             return;
         }
         FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -756,8 +756,8 @@ public final class PlayerFlagHandler {
             sendFlagMsg(onDeny);
         });
         if (!hasEmptyHand(player, event.getHand())) {
-            checkEvent = new FlagCheckEvent(event.getPos(), USE_ENTITIES, getDimKey(player), player);
-            if (Services.EVENT.post(checkEvent)) {
+            checkEvent = new FlagCheckRequest(event.getPos(), USE_ENTITIES, getDimKey(player), player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -772,11 +772,11 @@ public final class PlayerFlagHandler {
     public static void onEntityInteraction(PlayerInteractEvent.RightClickItem event) {
         if (notServerSideOrPlayerNull(event.getEntity())) return;
         Player player = event.getEntity();
-        FlagCheckEvent checkEvent;
+        FlagCheckRequest checkEvent;
 
         if (!hasEmptyHand(player, event.getHand())) {
-            checkEvent = new FlagCheckEvent(event.getPos(), USE_ENTITIES, getDimKey(player), player);
-            if (Services.EVENT.post(checkEvent)) {
+            checkEvent = new FlagCheckRequest(event.getPos(), USE_ENTITIES, getDimKey(player), player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -784,8 +784,8 @@ public final class PlayerFlagHandler {
                 sendFlagMsg(onDeny);
             });
         }
-        checkEvent = new FlagCheckEvent(event.getPos(), USE_ITEMS, getDimKey(player), player);
-        if (Services.EVENT.post(checkEvent)) {
+        checkEvent = new FlagCheckRequest(event.getPos(), USE_ITEMS, getDimKey(player), player);
+        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
             return;
         }
         FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -809,15 +809,15 @@ public final class PlayerFlagHandler {
                 AABB areaAbovePressurePlate = new AABB(pos.getX() - 1, pos.getY(), pos.getZ() - 1, pos.getX() + 1, pos.getY() + 2, pos.getZ() + 1);
                 List<Player> players = event.getLevel().getEntities(EntityType.PLAYER, areaAbovePressurePlate, (player) -> true);
                 final FlagState[] cumulativeState = {FlagState.UNDEFINED};
-                Map<Player, FlagCheckEvent> playerCheckEventMap = new HashMap<>();
+                Map<Player, FlagCheckRequest> playerCheckEventMap = new HashMap<>();
                 for (Player player : players) {
-                    FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), USE_BLOCKS, getDimKey(player), player);
-                    if (Services.EVENT.post(checkEvent)) {
+                    FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), USE_BLOCKS, getDimKey(player), player);
+                    if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                         return;
                     }
                     playerCheckEventMap.put(player, checkEvent);
                 }
-                for (Map.Entry<Player, FlagCheckEvent> entry : playerCheckEventMap.entrySet()) {
+                for (Map.Entry<Player, FlagCheckRequest> entry : playerCheckEventMap.entrySet()) {
                     FlagState state = FlagEvaluator.processCheck(entry.getValue(), null, MessageSender::sendFlagMsg);
                     if (state == FlagState.DENIED) {
                         cumulativeState[0] = state;
@@ -846,8 +846,8 @@ public final class PlayerFlagHandler {
             int bucketItemMaxStackCount = event.getEmptyBucket().getMaxStackSize();
             // placing fluid
             if (bucketItemMaxStackCount == 1) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(targetPos, PLACE_FLUIDS, getDimKey(player), player);
-                if (Services.EVENT.post(checkEvent)) {
+                FlagCheckRequest checkEvent = new FlagCheckRequest(targetPos, PLACE_FLUIDS, getDimKey(player), player);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -871,8 +871,8 @@ public final class PlayerFlagHandler {
                         isFluid = tags.getTagNames().anyMatch(tag -> blockState.getFluidState().is(tag));
                     }
                     if (isWaterlogged || isFluid) {
-                        FlagCheckEvent checkEvent = new FlagCheckEvent(targetPos, SCOOP_FLUIDS, getDimKey(player), player);
-                        if (Services.EVENT.post(checkEvent)) {
+                        FlagCheckRequest checkEvent = new FlagCheckRequest(targetPos, SCOOP_FLUIDS, getDimKey(player), player);
+                        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                             return;
                         }
                         FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -894,8 +894,8 @@ public final class PlayerFlagHandler {
     public static void onSendChat(ServerChatEvent event) {
         if (event.getPlayer() == null) return;
         ServerPlayer player = event.getPlayer();
-        FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), SEND_MESSAGE, getDimKey(player), player);
-        if (Services.EVENT.post(checkEvent)) {
+        FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), SEND_MESSAGE, getDimKey(player), player);
+        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
             return;
         }
         FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -909,8 +909,8 @@ public final class PlayerFlagHandler {
     public static void onCommandSend(CommandEvent event) {
         try {
             Player player = event.getParseResults().getContext().getSource().getPlayerOrException();
-            FlagCheckEvent checkEvent = new FlagCheckEvent(player.blockPosition(), EXECUTE_COMMAND, getDimKey(player), player);
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), EXECUTE_COMMAND, getDimKey(player), player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -928,8 +928,8 @@ public final class PlayerFlagHandler {
         if (notServerSideOrPlayerNull(event.getEntity())) return;
         Player player = event.getEntity();
         event.getSleepingLocation().ifPresent((pos) -> {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(pos, SLEEP, getDimKey(player), player);
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(pos, SLEEP, getDimKey(player), player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -946,8 +946,8 @@ public final class PlayerFlagHandler {
         BlockPos newSpawn = event.getNewSpawn();
         Player player = event.getEntity();
         if (newSpawn != null) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(newSpawn, SET_SPAWN, getDimKey(player), player);
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(newSpawn, SET_SPAWN, getDimKey(player), player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -962,8 +962,8 @@ public final class PlayerFlagHandler {
         if (!event.getPlayer().getCommandSenderWorld().isClientSide) {
             Player player = event.getPlayer();
             if (player == null) return;
-            FlagCheckEvent checkEvent = new FlagCheckEvent(event.getEntity().blockPosition(), ITEM_DROP, getDimKey(player), player);
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(event.getEntity().blockPosition(), ITEM_DROP, getDimKey(player), player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -983,8 +983,8 @@ public final class PlayerFlagHandler {
         if (ForgeHandlerUtil.isServerSide(event)) {
             Entity entityBeingMounted = event.getEntityBeingMounted();
             if (event.getEntityMounting() instanceof Player player) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(entityBeingMounted.blockPosition(), ANIMAL_MOUNTING, getDimKey(player), player);
-                if (Services.EVENT.post(checkEvent)) {
+                FlagCheckRequest checkEvent = new FlagCheckRequest(entityBeingMounted.blockPosition(), ANIMAL_MOUNTING, getDimKey(player), player);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, onDeny -> {
@@ -992,8 +992,8 @@ public final class PlayerFlagHandler {
                     sendFlagMsg(onDeny);
                 });
                 if (event.isDismounting()) {
-                    checkEvent = new FlagCheckEvent(entityBeingMounted.blockPosition(), ANIMAL_UNMOUNTING, getDimKey(player), player);
-                    if (Services.EVENT.post(checkEvent)) {
+                    checkEvent = new FlagCheckRequest(entityBeingMounted.blockPosition(), ANIMAL_UNMOUNTING, getDimKey(player), player);
+                    if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                         return;
                     }
                     FlagEvaluator.processCheck(checkEvent, onDeny -> {
