@@ -24,7 +24,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import org.apache.commons.lang3.NotImplementedException;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -261,21 +260,6 @@ public class ChatLinkBuilder {
         ChatFormatting color = flag.doesOverride() ? GREEN : GRAY;
         String cmd = buildFlagOverrideToggleCmd(region, flag.getName());
         return buildExecuteCmdLinkWithBrackets(linkText, hoverText, cmd, RUN_COMMAND, color);
-    }
-
-    public static MutableComponent buildFlagMessageEditLink(IProtectedRegion region, IFlag flag) {
-        MutableComponent hover = Component.translatableWithFallback("cli.flag.msg.text.set.link.hover", "Change the message shown when the flag '%s' of '%s' is triggered", flag.getName(), region.getName());
-        MutableComponent text = Component.translatableWithFallback("cli.flag.msg.text.set.link.text", "Edit");
-        String msg = "\"" + flag.getFlagMsg().msg() + "\"";
-        String cmd = buildFlagMsgSetCmd(region, flag.getName(), msg);
-        return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, LINK_COLOR);
-    }
-
-    public static MutableComponent buildFlagMessageClearLink(IProtectedRegion region, IFlag flag) {
-        MutableComponent hover = Component.translatableWithFallback("cli.flag.msg.text.set.default", "Reset flag message for flag '%s' of '%s' to config default", flag.getName(), region.getName());
-        MutableComponent text = Component.translatableWithFallback("cli.link.remove", "x");
-        String cmd = buildFlagMsgClearCmd(region, flag.getName());
-        return buildExecuteCmdComponent(text, hover, cmd, RUN_COMMAND, REMOVE_CMD_COLOR);
     }
 
     public static MutableComponent buildFlagMuteToggleLink(IProtectedRegion region, IFlag flag, boolean shortLink) {
