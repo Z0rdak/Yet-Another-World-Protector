@@ -1,19 +1,15 @@
 package de.z0rdak.yawp.api;
 
 import de.z0rdak.yawp.api.events.flag.FlagCheckResult;
-import de.z0rdak.yawp.core.flag.FlagMessage;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
+import de.z0rdak.yawp.util.text.messages.FlagMessageBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Player;
-
-import java.util.Map;
-
-import static de.z0rdak.yawp.core.flag.FlagMessage.REGION_TEMPLATE;
 
 public class MessageSender {
 
@@ -62,10 +58,8 @@ public class MessageSender {
         boolean isFlagMuted = flag.getFlagMsg().isMuted() || responsibleRegion.isMuted();
         Player player = result.getFlagCheck().getPlayer();
         // If not muted and the event is a player event, and the player is not null, send the message
-        if (!isFlagMuted && RegionFlag.hasPlayerCategory(flag) && player instanceof Player) {
-            Map<String, String> msgSubstitutes = FlagMessage.defaultSubstitutesFor(result);
-            msgSubstitutes.put(REGION_TEMPLATE, responsibleRegion.getName());
-            MutableComponent flagMsg = FlagMessage.buildFrom(result, msgSubstitutes);
+        if (!isFlagMuted && RegionFlag.hasPlayerCategory(flag) && player != null) {
+            MutableComponent flagMsg = FlagMessageBuilder.buildFrom(result, null);
             sendNotification(player, flagMsg);
         }
     }
