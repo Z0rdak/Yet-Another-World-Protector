@@ -1,13 +1,20 @@
 package de.z0rdak.yawp.config;
 
 import de.z0rdak.yawp.YetAnotherWorldProtector;
+import de.z0rdak.yawp.api.events.region.YawpEvents;
 import de.z0rdak.yawp.commands.CommandRegistry;
-import de.z0rdak.yawp.config.server.FlagConfig;
-import de.z0rdak.yawp.config.server.LoggingConfig;
-import de.z0rdak.yawp.config.server.PermissionConfig;
-import de.z0rdak.yawp.config.server.RegionConfig;
+import de.z0rdak.yawp.config.server.*;
 import de.z0rdak.yawp.constants.Constants;
+import de.z0rdak.yawp.handler.PlayerPosTracker;
+import de.z0rdak.yawp.handler.RegionSpatialCache;
+import net.minecraft.client.telemetry.events.WorldLoadEvent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.level.LevelEvent;
+import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -17,6 +24,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import static de.z0rdak.yawp.config.server.FeatureConfig.FEATURE_CONFIG_LOGGER;
 import static de.z0rdak.yawp.config.server.FlagConfig.FLAG_CONFIG_LOGGER;
 import static de.z0rdak.yawp.config.server.LoggingConfig.LOGGING_CONFIG_LOGGER;
 import static de.z0rdak.yawp.config.server.PermissionConfig.PERMISSION_CONFIG_LOGGER;
@@ -24,7 +32,7 @@ import static de.z0rdak.yawp.config.server.RegionConfig.REGION_CONFIG_LOGGER;
 
 public final class ConfigRegistry {
 
-    public static final Logger CONFIG_LOGGER = LogManager.getLogger(Constants.MOD_ID.toUpperCase() + "-Config");
+    public static final Logger CONFIG_LOGGER = LogManager.getLogger(Constants.MOD_ID.toUpperCase() + "-Config-Event");
 
     private ConfigRegistry() {
     }
@@ -37,12 +45,33 @@ public final class ConfigRegistry {
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, FlagConfig.CONFIG_SPEC, FlagConfig.CONFIG_NAME);
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, RegionConfig.CONFIG_SPEC, RegionConfig.CONFIG_NAME);
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, LoggingConfig.CONFIG_SPEC, LoggingConfig.CONFIG_NAME);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, FeatureConfig.CONFIG_SPEC, FeatureConfig.CONFIG_NAME);
     }
 
     @SubscribeEvent
     public static void onConfigLoading(ModConfigEvent.Loading event) {
         if (event.getConfig().getModId().equals(Constants.MOD_ID)) {
             switch (event.getConfig().getFileName()) {
+                case FeatureConfig.CONFIG_NAME: {
+                    var enablePlayerTracker = FeatureConfig.enablePlayerTracker();
+                    FEATURE_CONFIG_LOGGER.info("Player tracking feature: {}", enablePlayerTracker ? "enabled" : "disabled" );
+
+                    if (enablePlayerTracker) {
+                        // Note: For now the spatial indexing is only used for this feature, so I guess it can stay here
+                        YawpEvents.ON_REGION_DATA_LOADED.register(RegionSpatialCache::initRegions);
+
+                        MinecraftForge.EVENT_BUS.addListener((TickEvent.LevelTickEvent e) -> {
+                            if (e.phase == TickEvent.Phase.START && e.level instanceof ServerLevel level)
+                                PlayerPosTracker.tickLevel(level);
+                        });
+                        MinecraftForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedOutEvent e) -> {
+                            if (!e.getEntity().level().isClientSide() && e.getEntity() instanceof ServerPlayer player) {
+                                PlayerPosTracker.onPlayerDisc(player);
+                            }
+                        });
+                    }
+                }
+                break;
                 case PermissionConfig.CONFIG_NAME: {
                     int numOfUuidsWithPermission = PermissionConfig.UUIDsWithPermission().size();
                     String uuidsWithPermission = (numOfUuidsWithPermission > 0
