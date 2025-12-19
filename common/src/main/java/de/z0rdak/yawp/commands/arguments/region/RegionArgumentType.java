@@ -28,14 +28,13 @@ import net.minecraft.world.level.Level;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static de.z0rdak.yawp.api.commands.CommandConstants.FLAG;
 import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
+import static de.z0rdak.yawp.api.commands.CommandConstants.FLAG;
 
 public class RegionArgumentType implements ArgumentType<String> {
 

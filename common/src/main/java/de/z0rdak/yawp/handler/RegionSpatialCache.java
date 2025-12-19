@@ -4,7 +4,6 @@ import de.z0rdak.yawp.api.events.region.RegionEvent;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.SphereArea;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
-import de.z0rdak.yawp.data.region.LevelRegionData;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
@@ -17,10 +16,8 @@ import net.minecraft.world.level.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import static de.z0rdak.yawp.constants.Constants.MOD_ID;
 
@@ -45,7 +42,11 @@ public final class RegionSpatialCache {
     }
 
     public static void initRegions(ServerLevel level) {
-        LevelRegionData levelRegionData = RegionDataManager.getOrCreate(level);
+        var maybeLevelRegionData = RegionDataManager.getLevelRegionData(level.dimension());
+        if (maybeLevelRegionData.isEmpty()) {
+            return;
+        }
+        var levelRegionData = maybeLevelRegionData.get();
         RegionSpatialCache cache = RegionSpatialCache.get(levelRegionData.getDimKey());
         levelRegionData.getLocals().forEach((k, region) -> {
             cache.addRegion(region);
