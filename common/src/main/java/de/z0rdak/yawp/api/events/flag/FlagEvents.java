@@ -25,12 +25,12 @@ public final class FlagEvents {
 
     @FunctionalInterface
     public interface AddFlagListener {
-        void add(FlagEvent.Add event);
+        boolean add(FlagEvent.Add event);
     }
 
     @FunctionalInterface
     public interface RemoveFlagListener {
-        void remove(FlagEvent.Remove event);
+        boolean remove(FlagEvent.Remove event);
     }
 
     @FunctionalInterface

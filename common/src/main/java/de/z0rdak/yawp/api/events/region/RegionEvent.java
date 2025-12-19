@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.api.events.region;
 
+import de.z0rdak.yawp.api.events.Cancelable;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import net.minecraft.core.BlockPos;
@@ -16,80 +17,52 @@ public abstract class RegionEvent {
         this.player = player;
     }
 
-    public IMarkableRegion getRegion() {
-        return region;
-    }
+    public IMarkableRegion getRegion() { return region; }
+    public ServerPlayer getPlayer() { return player; }
 
-    public ServerPlayer getPlayer() {
-        return player;
-    }
+    public final static class Create extends RegionEvent implements Cancelable {
+        private boolean canceled;
 
-
-    /**
-     * This event is fired whenever a new region is created. This event is cancelable.
-     * When this is event is canceled, the region will not be created.
-     */
-    public final static class Create extends RegionEvent {
-
-        public Create(final IMarkableRegion region, final ServerPlayer player) {
-            super(region, player);
-        }
+        public Create(final IMarkableRegion region, final ServerPlayer player) { super(region, player); }
 
         @Override
         @Nullable
-        public ServerPlayer getPlayer() {
-            return super.getPlayer();
-        }
+        public ServerPlayer getPlayer() { return super.getPlayer(); }
+
+        @Override
+        public boolean isCanceled() { return canceled; }
+        @Override
+        public void setCanceled(boolean canceled) { this.canceled = canceled; }
     }
 
-    /**
-     * This event is fired whenever a new region is renamed. This event is cancelable.
-     * When this is event is canceled, the region will not be renamed.
-     */
-    public final static class Rename extends RegionEvent {
-
+    public final static class Rename extends RegionEvent implements Cancelable {
         private final String oldName;
         private String newName;
+        private boolean canceled;
 
         public Rename(final IMarkableRegion region, final String oldName, final String newName, final ServerPlayer player) {
             super(region, player);
-            this.newName = newName;
             this.oldName = oldName;
+            this.newName = newName;
         }
 
         @Override
         @Nullable
-        public ServerPlayer getPlayer() {
-            return super.getPlayer();
-        }
+        public ServerPlayer getPlayer() { return super.getPlayer(); }
 
-        public String getOldName() {
-            return oldName;
-        }
+        public String getOldName() { return oldName; }
+        public String getNewName() { return newName; }
+        public void setNewName(String newName) { this.newName = newName; }
 
-        public String getNewName() {
-            return newName;
-        }
-
-        /**
-         * The name set here is not validated again. Be sure you validate the name before setting it. <br>
-         * Otherwise, you may cause inconsistencies and break your whole region definition.
-         *
-         * @param newName The new name of the region - be sure to validate it before
-         * @see de.z0rdak.yawp.data.region.LevelRegionData#isValidRegionName(String)
-         */
-        public void setNewName(String newName) {
-            this.newName = newName;
-        }
+        @Override
+        public boolean isCanceled() { return canceled; }
+        @Override
+        public void setCanceled(boolean canceled) { this.canceled = canceled; }
     }
 
-    /**
-     * This event is fired whenever a new area is created. This event is cancelable.
-     * Canceling this event will prevent the area from being updated.
-     */
-    public final static class UpdateArea extends RegionEvent {
-
+    public final static class UpdateArea extends RegionEvent implements Cancelable {
         private IMarkableArea markedArea;
+        private boolean canceled;
 
         public UpdateArea(final IMarkableRegion region, final IMarkableArea area, final ServerPlayer player) {
             super(region, player);
@@ -98,74 +71,63 @@ public abstract class RegionEvent {
 
         @Override
         @Nullable
-        public ServerPlayer getPlayer() {
-            return super.getPlayer();
-        }
+        public ServerPlayer getPlayer() { return super.getPlayer(); }
 
-        public IMarkableArea markedArea() {
-            return markedArea;
-        }
+        public IMarkableArea markedArea() { return markedArea; }
+        public void setMarkedArea(IMarkableArea markedArea) { this.markedArea = markedArea; }
 
-        /**
-         * The area set here is not validated again. Be sure you validate the area before setting it. <br>
-         * Otherwise, you may cause inconsistencies and break your whole region definition.
-         *
-         * @param markedArea The new area of the region - be sure to validate it before
-         */
-        public void setMarkedArea(IMarkableArea markedArea) {
-            this.markedArea = markedArea;
-        }
+        @Override
+        public boolean isCanceled() { return canceled; }
+        @Override
+        public void setCanceled(boolean canceled) { this.canceled = canceled; }
     }
 
+    public final static class Remove extends RegionEvent implements Cancelable {
+        private boolean canceled;
 
-    /**
-     * This event is fired whenever a region is about to be removed. This event is cancelable.
-     * When this is event is canceled, the region will not be deleted.
-     */
-    public final static class Remove extends RegionEvent {
+        public Remove(final IMarkableRegion region, final ServerPlayer player) { super(region, player); }
 
         @Override
         @Nullable
-        public ServerPlayer getPlayer() {
-            return super.getPlayer();
-        }
+        public ServerPlayer getPlayer() { return super.getPlayer(); }
 
-        public Remove(final IMarkableRegion region, final ServerPlayer player) {
-            super(region, player);
-        }
+        @Override
+        public boolean isCanceled() { return canceled; }
+        @Override
+        public void setCanceled(boolean canceled) { this.canceled = canceled; }
     }
-
 
     public static abstract class PlayerMove extends RegionEvent {
         private final BlockPos previousPos;
         private final BlockPos currentPos;
+
         public PlayerMove(final IMarkableRegion region, final ServerPlayer player, final BlockPos previousPos, final BlockPos currentPos) {
             super(region, player);
             this.previousPos = previousPos;
             this.currentPos = currentPos;
         }
 
-        public BlockPos previous() {
-            return previousPos;
-        }
+        public BlockPos previous() { return previousPos; }
+        public BlockPos current() { return currentPos; }
 
-        public BlockPos current() {
-            return currentPos;
-        }
     }
 
-    public final static class PlayerEnter extends PlayerMove {
+    public final static class PlayerEnter extends PlayerMove implements Cancelable {
         public PlayerEnter(final IMarkableRegion region, final ServerPlayer player, final BlockPos oldPos, final BlockPos newPos) {
             super(region, player, oldPos, newPos);
         }
+        private boolean canceled;
 
+        @Override public boolean isCanceled() { return canceled; }
+        @Override public void setCanceled(boolean canceled) { this.canceled = canceled; }
     }
 
-    public final static class PlayerLeave extends PlayerMove {
+    public final static class PlayerLeave extends PlayerMove implements Cancelable {
         public PlayerLeave(final IMarkableRegion region, final ServerPlayer player, final BlockPos oldPos, final BlockPos newPos) {
             super(region, player, oldPos, newPos);
         }
+        private boolean canceled;
+        @Override public boolean isCanceled() { return canceled; }
+        @Override public void setCanceled(boolean canceled) { this.canceled = canceled; }
     }
 }
-
-
