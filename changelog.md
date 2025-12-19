@@ -9,11 +9,16 @@
 - Add default title message which is displayed when a player enters/leaves a Local Region. This will be customizable in the future.
 - Add `yawp-features.toml` config to enable/disable features.
 - Add config setting to enable player tracker in `yawp-features.toml`
-- 
+- Add config setting to log detailed event info in `yawp-logging.toml`
+- Levels (Dimecommands no longer trigger saving of all data, instead specific to the level of the involved regionnsional Regions and Local Regions for that level) now need to be tracked to be recognized by YAWP. 
+- Add command `/yawp global track <level>` to track a level so it can be protected like always.
+- Add command `/yawp global untrack <level>` to untrack a level. It will be unloaded and its data no longer loaded on server start.
 
 ## Changed
 
 - Rename flag `xp-drop-all` to `drop-xp`. This now covers all xp dropping from players killing monsters.
+- Rework saving to reduce performance impact.
+- Commands no longer trigger saving of all data, instead specific to the level of the involved region
 
 ## Removed
 
@@ -26,6 +31,7 @@
 - Fix cuboid area not being normalized causing issues with recognizing players entering/leaving
 - Fix visualization not being updated when updating region area
 - Fix visualization not being removed when removing regions
+- Fix spammy output when saving region data - should be less verbose now.
 
 # [0.6.2-beta1] - 2025-10-30
 
