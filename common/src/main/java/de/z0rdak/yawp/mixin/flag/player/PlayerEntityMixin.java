@@ -2,10 +2,9 @@
 package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.platform.Services;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -22,8 +21,8 @@ public abstract class PlayerEntityMixin {
     void injectElytraCheck(CallbackInfoReturnable<Boolean> cir) {
         Player self = (Player) (Object) this;
         if (isServerSide(self.level())) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), RegionFlag.USE_ELYTRA, getDimKey(self), self);
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), RegionFlag.USE_ELYTRA, getDimKey(self), self);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, denyResult -> cir.setReturnValue(false));
@@ -34,8 +33,8 @@ public abstract class PlayerEntityMixin {
     void onDropEquipment(CallbackInfo ci) {
         Player self = (Player) (Object) this;
         if (isServerSide(self.level())) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), RegionFlag.KEEP_INV, getDimKey(self));
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), RegionFlag.KEEP_INV, getDimKey(self));
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.process(checkEvent)
@@ -47,8 +46,8 @@ public abstract class PlayerEntityMixin {
     public void onGainHunger(float exhaustion, CallbackInfo ci) {
         Player self = (Player) (Object) this;
         if (isServerSide(self)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(self.blockPosition(), RegionFlag.NO_HUNGER, getDimKey(self), self);
-            if (Services.EVENT.post(checkEvent))
+            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), RegionFlag.NO_HUNGER, getDimKey(self), self);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;
             FlagEvaluator.process(checkEvent)
                     .onAllow( res -> ci.cancel());
