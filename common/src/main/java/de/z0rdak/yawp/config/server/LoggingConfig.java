@@ -3,6 +3,8 @@ package de.z0rdak.yawp.config.server;
 import de.z0rdak.yawp.api.FlagTagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.api.events.flag.FlagCheckResult;
+import de.z0rdak.yawp.platform.event.ForgeFlagCheckRequest;
+import de.z0rdak.yawp.platform.event.ForgeFlagCheckResult;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.*;
 import de.z0rdak.yawp.core.region.RegionType;
@@ -152,7 +154,7 @@ public class LoggingConfig {
     }
     */
 
-    public static boolean logCheck(FlagCheckRequest check) {
+    public static boolean logCheck(ForgeFlagCheckRequest check) {
         boolean matchesFlagOrCategory = (flagMatchesCategory(check) || matchesFlag(check));
         if (matchesFlagOrCategory) {
             LOGGING_CONFIG_LOGGER.info("[Check] {}, at {}, in '{}', Player={}, Id={}",
@@ -165,8 +167,8 @@ public class LoggingConfig {
         return true;
     }
 
-    public static FlagCheckResult logResult(FlagCheckResult result) {
-        FlagCheckRequest check = result.getFlagCheck();
+    public static ForgeFlagCheckResult logResult(ForgeFlagCheckResult result) {
+        ForgeFlagCheckRequest check = result.getFlagCheck();
         boolean matchesFlagOrCategory = (flagMatchesCategory(check) || matchesFlag(check));
         if (matchesFlagOrCategory && matchesResult(result)) {
             if (result.getResponsible() == null || result.getFlag() == null) {
@@ -200,11 +202,11 @@ public class LoggingConfig {
         return LoggingConfig.getResultValuesToLog().contains(result.getFlagState().name);
     }
 
-    public static boolean flagMatchesCategory(FlagCheckRequest check) {
+    public static boolean flagMatchesCategory(ForgeFlagCheckRequest check) {
         return RegionFlag.matchesCategory(check.getRegionFlag(), getFlagTags());
     }
 
-    public static boolean matchesFlag(FlagCheckRequest check) {
+    public static boolean matchesFlag(ForgeFlagCheckRequest check) {
         return LoggingConfig.getFlagsToLog().contains(check.getRegionFlag().name);
     }
 }
