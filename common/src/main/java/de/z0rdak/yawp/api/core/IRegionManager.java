@@ -45,6 +45,9 @@ public interface IRegionManager {
     void saveAll();
 
     void save(ServerLevel level);
+
+    void save(IProtectedRegion region);
+
     void save(ResourceKey<Level> levelKey);
 
     /**
