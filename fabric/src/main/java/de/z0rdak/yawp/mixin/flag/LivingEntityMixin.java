@@ -133,44 +133,23 @@ public abstract class LivingEntityMixin {
         }
     }
 
+    /**
+     * By definition of the vanilla code, this method is only called when
+     * - the entity is killed by a player or
+     * - drops always XP (which is only true for other players)
+     */
     @Inject(method = "dropExperience", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/entity/ExperienceOrb;award(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/phys/Vec3;I)V"), cancellable = true, allow = 1)
     public void onXpDrop(CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
         if (this.attackingPlayer != null) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), XP_DROP_ALL, getDimKey(self));
-            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
-                return;
-            FlagEvaluator.processCheck(checkEvent, deny -> {
-                ci.cancel();
-            });
-            
-            // if this entity is killed by a player, prevent xp dropping
-            checkEvent = new FlagCheckRequest(self.blockPosition(), XP_DROP_PLAYER, getDimKey(self), this.attackingPlayer);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), DROP_XP, getDimKey(self), this.attackingPlayer);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;
             FlagEvaluator.processCheck(checkEvent, deny -> {
                 sendFlagMsg(deny);
                 ci.cancel();
             });
-            
-            if (isMonster(self)) {
-                checkEvent = new FlagCheckRequest(self.blockPosition(), XP_DROP_MONSTER, getDimKey(self));
-                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
-                    return;
-                FlagEvaluator.processCheck(checkEvent, deny -> {
-                    sendFlagMsg(deny);
-                    ci.cancel();
-                });
-            } else {
-                checkEvent = new FlagCheckRequest(self.blockPosition(), XP_DROP_OTHER, getDimKey(self));
-                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
-                    return;
-                FlagEvaluator.processCheck(checkEvent, deny -> {
-                    sendFlagMsg(deny);
-                    ci.cancel();
-                });
-            }
         }
         
         if (self instanceof Player) {
