@@ -98,10 +98,7 @@ public enum RegionFlag {
     USE_PORTAL_VILLAGERS("use-portal-villagers", FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY),
     WATER_FLOW("water-flow", FlagTagRegister.ENVIRONMENT, FlagTagRegister.HIGH_FREQUENCY),
     WITHER_BLOCK_PROT("wither-destruction", FlagTagRegister.ENVIRONMENT, FlagTagRegister.BLOCK),
-    XP_DROP_ALL("xp-drop-all", FlagTagRegister.PLAYER_PREVENTION),
-    XP_DROP_MONSTER("xp-drop-monsters", FlagTagRegister.PLAYER_PREVENTION),
-    XP_DROP_OTHER("xp-drop-other", FlagTagRegister.PLAYER_PREVENTION),
-    XP_DROP_PLAYER("xp-drop-player", FlagTagRegister.PLAYER, FlagTagRegister.PLAYER_PREVENTION),
+    DROP_XP("drop-xp", FlagTagRegister.PLAYER_PREVENTION),
     XP_FREEZE("xp-freeze", FlagTagRegister.PLAYER),
     XP_PICKUP("xp-pickup", FlagTagRegister.PLAYER),
     ZOMBIE_DOOR_PROT("zombie-destruction", FlagTagRegister.ENVIRONMENT, FlagTagRegister.PROTECTION);
