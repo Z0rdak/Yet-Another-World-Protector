@@ -81,7 +81,7 @@ public class RegionDataManager {
     }
 
     public static LevelListData getSavedDims() {
-        if (savedLevelData == null) {
+        if (trackedLevelData == null) {
             if (serverInstance != null) {
                 ServerLevel overworld = serverInstance.overworld();
                 if (!overworld.isClientSide()) {
@@ -107,7 +107,7 @@ public class RegionDataManager {
         save(force);
     }
 
-    public static void saveLevel(ResourceLocation rl) {
+    public static void saveLevel(Identifier rl) {
         if (!trackedLevelData.doesTrack(rl)) {
             return;
         }
@@ -115,16 +115,16 @@ public class RegionDataManager {
     }
 
     public static void saveLevel(ServerLevel level) {
-        saveLevel(level.dimension().location());
+        saveLevel(level.dimension().identifier());
     }
 
     // Duplicated because I want the logging info at a common place and not in the hooks of the mod-loaders
     public static void saveOnUnload(ServerLevel level) {
-        var levelRl = level.dimension().location();
+        var levelRl = level.dimension().identifier();
         if (!trackedLevelData.doesTrack(levelRl)) {
             return;
         }
-        LOGGER.info(Component.translatableWithFallback("data.region.level.save.unload", "Unloading level '%s'. Saving region data", level.dimension().location().toString()).getString());
+        LOGGER.info(Component.translatableWithFallback("data.region.level.save.unload", "Unloading level '%s'. Saving region data", level.dimension().identifier().toString()).getString());
         saveLevelData(level);
     }
 
@@ -133,7 +133,7 @@ public class RegionDataManager {
         dataStorage.set(LevelListData.TYPE, trackedLevelData);
     }
 
-    private static void saveGlobalData() {
+    public static void saveGlobalData() {
         SavedDataStorage dataStorage = serverInstance.overworld().getDataStorage();
         dataStorage.set(GlobalRegionData.TYPE, globalRegionData);
     }
@@ -142,7 +142,7 @@ public class RegionDataManager {
         saveLevelData(level.dimension().identifier());
     }
 
-    private static void saveLevelData(ResourceLocation levelRl) {
+    private static void saveLevelData(Identifier levelRl) {
         if (trackedLevelData.doesTrack(levelRl)) {
             SavedDataStorage storage = serverInstance.overworld().getDataStorage();
             LevelRegionData levelRegionData = RegionDataManager.levelRegionData.get(levelRl);
@@ -165,9 +165,9 @@ public class RegionDataManager {
     }
 
     public static void saveOnUnload(MinecraftServer server, ServerLevel level) {
-        if (savedLevelData.hasDimEntry(level.dimension().identifier())) {
+        if (trackedLevelData.hasDimEntry(level.dimension().identifier())) {
             LOGGER.info(Component.translatableWithFallback("data.region.level.save.unload", "Unloading level '%s'. Saving region data", level.dimension().identifier().toString()).getString());
-            saveLevelData(server, level);
+            saveLevelData(level);
         }
     }
 
@@ -177,9 +177,9 @@ public class RegionDataManager {
                 serverInstance = server;
             SavedDataStorage dataStorage = server.overworld().getDataStorage();
             trackedLevelData = dataStorage.get(LevelListData.TYPE);
-            if (savedLevelData == null) {
+            if (trackedLevelData == null) {
                 LOGGER.info(Component.translatableWithFallback("data.region.levels.load.missing", "Missing level list for region data (ignore on first startup). Initializing...").getString());
-                return new LevelListData();
+                trackedLevelData = new LevelListData();
             };
             saveTrackedLevelList();
             LOGGER.info(Component.translatableWithFallback("data.region.levels.load.success", "Found region data for %s dimension(s)", trackedLevelData.getLevels().size()).getString());
@@ -202,11 +202,10 @@ public class RegionDataManager {
             // init level data
             if (trackedLevelData.doesTrack(levelRl)) {
                 LevelRegionData newLevelRegionData = loadLevelData(server, level);
-                if (levelRegionData == null) {
-                    levelRegionData = new LevelRegionData(levelRl);
+                if (newLevelRegionData == null) {
+                    newLevelRegionData = new LevelRegionData(levelRl);
                     LOGGER.info(Component.translatableWithFallback("data.region.level.local.missing", "Initializing region data for '%s'", levelRl.toString()).getString());
-                    dimRegionStorage.put(levelRl, levelRegionData);
-                    saveLevelData(server, level);
+                    saveLevelData(level);
                 } else {
                     LOGGER.info(Component.translatableWithFallback("data.region.level.local.load.success", "Loaded %s region(s) for '%s'", newLevelRegionData.regionCount(), levelRl.toString()).getString());
                     levelRegionData.put(levelRl, newLevelRegionData);
@@ -258,7 +257,7 @@ public class RegionDataManager {
         }
     }
 
-    public static void removeTrackingFor(ResourceLocation rl){
+    public static void removeTrackingFor(Identifier rl){
         trackedLevelData.removeTrackingFor(rl);
         levelRegionData.remove(rl);
         saveLevel(rl);
@@ -299,22 +298,6 @@ public class RegionDataManager {
         return getLevelRegionData(dim.identifier());
     }
 
-    public static LevelRegionData getOrCreate(Identifier rl) {
-        if (!savedLevelData.hasDimEntry(rl)) {
-            return initLevelData(rl);
-        }
-        return dimRegionStorage.get(rl);
-    }
-
-    public static LevelRegionData getOrCreate(Level level)  {
-        return getOrCreate(level.dimension().identifier());
-    }
-
-
-    // TODO: Move to API?
-    // RegionManager.get().getLevelRegionData(region.getDim()).get().getLocalList()
-    // Instead
-    // RegionManager.get().getOrCreate(region.getDim()).getLocalList()
     public static Collection<IMarkableRegion> getLocalsFor(ResourceKey<Level> dim) {
         var maybeRld = getLevelRegionData(dim.identifier());
         return maybeRld.isPresent() ? maybeRld.get().getLocalList() : new ArrayList<>();

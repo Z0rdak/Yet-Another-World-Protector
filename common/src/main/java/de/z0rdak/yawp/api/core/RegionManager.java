@@ -5,6 +5,7 @@ import de.z0rdak.yawp.core.area.SphereArea;
 import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
+import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.data.region.LevelRegionData;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import net.minecraft.core.BlockPos;
@@ -58,6 +59,15 @@ public final class RegionManager implements IRegionManager {
     @Override
     public void save(ServerLevel level) {
         RegionDataManager.saveLevel(level);
+    }
+
+    @Override
+    public void save(IProtectedRegion region) {
+        if (region.getRegionType() == RegionType.GLOBAL) {
+            RegionDataManager.saveGlobalData();
+        } else {
+            save(region.getDim());
+        }
     }
 
     @Override

@@ -7,7 +7,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.api.commands.CommandConstants;
-import de.z0rdak.yawp.api.core.IDimensionRegionApi;
+import de.z0rdak.yawp.api.core.ILevelRegionApi;
 import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.commands.arguments.region.ContainingOwnedRegionArgumentType;
@@ -162,9 +162,9 @@ class ShortcutCommands {
         Level level = ctx.getSource().getLevel();
         ServerPlayer player = ctx.getSource().getPlayerOrException();
 
-        Optional<IDimensionRegionApi> maybeDimRegionApi = RegionManager.get().getDimRegionApi(level.dimension());
+        Optional<ILevelRegionApi> maybeDimRegionApi = RegionManager.get().getDimRegionApi(level.dimension());
         if (maybeDimRegionApi.isPresent()) {
-            IDimensionRegionApi dimRegionApi = maybeDimRegionApi.get();
+            ILevelRegionApi dimRegionApi = maybeDimRegionApi.get();
             List<IProtectedRegion> regionsAround = dimRegionApi.getRegionsAround(player.blockPosition(), blockRadius)
                     .stream()
                     .map(r -> (IProtectedRegion)r)
@@ -190,7 +190,7 @@ class ShortcutCommands {
 
         Level level = player.level();
         BlockPos playerPos = player.blockPosition();
-        Optional<IDimensionRegionApi> maybeApi = RegionManager.get().getDimRegionApi(level.dimension());
+        Optional<ILevelRegionApi> maybeApi = RegionManager.get().getDimRegionApi(level.dimension());
         if (maybeApi.isPresent()) {
             var dimApi = maybeApi.get();
             List<IMarkableRegion> regionsAround = dimApi.getRegionsAround(playerPos, blockRadius);

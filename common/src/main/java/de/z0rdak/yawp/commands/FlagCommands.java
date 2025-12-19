@@ -139,7 +139,7 @@ final class FlagCommands {
         MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!setMuted), String.valueOf(setMuted));
         MutableComponent msg = Messages.substitutable("%s %s", infoMsg, undoLink);
         sendCmdFeedback(ctx.getSource(), msg);
-        RegionManager.get().save();
+        RegionManager.get().save(region);
         return 0;
 
     }
@@ -165,7 +165,7 @@ final class FlagCommands {
         MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), flagMsgStr, oldFlagMsg);
         MutableComponent msg = Messages.substitutable("%s %s", infoMsg, undoLink);
         sendCmdFeedback(ctx.getSource(), msg);
-        RegionManager.get().save();
+        RegionManager.get().save(region);
         return 0;
     }
 
@@ -197,7 +197,7 @@ final class FlagCommands {
                 buildFlagInfoLink(region, flag), flag.getState().name);
         MutableComponent msg = Messages.substitutable("%s %s", infoMsg, undoLink);
         sendCmdFeedback(ctx.getSource(), msg);
-        RegionManager.get().save();
+        RegionManager.get().save(region);
         return 0;
 
     }
@@ -224,7 +224,7 @@ final class FlagCommands {
         MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!override), String.valueOf(override));
         MutableComponent msg = Messages.substitutable("%s %s", infoMsg, undoLink);
         sendCmdFeedback(ctx.getSource(), msg);
-        RegionManager.get().save();
+        RegionManager.get().save(region);
         return 0;
     }
 
