@@ -24,9 +24,6 @@ public class YAWPCommon {
         RegionEvents.ON_UPDATE_AREA.register(YawpEventHandler::onUpdateRegion);
         RegionEvents.ON_REMOVE.register(YawpEventHandler::onRemoveRegion);
 
-        RegionEvents.ON_PLAYER_ENTER_REGION.register(YawpEventHandler::onPlayerEnterRegion);
-        RegionEvents.ON_PLAYER_LEAVE_REGION.register(YawpEventHandler::onPlayerLeaveRegion);
-
         RegionEvents.ON_CREATE.register(RegionSpatialCache::onCreateRegion);
         RegionEvents.ON_REMOVE.register(RegionSpatialCache::onRemoveRegion);
         RegionEvents.ON_UPDATE_AREA.register(RegionSpatialCache::onUpdateRegion);
