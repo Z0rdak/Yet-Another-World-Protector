@@ -35,20 +35,15 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Display;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.entity.EntityTypeTest;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static de.z0rdak.yawp.api.commands.CommandConstants.*;
-import static de.z0rdak.yawp.api.visualization.VisualizationManager.REGION_BLOCK_DISPLAY_TAG;
-import static de.z0rdak.yawp.api.visualization.VisualizationManager.REGION_TEXT_DISPLAY_TAG;
-import static de.z0rdak.yawp.commands.CommandUtil.*;
-import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 import static de.z0rdak.yawp.api.MessageSender.sendError;
+import static de.z0rdak.yawp.api.commands.CommandConstants.*;
+import static de.z0rdak.yawp.commands.CommandUtil.*;
+import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 
 class DimensionCommands {
 
@@ -162,14 +157,8 @@ class DimensionCommands {
                 );
     }
 
-    private static int nukeDisplayEntities(CommandContext<CommandSourceStack> ctx, ServerLevel level) {
-        var entities = level.getEntities(EntityTypeTest.forClass(Display.class), (entity) -> {
-            boolean containsTextTag = entity.getTags().contains(REGION_TEXT_DISPLAY_TAG.toString());
-            boolean containsBlockTag = entity.getTags().contains(REGION_BLOCK_DISPLAY_TAG.toString());
-            return containsTextTag || containsBlockTag;
-        });
-        var entityAmount = entities.size();
-        entities.forEach(e -> e.remove(Entity.RemovalReason.DISCARDED));
+    public static int nukeDisplayEntities(CommandContext<CommandSourceStack> ctx, ServerLevel level) {
+        var entityAmount = VisualizationManager.nukeDisplayEntities(level);
         // TODO: I18n
         sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Nuked all (%s) yawp entities in '%s'", "Nuked all (%s) yawp entities in '%s'", entityAmount, level.dimension().location().toString()));
         return 0;
@@ -257,9 +246,7 @@ class DimensionCommands {
         }
 
         var regionCreated = new RegionEvent.Create(region, player);
-        Constants.LOGGER.info("1 before post created region {}", regionName);
         if (Services.REGION_EVENT_DISPATCHER.post(regionCreated)) {
-            Constants.LOGGER.info("LAst? {}", regionName);
             return 1;
         }
 
