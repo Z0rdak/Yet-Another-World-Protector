@@ -5,6 +5,7 @@ import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.area.SphereArea;
+import de.z0rdak.yawp.core.flag.FlagMessage;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.group.GroupType;
@@ -13,15 +14,12 @@ import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.data.PlayerManager;
-import de.z0rdak.yawp.data.region.RegionDataManager;
-import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.util.text.Messages;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -228,23 +226,30 @@ public class ChatComponentBuilder {
         return Messages.substitutable("%s %s", stateInfo, buildFlagStateSuggestionLink(region, flag));
     }
 
+    /**
+     * Builds flag message with hover text showing the full message
+     * This does not resolve the i18n key, it only shows the raw message
+     * (how should it, it can be different at the client anyway)
+     */
     public static MutableComponent buildFlagMessageHoverText(IProtectedRegion region, IFlag flag) {
-        MutableComponent flagMsgText = truncateMsg(flag);
+        MutableComponent flagMsgText = truncateMsg(flag.getFlagMsg(), 30);
         MutableComponent hoverText = Component.literal(flag.getFlagMsg().msg());
-        // if flag has default msg, use default msg
+        // if flag has default msg, use default msg i18n key
         if (flag.getFlagMsg().isDefault()) {
-            String hoverFallback = "[{region}]: The '{flag}' flag denies this action here!";
-            hoverText = Component.translatableWithFallback("flag.msg.deny." + region.getRegionType().type + ".default", hoverFallback);
+            hoverText = Component.literal("flag.msg.deny." + region.getRegionType().type + ".default");
         }
         return buildTextWithHoverAndBracketsMsg(flagMsgText, hoverText, WHITE);
     }
 
-    public static MutableComponent truncateMsg(IFlag flag, int length) {
-        String flagMsg = flag.getFlagMsg().msg();
-        if (flag.getFlagMsg().msg().length() > length) {
-            flagMsg = flagMsg.substring(0, length) + "...";
+    private static final String ELLIPSIS = "...";
+    public static MutableComponent truncateMsg(FlagMessage flagMsg, int length) {
+        String s = flagMsg.msg();
+        if (s.length() <= length) {
+            return Component.literal(s);
         }
-        return Component.literal(flagMsg);
+        int cutoff = Math.max(0, length - ELLIPSIS.length());
+        String truncated = s.substring(0, cutoff) + ELLIPSIS;
+        return Component.literal(truncated);
     }
 
     public static List<Component> buildRemoveRegionEntries(IProtectedRegion parent, List<IProtectedRegion> regions) {
