@@ -15,7 +15,9 @@ public enum RegionFlag {
     BREAK_BLOCKS("break-blocks", FlagTagRegister.BLOCK, FlagTagRegister.PLAYER),
     CONTAINER_ACCESS("access-container", FlagTagRegister.BLOCK, FlagTagRegister.PLAYER),
     DRAGON_BLOCK_PROT("dragon-destruction", FlagTagRegister.ENVIRONMENT, FlagTagRegister.BLOCK),
+    /* also prevents drop-xp currently */
     DROP_LOOT_ALL("drop-loot", FlagTagRegister.PLAYER_PREVENTION),
+    /* also prevents drop-xp currently */
     DROP_LOOT_PLAYER("drop-loot-player", FlagTagRegister.PLAYER, FlagTagRegister.PLAYER_PREVENTION),
     ENDERMAN_GRIEFING("enderman-griefing", FlagTagRegister.PROTECTION),
     ENDERMAN_TELEPORT_FROM_REGION("enderman-tp-from", FlagTagRegister.PROTECTION),
