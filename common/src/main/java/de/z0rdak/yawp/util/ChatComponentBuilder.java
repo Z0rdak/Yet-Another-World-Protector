@@ -273,20 +273,6 @@ public class ChatComponentBuilder {
         return Component.literal(flagMsg);
     }
 
-    public static MutableComponent truncateMsg(IFlag flag) {
-        return truncateMsg(flag, 30);
-    }
-
-    /**
-     * Message: [set] [x]: 'msg' <br>
-     */
-    public static MutableComponent buildFlagMessageComponent(IProtectedRegion region, IFlag flag) {
-        MutableComponent editLink = buildFlagMessageEditLink(region, flag);
-        MutableComponent clearLink = buildFlagMessageClearLink(region, flag);
-        MutableComponent flagMsgTextWithHover = buildFlagMessageHoverText(region, flag);
-        return Messages.substitutable("%s %s '%s'", editLink, clearLink, flagMsgTextWithHover);
-    }
-
     public static List<Component> buildRemoveRegionEntries(IProtectedRegion parent, List<IProtectedRegion> regions) {
         return regions.stream().map(region -> buildRemoveRegionEntry(parent, region)).collect(Collectors.toList());
     }

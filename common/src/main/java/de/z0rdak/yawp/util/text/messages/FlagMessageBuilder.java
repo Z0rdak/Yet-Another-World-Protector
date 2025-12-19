@@ -87,34 +87,4 @@ public class FlagMessageBuilder {
         }
         return args;
     }
-
-    /**
-     * Returns the flag message template for the given flag from the I18n keys. <br>
-     * If the flag has a custom message defined, that message is returned instead. <br>
-     *
-     * @param result of the flag check to get the default message template for
-     * @return the default flag message template for the given flag
-     */
-    private static String getI18nFlagMsgTemplate(FlagCheckResult result) {
-        String flagMsgLangKey = "flag.msg.deny." + result.getFlag().getName();
-        String fallBackLangKey = "flag.msg.deny." + result.getResponsible().getRegionType().type + ".default";
-        return Component.translatableWithFallback(flagMsgLangKey, fallBackLangKey).getString();
-    }
-
-    /**
-     * Replaces the matches in the given flag message template with the substitutes. <br>
-     * The matches are replaced with the substitutes in the given map. <br>
-     * The flag message with the matches replaced is then returned. <br>
-     *
-     * @param flagMsgTemplate the flag message template to replace the matches in
-     * @param substitutes     the substitutes to replace the matches with
-     * @return the flag message with the matches replaced
-     */
-    private static String replaceMatches(String flagMsgTemplate, Map<String, String> substitutes) {
-        String flagMsg = flagMsgTemplate;
-        for (Map.Entry<String, String> entry : substitutes.entrySet()) {
-            flagMsg = flagMsg.replace(entry.getKey(), entry.getValue());
-        }
-        return flagMsg;
-    }
 }
