@@ -66,6 +66,8 @@ public enum CommandConstants {
     REGIONS("regions"),
     REMOVE("remove"),
     RESET("reset"),
+    TRACK("track"),
+    UNTRACK("untrack"),
     SELECT("select"),
     DESELECT("deselect"),
     SET("set"),

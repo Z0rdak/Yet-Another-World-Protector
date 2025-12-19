@@ -9,6 +9,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.datafix.DataFixTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import org.jetbrains.annotations.NotNull;
@@ -16,6 +17,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Supplier;
+
+import static net.minecraft.world.level.Level.*;
 
 public class LevelListData extends SavedData {
 
@@ -37,6 +40,9 @@ public class LevelListData extends SavedData {
 
     public LevelListData(){
         this.dimensions = new HashSet<>();
+        this.dimensions.add(OVERWORLD.location());
+        this.dimensions.add(NETHER.location());
+        this.dimensions.add(END.location());
     }
 
     @Override
@@ -47,6 +53,14 @@ public class LevelListData extends SavedData {
             tag = (CompoundTag) nbt.get();
         }
         return tag;
+    }
+
+    public boolean doesTrack(ResourceLocation rl) {
+        return this.hasDimEntry(rl);
+    }
+
+    public boolean doesTrack(ServerLevel level) {
+        return this.doesTrack(level.dimension().location());
     }
 
     public static LevelListData get(DimensionDataStorage storage, @Nullable Supplier<LevelListData> defaultSupplier) {
@@ -65,11 +79,15 @@ public class LevelListData extends SavedData {
         return new ArrayList<>(this.dimensions);
     }
 
-    public void addDimEntry(ResourceLocation rl) {
+    public void addTrackingFor(ResourceLocation rl) {
         this.dimensions.add(rl);
     }
 
-    public boolean hasDimEntry(ResourceLocation rl) {
+    public void removeTrackingFor(ResourceLocation rl) {
+        this.dimensions.remove(rl);
+    }
+
+    private boolean hasDimEntry(ResourceLocation rl) {
         return this.dimensions.contains(rl);
     }
 }
