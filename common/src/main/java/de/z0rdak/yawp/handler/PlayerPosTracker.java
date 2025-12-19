@@ -7,10 +7,8 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,10 +30,10 @@ public final class PlayerPosTracker {
     }
 
     /** Clears cached state for a player when they disconnect */
-    public static void onPlayerDisc(ServerGamePacketListenerImpl listener, MinecraftServer server) {
-        UUID playerId = listener.player.getUUID();
+    public static void onPlayerDisc(ServerPlayer player) {
+        UUID playerId = player.getUUID();
         PlayerPosTracker.playerStates.remove(playerId);
-        LOGGER.info("Player {} ({}) disconnected. Removing player from cache.", listener.player.getScoreboardName(), playerId);
+        LOGGER.info("Player {} ({}) disconnected. Removing player from cache.", player.getScoreboardName(), playerId);
     }
 
 

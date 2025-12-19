@@ -3,6 +3,8 @@ package de.z0rdak.yawp.handler;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.api.events.flag.FlagEvent;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
+import de.z0rdak.yawp.api.events.region.RegionEvents;
+import de.z0rdak.yawp.api.events.region.YawpEvents;
 import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.flag.FlagState;
@@ -58,6 +60,15 @@ public final class YawpEventHandler {
     public static boolean onRemoveRegion(RegionEvent.Remove regionRemove) {
         VisualizationManager.hide(regionRemove.getRegion());
         return true;
+    }
+
+    public static void enableRegionSpatialCache(){
+        YawpEvents.ON_REGION_DATA_LOADED.register(RegionSpatialCache::initRegions);
+    }
+
+    public static void enablePlayerRegionMessages(){
+        RegionEvents.ON_PLAYER_ENTER_REGION.register(YawpEventHandler::onPlayerEnterRegion);
+        RegionEvents.ON_PLAYER_LEAVE_REGION.register(YawpEventHandler::onPlayerLeaveRegion);
     }
 
     public static void removeInvolvedEntities(IProtectedRegion region, RegionFlag flag) {
