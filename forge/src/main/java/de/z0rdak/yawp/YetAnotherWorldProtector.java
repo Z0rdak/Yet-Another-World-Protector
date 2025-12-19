@@ -91,12 +91,6 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
                     }
                 });
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
-                (LevelEvent.Save saveEvent) -> {
-                    if (saveEvent.getLevel() instanceof ServerLevel serverLevel) {
-                        RegionDataManager.save(serverLevel.getServer(), false, false);
-                    }
-                });
-        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
                 (EntityTravelToDimensionEvent event) -> {
                     if (event.getEntity() instanceof Player player && event.getEntity().getServer() != null) {
                         Level targetLevel = event.getEntity().getServer().getLevel(event.getDimension());
