@@ -106,7 +106,11 @@ public final class ConfigRegistry {
                     LOGGING_CONFIG_LOGGER.info("Logging flag results: [{}]", String.join(",", LoggingConfig.getResultValuesToLog()));
                     LOGGING_CONFIG_LOGGER.info("Logging flags: [{}]", String.join(",", LoggingConfig.getFlagsToLog()));
                     // LOGGING_CONFIG_LOGGER.info("Logging detailed player flag checks: {}", LoggingConfig.shouldLogDetailedPlayerFlags());
+                    LOGGING_CONFIG_LOGGER.info("Logging events: [{}]", LoggingConfig.shouldLogEvents());
 
+                    if (LoggingConfig.shouldLogEvents()) {
+                        YawpEventHandler.enableDetailedEventLogger();
+                    }
                     if (LoggingConfig.shouldLogFlagChecks()) {
                         MinecraftForge.EVENT_BUS.addListener(LoggingConfig::logCheck);
                     }
