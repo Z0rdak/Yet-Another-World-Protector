@@ -165,32 +165,32 @@ class DimensionCommands {
     }
 
 
-    private static int setActiveStateForAllLocal(CommandContext<CommandSourceStack> ctx, LevelRegionData dimCache, boolean enable) {
-        if (dimCache != null) {
-            dimCache.getLocalList().forEach(region -> region.setIsActive(enable));
+    private static int setActiveStateForAllLocal(CommandContext<CommandSourceStack> ctx, LevelRegionData levelData, boolean enable) {
+        if (levelData != null) {
+            levelData.getLocalList().forEach(region -> region.setIsActive(enable));
             if (enable)
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.state.enable.all.set.on.value",
-                        "Activates alert for all local regions of %s", ChatLinkBuilder.buildRegionInfoLink(dimCache.getDim())));
+                        "Activates alert for all local regions of %s", ChatLinkBuilder.buildRegionInfoLink(levelData.getDim())));
             else
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.state.enable.all.set.off.value",
-                        "Deactivated all local regions of %s", ChatLinkBuilder.buildRegionInfoLink(dimCache.getDim())));
-            RegionManager.get().save();
+                        "Deactivated all local regions of %s", ChatLinkBuilder.buildRegionInfoLink(levelData.getDim())));
+            RegionManager.get().save(levelData.getDim());
             return 0;
         } else {
             return 1;
         }
     }
 
-    private static int setAlertStateForAllLocal(CommandContext<CommandSourceStack> ctx, LevelRegionData dimCache, boolean mute) {
-        if (dimCache != null) {
-            dimCache.getLocalList().forEach(region -> region.setIsMuted(mute));
+    private static int setAlertStateForAllLocal(CommandContext<CommandSourceStack> ctx, LevelRegionData levelData, boolean mute) {
+        if (levelData != null) {
+            levelData.getLocalList().forEach(region -> region.setIsMuted(mute));
             if (mute)
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.state.alert.all.set.on.value",
-                        "Activated alert for all local regions of %s", ChatLinkBuilder.buildRegionInfoLink(dimCache.getDim())));
+                        "Activated alert for all local regions of %s", ChatLinkBuilder.buildRegionInfoLink(levelData.getDim())));
             else
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.state.alert.all.set.off.value",
-                        "Deactivated alert for all local regions of %s", ChatLinkBuilder.buildRegionInfoLink(dimCache.getDim())));
-            RegionManager.get().save();
+                        "Deactivated alert for all local regions of %s", ChatLinkBuilder.buildRegionInfoLink(levelData.getDim())));
+            RegionManager.get().save(levelData.getDim());
             return 0;
         } else {
             return 1;
@@ -202,14 +202,14 @@ class DimensionCommands {
      * This keeps region hierarchy and flags intact. <br>
      * Scenario: You want to keep the local region layout and hierarchy but want to reset players and teams.<br>
      */
-    private static int resetLocalRegions(CommandContext<CommandSourceStack> ctx, LevelRegionData dimCache) {
-        dimCache.getLocalList().forEach(region -> {
+    private static int resetLocalRegions(CommandContext<CommandSourceStack> ctx, LevelRegionData levelData) {
+        levelData.getLocalList().forEach(region -> {
             region.resetGroups();
             region.setIsActive(true);
             region.setIsMuted(false);
         });
-        RegionManager.get().save();
-        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.dim.reset.all.confirm", "Successfully reset all local regions in %s", ChatLinkBuilder.buildRegionInfoLink(dimCache.getDim())));
+        RegionManager.get().save(levelData.getDim());
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.dim.reset.all.confirm", "Successfully reset all local regions in %s", ChatLinkBuilder.buildRegionInfoLink(levelData.getDim())));
         return 0;
     }
 
@@ -223,7 +223,7 @@ class DimensionCommands {
         dimRegion.setIsActive(true);
         dimRegion.setIsMuted(false);
         dimRegion.getFlags().clear();
-        RegionManager.get().save();
+        RegionManager.get().save(dimRegion);
         sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.dim.reset.confirm", "Successfully reset dimensional region %s", ChatLinkBuilder.buildRegionInfoLink(dimRegion)));
         return 0;
     }
@@ -255,7 +255,7 @@ class DimensionCommands {
                 .forEach(flag -> region.addFlag(new BooleanFlag(flag)));
         levelData.addLocal(parent, region);
         LocalRegions.ensureHigherRegionPriorityFor(region, Services.REGION_CONFIG.getDefaultPriority());
-        RegionManager.get().save();
+        RegionManager.get().save(levelData.getDim());
         sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.success", "Successfully created region %s (parent: %s)", ChatLinkBuilder.buildRegionInfoLink(region), ChatLinkBuilder.buildRegionInfoLink(parent)));
         return 0;
     }
@@ -333,7 +333,7 @@ class DimensionCommands {
             RegionType parentType = region.getParent().getRegionType();
             if (parentType == RegionType.DIMENSION) {
                 levelData.removeLocal(region);
-                RegionManager.get().save();
+                RegionManager.get().save(levelData.getDim());
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.dim.region.remove.confirm", "Removed region '%s' from %s", region.getName(), ChatLinkBuilder.buildRegionInfoLink(levelData.getDim())));
                 return 0;
             }
@@ -356,7 +356,7 @@ class DimensionCommands {
     private static int deleteRegions(CommandContext<CommandSourceStack> ctx, LevelRegionData levelData) {
         int amount = levelData.regionCount();
         levelData.clearLocals();
-        RegionManager.get().save();
+        RegionManager.get().save(levelData.getDim());
         sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.dim.region.remove.all.confirm", "Removed %s regions from dimension %s", amount, ChatLinkBuilder.buildRegionInfoLink(levelData.getDim())));
         return 0;
     }

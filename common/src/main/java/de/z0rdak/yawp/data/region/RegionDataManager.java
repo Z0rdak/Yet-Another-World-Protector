@@ -141,7 +141,7 @@ public class RegionDataManager {
         dataStorage.set(LevelListData.TYPE, trackedLevelData);
     }
 
-    private static void saveGlobalData() {
+    public static void saveGlobalData() {
         DimensionDataStorage dataStorage = serverInstance.overworld().getDataStorage();
         dataStorage.set(Constants.MOD_ID + "/" + GLOBAL_REGION_FILE_NAME, globalRegionData);
     }

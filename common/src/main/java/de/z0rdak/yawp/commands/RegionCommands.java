@@ -7,10 +7,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.api.core.RegionManager;
-import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
-import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.commands.arguments.region.AddRegionChildArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
@@ -35,7 +33,6 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -48,7 +45,6 @@ import net.minecraft.world.level.block.Block;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 import static de.z0rdak.yawp.api.MessageSender.sendError;
@@ -299,7 +295,7 @@ class RegionCommands {
     private static int setDisplayLightLevel(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, int lightLevel) {
         IMarkableArea area = region.getArea();
         area.getDisplay().setLightLevel(lightLevel);
-        RegionManager.get().save();
+        RegionManager.get().save(region);
         // TODO: Trigger update event instead
         VisualizationManager.refreshDisplay(region);
         // TODO: I18n
@@ -311,7 +307,7 @@ class RegionCommands {
         IMarkableArea area = region.getArea();
         area.getDisplay().setHasGlow(BlockDisplayProperties.DEFAULT_GLOW);
         area.getDisplay().setLightLevel(BlockDisplayProperties.DEFAULT_LIGHT_LEVEL);
-        RegionManager.get().save();
+        RegionManager.get().save(region);
         // TODO: Trigger update event instead
         VisualizationManager.refreshDisplay(region);
         // TODO: I18n
@@ -324,7 +320,7 @@ class RegionCommands {
         BlockDisplayProperties display = area.getDisplay();
         if (display.hasGlow() != hasGlow) {
             display.setHasGlow(hasGlow);
-            RegionManager.get().save();
+            RegionManager.get().save(region);
             // TODO: Trigger update event instead
             VisualizationManager.refreshDisplay(region);
             // TODO: I18n
@@ -345,7 +341,7 @@ class RegionCommands {
         }
         IMarkableArea area = region.getArea();
         area.getDisplay().setBlockRl(blockRl);
-        RegionManager.get().save();
+        RegionManager.get().save(region);
         // TODO: Trigger update
         VisualizationManager.refreshDisplay(region);
         // TODO: I18n
@@ -432,7 +428,7 @@ class RegionCommands {
                 sendCmdFeedback(ctx.getSource(), updateAreaFailMsg);
             }
             region.setArea(area);
-            RegionManager.get().save();
+            RegionManager.get().save(region);
 
             // TODO: Use event to update visualization. But I am currently to lazy to add event handlers for each modloader platform
             VisualizationManager.updateRegionDisplay(region);
@@ -478,7 +474,7 @@ class RegionCommands {
             String oldName = region.getName();
             levelData.renameLocal(region, regionName);
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.success", "Changed name of region %s from '%s' to '%s'", buildRegionInfoLink(region), oldName, regionName));
-            RegionManager.get().save();
+            RegionManager.get().save(region);
             return 0;
         } catch (IllegalArgumentException ex) {
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.exists", "Dimension %s already contains region with name %s", levelData.getDim().getName(), buildRegionInfoLink(levelData.getLocal(regionName))));
@@ -492,7 +488,7 @@ class RegionCommands {
             parent.removeChild(child);
             dimCache.getDim().addChild(child);
             LocalRegions.ensureLowerRegionPriorityFor(child, Services.REGION_CONFIG.getDefaultPriority());
-            RegionManager.get().save();
+            RegionManager.get().save(parent);
             MutableComponent parentLink = buildRegionInfoLink(parent);
             MutableComponent notLongerChildLink = buildRegionInfoLink(child);
             MutableComponent dimensionalLink = buildRegionInfoLink(dimCache.getDim());
@@ -516,7 +512,7 @@ class RegionCommands {
             child.getParent().removeChild(child);
             parent.addChild(child);
             LocalRegions.ensureHigherRegionPriorityFor(child, parent.getPriority() + 1);
-            RegionManager.get().save();
+            RegionManager.get().save(parent);
             MutableComponent parentLink = buildRegionInfoLink(parent);
             MutableComponent childLink = buildRegionInfoLink(child);
             MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), ADD, REMOVE);
@@ -561,7 +557,7 @@ class RegionCommands {
             int oldPriority = region.getPriority();
             if (oldPriority != priority) {
                 region.setPriority(priority);
-                RegionManager.get().save();
+                RegionManager.get().save(region);
                 MutableComponent undoLink = buildRegionActionUndoLink(ctx.getInput(), String.valueOf(oldPriority), String.valueOf(priority));
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.state.priority.set.success", "Changed priority for region %s: %s -> %s",
                                 buildRegionInfoLink(region), oldPriority, region.getPriority())
@@ -662,7 +658,7 @@ class RegionCommands {
             return 0;
         }
         tpAnchors.addOrUpdate(name, pos);
-        RegionManager.get().save();
+        RegionManager.get().save(region);
 
         var anchor = tpAnchors.getTpAnchor(name);
         VisualizationManager.updateTpAnchor(region, anchor);
@@ -683,7 +679,7 @@ class RegionCommands {
         }
         TeleportAnchor anchor = tpAnchors.getTpAnchor(name);
         tpAnchors.removeTpAnchor(name);
-        RegionManager.get().save();
+        RegionManager.get().save(region);
         // TODO: Trigger update - if tpAnchor is currently visualized, it should be removed
         var blockTpLink = ChatLinkBuilder.buildDimensionalBlockTpLink(region.getDim(), anchor.getPos(), Component.literal(shortBlockPos(anchor.getPos())));
         sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.removed.msg", "Removed teleport anchor '%s' (at %s ) from %s", name, blockTpLink, buildRegionInfoLink(region)));
@@ -714,7 +710,7 @@ class RegionCommands {
             return 1;
         }
         tpAnchors.rename(name, newName);
-        RegionManager.get().save();
+        RegionManager.get().save(region);
         // TODO: Trigger update - if tpAnchor is currently visualized, it should be removed and displayed with new name
         sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.region.tp-anchor.renamed.msg", "Renamed teleport anchor '%s' to '%s'", name, newName));
         return 0;

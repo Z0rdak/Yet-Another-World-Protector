@@ -310,7 +310,7 @@ public class CommandUtil {
 
     public static int setActiveState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, boolean activate) {
         region.setIsActive(activate);
-        RegionManager.get().save();
+        RegionManager.get().save(region);
         MutableComponent undoLink = ChatLinkBuilder.buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!activate), String.valueOf(activate));
         MutableComponent msg = Component.translatableWithFallback("cli.msg.info.region.state.enable.set.value", "Region state of %s is now: %s",
                 ChatLinkBuilder.buildRegionInfoLink(region), region.isActive() ? "active" : "inactive");
@@ -320,7 +320,7 @@ public class CommandUtil {
 
     public static int setAlertState(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, boolean showAlert) {
         region.setIsMuted(!showAlert);
-        RegionManager.get().save();
+        RegionManager.get().save(region);
         MutableComponent undoLink = ChatLinkBuilder.buildRegionActionUndoLink(ctx.getInput(), String.valueOf(!showAlert), String.valueOf(showAlert));
         MutableComponent msg = Component.translatableWithFallback("cli.msg.info.state.alert.set.value", "Flag messages of %s are now: %s",
                 ChatLinkBuilder.buildRegionInfoLink(region), region.isMuted() ? "muted" : "active");
@@ -341,7 +341,7 @@ public class CommandUtil {
         MutableComponent teamInfo = buildGroupInfo(region, team.getName(), GroupType.TEAM);
         if (region.getGroup(group).hasTeam(team.getName())) {
             region.removeTeam(team.getName(), group);
-            RegionManager.get().save();
+            RegionManager.get().save(region);
             MutableComponent msg = Component.translatableWithFallback("cli.msg.info.region.group.team.removed", "Removed team '%s' (group '%s') from %s", teamInfo, group,
                     ChatLinkBuilder.buildRegionInfoLink(region));
             sendCmdFeedback(ctx.getSource(), Messages.substitutable("%s %s", msg, undoLink));
@@ -409,7 +409,7 @@ public class CommandUtil {
             MutableComponent msg = Component.translatableWithFallback("cli.msg.info.region.group.player.removed", "Removed player '%s' (group '%s') from %s", playerInfo, group,
                     ChatLinkBuilder.buildRegionInfoLink(region));
             sendCmdFeedback(ctx.getSource(), Messages.substitutable("%s %s", msg, undoLink));
-            RegionManager.get().save();
+            RegionManager.get().save(region);
             return 0;
         }
 
@@ -508,7 +508,7 @@ public class CommandUtil {
         MutableComponent undoLink = ChatLinkBuilder.buildRegionActionUndoLink(ctx.getInput(), ADD, REMOVE);
         if (!region.hasPlayer(uuid, group)) {
             region.addPlayer(uuid, name, group);
-            RegionManager.get().save();
+            RegionManager.get().save(region);
             MutableComponent msg = Component.translatableWithFallback("cli.msg.info.region.group.player.added", "Added player '%s' as '%s' to %s", name, group, regionInfoLink);
             sendCmdFeedback(ctx.getSource(), Messages.substitutable("%s %s", msg, undoLink));
             return 0;
@@ -527,7 +527,7 @@ public class CommandUtil {
         MutableComponent teamHoverInfo = buildTeamHoverComponent(team);
         if (!region.hasTeam(team.getName(), group)) {
             region.addTeam(team.getName(), group);
-            RegionManager.get().save();
+            RegionManager.get().save(region);
             MutableComponent undoLink = ChatLinkBuilder.buildRegionActionUndoLink(ctx.getInput(), ADD, REMOVE);
             MutableComponent msg = Component.translatableWithFallback("cli.msg.info.region.group.team.added", "Added team '%s' as '%s' to region %s",
                     teamHoverInfo, group, regionInfoLink);
@@ -559,7 +559,7 @@ public class CommandUtil {
             FlagEvent.Remove remove = new FlagEvent.Remove(player, region, iFlag);
             Services.FLAG_EVENT_DISPATCHER.post(remove);
             region.removeFlag(flag.name);
-            RegionManager.get().save();
+            RegionManager.get().save(region);
             MutableComponent msg = Component.translatableWithFallback("cli.msg.flag.removed", "Removed flag '%s' from %s", flag.name,
                     ChatLinkBuilder.buildRegionInfoLink(region));
             MutableComponent undoLink = ChatLinkBuilder.buildRegionActionUndoLink(ctx.getInput(), REMOVE, ADD);
@@ -584,7 +584,7 @@ public class CommandUtil {
                 .collect(Collectors.toSet());
         // flagsToCopy.forEach(region::addFlag);
         srcRegion.getFlags().flags().forEach(targetRegion::addFlag);
-        RegionManager.get().save();
+        RegionManager.get().save(targetRegion);
         sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.copy.region.flags", "Copied %s flag(s) from region %s to %s", flagsToCopy.size(), ChatLinkBuilder.buildRegionInfoLink(srcRegion), ChatLinkBuilder.buildRegionInfoLink(targetRegion)));
         return 0;
     }
@@ -595,7 +595,7 @@ public class CommandUtil {
         if (srcRegion instanceof IMarkableRegion regionSource && targetRegion instanceof IMarkableRegion regionTarget) {
             regionTarget.setPriority(regionSource.getPriority());
         }
-        RegionManager.get().save();
+        RegionManager.get().save(targetRegion);
         sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.copy.region.state", "Copied state from region %s to %s", ChatLinkBuilder.buildRegionInfoLink(srcRegion), ChatLinkBuilder.buildRegionInfoLink(targetRegion)));
         return 0;
     }
@@ -609,7 +609,7 @@ public class CommandUtil {
             //playerEntriesToCopy.forEach(entry -> region.getGroup(group).addPlayer(entry.getKey(), entry.getValue()));
 
             srcRegion.getGroup(group).getPlayers().forEach((uuid, name) -> targetRegion.getGroup(group).addPlayer(uuid, name));
-            RegionManager.get().save();
+            RegionManager.get().save(targetRegion);
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.copy.region.players", "Copied %s player(s) of group '%s' from %s to %s", playerEntriesToCopy.size(), group, ChatLinkBuilder.buildRegionInfoLink(srcRegion), ChatLinkBuilder.buildRegionInfoLink(targetRegion)));
             return 0;
         }
@@ -633,7 +633,7 @@ public class CommandUtil {
         region.getFlags().clear();
         MutableComponent feedbackMsg = Component.translatableWithFallback("cli.msg.info.region.flag.cleared", "Removed %s flag(s) from %s", amount, ChatLinkBuilder.buildRegionInfoLink(region));
         sendCmdFeedback(ctx.getSource(), feedbackMsg);
-        RegionManager.get().save();
+        RegionManager.get().save(region);
         return 0;
     }
 
@@ -651,7 +651,7 @@ public class CommandUtil {
         region.getGroup(groupName).clearPlayers();
         MutableComponent feedbackMsg = Component.translatableWithFallback("cli.msg.info.region.players.cleared", "Cleared %s players of group '%s' for %s\",", ChatLinkBuilder.buildRegionInfoLink(region), amount, groupName);
         sendCmdFeedback(ctx.getSource(), feedbackMsg);
-        RegionManager.get().save();
+        RegionManager.get().save(region);
         return 0;
     }
 
@@ -669,7 +669,7 @@ public class CommandUtil {
         region.getGroup(groupName).clearTeams();
         MutableComponent feedbackMsg = Component.translatableWithFallback("cli.msg.info.region.teams.cleared", "Cleared %s teams of group '%s' for %s", ChatLinkBuilder.buildRegionInfoLink(region), amount, groupName);
         sendCmdFeedback(ctx.getSource(), feedbackMsg);
-        RegionManager.get().save();
+        RegionManager.get().save(region);
         return 0;
     }
 
@@ -721,7 +721,7 @@ public class CommandUtil {
             FlagEvent.Add add = new FlagEvent.Add(player, region, iFlag);
             Services.FLAG_EVENT_DISPATCHER.post(add);
             region.addFlag(iFlag);
-            RegionManager.get().save();
+            RegionManager.get().save(region);
             MutableComponent flagLink = ChatLinkBuilder.buildFlagInfoLink(region, iFlag);
             MutableComponent msg = Component.translatableWithFallback("cli.msg.flag.added", "Added flag '%s' to %s",
                     flagLink, ChatLinkBuilder.buildRegionInfoLink(region));
