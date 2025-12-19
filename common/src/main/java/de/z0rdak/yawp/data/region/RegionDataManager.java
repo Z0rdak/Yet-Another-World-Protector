@@ -37,23 +37,25 @@ public class RegionDataManager {
 
     public static final Logger LOGGER = LogManager.getLogger(Constants.MOD_ID.toUpperCase() + "-RegionDataManager");
     private static MinecraftServer serverInstance;
-    private static LevelListData savedLevelData;
+    /**
+     * Implicit assumption: If savedLevelData contains a level, its also present in dimRegionStorage
+     */
+    private static LevelListData trackedLevelData;
     private static GlobalRegionData globalRegionData = new GlobalRegionData();
-    private static final Map<ResourceLocation, LevelRegionData> dimRegionStorage = new  HashMap<>();
+    private static final Map<ResourceLocation, LevelRegionData> levelRegionData = new  HashMap<>();
 
-    public static LevelListData getSavedLevelData() {
-        return savedLevelData;
+    public static LevelListData getTrackedLevelData() {
+        return trackedLevelData;
     }
 
     public static Set<ResourceLocation> getLevels() {
-        return new HashSet<>(savedLevelData.getLevels());
+        return new HashSet<>(trackedLevelData.getLevels());
     }
 
     public static boolean hasLevel(ResourceLocation level) {
-        return savedLevelData.hasDimEntry(level);
+        return trackedLevelData.doesTrack(level);
     }
 
-    // TODO: Move to API
     public static Set<String> getLevelNames() {
         return getLevels().stream().map(ResourceLocation::toString).collect(Collectors.toSet());
     }
@@ -75,24 +77,24 @@ public class RegionDataManager {
 
     public static void save(boolean force) {
         if (force) {
-            saveDimList(serverInstance);
-            saveGlobalData(serverInstance);
-            saveTrackedLevels(serverInstance);
+            saveTrackedLevelList();
+            saveGlobalData();
+            saveTrackedLevels();
         } else {
-            savedLevelData.setDirty();
+            trackedLevelData.setDirty();
             globalRegionData.setDirty();
-            dimRegionStorage.forEach((key, value) -> value.setDirty());
+            levelRegionData.forEach((key, value) -> value.setDirty());
         }
     }
 
     public static LevelListData getSavedDims(@Nullable Supplier<LevelListData> defaultSupplier) {
         var overworld = serverInstance.overworld();
         DimensionDataStorage storage = overworld.getDataStorage();
-        savedLevelData = storage.computeIfAbsent(
+        trackedLevelData = storage.computeIfAbsent(
                 LevelListData::load,
                 defaultSupplier == null ? LevelListData::new : defaultSupplier,
                 LevelListData.TYPE);
-        return savedLevelData;
+        return trackedLevelData;
     }
 
     public static void onServerStarting(MinecraftServer server) {
@@ -101,38 +103,58 @@ public class RegionDataManager {
         checkYawpDir(server);
     }
 
-    private static void saveTrackedLevels(MinecraftServer server){
-        server.getAllLevels().forEach(level -> {
-            ResourceLocation levelRl = level.dimension().location();
-            if (savedLevelData.hasDimEntry(levelRl)) {
-                saveLevelData(server, level);
-            }
-        });
+    private static void saveTrackedLevels(){
+        serverInstance.getAllLevels().forEach(RegionDataManager::saveLevelData);
     }
 
     public static void save(MinecraftServer server, boolean flush, boolean force) {
-        LOGGER.info(Component.translatableWithFallback("data.region.levels.save.forced", "Requested save. Saving region data for all levels").getString());
         if (serverInstance == null) serverInstance = server;
         save(force);
     }
 
-    private static void saveDimList(MinecraftServer server) {
-        DimensionDataStorage dataStorage = server.overworld().getDataStorage();
-        dataStorage.set(LevelListData.TYPE, savedLevelData);
+    public static void saveLevel(ResourceLocation rl) {
+        if (!trackedLevelData.doesTrack(rl)) {
+            return;
+        }
+        saveLevelData(rl);
     }
 
-    private static void saveGlobalData(MinecraftServer server) {
-        DimensionDataStorage dataStorage = server.overworld().getDataStorage();
+    public static void saveLevel(ServerLevel level) {
+        saveLevel(level.dimension().location());
+    }
+
+    // Duplicated because I want the logging info at a common place and not in the hooks of the mod-loaders
+    public static void saveOnUnload(ServerLevel level) {
+        var levelRl = level.dimension().location();
+        if (!trackedLevelData.doesTrack(levelRl)) {
+            return;
+        }
+        LOGGER.info(Component.translatableWithFallback("data.region.level.save.unload", "Unloading level '%s'. Saving region data", level.dimension().location().toString()).getString());
+        saveLevelData(level);
+    }
+
+    private static void saveTrackedLevelList() {
+        DimensionDataStorage dataStorage = serverInstance.overworld().getDataStorage();
+        dataStorage.set(LevelListData.TYPE, trackedLevelData);
+    }
+
+    private static void saveGlobalData() {
+        DimensionDataStorage dataStorage = serverInstance.overworld().getDataStorage();
         dataStorage.set(Constants.MOD_ID + "/" + GLOBAL_REGION_FILE_NAME, globalRegionData);
     }
 
-    private static void saveLevelData(MinecraftServer server, Level level) {
-        DimensionDataStorage storage = server.overworld().getDataStorage();
-        ResourceLocation levelRl = level.dimension().location();
-        LevelRegionData levelRegionData = dimRegionStorage.get(levelRl);
-        LOGGER.info(Component.translatableWithFallback("data.region.level.save", "Saving region data for level '%s'", levelRl.toString()).getString());
-        storage.set(LevelRegionData.buildSavedDataType(levelRl), levelRegionData);
-        levelRegionData.setDirty();
+    private static void saveLevelData(ServerLevel level) {
+        saveLevelData(level.dimension().location());
+    }
+
+    private static void saveLevelData(ResourceLocation levelRl) {
+        if (trackedLevelData.doesTrack(levelRl)) {
+            DimensionDataStorage storage = serverInstance.overworld().getDataStorage();
+            LevelRegionData levelRegionData = RegionDataManager.levelRegionData.get(levelRl);
+            LOGGER.info(Component.translatableWithFallback("data.region.level.save", "Saving region data for level '%s'", levelRl.toString()).getString());
+            storage.set(LevelRegionData.buildSavedDataType(levelRl), levelRegionData);
+            levelRegionData.setDirty();
+        }
     }
 
     public static void saveOnStop(MinecraftServer server) {
@@ -141,30 +163,23 @@ public class RegionDataManager {
         save(true);
     }
 
-    public static void saveOnUnload(MinecraftServer server, ServerLevel level) {
-        if (savedLevelData.hasDimEntry(level.dimension().location())) {
-            LOGGER.info(Component.translatableWithFallback("data.region.level.save.unload", "Unloading level '%s'. Saving region data", level.dimension().location().toString()).getString());
-            saveLevelData(server, level);
-        }
-    }
-
     public static void loadLevelListData(MinecraftServer server) {
         try {
             if (serverInstance == null)
                 serverInstance = server;
             var dataStorage = server.overworld().getDataStorage();
-            savedLevelData = LevelListData.get(dataStorage, () -> {
+            trackedLevelData = LevelListData.get(dataStorage, () -> {
                 LOGGER.info(Component.translatableWithFallback("data.region.levels.load.missing", "Missing level list for region data (ignore on first startup). Initializing...").getString());
                 return new LevelListData();
             });
-            saveDimList(server);
-            LOGGER.info(Component.translatableWithFallback("data.region.levels.load.success", "Found region data for %s dimension(s)", savedLevelData.getLevels().size()).getString());
+            saveTrackedLevelList();
+            LOGGER.info(Component.translatableWithFallback("data.region.levels.load.success", "Found region data for %s dimension(s)", trackedLevelData.getLevels().size()).getString());
 
             globalRegionData = GlobalRegionData.get(dataStorage, () -> {
                 LOGGER.info(Component.translatableWithFallback("data.region.global.missing", "Missing global region data (ignore on first startup). Initializing...").getString());
                 return new GlobalRegionData();
             });
-            saveGlobalData(server);
+            saveGlobalData();
         } catch (NullPointerException npe) {
             LOGGER.error(Component.translatableWithFallback("data.region.level.local.load.failed", "Loading level region list failed!").getString(), npe);
         }
@@ -177,26 +192,26 @@ public class RegionDataManager {
             var levelRl = level.dimension().location();
             var dataStorage = server.overworld().getDataStorage();
             // init level data
-            if (savedLevelData.hasDimEntry(levelRl)) {
-                LevelRegionData levelRegionData = LevelRegionData.get(dataStorage, levelRl, () -> {
+            if (trackedLevelData.doesTrack(levelRl)) {
+                LevelRegionData newLevelRegionData = LevelRegionData.get(dataStorage, levelRl, () -> {
                     LOGGER.info(Component.translatableWithFallback("data.region.level.local.missing", "Initializing region data for '%s'", levelRl.toString()).getString());
                     return new LevelRegionData(levelRl);
                 });
-                LOGGER.info(Component.translatableWithFallback("data.region.level.local.load.success", "Loaded %s region(s) for '%s'", levelRegionData.regionCount(), levelRl.toString()).getString());
-                dimRegionStorage.put(levelRl, levelRegionData);
-                savedLevelData.addDimEntry(levelRl);
+                LOGGER.info(Component.translatableWithFallback("data.region.level.local.load.success", "Loaded %s region(s) for '%s'", newLevelRegionData.regionCount(), levelRl.toString()).getString());
+                levelRegionData.put(levelRl, newLevelRegionData);
+                trackedLevelData.addTrackingFor(levelRl);
 
                 // restoring region hierarchy
                 LOGGER.info(Component.translatableWithFallback("data.region.level.local.load.restore", "Restoring region hierarchy for '%s'.", levelRl.toString()).getString());
 
                 // restore dim <-> global hierarchy
-                DimensionalRegion dimensionalRegion = levelRegionData.getDim();
+                DimensionalRegion dimensionalRegion = newLevelRegionData.getDim();
                 RegionManager.get().getGlobalRegion().addChild(dimensionalRegion);
-                restoreHierarchy(levelRegionData, dimensionalRegion);
+                restoreHierarchy(newLevelRegionData, dimensionalRegion);
 
                 // restore dim <-> local <-> local hierarchy
-                levelRegionData.getLocals().forEach((regionName, region) -> {
-                    restoreHierarchy(dimRegionStorage.get(levelRl), region);
+                newLevelRegionData.getLocals().forEach((regionName, region) -> {
+                    restoreHierarchy(RegionDataManager.levelRegionData.get(levelRl), region);
                 });
             }
             Services.YAWP_EVENT_DISPATCHER.post(level);
@@ -237,71 +252,64 @@ public class RegionDataManager {
 
     public static void initLevelDataOnLogin(Entity entity, Level level) {
         if (isServerSide(level) && entity instanceof Player) {
-            initLevelData(level.dimension().location());
+            addTrackingFor(level.dimension().location());
         }
     }
 
     public static void initLevelDataOnChangeWorld(Player player, Level srcLvl, Level dstLvl) {
         if (isServerSide(srcLvl)) {
-            initLevelData(dstLvl.dimension().location());
+            addTrackingFor(dstLvl.dimension().location());
         }
     }
 
-    private static LevelRegionData initLevelData(ResourceLocation rl){
-        if (!savedLevelData.hasDimEntry(rl)) {
-            LevelRegionData levelRegionData = new LevelRegionData(rl);
-            DimensionalRegion dimensionalRegion = levelRegionData.getDim();
-            // add default flags from config
-            Set<String> defaultDimFlags = Services.REGION_CONFIG.getDefaultDimFlags();
-            defaultDimFlags.stream()
-                    .map(RegionFlag::fromId)
-                    .forEach(flag -> dimensionalRegion.addFlag(new BooleanFlag(flag)));
-            // set state from config
-            dimensionalRegion.setIsActive(Services.REGION_CONFIG.shouldActivateNewDimRegion());
-            // add as child of global
-            RegionManager.get().getGlobalRegion().addChild(dimensionalRegion);
+    public static void removeTrackingFor(ResourceLocation rl){
+        trackedLevelData.removeTrackingFor(rl);
+        levelRegionData.remove(rl);
+        saveLevel(rl);
+        saveTrackedLevelList();
+    }
 
-            dimRegionStorage.put(rl, levelRegionData);
-            savedLevelData.addDimEntry(rl);
-            LOGGER.info(Component.translatableWithFallback("data.region.level.init", "Initializing region data for level '%s'", rl.toString()).getString());
-            save(false);
-            return levelRegionData;
+    public static LevelRegionData addTrackingFor(ResourceLocation rl){
+        if (trackedLevelData.doesTrack(rl) && levelRegionData.containsKey(rl)) {
+            return levelRegionData.get(rl);
         }
-        return dimRegionStorage.get(rl);
+        LevelRegionData newLevelRegion = new LevelRegionData(rl);
+        trackedLevelData.addTrackingFor(rl);
+        levelRegionData.put(rl, newLevelRegion);
+        DimensionalRegion dimensionalRegion = newLevelRegion.getDim();
+        // add default flags from config
+        Set<String> defaultDimFlags = Services.REGION_CONFIG.getDefaultDimFlags();
+        defaultDimFlags.stream()
+                .map(RegionFlag::fromId)
+                .forEach(flag -> dimensionalRegion.addFlag(new BooleanFlag(flag)));
+        // set state from config
+        dimensionalRegion.setIsActive(Services.REGION_CONFIG.shouldActivateNewDimRegion());
+        // add as child of global
+        RegionManager.get().getGlobalRegion().addChild(dimensionalRegion);
+        LOGGER.info(Component.translatableWithFallback("data.region.level.init", "Initializing region data for level '%s'", rl.toString()).getString());
+        saveLevel(rl);
+        saveTrackedLevelList();
+        return newLevelRegion;
     }
 
     public static Optional<LevelRegionData> getLevelRegionData(ResourceLocation rl) {
-        if (!savedLevelData.hasDimEntry(rl)) {
+        if (!trackedLevelData.doesTrack(rl)) {
             return Optional.empty();
         }
-        return Optional.of(dimRegionStorage.get(rl));
+        return Optional.of(levelRegionData.get(rl));
     }
 
     public static Optional<LevelRegionData> getLevelRegionData(ResourceKey<Level> dim) {
         return getLevelRegionData(dim.location());
     }
 
-    public static LevelRegionData getOrCreate(ResourceLocation rl) {
-        if (!savedLevelData.hasDimEntry(rl)) {
-            return initLevelData(rl);
-        }
-        return dimRegionStorage.get(rl);
-    }
-
-    public static LevelRegionData getOrCreate(Level level)  {
-        return getOrCreate(level.dimension().location());
-    }
-
     public static Collection<IMarkableRegion> getLocalsFor(ResourceKey<Level> dim) {
-        return getOrCreate(dim.location()).getLocalList();
-    }
-
-    public static LevelRegionData getOrCreate(ResourceKey<Level> dim) {
-       return getOrCreate(dim.location());
+        var maybeRld = getLevelRegionData(dim.location());
+        return maybeRld.isPresent() ? maybeRld.get().getLocalList() : new ArrayList<>();
     }
 
     public static void resetLevelData(ResourceLocation rl) {
-        dimRegionStorage.remove(rl);
+        levelRegionData.remove(rl);
     }
 
     public static void resetLevelData(ResourceKey<Level> dim) {
