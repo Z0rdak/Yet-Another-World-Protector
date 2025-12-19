@@ -1,14 +1,11 @@
 package de.z0rdak.yawp.config;
 
 import de.z0rdak.yawp.api.events.flag.FlagEvents;
-import de.z0rdak.yawp.api.events.region.YawpEvents;
 import de.z0rdak.yawp.config.server.*;
-import de.z0rdak.yawp.handler.PlayerPosTracker;
-import de.z0rdak.yawp.handler.RegionSpatialCache;
+import de.z0rdak.yawp.handler.YawpEventHandler;
+import de.z0rdak.yawp.platform.Services;
 import fuzs.forgeconfigapiport.api.config.v2.ForgeConfigRegistry;
 import fuzs.forgeconfigapiport.api.config.v2.ModConfigEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraftforge.fml.config.ModConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -54,11 +51,9 @@ public final class ConfigRegistry {
                     FEATURE_CONFIG_LOGGER.info("Player tracking feature: {}", enablePlayerTracker ? "enabled" : "disabled" );
 
                     if (enablePlayerTracker) {
-                        // Note: For now the spatial indexing is only used for this feature, so I guess it can stay here
-                        YawpEvents.ON_REGION_DATA_LOADED.register(RegionSpatialCache::initRegions);
-
-                        ServerTickEvents.START_WORLD_TICK.register(PlayerPosTracker::tickLevel);
-                        ServerPlayConnectionEvents.DISCONNECT.register(PlayerPosTracker::onPlayerDisc);
+                        YawpEventHandler.enableRegionSpatialCache();
+                        Services.FEATURE_MANAGER.enablePlayerTracker();
+                        YawpEventHandler.enablePlayerRegionMessages();
                     }
                 }
                 break;
