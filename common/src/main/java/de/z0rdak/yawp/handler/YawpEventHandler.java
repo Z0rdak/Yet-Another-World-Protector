@@ -2,16 +2,20 @@ package de.z0rdak.yawp.handler;
 
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.api.events.flag.FlagEvent;
+import de.z0rdak.yawp.api.events.flag.FlagEvents;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
 import de.z0rdak.yawp.api.events.region.RegionEvents;
 import de.z0rdak.yawp.api.events.region.YawpEvents;
 import de.z0rdak.yawp.api.visualization.VisualizationManager;
+import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
+import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.platform.Services;
+import de.z0rdak.yawp.util.ChatComponentBuilder;
 import de.z0rdak.yawp.util.text.TitleBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.Registries;
@@ -20,6 +24,7 @@ import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.Mob;
@@ -184,6 +189,170 @@ public final class YawpEventHandler {
                 .timings(10, 40, 15)
                 .build();
         title.send();
+        return true;
+    }
+
+    public static void enableDetailedEventLogger(){
+        /* Debug loggers */
+        RegionEvents.ON_CREATE.register(YawpEventHandler::logCreateRegion);
+        RegionEvents.ON_REMOVE.register(YawpEventHandler::logRemoveRegion);
+        RegionEvents.ON_UPDATE_AREA.register(YawpEventHandler::logUpdateRegion);
+        RegionEvents.ON_RENAME.register(YawpEventHandler::logRenameRegion);
+        RegionEvents.ON_PLAYER_ENTER_REGION.register(YawpEventHandler::logEnterRegion);
+        RegionEvents.ON_PLAYER_LEAVE_REGION.register(YawpEventHandler::logLeaveRegion);
+        FlagEvents.ON_ADD_FLAG.register(YawpEventHandler::logAddFlag);
+        FlagEvents.ON_REMOVE_FLAG.register(YawpEventHandler::logRemoveFlag);
+        FlagEvents.ON_UPDATE_FLAG_MESSAGE.register(YawpEventHandler::logUpdateFlagMsg);
+    }
+
+    private static boolean logRenameRegion(RegionEvent.Rename rename) {
+        if (rename.isCanceled()) {
+            Constants.LOGGER.debug("onRenameRegion was canceled.");
+            return false;
+        }
+        ServerPlayer player = rename.getPlayer();
+        var region = rename.getRegion();
+        var oldName = rename.getOldName();
+        var newName = region.getName();
+        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().location() + ")" : "";
+        if (player == null) {
+            Constants.LOGGER.debug("Region '{}'{} was renamed to '{}'.", oldName, regionLoc, newName);
+        } else {
+            Constants.LOGGER.debug("Region '{}'{} was renamed to '{}' by '{}'.", oldName, regionLoc, newName, player.getScoreboardName());
+        }
+        return true;
+    }
+
+    private static FlagEvent.UpdateFlagMessage logUpdateFlagMsg(FlagEvent.UpdateFlagMessage updateFlagMessage) {
+        ServerPlayer player = updateFlagMessage.getPlayer();
+        var region = updateFlagMessage.getRegion();
+        var regionName = region.getName();
+        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().location() + ")" : "";
+        var flagName = updateFlagMessage.getFlag().getName();
+        var newMsg = updateFlagMessage.getNewMsg();
+        if (player == null) {
+            Constants.LOGGER.debug("Flag '{}' in region '{}'{} updated message to '{}'.", flagName, regionName, regionLoc, newMsg);
+        } else {
+            Constants.LOGGER.debug("Player '{}' updated flag '{}' in region '{}'{} message to '{}'.",
+                    player.getScoreboardName(), flagName, regionName, regionLoc, newMsg);
+        }
+        return updateFlagMessage;
+    }
+
+    private static boolean logRemoveFlag(FlagEvent.Remove remove) {
+        if (remove.isCanceled()) {
+            Constants.LOGGER.debug("onRemoveFlag was canceled.");
+            return false;
+        }
+        ServerPlayer player = remove.getPlayer();
+        var region = remove.getRegion();
+        var regionName = region.getName();
+        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().location() + ")" : "";
+        var flagName = remove.getFlag().getName();
+        if (player == null) {
+            Constants.LOGGER.debug("Flag '{}' removed from region '{}'{}.", flagName, regionName, regionLoc);
+        } else {
+            Constants.LOGGER.debug("Player '{}' removed flag '{}' from region '{}'{}.",
+                    player.getScoreboardName(), flagName, regionName, regionLoc);
+        }
+        return true;
+    }
+
+    private static boolean logAddFlag(FlagEvent.Add add) {
+        if (add.isCanceled()) {
+            Constants.LOGGER.debug("onAddFlag was canceled.");
+            return false;
+        }
+        ServerPlayer player = add.getPlayer();
+        var region = add.getRegion();
+        var regionName = region.getName();
+        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().location() + ")" : "";
+        var flagName = add.getFlag().getName();
+        if (player == null) {
+            Constants.LOGGER.debug("Flag '{}' added to region '{}'{}.", flagName, regionName, regionLoc);
+        } else {
+            Constants.LOGGER.debug("Player '{}' added flag '{}' to region '{}'{}.",
+                    player.getScoreboardName(), flagName, regionName, regionLoc);
+        }
+        return true;
+    }
+
+    private static boolean logEnterRegion(RegionEvent.PlayerEnter onEnter) {
+        if (onEnter.isCanceled()) {
+            Constants.LOGGER.debug("onEnterRegion was canceled.");
+            return false;
+        }
+        var player = onEnter.getPlayer();
+        var region = onEnter.getRegion();
+        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().location() + ")" : "";
+        Constants.LOGGER.debug("Player {} entered region '{}'{} at {}",
+                player.getScoreboardName(), region.getName(), regionLoc, ChatComponentBuilder.tinyBlockPos(player.blockPosition()));
+        return true;
+    }
+
+    private static boolean logLeaveRegion(RegionEvent.PlayerLeave onLeave) {
+        if (onLeave.isCanceled()) {
+            Constants.LOGGER.debug("onLeaveRegion was canceled.");
+            return false;
+        }
+        var player = onLeave.getPlayer();
+        var region = onLeave.getRegion();
+        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().location() + ")" : "";
+
+        Constants.LOGGER.debug("Player {} left region '{}'{} at {}",
+                player.getScoreboardName(), region.getName(), regionLoc, ChatComponentBuilder.tinyBlockPos(player.blockPosition()));
+        return true;
+    }
+
+    private static boolean logCreateRegion(RegionEvent.Create create) {
+        if (create.isCanceled()) {
+            Constants.LOGGER.debug("Region creation was canceled.");
+            return false;
+        }
+        ServerPlayer player = create.getPlayer();
+        var region = create.getRegion();
+        var regionName = region.getName();
+        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().location() + ")" : "";
+        if (player == null) {
+            Constants.LOGGER.debug("Region '{}'{} was created.", regionName, regionLoc);
+        } else {
+            Constants.LOGGER.debug("Region '{}'{} was created by '{}'.", regionName, regionLoc, player.getScoreboardName());
+        }
+        return true;
+    }
+
+    private static boolean logRemoveRegion(RegionEvent.Remove remove) {
+        if (remove.isCanceled()) {
+            Constants.LOGGER.debug("onRemoveRegion was canceled.");
+            return false;
+        }
+        ServerPlayer player = remove.getPlayer();
+        var region = remove.getRegion();
+        var regionName = region.getName();
+        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().location() + ")" : "";
+        if (player == null) {
+            Constants.LOGGER.debug("Region '{}'{} was deleted.", regionName, regionLoc);
+        } else {
+            Constants.LOGGER.debug("Region '{}'{} was deleted by '{}'.", regionName, regionLoc, player.getScoreboardName());
+        }
+        return true;
+    }
+
+    private static boolean logUpdateRegion(RegionEvent.UpdateArea update) {
+        if (update.isCanceled()) {
+            Constants.LOGGER.debug("onUpdateRegion was canceled.");
+            return false;
+        }
+        ServerPlayer player = update.getPlayer();
+        var region = update.getRegion();
+        var regionName = region.getName();
+        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().location() + ")" : "";
+
+        if (player == null) {
+            Constants.LOGGER.debug("Region area of '{}'{} was updated.", regionName, regionLoc);
+        } else {
+            Constants.LOGGER.debug("Region area of '{}'{} was updated by '{}'.", regionName, regionLoc, player.getScoreboardName());
+        }
         return true;
     }
 }
