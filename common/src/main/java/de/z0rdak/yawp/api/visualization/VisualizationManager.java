@@ -43,24 +43,25 @@ public class VisualizationManager {
     public final static Identifier REGION_BLOCK_DISPLAY_TAG = Identifier.parse("yawp:region_block_display");
     public final static Identifier REGION_TEXT_DISPLAY_TAG = Identifier.parse("yawp:region_text_display");
 
-    public static void nukeDisplayEntities(ServerLevel level) {
+    public static int nukeDisplayEntities(ServerLevel level) {
         var entities = level.getEntities(EntityTypeTest.forClass(Display.class), (entity) -> {
             boolean containsTextTag = entity.entityTags().contains(REGION_TEXT_DISPLAY_TAG.toString());
             boolean containsBlockTag = entity.entityTags().contains(REGION_BLOCK_DISPLAY_TAG.toString());
             return containsTextTag || containsBlockTag;
         });
-        var entityAmount = entities.size();
-        entities.forEach(e -> e.remove(Entity.RemovalReason.DISCARDED));
+        var entityList = new ArrayList<>(entities);
+        var entityAmount = entityList.size();
+        entityList.forEach(e -> e.remove(Entity.RemovalReason.DISCARDED));
         if (entityAmount > 0) {
-            VISUALIZATION_LOGGER.info("Nuked all ({}) untracked region display entities in level {}.", entityAmount, level.dimension().identifier().toString());
+            VISUALIZATION_LOGGER.info("Nuked all ({}) untracked region display entities in level {}.", entityAmount, level.dimension().identifier());
         }
+        return entityAmount;
     }
 
     private static MinecraftServer serverInstance;
     // level key -> VisualizationManager
     private static final Map<Identifier, VisualizationManager> dimVisualizationManagers = new HashMap<>();
     // region name -> RegionVisualizationManager
-
     private final Map<String, RegionVisualizationManager> regionDisplayManagers;
 
     private VisualizationManager() {
