@@ -64,25 +64,8 @@ public abstract class ServerPlayerMixin {
             checkEvent = new FlagCheckRequest(player.blockPosition(), ENTER_DIM, getDimKey(destination), player);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;
-            var res = FlagEvaluator.process(checkEvent)
+            FlagEvaluator.process(checkEvent)
                     .onDenyWithMsg(result -> cir.setReturnValue(null));
-
-
-            ServerPlayer serverPlayer = (ServerPlayer) player; // argument later
-            IProtectedRegion region = res.result().getResponsible(); // argument later
-
-            var title = Component.translatable("%s", region.getName()).withStyle(ChatFormatting.YELLOW);
-            var subtitle = Component.translatable("Hope you brought sunscreen, %s!", serverPlayer.getScoreboardName()).withStyle(ChatFormatting.RED);
-            var actionbar = Component.literal("You can't get mine!").withStyle(ChatFormatting.DARK_PURPLE);
-            TitleBuilder.BuiltTitle regionTitle = TitleBuilder.of(serverPlayer, region)
-                    .title(title)
-                    .subtitle(subtitle)
-                    .actionbar(actionbar)
-                    .fadeIn(10).stay(80).fadeOut(20)
-                    .build();
-
-            regionTitle.send();
-
         }
     }
 
