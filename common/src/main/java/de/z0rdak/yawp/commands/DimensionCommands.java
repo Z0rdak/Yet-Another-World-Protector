@@ -9,6 +9,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.api.commands.CommandConstants;
 import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
+import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.commands.arguments.region.ContainingOwnedRegionArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.constants.Constants;
@@ -159,8 +160,7 @@ class DimensionCommands {
 
     public static int nukeDisplayEntities(CommandContext<CommandSourceStack> ctx, ServerLevel level) {
         var entityAmount = VisualizationManager.nukeDisplayEntities(level);
-        // TODO: I18n
-        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Nuked all (%s) yawp entities in '%s'", "Nuked all (%s) yawp entities in '%s'", entityAmount, level.dimension().location().toString()));
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.nuke-display-entities", "Removed all (%s) visualization entities '%s'", entityAmount, level.dimension().location().toString()));
         return 0;
     }
 

@@ -78,6 +78,7 @@
   "cli.msg.dim.flag.list.link.hover": "List flags in dimension %s",
   "cli.msg.dim.help.header": "YetAnotherWorldProtector dimension command help",
   "cli.msg.dim.info": "Print region info",
+  "cli.msg.dim.nuke-display-entities": "Removed all (%s) visualization entities '%s'",
   "cli.msg.dim.info.flags": "Flags",
   "cli.msg.dim.info.flags.add": "Add flag to region",
   "cli.msg.dim.info.members": "Members",
