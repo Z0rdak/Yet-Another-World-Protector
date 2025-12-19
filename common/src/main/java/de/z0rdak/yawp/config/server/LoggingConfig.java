@@ -58,6 +58,9 @@ public class LoggingConfig {
         LOG_EVENTS_DETAIL = BUILDER.comment("Enable logging of detailed event info.")
                 .define("log_event_details", false);
 
+        LOG_EVENTS_DETAIL = BUILDER.comment("Enable logging of detailed event info.")
+                .define("log_event_details", false);
+
         // DETAILED_PLAYER_FLAG_LOG = BUILDER.comment("Enable logging of detailed flag checks for player related flags.").define("log_detailed_player_flags", false);
 
         BUILDER.pop();
