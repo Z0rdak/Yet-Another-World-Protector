@@ -28,6 +28,7 @@ public class LoggingConfig {
     private static final ForgeConfigSpec.ConfigValue<Boolean> FLAG_CHECK_LOG;
     private static final ForgeConfigSpec.ConfigValue<Boolean> FLAG_RESULT_LOG;
     private static final ForgeConfigSpec.ConfigValue<Boolean> LOG_EMPTY_RESULTS;
+    private static final ForgeConfigSpec.ConfigValue<Boolean> LOG_EVENTS_DETAIL;
     // private static final ForgeConfigSpec.ConfigValue<Boolean> DETAILED_PLAYER_FLAG_LOG;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> LOG_RESULT_VALUES;
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> LOG_FLAG_TAGS;
@@ -55,6 +56,9 @@ public class LoggingConfig {
 
         LOG_FLAGS = BUILDER.comment("List of flags which shall be logged.")
                 .defineListAllowEmpty(List.of("log_flags"), () -> Arrays.asList(RegionFlag.BREAK_BLOCKS.name, RegionFlag.PLACE_BLOCKS.name), LoggingConfig::isValidFlag);
+
+        LOG_EVENTS_DETAIL = BUILDER.comment("Enable logging of detailed event info.")
+                .define("log_event_details", false);
 
         // DETAILED_PLAYER_FLAG_LOG = BUILDER.comment("Enable logging of detailed flag checks for player related flags.").define("log_detailed_player_flags", false);
 
@@ -123,6 +127,10 @@ public class LoggingConfig {
         }
         LOGGING_CONFIG_LOGGER.warn("Invalid FlagState supplied for 'log_result_values': {}", flagState);
         return false;
+    }
+
+    public static boolean shouldLogEvents() {
+        return LOG_EVENTS_DETAIL.get();
     }
 
     public static boolean shouldLogFlagChecks() {
