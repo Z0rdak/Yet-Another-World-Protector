@@ -33,11 +33,13 @@ import net.minecraft.world.item.Items;
 import java.util.Collections;
 import java.util.Objects;
 
+import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.DimensionCommands.getRandomExample;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.ChatLinkBuilder.buildRegionInfoLink;
 import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
+import static de.z0rdak.yawp.util.StickUtil.getStickType;
 import static net.minecraft.ChatFormatting.RED;
 
 public final class MarkerCommands {
@@ -84,7 +86,14 @@ public final class MarkerCommands {
 
     private static int createMarkedRegion(CommandContext<CommandSourceStack> ctx, String regionName, IProtectedRegion parentRegion) {
         try {
-            LevelRegionData levelData = RegionDataManager.getOrCreate(ctx.getSource().getLevel().dimension().location());
+            var levelRl = ctx.getSource().getLevel().dimension().location();
+            var maybeLevelData = RegionDataManager.getLevelRegionData(levelRl);
+            if (maybeLevelData.isEmpty()) {
+                // TODO: CommandLink
+                sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.global.level-not-tracked", "The level '%s' is currently not tracked by YAWP. Track it by using %s.", levelRl, "/yawp global track <level>"));
+                return -1;
+            }
+            var levelData = maybeLevelData.get();
             int res = levelData.isValidRegionName(regionName);
             if (res == -1) {
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.invalid", "Invalid region name supplied: '%s'", regionName));

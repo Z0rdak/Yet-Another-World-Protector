@@ -18,6 +18,8 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
+import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
+
 public class LevelRegionDataArgumentType implements ArgumentType<LevelRegionData> {
 
     private static final Collection<String> EXAMPLES = RegionDataManager.getLevelNames();
@@ -36,12 +38,13 @@ public class LevelRegionDataArgumentType implements ArgumentType<LevelRegionData
                 .map(ResourceKey::location)
                 .anyMatch(loc -> loc.equals(levelRl));
         if (isValidDimResourceLocation) {
-            // TODO: this just creates new lrd, fix it. Init new ones by command to make them available?
-            LevelRegionData dimCache = RegionDataManager.getOrCreate(levelRl);
-            if (dimCache == null) {
+            var maybeLevelData = RegionDataManager.getLevelRegionData(levelRl);
+            if (maybeLevelData.isEmpty()) {
+                // TODO: CommandLink
+                sendCmdFeedback(context.getSource(), Component.translatableWithFallback("cli.msg.global.level-not-tracked", "The level '%s' is currently not tracked by YAWP. Track it by using %s", levelRl, "cmd"));
                 throw ERROR_INVALID_VALUE.create(levelRl.toString());
             }
-            return dimCache;
+            return maybeLevelData.get();
         } else {
             throw ERROR_INVALID_VALUE.create(levelRl.toString());
         }
@@ -64,9 +67,7 @@ public class LevelRegionDataArgumentType implements ArgumentType<LevelRegionData
     @Override
     public LevelRegionData parse(StringReader reader) throws CommandSyntaxException {
         ResourceLocation levelRl = ResourceLocation.read(reader);
-        if (RegionDataManager.hasLevel(levelRl)) {
-            return RegionDataManager.getOrCreate(levelRl);
-        }
-        return null;
+        var maybeLevelData = RegionDataManager.getLevelRegionData(levelRl);
+        return maybeLevelData.orElseThrow( () -> ERROR_INVALID_VALUE.create(levelRl.toString()));
     }
 }
