@@ -190,6 +190,16 @@ public class VisualizationManager {
         rvm.hide(displayType);
     }
 
+    public static void hide(IMarkableRegion region) {
+        ResourceLocation levelRl = region.getDim().location();
+        VisualizationManager vm = getOrCreateVisualizationManager(levelRl);
+        RegionVisualizationManager rvm = getOrCreateRegionVisualizationManager(vm, region);
+        rvm.hide(DisplayType.HULL);
+        rvm.hide(DisplayType.FRAME);
+        rvm.hide(DisplayType.MARKED);
+        rvm.hide(DisplayType.MINIMAL);
+    }
+
     public static void updateRegionDisplay(IMarkableRegion region) {
         ResourceLocation levelRl = region.getDim().location();
         VisualizationManager vm = getOrCreateVisualizationManager(levelRl);
