@@ -6,12 +6,14 @@ import com.mojang.brigadier.context.CommandContext;
 import de.z0rdak.yawp.api.core.RegionManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 
+import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.ChatLinkBuilder.buildRegionInfoLink;
-import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 
 public class GlobalCommands {
 
@@ -40,7 +42,37 @@ public class GlobalCommands {
                                         .executes(ctx -> CommandUtil.setActiveState(ctx, getGlobalRegion(), getEnableArgument(ctx))))
                         )
                 )
-                .then(literal(RESET).executes(GlobalCommands::resetGlobalRegion));
+                .then(literal(RESET).executes(GlobalCommands::resetGlobalRegion))
+                // TODO: Only suggest levels which are not tracked yet
+                .then(literal(TRACK)
+                        .then(Commands.argument(DIM.toString(), DimensionArgument.dimension())
+                        .executes(ctx -> trackLevel(ctx, DimensionArgument.getDimension(ctx, DIM.toString()))))
+                )
+                // TODO: Only suggest levels which are already tracked
+                .then(literal(UNTRACK)
+                        .then(Commands.argument(DIM.toString(), DimensionArgument.dimension())
+                                .executes(ctx -> untrackLevel(ctx, DimensionArgument.getDimension(ctx, DIM.toString()))))
+                );
+    }
+
+    private static int untrackLevel(CommandContext<CommandSourceStack> ctx, ServerLevel level) {
+        RegionManager.get().untrackLevel(level.dimension());
+        if (!RegionManager.get().hasLevelData(level.dimension())) {
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.global.level-not-tracked", "The level '%s' is currently not tracked by YAWP.", level.dimension().toString()));
+            return 1;
+        }
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.global.level.untracked", "The level '%s' is no longer tracked. Its regions are disabled from now on.", level.dimension().toString()));
+        return 0;
+    }
+
+    private static int trackLevel(CommandContext<CommandSourceStack> ctx, ServerLevel level) {
+        var levelRegionData = RegionManager.get().trackLevel(level.dimension());
+        if (RegionManager.get().hasLevelData(level.dimension())) {
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.global.level.already-tracked", "The level '%s' is already tracked.", buildRegionInfoLink(levelRegionData.getDim())));
+            return 1;
+        }
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.global.level.tracked", "The level '%s' is now tracked and available to create regions.", buildRegionInfoLink(levelRegionData.getDim())));
+        return 0;
     }
 
     public static int resetGlobalRegion(CommandContext<CommandSourceStack> ctx) {

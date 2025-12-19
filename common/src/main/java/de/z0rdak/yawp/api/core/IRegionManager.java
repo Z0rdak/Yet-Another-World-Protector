@@ -5,6 +5,7 @@ import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.data.region.LevelRegionData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 
 import java.util.Optional;
@@ -41,7 +42,10 @@ public interface IRegionManager {
      * - shutting down the server gracefully 
      * - or executing the '/save-all' command.
      */
-    void save();
+    void saveAll();
+
+    void save(ServerLevel level);
+    void save(ResourceKey<Level> levelKey);
 
     /**
      * Gets the DimensionalRegion API for the specified dimension key.
@@ -49,7 +53,7 @@ public interface IRegionManager {
      * @param dim the dimension key to get the API for
      * @return the DimensionalRegionApi for the specified dimension key if it exists, otherwise Optional.Empty
      */
-    Optional<IDimensionRegionApi> getDimRegionApi(ResourceKey<Level> dim);
+    Optional<ILevelRegionApi> getDimRegionApi(ResourceKey<Level> dim);
 
     /**
      * Gets the DimensionalRegion API for the specified dimension key (E.g. "minecraft:overworld").
@@ -57,7 +61,7 @@ public interface IRegionManager {
      * @param dimKey the dimension key to get the API for
      * @return the DimensionalRegionApi for the specified dimension key if it exists, otherwise Optional.Empty
      */
-    Optional<IDimensionRegionApi> getDimRegionApiByKey(String dimKey);
+    Optional<ILevelRegionApi> getDimRegionApiByKey(String dimKey);
 
     /**
      * Create the corresponding ResourceKey for the provided resource key string (e.g. 'minecraft:overworld')
@@ -76,12 +80,14 @@ public interface IRegionManager {
     boolean hasLevelData(ResourceKey<Level> dim);
 
     /**
-     * Creates a new DimensionalRegionCache (and DimensionalRegion) for the specified dimension.
+     * Creates a DimensionalRegion for the specified dimension key
      *
      * @param dim the dimension identifier of the dimension
-     * @return true if a new DimensionalRegionCache was created, false if it already existed
+     * @return the LevelRegionData for the specified dimension, newly created or the already existing
      */
-    boolean createDimRegion(ResourceKey<Level> dim);
+    LevelRegionData trackLevel(ResourceKey<Level> dim);
+
+    void untrackLevel(ResourceKey<Level> dim);
 
     /**
      * Returns a set of resource keys for all created Dimensional Regions

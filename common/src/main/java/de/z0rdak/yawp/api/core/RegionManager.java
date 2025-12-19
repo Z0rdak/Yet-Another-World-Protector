@@ -12,6 +12,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
@@ -35,7 +36,7 @@ public final class RegionManager implements IRegionManager {
     @Override
     public void resetGlobal() {
         RegionDataManager.getGlobalRegionData().reset();
-        save();
+        saveAll();
     }
 
     @Override
@@ -50,8 +51,18 @@ public final class RegionManager implements IRegionManager {
     }
 
     @Override
-    public void save() {
+    public void saveAll() {
         RegionDataManager.save(true);
+    }
+
+    @Override
+    public void save(ServerLevel level) {
+        RegionDataManager.saveLevel(level);
+    }
+
+    @Override
+    public void save(ResourceKey<Level> levelRl) {
+        RegionDataManager.saveLevel(levelRl.location());
     }
 
     /**
@@ -61,12 +72,13 @@ public final class RegionManager implements IRegionManager {
      * @return the DimensionalRegionApi for the specified dimension key if it exists, otherwise Optional.Empty
      */
     @Override
-    public Optional<IDimensionRegionApi> getDimRegionApi(ResourceKey<Level> dim) {
+    public Optional<ILevelRegionApi> getDimRegionApi(ResourceKey<Level> dim) {
         if (RegionDataManager.hasLevel(dim.identifier())){
-            LevelRegionData levelRegionData = RegionDataManager.getOrCreate(dim.identifier());
-            return Optional.of(new DimensionRegionApi(levelRegionData));
+            var maybeLevelRegionData= RegionDataManager.getLevelRegionData(dim.identifier());
+            if (maybeLevelRegionData.isPresent()) {
+                return Optional.of(new DimensionRegionApi(maybeLevelRegionData.get()));
+            }
         }
-
         return Optional.empty();
     }
 
@@ -77,7 +89,7 @@ public final class RegionManager implements IRegionManager {
      * @return the DimensionalRegionApi for the specified dimension key if it exists, otherwise Optional.Empty
      */
     @Override
-    public Optional<IDimensionRegionApi> getDimRegionApiByKey(String dimKey) {
+    public Optional<ILevelRegionApi> getDimRegionApiByKey(String dimKey) {
         return this.getDimRegionApi(getDimApiKey(dimKey));
     }
 
@@ -92,13 +104,13 @@ public final class RegionManager implements IRegionManager {
     }
 
     @Override
-    public boolean createDimRegion(ResourceKey<Level> dim) {
-        if (hasLevelData(dim)) {
-            return false;
-        }
-        RegionDataManager.getOrCreate(dim);
-        save();
-        return true;
+    public LevelRegionData trackLevel(ResourceKey<Level> dim) {
+        return RegionDataManager.addTrackingFor(dim.location());
+    }
+
+    @Override
+    public void untrackLevel(ResourceKey<Level> dim) {
+        RegionDataManager.removeTrackingFor(dim.location());
     }
 
     @Override
@@ -111,12 +123,12 @@ public final class RegionManager implements IRegionManager {
     }
 
     @Override
-    public void resetLevelData(ResourceKey<Level> dim) {
-        RegionDataManager.resetLevelData(dim);
-        save();
+    public void resetLevelData(ResourceKey<Level> level) {
+        RegionDataManager.resetLevelData(level);
+        save(level);
     }
 
-    public static class DimensionRegionApi implements IDimensionRegionApi {
+    public static class DimensionRegionApi implements ILevelRegionApi {
         private final LevelRegionData levelData;
 
         private DimensionRegionApi(LevelRegionData levelData) {
@@ -125,7 +137,7 @@ public final class RegionManager implements IRegionManager {
 
         @Override
         public void save() {
-            RegionManager.get().save();
+            RegionManager.get().saveAll();
         }
 
         @Override

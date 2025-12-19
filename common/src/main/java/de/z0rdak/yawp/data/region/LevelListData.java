@@ -4,10 +4,13 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.constants.Constants;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 
 import java.util.*;
+
+import static net.minecraft.world.level.Level.*;
 
 public class LevelListData extends SavedData {
 
@@ -32,17 +35,54 @@ public class LevelListData extends SavedData {
 
     public LevelListData(){
         this.dimensions = new HashSet<>();
+        this.dimensions.add(OVERWORLD.location());
+        this.dimensions.add(NETHER.location());
+        this.dimensions.add(END.location());
+    }
+
+    @Override
+    public @NotNull CompoundTag save(@NotNull CompoundTag tag, HolderLookup.Provider provider) {
+        Optional<Tag> nbt = LevelListData.CODEC.encodeStart(NbtOps.INSTANCE, this)
+                .resultOrPartial(Constants.LOGGER::warn);
+        if (nbt.isPresent()) {
+            tag = (CompoundTag) nbt.get();
+        }
+        return tag;
+    }
+
+    public boolean doesTrack(Identifier rl) {
+        return this.hasDimEntry(rl);
+    }
+
+    public boolean doesTrack(ServerLevel level) {
+        return this.doesTrack(level.dimension().location());
+    }
+
+    public static LevelListData get(DimensionDataStorage storage, @Nullable Supplier<LevelListData> defaultSupplier) {
+        Supplier<LevelListData> supplier = defaultSupplier == null ? LevelListData::new : defaultSupplier;
+        var factory = new Factory<>(supplier, LevelListData::load, DataFixTypes.SAVED_DATA_MAP_DATA);
+        return storage.computeIfAbsent(factory, LevelListData.TYPE);
+    }
+
+    public static LevelListData load(CompoundTag tag, HolderLookup.Provider provider) {
+        return LevelListData.CODEC.parse(NbtOps.INSTANCE, tag)
+                .resultOrPartial(Constants.LOGGER::warn)
+                .orElse(new LevelListData());
     }
 
     public List<Identifier> getLevels() {
         return new ArrayList<>(this.dimensions);
     }
 
-    public void addDimEntry(Identifier rl) {
+    public void addTrackingFor(Identifier rl) {
         this.dimensions.add(rl);
     }
 
-    public boolean hasDimEntry(Identifier rl) {
+    public void removeTrackingFor(Identifier rl) {
+        this.dimensions.remove(rl);
+    }
+
+    private boolean hasDimEntry(Identifier rl) {
         return this.dimensions.contains(rl);
     }
 }
