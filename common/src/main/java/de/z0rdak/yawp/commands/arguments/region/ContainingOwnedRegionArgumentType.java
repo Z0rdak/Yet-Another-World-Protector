@@ -19,7 +19,6 @@ import de.z0rdak.yawp.core.area.SphereArea;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.stick.MarkerStick;
-import de.z0rdak.yawp.data.region.LevelRegionData;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
 import de.z0rdak.yawp.util.StickUtil;
@@ -42,9 +41,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static de.z0rdak.yawp.api.MessageSender.overLayMessage;
+import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.MarkerCommands.fromMarkedBlocks;
-import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 
 public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
 
@@ -71,7 +70,11 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
     public static IMarkableRegion getRegion(CommandContext<CommandSourceStack> context, String argName) throws CommandSyntaxException {
         String containingRegionName = context.getArgument(argName, String.class);
         String containedRegionName = context.getArgument(NAME.toString(), String.class);
-        LevelRegionData levelRegionData = RegionDataManager.getOrCreate(context.getSource().getLevel());
+        var maybeLevelRegionData = RegionDataManager.getLevelRegionData(context.getSource().getLevel().dimension());
+        if (maybeLevelRegionData.isEmpty()) {
+            throw new IllegalArgumentException("...");
+        }
+        var levelRegionData = maybeLevelRegionData.get();
         IMarkableRegion parent = levelRegionData.getLocal(containingRegionName);
 
         IMarkableArea markedArea = markableArea(context);
@@ -99,9 +102,12 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
     public static IMarkableRegion getRegionWithMarker(CommandContext<CommandSourceStack> context, String argName) throws CommandSyntaxException {
         String containingRegionName = context.getArgument(argName, String.class);
         String containedRegionName = context.getArgument(NAME.toString(), String.class);
-        LevelRegionData levelData = RegionDataManager.getOrCreate(context.getSource().getLevel());
-        IMarkableRegion parent = levelData.getLocal(containingRegionName);
-
+        var maybeLevelRegionData = RegionDataManager.getLevelRegionData(context.getSource().getLevel().dimension());
+        if (maybeLevelRegionData.isEmpty()) {
+            throw new IllegalArgumentException("...");
+        }
+        var levelRegionData = maybeLevelRegionData.get();
+        IMarkableRegion parent = levelRegionData.getLocal(containingRegionName);
         ServerPlayer player = context.getSource().getPlayerOrException();
         IMarkableRegion markedRegion = fromMarkedBlocks(context, player, containedRegionName);
         if (markedRegion == null) {

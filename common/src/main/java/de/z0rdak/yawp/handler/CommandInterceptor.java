@@ -1,7 +1,6 @@
 package de.z0rdak.yawp.handler;
 
 import com.mojang.brigadier.ParseResults;
-import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.context.ParsedCommandNode;
@@ -10,9 +9,7 @@ import de.z0rdak.yawp.api.commands.CommandConstants;
 import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.permission.Permissions;
 import de.z0rdak.yawp.commands.CommandSourceType;
-import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.constants.Constants;
-import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
@@ -21,7 +18,6 @@ import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -37,9 +33,9 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.util.ChatLinkBuilder.buildRegionInfoLink;
-import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 
 public class CommandInterceptor {
     private final static int CANCEL_CMD = 1;
@@ -181,23 +177,30 @@ public class CommandInterceptor {
                 // wp marker create <name> >parent>
                 boolean isParentArgProvided = nodeNames.size() >= 5 && nodeNames.get(4) != null;
                 Player player = cmdContext.getSource().getPlayerOrException();
-                LevelRegionData dimCache = RegionDataManager.getOrCreate(player.level().dimension());
+                var levelRl = player.level().dimension().location();
+                var maybeLevelData = RegionDataManager.getLevelRegionData(levelRl);
+                if (maybeLevelData.isEmpty()) {
+                    // TODO: CommandLink
+                    sendCmdFeedback(cmdContext.getSource(), Component.translatableWithFallback("cli.msg.global.level-not-tracked", "The level '%s' is currently not tracked by YAWP. Track it by using %s.", levelRl, "/yawp global track <level>"));
+                    return CANCEL_CMD;
+                }
+                var levelRegionData = maybeLevelData.get();
                 boolean hasPermission = Services.PERMISSION_CONFIG.hasConfigPermission(cmdContext.getSource(), cmdSrcType);
                 boolean hasRegionPermission = false;
                 if (isCreateCmd) {
                     if (isParentArgProvided) {
                         ParsedArgument<CommandSourceStack, ?> commandSourceParsedArgument = cmdContext.getArguments().get(nodeNames.get(4));
                         if (commandSourceParsedArgument.getResult() instanceof String parentName) {
-                            IMarkableRegion parent = dimCache.getLocal(parentName);
+                            IMarkableRegion parent = levelRegionData.getLocal(parentName);
                             if (parent != null) {
                                 hasRegionPermission = Permissions.get().hasGroupPermission(parent, player, Permissions.OWNER);
                             }
                         }
                     } else { // assuming dimensional regions as parent
-                        hasRegionPermission = Permissions.get().hasGroupPermission(dimCache.getDim(), player, Permissions.OWNER);
+                        hasRegionPermission = Permissions.get().hasGroupPermission(levelRegionData.getDim(), player, Permissions.OWNER);
                     }
                 } else {
-                    hasRegionPermission = Permissions.get().hasGroupPermission(dimCache.getDim(), player, Permissions.OWNER);
+                    hasRegionPermission = Permissions.get().hasGroupPermission(levelRegionData.getDim(), player, Permissions.OWNER);
                 }
                 hasPermission = hasPermission || hasRegionPermission;
                 handlePermission(cmdContext.getSource(), hasPermission);
@@ -412,19 +415,32 @@ public class CommandInterceptor {
         return null;
     }
 
+    /**
+     * TODO: Could be combined with @see checkValidLocalRegion
+     * @param cmdContext
+     * @param argumentKey
+     * @return
+     */
     @Nullable
     private static IProtectedRegion checkValidLocalRegionShortcut(CommandContextBuilder<CommandSourceStack> cmdContext, CommandConstants argumentKey) {
         ParsedArgument<CommandSourceStack, ?> regionArg = cmdContext.getArguments().get(argumentKey.toString());
         if (regionArg != null && regionArg.getResult() instanceof String regionName) {
             ServerLevel level = cmdContext.getSource().getLevel();
-            LevelRegionData dimCache = RegionDataManager.getOrCreate(level.dimension());
-            if (!dimCache.hasLocal(regionName)) {
-                sendCmdFeedback(cmdContext.getSource(), Component.literal("No region with name '" + regionName + "' defined in dim '" + dimCache.getDim().getName() + "'"));
+            var levelRl = level.dimension().location();
+            var maybeLevelData = RegionDataManager.getLevelRegionData(levelRl);
+            if (maybeLevelData.isEmpty()) {
+                // TODO: CommandLink
+                sendCmdFeedback(cmdContext.getSource(), Component.translatableWithFallback("cli.msg.global.level-not-tracked", "The level '%s' is currently not tracked by YAWP. Track it by using %s.", levelRl, "/yawp global track <level>"));
                 return null;
             }
-            IMarkableRegion region = dimCache.getLocal(regionName);
+            var levelRegionData = maybeLevelData.get();
+            if (!levelRegionData.hasLocal(regionName)) {
+                sendCmdFeedback(cmdContext.getSource(), Component.literal("No region with name '" + regionName + "' defined in dim '" + levelRegionData.getDim().getName() + "'"));
+                return null;
+            }
+            IMarkableRegion region = levelRegionData.getLocal(regionName);
             if (region == null) {
-                sendCmdFeedback(cmdContext.getSource(), Component.literal("No region with name '" + regionName + "' defined in dim '" + dimCache.getDim().getName() + "'"));
+                sendCmdFeedback(cmdContext.getSource(), Component.literal("No region with name '" + regionName + "' defined in dim '" + levelRegionData.getDim().getName() + "'"));
                 return null;
             }
             return region;
@@ -438,15 +454,22 @@ public class CommandInterceptor {
         if (regionArg != null && regionArg.getResult() instanceof String regionName) {
             ParsedArgument<CommandSourceStack, ?> dimParsedArgument = cmdContext.getArguments().get(DIM.toString());
             if (dimParsedArgument != null && dimParsedArgument.getResult() instanceof ResourceLocation dimResLoc) {
-                ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, dimResLoc);
-                LevelRegionData dimCache = RegionDataManager.getOrCreate(dim);
-                if (!dimCache.hasLocal(regionName)) {
-                    sendCmdFeedback(cmdContext.getSource(), Component.literal("No region with name '" + regionName + "' defined in dim '" + dimCache.getDim().getName() + "'"));
+                ResourceKey<Level> levelRk = ResourceKey.create(Registries.DIMENSION, dimResLoc);
+                var levelRl = levelRk.location();
+                var maybeLevelData = RegionDataManager.getLevelRegionData(levelRl);
+                if (maybeLevelData.isEmpty()) {
+                    // TODO: CommandLink
+                    sendCmdFeedback(cmdContext.getSource(), Component.translatableWithFallback("cli.msg.global.level-not-tracked", "The level '%s' is currently not tracked by YAWP. Track it by using %s.", levelRl, "/yawp global track <level>"));
                     return null;
                 }
-                IMarkableRegion region = dimCache.getLocal(regionName);
+                var levelRegionData = maybeLevelData.get();
+                if (!levelRegionData.hasLocal(regionName)) {
+                    sendCmdFeedback(cmdContext.getSource(), Component.literal("No region with name '" + regionName + "' defined in dim '" + levelRegionData.getDim().getName() + "'"));
+                    return null;
+                }
+                IMarkableRegion region = levelRegionData.getLocal(regionName);
                 if (region == null) {
-                    sendCmdFeedback(cmdContext.getSource(), Component.literal("No region with name '" + regionName + "' defined in dim '" + dimCache.getDim().getName() + "'"));
+                    sendCmdFeedback(cmdContext.getSource(), Component.literal("No region with name '" + regionName + "' defined in dim '" + levelRegionData.getDim().getName() + "'"));
                     return null;
                 }
                 return region;

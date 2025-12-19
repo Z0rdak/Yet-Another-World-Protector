@@ -137,7 +137,8 @@ public class RegionInfoMessage implements MultiLineMessage<IProtectedRegion> {
             case DIMENSION: {
                 // Parent: [global], [n children], [n regions] [+]
                 MutableComponent globalRegionLink = buildRegionInfoLink(region.getParent(), Component.translatableWithFallback("cli.msg.info.region.global.link.hover", "Show global region info"));
-                LevelRegionData levelData = RegionDataManager.getOrCreate(region.getDim());
+                // Note: optional.get is fine here since we already got a valid region
+                LevelRegionData levelData = RegionDataManager.getLevelRegionData(region.getDim()).get();
                 MutableComponent hierarchyLinks = Messages.substitutable("%s, %s, %s", globalRegionLink, buildDimRegionsLink(levelData), listChildrenLink);
                 return buildInfoComponent("cli.msg.info.region.hierarchy", "Hierarchy", hierarchyLinks);
             }
