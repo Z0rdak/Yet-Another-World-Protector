@@ -56,8 +56,8 @@ public class GlobalCommands {
     }
 
     private static int untrackLevel(CommandContext<CommandSourceStack> ctx, ServerLevel level) {
-        RegionManager.get().untrackLevel(level.dimension());
-        if (!RegionManager.get().hasLevelData(level.dimension())) {
+        var maybeLrd = RegionManager.get().getLevelRegionData(level.dimension());
+        if (!maybeLrd.isPresent()) {
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.global.level-not-tracked", "The level '%s' is currently not tracked by YAWP.", level.dimension().toString()));
             return 1;
         }
@@ -66,11 +66,13 @@ public class GlobalCommands {
     }
 
     private static int trackLevel(CommandContext<CommandSourceStack> ctx, ServerLevel level) {
-        var levelRegionData = RegionManager.get().trackLevel(level.dimension());
-        if (RegionManager.get().hasLevelData(level.dimension())) {
-            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.global.level.already-tracked", "The level '%s' is already tracked.", buildRegionInfoLink(levelRegionData.getDim())));
+        var maybeLrd = RegionManager.get().getLevelRegionData(level.dimension());
+        if (maybeLrd.isPresent()) {
+            var lrd = maybeLrd.get();
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.global.level.already-tracked", "The level '%s' is already tracked.", buildRegionInfoLink(lrd.getDim())));
             return 1;
         }
+        var levelRegionData = RegionManager.get().trackLevel(level.dimension());
         sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.global.level.tracked", "The level '%s' is now tracked and available to create regions.", buildRegionInfoLink(levelRegionData.getDim())));
         return 0;
     }
