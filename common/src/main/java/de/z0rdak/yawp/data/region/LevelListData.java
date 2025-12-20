@@ -40,9 +40,6 @@ public class LevelListData extends SavedData {
 
     public LevelListData(){
         this.dimensions = new HashSet<>();
-        this.dimensions.add(OVERWORLD.location());
-        this.dimensions.add(NETHER.location());
-        this.dimensions.add(END.location());
     }
 
     @Override
