@@ -1,11 +1,10 @@
 package de.z0rdak.yawp;
 
-import de.z0rdak.yawp.api.events.flag.ForgeFlagEvent;
+import de.z0rdak.yawp.handler.YawpEventHandler;
 import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.commands.CommandRegistry;
 import de.z0rdak.yawp.config.ConfigRegistry;
 import de.z0rdak.yawp.constants.Constants;
-import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.data.PlayerManager;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.ForgeConfigHelper;
@@ -21,7 +20,6 @@ import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -48,23 +46,17 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
         ModLoadingContext modLoadingContext = new ModLoadingContext();
         //Make sure the mod being absent on the other network side does not cause the client to display the server as incompatible
         modLoadingContext.registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> IGNORESERVERONLY, (s, b) -> true));
-        MinecraftForge.EVENT_BUS.register(YetAnotherWorldProtector.class);
+
+        MinecraftForge.EVENT_BUS.addListener(
+                (ServerAboutToStartEvent startEvent) -> YawpEventHandler.storeRef(startEvent.getServer())
+        );
     }
 
-    @SubscribeEvent
-    public static void onAddFlag(ForgeFlagEvent.AddFlagEvent event) {
-        if (event.getFlag().getName().contains("spawning") && Services.FLAG_CONFIG.removeEntitiesEnabled()) {
-            removeInvolvedEntities(event.getSrc(), event.getRegion(), RegionFlag.fromId(event.getFlag().getName()));
-        }
-    }
-    
     @Override
     public void registerCommands() {
-        MinecraftForge.EVENT_BUS.addListener(this::registerCommandsForge);
-    }
-
-    private void registerCommandsForge(RegisterCommandsEvent event) {
-        CommandRegistry.registerCommands(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection());
+        MinecraftForge.EVENT_BUS.addListener((RegisterCommandsEvent event) ->
+                CommandRegistry.registerCommands(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection())
+        );
     }
 
     @Override
@@ -103,7 +95,7 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
                 (LevelEvent.Unload unloadEvent) -> {
                     if (unloadEvent.getLevel() instanceof ServerLevel serverLevel) {
-                        RegionDataManager.saveOnUnload(serverLevel.getServer(), serverLevel);
+                        RegionDataManager.saveOnUnload(serverLevel);
                     }
                 });
     }
