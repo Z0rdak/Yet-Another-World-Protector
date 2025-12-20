@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.api.visualization;
 
-import de.z0rdak.yawp.api.core.IDimensionRegionApi;
+import de.z0rdak.yawp.api.core.ILevelRegionApi;
 import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.core.area.BlockDisplayProperties;
 import de.z0rdak.yawp.core.area.DisplayType;
@@ -72,7 +72,7 @@ public class VisualizationManager {
     public static void hideRegionsAround(Player player, int radius) {
         Level level = player.getCommandSenderWorld();
         BlockPos playerPos = player.blockPosition();
-        Optional<IDimensionRegionApi> maybeApi = RegionManager.get().getDimRegionApi(level.dimension());
+        Optional<ILevelRegionApi> maybeApi = RegionManager.get().getDimRegionApi(level.dimension());
         if (maybeApi.isPresent()) {
             var dimApi = maybeApi.get();
             List<IMarkableRegion> regionsAround = dimApi.getRegionsAround(playerPos, radius);
@@ -88,7 +88,7 @@ public class VisualizationManager {
     public static void showRegionsAround(Player player, int radius, DisplayType displayType) {
         Level level = player.getCommandSenderWorld();
         BlockPos playerPos = player.blockPosition();
-        Optional<IDimensionRegionApi> maybeApi = RegionManager.get().getDimRegionApi(level.dimension());
+        Optional<ILevelRegionApi> maybeApi = RegionManager.get().getDimRegionApi(level.dimension());
         if (maybeApi.isPresent()) {
             var dimApi = maybeApi.get();
             List<IMarkableRegion> regionsAround = dimApi.getRegionsAround(playerPos, radius);
@@ -99,7 +99,7 @@ public class VisualizationManager {
     }
 
     public static void hideAllRegions(Level level, boolean untracked) {
-        Optional<IDimensionRegionApi> maybeApi = RegionManager.get().getDimRegionApi(level.dimension());
+        Optional<ILevelRegionApi> maybeApi = RegionManager.get().getDimRegionApi(level.dimension());
         if (maybeApi.isPresent()) {
             var dimApi = maybeApi.get();
             Collection<IMarkableRegion> regions = dimApi.getAllLocalRegions();
@@ -226,7 +226,7 @@ public class VisualizationManager {
     }
 
     public static void showHierarchy(IMarkableRegion region, DisplayType displayType, boolean recursive) {
-        Optional<IDimensionRegionApi> maybeApi = RegionManager.get().getDimRegionApi(region.getDim());
+        Optional<ILevelRegionApi> maybeApi = RegionManager.get().getDimRegionApi(region.getDim());
         if (maybeApi.isEmpty()) return;
         Collection<IProtectedRegion> children = region.getChildren().values();
         for (IProtectedRegion child : children) {
@@ -240,7 +240,7 @@ public class VisualizationManager {
     }
 
     public static void showIntersecting(IMarkableRegion region, DisplayType displayType) {
-        Optional<IDimensionRegionApi> maybeApi = RegionManager.get().getDimRegionApi(region.getDim());
+        Optional<ILevelRegionApi> maybeApi = RegionManager.get().getDimRegionApi(region.getDim());
         if (maybeApi.isPresent()) {
             var dimApi = maybeApi.get();
             List<IMarkableRegion> intersectingRegions = dimApi.getIntersectingRegions(region);
@@ -251,7 +251,7 @@ public class VisualizationManager {
     }
 
     public static void hideHierarchy(IMarkableRegion region, DisplayType displayType, boolean recursive) {
-        Optional<IDimensionRegionApi> maybeApi = RegionManager.get().getDimRegionApi(region.getDim());
+        Optional<ILevelRegionApi> maybeApi = RegionManager.get().getDimRegionApi(region.getDim());
         if (maybeApi.isEmpty()) return;
         Collection<IProtectedRegion> children = region.getChildren().values();
         for (IProtectedRegion child : children) {
@@ -265,7 +265,7 @@ public class VisualizationManager {
     }
 
     public static void hideIntersecting(IMarkableRegion region, DisplayType displayType) {
-        Optional<IDimensionRegionApi> maybeApi = RegionManager.get().getDimRegionApi(region.getDim());
+        Optional<ILevelRegionApi> maybeApi = RegionManager.get().getDimRegionApi(region.getDim());
         if (maybeApi.isPresent()) {
             var dimApi = maybeApi.get();
             List<IMarkableRegion> intersectingRegions = dimApi.getIntersectingRegions(region);
