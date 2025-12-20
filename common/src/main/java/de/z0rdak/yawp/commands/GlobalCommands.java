@@ -49,19 +49,21 @@ public class GlobalCommands {
                         .executes(ctx -> trackLevel(ctx, DimensionArgument.getDimension(ctx, DIM.toString()))))
                 )
                 // TODO: Only suggest levels which are already tracked
-                .then(literal(UNTRACK)
-                        .then(Commands.argument(DIM.toString(), DimensionArgument.dimension())
-                                .executes(ctx -> untrackLevel(ctx, DimensionArgument.getDimension(ctx, DIM.toString()))))
-                );
+                // .then(literal(UNTRACK)
+                //         .then(Commands.argument(DIM.toString(), DimensionArgument.dimension())
+                //                 .executes(ctx -> untrackLevel(ctx, DimensionArgument.getDimension(ctx, DIM.toString()))))
+                // )
+        ;
     }
 
     private static int untrackLevel(CommandContext<CommandSourceStack> ctx, ServerLevel level) {
         var maybeLrd = RegionManager.get().getLevelRegionData(level.dimension());
         if (!maybeLrd.isPresent()) {
-            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.global.level-not-tracked", "The level '%s' is currently not tracked by YAWP.", level.dimension().toString()));
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.global.level-not-tracked", "The level '%s' is currently not tracked by YAWP.", level.dimension().location().toString()));
             return 1;
         }
-        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.global.level.untracked", "The level '%s' is no longer tracked. Its regions are disabled from now on.", level.dimension().toString()));
+        RegionManager.get().untrackLevel(level.dimension());
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.global.level.untracked", "The level '%s' is no longer tracked. Its regions are disabled from now on.", level.dimension().location().toString()));
         return 0;
     }
 
