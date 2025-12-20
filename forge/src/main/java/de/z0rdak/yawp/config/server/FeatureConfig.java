@@ -12,6 +12,7 @@ public class FeatureConfig {
     public static final String CONFIG_NAME = MOD_ID + "-features.toml";
     public static final Logger FEATURE_CONFIG_LOGGER = LogManager.getLogger(MOD_ID.toUpperCase() + "-Feature-Config");
     public static final ForgeConfigSpec.ConfigValue<Boolean> PLAYER_TRACKER;
+
     public static final ForgeConfigSpec.ConfigValue<Boolean> AUTO_CREATE_NEW_LEVEL_DATA;
 
     static {
@@ -36,4 +37,6 @@ public class FeatureConfig {
     public static boolean shouldCreateNewLevelData() {
         return AUTO_CREATE_NEW_LEVEL_DATA.get();
     }
+
+
 }
