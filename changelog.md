@@ -13,6 +13,7 @@
 - Levels (Dimecommands no longer trigger saving of all data, instead specific to the level of the involved regionnsional Regions and Local Regions for that level) now need to be tracked to be recognized by YAWP. 
 - Add command `/yawp global track <level>` to track a level so it can be protected like always.
 - Add command `/yawp global untrack <level>` to untrack a level. It will be unloaded and its data no longer loaded on server start.
+- Add config setting to enable/disable the automatic tracking of Levels (Dimensional Regions and Local Regions for that level) in `yawp-features.toml`. Default is true which will work like before.
 
 ## Changed
 
@@ -32,6 +33,7 @@
 - Fix visualization not being updated when updating region area
 - Fix visualization not being removed when removing regions
 - Fix spammy output when saving region data - should be less verbose now.
+- Fix NPE when saving region data causing crashes 
 
 # [0.6.2-beta1] - 2025-10-30
 

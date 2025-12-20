@@ -53,7 +53,7 @@ public final class RegionManager implements IRegionManager {
 
     @Override
     public void saveAll() {
-        RegionDataManager.save(true);
+        RegionDataManager.save();
     }
 
     @Override
