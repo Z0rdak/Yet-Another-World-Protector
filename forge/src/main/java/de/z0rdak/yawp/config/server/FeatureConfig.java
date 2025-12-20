@@ -22,7 +22,6 @@ public class FeatureConfig {
 
         PLAYER_TRACKER = BUILDER.comment("Enable player position tracker")
                 .define("player_tracker", false);
-        BUILDER.pop();
 
         AUTO_CREATE_NEW_LEVEL_DATA = BUILDER.comment("Enables automatic creation of Dimensional Regions for new levels")
                 .define("auto_create_new_level_data", true);
