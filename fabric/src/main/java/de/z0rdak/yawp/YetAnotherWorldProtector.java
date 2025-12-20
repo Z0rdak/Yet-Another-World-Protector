@@ -61,7 +61,7 @@ public class YetAnotherWorldProtector implements ModInitializer, YAWPModInitiali
         ServerEntityEvents.ENTITY_LOAD.register(RegionDataManager::initLevelDataOnLogin);
         ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register(RegionDataManager::initLevelDataOnChangeWorld);
         ServerLifecycleEvents.BEFORE_SAVE.register(RegionDataManager::save);
-        ServerLevelEvents.UNLOAD.register(RegionDataManager::saveOnUnload);
+        ServerLevelEvents.UNLOAD.register((server, level) -> RegionDataManager.saveOnUnload(level));
         ServerLifecycleEvents.SERVER_STOPPING.register(RegionDataManager::saveOnStop);
     }
 
