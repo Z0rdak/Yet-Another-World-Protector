@@ -34,6 +34,7 @@
 - Fix visualization not being removed when removing regions
 - Fix spammy output when saving region data - should be less verbose now.
 - Fix NPE when saving region data causing crashes 
+- [ ] Fix visualizations not being removed on server shutdown/restart
 
 # [0.6.2-beta1] - 2025-10-30
 
