@@ -7,4 +7,5 @@ public interface FeatureManager {
      * to clear player position cache on disconnect to clean up memory
      */
     void enablePlayerTracker();
+    boolean shouldCreateNewLevelData();
 }

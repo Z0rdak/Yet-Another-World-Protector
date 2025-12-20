@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.platform;
 
+import de.z0rdak.yawp.config.server.FeatureConfig;
 import de.z0rdak.yawp.handler.PlayerPosTracker;
 import de.z0rdak.yawp.platform.services.FeatureManager;
 import net.minecraft.server.level.ServerLevel;
@@ -21,5 +22,10 @@ public class ForgeFeatureManager implements FeatureManager {
                 PlayerPosTracker.onPlayerDisc(player);
             }
         });
+    }
+
+    @Override
+    public boolean shouldCreateNewLevelData() {
+        return FeatureConfig.shouldCreateNewLevelData();
     }
 }

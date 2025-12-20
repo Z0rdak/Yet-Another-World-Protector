@@ -70,21 +70,10 @@ public class RegionDataManager {
     private RegionDataManager() {
     }
 
-
     public static void save() {
-        save(true);
-    }
-
-    public static void save(boolean force) {
-        if (force) {
-            saveTrackedLevelList();
-            saveGlobalData();
-            saveTrackedLevels();
-        } else {
-            trackedLevelData.setDirty();
-            globalRegionData.setDirty();
-            levelRegionData.forEach((key, value) -> value.setDirty());
-        }
+        saveTrackedLevelList();
+        saveGlobalData();
+        saveTrackedLevels();
     }
 
     public static LevelListData getSavedDims(@Nullable Supplier<LevelListData> defaultSupplier) {
@@ -109,7 +98,7 @@ public class RegionDataManager {
 
     public static void save(MinecraftServer server, boolean flush, boolean force) {
         if (serverInstance == null) serverInstance = server;
-        save(force);
+        save();
     }
 
     public static void saveLevel(ResourceLocation rl) {
@@ -136,11 +125,13 @@ public class RegionDataManager {
     private static void saveTrackedLevelList() {
         DimensionDataStorage dataStorage = serverInstance.overworld().getDataStorage();
         dataStorage.set(LevelListData.TYPE, trackedLevelData);
+        trackedLevelData.setDirty();
     }
 
     public static void saveGlobalData() {
         DimensionDataStorage dataStorage = serverInstance.overworld().getDataStorage();
         dataStorage.set(Constants.MOD_ID + "/" + GLOBAL_REGION_FILE_NAME, globalRegionData);
+        globalRegionData.setDirty();
     }
 
     private static void saveLevelData(ServerLevel level) {
@@ -160,7 +151,7 @@ public class RegionDataManager {
     public static void saveOnStop(MinecraftServer server) {
         if (serverInstance == null) serverInstance = server;
         LOGGER.info(Component.translatableWithFallback("data.region.levels.save.stopped", "Stopping server. Saving region data for all levels").getString());
-        save(true);
+        save();
     }
 
     public static void loadLevelListData(MinecraftServer server) {
@@ -252,13 +243,19 @@ public class RegionDataManager {
 
     public static void initLevelDataOnLogin(Entity entity, Level level) {
         if (isServerSide(level) && entity instanceof Player) {
-            addTrackingFor(level.dimension().location());
+            var shouldCreateNewLevelData = Services.FEATURE_MANAGER.shouldCreateNewLevelData();
+            if (shouldCreateNewLevelData) {
+                RegionManager.get().trackLevel(level.dimension());
+            }
         }
     }
 
     public static void initLevelDataOnChangeWorld(Player player, Level srcLvl, Level dstLvl) {
         if (isServerSide(srcLvl)) {
-            addTrackingFor(dstLvl.dimension().location());
+            var shouldCreateNewLevelData = Services.FEATURE_MANAGER.shouldCreateNewLevelData();
+            if (shouldCreateNewLevelData) {
+                RegionManager.get().trackLevel(dstLvl.dimension());
+            }
         }
     }
 
