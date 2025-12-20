@@ -1,16 +1,12 @@
 package de.z0rdak.yawp;
 
-import de.z0rdak.yawp.api.events.flag.ForgeFlagEvent;
+import de.z0rdak.yawp.handler.YawpEventHandler;
 import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.commands.CommandRegistry;
 import de.z0rdak.yawp.config.ConfigRegistry;
 import de.z0rdak.yawp.constants.Constants;
-import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.data.PlayerManager;
 import de.z0rdak.yawp.data.region.RegionDataManager;
-import de.z0rdak.yawp.platform.Services;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -20,18 +16,14 @@ import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.network.NetworkConstants;
-
-import static de.z0rdak.yawp.handler.YawpEventHandler.removeInvolvedEntities;
 
 @Mod(Constants.MOD_ID)
 public class YetAnotherWorldProtector implements YAWPModInitializer {
@@ -45,23 +37,24 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
 
         //Make sure the mod being absent on the other network side does not cause the client to display the server as incompatible
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (s, b) -> true));
-        MinecraftForge.EVENT_BUS.register(YetAnotherWorldProtector.class);
+
+        MinecraftForge.EVENT_BUS.addListener(
+                (ServerAboutToStartEvent startEvent) -> YawpEventHandler.storeRef(startEvent.getServer())
+        );
     }
 
-    @SubscribeEvent
-    public static void onAddFlag(ForgeFlagEvent.AddFlagEvent event) {
-        if (event.getFlag().getName().contains("spawning") && Services.FLAG_CONFIG.removeEntitiesEnabled()) {
-            removeInvolvedEntities(event.getSrc(), event.getRegion(), RegionFlag.fromId(event.getFlag().getName()));
-        }
-    }
-    
     @Override
     public void registerCommands() {
-        MinecraftForge.EVENT_BUS.addListener(this::registerCommandsForge);
+        MinecraftForge.EVENT_BUS.addListener((RegisterCommandsEvent event) ->
+                CommandRegistry.registerCommands(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection())
+        );
     }
 
-    private void registerCommandsForge(RegisterCommandsEvent event) {
-        CommandRegistry.registerCommands(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection());
+    @Override
+    public void registerConfig() {
+        FMLJavaModLoadingContext.get()
+                .getModEventBus()
+                .addListener((FMLCommonSetupEvent event) -> ConfigRegistry.register());
     }
 
     @Override
@@ -100,17 +93,8 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
                 (LevelEvent.Unload unloadEvent) -> {
                     if (unloadEvent.getLevel() instanceof ServerLevel serverLevel) {
-                        RegionDataManager.saveOnUnload(serverLevel.getServer(), serverLevel);
+                        RegionDataManager.saveOnUnload(serverLevel);
                     }
                 });
-    }
-
-    @Override
-    public void registerConfig() {
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerConfigForge);
-    }
-
-    public void registerConfigForge(FMLCommonSetupEvent event) {
-        ConfigRegistry.register();
     }
 }
