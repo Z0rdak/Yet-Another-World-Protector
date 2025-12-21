@@ -43,7 +43,6 @@ public class VisualizationManager {
     public final static ResourceLocation REGION_BLOCK_DISPLAY_TAG = ResourceLocation.tryParse("yawp:region_block_display");
     public final static ResourceLocation REGION_TEXT_DISPLAY_TAG = ResourceLocation.tryParse("yawp:region_text_display");
 
-    public static void nukeDisplayEntities(ServerLevel level) {
     public static int nukeDisplayEntities(ServerLevel level) {
         var entities = level.getEntities(EntityTypeTest.forClass(Display.class), (entity) -> {
             boolean containsTextTag = entity.getTags().contains(REGION_TEXT_DISPLAY_TAG.toString());
