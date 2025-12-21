@@ -206,8 +206,11 @@ public record FlagEvaluator(FlagCheckResult result) {
     public static IProtectedRegion findResponsibleRegion(@NotNull BlockPos pos, @NotNull ResourceKey<Level> dim) {
         var localRegion = getInvolvedRegionFor(pos, dim);
         if (localRegion == null) {
-            // Note: optional.get is fine here since we already got a valid region
-            var dimRegion = RegionDataManager.getLevelRegionData(dim).get().getDim();
+            var maybeLrd = RegionDataManager.getLevelRegionData(dim);
+            if (maybeLrd.isEmpty()) {
+                return null;
+            }
+            var dimRegion = maybeLrd.get().getDim();
             if (dimRegion.isActive()) {
                 return dimRegion;
             } else {
