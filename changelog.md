@@ -1,4 +1,4 @@
-# [0.6.3-beta1] - unreleased
+# [0.6.3-beta1] - 2025-21-12
 
 ## Added
 
@@ -10,16 +10,15 @@
 - Add `yawp-features.toml` config to enable/disable features.
 - Add config setting to enable player tracker in `yawp-features.toml`
 - Add config setting to log detailed event info in `yawp-logging.toml`
-- Levels (Dimecommands no longer trigger saving of all data, instead specific to the level of the involved regionnsional Regions and Local Regions for that level) now need to be tracked to be recognized by YAWP. 
+- Levels (Dimensional Regions and Local Regions for that level) now need to be tracked to be recognized by YAWP.
 - Add command `/yawp global track <level>` to track a level so it can be protected like always.
-- Add command `/yawp global untrack <level>` to untrack a level. It will be unloaded and its data no longer loaded on server start.
 - Add config setting to enable/disable the automatic tracking of Levels (Dimensional Regions and Local Regions for that level) in `yawp-features.toml`. Default is true which will work like before.
 
 ## Changed
 
 - Rename flag `xp-drop-all` to `drop-xp`. This now covers all xp dropping from players killing monsters.
 - Rework saving to reduce performance impact.
-- Commands no longer trigger saving of all data, instead specific to the level of the involved region
+- Commands no longer trigger saving of all data, instead specific to the level of the involved region.
 
 ## Removed
 
@@ -28,13 +27,12 @@
 
 ## Fixed
 
-- Fix NPE when updating tp anchor position
-- Fix cuboid area not being normalized causing issues with recognizing players entering/leaving
+- Fix NPE when updating tp anchor position.
+- Fix cuboid area not being normalized causing issues with recognizing players entering/leaving.
 - Fix visualization not being updated when updating region area
-- Fix visualization not being removed when removing regions
+- Fix visualization not being removed when removing regions.
 - Fix spammy output when saving region data - should be less verbose now.
-- Fix NPE when saving region data causing crashes 
-- [ ] Fix visualizations not being removed on server shutdown/restart
+- Fix NPE when saving region data causing crashes-
 
 # [0.6.2-beta1] - 2025-10-30
 
