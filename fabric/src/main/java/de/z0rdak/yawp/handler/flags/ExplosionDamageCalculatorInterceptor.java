@@ -4,7 +4,7 @@
 package de.z0rdak.yawp.handler.flags;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import net.minecraft.core.BlockPos;
@@ -36,7 +36,7 @@ public class ExplosionDamageCalculatorInterceptor extends ExplosionDamageCalcula
 			case Creeper c -> RegionFlag.EXPLOSION_CREEPER_BLOCK;
 			case null, default -> RegionFlag.EXPLOSION_BLOCK;
 		};
-		FlagCheckEvent checkEvent = new FlagCheckEvent(pos, flag, this.level.dimension());
+		FlagCheckRequest checkEvent = new FlagCheckRequest(pos, flag, this.level.dimension());
 		FlagState flagState = FlagEvaluator.processCheck(checkEvent);
 		return flagState == FlagState.DENIED
 				? false : nextBehavior.shouldBlockExplode(explosion, blockGetter, pos, state, power);
@@ -48,7 +48,7 @@ public class ExplosionDamageCalculatorInterceptor extends ExplosionDamageCalcula
 			case Creeper c -> RegionFlag.EXPLOSION_CREEPER_ENTITY;
 			case null, default -> RegionFlag.EXPLOSION_ENTITY;
 		};
-		FlagCheckEvent checkEvent = new FlagCheckEvent(entity.blockPosition(), flag, entity.level().dimension());
+		FlagCheckRequest checkEvent = new FlagCheckRequest(entity.blockPosition(), flag, entity.level().dimension());
 		FlagState flagState = FlagEvaluator.processCheck(checkEvent);
 		return flagState == FlagState.DENIED
 				? false : nextBehavior.shouldDamageEntity(explosion, entity);
@@ -58,8 +58,8 @@ public class ExplosionDamageCalculatorInterceptor extends ExplosionDamageCalcula
 	// we just go with the fact that if any of the two flags are denied we prevent knockback
 	@Override
 	public float getKnockbackMultiplier(Entity entity) {
-		FlagCheckEvent checkExplosionEntityFlag = new FlagCheckEvent(entity.blockPosition(), RegionFlag.EXPLOSION_ENTITY, entity.level().dimension());
-		FlagCheckEvent checkCreeperExplosionEntityFlag = new FlagCheckEvent(entity.blockPosition(), RegionFlag.EXPLOSION_CREEPER_ENTITY, entity.level().dimension());
+		FlagCheckRequest checkExplosionEntityFlag = new FlagCheckRequest(entity.blockPosition(), RegionFlag.EXPLOSION_ENTITY, entity.level().dimension());
+		FlagCheckRequest checkCreeperExplosionEntityFlag = new FlagCheckRequest(entity.blockPosition(), RegionFlag.EXPLOSION_CREEPER_ENTITY, entity.level().dimension());
 		FlagState flagState1 = FlagEvaluator.processCheck(checkExplosionEntityFlag);
 		FlagState flagState2 = FlagEvaluator.processCheck(checkCreeperExplosionEntityFlag);
 		return flagState1 == FlagState.DENIED || flagState2 == FlagState.DENIED
