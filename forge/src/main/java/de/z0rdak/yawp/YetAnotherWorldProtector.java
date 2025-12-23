@@ -3,14 +3,10 @@ package de.z0rdak.yawp;
 import de.z0rdak.yawp.handler.YawpEventHandler;
 import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.commands.CommandRegistry;
-import de.z0rdak.yawp.config.ConfigRegistry;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.data.PlayerManager;
 import de.z0rdak.yawp.data.region.RegionDataManager;
-import de.z0rdak.yawp.platform.ForgeConfigHelper;
 import de.z0rdak.yawp.platform.Services;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -23,14 +19,12 @@ import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-import static de.z0rdak.yawp.handler.YawpEventHandler.removeInvolvedEntities;
 import static net.minecraftforge.fml.IExtensionPoint.DisplayTest.IGNORESERVERONLY;
 
 @Mod(Constants.MOD_ID)
