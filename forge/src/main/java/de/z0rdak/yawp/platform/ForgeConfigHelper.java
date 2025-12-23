@@ -1,17 +1,10 @@
 package de.z0rdak.yawp.platform;
 
-import de.z0rdak.yawp.api.events.region.ForgeFlagCheckEvent;
-import de.z0rdak.yawp.api.events.region.ForgeFlagCheckResult;
-import de.z0rdak.yawp.commands.CommandRegistry;
 import de.z0rdak.yawp.config.ConfigRegistry;
-import de.z0rdak.yawp.config.server.FlagConfig;
-import de.z0rdak.yawp.config.server.LoggingConfig;
-import de.z0rdak.yawp.config.server.PermissionConfig;
-import de.z0rdak.yawp.config.server.RegionConfig;
+import de.z0rdak.yawp.config.server.*;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.platform.services.IConfigHelper;
 import fuzs.forgeconfigapiport.forge.api.neoforge.v4.NeoForgeConfigRegistry;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
@@ -49,22 +42,13 @@ public class ForgeConfigHelper implements IConfigHelper {
         Services.CONFIG_REGISTRY.registerServerConfig(FlagConfig.CONFIG_SPEC, FlagConfig.CONFIG_NAME);
         Services.CONFIG_REGISTRY.registerServerConfig(RegionConfig.CONFIG_SPEC, RegionConfig.CONFIG_NAME);
         Services.CONFIG_REGISTRY.registerServerConfig(LoggingConfig.CONFIG_SPEC, LoggingConfig.CONFIG_NAME);
+        Services.CONFIG_REGISTRY.registerServerConfig(FeatureConfig.CONFIG_SPEC, FeatureConfig.CONFIG_NAME);
     }
 
     @SubscribeEvent
     public static void onConfigLoading(ModConfigEvent.Loading event) {
         if (event.getConfig().getModId().equals(Constants.MOD_ID)) {
-            Runnable registerHandler = () -> {
-                if (LoggingConfig.shouldLogFlagChecks()) {
-                    MinecraftForge.EVENT_BUS.addListener(
-                            (ForgeFlagCheckEvent e) -> LoggingConfig.logCheck(ForgeFlagCheckEvent.asNonEvent(e)));
-                }
-                if (LoggingConfig.shouldLogFlagCheckResults()) {
-                    MinecraftForge.EVENT_BUS.addListener(
-                            (ForgeFlagCheckResult e) -> LoggingConfig.logResult(ForgeFlagCheckResult.asNonEvent(e)));
-                }
-            };
-            ConfigRegistry.onModLoaded(event.getConfig().getFileName(), registerHandler);
+            ConfigRegistry.onModLoaded(event.getConfig().getFileName(), () -> {});
         }
     }
 

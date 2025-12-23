@@ -1,12 +1,7 @@
 package de.z0rdak.yawp.platform;
 
-import de.z0rdak.yawp.api.events.region.FabricRegionEvents;
-import de.z0rdak.yawp.commands.CommandRegistry;
 import de.z0rdak.yawp.config.ConfigRegistry;
-import de.z0rdak.yawp.config.server.FlagConfig;
-import de.z0rdak.yawp.config.server.LoggingConfig;
-import de.z0rdak.yawp.config.server.PermissionConfig;
-import de.z0rdak.yawp.config.server.RegionConfig;
+import de.z0rdak.yawp.config.server.*;
 import de.z0rdak.yawp.platform.services.IConfigHelper;
 import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeConfigRegistry;
 import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeModConfigEvents;
@@ -44,6 +39,7 @@ public class FabricConfigHelper implements IConfigHelper {
         Services.CONFIG_REGISTRY.registerServerConfig(FlagConfig.CONFIG_SPEC, FlagConfig.CONFIG_NAME);
         Services.CONFIG_REGISTRY.registerServerConfig(RegionConfig.CONFIG_SPEC, RegionConfig.CONFIG_NAME);
         Services.CONFIG_REGISTRY.registerServerConfig(LoggingConfig.CONFIG_SPEC, LoggingConfig.CONFIG_NAME);
+        Services.CONFIG_REGISTRY.registerServerConfig(FeatureConfig.CONFIG_SPEC, FeatureConfig.CONFIG_NAME);
     }
 
     private static void onModReloading(ModConfig modConfig) {
@@ -54,15 +50,7 @@ public class FabricConfigHelper implements IConfigHelper {
      
     private static void onModLoading(ModConfig modConfig) {
         if (modConfig.getModId().equals(MOD_ID)) {
-            Runnable registerHandler = () -> {
-                if (LoggingConfig.shouldLogFlagChecks()) {
-                    FabricRegionEvents.CHECK_FLAG.register(LoggingConfig::logCheck);
-                }
-                if (LoggingConfig.shouldLogFlagCheckResults()) {
-                    FabricRegionEvents.FLAG_RESULT.register(LoggingConfig::logResult);
-                }
-            };
-            ConfigRegistry.onModLoaded(modConfig.getFileName(), registerHandler);
+            ConfigRegistry.onModLoaded(modConfig.getFileName(), () -> {});
         }
     }
 }

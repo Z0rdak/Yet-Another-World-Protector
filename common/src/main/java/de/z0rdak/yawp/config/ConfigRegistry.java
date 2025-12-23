@@ -1,28 +1,40 @@
 package de.z0rdak.yawp.config;
 
-import de.z0rdak.yawp.config.server.FlagConfig;
-import de.z0rdak.yawp.config.server.LoggingConfig;
-import de.z0rdak.yawp.config.server.PermissionConfig;
-import de.z0rdak.yawp.config.server.RegionConfig;
-import de.z0rdak.yawp.core.flag.FlagFrequency;
+import de.z0rdak.yawp.api.events.flag.FlagEvents;
+import de.z0rdak.yawp.config.server.*;
+import de.z0rdak.yawp.handler.YawpEventHandler;
+import de.z0rdak.yawp.platform.Services;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import static de.z0rdak.yawp.config.server.FeatureConfig.FEATURE_CONFIG_LOGGER;
 import static de.z0rdak.yawp.config.server.FlagConfig.FLAG_CONFIG_LOGGER;
 import static de.z0rdak.yawp.config.server.LoggingConfig.LOGGING_CONFIG_LOGGER;
+import static de.z0rdak.yawp.config.server.LoggingConfig.shouldLogEvents;
 import static de.z0rdak.yawp.config.server.PermissionConfig.PERMISSION_CONFIG_LOGGER;
 import static de.z0rdak.yawp.config.server.RegionConfig.REGION_CONFIG_LOGGER;
 import static de.z0rdak.yawp.constants.Constants.MOD_ID;
 
 public final class ConfigRegistry {
 
-    public static final Logger CONFIG_LOGGER = LogManager.getLogger(MOD_ID.toUpperCase() + "-Config");
+    public static final Logger CONFIG_LOGGER = LogManager.getLogger(MOD_ID.toUpperCase() + "-Config-Event");
 
     private ConfigRegistry() {
     }
 
     public static void onModLoaded(String configName, Runnable registerHandler) {
         switch (configName) {
+            case FeatureConfig.CONFIG_NAME: {
+                var enablePlayerTracker = FeatureConfig.enablePlayerTracker();
+                FEATURE_CONFIG_LOGGER.info("Player tracking feature: {}", enablePlayerTracker ? "enabled" : "disabled" );
+
+                if (enablePlayerTracker) {
+                    YawpEventHandler.enableRegionSpatialCache();
+                    Services.FEATURE_MANAGER.enablePlayerTracker();
+                    YawpEventHandler.enablePlayerRegionMessages();
+                }
+            }
+            break;
             case PermissionConfig.CONFIG_NAME: {
                 int numOfUuidsWithPermission = PermissionConfig.UUIDsWithPermission().size();
                 String uuidsWithPermission = (numOfUuidsWithPermission > 0
@@ -67,12 +79,6 @@ public final class ConfigRegistry {
                         : "");
                 FLAG_CONFIG_LOGGER.info("{} Block Entity tag entries read from config{}", numBreakEntityTagEntries, loadedBreakEntityTags);
                 FLAG_CONFIG_LOGGER.info("Remove entities when enabling spawning flags: {}", FlagConfig.removeEntitiesEnabled() ? "enabled" : "disabled");
-
-                int amountOfDisabledFlags = FlagConfig.getDisabledFrequencyFlags(FlagFrequency.VERY_HIGH).size();
-                String disabledFlagsStr = (amountOfDisabledFlags > 0
-                        ? ": " + String.join(", ", FlagConfig.getDisabledFrequencyFlags(FlagFrequency.VERY_HIGH))
-                        : "");
-                FLAG_CONFIG_LOGGER.info("{} Disabled high frequency flags{}", disabledFlagsStr, disabledFlagsStr);
                 break;
             }
             case LoggingConfig.CONFIG_NAME: {
@@ -83,6 +89,18 @@ public final class ConfigRegistry {
                 LOGGING_CONFIG_LOGGER.info("Logging flag results: [{}]", String.join(",", LoggingConfig.getResultValuesToLog()));
                 LOGGING_CONFIG_LOGGER.info("Logging flags: [{}]", String.join(",", LoggingConfig.getFlagsToLog()));
                 // LOGGING_CONFIG_LOGGER.info("Logging detailed player flag checks: {}", LoggingConfig.shouldLogDetailedPlayerFlags());
+                LOGGING_CONFIG_LOGGER.info("Logging events: [{}]", LoggingConfig.shouldLogEvents());
+
+                if (shouldLogEvents()) {
+                    YawpEventHandler.enableDetailedEventLogger();
+                }
+                if (LoggingConfig.shouldLogFlagChecks()) {
+                    FlagEvents.ON_FLAG_CHECK.register(LoggingConfig::logCheck);
+                }
+                if (LoggingConfig.shouldLogFlagCheckResults()) {
+                    FlagEvents.ON_FLAG_RESULT.register(LoggingConfig::logResult);
+                }
+
                 registerHandler.run();
             }
             break;

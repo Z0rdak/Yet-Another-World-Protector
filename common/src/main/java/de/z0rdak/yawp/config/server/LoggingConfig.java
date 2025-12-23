@@ -3,8 +3,6 @@ package de.z0rdak.yawp.config.server;
 import de.z0rdak.yawp.api.FlagTagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.api.events.flag.FlagCheckResult;
-import de.z0rdak.yawp.platform.event.ForgeFlagCheckRequest;
-import de.z0rdak.yawp.platform.event.ForgeFlagCheckResult;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.*;
 import de.z0rdak.yawp.core.region.RegionType;
@@ -29,7 +27,7 @@ public class LoggingConfig {
     private static final ModConfigSpec.ConfigValue<Boolean> FLAG_RESULT_LOG;
     private static final ModConfigSpec.ConfigValue<Boolean> LOG_EMPTY_RESULTS;
     private static final ModConfigSpec.ConfigValue<Boolean> LOG_EVENTS_DETAIL;
-    // private static final ForgeConfigSpec.ConfigValue<Boolean> DETAILED_PLAYER_FLAG_LOG;
+    // private static final ModConfigSpec.ConfigValue<Boolean> DETAILED_PLAYER_FLAG_LOG;
     private static final ModConfigSpec.ConfigValue<List<? extends String>> LOG_RESULT_VALUES;
     private static final ModConfigSpec.ConfigValue<List<? extends String>> LOG_FLAG_TAGS;
     private static final ModConfigSpec.ConfigValue<List<? extends String>> LOG_FLAGS;
@@ -56,9 +54,6 @@ public class LoggingConfig {
 
         LOG_FLAGS = BUILDER.comment("List of flags which shall be logged.")
                 .defineListAllowEmpty(List.of("log_flags"), () -> Arrays.asList(RegionFlag.BREAK_BLOCKS.name, RegionFlag.PLACE_BLOCKS.name), null, LoggingConfig::isValidFlag);
-
-        LOG_EVENTS_DETAIL = BUILDER.comment("Enable logging of detailed event info.")
-                .define("log_event_details", false);
 
         LOG_EVENTS_DETAIL = BUILDER.comment("Enable logging of detailed event info.")
                 .define("log_event_details", false);
@@ -154,7 +149,7 @@ public class LoggingConfig {
     }
     */
 
-    public static boolean logCheck(ForgeFlagCheckRequest check) {
+    public static boolean logCheck(FlagCheckRequest check) {
         boolean matchesFlagOrCategory = (flagMatchesCategory(check) || matchesFlag(check));
         if (matchesFlagOrCategory) {
             LOGGING_CONFIG_LOGGER.info("[Check] {}, at {}, in '{}', Player={}, Id={}",
@@ -167,8 +162,8 @@ public class LoggingConfig {
         return true;
     }
 
-    public static ForgeFlagCheckResult logResult(ForgeFlagCheckResult result) {
-        ForgeFlagCheckRequest check = result.getFlagCheck();
+    public static FlagCheckResult logResult(FlagCheckResult result) {
+        FlagCheckRequest check = result.getFlagCheck();
         boolean matchesFlagOrCategory = (flagMatchesCategory(check) || matchesFlag(check));
         if (matchesFlagOrCategory && matchesResult(result)) {
             if (result.getResponsible() == null || result.getFlag() == null) {
@@ -202,11 +197,11 @@ public class LoggingConfig {
         return LoggingConfig.getResultValuesToLog().contains(result.getFlagState().name);
     }
 
-    public static boolean flagMatchesCategory(ForgeFlagCheckRequest check) {
+    public static boolean flagMatchesCategory(FlagCheckRequest check) {
         return RegionFlag.matchesCategory(check.getRegionFlag(), getFlagTags());
     }
 
-    public static boolean matchesFlag(ForgeFlagCheckRequest check) {
+    public static boolean matchesFlag(FlagCheckRequest check) {
         return LoggingConfig.getFlagsToLog().contains(check.getRegionFlag().name);
     }
 }

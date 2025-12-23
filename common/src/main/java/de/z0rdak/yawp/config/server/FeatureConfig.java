@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.config.server;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -8,14 +8,14 @@ import static de.z0rdak.yawp.constants.Constants.MOD_ID;
 
 public class FeatureConfig {
 
-    public static final ForgeConfigSpec CONFIG_SPEC;
+    public static final ModConfigSpec CONFIG_SPEC;
     public static final String CONFIG_NAME = MOD_ID + "-features.toml";
     public static final Logger FEATURE_CONFIG_LOGGER = LogManager.getLogger(MOD_ID.toUpperCase() + "-Feature-Config");
-    public static final ForgeConfigSpec.ConfigValue<Boolean> PLAYER_TRACKER;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> AUTO_CREATE_NEW_LEVEL_DATA;
+    public static final ModConfigSpec.ConfigValue<Boolean> PLAYER_TRACKER;
+    public static final ModConfigSpec.ConfigValue<Boolean> AUTO_CREATE_NEW_LEVEL_DATA;
 
     static {
-        final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+        final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
         BUILDER.push("YAWP feature config").build();
 
