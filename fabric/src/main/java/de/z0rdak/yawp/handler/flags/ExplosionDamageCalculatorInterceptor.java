@@ -4,7 +4,7 @@
 package de.z0rdak.yawp.handler.flags;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import net.minecraft.core.BlockPos;
@@ -23,13 +23,13 @@ import java.util.Optional;
 public class ExplosionDamageCalculatorInterceptor extends ExplosionDamageCalculator {
 	protected ExplosionDamageCalculator nextBehavior;
 	protected Level level;
-	
-	public ExplosionDamageCalculatorInterceptor(ExplosionDamageCalculator nextBehavior, Level level) 
+
+	public ExplosionDamageCalculatorInterceptor(ExplosionDamageCalculator nextBehavior, Level level)
 	{
 		this.nextBehavior = nextBehavior;
 		this.level = level;
 	}
-	
+
 	@Override
 	public boolean shouldBlockExplode(Explosion explosion, BlockGetter blockGetter, BlockPos pos, BlockState state, float power) {
 		RegionFlag flag = switch (explosion.getIndirectSourceEntity()) {
@@ -37,9 +37,9 @@ public class ExplosionDamageCalculatorInterceptor extends ExplosionDamageCalcula
 			// case Player p -> RegionFlag.EXPLOSION_PLAYER_BLOCK;
 			case null, default -> RegionFlag.EXPLOSION_BLOCK; // is null for dispenser etc
 		};
-		FlagCheckEvent checkEvent = new FlagCheckEvent(pos, flag, this.level.dimension());
+		FlagCheckRequest checkEvent = new FlagCheckRequest(pos, flag, this.level.dimension());
 		FlagState flagState = FlagEvaluator.processCheck(checkEvent);
-		return flagState == FlagState.DENIED 
+		return flagState == FlagState.DENIED
 				? false : nextBehavior.shouldBlockExplode(explosion, blockGetter, pos, state, power);
 	}
 
@@ -49,7 +49,7 @@ public class ExplosionDamageCalculatorInterceptor extends ExplosionDamageCalcula
 			case Creeper c -> RegionFlag.EXPLOSION_CREEPER_ENTITY;
 			case null, default -> RegionFlag.EXPLOSION_ENTITY;
 		};
-		FlagCheckEvent checkEvent = new FlagCheckEvent(entity.blockPosition(), flag, explosion.level().dimension());
+		FlagCheckRequest checkEvent = new FlagCheckRequest(entity.blockPosition(), flag, explosion.level().dimension());
 		FlagState flagState = FlagEvaluator.processCheck(checkEvent);
 		return flagState == FlagState.DENIED
 				? false : nextBehavior.shouldDamageEntity(explosion, entity);
@@ -59,17 +59,17 @@ public class ExplosionDamageCalculatorInterceptor extends ExplosionDamageCalcula
 	// we just go with the fact that if any of the two flags are denied we prevent knockback
 	@Override
 	public float getKnockbackMultiplier(Entity entity) {
-		FlagCheckEvent checkExplosionEntityFlag = new FlagCheckEvent(entity.blockPosition(), RegionFlag.EXPLOSION_ENTITY, entity.level().dimension());
-		FlagCheckEvent checkCreeperExplosionEntityFlag = new FlagCheckEvent(entity.blockPosition(), RegionFlag.EXPLOSION_CREEPER_ENTITY, entity.level().dimension());
+		FlagCheckRequest checkExplosionEntityFlag = new FlagCheckRequest(entity.blockPosition(), RegionFlag.EXPLOSION_ENTITY, entity.level().dimension());
+		FlagCheckRequest checkCreeperExplosionEntityFlag = new FlagCheckRequest(entity.blockPosition(), RegionFlag.EXPLOSION_CREEPER_ENTITY, entity.level().dimension());
 		FlagState flagState1 = FlagEvaluator.processCheck(checkExplosionEntityFlag);
 		FlagState flagState2 = FlagEvaluator.processCheck(checkCreeperExplosionEntityFlag);
 		return flagState1 == FlagState.DENIED || flagState2 == FlagState.DENIED
 				? 0	: nextBehavior.getKnockbackMultiplier(entity);
 	}
-	
+
 	// Note: All other method implementations pass the call directly to the underlying ExplosionDamageCalculator
-	
-	@Override		
+
+	@Override
 	public @NotNull Optional<Float> getBlockExplosionResistance(Explosion explosion, BlockGetter blockGetter, BlockPos pos, BlockState blockState, FluidState fluidState) {
 		return nextBehavior.getBlockExplosionResistance(explosion, blockGetter, pos, blockState, fluidState);
 	}
