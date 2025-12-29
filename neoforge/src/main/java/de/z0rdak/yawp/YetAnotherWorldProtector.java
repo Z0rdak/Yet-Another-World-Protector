@@ -1,6 +1,6 @@
 package de.z0rdak.yawp;
 
-import de.z0rdak.yawp.api.events.flag.NeoForgeFlagEvent;
+import de.z0rdak.yawp.platform.event.NeoForgeFlagEvent;
 import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.commands.CommandRegistry;
 import de.z0rdak.yawp.constants.Constants;
@@ -16,7 +16,6 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
@@ -44,9 +43,9 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
     }
 
     @SubscribeEvent
-    public static void onAddFlag(NeoForgeFlagEvent.AddFlagEvent event) {
+    public static void onAddFlag(NeoForgeFlagEvent.Add event) {
         if (event.getFlag().getName().contains("spawning") && Services.FLAG_CONFIG.removeEntitiesEnabled()) {
-            removeInvolvedEntities(event.getSrc(), event.getRegion(), RegionFlag.fromId(event.getFlag().getName()));
+            removeInvolvedEntities(event.getRegion(), RegionFlag.fromId(event.getFlag().getName()));
         }
     }
 
@@ -97,7 +96,7 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
                 (LevelEvent.Unload unloadEvent) -> {
                     if (unloadEvent.getLevel() instanceof ServerLevel serverLevel) {
-                        RegionDataManager.saveOnUnload(serverLevel.getServer(), serverLevel);
+                        RegionDataManager.saveOnUnload(serverLevel);
                     }
                 });
     }

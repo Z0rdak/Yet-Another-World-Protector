@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.handler.flags;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
@@ -46,8 +46,8 @@ public class WorldFlagHandler {
     public static void onLightningStrikeOccur(EntityStruckByLightningEvent event) {
         if (NeoForgeHandlerUtil.isServerSide(event)) {
             Entity poorEntity = event.getEntity();
-            FlagCheckEvent checkEvent = new FlagCheckEvent(poorEntity.blockPosition(), LIGHTNING_PROT, event.getEntity().level().dimension());
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(poorEntity.blockPosition(), LIGHTNING_PROT, event.getEntity().level().dimension());
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, denyResult -> {
@@ -59,8 +59,8 @@ public class WorldFlagHandler {
 
     @SubscribeEvent
     public static void onItemExpire(ItemExpireEvent event) {
-        FlagCheckEvent checkEvent = new FlagCheckEvent(event.getEntity().blockPosition(), NO_ITEM_DESPAWN, event.getEntity().level().dimension());
-        if (Services.EVENT.post(checkEvent)) {
+        FlagCheckRequest checkEvent = new FlagCheckRequest(event.getEntity().blockPosition(), NO_ITEM_DESPAWN, event.getEntity().level().dimension());
+        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
             return;
         }
 
@@ -80,8 +80,8 @@ public class WorldFlagHandler {
     public static void onNetherPortalSpawn(BlockEvent.PortalSpawnEvent event) {
         Level world = (Level) event.getLevel();
         if (isServerSide(world)) {
-            FlagCheckEvent checkEvent = new FlagCheckEvent(event.getPos(), SPAWN_PORTAL, world.dimension());
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(event.getPos(), SPAWN_PORTAL, world.dimension());
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, deny -> event.setCanceled(true));
@@ -102,8 +102,8 @@ public class WorldFlagHandler {
             ResourceKey<Level> dimension = event.getEntity().level().dimension();
             BlockPos target = entity.blockPosition();
             Player player = entity instanceof Player ? (Player) entity : null;
-            FlagCheckEvent checkEvent = new FlagCheckEvent(target, USE_PORTAL, dimension, player);
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(target, USE_PORTAL, dimension, player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, denyResult -> {
@@ -111,8 +111,8 @@ public class WorldFlagHandler {
             });
 
             if (entity instanceof Player) {
-                checkEvent = new FlagCheckEvent(target, USE_PORTAL_PLAYERS, dimension, player);
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(target, USE_PORTAL_PLAYERS, dimension, player);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, denyResult -> {
@@ -121,7 +121,7 @@ public class WorldFlagHandler {
             } else {
                 checkEvent = getNonPlayerCheckEventFor(entity, target, dimension);
                 if (checkEvent != null) {
-                    if (Services.EVENT.post(checkEvent)) {
+                    if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                         return;
                     }
                     FlagEvaluator.processCheck(checkEvent, denyResult -> {
@@ -135,22 +135,22 @@ public class WorldFlagHandler {
     @Nullable
     @Deprecated
     // this will be replaced with resource key matching in the next updates, so all these flags will disappear, too.
-    private static FlagCheckEvent getNonPlayerCheckEventFor(Entity entity, BlockPos target, ResourceKey<Level> dimension) {
-        FlagCheckEvent nonPlayerCheckEvent = null;
+    private static FlagCheckRequest getNonPlayerCheckEventFor(Entity entity, BlockPos target, ResourceKey<Level> dimension) {
+        FlagCheckRequest nonPlayerCheckEvent = null;
         if (entity instanceof ItemEntity) {
-            nonPlayerCheckEvent = new FlagCheckEvent(target, USE_PORTAL_ITEMS, dimension);
+            nonPlayerCheckEvent = new FlagCheckRequest(target, USE_PORTAL_ITEMS, dimension);
         }
         if (isAnimal(entity)) {
-            nonPlayerCheckEvent = new FlagCheckEvent(target, USE_PORTAL_ANIMALS, dimension);
+            nonPlayerCheckEvent = new FlagCheckRequest(target, USE_PORTAL_ANIMALS, dimension);
         }
         if (isMonster(entity)) {
-            nonPlayerCheckEvent = new FlagCheckEvent(target, USE_PORTAL_MONSTERS, dimension);
+            nonPlayerCheckEvent = new FlagCheckRequest(target, USE_PORTAL_MONSTERS, dimension);
         }
         if (entity instanceof AbstractVillager) {
-            nonPlayerCheckEvent = new FlagCheckEvent(target, USE_PORTAL_VILLAGERS, dimension);
+            nonPlayerCheckEvent = new FlagCheckRequest(target, USE_PORTAL_VILLAGERS, dimension);
         }
         if (entity instanceof AbstractMinecart) {
-            nonPlayerCheckEvent = new FlagCheckEvent(target, USE_PORTAL_MINECARTS, dimension);
+            nonPlayerCheckEvent = new FlagCheckRequest(target, USE_PORTAL_MINECARTS, dimension);
         }
         return nonPlayerCheckEvent;
     }
@@ -173,8 +173,8 @@ public class WorldFlagHandler {
                     BlockPos targetPos = worldborder.clampToBounds(player.getX() * tpPosScale, player.getY(), player.getZ() * tpPosScale);
                      */
                     // FIXME: Workaround is to not let users add this flag to Local Regions for now until the block position is correctly determined
-                    FlagCheckEvent checkGeneralEvent = new FlagCheckEvent(player.blockPosition(), ENTER_DIM, dim, player);
-                    if (Services.EVENT.post(checkGeneralEvent)) {
+                    FlagCheckRequest checkGeneralEvent = new FlagCheckRequest(player.blockPosition(), ENTER_DIM, dim, player);
+                    if (Services.FLAG_EVENT_DISPATCHER.post(checkGeneralEvent)) {
                         return;
                     }
                     FlagEvaluator.processCheck(checkGeneralEvent, denyResult -> {

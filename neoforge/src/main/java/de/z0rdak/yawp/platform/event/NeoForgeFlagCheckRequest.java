@@ -1,5 +1,6 @@
-package de.z0rdak.yawp.api.events.region;
+package de.z0rdak.yawp.platform.event;
 
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
@@ -15,7 +16,7 @@ import java.util.UUID;
  * Event that is fired before a flag is checked.
  * Can be used to cancel the flag check.
  */
-public class NeoForgeFlagCheckEvent extends Event implements ICancellableEvent {
+public class NeoForgeFlagCheckRequest extends Event implements ICancellableEvent {
 
     /**
      * The target position of the flag check. Depending on the flag this can be a block position or an entity position.
@@ -42,7 +43,7 @@ public class NeoForgeFlagCheckEvent extends Event implements ICancellableEvent {
     private final String id;
 
 
-    public NeoForgeFlagCheckEvent(BlockPos target, RegionFlag regionFlag, ResourceKey<Level> dimension, @Nullable Player player) {
+    public NeoForgeFlagCheckRequest(BlockPos target, RegionFlag regionFlag, ResourceKey<Level> dimension, @Nullable Player player) {
         this.player = player;
         this.target = target;
         this.dimension = dimension;
@@ -50,15 +51,7 @@ public class NeoForgeFlagCheckEvent extends Event implements ICancellableEvent {
         this.id = UUID.randomUUID().toString();
     }
 
-    public NeoForgeFlagCheckEvent(BlockPos target, RegionFlag regionFlag, ResourceKey<Level> dimension, @Nullable Player player, String id) {
-        this.player = player;
-        this.target = target;
-        this.dimension = dimension;
-        this.regionFlag = regionFlag;
-        this.id = id;
-    }
-
-    public NeoForgeFlagCheckEvent(FlagCheckEvent event) {
+    public NeoForgeFlagCheckRequest(FlagCheckRequest event) {
         this.player = event.getPlayer();
         this.target = event.getTarget();
         this.dimension = event.getDimension();
@@ -66,12 +59,20 @@ public class NeoForgeFlagCheckEvent extends Event implements ICancellableEvent {
         this.id = event.getId();
     }
 
-    public NeoForgeFlagCheckEvent(BlockPos target, RegionFlag regionFlag, ResourceKey<Level> dimension) {
+    public NeoForgeFlagCheckRequest(BlockPos target, RegionFlag regionFlag, ResourceKey<Level> dimension, @Nullable Player player, String id) {
+        this.player = player;
+        this.target = target;
+        this.dimension = dimension;
+        this.regionFlag = regionFlag;
+        this.id = id;
+    }
+
+    public NeoForgeFlagCheckRequest(BlockPos target, RegionFlag regionFlag, ResourceKey<Level> dimension) {
         this(target, regionFlag, dimension, null);
     }
 
-    public static FlagCheckEvent asNonEvent(NeoForgeFlagCheckEvent check) {
-        return new FlagCheckEvent(check.getTarget(), check.getRegionFlag(), check.getDimension(), check.getPlayer(), check.getId());
+    public static FlagCheckRequest asNonEvent(NeoForgeFlagCheckRequest check) {
+        return new FlagCheckRequest(check.getTarget(), check.getRegionFlag(), check.getDimension(), check.getPlayer(), check.getId());
     }
 
     public String getId() {

@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.platform.config;
 
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
-import de.z0rdak.yawp.api.events.region.FlagCheckResult;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
+import de.z0rdak.yawp.api.events.flag.FlagCheckResult;
 import de.z0rdak.yawp.config.server.LoggingConfig;
 import de.z0rdak.yawp.platform.services.config.ILoggingConfigHelper;
 
@@ -25,7 +25,7 @@ public class NeoForgeLoggingConfigHelper implements ILoggingConfigHelper {
     }
 
     @Override
-    public boolean logCheck(FlagCheckEvent check) {
+    public boolean logCheck(FlagCheckRequest check) {
         return LoggingConfig.logCheck(check);
     }
 
