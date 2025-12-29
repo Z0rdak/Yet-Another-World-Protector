@@ -1,9 +1,10 @@
-package de.z0rdak.yawp.api.events.region;
+package de.z0rdak.yawp.platform.event;
 
+import de.z0rdak.yawp.api.events.region.RegionEvent;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.ICancellableEvent;
 
@@ -13,9 +14,9 @@ public abstract class NeoForgeRegionEvent extends Event implements ICancellableE
 
     private final IMarkableRegion region;
     @Nullable
-    private final Player player;
+    private final ServerPlayer player;
 
-    private NeoForgeRegionEvent(IMarkableRegion region, @Nullable Player player) {
+    private NeoForgeRegionEvent(IMarkableRegion region, @Nullable ServerPlayer player) {
         this.region = region;
         this.player = player;
     }
@@ -25,7 +26,7 @@ public abstract class NeoForgeRegionEvent extends Event implements ICancellableE
     }
 
     @Nullable
-    public Player getPlayer() {
+    public ServerPlayer getPlayer() {
         return player;
     }
 
@@ -35,7 +36,7 @@ public abstract class NeoForgeRegionEvent extends Event implements ICancellableE
      */
     public static class Create extends NeoForgeRegionEvent {
 
-        public Create(IMarkableRegion region, Player player) {
+        public Create(IMarkableRegion region, ServerPlayer player) {
             super(region, player);
         }
 
@@ -57,7 +58,7 @@ public abstract class NeoForgeRegionEvent extends Event implements ICancellableE
         private final String oldName;
         private String newName;
 
-        public Rename(IMarkableRegion region, String oldName, String newName, Player player) {
+        public Rename(IMarkableRegion region, String oldName, String newName, ServerPlayer player) {
             super(region, player);
             this.newName = newName;
             this.oldName = oldName;
@@ -99,7 +100,7 @@ public abstract class NeoForgeRegionEvent extends Event implements ICancellableE
 
         private IMarkableArea markedArea;
 
-        public UpdateArea(IMarkableRegion region, IMarkableArea area, Player player) {
+        public UpdateArea(IMarkableRegion region, IMarkableArea area, ServerPlayer player) {
             super(region, player);
             this.markedArea = area;
         }
@@ -142,7 +143,7 @@ public abstract class NeoForgeRegionEvent extends Event implements ICancellableE
      */
     public static class Remove extends NeoForgeRegionEvent {
 
-        public Remove(IMarkableRegion region, Player player) {
+        public Remove(IMarkableRegion region, ServerPlayer player) {
             super(region, player);
         }
 
@@ -153,6 +154,40 @@ public abstract class NeoForgeRegionEvent extends Event implements ICancellableE
         public static RegionEvent.Remove asCommonEvent(Remove event) {
             return new RegionEvent.Remove(event.getRegion(), event.getPlayer());
         }
+    }
+
+    public static abstract class PlayerMove extends NeoForgeRegionEvent {
+        private final BlockPos previousPos;
+        private final BlockPos currentPos;
+
+        public PlayerMove(final IMarkableRegion region, final ServerPlayer player, final BlockPos previousPos, final BlockPos currentPos) {
+            super(region, player);
+            this.previousPos = previousPos;
+            this.currentPos = currentPos;
+        }
+
+        public BlockPos previous() { return previousPos; }
+        public BlockPos current() { return currentPos; }
+
+    }
+
+    public final static class PlayerEnter extends PlayerMove {
+        public PlayerEnter(final IMarkableRegion region, final ServerPlayer player, final BlockPos oldPos, final BlockPos newPos) {
+            super(region, player, oldPos, newPos);
+        }
+        private boolean canceled;
+
+        @Override public boolean isCanceled() { return canceled; }
+        @Override public void setCanceled(boolean canceled) { this.canceled = canceled; }
+    }
+
+    public final static class PlayerLeave extends PlayerMove {
+        public PlayerLeave(final IMarkableRegion region, final ServerPlayer player, final BlockPos oldPos, final BlockPos newPos) {
+            super(region, player, oldPos, newPos);
+        }
+        private boolean canceled;
+        @Override public boolean isCanceled() { return canceled; }
+        @Override public void setCanceled(boolean canceled) { this.canceled = canceled; }
     }
 }
 

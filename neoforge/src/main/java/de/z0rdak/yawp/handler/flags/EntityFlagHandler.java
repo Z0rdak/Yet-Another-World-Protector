@@ -1,8 +1,8 @@
 package de.z0rdak.yawp.handler.flags;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
-import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
-import de.z0rdak.yawp.api.events.region.FlagCheckResult;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
+import de.z0rdak.yawp.api.events.flag.FlagCheckResult;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.RegionFlag;
@@ -47,16 +47,16 @@ public class EntityFlagHandler {
             // handle enderman teleportation
             BlockPos target = new BlockPos((int) event.getPrev().x, (int) event.getPrev().y, (int) event.getPrev().z);
             if (event.getEntityLiving() instanceof EnderMan) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(target, RegionFlag.ENDERMAN_TELEPORT_FROM_REGION, dim);
-                if (Services.EVENT.post(checkEvent)) {
+                FlagCheckRequest checkEvent = new FlagCheckRequest(target, RegionFlag.ENDERMAN_TELEPORT_FROM_REGION, dim);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, denyResult -> event.setCanceled(true));
             }
             // handle shulker teleportation
             if (event.getEntityLiving() instanceof Shulker) {
-                FlagCheckEvent checkEvent = new FlagCheckEvent(target, RegionFlag.SHULKER_TELEPORT_FROM_REGION, dim);
-                if (Services.EVENT.post(checkEvent)) {
+                FlagCheckRequest checkEvent = new FlagCheckRequest(target, RegionFlag.SHULKER_TELEPORT_FROM_REGION, dim);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, denyResult -> event.setCanceled(true));
@@ -76,8 +76,8 @@ public class EntityFlagHandler {
                 event.setDamageMultiplier(0.0f);
             };
 
-            FlagCheckEvent checkEvent = new FlagCheckEvent(target, RegionFlag.FALL_DAMAGE, dim, entity instanceof Player ? (Player) entity : null);
-            if (Services.EVENT.post(checkEvent)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(target, RegionFlag.FALL_DAMAGE, dim, entity instanceof Player ? (Player) entity : null);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
             FlagState flagState = FlagEvaluator.processCheck(checkEvent, preventFallDmg);
@@ -85,26 +85,26 @@ public class EntityFlagHandler {
                 return;
 
             if (entity instanceof Player player) {
-                checkEvent = new FlagCheckEvent(target, RegionFlag.FALL_DAMAGE_PLAYERS, dim, player);
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(target, RegionFlag.FALL_DAMAGE_PLAYERS, dim, player);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
             }
             if (isVillager(entity)) {
-                checkEvent = new FlagCheckEvent(target, RegionFlag.FALL_DAMAGE_VILLAGERS, dim);
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(target, RegionFlag.FALL_DAMAGE_VILLAGERS, dim);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
             }
             if (isAnimal(entity)) {
-                checkEvent = new FlagCheckEvent(target, RegionFlag.FALL_DAMAGE_ANIMALS, dim);
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(target, RegionFlag.FALL_DAMAGE_ANIMALS, dim);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
             }
             if (isMonster(entity)) {
-                checkEvent = new FlagCheckEvent(target, RegionFlag.FALL_DAMAGE_MONSTERS, dim);
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(target, RegionFlag.FALL_DAMAGE_MONSTERS, dim);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
             }
@@ -122,10 +122,10 @@ public class EntityFlagHandler {
             BlockPos target = entity.blockPosition();
             Consumer<FlagCheckResult> onDenyHandler = denyResult -> event.setCanceled(true);
 
-            FlagCheckEvent checkEvent = null;
+            FlagCheckRequest checkEvent = null;
             if (entity instanceof Mob) {
-                checkEvent = new FlagCheckEvent(target, RegionFlag.SPAWNING_ALL, dim);
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(target, RegionFlag.SPAWNING_ALL, dim);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagState flagState = FlagEvaluator.processCheck(checkEvent, onDenyHandler);
@@ -133,44 +133,44 @@ public class EntityFlagHandler {
                     return;
             }
             if (isAnimal(entity)) {
-                checkEvent = new FlagCheckEvent(target, RegionFlag.SPAWNING_ANIMAL, dim);
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(target, RegionFlag.SPAWNING_ANIMAL, dim);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
             }
             if (isMonster(entity)) {
-                checkEvent = new FlagCheckEvent(target, RegionFlag.SPAWNING_MONSTER, dim);
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(target, RegionFlag.SPAWNING_MONSTER, dim);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
             }
             if (entity instanceof SnowGolem || entity instanceof IronGolem) {
-                checkEvent = new FlagCheckEvent(target, RegionFlag.SPAWNING_GOLEM, dim);
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(target, RegionFlag.SPAWNING_GOLEM, dim);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
             }
             if (entity instanceof Villager) {
-                checkEvent = new FlagCheckEvent(target, RegionFlag.SPAWNING_VILLAGER, dim);
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(target, RegionFlag.SPAWNING_VILLAGER, dim);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
             }
             if (entity instanceof WanderingTrader || entity instanceof TraderLlama) {
-                checkEvent = new FlagCheckEvent(target, RegionFlag.SPAWNING_TRADER, dim);
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(target, RegionFlag.SPAWNING_TRADER, dim);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
             }
             if (entity instanceof Slime) {
-                checkEvent = new FlagCheckEvent(target, RegionFlag.SPAWNING_SLIME, dim);
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(target, RegionFlag.SPAWNING_SLIME, dim);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
             }
             if (entity instanceof ExperienceOrb) {
-                checkEvent = new FlagCheckEvent(target, RegionFlag.SPAWNING_XP, dim);
-                if (Services.EVENT.post(checkEvent)) {
+                checkEvent = new FlagCheckRequest(target, RegionFlag.SPAWNING_XP, dim);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
             }

@@ -1,34 +1,27 @@
 package de.z0rdak.yawp;
 
-import de.z0rdak.yawp.api.events.flag.NeoForgeFlagEvent;
+import de.z0rdak.yawp.platform.event.NeoForgeFlagEvent;
 import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.commands.CommandRegistry;
-import de.z0rdak.yawp.config.ConfigRegistry;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.data.PlayerManager;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.NeoForgeConfigHelper;
 import de.z0rdak.yawp.platform.Services;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.IExtensionPoint;
-import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
-import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 
 import static de.z0rdak.yawp.handler.YawpEventHandler.removeInvolvedEntities;
@@ -55,9 +48,9 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
     }
 
     @SubscribeEvent
-    public static void onAddFlag(NeoForgeFlagEvent.AddFlagEvent event) {
+    public static void onAddFlag(NeoForgeFlagEvent.Add event) {
         if (event.getFlag().getName().contains("spawning") && Services.FLAG_CONFIG.removeEntitiesEnabled()) {
-            removeInvolvedEntities(event.getSrc(), event.getRegion(), RegionFlag.fromId(event.getFlag().getName()));
+            removeInvolvedEntities(event.getRegion(), RegionFlag.fromId(event.getFlag().getName()));
         }
     }
 
@@ -108,7 +101,7 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
                 (LevelEvent.Unload unloadEvent) -> {
                     if (unloadEvent.getLevel() instanceof ServerLevel serverLevel) {
-                        RegionDataManager.saveOnUnload(serverLevel.getServer(), serverLevel);
+                        RegionDataManager.saveOnUnload(serverLevel);
                     }
                 });
     }
