@@ -8,7 +8,6 @@ import de.z0rdak.yawp.api.commands.CommandConstants;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
 import de.z0rdak.yawp.api.permission.Permissions;
 import de.z0rdak.yawp.commands.arguments.region.ContainingOwnedRegionArgumentType;
-import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
@@ -23,23 +22,20 @@ import de.z0rdak.yawp.util.StickUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+
 import java.util.Collections;
-import java.util.Objects;
 
 import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.commands.DimensionCommands.getRandomExample;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.ChatLinkBuilder.buildRegionInfoLink;
-import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
-import static de.z0rdak.yawp.util.StickUtil.getStickType;
 import static net.minecraft.ChatFormatting.RED;
 
 public final class MarkerCommands {
