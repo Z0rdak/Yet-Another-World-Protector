@@ -8,7 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
@@ -92,7 +92,7 @@ public class MarkerStick extends AbstractStick {
         nbt.putString(ItemNbtKeys.STICK_ID, UUID.randomUUID().toString());
         nbt.putBoolean(ItemNbtKeys.VALID_AREA, this.isValidArea);
         nbt.putString(ItemNbtKeys.AREA_TYPE, this.areaType.areaType);
-        nbt.putString(ItemNbtKeys.DIM, this.dimension.location().toString());
+        nbt.putString(ItemNbtKeys.DIM, this.dimension.identifier().toString());
         ListTag blocks = new ListTag();
         this.markedBlocks.forEach(block -> blocks.add(NbtCompatHelper.asInts(block)));
         nbt.put(ItemNbtKeys.MARKED_BLOCKS, blocks);
@@ -104,7 +104,7 @@ public class MarkerStick extends AbstractStick {
         super.deserializeNBT(nbt);
         this.isValidArea = nbt.getBoolean(ItemNbtKeys.VALID_AREA).orElseThrow();
         this.areaType = AreaType.of(nbt.getString(ItemNbtKeys.AREA_TYPE).orElseThrow());
-        this.dimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(nbt.getString(ItemNbtKeys.DIM).orElseThrow()));
+        this.dimension = ResourceKey.create(Registries.DIMENSION, Identifier.parse(nbt.getString(ItemNbtKeys.DIM).orElseThrow()));
         ListTag markedBlocksNBT = (ListTag) nbt.get(ItemNbtKeys.MARKED_BLOCKS);
         if (markedBlocksNBT != null) {
             this.markedBlocks = new ArrayList<>(this.areaType.maxBlocks);

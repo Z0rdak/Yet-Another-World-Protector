@@ -2,8 +2,8 @@ package de.z0rdak.yawp.api;
 
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.*;
-import net.minecraft.ResourceLocationException;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.IdentifierException;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,10 +15,10 @@ public class FlagRegister {
     private FlagRegister() {
     }
 
-    private static final Map<ResourceLocation, Flag> flagRegister = new HashMap<>();
+    private static final Map<Identifier, Flag> flagRegister = new HashMap<>();
 
-    private static ResourceLocation flagId(final String flagName) {
-        return ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, flagName);
+    private static Identifier flagId(final String flagName) {
+        return Identifier.fromNamespaceAndPath(Constants.MOD_ID, flagName);
     }
 
     /**
@@ -26,10 +26,10 @@ public class FlagRegister {
      *
      * @param flagId The string representation of the flag ID.
      * @param flag   The flag to compare against.
-     * @return True if the flag ID matches the flag's ResourceLocation, false otherwise.
+     * @return True if the flag ID matches the flag's Identifier, false otherwise.
      */
     public static boolean isSame(String flagId, Flag flag) {
-        ResourceLocation left = ResourceLocation.parse(flagId);
+        Identifier left = Identifier.parse(flagId);
         return left.equals(flag.id());
     }
 
@@ -38,20 +38,20 @@ public class FlagRegister {
      *
      * @param left  The first flag.
      * @param right The second flag.
-     * @return True if both flags have the same ResourceLocation, false otherwise.
+     * @return True if both flags have the same Identifier, false otherwise.
      */
     public static boolean isSame(Flag left, Flag right) {
         return isSame(left.id(), right);
     }
 
     /**
-     * Checks if the given ResourceLocation matches the specified Flag.
+     * Checks if the given Identifier matches the specified Flag.
      *
-     * @param flagId The ResourceLocation of the flag.
+     * @param flagId The Identifier of the flag.
      * @param flag   The flag to compare against.
-     * @return True if the ResourceLocation matches the flag's ResourceLocation, false otherwise.
+     * @return True if the Identifier matches the flag's Identifier, false otherwise.
      */
-    public static boolean isSame(ResourceLocation flagId, Flag flag) {
+    public static boolean isSame(Identifier flagId, Flag flag) {
         return flagId.equals(flag.id());
     }
 
@@ -71,14 +71,14 @@ public class FlagRegister {
     }
 
     /**
-     * Registers a flag in the internal flag registry using a {@link ResourceLocation} and {@link FlagMetaInfo}.
+     * Registers a flag in the internal flag registry using a {@link Identifier} and {@link FlagMetaInfo}.
      * If a flag with the same resource location already exists, registration is skipped.
      *
      * @param flagRl       The unique resource location of the flag.
      * @param flagMetaInfo The metadata associated with the flag.
      * @return {@code true} if the flag was successfully registered, {@code false} if it was already registered.
      */
-    public static boolean registerFlag(@NotNull ResourceLocation flagRl, @NotNull FlagMetaInfo flagMetaInfo) {
+    public static boolean registerFlag(@NotNull Identifier flagRl, @NotNull FlagMetaInfo flagMetaInfo) {
         if (flagRl.getNamespace().equalsIgnoreCase(Constants.MOD_ID)) {
             throw new IllegalArgumentException("You are not permitted to register flags with the YAWP namespace!");
         }
@@ -95,7 +95,7 @@ public class FlagRegister {
      * @return {@code true} if the flag was successfully registered, {@code false} if it was already registered.
      */
     public static boolean registerFlag(@NotNull String modId, @NotNull String flagId, @NotNull FlagMetaInfo flagMetaInfo) {
-        var rl = ResourceLocation.fromNamespaceAndPath(modId, flagId);
+        var rl = Identifier.fromNamespaceAndPath(modId, flagId);
         return registerFlag(rl, flagMetaInfo);
     }
 
@@ -112,12 +112,12 @@ public class FlagRegister {
     }
 
     /**
-     * Checks if a flag is registered based on its ResourceLocation.
+     * Checks if a flag is registered based on its Identifier.
      *
-     * @param rl The ResourceLocation of the flag.
+     * @param rl The Identifier of the flag.
      * @return True if the flag is registered, false otherwise.
      */
-    public static boolean isFlagRegistered(ResourceLocation rl) {
+    public static boolean isFlagRegistered(Identifier rl) {
         return flagRegister.containsKey(rl);
     }
 
@@ -129,9 +129,9 @@ public class FlagRegister {
      */
     public static boolean isRegistered(String flagIdentifier) {
         try {
-            ResourceLocation rl = ResourceLocation.parse(flagIdentifier);
+            Identifier rl = Identifier.parse(flagIdentifier);
             return isFlagRegistered(rl);
-        } catch (ResourceLocationException rle) {
+        } catch (IdentifierException rle) {
             return false;
         }
     }
@@ -145,7 +145,7 @@ public class FlagRegister {
      */
     public static Flag byId(String flagIdentifier) throws IllegalArgumentException {
         if (isRegistered(flagIdentifier)) {
-            return flagRegister.get(ResourceLocation.parse(flagIdentifier));
+            return flagRegister.get(Identifier.parse(flagIdentifier));
         }
         throw new IllegalArgumentException("Invalid region flag identifier supplied");
     }
@@ -153,21 +153,21 @@ public class FlagRegister {
     /**
      * Retrieves an Optional containing the Flag if it exists.
      *
-     * @param rl The ResourceLocation of the flag.
+     * @param rl The Identifier of the flag.
      * @return An Optional containing the flag if registered, otherwise empty.
      */
-    public static Optional<Flag> getFlagOptional(ResourceLocation rl) {
+    public static Optional<Flag> getFlagOptional(Identifier rl) {
         return isFlagRegistered(rl) ? Optional.of(flagRegister.get(rl)) : Optional.empty();
     }
 
     /**
-     * Retrieves a Flag by its ResourceLocation, or null if not found.
+     * Retrieves a Flag by its Identifier, or null if not found.
      *
-     * @param rl The ResourceLocation of the flag.
+     * @param rl The Identifier of the flag.
      * @return The corresponding Flag if registered, otherwise null.
      */
     @Nullable
-    public static Flag getFlag(ResourceLocation rl) {
+    public static Flag getFlag(Identifier rl) {
         return isFlagRegistered(rl) ? flagRegister.get(rl) : null;
     }
 
@@ -178,7 +178,7 @@ public class FlagRegister {
      */
     public static List<String> getFlagNames() {
         return flagRegister.keySet().stream()
-                .map(ResourceLocation::toString)
+                .map(Identifier::toString)
                 .collect(Collectors.toList());
     }
 

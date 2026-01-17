@@ -4,13 +4,13 @@ import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.platform.Services;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.entity.npc.WanderingTrader;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -157,13 +157,13 @@ public abstract class PlayerMixin {
                 // this is for BlockEntities which are not covered by the block breaking flag
                 Set<String> entityTags = FlagConfig.getCoveredBlockEntityTags();
                 boolean isCoveredByTag = entityTags.stream().anyMatch(entityTag -> {
-                    ResourceLocation tagRl = ResourceLocation.parse(entityTag);
+                    Identifier tagRl = Identifier.parse(entityTag);
                     return target.getTags().contains(tagRl.getPath());
                 });
                 Set<String> entities = FlagConfig.getCoveredBlockEntities();
                 boolean isBlockEntityCovered = entities.stream().anyMatch(entity -> {
-                    ResourceLocation entityRl = ResourceLocation.parse(entity);
-                    ResourceLocation targetRl = EntityType.getKey(target.getType());
+                    Identifier entityRl = Identifier.parse(entity);
+                    Identifier targetRl = EntityType.getKey(target.getType());
                     return targetRl != null && targetRl.equals(entityRl);
                 });
                 if (isBlockEntityCovered || isCoveredByTag) {

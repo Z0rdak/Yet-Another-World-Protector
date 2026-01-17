@@ -20,7 +20,7 @@ public class RegionOutlineBuilder {
     }
 
     public static Entity buildBlockDisplay(ServerLevel level, BlockPos pos, CompoundTag displayTag) {
-        displayTag.putString("id",  EntityType.BLOCK_DISPLAY.builtInRegistryHolder().key().location().toString());
+        displayTag.putString("id",  EntityType.BLOCK_DISPLAY.builtInRegistryHolder().key().identifier().toString());
         return EntityType.loadEntityRecursive(displayTag, level, EntitySpawnReason.COMMAND, p_396566_ -> {
             p_396566_.snapTo(pos.getX(), pos.getY(), pos.getZ(), p_396566_.getYRot(), p_396566_.getXRot());
             return p_396566_;

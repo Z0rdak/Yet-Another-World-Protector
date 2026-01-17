@@ -89,7 +89,7 @@ public class RegionArgumentType implements ArgumentType<String> {
                 throw ERROR_INVALID_VALUE.create(regionName);
             }
         } else {
-            throw ERROR_INVALID_LEVEL.create(level.dimension().location().toString());
+            throw ERROR_INVALID_LEVEL.create(level.dimension().identifier().toString());
         }
     }
 
@@ -170,7 +170,7 @@ public class RegionArgumentType implements ArgumentType<String> {
         if (region != null) {
             return region;
         } else {
-            sendCmdFeedback(ctx.getSource(), Component.literal("No regions defined in dim '" + dimCache.getDim().getDim().location() + "'"));
+            sendCmdFeedback(ctx.getSource(), Component.literal("No regions defined in dim '" + dimCache.getDim().getDim().identifier() + "'"));
             throw ERROR_INVALID_VALUE.create(regionName);
         }
     }

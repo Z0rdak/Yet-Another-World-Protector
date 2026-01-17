@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
-import net.minecraft.world.entity.monster.Evoker;
+import net.minecraft.world.entity.monster.illager.Evoker;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;

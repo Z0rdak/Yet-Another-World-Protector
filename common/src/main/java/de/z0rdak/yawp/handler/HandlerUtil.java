@@ -7,9 +7,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.WaterAnimal;
-import net.minecraft.world.entity.animal.horse.SkeletonHorse;
-import net.minecraft.world.entity.animal.horse.ZombieHorse;
+import net.minecraft.world.entity.animal.AgeableWaterCreature;
+import net.minecraft.world.entity.animal.equine.SkeletonHorse;
+import net.minecraft.world.entity.animal.equine.ZombieHorse;
 import net.minecraft.world.entity.monster.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.trading.Merchant;
@@ -36,7 +36,8 @@ public final class HandlerUtil {
         boolean isMonsterHorse = entity instanceof ZombieHorse || entity instanceof SkeletonHorse;
         // Note: because monster horses are still horses and horses are animals? what the frick mojang
         return entity instanceof Animal && !isMonsterHorse 
-                || entity instanceof WaterAnimal;
+                || entity instanceof AgeableWaterCreature;
+        // TODO:
     }
 
     public static boolean isServerSide(Entity entity) {

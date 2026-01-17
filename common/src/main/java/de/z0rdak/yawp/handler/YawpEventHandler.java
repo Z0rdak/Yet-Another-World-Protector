@@ -14,13 +14,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.animal.IronGolem;
-import net.minecraft.world.entity.animal.SnowGolem;
-import net.minecraft.world.entity.animal.horse.TraderLlama;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.animal.equine.TraderLlama;
+import net.minecraft.world.entity.animal.golem.IronGolem;
+import net.minecraft.world.entity.animal.golem.SnowGolem;
 import net.minecraft.world.entity.monster.Slime;
-import net.minecraft.world.entity.npc.WanderingTrader;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.entity.EntityTypeTest;
 
@@ -33,7 +31,7 @@ import static de.z0rdak.yawp.api.FlagEvaluator.processCheck;
 public class YawpEventHandler {
 
     public static void removeInvolvedEntities(CommandSourceStack src, IProtectedRegion region, RegionFlag flag) {
-        ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, region.getDim().location());
+        ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, region.getDim().identifier());
         MinecraftServer server = src.getServer();
         Predicate<? super Entity> entityFilter = getEntityFilterForFlag(flag);
         switch (region.getRegionType()) {

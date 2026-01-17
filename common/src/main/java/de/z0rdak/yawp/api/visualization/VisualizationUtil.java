@@ -8,7 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.commands.data.EntityDataAccessor;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Display;
@@ -23,7 +23,7 @@ public final class VisualizationUtil {
 
     private VisualizationUtil() {}
 
-    public static void updateDisplayBlock(Entity blockDisplayEntity, ResourceLocation blockRl) {
+    public static void updateDisplayBlock(Entity blockDisplayEntity, Identifier blockRl) {
         if (!(blockDisplayEntity instanceof Display.BlockDisplay)) {
             throw new IllegalArgumentException("BlockDisplay entity is not a Display.BlockDisplay");
         }
@@ -149,7 +149,7 @@ public final class VisualizationUtil {
         var textDisplayTag = new CompoundTag();
 
         // General Entity Tags
-        ResourceLocation blockDisplayRl = ResourceLocation.withDefaultNamespace("text_display");
+        Identifier blockDisplayRl = Identifier.withDefaultNamespace("text_display");
         textDisplayTag.putString("id", blockDisplayRl.toString());
         // textDisplayTag.putBoolean("Glowing", properties.hasGlow());
 
@@ -181,7 +181,7 @@ public final class VisualizationUtil {
         var blockDisplayTag = new CompoundTag();
 
         // General Entity Tags
-        ResourceLocation blockDisplayRl = ResourceLocation.withDefaultNamespace("block_display");
+        Identifier blockDisplayRl = Identifier.withDefaultNamespace("block_display");
         blockDisplayTag.putString("id", blockDisplayRl.getPath());
         blockDisplayTag.putBoolean("Glowing", properties.hasGlow());
 

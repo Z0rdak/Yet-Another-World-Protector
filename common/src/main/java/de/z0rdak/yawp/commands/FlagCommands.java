@@ -24,7 +24,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,13 +51,13 @@ final class FlagCommands {
                         .then(flagLocalSubCommands()));
     }
 
-    private static RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> flagDimSubCommands() {
+    private static RequiredArgumentBuilder<CommandSourceStack, Identifier> flagDimSubCommands() {
         return Commands.argument(DIM.toString(), DimensionArgument.dimension())
                 .executes(ctx -> CommandUtil.promptRegionFlagList(ctx, getLevelDataArgument(ctx).getDim(), 0))
                 .then(flagSubCmd((ctx) -> getLevelDataArgument(ctx).getDim()));
     }
 
-    private static RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> flagLocalSubCommands() {
+    private static RequiredArgumentBuilder<CommandSourceStack, Identifier> flagLocalSubCommands() {
         return Commands.argument(DIM.toString(), DimensionArgument.dimension())
                 .then(Commands.argument(CommandConstants.LOCAL.toString(), StringArgumentType.word())
                         .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestions(ctx, builder))

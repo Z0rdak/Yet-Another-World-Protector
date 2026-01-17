@@ -6,7 +6,7 @@ import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.util.text.Messages;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +44,7 @@ public class VisualizationOptionsMessage implements MultiLineMessage<IMarkableAr
         var hierarchySubject = Component.translatableWithFallback("cli.msg.info.region.visualization.hierarchy", "Hierarchy");
         var intersectingSubject = Component.translatableWithFallback("cli.msg.info.region.visualization.intersecting", "Intersecting");
 
-        var customShowLink = buildShowAdvancedLink(region, DisplayType.FRAME, ResourceLocation.withDefaultNamespace("cyan_stained_glass"), true, 15);
+        var customShowLink = buildShowAdvancedLink(region, DisplayType.FRAME, Identifier.withDefaultNamespace("cyan_stained_glass"), true, 15);
         var displayActions = buildInfoComponent(showSubject, buildShowLinks(region), customShowLink);
         var hideActions = buildInfoComponent(hideSubject, buildHideLinks(region));
         var hierarchy = buildInfoComponent(hierarchySubject, buildHierarchyShowLink(region), buildHierarchyHideLink(region));
@@ -71,7 +71,7 @@ public class VisualizationOptionsMessage implements MultiLineMessage<IMarkableAr
         return Messages.substitutable("%s %s %s %s", frameLink, hullLink, minimalLink, markedLink);
     }
 
-    public static MutableComponent buildShowAdvancedLink(IMarkableRegion region, DisplayType displayType, ResourceLocation block, boolean glow, int lightLevel) {
+    public static MutableComponent buildShowAdvancedLink(IMarkableRegion region, DisplayType displayType, Identifier block, boolean glow, int lightLevel) {
         var cmd = buildAdvancedVisualizationShowCommand(region, displayType, block, glow, lightLevel);
         var text = Component.translatableWithFallback("cli.msg.info.region.visualization.show.advanced.link.text", "custom");
         var hover = Component.translatableWithFallback("cli.msg.info.region.visualization.show.advanced.link.hover", "Click to paste custom visualization command for '%s'", displayType.name, region.getName());

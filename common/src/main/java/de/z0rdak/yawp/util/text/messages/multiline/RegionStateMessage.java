@@ -44,7 +44,7 @@ public class RegionStateMessage implements MultiLineMessage<IProtectedRegion> {
     }
 
     public static MutableComponent buildRegionRenameLink(IMarkableRegion region) {
-        String cmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), RENAME.toString(), "");
+        String cmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().identifier().toString(), region.getName(), RENAME.toString(), "");
         MutableComponent text = Component.translatableWithFallback("cli.msg.info.region.state.rename.link.text", "rename");
         MutableComponent hover = Component.translatableWithFallback("cli.msg.info.region.state.rename.link.hover", "Rename region '%s'", region.getName());
         return buildExecuteCmdLink(text, hover, cmd, SUGGEST_COMMAND, LINK_COLOR);
@@ -52,15 +52,15 @@ public class RegionStateMessage implements MultiLineMessage<IProtectedRegion> {
 
     public static MutableComponent buildRegionPriorityComponent(IMarkableRegion region) {
         int defaultPriorityInc = Services.REGION_CONFIG.getDefaultPriorityInc();
-        String incPriorityCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), INC.toString(), String.valueOf(defaultPriorityInc));
+        String incPriorityCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().identifier().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), INC.toString(), String.valueOf(defaultPriorityInc));
         MutableComponent incLinkText = Component.translatableWithFallback("cli.msg.info.region.state.priority.increase.link.text", "+%s", defaultPriorityInc);
         MutableComponent incHoverText = Component.translatableWithFallback("cli.msg.info.region.state.priority.increase.link.hover", "Increase region priority by %s", defaultPriorityInc);
         MutableComponent increaseLink = buildExecuteCmdComponent(incLinkText, incHoverText, incPriorityCmd, RUN_COMMAND, ADD_CMD_COLOR);
-        String decPriorityCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), DEC.toString(), String.valueOf(defaultPriorityInc));
+        String decPriorityCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().identifier().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), DEC.toString(), String.valueOf(defaultPriorityInc));
         MutableComponent decLinkText = Component.translatableWithFallback("cli.msg.info.region.state.priority.decrease.link.text", "+%s", defaultPriorityInc);
         MutableComponent decHoverText = Component.translatableWithFallback("cli.msg.info.region.state.priority.decrease.link.hover", "Decrease region priority by %s", defaultPriorityInc);
         MutableComponent decreaseLink = buildExecuteCmdComponent(decLinkText, decHoverText, decPriorityCmd, RUN_COMMAND, REMOVE_CMD_COLOR);
-        String setPriorityCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), "");
+        String setPriorityCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().identifier().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), "");
         MutableComponent setPriorityLinkText = Component.translatableWithFallback("cli.msg.info.region.state.priority.set.link.text", "%s", region.getPriority());
         MutableComponent setPriorityHoverText = Component.translatableWithFallback("cli.msg.info.region.state.priority.set.link.hover", "Set priority for region");
         MutableComponent setPriorityLink = buildExecuteCmdComponent(setPriorityLinkText, setPriorityHoverText, setPriorityCmd, SUGGEST_COMMAND, LINK_COLOR);

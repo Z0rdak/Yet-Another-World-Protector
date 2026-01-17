@@ -7,7 +7,7 @@ import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.*;
 import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.util.AreaUtil;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -88,7 +88,7 @@ public class LoggingConfig {
                 if (str.equals("*")) {
                     return true;
                 }
-                FlagTag tag = FlagTagRegister.from(ResourceLocation.tryParse(str));
+                FlagTag tag = FlagTagRegister.from(Identifier.tryParse(str));
                 // if no exception was thrown, it's a valid tag
                 return tag != null;
             } catch (IllegalArgumentException e) {
@@ -147,7 +147,7 @@ public class LoggingConfig {
             LOGGING_CONFIG_LOGGER.info("[Check] {}, at {}, in '{}', Player={}, Id={}",
                     check.getRegionFlag().name,
                     AreaUtil.blockPosStr(check.getTarget()),
-                    check.getDimension().location().toString(),
+                    check.getDimension().identifier().toString(),
                     check.getPlayer() == null ? "n/a" : check.getPlayer().getDisplayName().getString(),
                     check.getId());
         }
@@ -177,7 +177,7 @@ public class LoggingConfig {
                             flag.getName(),
                             result.getFlagState().name,
                             result.getResponsible().getName(),
-                            result.getResponsible().getDim().location().toString(),
+                            result.getResponsible().getDim().identifier().toString(),
                             result.getFlagCheck().getId());
                 }
             }

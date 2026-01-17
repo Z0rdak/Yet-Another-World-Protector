@@ -29,7 +29,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -93,7 +93,7 @@ public final class MarkerCommands {
 
     private static int createMarkedRegion(CommandContext<CommandSourceStack> ctx, String regionName, IProtectedRegion parentRegion) {
         try {
-            LevelRegionData levelData = RegionDataManager.getOrCreate(ctx.getSource().getLevel().dimension().location());
+            LevelRegionData levelData = RegionDataManager.getOrCreate(ctx.getSource().getLevel().dimension().identifier());
             int res = levelData.isValidRegionName(regionName);
             if (res == -1) {
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.invalid", "Invalid region name supplied: '%s'", regionName));

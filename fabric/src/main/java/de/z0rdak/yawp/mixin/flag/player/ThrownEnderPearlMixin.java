@@ -6,17 +6,18 @@ import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.ThrownEnderpearl;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownEnderpearl;
 import net.minecraft.world.phys.HitResult;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 import static de.z0rdak.yawp.core.flag.RegionFlag.USE_ENDERPEARL_FROM_REGION;
 import static de.z0rdak.yawp.core.flag.RegionFlag.USE_ENDERPEARL_TO_REGION;
-import static de.z0rdak.yawp.handler.HandlerUtil.*;
-import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
+import static de.z0rdak.yawp.handler.HandlerUtil.getDimKey;
+import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
 
 @Mixin(ThrownEnderpearl.class)
 public abstract class ThrownEnderPearlMixin {

@@ -73,11 +73,11 @@ public class ResponsibleFlagPagination extends BasePaginationMessage<FlagCorrela
                 break;
             }
             case DIMENSION: {
-                cmd = buildCommandStr(CommandConstants.DIM.toString(), region.getDim().location().toString(), REMOVE.toString(), FLAG.toString(), flag.getName());
+                cmd = buildCommandStr(CommandConstants.DIM.toString(), region.getDim().identifier().toString(), REMOVE.toString(), FLAG.toString(), flag.getName());
                 break;
             }
             case LOCAL: {
-                cmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().location().toString(), region.getName(), REMOVE.toString(), FLAG.toString(), flag.getName());
+                cmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().identifier().toString(), region.getName(), REMOVE.toString(), FLAG.toString(), flag.getName());
                 break;
             }
             default:

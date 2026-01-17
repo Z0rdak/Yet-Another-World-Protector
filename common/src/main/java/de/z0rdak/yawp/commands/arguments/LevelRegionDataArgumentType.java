@@ -13,7 +13,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
@@ -31,11 +31,11 @@ public class LevelRegionDataArgumentType implements ArgumentType<LevelRegionData
     }
 
     public static LevelRegionData getDimRegion(CommandContext<CommandSourceStack> context, String dim) throws CommandSyntaxException {
-        ResourceLocation levelRl = context.getArgument(dim, ResourceLocation.class);
-        boolean isValidDimResourceLocation = context.getSource().levels().stream()
-                .map(ResourceKey::location)
+        Identifier levelRl = context.getArgument(dim, Identifier.class);
+        boolean isValidDimIdentifier = context.getSource().levels().stream()
+                .map(ResourceKey::identifier)
                 .anyMatch(loc -> loc.equals(levelRl));
-        if (isValidDimResourceLocation) {
+        if (isValidDimIdentifier) {
             // TODO: this just creates new lrd, fix it. Init new ones by command to make them available?
             LevelRegionData dimCache = RegionDataManager.getOrCreate(levelRl);
             if (dimCache == null) {
@@ -63,7 +63,7 @@ public class LevelRegionDataArgumentType implements ArgumentType<LevelRegionData
 
     @Override
     public LevelRegionData parse(StringReader reader) throws CommandSyntaxException {
-        ResourceLocation levelRl = ResourceLocation.read(reader);
+        Identifier levelRl = Identifier.read(reader);
         if (RegionDataManager.hasLevel(levelRl)) {
             return RegionDataManager.getOrCreate(levelRl);
         }

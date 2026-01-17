@@ -10,7 +10,7 @@ import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Display;
@@ -42,8 +42,8 @@ public class VisualizationManager {
         serverInstance = server;
     }
 
-    public final static ResourceLocation REGION_BLOCK_DISPLAY_TAG = ResourceLocation.parse("yawp:region_block_display");
-    public final static ResourceLocation REGION_TEXT_DISPLAY_TAG = ResourceLocation.parse("yawp:region_text_display");
+    public final static Identifier REGION_BLOCK_DISPLAY_TAG = Identifier.parse("yawp:region_block_display");
+    public final static Identifier REGION_TEXT_DISPLAY_TAG = Identifier.parse("yawp:region_text_display");
 
     public static void nukeDisplayEntities(ServerLevel level) {
         var entities = level.getEntities(EntityTypeTest.forClass(Display.class), (entity) -> {
@@ -54,13 +54,13 @@ public class VisualizationManager {
         var entityAmount = entities.size();
         entities.forEach(e -> e.remove(Entity.RemovalReason.DISCARDED));
         if (entityAmount > 0) {
-            VISUALIZATION_LOGGER.info("Nuked all ({}) untracked region display entities in level {}.", entityAmount, level.dimension().location().toString());
+            VISUALIZATION_LOGGER.info("Nuked all ({}) untracked region display entities in level {}.", entityAmount, level.dimension().identifier().toString());
         }
     }
 
     private static MinecraftServer serverInstance;
     // level key -> VisualizationManager
-    private static final Map<ResourceLocation, VisualizationManager> dimVisualizationManagers = new HashMap<>();
+    private static final Map<Identifier, VisualizationManager> dimVisualizationManagers = new HashMap<>();
     // region name -> RegionVisualizationManager
 
     private final Map<String, RegionVisualizationManager> regionDisplayManagers;
@@ -117,7 +117,7 @@ public class VisualizationManager {
     }
 
     public static void showTpAnchor(IMarkableRegion region, TeleportAnchor tpAnchor) {
-        ResourceLocation levelRl = region.getDim().location();
+        Identifier levelRl = region.getDim().identifier();
         VisualizationManager vm = getOrCreateVisualizationManager(levelRl);
         RegionVisualizationManager rvm = getOrCreateRegionVisualizationManager(vm, region);
 
@@ -126,7 +126,7 @@ public class VisualizationManager {
     }
 
     public static void hideTpAnchor(IMarkableRegion region, TeleportAnchor tpAnchor) {
-        ResourceLocation levelRl = region.getDim().location();
+        Identifier levelRl = region.getDim().identifier();
         VisualizationManager vm = getOrCreateVisualizationManager(levelRl);
         RegionVisualizationManager rvm = getOrCreateRegionVisualizationManager(vm, region);
 
@@ -135,7 +135,7 @@ public class VisualizationManager {
     }
 
     public static void updateTpAnchor(IMarkableRegion region, TeleportAnchor tpAnchor) {
-        ResourceLocation levelRl = region.getDim().location();
+        Identifier levelRl = region.getDim().identifier();
         VisualizationManager vm = getOrCreateVisualizationManager(levelRl);
         RegionVisualizationManager rvm = getOrCreateRegionVisualizationManager(vm, region);
 
@@ -156,7 +156,7 @@ public class VisualizationManager {
     }
 
     public static void show(IMarkableRegion region, DisplayType displayType, BlockDisplayProperties displayProperties) {
-        ResourceLocation levelRl = region.getDim().location();
+        Identifier levelRl = region.getDim().identifier();
         VisualizationManager vm = getOrCreateVisualizationManager(levelRl);
         RegionVisualizationManager rvm = getOrCreateRegionVisualizationManager(vm, region);
 
@@ -164,7 +164,7 @@ public class VisualizationManager {
         rvm.show(displayType, displayProperties, level);
     }
 
-    private static VisualizationManager getOrCreateVisualizationManager(ResourceLocation levelRl) {
+    private static VisualizationManager getOrCreateVisualizationManager(Identifier levelRl) {
         if (!dimVisualizationManagers.containsKey(levelRl)) {
             VisualizationManager dimVm = new VisualizationManager();
             dimVisualizationManagers.put(levelRl, dimVm);
@@ -184,14 +184,14 @@ public class VisualizationManager {
     }
 
     public static void hide(IMarkableRegion region, DisplayType displayType) {
-        ResourceLocation levelRl = region.getDim().location();
+        Identifier levelRl = region.getDim().identifier();
         VisualizationManager vm = getOrCreateVisualizationManager(levelRl);
         RegionVisualizationManager rvm = getOrCreateRegionVisualizationManager(vm, region);
         rvm.hide(displayType);
     }
 
     public static void updateRegionDisplay(IMarkableRegion region) {
-        ResourceLocation levelRl = region.getDim().location();
+        Identifier levelRl = region.getDim().identifier();
         VisualizationManager vm = getOrCreateVisualizationManager(levelRl);
         RegionVisualizationManager rvm = getOrCreateRegionVisualizationManager(vm, region);
         ServerLevel level = serverInstance.getLevel(region.getDim());
@@ -200,7 +200,7 @@ public class VisualizationManager {
 
 
     public static void refreshDisplay(IMarkableRegion region, DisplayType displayType) {
-        ResourceLocation levelRl = region.getDim().location();
+        Identifier levelRl = region.getDim().identifier();
         VisualizationManager vm = getOrCreateVisualizationManager(levelRl);
         RegionVisualizationManager rvm = getOrCreateRegionVisualizationManager(vm, region);
 
@@ -208,7 +208,7 @@ public class VisualizationManager {
     }
 
     public static void refreshDisplay(IMarkableRegion region) {
-        ResourceLocation levelRl = region.getDim().location();
+        Identifier levelRl = region.getDim().identifier();
         VisualizationManager vm = getOrCreateVisualizationManager(levelRl);
         RegionVisualizationManager rvm = getOrCreateRegionVisualizationManager(vm, region);
 

@@ -11,7 +11,7 @@ import de.z0rdak.yawp.platform.Services;
 import de.z0rdak.yawp.api.MessageSender;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
@@ -441,13 +441,13 @@ public final class PlayerFlagHandler {
             // TODO: This is done on forge, fabric and neoforge - write helper to reduce duplicate code
             Set<String> entityTags = Services.FLAG_CONFIG.getCoveredBlockEntityTags();
             boolean isCoveredByTag = entityTags.stream().anyMatch(entityTag -> {
-                ResourceLocation tagRl = ResourceLocation.parse(entityTag);
+                Identifier tagRl = Identifier.parse(entityTag);
                 return target.getTags().contains(tagRl.getPath());
             });
             Set<String> entities = Services.FLAG_CONFIG.getCoveredBlockEntities();
             boolean isBlockEntityCovered = entities.stream().anyMatch(entity -> {
-                ResourceLocation entityRl = ResourceLocation.parse(entity);
-                ResourceLocation targetRl = ForgeRegistries.ENTITY_TYPES.getKey(target.getType());
+                Identifier entityRl = Identifier.parse(entity);
+                Identifier targetRl = ForgeRegistries.ENTITY_TYPES.getKey(target.getType());
                 return targetRl != null && targetRl.equals(entityRl);
             });
             if (isBlockEntityCovered || isCoveredByTag) {
@@ -657,17 +657,17 @@ public final class PlayerFlagHandler {
             }
         }
         if (!hasEmptyHand) {
-            ResourceLocation itemRl = ForgeRegistries.ITEMS.getKey(itemInHand.getItem());
+            Identifier itemRl = ForgeRegistries.ITEMS.getKey(itemInHand.getItem());
             Set<String> entities = Services.FLAG_CONFIG.getCoveredBlockEntities();
             Set<String> entityTags = Services.FLAG_CONFIG.getCoveredBlockEntityTags();
             // TODO: This is done on forge, fabric and neoforge - write helper to reduce duplicate code
             // TODO: Unify the way this is handled across all flags (flag flattening update)
             boolean isCoveredByTag = entityTags.stream().anyMatch(tag -> {
-                ResourceLocation tagRl = ResourceLocation.parse(tag);
-                return itemInHand.getTags().anyMatch(itemTagKey -> itemTagKey.location().equals(tagRl));
+                Identifier tagRl = Identifier.parse(tag);
+                return itemInHand.getTags().anyMatch(itemTagKey -> itemTagKey.identifier().equals(tagRl));
             });
             boolean isBlockCovered = entities.stream().anyMatch(entity -> {
-                ResourceLocation entityRl = ResourceLocation.parse(entity);
+                Identifier entityRl = Identifier.parse(entity);
                 return itemRl != null && itemRl.equals(entityRl);
             });
 

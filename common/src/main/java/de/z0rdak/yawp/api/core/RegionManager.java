@@ -11,7 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
@@ -62,8 +62,8 @@ public final class RegionManager implements IRegionManager {
      */
     @Override
     public Optional<IDimensionRegionApi> getDimRegionApi(ResourceKey<Level> dim) {
-        if (RegionDataManager.hasLevel(dim.location())){
-            LevelRegionData levelRegionData = RegionDataManager.getOrCreate(dim.location());
+        if (RegionDataManager.hasLevel(dim.identifier())){
+            LevelRegionData levelRegionData = RegionDataManager.getOrCreate(dim.identifier());
             return Optional.of(new DimensionRegionApi(levelRegionData));
         }
 
@@ -83,12 +83,12 @@ public final class RegionManager implements IRegionManager {
 
     @Override
     public ResourceKey<Level> getDimApiKey(String dimKey) {
-        return ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(dimKey));
+        return ResourceKey.create(Registries.DIMENSION, Identifier.parse(dimKey));
     }
 
     @Override
     public boolean hasLevelData(ResourceKey<Level> dim) {
-        return RegionDataManager.hasLevel(dim.location());
+        return RegionDataManager.hasLevel(dim.identifier());
     }
 
     @Override
@@ -102,7 +102,7 @@ public final class RegionManager implements IRegionManager {
     }
 
     @Override
-    public Set<ResourceLocation> getLevels() {
+    public Set<Identifier> getLevels() {
         return RegionDataManager.getLevels();
     }
 

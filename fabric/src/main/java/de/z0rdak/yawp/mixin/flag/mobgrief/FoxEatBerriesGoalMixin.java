@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
-import net.minecraft.world.entity.animal.Fox;
+import net.minecraft.world.entity.animal.fox.Fox;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;

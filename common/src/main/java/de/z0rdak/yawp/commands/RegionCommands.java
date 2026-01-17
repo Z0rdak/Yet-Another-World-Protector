@@ -32,14 +32,14 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Relative;
@@ -206,7 +206,7 @@ class RegionCommands {
                                             .then(Commands.argument(STYLE.toString(), StringArgumentType.word())
                                                     .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(DisplayType.entries(), builder))
                                                     .executes(ctx -> showRegion(ctx, getRegionArgument(ctx), getDisplayTypeArgument(ctx)))
-                                                    .then(Commands.argument(BLOCK.toString(), ResourceLocationArgument.id())
+                                                    .then(Commands.argument(BLOCK.toString(), IdentifierArgument.id())
                                                             .executes(ctx -> showRegion(ctx, getRegionArgument(ctx),
                                                                     getDisplayTypeArgument(ctx),
                                                                     getDisplayBlockArgument(ctx)))
@@ -273,7 +273,7 @@ class RegionCommands {
                                 .then(literal(DISPLAY)
                                         .executes(ctx -> promptDisplaySettings(ctx, getRegionArgument(ctx)))
                                         .then(literal(BLOCK)
-                                                .then(Commands.argument(BLOCK.toString(), ResourceLocationArgument.id())
+                                                .then(Commands.argument(BLOCK.toString(), IdentifierArgument.id())
                                                         .executes(ctx -> setDisplayBlock(ctx, getRegionArgument(ctx), getDisplayBlockArgument(ctx)))
                                                 )
                                         )
@@ -335,7 +335,7 @@ class RegionCommands {
     }
 
 
-    public static int setDisplayBlock(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, ResourceLocation blockRl) {
+    public static int setDisplayBlock(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, Identifier blockRl) {
         Optional<Holder.Reference<Block>> block = BuiltInRegistries.BLOCK.get(blockRl);
         if (block.isPresent() && block.get().value() instanceof AirBlock) {
             // TODO: I18n
@@ -578,15 +578,15 @@ class RegionCommands {
         return showRegion(ctx, region, displayType, region.getArea().getDisplay().blockRl());
     }
 
-    public static int showRegion(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, DisplayType displayType, ResourceLocation blockRl) {
+    public static int showRegion(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, DisplayType displayType, Identifier blockRl) {
         return showRegion(ctx, region, displayType, blockRl, region.getArea().getDisplay().hasGlow());
     }
 
-    public static int showRegion(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, DisplayType displayType, ResourceLocation blockRl, boolean glow) {
+    public static int showRegion(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, DisplayType displayType, Identifier blockRl, boolean glow) {
         return showRegion(ctx, region, displayType, blockRl, glow, region.getArea().getDisplay().lightLevel());
     }
 
-    public static int showRegion(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, DisplayType displayType, ResourceLocation blockRl, boolean glow, int lightLevel) {
+    public static int showRegion(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, DisplayType displayType, Identifier blockRl, boolean glow, int lightLevel) {
         BlockDisplayProperties displayProperties = new BlockDisplayProperties(blockRl, glow, lightLevel);
         VisualizationManager.show(region, displayType, displayProperties);
         // TODO: Feedback?

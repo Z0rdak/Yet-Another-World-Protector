@@ -389,7 +389,7 @@ some great advantages for the future:
 
 ## Fixed
 
-* Fix ResourceLocation/Identifier entries in `covered_block_entities` not correctly considered in some versions (1.20+).
+* Fix Identifier/Identifier entries in `covered_block_entities` not correctly considered in some versions (1.20+).
 * Tags included in the list `covered_block_entity_tags` inside the config `yawp-flags.toml` are now considered for the `break-blocks` and `place-blocks` flag
 * Fix RegionMarker not working properly
 * Fix NPE when checking for player related flags which caused (beside others) issues with Minecolonies

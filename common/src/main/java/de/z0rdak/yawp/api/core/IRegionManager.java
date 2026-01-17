@@ -4,7 +4,7 @@ import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.data.region.LevelRegionData;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 
 import java.util.Optional;
@@ -61,7 +61,7 @@ public interface IRegionManager {
 
     /**
      * Create the corresponding ResourceKey for the provided resource key string (e.g. 'minecraft:overworld')
-     * Basically a wrapper around `ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(dimKey));`
+     * Basically a wrapper around `ResourceKey.create(Registries.DIMENSION, Identifier.parse(dimKey));`
      * @param dimKey resource key of the level/dimension
      * @return the corresponding ResourceKey for the level/dimension
      */
@@ -87,7 +87,7 @@ public interface IRegionManager {
      * Returns a set of resource keys for all created Dimensional Regions
      * @return a set of resource keys corresponding to registered DimensionalRegions
      */
-    Set<ResourceLocation> getLevels();
+    Set<Identifier> getLevels();
 
     /**
      * Resets the DimensionalRegion as well as all LocalRegions of the corresponding level.

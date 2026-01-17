@@ -2,17 +2,17 @@ package de.z0rdak.yawp.handler.flags;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.api.FlagEvaluator;
+import de.z0rdak.yawp.api.MessageSender;
 import de.z0rdak.yawp.api.events.region.FlagCheckEvent;
 import de.z0rdak.yawp.api.events.region.FlagCheckResult;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.handler.HandlerUtil;
 import de.z0rdak.yawp.platform.Services;
-import de.z0rdak.yawp.api.MessageSender;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.TriState;
 import net.minecraft.world.Container;
@@ -21,10 +21,15 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.entity.npc.WanderingTrader;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.*;
+import net.minecraft.world.entity.projectile.FireworkRocketEntity;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.Snowball;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownEgg;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownEnderpearl;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
@@ -49,7 +54,10 @@ import net.neoforged.neoforge.event.entity.EntityMountEvent;
 import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
 import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
 import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
-import net.neoforged.neoforge.event.entity.living.*;
+import net.neoforged.neoforge.event.entity.living.AnimalTameEvent;
+import net.neoforged.neoforge.event.entity.living.BabyEntitySpawnEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingKnockBackEvent;
 import net.neoforged.neoforge.event.entity.player.*;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.ExplosionEvent;
@@ -61,9 +69,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
-import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 
 /**
  * Contains flag handler for events directly related/cause to/by players.
@@ -431,13 +439,13 @@ public final class PlayerFlagHandler {
             Player player = event.getEntity();
             Set<String> entityTags = Services.FLAG_CONFIG.getCoveredBlockEntityTags();
             boolean isCoveredByTag = entityTags.stream().anyMatch(entityTag -> {
-                ResourceLocation tagRl =  ResourceLocation.parse(entityTag);
+                Identifier tagRl =  Identifier.parse(entityTag);
                 return target.getTags().contains(tagRl.getPath());
             });
             Set<String> entities = Services.FLAG_CONFIG.getCoveredBlockEntities();
             boolean isBlockEntityCovered = entities.stream().anyMatch(entity -> {
-                ResourceLocation entityRl = ResourceLocation.parse(entity);
-                ResourceLocation targetRl = BuiltInRegistries.ENTITY_TYPE.getKey(target.getType());
+                Identifier entityRl = Identifier.parse(entity);
+                Identifier targetRl = BuiltInRegistries.ENTITY_TYPE.getKey(target.getType());
                 return targetRl != null && targetRl.equals(entityRl);
             });
             if (isBlockEntityCovered || isCoveredByTag) {
@@ -604,15 +612,15 @@ public final class PlayerFlagHandler {
             }
         }
         if (!hasEmptyHand) {
-            ResourceLocation itemRl = BuiltInRegistries.ITEM.getKey(itemInHand.getItem());
+            Identifier itemRl = BuiltInRegistries.ITEM.getKey(itemInHand.getItem());
             Set<String> entities = Services.FLAG_CONFIG.getCoveredBlockEntities();
             Set<String> entityTags = Services.FLAG_CONFIG.getCoveredBlockEntityTags();
             boolean isCoveredByTag = entityTags.stream().anyMatch(tag -> {
-                ResourceLocation tagRl = ResourceLocation.parse(tag);
+                Identifier tagRl = Identifier.parse(tag);
                 return itemInHand.getTags().anyMatch(itemTagKey -> itemTagKey.location().equals(tagRl));
             });
             boolean isBlockCovered = entities.stream().anyMatch(entity -> {
-                ResourceLocation entityRl = ResourceLocation.parse(entity);
+                Identifier entityRl = Identifier.parse(entity);
                 return itemRl != null && itemRl.equals(entityRl);
             });
 
@@ -824,7 +832,7 @@ public final class PlayerFlagHandler {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, onDeny -> {
-                event.setProblem(Player.BedSleepingProblem.NOT_POSSIBLE_HERE);
+                event.setProblem(Player.BedSleepingProblem.OTHER_PROBLEM);
                 sendFlagMsg(onDeny);
             });
        

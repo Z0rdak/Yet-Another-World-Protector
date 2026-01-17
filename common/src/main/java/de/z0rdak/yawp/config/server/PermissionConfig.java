@@ -6,6 +6,10 @@ import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionLevel;
+import net.minecraft.server.permissions.PermissionSet;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.logging.log4j.LogManager;
@@ -141,7 +145,11 @@ public class PermissionConfig {
     }
 
     public static boolean hasRequiredOpLevel(Player player) {
-        return player.hasPermissions(PermissionConfig.getRequiredOpLevel());
+        PermissionSet permissions = player.permissions();
+        int requiredOpLevel = PermissionConfig.getRequiredOpLevel();
+        permissions.hasPermission(Permissions.COMMANDS_GAMEMASTER);
+        Permission.HasCommandLevel hasCommandLevel = new Permission.HasCommandLevel(PermissionLevel.byId(requiredOpLevel));
+        return player.permissions().hasPermission(hasCommandLevel);
     }
 
     public static boolean hasConfigPermission(CommandSourceStack src, CommandSourceType cmdSrcType) throws CommandSyntaxException {

@@ -21,7 +21,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -396,7 +396,7 @@ public class CommandInterceptor {
     @Nullable
     private static LevelRegionData checkValidDimRegion(CommandContextBuilder<CommandSourceStack> cmdContext) {
         ParsedArgument<CommandSourceStack, ?> dimParsedArgument = cmdContext.getArguments().get(DIM.toString());
-        if (dimParsedArgument != null && dimParsedArgument.getResult() instanceof ResourceLocation dimResLoc) {
+        if (dimParsedArgument != null && dimParsedArgument.getResult() instanceof Identifier dimResLoc) {
             ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, dimResLoc);
             Optional<LevelRegionData> levelData = RegionManager.get().getLevelRegionData(dim);
             if (levelData.isEmpty()) {
@@ -433,7 +433,7 @@ public class CommandInterceptor {
         ParsedArgument<CommandSourceStack, ?> regionArg = cmdContext.getArguments().get(CommandConstants.LOCAL.toString());
         if (regionArg != null && regionArg.getResult() instanceof String regionName) {
             ParsedArgument<CommandSourceStack, ?> dimParsedArgument = cmdContext.getArguments().get(DIM.toString());
-            if (dimParsedArgument != null && dimParsedArgument.getResult() instanceof ResourceLocation dimResLoc) {
+            if (dimParsedArgument != null && dimParsedArgument.getResult() instanceof Identifier dimResLoc) {
                 ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, dimResLoc);
                 LevelRegionData dimCache = RegionDataManager.getOrCreate(dim);
                 if (!dimCache.hasLocal(regionName)) {

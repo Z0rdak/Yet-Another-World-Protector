@@ -7,13 +7,9 @@ import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.group.GroupType;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
-import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.commandBlockPosStr;
@@ -35,10 +31,10 @@ public final class Commands {
                 return buildCommandStr(GLOBAL.toString());
             }
             case DIMENSION: {
-                return buildCommandStr(DIM.toString(), region.getDim().location().toString());
+                return buildCommandStr(DIM.toString(), region.getDim().identifier().toString());
             }
             case LOCAL: {
-                return buildCommandStr(LOCAL.toString(), region.getDim().location().toString(), region.getName());
+                return buildCommandStr(LOCAL.toString(), region.getDim().identifier().toString(), region.getName());
             }
             default:
                 throw new IllegalArgumentException("Unexpected value: " + region.getRegionType());
@@ -51,10 +47,10 @@ public final class Commands {
                 return buildCommandStr(FLAG.toString(), GLOBAL.toString(), flag);
             }
             case DIMENSION: {
-                return buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().location().toString(), flag);
+                return buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().identifier().toString(), flag);
             }
             case LOCAL: {
-                return buildCommandStr(FLAG.toString(), LOCAL.toString(), region.getDim().location().toString(), region.getName(), flag);
+                return buildCommandStr(FLAG.toString(), LOCAL.toString(), region.getDim().identifier().toString(), region.getName(), flag);
             }
             default:
                 throw new IllegalArgumentException("Unexpected value: " + region.getRegionType());
@@ -155,7 +151,7 @@ public final class Commands {
         return buildDisplaySubCommand(region, subCmd);
     }
 
-    public static String buildSetDisplayBlockCommand(IMarkableRegion region, ResourceLocation block) {
+    public static String buildSetDisplayBlockCommand(IMarkableRegion region, Identifier block) {
         String subCmd = buildSubCmdStr(BLOCK.toString(), block.toString());
         return buildDisplaySubCommand(region, subCmd);
     }
@@ -185,7 +181,7 @@ public final class Commands {
         return buildShowSubCommand(region, subCmd);
     }
 
-    public static String buildAdvancedVisualizationShowCommand(IMarkableRegion region, DisplayType displayType, ResourceLocation block, boolean glow, int lightLevel) {
+    public static String buildAdvancedVisualizationShowCommand(IMarkableRegion region, DisplayType displayType, Identifier block, boolean glow, int lightLevel) {
         String subCmd = buildSubCmdStr(LOCAL.toString(), displayType.name, block.toString(), String.valueOf(glow), String.valueOf(lightLevel));
         return buildShowSubCommand(region, subCmd);
     }
@@ -347,7 +343,7 @@ public final class Commands {
         return buildRemoveCommand(region, subCmd);
     }
 
-    public static String buildListLocalRegionCommand(ResourceLocation levelRl) {
+    public static String buildListLocalRegionCommand(Identifier levelRl) {
         return buildCommandStr(DIM.toString(), levelRl.toString(), LIST.toString(), LOCAL.toString());
     }
 

@@ -24,12 +24,12 @@ import de.z0rdak.yawp.data.region.LevelRegionData;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.commands.arguments.TeamArgument;
 import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.scores.Team;
@@ -78,8 +78,8 @@ public class ArgumentUtil {
         return DisplayType.of(displayType);
     }
 
-    public static ResourceLocation getDisplayBlockArgument(CommandContext<CommandSourceStack> ctx) {
-        return ResourceLocationArgument.getId(ctx, CommandConstants.BLOCK.toString());
+    public static Identifier getDisplayBlockArgument(CommandContext<CommandSourceStack> ctx) {
+        return IdentifierArgument.getId(ctx, CommandConstants.BLOCK.toString());
     }
 
     public static BlockPos getTeleportAnchorPosArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {

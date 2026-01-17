@@ -107,7 +107,7 @@ public class FlagMessage {
         substituteMap.put(FLAG_TEMPLATE, flag.name);
         substituteMap.put(POS_TEMPLATE, shortBlockPosBracketed(pos));
         substituteMap.put(REGION_TEMPLATE, region.getName());
-        substituteMap.put(DIM_TEMPLATE, region.getDim().location().toString());
+        substituteMap.put(DIM_TEMPLATE, region.getDim().identifier().toString());
         if (player != null && flag.tags.contains(FlagTagRegister.PLAYER)) {
             substituteMap.put(PLAYER_TEMPLATE, player.getScoreboardName());
         }
@@ -127,7 +127,7 @@ public class FlagMessage {
         substituteMap.put(FLAG_TEMPLATE, result.getFlagCheck().getRegionFlag().name);
         substituteMap.put(POS_TEMPLATE, tinyBlockPos(result.getFlagCheck().getTarget()));
         substituteMap.put(REGION_TEMPLATE, result.getResponsible().getName());
-        substituteMap.put(DIM_TEMPLATE, result.getResponsible().getDim().location().toString());
+        substituteMap.put(DIM_TEMPLATE, result.getResponsible().getDim().identifier().toString());
         if (result.getFlagCheck().getPlayer() != null && RegionFlag.hasPlayerCategory(result.getFlagCheck().getRegionFlag())) {
             substituteMap.put(PLAYER_TEMPLATE, result.getFlagCheck().getPlayer().getScoreboardName());
         }

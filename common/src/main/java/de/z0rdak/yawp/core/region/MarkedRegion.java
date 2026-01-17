@@ -12,7 +12,7 @@ import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
@@ -61,7 +61,7 @@ public abstract class MarkedRegion extends ProtectedRegion implements IMarkableR
                     .apply(instance, (name, dim, parentName, regionType, flags, isActive, isMuted,
                                       priority, areaType, area, anchors, groups, childrenNames) -> {
                         String lowerCase = areaType.toLowerCase(Locale.ROOT);
-                        var areaT = AreaType.of(ResourceLocation.parse(lowerCase).getPath());
+                        var areaT = AreaType.of(Identifier.parse(lowerCase).getPath());
                         switch (areaT) {
                             case CUBOID -> {
                                 return new CuboidRegion(name, dim, parentName, flags, isActive, isMuted, priority, area, new RegionAnchors(anchors), groups, childrenNames);

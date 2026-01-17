@@ -50,7 +50,7 @@ public final class DimensionalRegion extends ProtectedRegion {
     );
 
     public DimensionalRegion(ResourceKey<Level> dimensionKey, IProtectedRegion parent) {
-        super(dimensionKey.location().toString(), dimensionKey, RegionType.DIMENSION);
+        super(dimensionKey.identifier().toString(), dimensionKey, RegionType.DIMENSION);
         this.dimension = dimensionKey;
         if (!(parent instanceof GlobalRegion)) {
             throw new IllegalArgumentException("Illegal parent region for dimensional region");
@@ -59,7 +59,7 @@ public final class DimensionalRegion extends ProtectedRegion {
     }
 
     private DimensionalRegion(ResourceKey<Level> dim, RegionFlags flags, boolean isActive, boolean isMuted, Map<String, PlayerContainer> groups, List<String> childrenNames) {
-        super(dim.location().toString(), dim, RegionType.DIMENSION);
+        super(dim.identifier().toString(), dim, RegionType.DIMENSION);
         this.dimension = dim;
         var globalRegion = RegionManager.get().getGlobalRegion();
         this.setParent(globalRegion);
@@ -99,6 +99,6 @@ public final class DimensionalRegion extends ProtectedRegion {
     }
     @Override
     public String getName() {
-        return this.dimension.location().toString();
+        return this.dimension.identifier().toString();
     }
 }

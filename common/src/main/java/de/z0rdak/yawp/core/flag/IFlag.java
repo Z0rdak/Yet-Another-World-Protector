@@ -5,7 +5,7 @@ public interface IFlag extends Comparable<IFlag> {
     /**
      * Get the unique identifier for the flag. <br>
      * The valid flags are currently stored as an enum. <br>
-     * Mod:Name -> ResourceLocation in the future.
+     * Mod:Name -> Identifier in the future.
      *
      * @return unique name for flag.
      * @see RegionFlag

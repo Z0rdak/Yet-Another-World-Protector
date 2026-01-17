@@ -3,7 +3,7 @@ package de.z0rdak.yawp.api.visualization;
 import de.z0rdak.yawp.core.area.*;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 
@@ -56,7 +56,7 @@ public class RegionVisualizationManager {
     }
 
     public void showTpAnchor(TeleportAnchor tpAnchor, ServerLevel level) {
-        var blockPorps = new BlockDisplayProperties(ResourceLocation.parse("minecraft:cyan_stained_glass_pane"), true, 15);
+        var blockPorps = new BlockDisplayProperties(Identifier.parse("minecraft:cyan_stained_glass_pane"), true, 15);
         var textProps = new TextDisplayProperties(tpAnchor.getName());
             showTpAnchor(tpAnchor, level, blockPorps, textProps);
     }

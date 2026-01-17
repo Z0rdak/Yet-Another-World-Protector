@@ -14,7 +14,7 @@ import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
@@ -156,15 +156,15 @@ public final class PlayerFlagHandler {
                     // FLAG_LOGGER.info("### targetsContainerWhileNotSneaking ###");
                 }
 
-                ResourceLocation itemRl = BuiltInRegistries.ITEM.getKey(stackInHand.getItem());
+                Identifier itemRl = BuiltInRegistries.ITEM.getKey(stackInHand.getItem());
                 Set<String> entities = FlagConfig.getCoveredBlockEntities();
                 Set<String> entityTags = FlagConfig.getCoveredBlockEntityTags();
                 boolean isCoveredByTag = entityTags.stream().anyMatch(tag -> {
-                    ResourceLocation tagRl = ResourceLocation.parse(tag);
+                    Identifier tagRl = Identifier.parse(tag);
                     return stackInHand.getTags().anyMatch(itemTagKey -> itemTagKey.location().equals(tagRl));
                 });
                 boolean isBlockCovered = entities.stream().anyMatch(entity -> {
-                    ResourceLocation entityRl = ResourceLocation.parse(entity);
+                    Identifier entityRl = Identifier.parse(entity);
                     return itemRl.equals(entityRl);
                 });
                 if (isBlockCovered || isCoveredByTag) {
@@ -296,7 +296,7 @@ public final class PlayerFlagHandler {
             }
             FlagState flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
             if (flagState == FlagState.DENIED) {
-                return Player.BedSleepingProblem.NOT_POSSIBLE_HERE;
+                return Player.BedSleepingProblem.OTHER_PROBLEM;
             }
         }
         return null;

@@ -173,7 +173,7 @@ class DimensionCommands {
         var entityAmount = entities.size();
         entities.forEach(e -> e.remove(Entity.RemovalReason.DISCARDED));
         // TODO: I18n
-        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Nuked all (%s) yawp entities in '%s'", "Nuked all (%s) yawp entities in '%s'", entityAmount, level.dimension().location().toString()));
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("Nuked all (%s) yawp entities in '%s'", "Nuked all (%s) yawp entities in '%s'", entityAmount, level.dimension().identifier().toString()));
         return 0;
     }
 
@@ -276,7 +276,7 @@ class DimensionCommands {
         if (dimCache.isPresent()) {
             return createCuboidRegion(ctx, regionName, dimCache.get(), pos1, pos2, parentRegion);
         }
-        Constants.LOGGER.error("Error getting dimension cache for {}", ctx.getSource().getLevel().dimension().location().toString());
+        Constants.LOGGER.error("Error getting dimension cache for {}", ctx.getSource().getLevel().dimension().identifier().toString());
         return -1;
     }
 
@@ -285,7 +285,7 @@ class DimensionCommands {
         if (dimCache.isPresent()) {
             return createSphereRegion(ctx, regionName, dimCache.get(), centerPos, radius, parentRegion);
         }
-        Constants.LOGGER.error("Error getting dimension cache for {}", ctx.getSource().getLevel().dimension().location().toString());
+        Constants.LOGGER.error("Error getting dimension cache for {}", ctx.getSource().getLevel().dimension().identifier().toString());
         return -1;
     }
 
@@ -322,7 +322,7 @@ class DimensionCommands {
         if (dimCache.isPresent()) {
             return deleteRegion(ctx, dimCache.get(), region);
         }
-        Constants.LOGGER.error("Error getting dimension cache for region {} in {}", region.getName(), region.getDim().location().toString());
+        Constants.LOGGER.error("Error getting dimension cache for region {} in {}", region.getName(), region.getDim().identifier().toString());
         return -1;
     }
 

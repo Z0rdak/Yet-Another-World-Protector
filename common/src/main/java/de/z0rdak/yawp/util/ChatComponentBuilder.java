@@ -323,7 +323,7 @@ public class ChatComponentBuilder {
     }
 
     private static MutableComponent buildDimResetComponent(DimensionalRegion region) {
-        String cmd = buildCommandStr(DIM.toString(), region.getDim().location().toString(), CommandConstants.RESET.toString(), DIM.toString());
+        String cmd = buildCommandStr(DIM.toString(), region.getDim().identifier().toString(), CommandConstants.RESET.toString(), DIM.toString());
         MutableComponent hover = Component.translatableWithFallback("cli.dim.reset.dim.link.hover", "Reset Dimensional Region '%s'", region.getName());
         MutableComponent text = Component.translatableWithFallback("cli.link.action.undo.text", "<-");
         return buildExecuteCmdComponent(text, hover, cmd, SUGGEST_COMMAND, REMOVE_CMD_COLOR);
@@ -342,7 +342,7 @@ public class ChatComponentBuilder {
     }
 
     public static String buildExecuteCommandString(ResourceKey<Level> dim, String command) {
-        return "/execute in " + dim.location() + " run " + command;
+        return "/execute in " + dim.identifier() + " run " + command;
     }
 
     public static String buildTeleportCmd(ResourceKey<Level> dim, String tpSource, BlockPos target) {

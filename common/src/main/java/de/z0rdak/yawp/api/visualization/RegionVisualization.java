@@ -2,7 +2,7 @@ package de.z0rdak.yawp.api.visualization;
 
 import de.z0rdak.yawp.core.area.BlockDisplayProperties;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 
 import java.util.HashMap;
@@ -56,7 +56,7 @@ public class RegionVisualization {
         this.displayEntities.clear();
     }
 
-    public void updateBlock(final ResourceLocation block) {
+    public void updateBlock(final Identifier block) {
         this.properties.setBlockRl(block);
         this.displayEntities.forEach((pos, entity) -> {
             updateDisplayBlock(entity, block);

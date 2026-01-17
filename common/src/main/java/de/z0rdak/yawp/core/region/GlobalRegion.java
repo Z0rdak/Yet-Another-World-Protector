@@ -7,7 +7,7 @@ import de.z0rdak.yawp.core.flag.RegionFlags;
 import de.z0rdak.yawp.core.group.PlayerContainer;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 
 import java.util.*;
@@ -45,7 +45,7 @@ public class GlobalRegion extends ProtectedRegion {
 
 
 
-    public static final ResourceLocation GLOBAL = ResourceLocation.fromNamespaceAndPath("yawp", "global");
+    public static final Identifier GLOBAL = Identifier.fromNamespaceAndPath("yawp", "global");
     public static final ResourceKey<Level> GLOBAL_DIMENSION = ResourceKey.create(Registries.DIMENSION, GLOBAL);
 
     public GlobalRegion() {

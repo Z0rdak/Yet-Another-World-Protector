@@ -7,7 +7,7 @@ import de.z0rdak.yawp.util.NbtCompatHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class TeleportAnchor {
 

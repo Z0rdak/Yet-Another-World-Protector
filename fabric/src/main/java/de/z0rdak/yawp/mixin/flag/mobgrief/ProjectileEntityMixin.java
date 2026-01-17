@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Projectile.class)
 public abstract class ProjectileEntityMixin {
-    @Inject(method = "mayInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;getGameRules()Lnet/minecraft/world/level/GameRules;"), cancellable = true)
+    @Inject(method = "mayInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/gamerules/GameRules;get(Lnet/minecraft/world/level/gamerules/GameRule;)Ljava/lang/Object;"), cancellable = true)
     public void onCanModifyAt(ServerLevel world, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         Projectile self = (Projectile) (Object) this;
         if (self.getOwner() != null) {

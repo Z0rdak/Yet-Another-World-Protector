@@ -10,7 +10,7 @@ import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.region.*;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
@@ -24,7 +24,7 @@ public class LevelRegionData extends SavedData {
 
     public static Codec<LevelRegionData> CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
-                    ResourceLocation.CODEC.fieldOf("id")
+                    Identifier.CODEC.fieldOf("id")
                             .forGetter(lrd -> lrd.id),
                     DimensionalRegion.CODEC.fieldOf("dim_region")
                             .forGetter(lrd -> lrd.dim),
@@ -32,32 +32,31 @@ public class LevelRegionData extends SavedData {
                             .forGetter(lrd -> lrd.locals)
             ).apply(instance, LevelRegionData::new));
 
-    public static SavedDataType<LevelRegionData> buildSavedDataType(ResourceLocation dimRl) {
-        var dimId = dimRl.toString().replace(ResourceLocation.NAMESPACE_SEPARATOR, '_');
+    public static SavedDataType<LevelRegionData> buildSavedDataType(Identifier dimRl) {
+        var dimId = dimRl.toString().replace(Identifier.NAMESPACE_SEPARATOR, '_');
         return new SavedDataType<>(
                 String.join("/", Constants.MOD_ID, dimId),
-                (ctx) -> new LevelRegionData(dimRl),
-                (ctx) -> CODEC,
+                () -> new LevelRegionData(dimRl), CODEC,
                 null);
     }
 
-    private final ResourceLocation id;
+    private final Identifier id;
     private  HashMap<String, IMarkableRegion> locals;
     private DimensionalRegion dim;
 
-    public LevelRegionData(ResourceLocation id, DimensionalRegion dim, Map<String, IMarkableRegion> locals) {
+    public LevelRegionData(Identifier id, DimensionalRegion dim, Map<String, IMarkableRegion> locals) {
         this(id);
         this.dim = dim;
         this.locals.putAll(locals);
     }
 
-    public LevelRegionData(ResourceLocation id, DimensionalRegion dim) {
+    public LevelRegionData(Identifier id, DimensionalRegion dim) {
         this(id);
         this.dim = dim;
         this.locals = new HashMap<>();
     }
 
-    public LevelRegionData(ResourceLocation id) {
+    public LevelRegionData(Identifier id) {
         this.id = id;
         this.locals = new HashMap<>();
         var global = RegionManager.get().getGlobalRegion();
@@ -69,7 +68,7 @@ public class LevelRegionData extends SavedData {
         return locals;
     }
 
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return id;
     }
 
