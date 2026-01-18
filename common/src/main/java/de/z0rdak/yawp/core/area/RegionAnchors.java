@@ -1,17 +1,11 @@
 package de.z0rdak.yawp.core.area;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.Lifecycle;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.z0rdak.yawp.core.group.PlayerContainer;
-import de.z0rdak.yawp.core.region.IMarkableRegion;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.UUIDUtil;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.Identifier;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static de.z0rdak.yawp.util.ChatComponentBuilder.tinyBlockPos;
 
@@ -44,6 +38,15 @@ public class RegionAnchors {
         return this.tpAnchors.containsKey(name);
     }
 
+    public boolean hasAnchor(String name, BlockPos pos) {
+        return this.tpAnchors.containsKey(name)
+                && this.tpAnchors.get(name).getPos().equals(pos);
+    }
+
+    public boolean hasAnchorWithPos(BlockPos pos) {
+        return this.tpAnchors.values().stream()
+                .anyMatch(tpAnchor -> tpAnchor.getPos().equals(pos));
+    }
 
     public TeleportAnchor addTpAnchor(BlockPos pos, String name) {
         var anchor = new TeleportAnchor(pos, name);
