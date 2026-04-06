@@ -13,7 +13,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.world.level.storage.SavedDataStorage;
 import net.minecraft.world.level.storage.LevelResource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -83,7 +83,7 @@ public class RegionDataManager {
             if (serverInstance != null) {
                 ServerLevel overworld = serverInstance.overworld();
                 if (!overworld.isClientSide()) {
-                    DimensionDataStorage storage = overworld.getDataStorage();
+                    SavedDataStorage storage = overworld.getDataStorage();
                     savedLevelData = storage.computeIfAbsent(LevelListData.TYPE);
                 }
             }
@@ -113,17 +113,17 @@ public class RegionDataManager {
     }
 
     private static void saveDimList(MinecraftServer server) {
-        DimensionDataStorage dataStorage = server.overworld().getDataStorage();
+        SavedDataStorage dataStorage = server.overworld().getDataStorage();
         dataStorage.set(LevelListData.TYPE, savedLevelData);
     }
 
     private static void saveGlobalData(MinecraftServer server) {
-        DimensionDataStorage dataStorage = server.overworld().getDataStorage();
+        SavedDataStorage dataStorage = server.overworld().getDataStorage();
         dataStorage.set(GlobalRegionData.TYPE, globalRegionData);
     }
 
     private static void saveLevelData(MinecraftServer server, Level level) {
-        DimensionDataStorage storage = server.overworld().getDataStorage();
+        SavedDataStorage storage = server.overworld().getDataStorage();
         Identifier levelRl = level.dimension().identifier();
         LevelRegionData levelRegionData = dimRegionStorage.get(levelRl);
         LOGGER.info(Component.translatableWithFallback("data.region.level.save", "Saving region data for level '%s'", levelRl.toString()).getString());
@@ -132,7 +132,7 @@ public class RegionDataManager {
     }
 
     private static LevelRegionData loadLevelData(MinecraftServer server, Level level) {
-        DimensionDataStorage storage = server.overworld().getDataStorage();
+        SavedDataStorage storage = server.overworld().getDataStorage();
         Identifier dimLoc = level.dimension().identifier();
         return storage.get(LevelRegionData.buildSavedDataType(dimLoc));
     }
@@ -154,7 +154,7 @@ public class RegionDataManager {
         try {
             if (serverInstance == null)
                 serverInstance = server;
-            DimensionDataStorage dataStorage = server.overworld().getDataStorage();
+            SavedDataStorage dataStorage = server.overworld().getDataStorage();
             savedLevelData = dataStorage.get(LevelListData.TYPE);
             if (savedLevelData == null) {
                 LOGGER.info(Component.translatableWithFallback("data.region.levels.load.missing", "Missing level list for region data (ignore on first startup). Initializing...").getString());

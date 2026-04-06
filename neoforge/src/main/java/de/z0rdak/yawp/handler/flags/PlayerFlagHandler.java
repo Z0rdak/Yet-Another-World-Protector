@@ -440,7 +440,7 @@ public final class PlayerFlagHandler {
             Set<String> entityTags = Services.FLAG_CONFIG.getCoveredBlockEntityTags();
             boolean isCoveredByTag = entityTags.stream().anyMatch(entityTag -> {
                 Identifier tagRl =  Identifier.parse(entityTag);
-                return target.getTags().contains(tagRl.getPath());
+                return target.entityTags().contains(tagRl.getPath());
             });
             Set<String> entities = Services.FLAG_CONFIG.getCoveredBlockEntities();
             boolean isBlockEntityCovered = entities.stream().anyMatch(entity -> {
@@ -617,7 +617,7 @@ public final class PlayerFlagHandler {
             Set<String> entityTags = Services.FLAG_CONFIG.getCoveredBlockEntityTags();
             boolean isCoveredByTag = entityTags.stream().anyMatch(tag -> {
                 Identifier tagRl = Identifier.parse(tag);
-                return itemInHand.getTags().anyMatch(itemTagKey -> itemTagKey.location().equals(tagRl));
+                return itemInHand.tags().anyMatch(itemTagKey -> itemTagKey.location().equals(tagRl));
             });
             boolean isBlockCovered = entities.stream().anyMatch(entity -> {
                 Identifier entityRl = Identifier.parse(entity);

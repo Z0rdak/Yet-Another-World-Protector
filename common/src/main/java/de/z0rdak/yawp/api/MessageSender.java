@@ -22,19 +22,19 @@ public class MessageSender {
     }
 
     public static void message(Player player, MutableComponent msg) {
-        player.displayClientMessage(msg, false);
+        player.sendSystemMessage(msg);
     }
 
     public static void message(Player player, String msg) {
-        player.displayClientMessage(Component.literal(msg), false);
+        player.sendSystemMessage(Component.literal(msg));
     }
 
     public static void overLayMessage(Player player, String msg) {
-        player.displayClientMessage(Component.literal(msg), true);
+        player.sendOverlayMessage(Component.literal(msg));
     }
 
     public static void overLayMessage(Player player, MutableComponent msg) {
-        player.displayClientMessage(msg, true);
+        player.sendOverlayMessage(msg);
     }
 
     public static void sendError(CommandSourceStack src, MutableComponent text) {
@@ -42,7 +42,7 @@ public class MessageSender {
     }
 
     public static void sendNotification(Player player, MutableComponent msg) {
-        player.displayClientMessage(msg, true);
+        player.sendOverlayMessage(msg);
     }
 
     /**

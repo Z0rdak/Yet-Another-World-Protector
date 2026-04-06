@@ -19,7 +19,7 @@ public class LevelListData extends SavedData {
                             .forGetter(LevelListData::getLevels)
             ).apply(instance, LevelListData::new));
     public final static SavedDataType<LevelListData> TYPE = new SavedDataType<>(
-            String.join("/", Constants.MOD_ID, DIMENSIONS_FILE_NAME),
+            Identifier.fromNamespaceAndPath(Constants.MOD_ID, DIMENSIONS_FILE_NAME),
             LevelListData::new,
             LEVEL_LIST_CODEC,
             null);

@@ -5,11 +5,9 @@ import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.core.area.BlockDisplayProperties;
 import de.z0rdak.yawp.core.area.DisplayType;
 import de.z0rdak.yawp.core.area.TeleportAnchor;
-import de.z0rdak.yawp.core.area.TextDisplayProperties;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -47,8 +45,8 @@ public class VisualizationManager {
 
     public static void nukeDisplayEntities(ServerLevel level) {
         var entities = level.getEntities(EntityTypeTest.forClass(Display.class), (entity) -> {
-            boolean containsTextTag = entity.getTags().contains(REGION_TEXT_DISPLAY_TAG.toString());
-            boolean containsBlockTag = entity.getTags().contains(REGION_BLOCK_DISPLAY_TAG.toString());
+            boolean containsTextTag = entity.entityTags().contains(REGION_TEXT_DISPLAY_TAG.toString());
+            boolean containsBlockTag = entity.entityTags().contains(REGION_BLOCK_DISPLAY_TAG.toString());
             return containsTextTag || containsBlockTag;
         });
         var entityAmount = entities.size();

@@ -7,12 +7,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.*;
 import net.minecraft.util.ExtraCodecs;
-import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -189,11 +188,11 @@ public class SubstituteTextContent implements ComponentContents {
     }
 
     @Override
-    public MutableComponent resolve(@Nullable CommandSourceStack source, @Nullable Entity sender, int depth) throws CommandSyntaxException {
+    public @NonNull MutableComponent resolve(@Nullable ResolutionContext source, int depth) throws CommandSyntaxException {
         Object[] objects = new Object[this.args.length];
         for (int i = 0; i < objects.length; ++i) {
             Object object = this.args[i];
-            objects[i] = object instanceof Component ? ComponentUtils.updateForEntity(source, (Component) object, sender, depth) : object;
+            objects[i] = object instanceof Component ? ComponentUtils.resolve(source, (Component) object, depth) : object;
         }
         return MutableComponent.create(new SubstituteTextContent(this.pattern, objects));
     }

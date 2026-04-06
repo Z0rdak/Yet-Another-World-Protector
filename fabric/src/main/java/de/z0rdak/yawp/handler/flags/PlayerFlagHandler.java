@@ -161,7 +161,7 @@ public final class PlayerFlagHandler {
                 Set<String> entityTags = FlagConfig.getCoveredBlockEntityTags();
                 boolean isCoveredByTag = entityTags.stream().anyMatch(tag -> {
                     Identifier tagRl = Identifier.parse(tag);
-                    return stackInHand.getTags().anyMatch(itemTagKey -> itemTagKey.location().equals(tagRl));
+                    return stackInHand.tags().anyMatch(itemTagKey -> itemTagKey.location().equals(tagRl));
                 });
                 boolean isBlockCovered = entities.stream().anyMatch(entity -> {
                     Identifier entityRl = Identifier.parse(entity);

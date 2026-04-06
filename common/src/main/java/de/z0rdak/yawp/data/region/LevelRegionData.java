@@ -34,10 +34,8 @@ public class LevelRegionData extends SavedData {
 
     public static SavedDataType<LevelRegionData> buildSavedDataType(Identifier dimRl) {
         var dimId = dimRl.toString().replace(Identifier.NAMESPACE_SEPARATOR, '_');
-        return new SavedDataType<>(
-                String.join("/", Constants.MOD_ID, dimId),
-                () -> new LevelRegionData(dimRl), CODEC,
-                null);
+        var levelId = Identifier.fromNamespaceAndPath(Constants.MOD_ID, dimId);
+        return new SavedDataType<>(levelId, () -> new LevelRegionData(dimRl), CODEC,null);
     }
 
     private final Identifier id;

@@ -166,8 +166,8 @@ class DimensionCommands {
 
     private static int nukeDisplayEntities(CommandContext<CommandSourceStack> ctx, ServerLevel level) {
         var entities = level.getEntities(EntityTypeTest.forClass(Display.class), (entity) -> {
-            boolean containsTextTag = entity.getTags().contains(REGION_TEXT_DISPLAY_TAG.toString());
-            boolean containsBlockTag = entity.getTags().contains(REGION_BLOCK_DISPLAY_TAG.toString());
+            boolean containsTextTag = entity.entityTags().contains(REGION_TEXT_DISPLAY_TAG.toString());
+            boolean containsBlockTag = entity.entityTags().contains(REGION_BLOCK_DISPLAY_TAG.toString());
             return containsTextTag || containsBlockTag;
         });
         var entityAmount = entities.size();

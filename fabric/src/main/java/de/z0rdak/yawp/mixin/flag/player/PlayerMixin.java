@@ -158,7 +158,7 @@ public abstract class PlayerMixin {
                 Set<String> entityTags = FlagConfig.getCoveredBlockEntityTags();
                 boolean isCoveredByTag = entityTags.stream().anyMatch(entityTag -> {
                     Identifier tagRl = Identifier.parse(entityTag);
-                    return target.getTags().contains(tagRl.getPath());
+                    return target.entityTags().contains(tagRl.getPath());
                 });
                 Set<String> entities = FlagConfig.getCoveredBlockEntities();
                 boolean isBlockEntityCovered = entities.stream().anyMatch(entity -> {

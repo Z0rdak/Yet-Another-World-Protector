@@ -21,7 +21,7 @@ public class GlobalRegionData extends SavedData {
                     .apply(instance, GlobalRegionData::new));
 
     public final static SavedDataType<GlobalRegionData> TYPE = new SavedDataType<GlobalRegionData>(
-            Constants.MOD_ID + "/" + GLOBAL_REGION_FILE_NAME,
+            Identifier.fromNamespaceAndPath(Constants.MOD_ID, GLOBAL_REGION_FILE_NAME),
             GlobalRegionData::new, CODEC,
             null);
 
