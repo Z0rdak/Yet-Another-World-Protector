@@ -10,10 +10,6 @@ neoForge {
     if (at.exists()) {
         accessTransformers.from(at.absolutePath)
     }
-    parchment {
-        minecraftVersion = parchment_minecraft
-        mappingsVersion = parchment_version
-    }
 }
 
 dependencies {
@@ -25,9 +21,8 @@ dependencies {
 
 
     // NeoForge's config system
-    api "fuzs.forgeconfigapiport:forgeconfigapiport-common-neoforgeapi:21.10.0"
-    // Forge's config system
-    // api "fuzs.forgeconfigapiport:forgeconfigapiport-common-forgeapi:21.4.1"
+    api "fuzs.forgeconfigapiport:forgeconfigapiport-common-neoforgeapi:26.1.0.1"
+
 }
 
 configurations {

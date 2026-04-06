@@ -1,27 +1,23 @@
 plugins {
     id 'multiloader-loader'
-    id 'fabric-loom'
+    id 'net.fabricmc.fabric-loom'
 }
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
-    mappings loom.layered {
-        officialMojangMappings()
-        parchment("org.parchmentmc.data:parchment-${parchment_minecraft}:${parchment_version}@zip")
-    }
 
     // Approach #1: Ensure fabric-permissions-api is always available by including it within your own jar (it's only ~12KB!)
-    //include(modImplementation('me.lucko:fabric-permissions-api:0.5.0'))
+    //include(implementation('me.lucko:fabric-permissions-api:0.5.0'))
     // Approach #2: Depend on fabric-permissions-api, but require that users install it themselves
-    modImplementation 'me.lucko:fabric-permissions-api:0.5.0'
+    implementation 'me.lucko:fabric-permissions-api:0.5.0'
 
-    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
-    modImplementation "curse.maven:luckperms-431733:7094492"
-    modApi "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:21.11.0"
+    implementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+
+    api "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:26.1.0.1"
     
     // WorldEdit API for optional WorldEdit integration
-    // modCompileOnlyApi "com.sk89q.worldedit:worldedit-fabric-mc${project.minecraft_version}:7.3.10-SNAPSHOT"
-    // modImplementation "curse.maven:worldedit-225608:6013137"
+    // compileOnlyApi "com.sk89q.worldedit:worldedit-fabric-mc${project.minecraft_version}:7.3.10-SNAPSHOT"
+    // implementation "curse.maven:worldedit-225608:6013137"
 }
 
 loom {

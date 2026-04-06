@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    api "fuzs.forgeconfigapiport:forgeconfigapiport-neoforge:21.11.0"
+    api "fuzs.forgeconfigapiport:forgeconfigapiport-neoforge:26.1.0.1"
     // implementation "curse.maven:worldedit-225608:6013137"
 }
 
@@ -14,10 +14,6 @@ neoForge {
     def at = project(':common').file('src/main/resources/META-INF/accesstransformer.cfg')
     if (at.exists()) {
         accessTransformers.from(at.absolutePath)
-    }
-    parchment {
-        minecraftVersion = parchment_minecraft
-        mappingsVersion = parchment_version
     }
     runs {
         configureEach {
