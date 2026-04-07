@@ -94,7 +94,6 @@ public class RegionDataManager {
     public static void onServerStarting(MinecraftServer server) {
         LOGGER.info(Component.translatableWithFallback("data.region.init","Initializing RegionDataManager...").getString());
         serverInstance = server;
-        checkYawpDir(server);
     }
 
     private static void saveTrackedLevels(MinecraftServer server){
@@ -223,21 +222,6 @@ public class RegionDataManager {
             }
         });
     }
-
-    private static void checkYawpDir(MinecraftServer server) {
-        Path worldRootPath = server.getWorldPath(LevelResource.ROOT).normalize();
-        Path dataDirPath = worldRootPath.resolve("data/" + Constants.MOD_ID);
-        if (Files.notExists(dataDirPath)) {
-            try {
-                Files.createDirectories(dataDirPath);
-                LOGGER.info(Component.translatableWithFallback("data.region.env.init", "Created region data directory '%s'", dataDirPath.toString()).getString());
-            } catch (IOException e) {
-                LOGGER.error(Component.translatableWithFallback("data.region.env.error", "Failed to create directory for region data: '%s'").getString(), e);
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
 
     public static void initLevelDataOnLogin(Entity entity, Level level) {
         if (isServerSide(level) && entity instanceof Player) {
