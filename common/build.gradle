@@ -21,7 +21,7 @@ dependencies {
 
 
     // NeoForge's config system
-    api "fuzs.forgeconfigapiport:forgeconfigapiport-common-neoforgeapi:26.1.0.1"
+    api "fuzs.forgeconfigapiport:forgeconfigapiport-common-neoforgeapi:26.1.3"
 
 }
 

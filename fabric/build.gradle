@@ -13,7 +13,7 @@ dependencies {
     implementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
-    api "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:26.1.0.1"
+    api "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:26.1.3"
     
     // WorldEdit API for optional WorldEdit integration
     // compileOnlyApi "com.sk89q.worldedit:worldedit-fabric-mc${project.minecraft_version}:7.3.10-SNAPSHOT"
