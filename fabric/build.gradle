@@ -14,8 +14,8 @@ dependencies {
     // Approach #2: Depend on fabric-permissions-api, but require that users install it themselves
     modImplementation 'me.lucko:fabric-permissions-api:0.5.0'
 
-    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+    modImplementation "net.fabricmc:fabric-loader:${loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
     modImplementation "curse.maven:luckperms-431733:7094492"
     modApi "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:21.10.0"
     
