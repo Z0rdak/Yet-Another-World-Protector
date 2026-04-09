@@ -161,11 +161,9 @@ public class WorldFlagHandler {
             if (event.getEntity() instanceof Player player) {
                 ResourceKey<Level> dim = event.getDimension();
                 ServerLevel targetServerLevel = null;
-                try (Level level = player.level()) {
-                    var server = level.getServer();
-                    if (server != null) {
-                        targetServerLevel = server.getLevel(dim);
-                    }
+                var server = player.level().getServer();
+                if (server != null) {
+                    targetServerLevel = server.getLevel(dim);
                 }
                 if (targetServerLevel != null) {
                   /*
