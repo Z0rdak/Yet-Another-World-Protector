@@ -1,12 +1,9 @@
 package de.z0rdak.yawp;
 
-import de.z0rdak.yawp.api.visualization.VisualizationManager;
-import de.z0rdak.yawp.api.events.flag.FabricFlagEvents;
-import de.z0rdak.yawp.api.events.flag.FlagEvent;
-import de.z0rdak.yawp.api.events.flag.FabricFlagEvents;
 import de.z0rdak.yawp.api.events.flag.FlagEvent;
 import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.commands.CommandRegistry;
+import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.data.PlayerManager;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.handler.YawpEventHandler;
@@ -19,6 +16,8 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLevelEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.level.ServerLevel;
+
+import static de.z0rdak.yawp.handler.YawpEventHandler.removeInvolvedEntities;
 
 public class YetAnotherWorldProtector implements ModInitializer, YAWPModInitializer {
 
@@ -35,9 +34,9 @@ public class YetAnotherWorldProtector implements ModInitializer, YAWPModInitiali
         ServerLifecycleEvents.SERVER_STARTING.register(YawpEventHandler::storeRef);
     }
 
-    private static void onAddFlag(FlagEvent.AddFlagEvent event) {
+    private static void onAddFlag(FlagEvent.Add event) {
         if (event.getFlag().getName().contains("spawning") && Services.FLAG_CONFIG.removeEntitiesEnabled()) {
-            removeInvolvedEntities(event.getSrc(), event.getRegion(), RegionFlag.fromId(event.getFlag().getName()));
+            removeInvolvedEntities(event.getRegion(), RegionFlag.fromId(event.getFlag().getName()));
         }
     }
 

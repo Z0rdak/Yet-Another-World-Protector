@@ -18,11 +18,9 @@ import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.data.region.LevelRegionData;
-import de.z0rdak.yawp.data.region.RegionDataManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
@@ -159,19 +157,6 @@ public class RegionArgumentType implements ArgumentType<String> {
      */
     public static RegionArgumentType region() {
         return new RegionArgumentType();
-    }
-
-    public static IMarkableRegion getRegionInPlayerDim(CommandContext<CommandSourceStack> ctx, String argName) throws CommandSyntaxException {
-        String regionName = ctx.getArgument(argName, String.class);
-        ServerPlayer player = ctx.getSource().getPlayerOrException();
-        LevelRegionData dimCache = RegionDataManager.getOrCreate(player.level());
-        IMarkableRegion region = dimCache.getLocal(regionName);
-        if (region != null) {
-            return region;
-        } else {
-            sendCmdFeedback(ctx.getSource(), Component.literal("No regions defined in dim '" + dimCache.getDim().getDim().identifier() + "'"));
-            throw ERROR_INVALID_VALUE.create(regionName);
-        }
     }
 
     @Override

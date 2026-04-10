@@ -21,7 +21,7 @@ public class CropBlockMixin {
 
     @Inject(method = "entityInside", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;destroyBlock(Lnet/minecraft/core/BlockPos;ZLnet/minecraft/world/entity/Entity;)Z"), cancellable = true, allow = 1)
     public void onEntityCollision(BlockState blockState, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier insideBlockEffectApplier, boolean bl, CallbackInfo ci) {
-        FlagCheckRequest checkEvent = new FlagCheckRequest(pos, MOB_GRIEFING, world.dimension(), null);
+        FlagCheckRequest checkEvent = new FlagCheckRequest(pos, MOB_GRIEFING, level.dimension(), null);
         if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
             return;
         processCheck(checkEvent, deny -> ci.cancel());

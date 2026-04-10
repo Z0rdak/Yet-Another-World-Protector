@@ -8,9 +8,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 
-import java.util.*;
-
-import static net.minecraft.world.level.Level.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class LevelListData extends SavedData {
 
@@ -37,34 +38,12 @@ public class LevelListData extends SavedData {
         this.dimensions = new HashSet<>();
     }
 
-    @Override
-    public @NotNull CompoundTag save(@NotNull CompoundTag tag, HolderLookup.Provider provider) {
-        Optional<Tag> nbt = LevelListData.CODEC.encodeStart(NbtOps.INSTANCE, this)
-                .resultOrPartial(Constants.LOGGER::warn);
-        if (nbt.isPresent()) {
-            tag = (CompoundTag) nbt.get();
-        }
-        return tag;
-    }
-
     public boolean doesTrack(Identifier rl) {
         return this.hasDimEntry(rl);
     }
 
     public boolean doesTrack(ServerLevel level) {
-        return this.doesTrack(level.dimension().location());
-    }
-
-    public static LevelListData get(DimensionDataStorage storage, @Nullable Supplier<LevelListData> defaultSupplier) {
-        Supplier<LevelListData> supplier = defaultSupplier == null ? LevelListData::new : defaultSupplier;
-        var factory = new Factory<>(supplier, LevelListData::load, DataFixTypes.SAVED_DATA_MAP_DATA);
-        return storage.computeIfAbsent(factory, LevelListData.TYPE);
-    }
-
-    public static LevelListData load(CompoundTag tag, HolderLookup.Provider provider) {
-        return LevelListData.CODEC.parse(NbtOps.INSTANCE, tag)
-                .resultOrPartial(Constants.LOGGER::warn)
-                .orElse(new LevelListData());
+        return this.doesTrack(level.dimension().identifier());
     }
 
     public List<Identifier> getLevels() {

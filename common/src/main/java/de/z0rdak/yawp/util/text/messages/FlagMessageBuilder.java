@@ -49,7 +49,7 @@ public class FlagMessageBuilder {
         substituteMap.put(FLAG_TEMPLATE, result.getFlagCheck().getRegionFlag().name);
         substituteMap.put(POS_TEMPLATE, tinyBlockPos(result.getFlagCheck().getTarget()));
         substituteMap.put(REGION_TEMPLATE, result.getResponsible().getName());
-        substituteMap.put(DIM_TEMPLATE, result.getResponsible().getDim().location().toString());
+        substituteMap.put(DIM_TEMPLATE, result.getResponsible().getDim().identifier().toString());
         if (result.getFlagCheck().getPlayer() != null && RegionFlag.hasPlayerCategory(result.getFlagCheck().getRegionFlag())) {
             substituteMap.put(PLAYER_TEMPLATE, result.getFlagCheck().getPlayer().getScoreboardName());
         }

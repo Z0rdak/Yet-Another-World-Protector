@@ -214,7 +214,7 @@ public final class YawpEventHandler {
         var region = rename.getRegion();
         var oldName = rename.getOldName();
         var newName = region.getName();
-        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().location() + ")" : "";
+        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().identifier() + ")" : "";
         if (player == null) {
             Constants.LOGGER.debug("Region '{}'{} was renamed to '{}'.", oldName, regionLoc, newName);
         } else {
@@ -227,7 +227,7 @@ public final class YawpEventHandler {
         ServerPlayer player = updateFlagMessage.getPlayer();
         var region = updateFlagMessage.getRegion();
         var regionName = region.getName();
-        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().location() + ")" : "";
+        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().identifier() + ")" : "";
         var flagName = updateFlagMessage.getFlag().getName();
         var newMsg = updateFlagMessage.getNewMsg();
         if (player == null) {
@@ -247,7 +247,7 @@ public final class YawpEventHandler {
         ServerPlayer player = remove.getPlayer();
         var region = remove.getRegion();
         var regionName = region.getName();
-        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().location() + ")" : "";
+        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().identifier() + ")" : "";
         var flagName = remove.getFlag().getName();
         if (player == null) {
             Constants.LOGGER.debug("Flag '{}' removed from region '{}'{}.", flagName, regionName, regionLoc);
@@ -266,7 +266,7 @@ public final class YawpEventHandler {
         ServerPlayer player = add.getPlayer();
         var region = add.getRegion();
         var regionName = region.getName();
-        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().location() + ")" : "";
+        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().identifier() + ")" : "";
         var flagName = add.getFlag().getName();
         if (player == null) {
             Constants.LOGGER.debug("Flag '{}' added to region '{}'{}.", flagName, regionName, regionLoc);
@@ -284,7 +284,7 @@ public final class YawpEventHandler {
         }
         var player = onEnter.getPlayer();
         var region = onEnter.getRegion();
-        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().location() + ")" : "";
+        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().identifier() + ")" : "";
         Constants.LOGGER.debug("Player {} entered region '{}'{} at {}",
                 player.getScoreboardName(), region.getName(), regionLoc, ChatComponentBuilder.tinyBlockPos(player.blockPosition()));
         return true;
@@ -297,7 +297,7 @@ public final class YawpEventHandler {
         }
         var player = onLeave.getPlayer();
         var region = onLeave.getRegion();
-        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().location() + ")" : "";
+        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().identifier() + ")" : "";
 
         Constants.LOGGER.debug("Player {} left region '{}'{} at {}",
                 player.getScoreboardName(), region.getName(), regionLoc, ChatComponentBuilder.tinyBlockPos(player.blockPosition()));
@@ -312,7 +312,7 @@ public final class YawpEventHandler {
         ServerPlayer player = create.getPlayer();
         var region = create.getRegion();
         var regionName = region.getName();
-        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().location() + ")" : "";
+        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().identifier() + ")" : "";
         if (player == null) {
             Constants.LOGGER.debug("Region '{}'{} was created.", regionName, regionLoc);
         } else {
@@ -329,7 +329,7 @@ public final class YawpEventHandler {
         ServerPlayer player = remove.getPlayer();
         var region = remove.getRegion();
         var regionName = region.getName();
-        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().location() + ")" : "";
+        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().identifier() + ")" : "";
         if (player == null) {
             Constants.LOGGER.debug("Region '{}'{} was deleted.", regionName, regionLoc);
         } else {
@@ -346,7 +346,7 @@ public final class YawpEventHandler {
         ServerPlayer player = update.getPlayer();
         var region = update.getRegion();
         var regionName = region.getName();
-        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().location() + ")" : "";
+        var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().identifier() + ")" : "";
 
         if (player == null) {
             Constants.LOGGER.debug("Region area of '{}'{} was updated.", regionName, regionLoc);

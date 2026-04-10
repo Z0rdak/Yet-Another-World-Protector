@@ -177,7 +177,7 @@ public class CommandInterceptor {
                 // wp marker create <name> >parent>
                 boolean isParentArgProvided = nodeNames.size() >= 5 && nodeNames.get(4) != null;
                 Player player = cmdContext.getSource().getPlayerOrException();
-                var levelRl = player.level().dimension().location();
+                var levelRl = player.level().dimension().identifier();
                 var maybeLevelData = RegionDataManager.getLevelRegionData(levelRl);
                 if (maybeLevelData.isEmpty()) {
                     // TODO: CommandLink
@@ -426,7 +426,7 @@ public class CommandInterceptor {
         ParsedArgument<CommandSourceStack, ?> regionArg = cmdContext.getArguments().get(argumentKey.toString());
         if (regionArg != null && regionArg.getResult() instanceof String regionName) {
             ServerLevel level = cmdContext.getSource().getLevel();
-            var levelRl = level.dimension().location();
+            var levelRl = level.dimension().identifier();
             var maybeLevelData = RegionDataManager.getLevelRegionData(levelRl);
             if (maybeLevelData.isEmpty()) {
                 // TODO: CommandLink
@@ -455,7 +455,7 @@ public class CommandInterceptor {
             ParsedArgument<CommandSourceStack, ?> dimParsedArgument = cmdContext.getArguments().get(DIM.toString());
             if (dimParsedArgument != null && dimParsedArgument.getResult() instanceof Identifier dimResLoc) {
                 ResourceKey<Level> levelRk = ResourceKey.create(Registries.DIMENSION, dimResLoc);
-                var levelRl = levelRk.location();
+                var levelRl = levelRk.identifier();
                 var maybeLevelData = RegionDataManager.getLevelRegionData(levelRl);
                 if (maybeLevelData.isEmpty()) {
                     // TODO: CommandLink

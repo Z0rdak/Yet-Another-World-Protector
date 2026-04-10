@@ -5,6 +5,7 @@ import de.z0rdak.yawp.core.region.IProtectedRegion;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.ResolutionContext;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
@@ -136,17 +137,20 @@ public final class TitleBuilder {
                 conn.send(new ClientboundClearTitlesPacket(false));
 
                 if (title != null) {
-                    var resolved = ComponentUtils.updateForEntity(source, title, player, 0);
+                    var updateForEntity = ResolutionContext.create(source);
+                    var resolved = ComponentUtils.resolve(updateForEntity, title);
                     conn.send(new ClientboundSetTitleTextPacket(resolved));
                 }
 
                 if (subtitle != null) {
-                    var resolved = ComponentUtils.updateForEntity(source, subtitle, player, 0);
+                    var updateForEntity = ResolutionContext.create(source);
+                    var resolved = ComponentUtils.resolve(updateForEntity, subtitle);
                     conn.send(new ClientboundSetSubtitleTextPacket(resolved));
                 }
 
                 if (actionbar != null) {
-                    var resolved = ComponentUtils.updateForEntity(source, actionbar, player, 0);
+                    var updateForEntity = ResolutionContext.create(source);
+                    var resolved = ComponentUtils.resolve(updateForEntity, actionbar);
                     conn.send(new ClientboundSetActionBarTextPacket(resolved));
                 }
 

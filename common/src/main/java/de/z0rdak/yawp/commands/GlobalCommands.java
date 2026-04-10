@@ -59,11 +59,11 @@ public class GlobalCommands {
     private static int untrackLevel(CommandContext<CommandSourceStack> ctx, ServerLevel level) {
         var maybeLrd = RegionManager.get().getLevelRegionData(level.dimension());
         if (!maybeLrd.isPresent()) {
-            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.global.level-not-tracked", "The level '%s' is currently not tracked by YAWP.", level.dimension().location().toString()));
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.global.level-not-tracked", "The level '%s' is currently not tracked by YAWP.", level.dimension().identifier().toString()));
             return 1;
         }
         RegionManager.get().untrackLevel(level.dimension());
-        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.global.level.untracked", "The level '%s' is no longer tracked. Its regions are disabled from now on.", level.dimension().location().toString()));
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.global.level.untracked", "The level '%s' is no longer tracked. Its regions are disabled from now on.", level.dimension().identifier().toString()));
         return 0;
     }
 

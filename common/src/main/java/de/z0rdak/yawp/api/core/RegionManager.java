@@ -72,7 +72,7 @@ public final class RegionManager implements IRegionManager {
 
     @Override
     public void save(ResourceKey<Level> levelRl) {
-        RegionDataManager.saveLevel(levelRl.location());
+        RegionDataManager.saveLevel(levelRl.identifier());
     }
 
     /**
@@ -115,12 +115,12 @@ public final class RegionManager implements IRegionManager {
 
     @Override
     public LevelRegionData trackLevel(ResourceKey<Level> dim) {
-        return RegionDataManager.addTrackingFor(dim.location());
+        return RegionDataManager.addTrackingFor(dim.identifier());
     }
 
     @Override
     public void untrackLevel(ResourceKey<Level> dim) {
-        RegionDataManager.removeTrackingFor(dim.location());
+        RegionDataManager.removeTrackingFor(dim.identifier());
     }
 
     @Override

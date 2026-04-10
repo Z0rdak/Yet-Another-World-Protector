@@ -2,25 +2,25 @@ package de.z0rdak.yawp.data.region;
 
 import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.constants.Constants;
-import de.z0rdak.yawp.core.flag.*;
-import de.z0rdak.yawp.core.region.*;
+import de.z0rdak.yawp.core.flag.BooleanFlag;
+import de.z0rdak.yawp.core.flag.RegionFlag;
+import de.z0rdak.yawp.core.region.DimensionalRegion;
+import de.z0rdak.yawp.core.region.GlobalRegion;
+import de.z0rdak.yawp.core.region.IMarkableRegion;
+import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.SavedDataStorage;
-import net.minecraft.world.level.storage.LevelResource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -137,7 +137,7 @@ public class RegionDataManager {
         if (trackedLevelData.doesTrack(levelRl)) {
             SavedDataStorage storage = serverInstance.overworld().getDataStorage();
             LevelRegionData levelRegionData = RegionDataManager.levelRegionData.get(levelRl);
-            LOGGER.info(Component.translatableWithFallback("data.region.level.save", "Saving region data for level '%s'", levelRl.toString()).getString());
+            LOGGER.debug(Component.translatableWithFallback("data.region.level.save", "Saving region data for level '%s'", levelRl.toString()).getString());
             storage.set(LevelRegionData.buildSavedDataType(levelRl), levelRegionData);
             levelRegionData.setDirty();
         }
@@ -156,7 +156,7 @@ public class RegionDataManager {
     }
 
     public static void saveOnUnload(MinecraftServer server, ServerLevel level) {
-        if (trackedLevelData.hasDimEntry(level.dimension().identifier())) {
+        if (trackedLevelData.doesTrack(level.dimension().identifier())) {
             LOGGER.info(Component.translatableWithFallback("data.region.level.save.unload", "Unloading level '%s'. Saving region data", level.dimension().identifier().toString()).getString());
             saveLevelData(level);
         }
@@ -171,15 +171,16 @@ public class RegionDataManager {
             if (trackedLevelData == null) {
                 LOGGER.info(Component.translatableWithFallback("data.region.levels.load.missing", "Missing level list for region data (ignore on first startup). Initializing...").getString());
                 trackedLevelData = new LevelListData();
-            };
-            saveTrackedLevelList();
-            LOGGER.info(Component.translatableWithFallback("data.region.levels.load.success", "Found region data for %s dimension(s)", trackedLevelData.getLevels().size()).getString());
-
-            globalRegionData = GlobalRegionData.get(dataStorage, () -> {
+                saveTrackedLevelList();
+            } else {
+                LOGGER.info(Component.translatableWithFallback("data.region.levels.load.success", "Found region data for %s dimension(s)", trackedLevelData.getLevels().size()).getString());
+            }
+            globalRegionData = dataStorage.get(GlobalRegionData.TYPE);
+            if (globalRegionData == null) {
                 LOGGER.info(Component.translatableWithFallback("data.region.global.missing", "Missing global region data (ignore on first startup). Initializing...").getString());
                 globalRegionData = new GlobalRegionData();
                 saveGlobalData();
-            });
+            }
         } catch (NullPointerException npe) {
             LOGGER.error(Component.translatableWithFallback("data.region.level.local.load.failed", "Loading level region list failed!").getString(), npe);
         }

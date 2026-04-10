@@ -190,7 +190,7 @@ public class VisualizationManager {
     }
 
     public static void hide(IMarkableRegion region) {
-        ResourceLocation levelRl = region.getDim().location();
+        Identifier levelRl = region.getDim().identifier();
         VisualizationManager vm = getOrCreateVisualizationManager(levelRl);
         RegionVisualizationManager rvm = getOrCreateRegionVisualizationManager(vm, region);
         rvm.hide(DisplayType.HULL);

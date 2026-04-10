@@ -67,7 +67,7 @@ public class ServerWorldMixin {
             CallbackInfo ci) {
         ServerLevel world = (ServerLevel) (Object) this;
         if (isServerSide(world)) {
-            if (explosionMode == Level.ExplosionInteraction.TNT || explosionInteraction == Level.ExplosionInteraction.BLOCK) {
+            if (explosionMode == Level.ExplosionInteraction.TNT || explosionMode == Level.ExplosionInteraction.BLOCK) {
                 FlagCheckRequest checkEvent = new FlagCheckRequest(new BlockPos((int) x, (int) y, (int) z), IGNITE_EXPLOSIVES, world.dimension());
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;

@@ -10,7 +10,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import org.apache.logging.log4j.LogManager;
@@ -26,19 +26,19 @@ public final class RegionSpatialCache {
     private static final Logger LOGGER = LogManager.getLogger(MOD_ID.toUpperCase()+ "-Spatial-Region-Index");
 
     public static RegionSpatialCache get(ResourceKey<Level> levelRl) {
-        return levelPlayerCaches.computeIfAbsent(levelRl.location(), key -> new RegionSpatialCache(levelRl));
+        return levelPlayerCaches.computeIfAbsent(levelRl.identifier(), key -> new RegionSpatialCache(levelRl));
     }
 
-    private static final Map<ResourceLocation, RegionSpatialCache> levelPlayerCaches = new Object2ObjectOpenHashMap<>();
+    private static final Map<Identifier, RegionSpatialCache> levelPlayerCaches = new Object2ObjectOpenHashMap<>();
 
-    private static final Set<ResourceLocation> excludedLevels = new ObjectOpenHashSet<>();
+    private static final Set<Identifier> excludedLevels = new ObjectOpenHashSet<>();
 
-    public static void excludeLevel(ResourceLocation id) {
+    public static void excludeLevel(Identifier id) {
         excludedLevels.add(id);
     }
 
     public static boolean excludes(ServerLevel level) {
-        return excludedLevels.contains(level.dimension().location());
+        return excludedLevels.contains(level.dimension().identifier());
     }
 
     public static void initRegions(ServerLevel level) {

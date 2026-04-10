@@ -9,7 +9,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 public class FabricFeatureManager implements FeatureManager {
     @Override
     public void enablePlayerTracker() {
-        ServerTickEvents.START_WORLD_TICK.register(PlayerPosTracker::tickLevel);
+        ServerTickEvents.START_LEVEL_TICK.register(PlayerPosTracker::tickLevel);
         ServerPlayConnectionEvents.DISCONNECT.register(
                 (e, s) -> PlayerPosTracker.onPlayerDisc(e.getPlayer()));
     }
