@@ -1,3 +1,14 @@
+# [0.6.3-beta2] - 2026-10-04
+
+## Changed
+
+- Cyclic region data related logging is now only logged in debug log
+- **Breaking Change**: Starting with YAWP for **MC 26.1.2**, the region data is now saved in `/world/dimensions/minecraft/overworld/data/yawp`  
+
+## Fixed 
+
+- Fix server crash caused by using level in try with resource block. Fixes [#187](https://github.com/Z0rdak/Yet-Another-World-Protector/issues/187)
+
 # [0.6.3-beta1] - 2025-21-12
 
 ## Added

@@ -4,8 +4,7 @@ plugins {
 }
 
 dependencies {
-    api "fuzs.forgeconfigapiport:forgeconfigapiport-neoforge:26.1.3"
-    // implementation "curse.maven:worldedit-225608:6013137"
+    api "fuzs.forgeconfigapiport:forgeconfigapiport-neoforge:${fcap_version}"
 }
 
 neoForge {
