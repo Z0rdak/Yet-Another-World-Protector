@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 
-@Mixin(targets = "net.minecraft.world.entity.animal.Rabbit$RaidGardenGoal")
+@Mixin(targets = "net.minecraft.world.entity.animal.rabbit.Rabbit$RaidGardenGoal")
 public class RabbitRaidGardenGoalMixin {
     @Final
     @Shadow
