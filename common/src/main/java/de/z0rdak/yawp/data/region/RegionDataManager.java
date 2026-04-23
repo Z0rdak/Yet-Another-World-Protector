@@ -263,10 +263,11 @@ public class RegionDataManager {
     }
 
     public static void removeTrackingFor(ResourceLocation rl){
+        saveLevel(rl);
         trackedLevelData.removeTrackingFor(rl);
         levelRegionData.remove(rl);
-        saveLevel(rl);
         saveTrackedLevelList();
+
     }
 
     public static LevelRegionData addTrackingFor(ResourceLocation rl){
