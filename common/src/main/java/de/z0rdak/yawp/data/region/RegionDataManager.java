@@ -256,10 +256,11 @@ public class RegionDataManager {
     }
 
     public static void removeTrackingFor(Identifier rl){
+        saveLevel(rl);
         trackedLevelData.removeTrackingFor(rl);
         levelRegionData.remove(rl);
-        saveLevel(rl);
         saveTrackedLevelList();
+
     }
 
     public static LevelRegionData addTrackingFor(Identifier rl){
