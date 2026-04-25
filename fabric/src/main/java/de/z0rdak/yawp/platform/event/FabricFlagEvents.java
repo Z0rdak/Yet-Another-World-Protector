@@ -14,7 +14,11 @@ public final class FabricFlagEvents {
     }
 
     public static final Event<FlagEvents.AddFlagListener> ADD_FLAG =
-            EventFactory.createArrayBacked(FlagEvents.AddFlagListener.class, callbacks -> (event) -> {
+            EventFactory.createArrayBacked(FlagEvents.AddFlagListener.class,
+                    callbacks -> (event) -> {
+                        if (callbacks.length == 0) {
+                            return event.isCanceled();
+                        }
                         for (var callback : callbacks) {
                             if (!callback.add(event) || event.isCanceled()) {
                                 return CANCEL;
@@ -25,7 +29,11 @@ public final class FabricFlagEvents {
             );
 
     public static final Event<FlagEvents.RemoveFlagListener> REMOVE_FLAG =
-            EventFactory.createArrayBacked(FlagEvents.RemoveFlagListener.class, callbacks -> (event) -> {
+            EventFactory.createArrayBacked(FlagEvents.RemoveFlagListener.class,
+                    callbacks -> (event) -> {
+                        if (callbacks.length == 0) {
+                            return event.isCanceled();
+                        }
                         for (var callback : callbacks) {
                             if (!callback.remove(event) || event.isCanceled()) {
                                 return CANCEL;
@@ -45,7 +53,11 @@ public final class FabricFlagEvents {
             });
 
     public static final Event<FlagEvents.FlagCheckListener> CHECK_FLAG =
-            EventFactory.createArrayBacked(FlagEvents.FlagCheckListener.class, callbacks -> (event) -> {
+            EventFactory.createArrayBacked(FlagEvents.FlagCheckListener.class,
+                    callbacks -> (event) -> {
+                        if (callbacks.length == 0) {
+                            return event.isCanceled();
+                        }
                         for (var callback : callbacks) {
                             if (!callback.checkFlag(event) || event.isCanceled()) {
                                 return CANCEL;
