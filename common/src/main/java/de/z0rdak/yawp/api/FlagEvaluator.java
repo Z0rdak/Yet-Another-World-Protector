@@ -5,6 +5,7 @@ import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.api.events.flag.FlagCheckResult;
 import de.z0rdak.yawp.core.flag.FlagContext;
 import de.z0rdak.yawp.core.flag.FlagState;
+import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
@@ -204,6 +205,9 @@ public record FlagEvaluator(FlagCheckResult result) {
      */
     @Nullable
     public static IProtectedRegion findResponsibleRegion(@NotNull BlockPos pos, @NotNull ResourceKey<Level> dim) {
+        if (RegionDataManager.getTrackedLevelData().doesTrack(dim.identifier())){
+            return RegionManager.get().getGlobalRegion();
+        }
         var localRegion = getInvolvedRegionFor(pos, dim);
         if (localRegion == null) {
             var maybeLrd = RegionDataManager.getLevelRegionData(dim);
