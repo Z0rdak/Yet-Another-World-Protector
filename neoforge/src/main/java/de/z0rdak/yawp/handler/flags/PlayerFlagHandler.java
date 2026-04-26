@@ -56,6 +56,7 @@ import net.neoforged.neoforge.event.entity.living.LivingKnockBackEvent;
 import net.neoforged.neoforge.event.entity.player.*;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.ExplosionEvent;
+import net.neoforged.neoforge.event.level.block.BreakBlockEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import java.util.HashMap;
@@ -392,7 +393,7 @@ public final class PlayerFlagHandler {
     }
 
     @SubscribeEvent
-    public static void onPlayerBreakBlock(BlockEvent.BreakEvent event) {
+    public static void onPlayerBreakBlock(BreakBlockEvent event) {
         if (NeoForgeHandlerUtil.isServerSide(event)) {
             if (event.getPlayer() == null) return;
             Player player = event.getPlayer();
