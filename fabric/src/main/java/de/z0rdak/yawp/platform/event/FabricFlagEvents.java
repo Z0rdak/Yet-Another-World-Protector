@@ -19,12 +19,11 @@ public final class FabricFlagEvents {
                         if (callbacks.length == 0) {
                             return event.isCanceled();
                         }
+                        boolean result = false;
                         for (var callback : callbacks) {
-                            if (!callback.add(event) || event.isCanceled()) {
-                                return CANCEL;
-                            }
+                            result |= !callback.add(event) || event.isCanceled();
                         }
-                        return CONTINUE;
+                        return result;
                     }
             );
 
@@ -34,12 +33,11 @@ public final class FabricFlagEvents {
                         if (callbacks.length == 0) {
                             return event.isCanceled();
                         }
+                        boolean result = false;
                         for (var callback : callbacks) {
-                            if (!callback.remove(event) || event.isCanceled()) {
-                                return CANCEL;
-                            }
+                            result |= !callback.remove(event) || event.isCanceled();
                         }
-                        return CONTINUE;
+                        return result;
                     }
             );
 
@@ -58,12 +56,11 @@ public final class FabricFlagEvents {
                         if (callbacks.length == 0) {
                             return event.isCanceled();
                         }
+                        boolean result = false;
                         for (var callback : callbacks) {
-                            if (!callback.checkFlag(event) || event.isCanceled()) {
-                                return CANCEL;
-                            }
+                            result |= !callback.checkFlag(event) || event.isCanceled();
                         }
-                        return CONTINUE;
+                        return result;
                     }
             );
 
