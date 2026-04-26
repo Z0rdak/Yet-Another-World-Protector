@@ -30,7 +30,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: 21
+          java-version: 25
 
       - name: Get current time
         uses: srfrnk/current-time@master
@@ -88,7 +88,7 @@ jobs:
             neoforge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
             neoforge/build/libs/*-@(sources|javadoc).jar
           java: |
-            21
+            25
 
       - name: Publish Fabric to Curseforge
         uses: Kir-Antipov/mc-publish@v3.3
@@ -103,7 +103,7 @@ jobs:
           dependencies: |
             forge-config-api-port(required){modrinth:ohNO6lps}{curseforge:547434}#(ignore:github)
           java: |
-            21
+            25
 
       - name: Publish NeoForge to Modrinth
         uses: Kir-Antipov/mc-publish@v3.3
@@ -118,7 +118,7 @@ jobs:
             neoforge/build/libs/!(*-@(dev|sources|javadoc|slim)).jar
             neoforge/build/libs/*-@(sources|javadoc).jar
           java: |
-            21
+            25
 
       - name: Publish Fabric to Modrinth
         uses: Kir-Antipov/mc-publish@v3.3
@@ -135,4 +135,4 @@ jobs:
           dependencies: |
             forge-config-api-port(required){modrinth:ohNO6lps}{curseforge:547434}#(ignore:github)
           java: |
-            21
+            25
