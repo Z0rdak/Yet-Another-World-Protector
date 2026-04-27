@@ -158,8 +158,8 @@ public class RegionDataManager {
     }
 
     public static void saveOnUnload(MinecraftServer server, ServerLevel level) {
-        if (trackedLevelData.doesTrack(level.dimension().identifier())) {
-            LOGGER.info(Component.translatableWithFallback("data.region.levels.save.unload", "Unloading level '%s'. Saving region data", level.dimension().identifier().toString()).getString());
+        if (trackedLevelData.doesTrack(level.dimension().location())) {
+            LOGGER.info(Component.translatableWithFallback("data.region.levels.save.unload", "Unloading level '%s'. Saving region data", level.dimension().location().toString()).getString());
             saveLevelData(level);
         }
     }

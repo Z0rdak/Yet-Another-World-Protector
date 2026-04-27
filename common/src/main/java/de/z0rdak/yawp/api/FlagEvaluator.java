@@ -208,7 +208,7 @@ public record FlagEvaluator(FlagCheckResult result) {
         // since levels are no longer automatically tracked,
         // it needs to be considered when resolving responsible regions
         // level not tracked -> global
-        if (!RegionDataManager.getTrackedLevelData().doesTrack(dim.identifier())){
+        if (!RegionDataManager.getTrackedLevelData().doesTrack(dim.location())){
             var globalRegion = RegionManager.get().getGlobalRegion();
             return globalRegion.isActive() ? globalRegion : null;
         }
