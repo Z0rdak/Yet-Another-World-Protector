@@ -116,7 +116,7 @@ public abstract class EntityMixin {
                     cir.setReturnValue(null);
                 });
             }
-            if (isMonster(self)) {
+            if (isMonster(self) || hasMonsterJockey(self)) {
                 checkEvent = new FlagCheckRequest(self.blockPosition(), USE_PORTAL_MONSTERS, getDimKey(from));
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;

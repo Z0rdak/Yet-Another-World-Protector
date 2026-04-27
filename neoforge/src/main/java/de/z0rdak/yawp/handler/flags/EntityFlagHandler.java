@@ -138,7 +138,7 @@ public class EntityFlagHandler {
                     return;
                 }
             }
-            if (isMonster(entity)) {
+            if (isMonster(entity) || hasMonsterJockey(entity)) {
                 checkEvent = new FlagCheckRequest(target, RegionFlag.SPAWNING_MONSTER, dim);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;

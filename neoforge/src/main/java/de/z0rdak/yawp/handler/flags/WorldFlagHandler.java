@@ -143,7 +143,7 @@ public class WorldFlagHandler {
         if (isAnimal(entity)) {
             nonPlayerCheckEvent = new FlagCheckRequest(target, USE_PORTAL_ANIMALS, dimension);
         }
-        if (isMonster(entity)) {
+        if (isMonster(entity) || hasMonsterJockey(entity)) {
             nonPlayerCheckEvent = new FlagCheckRequest(target, USE_PORTAL_MONSTERS, dimension);
         }
         if (entity instanceof AbstractVillager) {

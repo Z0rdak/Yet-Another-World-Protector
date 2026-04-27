@@ -111,7 +111,7 @@ public final class YawpEventHandler {
             case SPAWNING_ALL:
                 return e -> e instanceof Mob;
             case SPAWNING_MONSTER:
-                return HandlerUtil::isMonster;
+                return e -> HandlerUtil.isMonster(e) || HandlerUtil.hasMonsterJockey(e);
             case SPAWNING_ANIMAL:
                 return HandlerUtil::isAnimal;
             case SPAWNING_GOLEM:
