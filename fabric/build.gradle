@@ -8,18 +8,10 @@ dependencies {
         officialMojangMappings()
         parchment("org.parchmentmc.data:parchment-${parchment_minecraft}:${parchment_version}@zip")
     }
-    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+    modImplementation "net.fabricmc:fabric-loader:${loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
 
-    modApi "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:21.1.1"
-    
-    // WorldEdit API for optional WorldEdit integration
-    //modCompileOnlyApi "com.sk89q.worldedit:worldedit-fabric-mc${project.minecraft_version}:7.3.10-SNAPSHOT"
-    //modImplementation "curse.maven:worldedit-225608:6013137"
-
-    // Snow Real Magic
-    // modImplementation "maven.modrinth:kiwi:LzP2xOQB" // Snow Real Magic dependency
-    modCompileOnly "maven.modrinth:snow-real-magic:Xm9IuQvC"
+    modApi "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${fcap_version}"
 }
 
 loom {

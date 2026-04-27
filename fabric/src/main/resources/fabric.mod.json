@@ -8,7 +8,7 @@
         "${mod_author}"
     ],
     "contact": {
-        "homepage": "https://www.curseforge.com/minecraft/mc-mods/yawp",
+        "homepage": "${wiki_url}",
         "sources": "https://github.com/Z0rdak/Yet-Another-World-Protector",
         "issues": "https://github.com/Z0rdak/Yet-Another-World-Protector/issues"
     },
@@ -25,7 +25,7 @@
         "${mod_id}.fabric.mixins.json"
     ],
     "depends": {
-        "fabricloader": ">=${fabric_loader_version}",
+        "fabricloader": ">=${loader_version}",
         "fabric-api": "*",
         "minecraft": "${minecraft_version}",
         "forgeconfigapiport": "*",
