@@ -1,3 +1,11 @@
+# [0.6.3-beta3] - 2026-27-04
+
+## Changed
+- `spawning-monster` and `use-portal-monster` flag now also considers if the passenger is a hostile mob. 
+
+## Fixed
+- Fix global region state not being considerate correctly when evaluating untracked levels.
+
 # [0.6.3-beta2] - 2026-26-04
 
 ## Changed
