@@ -83,7 +83,7 @@ public class RegionDataManager {
     }
 
     public static void onServerStarting(MinecraftServer server) {
-        LOGGER.info(Component.translatableWithFallback("data.region.init","Initializing RegionDataManager...").getString());
+        LOGGER.debug("Initializing RegionDataManager");
         serverInstance = server;
     }
 
@@ -113,7 +113,7 @@ public class RegionDataManager {
         if (!trackedLevelData.doesTrack(levelRl)) {
             return;
         }
-        LOGGER.info(Component.translatableWithFallback("data.region.level.save.unload", "Unloading level '%s'. Saving region data", level.dimension().identifier().toString()).getString());
+        LOGGER.info(Component.translatableWithFallback(  "data.region.levels.save.unload", "Unloading level '%s'. Saving region data", level.dimension().identifier().toString()).getString());
         saveLevelData(level);
     }
 
@@ -137,7 +137,7 @@ public class RegionDataManager {
         if (trackedLevelData.doesTrack(levelRl)) {
             SavedDataStorage storage = serverInstance.overworld().getDataStorage();
             LevelRegionData levelRegionData = RegionDataManager.levelRegionData.get(levelRl);
-            LOGGER.debug(Component.translatableWithFallback("data.region.level.save", "Saving region data for level '%s'", levelRl.toString()).getString());
+            LOGGER.debug(Component.translatableWithFallback("data.region.levels.save", "Saving region data for level '%s' (%s local region(s))", levelRl.toString(), levelRegionData.regionCount()).getString());
             storage.set(LevelRegionData.buildSavedDataType(levelRl), levelRegionData);
             levelRegionData.setDirty();
         }
@@ -157,7 +157,7 @@ public class RegionDataManager {
 
     public static void saveOnUnload(MinecraftServer server, ServerLevel level) {
         if (trackedLevelData.doesTrack(level.dimension().identifier())) {
-            LOGGER.info(Component.translatableWithFallback("data.region.level.save.unload", "Unloading level '%s'. Saving region data", level.dimension().identifier().toString()).getString());
+            LOGGER.info(Component.translatableWithFallback("data.region.levels.save.unload", "Unloading level '%s'. Saving region data", level.dimension().identifier().toString()).getString());
             saveLevelData(level);
         }
     }
@@ -173,14 +173,17 @@ public class RegionDataManager {
                 trackedLevelData = new LevelListData();
                 saveTrackedLevelList();
             } else {
-                LOGGER.info(Component.translatableWithFallback("data.region.levels.load.success", "Found region data for %s dimension(s)", trackedLevelData.getLevels().size()).getString());
+                LOGGER.info(Component.translatableWithFallback("data.region.levels.load.found", "Found region data for %s tracked level(s)", trackedLevelData.getLevels().size()).getString());
             }
             globalRegionData = dataStorage.get(GlobalRegionData.TYPE);
             if (globalRegionData == null) {
                 LOGGER.info(Component.translatableWithFallback("data.region.global.missing", "Missing global region data (ignore on first startup). Initializing...").getString());
                 globalRegionData = new GlobalRegionData();
                 saveGlobalData();
+            } else {
+                LOGGER.info(Component.translatableWithFallback("data.region.global.success", "Loaded global region data").getString());
             }
+
         } catch (NullPointerException npe) {
             LOGGER.error(Component.translatableWithFallback("data.region.level.local.load.failed", "Loading level region list failed!").getString(), npe);
         }
@@ -193,10 +196,11 @@ public class RegionDataManager {
             Identifier levelRl = level.dimension().identifier();
             // init level data
             if (trackedLevelData.doesTrack(levelRl)) {
+                LOGGER.info(Component.translatableWithFallback(  "data.region.levels.load.attempt", "Loading region data for level %s", levelRl.toString()).getString());
                 LevelRegionData newLevelRegionData = loadLevelData(server, level);
                 if (newLevelRegionData == null) {
                     newLevelRegionData = new LevelRegionData(levelRl);
-                    LOGGER.info(Component.translatableWithFallback("data.region.level.local.missing", "Initializing region data for '%s'", levelRl.toString()).getString());
+                    LOGGER.info(Component.translatableWithFallback("data.region.levels.load.missing", "Missing level list for region data (ignore on first startup). Initializing...", levelRl.toString()).getString());
                     saveLevelData(level);
                 } else {
                     LOGGER.info(Component.translatableWithFallback("data.region.level.local.load.success", "Loaded %s region(s) for '%s'", newLevelRegionData.regionCount(), levelRl.toString()).getString());
@@ -204,7 +208,7 @@ public class RegionDataManager {
                     trackedLevelData.addTrackingFor(levelRl);
                 }
                 // restoring region hierarchy
-                LOGGER.info(Component.translatableWithFallback("data.region.level.local.load.restore", "Restoring region hierarchy for '%s'.", levelRl.toString()).getString());
+                LOGGER.debug(Component.translatableWithFallback("data.region.level.local.load.restore", "Restoring region hierarchy for '%s'", levelRl.toString()).getString());
 
                 // restore dim <-> global hierarchy
                 DimensionalRegion dimensionalRegion = newLevelRegionData.getDim();
@@ -218,7 +222,7 @@ public class RegionDataManager {
             }
             Services.YAWP_EVENT_DISPATCHER.post(level);
         } catch (NullPointerException npe) {
-            LOGGER.error(Component.translatableWithFallback("data.region.level.local.load.failed", "Loading regions failed!").getString(), npe);
+            LOGGER.error(Component.translatableWithFallback(  "data.region.levels.load.failure", "Loading regions failed!").getString(), npe);
         }
     }
     
@@ -280,7 +284,7 @@ public class RegionDataManager {
         dimensionalRegion.setIsActive(Services.REGION_CONFIG.shouldActivateNewDimRegion());
         // add as child of global
         RegionManager.get().getGlobalRegion().addChild(dimensionalRegion);
-        LOGGER.info(Component.translatableWithFallback("data.region.level.init", "Initializing region data for level '%s'", rl.toString()).getString());
+        LOGGER.info(Component.translatableWithFallback("data.region.levels.init", "Initializing region data for level '%s'", rl.toString()).getString());
         saveLevel(rl);
         saveTrackedLevelList();
         return newLevelRegion;
