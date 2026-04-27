@@ -194,7 +194,6 @@ public class RegionDataManager {
             var dataStorage = server.overworld().getDataStorage();
             // init level data
             if (trackedLevelData.doesTrack(levelRl)) {
-                LOGGER.info(Component.translatableWithFallback(  "data.region.levels.load.attempt", "Loading region data for level %s", levelRl.toString()).getString());
                 LevelRegionData newLevelRegionData = LevelRegionData.get(dataStorage, levelRl, () -> {
                     LOGGER.info(Component.translatableWithFallback("data.region.levels.load.missing", "Missing level list for region data (ignore on first startup). Initializing...", levelRl.toString()).getString());
                     return new LevelRegionData(levelRl);
