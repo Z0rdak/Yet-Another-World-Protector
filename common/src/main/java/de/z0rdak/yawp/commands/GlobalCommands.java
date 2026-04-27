@@ -6,9 +6,15 @@ import com.mojang.brigadier.context.CommandContext;
 import de.z0rdak.yawp.api.core.RegionManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
@@ -43,9 +49,17 @@ public class GlobalCommands {
                         )
                 )
                 .then(literal(RESET).executes(GlobalCommands::resetGlobalRegion))
-                // TODO: Only suggest levels which are not tracked yet
                 .then(literal(TRACK)
                         .then(Commands.argument(DIM.toString(), DimensionArgument.dimension())
+                                .suggests((ctx, builder) -> {
+                                    var allLevels = ctx.getSource().levels().stream().
+                                            map(ResourceKey::identifier)
+                                            .collect(Collectors.toSet());
+                                    var tracked = RegionManager.get().getLevels();
+                                    allLevels.removeAll(tracked);
+                                    var untracked = allLevels.stream().map(Identifier::toString).toList();
+                                    return SharedSuggestionProvider.suggest(untracked, builder);
+                                })
                         .executes(ctx -> trackLevel(ctx, DimensionArgument.getDimension(ctx, DIM.toString()))))
                 )
                 // TODO: Only suggest levels which are already tracked
