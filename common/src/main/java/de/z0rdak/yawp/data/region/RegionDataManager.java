@@ -196,7 +196,6 @@ public class RegionDataManager {
             Identifier levelRl = level.dimension().identifier();
             // init level data
             if (trackedLevelData.doesTrack(levelRl)) {
-                LOGGER.info(Component.translatableWithFallback(  "data.region.levels.load.attempt", "Loading region data for level %s", levelRl.toString()).getString());
                 LevelRegionData newLevelRegionData = loadLevelData(server, level);
                 if (newLevelRegionData == null) {
                     newLevelRegionData = new LevelRegionData(levelRl);

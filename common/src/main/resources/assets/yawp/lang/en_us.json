@@ -336,7 +336,6 @@
   "data.region.levels.load.missing": "Missing level list for region data (ignore on first startup). Initializing...",
   "data.region.levels.load.failure": "Loading regions failed!",
   "data.region.levels.load.found": "Found region data for %s tracked level(s)",
-  "data.region.levels.load.attempt": "Loading region data for level %s",
   "data.region.levels.init": "Initializing region data for level '%s'",
   "data.region.levels.save": "Saving region data for level '%s' (%s local region(s))",
   "data.region.levels.save.unload": "Unloading level '%s'. Saving region data",
