@@ -69,6 +69,10 @@ public final class HandlerUtil {
                 || entity instanceof ZombieHorse || entity instanceof SkeletonHorse;
     }
 
+    public static boolean hasMonsterJockey(Entity entity) {
+        return entity.hasControllingPassenger() && isMonster(entity.getControllingPassenger());
+    }
+
     public static boolean notServerSideOrPlayerNull(Entity entity) {
         return entity == null || !isServerSide(entity);
     }

@@ -34,7 +34,7 @@ public class ServerWorldMixin {
                 }
                 FlagEvaluator.processCheck(checkEvent, deny -> cir.setReturnValue(false));
             }
-            if (isMonster(entity)) {
+            if (isMonster(entity) || hasMonsterJockey(entity)) {
                 checkEvent = new FlagCheckRequest(entity.blockPosition(), SPAWNING_MONSTER, getDimKey(entity));
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
