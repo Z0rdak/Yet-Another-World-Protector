@@ -5,6 +5,8 @@
 
 ## Fixed
 - Fix global region state not being considerate correctly when evaluating untracked levels.
+- Fix `/yawp dim <dim>` suggesting untracked levels
+- Fix `/yawp global track `suggesting tracked levels
 
 # [0.6.3-beta2] - 2026-26-04
 
