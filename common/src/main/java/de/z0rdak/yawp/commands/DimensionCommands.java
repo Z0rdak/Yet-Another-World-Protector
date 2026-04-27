@@ -65,6 +65,7 @@ class DimensionCommands {
         return literal(DIM)
                 /* /wp dimension <dim> list region */
                 .then(Commands.argument(DIM.toString(), DimensionArgument.dimension())
+                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(new ArrayList<>(RegionManager.get().getLevelNames()), builder))
                         /* /wp dimension <dim> [info] */
                         .executes(ctx -> CommandUtil.promptRegionInfo(ctx, getLevelDataArgument(ctx).getDim()))
                         .then(literal(INFO)
