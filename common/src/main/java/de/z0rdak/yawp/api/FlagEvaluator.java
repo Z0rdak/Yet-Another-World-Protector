@@ -205,8 +205,12 @@ public record FlagEvaluator(FlagCheckResult result) {
      */
     @Nullable
     public static IProtectedRegion findResponsibleRegion(@NotNull BlockPos pos, @NotNull ResourceKey<Level> dim) {
-        if (RegionDataManager.getTrackedLevelData().doesTrack(dim.identifier())){
-            return RegionManager.get().getGlobalRegion();
+        // since levels are no longer automatically tracked,
+        // it needs to be considered when resolving responsible regions
+        // level not tracked -> global
+        if (!RegionDataManager.getTrackedLevelData().doesTrack(dim.identifier())){
+            var globalRegion = RegionManager.get().getGlobalRegion();
+            return globalRegion.isActive() ? globalRegion : null;
         }
         var localRegion = getInvolvedRegionFor(pos, dim);
         if (localRegion == null) {
