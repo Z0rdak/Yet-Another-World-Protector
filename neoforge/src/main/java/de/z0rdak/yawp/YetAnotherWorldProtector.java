@@ -78,7 +78,7 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
                 });
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
                 (PlayerEvent.PlayerLoggedInEvent event) -> {
-                    if (event.getEntity().getCommandSenderWorld() instanceof ServerLevel serverLevel) {
+                    if (event.getEntity().level() instanceof ServerLevel serverLevel) {
                         RegionDataManager.initLevelDataOnLogin(event.getEntity(), serverLevel);
                     }
                 });
@@ -90,8 +90,8 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
                 });
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
                 (EntityTravelToDimensionEvent event) -> {
-                    if (event.getEntity() instanceof Player player && event.getEntity().getServer() != null) {
-                        Level targetLevel = event.getEntity().getServer().getLevel(event.getDimension());
+                    if (event.getEntity() instanceof Player player && event.getEntity().level().getServer() != null) {
+                        Level targetLevel = event.getEntity().level().getServer().getLevel(event.getDimension());
                         RegionDataManager.initLevelDataOnChangeWorld(player, player.level(), targetLevel);
                     }
                 });
