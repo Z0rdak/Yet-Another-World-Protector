@@ -145,7 +145,7 @@ public class RegionDataManager {
         if (trackedLevelData.doesTrack(levelRl)) {
             DimensionDataStorage storage = serverInstance.overworld().getDataStorage();
             LevelRegionData levelRegionData = RegionDataManager.levelRegionData.get(levelRl);
-            LOGGER.info(Component.translatableWithFallback("data.region.levels.save", "Saving region data for level '%s' (%s local region(s))", levelRl.toString(), levelRegionData.regionCount()).getString());
+            LOGGER.debug(Component.translatableWithFallback("data.region.levels.save", "Saving region data for level '%s' (%s local region(s))", levelRl.toString(), levelRegionData.regionCount()).getString());
             storage.set(LevelRegionData.buildSavedDataType(levelRl), levelRegionData);
             levelRegionData.setDirty();
         }
