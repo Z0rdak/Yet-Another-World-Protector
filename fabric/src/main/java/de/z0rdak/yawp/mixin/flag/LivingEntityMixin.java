@@ -36,8 +36,8 @@ public abstract class LivingEntityMixin {
     @Nullable
     protected Player attackingPlayer;
 
-    @Inject(method = "knockback", at = @At(value = "HEAD"), cancellable = true, allow = 1)
-    public void onKnockback(double strength, double x, double z, CallbackInfo ci) {
+    @Inject(method = "knockback(DDDLnet/minecraft/world/damagesource/DamageSource;FZ)V", at = @At(value = "HEAD"), cancellable = true, allow = 1)
+    public void onKnockback(double power, double xd, double zd, DamageSource source, final float damage, final boolean comesFromEffect, CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
         if (isServerSide(self)) {
             if (self instanceof Player player) {

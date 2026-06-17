@@ -20,6 +20,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
@@ -763,7 +764,7 @@ public final class PlayerFlagHandler {
             BlockPos pos = event.getPos();
             if (block instanceof BasePressurePlateBlock) {
                 AABB areaAbovePressurePlate = new AABB(pos.getX() - 1, pos.getY(), pos.getZ() - 1, pos.getX() + 1, pos.getY() + 2, pos.getZ() + 1);
-                List<Player> players = event.getLevel().getEntities(EntityType.PLAYER, areaAbovePressurePlate, (player) -> true);
+                List<Player> players = event.getLevel().getEntities(EntityTypes.PLAYER, areaAbovePressurePlate, (player) -> true);
                 final FlagState[] cumulativeState = {FlagState.UNDEFINED};
                 Map<Player, FlagCheckRequest> playerCheckEventMap = new HashMap<>();
                 for (Player player : players) {

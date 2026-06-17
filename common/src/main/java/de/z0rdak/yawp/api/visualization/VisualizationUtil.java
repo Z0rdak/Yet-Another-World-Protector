@@ -11,10 +11,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.commands.data.EntityDataAccessor;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Display;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTypes;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Optional;
@@ -124,7 +123,7 @@ public final class VisualizationUtil {
      * @param regionName a marker, stored in custom entity data for identification later
      */
     public static Optional<Entity> createTextDisplayEntity(ServerLevel level, String regionName, BlockPos pos, TextDisplayProperties displayProperties) {
-        var textDisplay = EntityType.BLOCK_DISPLAY.create(level, (e) -> {
+        var textDisplay = EntityTypes.BLOCK_DISPLAY.create(level, (e) -> {
             VisualizationUtil.initTextDisplayProperties(e, regionName, displayProperties);
         }, pos, EntitySpawnReason.COMMAND, false, false);
         return textDisplay == null ? Optional.empty() : Optional.of(textDisplay);
@@ -135,7 +134,7 @@ public final class VisualizationUtil {
      * @param regionName a marker, stored in custom entity data for identification later
      */
     public static Optional<Entity> createBlockDisplayEntity(ServerLevel level, String regionName, BlockPos pos, BlockDisplayProperties displayProperties) {
-        Entity blockDisplay = EntityType.BLOCK_DISPLAY.create(level, (e) -> {
+        Entity blockDisplay = EntityTypes.BLOCK_DISPLAY.create(level, (e) -> {
             VisualizationUtil.initBlockDisplayProperties(e, regionName, displayProperties);
             e.moveOrInterpolateTo(new Vec3(pos), 0, 0);
         }, pos, EntitySpawnReason.COMMAND, false, false);

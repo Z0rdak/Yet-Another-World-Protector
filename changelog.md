@@ -1,4 +1,9 @@
-# [0.6.3-beta3] - 2026-27-04
+# [0.6.3-beta4] - 2026-06-17
+
+## Fixed
+- NPE when trying to add `spawning-*` flag to region (NeoForge).
+
+# [0.6.3-beta3] - 2026-04-27
 
 ## Changed
 - `spawning-monster` and `use-portal-monster` flag now also considers if the passenger is a hostile mob. 
@@ -8,7 +13,7 @@
 - Fix `/yawp dim <dim>` suggesting untracked levels
 - Fix `/yawp global track `suggesting tracked levels
 
-# [0.6.3-beta2] - 2026-26-04
+# [0.6.3-beta2] - 2026-04-26
 
 ## Changed
 
@@ -22,7 +27,7 @@
 - Fix wrong evaluation of flag event cancellation
 - Fix flag event listeners not firing
 
-# [0.6.3-beta1] - 2025-21-12
+# [0.6.3-beta1] - 2025-12-21
 
 ## Added
 
