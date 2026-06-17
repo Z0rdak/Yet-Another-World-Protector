@@ -7,6 +7,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
 
+import java.util.Locale;
+
+
 public final class TextDisplayProperties {
 
     public static int BG_TRANSPARENT = 0x10_00_00_00;
@@ -33,8 +36,9 @@ public final class TextDisplayProperties {
         this.text = text;
         this.alignment = alignment;
         this.backgroundColor = backgroundColor;
-        var colorFormat = ChatFormatting.getByName(color);
-        this.color = colorFormat == null ? ChatFormatting.WHITE.getName() : colorFormat.getName();
+        // TODO ChatFormatting Changed in 26.2
+  //      var colorFormat = ChatFormatting.getByName(color);
+        this.color = ChatFormatting.WHITE.name().toLowerCase(Locale.ROOT);
         this.lightLevel = lightLevel;
     }
 
@@ -62,8 +66,8 @@ public final class TextDisplayProperties {
         this.text = nbt.getString("text").get();
         this.alignment = nbt.getString("alignment").get();
         this.backgroundColor = nbt.getInt("backgroundColor").get();
-        var colorFormat = ChatFormatting.getByName(color);
-        this.color = colorFormat == null ? ChatFormatting.WHITE.getName() : colorFormat.getName();
+      //  var colorFormat = ChatFormatting.getByName(color);
+        this.color =  ChatFormatting.WHITE.name().toLowerCase(Locale.ROOT);
         this.lightLevel = nbt.getInt("lightLevel").get();
     }
 
