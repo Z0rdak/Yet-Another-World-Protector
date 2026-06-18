@@ -1,20 +1,12 @@
 package de.z0rdak.yawp.util;
 
-import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.permission.Permissions;
-import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.IMarkableArea;
-import de.z0rdak.yawp.core.area.SphereArea;
-import de.z0rdak.yawp.core.region.CuboidRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
-import de.z0rdak.yawp.core.region.SphereRegion;
-import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.data.region.RegionDataManager;
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,45 +17,6 @@ import java.util.stream.Collectors;
 public final class LocalRegions {
 
     private LocalRegions() {
-    }
-
-    public static IMarkableRegion regionFrom(Player player, MarkerStick marker, String regionName) {
-        return regionFrom(player, marker, regionName, marker.getDimension());
-    }
-
-    public static IMarkableArea areaFrom(MarkerStick marker) {
-        List<BlockPos> blocks = marker.getMarkedBlocks();
-        switch (marker.getAreaType()) {
-            case CUBOID:
-                return new CuboidArea(blocks.get(0), blocks.get(1));
-            case SPHERE:
-                return new SphereArea(blocks.get(0), blocks.get(1));
-            default:
-                throw new NotImplementedException("Area type not implemented yet");
-        }
-    }
-
-    public static IMarkableRegion regionFrom(Player player, MarkerStick marker, String regionName, ResourceKey<Level> dim) {
-        switch (marker.getAreaType()) {
-            case CUBOID:
-                return cuboidRegionFrom(marker, regionName, player, dim);
-            case SPHERE:
-                return sphericalRegionFrom(marker, regionName, player, dim);
-            default:
-                throw new NotImplementedException("Area type not implemented yet");
-        }
-    }
-
-    private static SphereRegion sphericalRegionFrom(MarkerStick marker, String regionName, Player player, ResourceKey<Level> dim) {
-        List<BlockPos> blocks = marker.getMarkedBlocks();
-        SphereArea sphereArea = new SphereArea(blocks.get(0), blocks.get(1));
-        return new SphereRegion(regionName, sphereArea, player, dim);
-    }
-
-    private static CuboidRegion cuboidRegionFrom(MarkerStick marker, String regionName, Player player, ResourceKey<Level> dim) {
-        List<BlockPos> blocks = marker.getMarkedBlocks();
-        CuboidArea cuboidArea = new CuboidArea(blocks.get(0), blocks.get(1));
-        return new CuboidRegion(regionName, cuboidArea, player, dim);
     }
 
     public static boolean hasAnyRegionWithSamePriority(IMarkableRegion region, int priority) {

@@ -27,14 +27,12 @@ public class PermissionConfig {
     public static final Logger PERMISSION_CONFIG_LOGGER = LogManager.getLogger(MOD_ID.toUpperCase() + "-Permission-Config");
 
     private static final ModConfigSpec.ConfigValue<Boolean> ENABLE_REGION_TP;
-    private static final ModConfigSpec.ConfigValue<Boolean> ALLOW_READ_ONLY_CMDS;
     private static final ModConfigSpec.ConfigValue<Boolean> DISABLE_CMD_FOR_NON_OP;
     private static final ModConfigSpec.ConfigValue<Boolean> OP_BYPASS_FLAGS;
     private static final ModConfigSpec.ConfigValue<Boolean> ENABLE_HIERARCHY_OWNERSHIP;
     private static final ModConfigSpec.ConfigValue<Integer> REQUIRED_OP_LEVEL;
     private static final ModConfigSpec.ConfigValue<List<? extends String>> PLAYERS_WITH_PERMISSION;
     private static final ModConfigSpec.ConfigValue<Boolean> COMMAND_BLOCK_EXECUTION;
-    private static final ModConfigSpec.ConfigValue<Boolean> ENABLE_MARKER_CREATION;
 
     static {
         final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
@@ -46,9 +44,6 @@ public class PermissionConfig {
         
         REQUIRED_OP_LEVEL = BUILDER.comment("Minimum OP level to use mod commands.\n 0 -> everyone can use the commands.\n 1-4 -> OP with specific level can use the commands.\n 5 -> no operator can use the commands.\n Defaults to 4.")
                 .defineInRange("command_op_level", 4, 0, 5);
-
-        ALLOW_READ_ONLY_CMDS = BUILDER.comment("Defines whether info commands for regions can be used by every player.")
-                .define("allow_info_cmds", true);
 
         DISABLE_CMD_FOR_NON_OP = BUILDER.comment("Defines whether mod commands are disabled for non-OP players.")
                 .define("disable_cmd_for_non_op", false);
@@ -62,9 +57,6 @@ public class PermissionConfig {
         ENABLE_REGION_TP = BUILDER.comment("Defines whether teleport in and out of a region is allowed by everyone. Mostly useful when using something like Waystones inside of regions.")
                 .define("allow_region_tp", false);
 
-        ENABLE_MARKER_CREATION = BUILDER.comment("Enable creation of RegionMarker by renaming a stick in an Anvil.")
-                .define("enable_marker_creation", true);
-        
         PLAYERS_WITH_PERMISSION = BUILDER.comment("Player UUIDs with permission to use mod commands.\n Make sure to put the UUIDs in parentheses, just like a normal string.\n Example: players_with_permission = [\"614c9eac-11c9-3ca6-b697-938355fa8235\", \"b9f5e998-520a-3fa2-8208-0c20f22aa20f\"]")
                 .defineListAllowEmpty(Collections.singletonList("players_with_permission"), ArrayList::new, null, PermissionConfig::validateUuid);
         BUILDER.pop();
@@ -83,10 +75,6 @@ public class PermissionConfig {
                 .collect(Collectors.toSet());
     }
 
-    public static boolean isReadOnlyAllowed() {
-        return ALLOW_READ_ONLY_CMDS.get();
-    }
-
     public static boolean isCmdEnabledForNonOp() {
         return !DISABLE_CMD_FOR_NON_OP.get();
     }
@@ -94,10 +82,7 @@ public class PermissionConfig {
     public static boolean allowRegionTp() {
         return ENABLE_REGION_TP.get();
     }
-    
-    public static boolean isMarkerCreationEnabled() {
-        return ENABLE_MARKER_CREATION.get();
-    }
+
 
     public static boolean isHierarchyOwnershipEnabled() {
         return ENABLE_HIERARCHY_OWNERSHIP.get();

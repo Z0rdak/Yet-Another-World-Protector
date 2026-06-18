@@ -17,7 +17,5 @@ public interface IPermissionConfigHelper {
     boolean byPassFlagAllowed();
     boolean hasConfigPermission(Player player);
     boolean hasConfigPermission(CommandSourceStack src, CommandSourceType srcType) throws CommandSyntaxException;
-    boolean isReadOnlyAllowed();
     boolean allowRegionTp();
-    boolean isMarkerCreationEnabled();
 }

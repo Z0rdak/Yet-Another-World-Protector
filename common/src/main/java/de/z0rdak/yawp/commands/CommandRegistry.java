@@ -43,7 +43,6 @@ public final class CommandRegistry {
                 .then(ArgumentUtil.literal(CommandConstants.HELP)
                         .executes(ctx -> promptHelp(ctx.getSource())))
                 .then(FlagCommands.build())
-                .then(MarkerCommands.build())
                 .then(GlobalCommands.build())
                 .then(DimensionCommands.build())
                 .then(RegionCommands.build())

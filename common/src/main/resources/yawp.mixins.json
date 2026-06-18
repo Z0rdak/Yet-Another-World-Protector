@@ -16,8 +16,6 @@
     "SignBlockMixin",
     "SnowLayerBlockMixin",
     "flag.player.PlayerEntityMixin",
-    "stick.AnvilScreenHandlerMixin",
-    "stick.ServerPlayerInteractionManagerMixin"
   ],
   "client": [
   ],

@@ -52,17 +52,7 @@ public class FabricPermissionConfigHelper implements IPermissionConfigHelper {
     }
 
     @Override
-    public boolean isReadOnlyAllowed() {
-        return PermissionConfig.isReadOnlyAllowed();
-    }
-
-    @Override
     public boolean allowRegionTp() {
         return PermissionConfig.allowRegionTp();
-    }
-
-    @Override
-    public boolean isMarkerCreationEnabled() {
-        return PermissionConfig.isMarkerCreationEnabled();
     }
 }

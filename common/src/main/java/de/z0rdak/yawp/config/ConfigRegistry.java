@@ -43,11 +43,9 @@ public final class ConfigRegistry {
                 PERMISSION_CONFIG_LOGGER.info("{} UUID(s) with permission read from config{}", numOfUuidsWithPermission, uuidsWithPermission);
                 PERMISSION_CONFIG_LOGGER.info("Required OP level to use commands: {}", PermissionConfig.getRequiredOpLevel());
                 PERMISSION_CONFIG_LOGGER.info("Command block execution: {}", PermissionConfig.isCommandBlockExecutionAllowed() ? "enabled" : "disabled");
-                PERMISSION_CONFIG_LOGGER.info("Region info commands for all players: {}", PermissionConfig.isReadOnlyAllowed() ? "enabled" : "disabled");
                 PERMISSION_CONFIG_LOGGER.info("Region-Hierarchy ownership: {}", PermissionConfig.isHierarchyOwnershipEnabled() ? "enabled" : "disabled");
                 PERMISSION_CONFIG_LOGGER.info("OP bypassing flags: {}", PermissionConfig.byPassFlagAllowed() ? "enabled" : "disabled");
                 PERMISSION_CONFIG_LOGGER.info("Commands for non OPs: {}", PermissionConfig.isCmdEnabledForNonOp() ? "enabled" : "disabled");
-                PERMISSION_CONFIG_LOGGER.info("RegionMarker creation: {}", PermissionConfig.isMarkerCreationEnabled() ? "enabled" : "disabled");
                 PERMISSION_CONFIG_LOGGER.info("Region teleportation: {}", PermissionConfig.allowRegionTp() ? "enabled" : "disabled");
             }
             break;

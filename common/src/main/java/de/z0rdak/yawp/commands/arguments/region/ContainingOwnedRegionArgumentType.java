@@ -18,10 +18,8 @@ import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.area.SphereArea;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.core.stick.MarkerStick;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.LocalRegions;
-import de.z0rdak.yawp.util.StickUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
@@ -43,7 +41,6 @@ import java.util.stream.Stream;
 import static de.z0rdak.yawp.api.MessageSender.overLayMessage;
 import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
-import static de.z0rdak.yawp.commands.MarkerCommands.fromMarkedBlocks;
 
 public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
 
@@ -86,38 +83,6 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
         }
         boolean hasPermissionForParent = Permissions.get().hasConfigPermission(context.getSource(), CommandSourceType.of(context.getSource()));
         boolean containsChild = parent.getArea().containsOther(markedArea);
-        if (hasPermissionForParent && containsChild) {
-            return parent;
-        } else {
-            if (!hasPermissionForParent) {
-                sendCmdFeedback(context.getSource(), Component.translatableWithFallback("cli.arg.region.owned.invalid.permission", "Region %s is not suitable as parent for %s (no permission for parent)", containingRegionName, containedRegionName));
-            }
-            if (!containsChild) {
-                sendCmdFeedback(context.getSource(), Component.translatableWithFallback("cli.arg.region.owned.invalid.containment", "Region %s is not suitable as parent for %s (does not fully contain child region)", containingRegionName, containedRegionName));
-            }
-            throw ERROR_INVALID_PARENT.create(containingRegionName);
-        }
-    }
-
-    public static IMarkableRegion getRegionWithMarker(CommandContext<CommandSourceStack> context, String argName) throws CommandSyntaxException {
-        String containingRegionName = context.getArgument(argName, String.class);
-        String containedRegionName = context.getArgument(NAME.toString(), String.class);
-        var maybeLevelRegionData = RegionDataManager.getLevelRegionData(context.getSource().getLevel().dimension());
-        if (maybeLevelRegionData.isEmpty()) {
-            throw new IllegalArgumentException("...");
-        }
-        var levelRegionData = maybeLevelRegionData.get();
-        IMarkableRegion parent = levelRegionData.getLocal(containingRegionName);
-        ServerPlayer player = context.getSource().getPlayerOrException();
-        IMarkableRegion markedRegion = fromMarkedBlocks(context, player, containedRegionName);
-        if (markedRegion == null) {
-            throw new IllegalArgumentException("Could not get marked blocks from command");
-        }
-        if (parent == null) {
-            throw ERROR_INVALID_VALUE.create(containingRegionName);
-        }
-        boolean hasPermissionForParent = Permissions.get().hasConfigPermission(context.getSource(), CommandSourceType.of(context.getSource()));
-        boolean containsChild = parent.getArea().containsOther(markedRegion.getArea());
         if (hasPermissionForParent && containsChild) {
             return parent;
         } else {
@@ -182,41 +147,6 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
             reader.setCursor(i);
             Constants.LOGGER.error("Error parsing region name");
             throw ERROR_AREA_INVALID.createWithContext(reader);
-        }
-    }
-
-    /**
-     * Suggests regions with permission, which are also fully containing the area provided by the marked blocks of the region marker
-     */
-    public <S> CompletableFuture<Suggestions> listSuggestionsWithMarker(CommandContext<S> context, SuggestionsBuilder builder) {
-        if (context.getSource() instanceof CommandSourceStack src) {
-            try {
-                Player player = src.getPlayerOrException();
-                ItemStack maybeStick = player.getMainHandItem();
-                if (StickUtil.isMarker(maybeStick)) {
-                    CompoundTag stickNBT = StickUtil.getStickNBT(maybeStick);
-                    if (stickNBT != null) {
-                        MarkerStick marker = new MarkerStick(stickNBT);
-                        if (!marker.isValidArea()) {
-                            return Suggestions.empty();
-                        }
-                        IMarkableArea markedArea = StickUtil.getMarkedArea(player.getMainHandItem());
-                        LocalRegions.RegionOverlappingInfo overlapping = LocalRegions.getOverlappingWithPermission(markedArea, player);
-                        if (!overlapping.hasContaining()) {
-                            overLayMessage(src.getPlayer(), Component.translatableWithFallback("cli.arg.area.marked.no-containment", "No containing region available as parent for marked area."));
-                            return Suggestions.empty();
-                        }
-                        Set<String> containingRegionName = overlapping.containingRegions.stream().map(IProtectedRegion::getName).collect(Collectors.toSet());
-                        return SharedSuggestionProvider.suggest(containingRegionName, builder);
-                    }
-                }
-                return Suggestions.empty();
-            } catch (CommandSyntaxException e) {
-                Constants.LOGGER.error(e);
-                return Suggestions.empty();
-            }
-        } else {
-            return Suggestions.empty();
         }
     }
 
