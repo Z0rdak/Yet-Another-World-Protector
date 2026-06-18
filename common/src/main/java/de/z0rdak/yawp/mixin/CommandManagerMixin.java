@@ -2,7 +2,6 @@ package de.z0rdak.yawp.mixin;
 
 import com.mojang.brigadier.ParseResults;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
-import de.z0rdak.yawp.handler.CommandInterceptor;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -22,11 +21,6 @@ public abstract class CommandManagerMixin {
 
     @Inject(method = "performCommand", at = @At(value = "HEAD"), cancellable = true)
     public void execute(ParseResults<CommandSourceStack> parseResults, String command, CallbackInfo ci) {
-        // check mod command permissions
-        int result = CommandInterceptor.handleModCommands(parseResults, command);
-        if (result != 0) {
-            ci.cancel();
-        }
         // check exec-command flag
         CommandSourceStack cmdSource = parseResults.getContext().getSource();
         if (cmdSource.isPlayer()) {
