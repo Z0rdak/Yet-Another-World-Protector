@@ -209,7 +209,7 @@ public class ChatComponentBuilder {
     public static MutableComponent buildHelpStartComponent() {
         String command = buildCommandStr(CommandConstants.GLOBAL.toString(), CommandConstants.INFO.toString());
         MutableComponent text = Component.translatableWithFallback("help.hint.link.text", "Start here");
-        MutableComponent hover = Component.translatableWithFallback("help.hint.link.hover", "Use '/%s global info' as a starting point to manage the global region", "/" + Constants.MOD_ID);
+        MutableComponent hover = Component.translatableWithFallback("help.hint.link.hover", "Use '%s' as a starting point to manage the global region", command);
         return buildExecuteCmdComponent(text, hover, command, ClickEvent.Action.RUN_COMMAND, LINK_COLOR);
     }
 

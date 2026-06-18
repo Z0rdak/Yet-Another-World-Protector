@@ -7,6 +7,9 @@ import de.z0rdak.yawp.handler.YawpEventHandler;
 
 public class YAWPCommon {
 
+    // TODO mod loader overwrite for modloader info
+    public static final String VERSION = "26.2-0.6.4-beta1";
+
     private YAWPCommon() {}
 
     public static void init() {

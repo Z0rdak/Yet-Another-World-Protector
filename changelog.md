@@ -1,3 +1,15 @@
+# [0.6.4-beta1] - unreleased
+
+## Changed
+
+- Update command help/info
+
+## Removed
+
+- Remove RegionMarker and related features
+- Remove custom command permission handler
+
+
 # [0.6.3-beta4] - 2026-06-17
 
 ## Fixed

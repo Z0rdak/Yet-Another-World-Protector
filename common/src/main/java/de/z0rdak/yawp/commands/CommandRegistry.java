@@ -13,10 +13,11 @@ import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
+import static de.z0rdak.yawp.YAWPCommon.VERSION;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.buildHeader;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.buildHelpStartComponent;
-import static de.z0rdak.yawp.util.ChatLinkBuilder.buildWikiLink;
 import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
+import static de.z0rdak.yawp.util.ChatLinkBuilder.*;
 
 public final class CommandRegistry {
 
@@ -54,11 +55,16 @@ public final class CommandRegistry {
     }
 
     private static int promptHelp(CommandSourceStack src) {
-        sendCmdFeedback(src, buildHeader(Component.translatableWithFallback("help.header", "== Yet Another World Protector - Help ==")));
-        MutableComponent wikiHint = Component.translatableWithFallback("help.tooltip.wiki.detail", "The in-game help is under construction. Visit the online wiki for a guide on how to use the mod.");
-        MutableComponent wikiText = Component.translatableWithFallback("help.tooltip.wiki", "Online-Wiki");
-        sendCmdFeedback(src, wikiHint);
-        sendCmdFeedback(src, Messages.substitutable("%s: %s", wikiText, buildWikiLink()));
+        var versionCopyLink = buildVersionCopyLink(VERSION);
+        sendCmdFeedback(src, buildHeader(Component.translatableWithFallback("help.header", "== Yet Another World Protector ==")));
+        MutableComponent versionDisclaimer = Component.translatableWithFallback("help.tooltip.version.info.disclaimer", "Disclaimer: This version of YAWP is on the cutting edge of development.");
+        MutableComponent versionInfo = Component.translatableWithFallback("help.tooltip.version.info",  "You are running YAWP '%s'. Please provide the version info when requesting help.", versionCopyLink);
+        MutableComponent wikiInfo = Component.translatableWithFallback("help.tooltip.wiki.info", "The wiki is likely to be outdated in comparison of the features present in this version. Please visit the discord for help/questions.");
+        sendCmdFeedback(src, versionDisclaimer);
+        sendCmdFeedback(src, versionInfo);
+        sendCmdFeedback(src, wikiInfo);
+        sendCmdFeedback(src, Messages.substitutable(" => %s", buildDiscordLink()));
+        sendCmdFeedback(src, Messages.substitutable(" => %s", buildWikiLink()));
         sendCmdFeedback(src, Messages.substitutable(" => %s", buildHelpStartComponent()));
         return 0;
     }

@@ -115,9 +115,21 @@ public class ChatLinkBuilder {
     }
 
     public static MutableComponent buildWikiLink() {
-        MutableComponent wikiLinkHover = Component.translatableWithFallback("help.tooltip.wiki.link.hover", "https://github.com/Z0rdak/Yet-Another-Level-Protector/wiki");
-        MutableComponent wikiLink = Component.translatableWithFallback("help.tooltip.wiki.link.text", "Open Wiki in default browser");
-        return buildExecuteCmdComponent(wikiLink, wikiLinkHover, "https://github.com/Z0rdak/Yet-Another-World-Protector/wiki", OPEN_URL, AQUA);
+        MutableComponent wikiLinkHover = Component.translatableWithFallback("help.tooltip.wiki", "Online-Wiki");
+        MutableComponent wikiLink = Component.translatableWithFallback("help.tooltip.wiki.link.text", "Open the wiki in your browser");
+        return buildExecuteCmdComponent(wikiLinkHover, wikiLink, "https://z0rdak.github.io/yawp-docs/", OPEN_URL, AQUA);
+    }
+
+    public static MutableComponent buildVersionCopyLink(String version) {
+        MutableComponent wikiLinkHover = Component.literal(version);
+        MutableComponent wikiLink = Component.translatableWithFallback("help.tooltip.version.copy", "Copy version info to clipboard");
+        return buildExecuteCmdLink(wikiLinkHover, wikiLink, version, COPY_TO_CLIPBOARD, GOLD);
+    }
+
+    public static MutableComponent buildDiscordLink() {
+        MutableComponent wikiLinkHover = Component.translatableWithFallback("help.tooltip.discord", "Discord-Server");
+        MutableComponent wikiLink = Component.translatableWithFallback("help.tooltip.discord.link.text", "Visit Discord server");
+        return buildExecuteCmdComponent(wikiLinkHover, wikiLink, "https://discord.gg/XDPEjB4Nr4", OPEN_URL, AQUA);
     }
 
     public static MutableComponent buildRegionInfoLink(IProtectedRegion region) {
