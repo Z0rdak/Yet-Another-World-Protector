@@ -1,8 +1,7 @@
 package de.z0rdak.yawp.core.group;
 
 public enum GroupType {
-    PLAYER("player"),
-    TEAM("team");
+    PLAYER("player");
 
     public final String name;
 
@@ -14,9 +13,6 @@ public enum GroupType {
         switch (name) {
             case "player":
                 return PLAYER;
-            case "team":
-                return TEAM;
-
             default:
                 return null;
         }

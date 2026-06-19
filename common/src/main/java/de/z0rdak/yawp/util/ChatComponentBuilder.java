@@ -23,7 +23,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import net.minecraft.world.scores.Team;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.net.URI;
@@ -134,15 +134,6 @@ public class ChatComponentBuilder {
         return playerName;
     }
 
-    public static MutableComponent buildTeamHoverComponent(Team team) {
-        MutableComponent playerName = Component.literal(team.getName());
-        playerName.setStyle(playerName.getStyle()
-                .withColor(LINK_COLOR)
-                .withHoverEvent(new HoverEvent.ShowText(Component.translatableWithFallback("cli.msg.info.region.group.link.hover", "Click to display team info")))
-                .withClickEvent(new ClickEvent.RunCommand("/team list " + team.getName())));
-        return playerName;
-    }
-
     public static MutableComponent buildRegionAreaDetailComponent(IMarkableRegion region) {
         IMarkableArea area = region.getArea();
         MutableComponent areaInfo = Component.literal(area.getAreaType().areaType);
@@ -219,7 +210,7 @@ public class ChatComponentBuilder {
 
     public static int getGroupSize(IProtectedRegion region, String groupName) {
         PlayerContainer group = region.getGroup(groupName);
-        return group.getPlayers().size() + group.getTeams().size();
+        return group.getPlayers().size();
     }
 
     public static MutableComponent buildGroupListHeader(IProtectedRegion region, String group) {
@@ -345,8 +336,8 @@ public class ChatComponentBuilder {
 
     /**
      * @param region    the region to build the link for
-     * @param names     the names of the players or teams of the group
-     * @param groupType the type of the group (player or team)
+     * @param names     the names of the players of the group
+     * @param groupType the type of the group
      * @param group     the name of the group
      * @return a list of links to remove the group from the region
      */
@@ -381,10 +372,6 @@ public class ChatComponentBuilder {
                     yield buildPlayerHoverComponent(player);
                 }
             }
-            case TEAM -> {
-                Team team = PlayerManager.getTeam(groupMemberName);
-                yield team == null ? Component.literal(groupMemberName) : buildTeamHoverComponent(team);
-            }
         };
     }
 
@@ -392,8 +379,6 @@ public class ChatComponentBuilder {
         switch (groupType) {
             case PLAYER:
                 return getPlayerNamesByState(region, group);
-            case TEAM:
-                return region.getGroup(group).getTeams().stream().sorted().collect(Collectors.toList());
             default:
                 return new ArrayList<>();
         }

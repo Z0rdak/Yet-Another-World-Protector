@@ -3,6 +3,7 @@ package de.z0rdak.yawp;
 import de.z0rdak.yawp.api.events.flag.FlagEvent;
 import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.commands.CommandRegistry;
+import de.z0rdak.yawp.config.ConfigRegistry;
 import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.data.PlayerManager;
 import de.z0rdak.yawp.data.region.RegionDataManager;
@@ -16,6 +17,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLevelEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
 
 import static de.z0rdak.yawp.handler.YawpEventHandler.removeInvolvedEntities;
 

@@ -29,7 +29,6 @@
   "cli.flag.msg.text.example.1": "<Deine Flag-Nachricht hier>",
   "cli.flag.msg.text.example.2": "You can't place blocks here in the region {region}, {player}!",
   "cli.flag.msg.text.example.3": "Sorry, you are not allowed to break blocks here, {player}!",
-  "cli.flag.msg.text.example.4": "Team '{team}' is not allowed to place blocks here!",
   "cli.flag.msg.text.example.5": "You are not allowed to use this block ('{block}' @ '{pos}')!",
   "cli.flag.msg.text.example.6": "Only players and teams which are '{group}' are allowed to participate in PVP here!",
   "cli.flag.msg.text.example.7": "This action is denied here because of the '{flag}' flag!",

@@ -43,7 +43,7 @@ public class RegionConfig {
         CLI_REGION_DEFAULT_PRIORITY_INC = BUILDER.comment("Default region priority increment/decrement.")
                 .defineInRange("default_region_priority_inc", 5, 1, 1000);
 
-        CLI_PAGINATION_ENTRY_SIZE = BUILDER.comment("Amount of pagination entries for CLI output of flags, region, children region, players, teams, etc.")
+        CLI_PAGINATION_ENTRY_SIZE = BUILDER.comment("Amount of pagination entries for CLI output of flags, region, children region, players, etc.")
                 .defineInRange("cli_entries_per_page", 5, 5, 15);
 
         DIM_REGION_DISABLE_ON_CREATION = BUILDER.comment("Enable new dimensional regions on creation.")

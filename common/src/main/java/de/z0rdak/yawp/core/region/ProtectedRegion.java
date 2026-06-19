@@ -157,17 +157,6 @@ public abstract class ProtectedRegion implements IProtectedRegion {
         this.getGroup(group).addPlayer(uuid, playerName);
     }
 
-
-    @Override
-    public void addTeam(String teamName, String group) {
-        this.getGroup(group).addTeam(teamName);
-    }
-
-    @Override
-    public void removeTeam(String teamName, String group) {
-        this.getGroup(group).removeTeam(teamName);
-    }
-
     public void resetGroups() {
         this.groups.clear();
         this.groups.put(Permissions.MEMBER, new PlayerContainer(Permissions.MEMBER));
@@ -183,11 +172,6 @@ public abstract class ProtectedRegion implements IProtectedRegion {
             return;
         }
         this.getGroup(group).removePlayer(playerUuid);
-    }
-
-    @Override
-    public boolean hasTeam(String teamName, String group) {
-        return this.getGroup(group).hasTeam(teamName);
     }
 
     @Override
@@ -220,7 +204,7 @@ public abstract class ProtectedRegion implements IProtectedRegion {
     }
 
     public boolean isInGroup(Player player, String group) {
-        return this.groups.get(group).hasPlayer(player.getUUID()) || (player.getTeam() != null && this.groups.get(group).hasTeam(player.getTeam().getName()));
+        return this.groups.get(group).hasPlayer(player.getUUID());
     }
 
     /**

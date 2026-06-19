@@ -74,8 +74,6 @@ public enum CommandConstants {
     STATE("state"),
     MSG("msg"),
     TARGET("target"),
-    TEAM("team"),
-    TEAMS("teams"),
     TELEPORT("tp"),
     TP_ANCHOR("tp-anchor"),
     SHOW("show"),

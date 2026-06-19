@@ -31,13 +31,11 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.TeamArgument;
 import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.scores.Team;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
@@ -65,12 +63,6 @@ public class CommandUtil {
                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Permissions.GROUP_LIST, builder))
                                 .executes(ctx -> CommandUtil.clearPlayers(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx))))
                 )
-                .then(literal(TEAMS)
-                        .executes(ctx -> CommandUtil.clearTeams(ctx, regionSupplier.apply(ctx)))
-                        .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
-                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Permissions.GROUP_LIST, builder))
-                                .executes(ctx -> CommandUtil.clearTeams(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx))))
-                )
                 .then(literal(GROUP)
                         .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Permissions.GROUP_LIST, builder))
@@ -95,11 +87,6 @@ public class CommandUtil {
                                                 .executes(ctx -> removePlayersByName(ctx, getPlayerNamesArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx)))))
                         )
                 )
-                .then(literal(TEAM)
-                        .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
-                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Permissions.GROUP_LIST, builder))
-                                .then(Commands.argument(TEAM.toString(), TeamArgument.team())
-                                        .executes(ctx -> removeTeam(ctx, getTeamArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx))))))
                 .then(literal(FLAG)
                         .then(Commands.argument(FLAG.toString(), StringArgumentType.word())
                                 .suggests((ctx, builder) -> IFlagArgumentType.flag().listSuggestions(ctx, builder))
@@ -128,11 +115,6 @@ public class CommandUtil {
                                                 .executes(ctx -> addPlayersByName(ctx, getPlayerNamesArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx)))))
                         )
                 )
-                .then(literal(TEAM)
-                        .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
-                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Permissions.GROUP_LIST, builder))
-                                .then(Commands.argument(TEAM.toString(), TeamArgument.team())
-                                        .executes(ctx -> addTeam(ctx, getTeamArgument(ctx), regionSupplier.apply(ctx), getGroupArgument(ctx))))))
                 .then(literal(FLAG)
                         .then(Commands.argument(FLAG.toString(), StringArgumentType.word())
                                 .suggests((ctx, builder) -> IFlagArgumentType.flag().listSuggestions(ctx, builder))
@@ -171,11 +153,6 @@ public class CommandUtil {
                         .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Permissions.GROUP_LIST, builder))
                                 .executes(ctx -> CommandUtil.promptGroupLinks(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx)))
-                                .then(literal(TEAM)
-                                        .executes(ctx -> CommandUtil.promptGroupList(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx), GroupType.TEAM, 0))
-                                        .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
-                                                .executes(ctx -> CommandUtil.promptGroupList(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx), GroupType.TEAM, getPageNoArgument(ctx))))
-                                )
                                 .then(literal(PLAYER)
                                         .executes(ctx -> CommandUtil.promptGroupList(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx), GroupType.PLAYER, 0))
                                         .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
@@ -235,7 +212,6 @@ public class CommandUtil {
     /**
      * == Group '%s' for '%s'==
      * Players: [n player(s)][+]
-     * Teams: [m team(s)][+]
      */
     public static int promptGroupLinks(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, String group) {
         if (!Permissions.GROUP_LIST.contains(group)) {
@@ -244,7 +220,6 @@ public class CommandUtil {
         }
         sendCmdFeedback(ctx.getSource(), buildGroupListHeader(region, group));
         sendCmdFeedback(ctx.getSource(), ChatLinkBuilder.buildGroupPlayerListLink(region, group));
-        sendCmdFeedback(ctx.getSource(), ChatLinkBuilder.buildGroupTeamListLink(region, group));
         return 0;
     }
 
@@ -331,28 +306,6 @@ public class CommandUtil {
     private static MutableComponent buildInvalidGroupMsg(String group) {
         return Component.translatableWithFallback("cli.msg.region.info.group.invalid", "Group '%s' is not defined!", group);
     }
-
-    public static int removeTeam(CommandContext<CommandSourceStack> ctx, Team team, IProtectedRegion region, String group) {
-        if (!Permissions.GROUP_LIST.contains(group)) {
-            sendError(ctx.getSource(), buildInvalidGroupMsg(group));
-            return -1;
-        }
-        MutableComponent undoLink = ChatLinkBuilder.buildRegionActionUndoLink(ctx.getInput(), REMOVE, ADD);
-        MutableComponent teamInfo = buildGroupInfo(region, team.getName(), GroupType.TEAM);
-        if (region.getGroup(group).hasTeam(team.getName())) {
-            region.removeTeam(team.getName(), group);
-            RegionManager.get().save(region);
-            MutableComponent msg = Component.translatableWithFallback("cli.msg.info.region.group.team.removed", "Removed team '%s' (group '%s') from %s", teamInfo, group,
-                    ChatLinkBuilder.buildRegionInfoLink(region));
-            sendCmdFeedback(ctx.getSource(), Messages.substitutable("%s %s", msg, undoLink));
-            return 0;
-        }
-        MutableComponent msg = Component.translatableWithFallback("cli.msg.info.region.group.team.not-present", "Team '%s' (group '%s') is not present in %s", teamInfo, group,
-                ChatLinkBuilder.buildRegionInfoLink(region));
-        sendCmdFeedback(ctx.getSource(), msg);
-        return 1;
-    }
-
 
     private static int removePlayersByName(CommandContext<CommandSourceStack> ctx, Collection<String> playerNames, IProtectedRegion region, String group) {
         if (!Permissions.GROUP_LIST.contains(group)) {
@@ -518,28 +471,6 @@ public class CommandUtil {
         return 1;
     }
 
-    public static int addTeam(CommandContext<CommandSourceStack> ctx, Team team, IProtectedRegion region, String group) {
-        if (!Permissions.GROUP_LIST.contains(group)) {
-            sendError(ctx.getSource(), buildInvalidGroupMsg(group));
-            return -1;
-        }
-        MutableComponent regionInfoLink = ChatLinkBuilder.buildRegionInfoLink(region);
-        MutableComponent teamHoverInfo = buildTeamHoverComponent(team);
-        if (!region.hasTeam(team.getName(), group)) {
-            region.addTeam(team.getName(), group);
-            RegionManager.get().save(region);
-            MutableComponent undoLink = ChatLinkBuilder.buildRegionActionUndoLink(ctx.getInput(), ADD, REMOVE);
-            MutableComponent msg = Component.translatableWithFallback("cli.msg.info.region.group.team.added", "Added team '%s' as '%s' to region %s",
-                    teamHoverInfo, group, regionInfoLink);
-            sendCmdFeedback(ctx.getSource(), Messages.substitutable("%s %s", msg, undoLink));
-            return 0;
-        }
-        MutableComponent msg = Component.translatableWithFallback("cli.msg.info.region.group.team.present", "Team '%s' (group '%s') already present in %s",
-                teamHoverInfo, group, regionInfoLink);
-        sendCmdFeedback(ctx.getSource(), msg);
-        return 1;
-    }
-
     public static int removeFlags(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, Set<RegionFlag> flags) {
         flags.forEach(flag -> CommandUtil.removeRegionFlag(ctx, region, flag));
         return 0;
@@ -655,27 +586,8 @@ public class CommandUtil {
         return 0;
     }
 
-    public static int clearTeams(CommandContext<CommandSourceStack> ctx, IProtectedRegion region) {
-        return clearPlayers(ctx, region, Permissions.MEMBER) + clearPlayers(ctx, region, Permissions.OWNER);
-    }
-
-    public static int clearTeams(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, String groupName) {
-        int amount = region.getGroup(groupName).getTeams().size();
-        if (amount == 0) {
-            MutableComponent feedbackMsg = Component.translatableWithFallback("cli.msg.info.region.teams.empty", "No teams (group '%s') present in %s", ChatLinkBuilder.buildRegionInfoLink(region), groupName);
-            sendCmdFeedback(ctx.getSource(), feedbackMsg);
-            return 1;
-        }
-        region.getGroup(groupName).clearTeams();
-        MutableComponent feedbackMsg = Component.translatableWithFallback("cli.msg.info.region.teams.cleared", "Cleared %s teams of group '%s' for %s", ChatLinkBuilder.buildRegionInfoLink(region), amount, groupName);
-        sendCmdFeedback(ctx.getSource(), feedbackMsg);
-        RegionManager.get().save(region);
-        return 0;
-    }
-
-
     public static int clearGroups(CommandContext<CommandSourceStack> ctx, IProtectedRegion region, String groupName) {
-        return CommandUtil.clearTeams(ctx, region, groupName) + CommandUtil.clearPlayers(ctx, region, groupName);
+        return CommandUtil.clearPlayers(ctx, region, groupName);
     }
 
     public static int addAllFlags(CommandContext<CommandSourceStack> ctx, IProtectedRegion region) {

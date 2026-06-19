@@ -25,14 +25,12 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.IdentifierArgument;
-import net.minecraft.commands.arguments.TeamArgument;
 import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.scores.Team;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -184,10 +182,6 @@ public class ArgumentUtil {
 
     public static ServerPlayer getOwnerArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         return EntityArgument.getPlayer(ctx, CommandConstants.OWNER.toString());
-    }
-
-    public static Team getTeamArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        return TeamArgument.getTeam(ctx, CommandConstants.TEAM.toString());
     }
 
     public static boolean getAlertArgument(CommandContext<CommandSourceStack> ctx) {

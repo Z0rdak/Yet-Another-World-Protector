@@ -10,7 +10,6 @@ import de.z0rdak.yawp.platform.Services;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.scores.Team;
 
 import java.util.HashMap;
 import java.util.List;
@@ -94,13 +93,6 @@ public abstract class LocalRegionBuilder<T extends IMarkableRegion> {
 
     public LocalRegionBuilder<T> addGroup(PlayerContainer group) {
         this.groups.put(group.getGroupName(), group);
-        return this;
-    }
-
-    public LocalRegionBuilder<T> addTeam(String groupName, Team team) {
-        if (!this.groups.containsKey(groupName))
-            this.groups.put(groupName, new PlayerContainer(groupName));
-        this.groups.get(groupName).addTeam(team.getName());
         return this;
     }
 

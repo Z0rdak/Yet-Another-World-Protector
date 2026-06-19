@@ -199,9 +199,9 @@ class DimensionCommands {
     }
 
     /**
-     * Reset groups (players and teams) and state for all local regions in the dimension.<br>
+     * Reset groups (players) and state for all local regions in the dimension.<br>
      * This keeps region hierarchy and flags intact. <br>
-     * Scenario: You want to keep the local region layout and hierarchy but want to reset players and teams.<br>
+     * Scenario: You want to keep the local region layout and hierarchy but want to reset players.<br>
      */
     private static int resetLocalRegions(CommandContext<CommandSourceStack> ctx, LevelRegionData levelData) {
         levelData.getLocalList().forEach(region -> {
@@ -215,7 +215,7 @@ class DimensionCommands {
     }
 
     /**
-     * Reset groups (players and teams) and state for the dimensional region.<br>
+     * Reset groups (players) and state for the dimensional region.<br>
      * This keeps region hierarchy and flags intact.<br>
      */
     private static int resetDimRegion(CommandContext<CommandSourceStack> ctx, LevelRegionData dimCache) {

@@ -20,7 +20,6 @@ public class FlagMessageBuilder {
     public static final String GROUP_TEMPLATE = "%6$s";
     public static final String ENTITY_TEMPLATE = "%7$s";
     public static final String BLOCK_ENTITY = "%8$s";
-    public static final String TEAM_TEMPLATE = "%9$s";
     private static final Map<String, Integer> TOKEN_INDEX;
 
     static {
@@ -32,8 +31,7 @@ public class FlagMessageBuilder {
                 PLAYER_TEMPLATE, 5,
                 GROUP_TEMPLATE, 6,
                 ENTITY_TEMPLATE, 7,
-                BLOCK_ENTITY, 8,
-                TEAM_TEMPLATE, 9);
+                BLOCK_ENTITY, 8);
     }
 
     /**

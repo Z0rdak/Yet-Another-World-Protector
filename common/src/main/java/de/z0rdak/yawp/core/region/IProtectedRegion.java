@@ -55,13 +55,7 @@ public interface IProtectedRegion{
 
     void addPlayer(UUID uuid, String playerName, String group);
 
-    void addTeam(String teamName, String group);
-
-    void removeTeam(String teamName, String group);
-
     void removePlayer(UUID playerUuid, String group);
-
-    boolean hasTeam(String teamName, String group);
 
     boolean hasPlayer(UUID playerUuid, String group);
 

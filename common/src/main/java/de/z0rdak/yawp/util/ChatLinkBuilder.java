@@ -197,30 +197,12 @@ public class ChatLinkBuilder {
         return buildExecuteCmdLinkWithBrackets(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
     }
 
-    /**
-     * Teams: [n team(s)] [+]
-     */
-    public static MutableComponent buildTeamListLink(IProtectedRegion region, PlayerContainer teams, String group) {
-        MutableComponent hoverText = Component.translatableWithFallback("cli.msg.info.region.group.team.list.link.hover", "List teams of group '%s' in region %s", group, region.getName());
-        MutableComponent linkText = Component.translatableWithFallback("cli.msg.info.region.group.team.list.link.text", "%s team(s)", teams.getTeams().size());
-        String cmd = Commands.buildListGroupMemberCommand(region, group, GroupType.TEAM);
-        return buildExecuteCmdLinkWithBrackets(linkText, hoverText, cmd, RUN_COMMAND, LINK_COLOR);
-    }
-
     public static MutableComponent buildAddToGroupLink(IProtectedRegion region, String group, GroupType groupType) {
         MutableComponent linkText = Component.translatableWithFallback("cli.link.add", "+");
         String fallback = "Add " + groupType.name + " as '%s' to region %s";
         MutableComponent hoverText = Component.translatableWithFallback("cli.msg.info.region.group." + groupType.name + ".add.link.hover", fallback, group, region.getName());
         String cmd = buildAddGroupMemberCommand(region, groupType, group, ""); // "" for blank (suggestion)
         return buildExecuteCmdLinkWithBrackets(linkText, hoverText, cmd, SUGGEST_COMMAND, LINK_COLOR);
-    }
-
-    public static MutableComponent buildGroupTeamListLink(IProtectedRegion region, String group) {
-        // Teams: [n team(s)] [+]
-        PlayerContainer playerContainer = region.getGroup(group);
-        MutableComponent teamAddLink = buildAddToGroupLink(region, group, GroupType.TEAM);
-        MutableComponent teamListLink = playerContainer.hasTeams() ? buildTeamListLink(region, playerContainer, group) : Component.translatableWithFallback("cli.msg.info.region.group.team.list.link.text", "%s team(s)", playerContainer.getTeams().size());
-        return Messages.substitutable("%s: %s %s", Component.translatableWithFallback("cli.msg.info.region.group.team", "Teams"), teamListLink, teamAddLink);
     }
 
     public static MutableComponent buildGroupPlayerListLink(IProtectedRegion region, String group) {

@@ -21,8 +21,7 @@ public final class RegionNbtKeys {
     public static final String CHILDREN = "children";
     public static final String OWNERS = "owners";
     public static final String MEMBERS = "members";
-    public static final String TEAMS = "teams";
-    
+
     /* IMarkableArea NBT keys */
     public static final String AREA = "area";
     public static final String AREA_TYPE = "area_type";
