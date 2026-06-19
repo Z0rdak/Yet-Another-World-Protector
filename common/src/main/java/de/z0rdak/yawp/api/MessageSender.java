@@ -3,7 +3,7 @@ package de.z0rdak.yawp.api;
 import de.z0rdak.yawp.api.events.flag.FlagCheckResult;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
-import de.z0rdak.yawp.core.flag.RegionFlag;
+
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.util.text.messages.FlagMessageBuilder;
 import net.minecraft.commands.CommandSourceStack;
@@ -51,14 +51,14 @@ public class MessageSender {
         if (responsibleRegion == null) {
             return;
         }
-        IFlag flag = responsibleRegion.getFlag(result.getFlagCheck().getRegionFlag().name);
+        IFlag flag = responsibleRegion.getFlag(result.getFlagCheck().getRegionFlag().name());
         if (flag == null || result.getFlagState() == FlagState.UNDEFINED || result.getFlagState() == FlagState.DISABLED) {
             return;
         }
         boolean isFlagMuted = flag.getFlagMsg().isMuted() || responsibleRegion.isMuted();
         Player player = result.getFlagCheck().getPlayer();
         // If not muted and the event is a player event, and the player is not null, send the message
-        if (!isFlagMuted && RegionFlag.hasPlayerCategory(flag) && player != null) {
+        if (!isFlagMuted && FlagRegister.hasPlayerTag(flag) && player != null) {
             MutableComponent flagMsg = FlagMessageBuilder.buildFrom(result, null);
             sendNotification(player, flagMsg);
         }

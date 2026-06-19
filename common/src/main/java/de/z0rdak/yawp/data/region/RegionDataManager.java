@@ -1,9 +1,10 @@
 package de.z0rdak.yawp.data.region;
 
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.BooleanFlag;
-import de.z0rdak.yawp.core.flag.RegionFlag;
+
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
@@ -277,7 +278,7 @@ public class RegionDataManager {
         // add default flags from config
         Set<String> defaultDimFlags = Services.REGION_CONFIG.getDefaultDimFlags();
         defaultDimFlags.stream()
-                .map(RegionFlag::fromId)
+                .map(FlagRegister::byId)
                 .forEach(flag -> dimensionalRegion.addFlag(new BooleanFlag(flag)));
         // set state from config
         dimensionalRegion.setIsActive(Services.REGION_CONFIG.shouldActivateNewDimRegion());

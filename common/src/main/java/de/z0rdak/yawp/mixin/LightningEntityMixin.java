@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.mixin;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
@@ -13,7 +14,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.LIGHTNING_PROT;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 
 @Mixin(LightningBolt.class)
@@ -27,7 +27,7 @@ public abstract class LightningEntityMixin {
     @Inject(method = "clearCopperOnLightningStrike", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;setBlockAndUpdate(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)Z"), cancellable = true, allow = 1)
     private static void cleanOxidationOnHitBlock(Level world, BlockPos pos, CallbackInfo ci) {
         if (isServerSide(world)) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(pos, LIGHTNING_PROT, getDimKey(world));
+            FlagCheckRequest checkEvent = new FlagCheckRequest(pos, FlagRegister.LIGHTNING_PROT, getDimKey(world));
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
@@ -45,7 +45,7 @@ public abstract class LightningEntityMixin {
     public void onSpawnFireFromLightning(int extraIgnitions, CallbackInfo ci, ServerLevel world, BlockPos blockPos) {
         LightningBolt lightningEntity = (LightningBolt) (Object) this;
         if (isServerSide(lightningEntity)) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, LIGHTNING_PROT, getDimKey(lightningEntity), null);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, FlagRegister.LIGHTNING_PROT, getDimKey(lightningEntity), null);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }

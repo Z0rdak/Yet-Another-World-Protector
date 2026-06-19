@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.mixin.flag;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.world.entity.Entity;
@@ -21,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
-import static de.z0rdak.yawp.core.flag.RegionFlag.NO_PVP;
+
 import static de.z0rdak.yawp.handler.HandlerUtil.getDimKey;
 import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
 
@@ -40,7 +41,7 @@ public class ThrowableProjectileMixin {
                 if (!isTypeOf)
                     return;
                 if (projectile.getOwner() instanceof Player shooter && entityHitResult.getEntity() instanceof IronGolem target) {
-                    FlagCheckRequest checkEvent = new FlagCheckRequest(target.blockPosition(), NO_PVP, getDimKey(target.level()), shooter);
+                    FlagCheckRequest checkEvent = new FlagCheckRequest(target.blockPosition(), FlagRegister.PLAYER_PVP, getDimKey(target.level()), shooter);
                     if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                         return;
                     }

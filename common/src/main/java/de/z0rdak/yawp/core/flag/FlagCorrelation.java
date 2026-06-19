@@ -12,7 +12,5 @@ import org.jetbrains.annotations.Nullable;
  * This class is primarily used for passing information between recursive calls when evaluating flag checks
  * and for retaining flag resolution details for use in the CLI.
  */
-public record FlagCorrelation(
-        IProtectedRegion region,
-        @Nullable IFlag flag) {
+public record FlagCorrelation(IProtectedRegion region, @Nullable IFlag flag) {
 }

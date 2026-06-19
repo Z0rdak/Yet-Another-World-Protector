@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.player.breeding;
 
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.server.level.ServerLevel;
@@ -11,7 +12,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.ANIMAL_BREEDING;
 import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
 import static de.z0rdak.yawp.api.FlagEvaluator.processCheck;
 
@@ -23,7 +23,7 @@ public abstract class FrogMixin {
         if (isServerSide(world)) {
             Frog parentA = (Frog) (Object) this;
             if (parentA.getLoveCause() instanceof Player breeder) {
-                FlagCheckRequest checkEvent = new FlagCheckRequest(parentA.blockPosition(), ANIMAL_BREEDING, world.dimension(), breeder);
+                FlagCheckRequest checkEvent = new FlagCheckRequest(parentA.blockPosition(), FlagRegister.PLAYER_BREED_ANIMAL, world.dimension(), breeder);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }

@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.handler.flags;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.platform.Services;
@@ -24,7 +25,6 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 
 import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
-import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 
 /**
@@ -46,7 +46,7 @@ public class WorldFlagHandler {
     public static void onLightningStrikeOccur(EntityStruckByLightningEvent event) {
         if (NeoForgeHandlerUtil.isServerSide(event)) {
             Entity poorEntity = event.getEntity();
-            FlagCheckRequest checkEvent = new FlagCheckRequest(poorEntity.blockPosition(), LIGHTNING_PROT, event.getEntity().level().dimension());
+            FlagCheckRequest checkEvent = new FlagCheckRequest(poorEntity.blockPosition(), FlagRegister.LIGHTNING_PROT, event.getEntity().level().dimension());
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
@@ -59,7 +59,7 @@ public class WorldFlagHandler {
 
     @SubscribeEvent
     public static void onItemExpire(ItemExpireEvent event) {
-        FlagCheckRequest checkEvent = new FlagCheckRequest(event.getEntity().blockPosition(), NO_ITEM_DESPAWN, event.getEntity().level().dimension());
+        FlagCheckRequest checkEvent = new FlagCheckRequest(event.getEntity().blockPosition(), FlagRegister.NO_ITEM_DESPAWN, event.getEntity().level().dimension());
         if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
             return;
         }
@@ -80,7 +80,7 @@ public class WorldFlagHandler {
     public static void onNetherPortalSpawn(BlockEvent.PortalSpawnEvent event) {
         Level world = (Level) event.getLevel();
         if (isServerSide(world)) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(event.getPos(), SPAWN_PORTAL, world.dimension());
+            FlagCheckRequest checkEvent = new FlagCheckRequest(event.getPos(), FlagRegister.CREATE_PORTAL, world.dimension());
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
@@ -102,7 +102,7 @@ public class WorldFlagHandler {
             ResourceKey<Level> dimension = event.getEntity().level().dimension();
             BlockPos target = entity.blockPosition();
             Player player = entity instanceof Player ? (Player) entity : null;
-            FlagCheckRequest checkEvent = new FlagCheckRequest(target, USE_PORTAL, dimension, player);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(target, FlagRegister.USE_PORTAL, dimension, player);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
@@ -111,7 +111,7 @@ public class WorldFlagHandler {
             });
 
             if (entity instanceof Player) {
-                checkEvent = new FlagCheckRequest(target, USE_PORTAL_PLAYERS, dimension, player);
+                checkEvent = new FlagCheckRequest(target, FlagRegister.PLAYER_ENTER_PORTAL, dimension, player);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
@@ -138,19 +138,19 @@ public class WorldFlagHandler {
     private static FlagCheckRequest getNonPlayerCheckEventFor(Entity entity, BlockPos target, ResourceKey<Level> dimension) {
         FlagCheckRequest nonPlayerCheckEvent = null;
         if (entity instanceof ItemEntity) {
-            nonPlayerCheckEvent = new FlagCheckRequest(target, USE_PORTAL_ITEMS, dimension);
+            nonPlayerCheckEvent = new FlagCheckRequest(target, FlagRegister.USE_PORTAL_ITEMS, dimension);
         }
         if (isAnimal(entity)) {
-            nonPlayerCheckEvent = new FlagCheckRequest(target, USE_PORTAL_ANIMALS, dimension);
+            nonPlayerCheckEvent = new FlagCheckRequest(target, FlagRegister.USE_PORTAL_ANIMALS, dimension);
         }
         if (isMonster(entity) || hasMonsterJockey(entity)) {
-            nonPlayerCheckEvent = new FlagCheckRequest(target, USE_PORTAL_MONSTERS, dimension);
+            nonPlayerCheckEvent = new FlagCheckRequest(target, FlagRegister.USE_PORTAL_MONSTERS, dimension);
         }
         if (entity instanceof AbstractVillager) {
-            nonPlayerCheckEvent = new FlagCheckRequest(target, USE_PORTAL_VILLAGERS, dimension);
+            nonPlayerCheckEvent = new FlagCheckRequest(target, FlagRegister.USE_PORTAL_VILLAGERS, dimension);
         }
         if (entity instanceof AbstractMinecart) {
-            nonPlayerCheckEvent = new FlagCheckRequest(target, USE_PORTAL_MINECARTS, dimension);
+            nonPlayerCheckEvent = new FlagCheckRequest(target, FlagRegister.USE_PORTAL_MINECARTS, dimension);
         }
         return nonPlayerCheckEvent;
     }
@@ -173,7 +173,7 @@ public class WorldFlagHandler {
                     BlockPos targetPos = worldborder.clampToBounds(player.getX() * tpPosScale, player.getY(), player.getZ() * tpPosScale);
                      */
                     // FIXME: Workaround is to not let users add this flag to Local Regions for now until the block position is correctly determined
-                    FlagCheckRequest checkGeneralEvent = new FlagCheckRequest(player.blockPosition(), ENTER_DIM, dim, player);
+                    FlagCheckRequest checkGeneralEvent = new FlagCheckRequest(player.blockPosition(), FlagRegister.PLAYER_ENTER_LEVEL, dim, player);
                     if (Services.FLAG_EVENT_DISPATCHER.post(checkGeneralEvent)) {
                         return;
                     }

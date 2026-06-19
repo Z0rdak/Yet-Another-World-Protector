@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
@@ -15,8 +16,6 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.Iterator;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
-import static de.z0rdak.yawp.core.flag.RegionFlag.WITHER_BLOCK_PROT;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 
 @Mixin(WitherBoss.class)
@@ -27,7 +26,7 @@ public abstract class WitherEntityMixin {
     public void onWitherDestroyBlocks(ServerLevel level, CallbackInfo ci, boolean bl, int j, int k, Iterator var5, BlockPos blockPos, BlockState blockState) {
         WitherBoss self = (WitherBoss) (Object) this;
         if (isServerSide(self)) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, WITHER_BLOCK_PROT, getDimKey(self));
+            FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, FlagRegister.WITHER_BLOCK_PROT, getDimKey(self));
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;
             FlagEvaluator.processCheck(checkEvent, deny -> ci.cancel());
@@ -38,7 +37,7 @@ public abstract class WitherEntityMixin {
     public void onWitherAttemptGriefing(ServerLevel level, CallbackInfo ci) {
         WitherBoss self = (WitherBoss) (Object) this;
         if (isServerSide(self)) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), MOB_GRIEFING, getDimKey(self));
+            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), FlagRegister.MOB_GRIEFING, getDimKey(self));
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;
             FlagEvaluator.processCheck(checkEvent, deny -> ci.cancel());

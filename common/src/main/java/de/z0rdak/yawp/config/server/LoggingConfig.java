@@ -1,5 +1,7 @@
 package de.z0rdak.yawp.config.server;
 
+import de.z0rdak.yawp.api.Flag;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.FlagTagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.api.events.flag.FlagCheckResult;
@@ -53,7 +55,7 @@ public class LoggingConfig {
                 .defineListAllowEmpty(List.of("log_flag_tags"), () -> Collections.singletonList(FlagTagRegister.PLAYER.tagRl().toString()), null, LoggingConfig::isValidTag);
 
         LOG_FLAGS = BUILDER.comment("List of flags which shall be logged.")
-                .defineListAllowEmpty(List.of("log_flags"), () -> Arrays.asList(RegionFlag.BREAK_BLOCKS.name, RegionFlag.PLACE_BLOCKS.name), null, LoggingConfig::isValidFlag);
+                .defineListAllowEmpty(List.of("log_flags"), () -> Arrays.asList(FlagRegister.PLAYER_BREAK_BLOCKS.name(), FlagRegister.PLAYER_PLACE_BLOCKS.name()), null, LoggingConfig::isValidFlag);
 
         LOG_EVENTS_DETAIL = BUILDER.comment("Enable logging of detailed event info.")
                 .define("log_event_details", false);
@@ -105,7 +107,7 @@ public class LoggingConfig {
 
     public static boolean isValidFlag(Object flag) {
         if (flag instanceof String) {
-            boolean contains = RegionFlag.contains((String) flag);
+            boolean contains = FlagRegister.isRegistered((String) flag);
             if (!contains) {
                 LOGGING_CONFIG_LOGGER.warn("Invalid flag supplied for 'log_flags': {}", flag);
             }
@@ -153,7 +155,7 @@ public class LoggingConfig {
         boolean matchesFlagOrCategory = (flagMatchesCategory(check) || matchesFlag(check));
         if (matchesFlagOrCategory) {
             LOGGING_CONFIG_LOGGER.info("[Check] {}, at {}, in '{}', Player={}, Id={}",
-                    check.getRegionFlag().name,
+                    check.getRegionFlag().name(),
                     AreaUtil.blockPosStr(check.getTarget()),
                     check.getDimension().identifier().toString(),
                     check.getPlayer() == null ? "n/a" : check.getPlayer().getDisplayName().getString(),
@@ -198,10 +200,10 @@ public class LoggingConfig {
     }
 
     public static boolean flagMatchesCategory(FlagCheckRequest check) {
-        return RegionFlag.matchesCategory(check.getRegionFlag(), getFlagTags());
+        return FlagRegister.matchesCategory(check.getRegionFlag(), getFlagTags());
     }
 
     public static boolean matchesFlag(FlagCheckRequest check) {
-        return LoggingConfig.getFlagsToLog().contains(check.getRegionFlag().name);
+        return LoggingConfig.getFlagsToLog().contains(check.getRegionFlag().name());
     }
 }

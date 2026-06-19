@@ -1,10 +1,12 @@
 package de.z0rdak.yawp.handler.flags;
 
+import de.z0rdak.yawp.api.Flag;
 import de.z0rdak.yawp.api.FlagEvaluator;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.FlagState;
-import de.z0rdak.yawp.core.flag.RegionFlag;
+
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
@@ -45,7 +47,7 @@ public class GrievingFlagHandler {
             Entity trampler = event.getEntity();
             ResourceKey<Level> dim = getDimKey(trampler);
             Player player = trampler instanceof Player ? (Player) trampler : null;
-            FlagCheckRequest checkEvent = new FlagCheckRequest(event.getPos(), RegionFlag.TRAMPLE_FARMLAND, dim, player);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(event.getPos(), FlagRegister.TRAMPLE_FARMLAND, dim, player);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
@@ -57,7 +59,7 @@ public class GrievingFlagHandler {
                 return;
             // cancel only player trampling
             if (trampler instanceof Player) {
-                checkEvent = new FlagCheckRequest(event.getPos(), RegionFlag.TRAMPLE_FARMLAND_PLAYER, dim, player);
+                checkEvent = new FlagCheckRequest(event.getPos(), FlagRegister.PLAYER_TRAMPLE_FARMLAND, dim, player);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
@@ -76,19 +78,19 @@ public class GrievingFlagHandler {
             BlockPos target = event.getPos();
             FlagCheckRequest checkEvent = null;
             if (destroyer instanceof EnderDragon) {
-                checkEvent = new FlagCheckRequest(target, RegionFlag.DRAGON_BLOCK_PROT, getDimKey(destroyer));
+                checkEvent = new FlagCheckRequest(target, FlagRegister.DRAGON_BLOCK_PROT, getDimKey(destroyer));
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
             }
             if (destroyer instanceof WitherBoss) {
-                checkEvent = new FlagCheckRequest(target, RegionFlag.WITHER_BLOCK_PROT, getDimKey(destroyer));
+                checkEvent = new FlagCheckRequest(target, FlagRegister.WITHER_BLOCK_PROT, getDimKey(destroyer));
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
             }
             if (destroyer instanceof Zombie) {
-                checkEvent = new FlagCheckRequest(target, RegionFlag.ZOMBIE_DOOR_PROT, getDimKey(destroyer));
+                checkEvent = new FlagCheckRequest(target, FlagRegister.ZOMBIE_DOOR_PROT, getDimKey(destroyer));
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
@@ -109,7 +111,7 @@ public class GrievingFlagHandler {
         if (NeoForgeHandlerUtil.isServerSide(event)) {
             LivingEntity lootEntity = event.getEntity();
             Player player = lootEntity instanceof Player ? (Player) lootEntity : null;
-            FlagCheckRequest checkEvent = new FlagCheckRequest(lootEntity.blockPosition(), RegionFlag.DROP_LOOT_ALL, event.getEntity().level().dimension(), player);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(lootEntity.blockPosition(), FlagRegister.DROP_LOOT_ALL, event.getEntity().level().dimension(), player);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
@@ -120,7 +122,7 @@ public class GrievingFlagHandler {
             if (flagState == FlagState.DENIED)
                 return;
             if (player != null) {
-                checkEvent = new FlagCheckRequest(lootEntity.blockPosition(), RegionFlag.DROP_LOOT_PLAYER, player.level().dimension(), player);
+                checkEvent = new FlagCheckRequest(lootEntity.blockPosition(), FlagRegister.PLAYER_GAIN_LOOT, player.level().dimension(), player);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
@@ -139,7 +141,7 @@ public class GrievingFlagHandler {
             Entity xpDroppingEntity = event.getEntity();
             BlockPos pos = xpDroppingEntity.blockPosition();
             if (player != null) {
-                FlagCheckRequest checkEvent = new FlagCheckRequest(pos, RegionFlag.DROP_XP, getDimKey(xpDroppingEntity), player);
+                FlagCheckRequest checkEvent = new FlagCheckRequest(pos, FlagRegister.PLAYER_DROP_XP, getDimKey(xpDroppingEntity), player);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
@@ -152,7 +154,7 @@ public class GrievingFlagHandler {
             }
 
             if (xpDroppingEntity instanceof Player xpDroppingPlayer) {
-                FlagCheckRequest checkEvent = new FlagCheckRequest(xpDroppingPlayer.blockPosition(), RegionFlag.KEEP_XP, getDimKey(xpDroppingPlayer), xpDroppingPlayer);
+                FlagCheckRequest checkEvent = new FlagCheckRequest(xpDroppingPlayer.blockPosition(), FlagRegister.PLAYER_KEEP_XP, getDimKey(xpDroppingPlayer), xpDroppingPlayer);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                     return;
                 FlagEvaluator.process(checkEvent)
@@ -167,7 +169,7 @@ public class GrievingFlagHandler {
             return;
         }
         if (isServerSide(event.getEntity())) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(event.getEntity().blockPosition(), RegionFlag.MOB_GRIEFING, getDimKey(event.getEntity()));
+            FlagCheckRequest checkEvent = new FlagCheckRequest(event.getEntity().blockPosition(), FlagRegister.MOB_GRIEFING, getDimKey(event.getEntity()));
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
@@ -178,7 +180,7 @@ public class GrievingFlagHandler {
             if (flagState == FlagState.DENIED)
                 return;
             if (event.getEntity() instanceof EnderMan) {
-                checkEvent = new FlagCheckRequest(event.getEntity().blockPosition(), RegionFlag.ENDERMAN_GRIEFING, getDimKey(event.getEntity()));
+                checkEvent = new FlagCheckRequest(event.getEntity().blockPosition(), FlagRegister.ENDERMAN_GRIEFING, getDimKey(event.getEntity()));
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
@@ -196,10 +198,10 @@ public class GrievingFlagHandler {
             ResourceKey<Level> dim = event.getLevel().dimension();
 
             Set<BlockPos> protectedBlocks = event.getAffectedBlocks().stream()
-                    .filter(explosionBlockPosFilterPredicate(dim, RegionFlag.EXPLOSION_BLOCK))
+                    .filter(explosionBlockPosFilterPredicate(dim, FlagRegister.EXPLOSION_BLOCK))
                     .collect(Collectors.toSet());
             Set<Entity> protectedEntities = event.getAffectedEntities().stream()
-                    .filter(explosionEntityPosFilterPredicate(dim, RegionFlag.EXPLOSION_ENTITY))
+                    .filter(explosionEntityPosFilterPredicate(dim, FlagRegister.EXPLOSION_ENTITY))
                     .collect(Collectors.toSet());
             preventDestructionFor(event, protectedBlocks, protectedEntities);
 
@@ -207,10 +209,10 @@ public class GrievingFlagHandler {
                 boolean explosionTriggeredByCreeper = (event.getExplosion().getIndirectSourceEntity() instanceof Creeper);
                 if (explosionTriggeredByCreeper) {
                     protectedBlocks = event.getAffectedBlocks().stream()
-                            .filter(explosionBlockPosFilterPredicate(dim, RegionFlag.EXPLOSION_CREEPER_BLOCK))
+                            .filter(explosionBlockPosFilterPredicate(dim, FlagRegister.EXPLOSION_CREEPER_BLOCK))
                             .collect(Collectors.toSet());
                     protectedEntities = event.getAffectedEntities().stream()
-                            .filter(explosionEntityPosFilterPredicate(dim, RegionFlag.EXPLOSION_CREEPER_ENTITY))
+                            .filter(explosionEntityPosFilterPredicate(dim, FlagRegister.EXPLOSION_CREEPER_ENTITY))
                             .collect(Collectors.toSet());
                 }
                 preventDestructionFor(event, protectedBlocks, protectedEntities);
@@ -230,7 +232,7 @@ public class GrievingFlagHandler {
         event.getAffectedEntities().removeAll(protectedEntities);
     }
 
-    private static Predicate<Entity> explosionEntityPosFilterPredicate(ResourceKey<Level> dim, RegionFlag flag) {
+    private static Predicate<Entity> explosionEntityPosFilterPredicate(ResourceKey<Level> dim, Flag flag) {
         return entity -> {
             // TODO: Introduce a subtype for FlagCheckRequest which holds multiple blocks? This way only one event is fired
             // TODO: Make the event cancellable and have a mutable blockpos list
@@ -244,7 +246,7 @@ public class GrievingFlagHandler {
         };
     }
 
-    private static Predicate<BlockPos> explosionBlockPosFilterPredicate(ResourceKey<Level> dim, RegionFlag flag) {
+    private static Predicate<BlockPos> explosionBlockPosFilterPredicate(ResourceKey<Level> dim, Flag flag) {
         return pos -> {
             // TODO: Introduce a subtype for FlagCheckRequest which holds multiple blocks? This way only one event is fired
             // TODO: Make the event cancellable and have a mutable blockpos list

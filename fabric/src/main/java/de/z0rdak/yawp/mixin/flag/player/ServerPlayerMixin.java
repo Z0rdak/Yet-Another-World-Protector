@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.Services;
@@ -20,7 +21,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.Set;
 
 import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
-import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.HandlerUtil.getDimKey;
 import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
 
@@ -32,7 +32,7 @@ public abstract class ServerPlayerMixin {
     private void onDropItem(ItemStack stack, boolean b1, boolean b2, CallbackInfoReturnable<ItemEntity> cir) {
         ServerPlayer player = (ServerPlayer) (Object) this;
         if (isServerSide(player)) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), ITEM_DROP, getDimKey(player), player);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), FlagRegister.PLAYER_DROP_ITEM, getDimKey(player), player);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;
             FlagEvaluator.processCheck(checkEvent, deny -> {
@@ -50,7 +50,7 @@ public abstract class ServerPlayerMixin {
         if (isServerSide(player)) {
             RegionDataManager.initLevelDataOnChangeWorld(player, player.level(), teleportTransition.newLevel());
 
-            FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), USE_PORTAL_PLAYERS, getDimKey(player), player);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), FlagRegister.PLAYER_ENTER_PORTAL, getDimKey(player), player);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;
             FlagEvaluator.processCheck(checkEvent, deny -> {
@@ -58,7 +58,7 @@ public abstract class ServerPlayerMixin {
                 cir.setReturnValue(null);
             });
 
-            checkEvent = new FlagCheckRequest(player.blockPosition(), ENTER_DIM, getDimKey(teleportTransition.newLevel()), player);
+            checkEvent = new FlagCheckRequest(player.blockPosition(), FlagRegister.PLAYER_ENTER_LEVEL, getDimKey(teleportTransition.newLevel()), player);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;
             FlagEvaluator.process(checkEvent)
@@ -70,7 +70,7 @@ public abstract class ServerPlayerMixin {
     private void onTeleportToDimension(ServerLevel level, double x, double y, double z, Set<Relative> relativeMovements, float yaw, float pitch, boolean setCamera, CallbackInfoReturnable<Boolean> cir) {
         Player player = (Player) (Object) this;
         if (isServerSide(player)) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), USE_PORTAL_PLAYERS, player.level().dimension(), player);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), FlagRegister.PLAYER_ENTER_PORTAL, player.level().dimension(), player);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;
             FlagEvaluator.processCheck(checkEvent, deny -> {

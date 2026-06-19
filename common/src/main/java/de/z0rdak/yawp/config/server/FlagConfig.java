@@ -3,7 +3,7 @@ package de.z0rdak.yawp.config.server;
 import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.FlagFrequency;
-import de.z0rdak.yawp.core.flag.RegionFlag;
+
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -107,9 +107,9 @@ public class FlagConfig {
                 FLAG_CONFIG_LOGGER.warn("Invalid flag supplied for 'disabled_flags': {}", entity);
                 return false;
             }
-            return str.equals(RegionFlag.FLUID_FLOW.name())
-                    || str.equals(RegionFlag.WATER_FLOW.name())
-                    || str.equals(RegionFlag.LAVA_FLOW.name());
+            return str.equals(FlagRegister.FLUID_FLOW.name())
+                    || str.equals(FlagRegister.WATER_FLOW.name())
+                    || str.equals(FlagRegister.LAVA_FLOW.name());
         }
         return false;
     }

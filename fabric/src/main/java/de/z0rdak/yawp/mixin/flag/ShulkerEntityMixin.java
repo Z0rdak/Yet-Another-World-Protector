@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.SHULKER_TELEPORT_FROM_REGION;
+import de.z0rdak.yawp.api.FlagRegister;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 
 @Mixin(Shulker.class)
@@ -18,7 +18,7 @@ public abstract class ShulkerEntityMixin {
     public void onShulkerTeleport(CallbackInfoReturnable<Boolean> cir) {
         Shulker self = (Shulker) (Object) this;
         if (isServerSide(self.level())) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), SHULKER_TELEPORT_FROM_REGION, getDimKey(self));
+            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), FlagRegister.SHULKER_TELEPORT, getDimKey(self));
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;
             FlagEvaluator.processCheck(checkEvent, deny -> cir.setReturnValue(false));

@@ -1,11 +1,12 @@
 package de.z0rdak.yawp.handler.flags;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.api.events.flag.FlagCheckResult;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.FlagState;
-import de.z0rdak.yawp.core.flag.RegionFlag;
+
 import de.z0rdak.yawp.handler.HandlerUtil;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
@@ -47,7 +48,7 @@ public class EntityFlagHandler {
             // handle enderman teleportation
             BlockPos target = new BlockPos((int) event.getPrev().x, (int) event.getPrev().y, (int) event.getPrev().z);
             if (event.getEntityLiving() instanceof EnderMan) {
-                FlagCheckRequest checkEvent = new FlagCheckRequest(target, RegionFlag.ENDERMAN_TELEPORT_FROM_REGION, dim);
+                FlagCheckRequest checkEvent = new FlagCheckRequest(target, FlagRegister.ENDERMAN_TELEPORT, dim);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
@@ -55,7 +56,7 @@ public class EntityFlagHandler {
             }
             // handle shulker teleportation
             if (event.getEntityLiving() instanceof Shulker) {
-                FlagCheckRequest checkEvent = new FlagCheckRequest(target, RegionFlag.SHULKER_TELEPORT_FROM_REGION, dim);
+                FlagCheckRequest checkEvent = new FlagCheckRequest(target, FlagRegister.SHULKER_TELEPORT, dim);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
@@ -76,7 +77,7 @@ public class EntityFlagHandler {
                 event.setDamageMultiplier(0.0f);
             };
 
-            FlagCheckRequest checkEvent = new FlagCheckRequest(target, RegionFlag.FALL_DAMAGE, dim, entity instanceof Player ? (Player) entity : null);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(target, FlagRegister.FALL_DAMAGE, dim, entity instanceof Player ? (Player) entity : null);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
@@ -85,25 +86,25 @@ public class EntityFlagHandler {
                 return;
 
             if (entity instanceof Player player) {
-                checkEvent = new FlagCheckRequest(target, RegionFlag.FALL_DAMAGE_PLAYERS, dim, player);
+                checkEvent = new FlagCheckRequest(target, FlagRegister.PLAYER_TAKE_FALL_DAMAGE, dim, player);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
             }
             if (isVillager(entity)) {
-                checkEvent = new FlagCheckRequest(target, RegionFlag.FALL_DAMAGE_VILLAGERS, dim);
+                checkEvent = new FlagCheckRequest(target, FlagRegister.FALL_DAMAGE_VILLAGERS, dim);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
             }
             if (isAnimal(entity)) {
-                checkEvent = new FlagCheckRequest(target, RegionFlag.FALL_DAMAGE_ANIMALS, dim);
+                checkEvent = new FlagCheckRequest(target, FlagRegister.FALL_DAMAGE_ANIMALS, dim);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
             }
             if (isMonster(entity)) {
-                checkEvent = new FlagCheckRequest(target, RegionFlag.FALL_DAMAGE_MONSTERS, dim);
+                checkEvent = new FlagCheckRequest(target, FlagRegister.FALL_DAMAGE_MONSTERS, dim);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
@@ -124,7 +125,7 @@ public class EntityFlagHandler {
 
             FlagCheckRequest checkEvent = null;
             if (entity instanceof Mob) {
-                checkEvent = new FlagCheckRequest(target, RegionFlag.SPAWNING_ALL, dim);
+                checkEvent = new FlagCheckRequest(target, FlagRegister.SPAWNING_ALL, dim);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
@@ -133,43 +134,43 @@ public class EntityFlagHandler {
                     return;
             }
             if (isAnimal(entity)) {
-                checkEvent = new FlagCheckRequest(target, RegionFlag.SPAWNING_ANIMAL, dim);
+                checkEvent = new FlagCheckRequest(target, FlagRegister.SPAWNING_ANIMAL, dim);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
             }
             if (isMonster(entity) || hasMonsterJockey(entity)) {
-                checkEvent = new FlagCheckRequest(target, RegionFlag.SPAWNING_MONSTER, dim);
+                checkEvent = new FlagCheckRequest(target, FlagRegister.SPAWNING_MONSTER, dim);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
             }
             if (entity instanceof SnowGolem || entity instanceof IronGolem) {
-                checkEvent = new FlagCheckRequest(target, RegionFlag.SPAWNING_GOLEM, dim);
+                checkEvent = new FlagCheckRequest(target, FlagRegister.SPAWNING_GOLEM, dim);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
             }
             if (entity instanceof Villager) {
-                checkEvent = new FlagCheckRequest(target, RegionFlag.SPAWNING_VILLAGER, dim);
+                checkEvent = new FlagCheckRequest(target, FlagRegister.SPAWNING_VILLAGER, dim);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
             }
             if (entity instanceof WanderingTrader || entity instanceof TraderLlama) {
-                checkEvent = new FlagCheckRequest(target, RegionFlag.SPAWNING_TRADER, dim);
+                checkEvent = new FlagCheckRequest(target, FlagRegister.SPAWNING_TRADER, dim);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
             }
             if (entity instanceof Slime) {
-                checkEvent = new FlagCheckRequest(target, RegionFlag.SPAWNING_SLIME, dim);
+                checkEvent = new FlagCheckRequest(target, FlagRegister.SPAWNING_SLIME, dim);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
             }
             if (entity instanceof ExperienceOrb) {
-                checkEvent = new FlagCheckRequest(target, RegionFlag.SPAWNING_XP, dim);
+                checkEvent = new FlagCheckRequest(target, FlagRegister.SPAWNING_XP, dim);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }

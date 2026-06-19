@@ -1,8 +1,9 @@
 package de.z0rdak.yawp.core.region;
 
+import de.z0rdak.yawp.api.Flag;
 import de.z0rdak.yawp.core.flag.RegionFlags;
 import de.z0rdak.yawp.core.flag.IFlag;
-import de.z0rdak.yawp.core.flag.RegionFlag;
+
 import de.z0rdak.yawp.core.group.PlayerContainer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
@@ -40,7 +41,7 @@ public interface IProtectedRegion{
 
     boolean containsFlag(String flag);
 
-    boolean containsFlag(RegionFlag flag);
+    boolean containsFlag(Flag flag);
 
     void setFlags(RegionFlags flags);
 

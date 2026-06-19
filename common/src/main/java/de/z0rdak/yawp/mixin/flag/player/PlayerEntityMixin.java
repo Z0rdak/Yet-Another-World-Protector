@@ -1,8 +1,9 @@
 package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
-import de.z0rdak.yawp.core.flag.RegionFlag;
+
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
@@ -22,7 +23,7 @@ public abstract class PlayerEntityMixin {
     void injectElytraCheck(CallbackInfoReturnable<Boolean> cir) {
         Player self = (Player) (Object) this;
         if (isServerSide(self.level())) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), RegionFlag.USE_ELYTRA, getDimKey(self), self);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), FlagRegister.PLAYER_USE_ELYTRA, getDimKey(self), self);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
@@ -34,7 +35,7 @@ public abstract class PlayerEntityMixin {
     void onDropEquipment(ServerLevel level, CallbackInfo ci) {
         Player self = (Player) (Object) this;
         if (isServerSide(self.level())) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), RegionFlag.KEEP_INV, getDimKey(self));
+            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), FlagRegister.PLAYER_KEEP_INV, getDimKey(self));
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
@@ -47,7 +48,7 @@ public abstract class PlayerEntityMixin {
     public void onGainHunger(float exhaustion, CallbackInfo ci) {
         Player self = (Player) (Object) this;
         if (isServerSide(self)) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), RegionFlag.NO_HUNGER, getDimKey(self), self);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), FlagRegister.PLAYER_APPLY_HUNGER, getDimKey(self), self);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;
             FlagEvaluator.process(checkEvent)

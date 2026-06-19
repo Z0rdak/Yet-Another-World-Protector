@@ -1,5 +1,7 @@
 package de.z0rdak.yawp.handler;
 
+import de.z0rdak.yawp.api.Flag;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.api.events.flag.FlagEvent;
 import de.z0rdak.yawp.api.events.flag.FlagEvents;
@@ -10,7 +12,6 @@ import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.flag.FlagState;
-import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
@@ -41,6 +42,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.api.FlagEvaluator.processCheck;
+import static de.z0rdak.yawp.api.FlagRegister.SPAWNING_ALL;
+import static de.z0rdak.yawp.api.FlagRegister.SPAWNING_MONSTER;
 
 public final class YawpEventHandler {
 
@@ -52,8 +55,9 @@ public final class YawpEventHandler {
     }
 
     public static boolean onAddFlag(FlagEvent.Add event) {
+        // TODO FlagTag check
         if (event.getFlag().getName().contains("spawning") && Services.FLAG_CONFIG.removeEntitiesEnabled()) {
-            removeInvolvedEntities(event.getRegion(), RegionFlag.fromId(event.getFlag().getName()));
+            removeInvolvedEntities(event.getRegion(), FlagRegister.byId(event.getFlag().getName()));
         }
         return true;
     }
@@ -76,7 +80,7 @@ public final class YawpEventHandler {
         RegionEvents.ON_PLAYER_LEAVE_REGION.register(YawpEventHandler::onPlayerLeaveRegion);
     }
 
-    public static void removeInvolvedEntities(IProtectedRegion region, RegionFlag flag) {
+    public static void removeInvolvedEntities(IProtectedRegion region, Flag flag) {
         ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, region.getDim().identifier());
         Predicate<? super Entity> entityFilter = getEntityFilterForFlag(flag);
         switch (region.getRegionType()) {
@@ -106,23 +110,27 @@ public final class YawpEventHandler {
         }
     }
 
-    private static Predicate<? super Entity> getEntityFilterForFlag(RegionFlag flag) {
-        switch (flag) {
-            case SPAWNING_ALL:
+    private static Predicate<? super Entity> getEntityFilterForFlag(Flag flag) {
+        if(!FlagRegister.isSpawningFlag(flag)){
+            return e -> false;
+        }
+        switch (flag.name()) { // TODO how to handle?
+            // registry for spawn flags which defines predicate entries?
+            case "yawp:spawning/all":
                 return e -> e instanceof Mob;
-            case SPAWNING_MONSTER:
+            case "yawp:spawning/monsters":
                 return e -> HandlerUtil.isMonster(e) || HandlerUtil.hasMonsterJockey(e);
-            case SPAWNING_ANIMAL:
+            case "yawp:spawning/animals":
                 return HandlerUtil::isAnimal;
-            case SPAWNING_GOLEM:
+            case "yawp:spawning/golems":
                 return e -> e instanceof SnowGolem || e instanceof IronGolem;
-            case SPAWNING_TRADER:
+            case "yawp:spawning/traders":
                 return e -> e instanceof WanderingTrader || e instanceof TraderLlama;
-            case SPAWNING_SLIME:
+            case "yawp:spawning/slimes":
                 return e -> e instanceof Slime;
-            case SPAWNING_VILLAGER:
+            case "yawp:spawning/villagers":
                 return HandlerUtil::isVillager;
-            case SPAWNING_XP:
+            case "yawp:spawning/xp":
                 return e -> e instanceof ExperienceOrb;
             default:
                 return e -> false;
@@ -141,7 +149,7 @@ public final class YawpEventHandler {
                 .collect(Collectors.toList());
     }
 
-    private static List<Entity> getEntitiesToRemove(ServerLevel level, Predicate<? super Entity> entityFilter, RegionFlag flag) {
+    private static List<Entity> getEntitiesToRemove(ServerLevel level, Predicate<? super Entity> entityFilter, Flag flag) {
         List<? extends Entity> entities = level.getEntities(EntityTypeTest.forClass(Entity.class), entityFilter);
         // TODO: EntityTypeTest static where possible, to reduce load
         // for monsters that could be Enemy.class i guess
@@ -162,7 +170,7 @@ public final class YawpEventHandler {
         return false;
     }
 
-    private static boolean isProtectedByRegion(ServerLevel level, RegionFlag flag, Entity e) {
+    private static boolean isProtectedByRegion(ServerLevel level, Flag flag, Entity e) {
         FlagCheckRequest checkEvent = new FlagCheckRequest(e.blockPosition(), flag, level.dimension());
         FlagState flagState = processCheck(checkEvent);
         return flagState == FlagState.ALLOWED;

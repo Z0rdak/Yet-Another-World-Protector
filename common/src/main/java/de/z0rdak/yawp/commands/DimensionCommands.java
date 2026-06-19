@@ -6,6 +6,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.commands.CommandConstants;
 import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
@@ -17,7 +18,7 @@ import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.SphereArea;
 import de.z0rdak.yawp.core.flag.BooleanFlag;
-import de.z0rdak.yawp.core.flag.RegionFlag;
+
 import de.z0rdak.yawp.core.region.*;
 import de.z0rdak.yawp.data.region.LevelRegionData;
 import de.z0rdak.yawp.platform.Services;
@@ -252,7 +253,7 @@ class DimensionCommands {
         }
 
         Services.REGION_CONFIG.getDefaultFlags().stream()
-                .map(RegionFlag::fromId)
+                .map(FlagRegister::byId)
                 .forEach(flag -> region.addFlag(new BooleanFlag(flag)));
         levelData.addLocal(parent, region);
         LocalRegions.ensureHigherRegionPriorityFor(region, Services.REGION_CONFIG.getDefaultPriority());

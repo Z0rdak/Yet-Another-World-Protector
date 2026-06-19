@@ -8,13 +8,16 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import de.z0rdak.yawp.api.Flag;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.constants.Constants;
-import de.z0rdak.yawp.core.flag.RegionFlag;
+
 import de.z0rdak.yawp.core.region.CuboidRegion;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -26,7 +29,7 @@ import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 public class RegionFlagArgumentType implements ArgumentType<String> {
 
     public static final Pattern VALID_FLAG_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z\\-][A-Za-z]$");
-    private static final Collection<String> EXAMPLES = RegionFlag.getFlagNames();
+    private static final Collection<String> EXAMPLES = FlagRegister.getFlagNames();
     private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(Component.translatableWithFallback("cli.arg.flag.parse.invalid", "Unable to parse flag identifier!"));
     private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
             flag -> Component.translatableWithFallback("cli.arg.flag.invalid", "Invalid flag identifier: '%s'", flag)
@@ -40,29 +43,29 @@ public class RegionFlagArgumentType implements ArgumentType<String> {
         return new RegionFlagArgumentType();
     }
 
-    public static RegionFlag getFlag(CommandContext<CommandSourceStack> ctx, String argName) throws CommandSyntaxException {
-        String flagIdentifier = ctx.getArgument(argName, String.class);
-        if (RegionFlag.contains(flagIdentifier)) {
-            return RegionFlag.fromId(flagIdentifier);
-        } else {
+    public static Flag getFlag(CommandContext<CommandSourceStack> ctx, String argName) throws CommandSyntaxException {
+        var flagIdentifier = ctx.getArgument(argName, Identifier.class);
+        try {
+            return FlagRegister.byId(flagIdentifier);
+        } catch (IllegalArgumentException e) {
             sendCmdFeedback(ctx.getSource(), Component.literal("Invalid flag identifier: '" + flagIdentifier + "'!"));
             throw ERROR_INVALID_VALUE.create(flagIdentifier);
         }
     }
 
-    public static Set<RegionFlag> getFlags(CommandContext<CommandSourceStack> ctx, String argName) throws CommandSyntaxException {
+    public static Set<Flag> getFlags(CommandContext<CommandSourceStack> ctx, String argName) throws CommandSyntaxException {
         String flagIdentifiers = ctx.getArgument(argName, String.class);
         Set<String> flagsList = new HashSet<>(Arrays.asList(flagIdentifiers.split(" ")));
-        Set<RegionFlag> regionFlags = flagsList.stream()
+        Set<Flag> regionFlags = flagsList.stream()
                 .filter(flag -> {
-                    if (RegionFlag.contains(flag))
+                    if (FlagRegister.isRegistered(flag))
                         return true;
                     else {
                         sendCmdFeedback(ctx.getSource(), Component.literal("Invalid flag identifier: '" + flag + "'!"));
                         return false;
                     }
                 })
-                .map(RegionFlag::fromId)
+                .map(FlagRegister::byId)
                 .collect(Collectors.toSet());
         if (regionFlags.isEmpty()) {
             throw ERROR_INVALID_VALUE.create(flagIdentifiers);
@@ -104,7 +107,7 @@ public class RegionFlagArgumentType implements ArgumentType<String> {
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> ctx, SuggestionsBuilder builder) {
         if (ctx.getSource() instanceof CommandSourceStack src) {
             CuboidRegion region = (CuboidRegion) ArgumentUtil.getRegionArgument((CommandContext<CommandSourceStack>) ctx);
-            List<String> flagNames = RegionFlag.getFlagNames();
+            List<String> flagNames = FlagRegister.getFlagNames();
 
             String input = ctx.getInput();
             if (input.contains("add")) {

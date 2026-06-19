@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
@@ -14,8 +15,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
-import static de.z0rdak.yawp.core.flag.RegionFlag.USE_ENDERPEARL_FROM_REGION;
-import static de.z0rdak.yawp.core.flag.RegionFlag.USE_ENDERPEARL_TO_REGION;
 import static de.z0rdak.yawp.handler.HandlerUtil.getDimKey;
 import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
 
@@ -29,7 +28,7 @@ public abstract class ThrownEnderPearlMixin {
             Entity owner = pearl.getOwner();
             if (owner instanceof Player player) {
                 BlockPos targetBlockPos = new BlockPos(pearl.getBlockX(), pearl.getBlockY(), pearl.getBlockZ());
-                FlagCheckRequest checkEvent = new FlagCheckRequest(targetBlockPos, USE_ENDERPEARL_TO_REGION, getDimKey(player), player);
+                FlagCheckRequest checkEvent = new FlagCheckRequest(targetBlockPos, FlagRegister.PLAYER_USE_ENDERPEARL, getDimKey(player), player);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                     return;
                 FlagEvaluator.processCheck(checkEvent, deny -> {
@@ -47,7 +46,7 @@ public abstract class ThrownEnderPearlMixin {
         if (isServerSide(pearl.level())) {
             Entity owner = pearl.getOwner();
             if (owner instanceof Player player) {
-                FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), USE_ENDERPEARL_FROM_REGION, getDimKey(player), player);
+                FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), FlagRegister.PLAYER_ENDERPEARL_AWAY, getDimKey(player), player);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                     return;
                 FlagEvaluator.processCheck(checkEvent, deny -> {

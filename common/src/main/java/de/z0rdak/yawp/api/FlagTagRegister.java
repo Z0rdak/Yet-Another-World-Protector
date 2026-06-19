@@ -106,6 +106,16 @@ public final class FlagTagRegister {
             "Flags defining preventive or defensive behavior rather than granting permissions. Examples: BLOCK_EXPLODE, griefing."
     ));
 
+    /**
+     * Flags defining preventive or defensive behavior
+     * rather than granting permissions.
+     * <p>Examples: {@code BLOCK_EXPLODE}, {@code griefing}, etc.</p>
+     */
+    public static final FlagTag SPAWNING = register(new FlagTag(
+            Identifier.fromNamespaceAndPath("yawp", "spawning"),
+            "Flags related to entity Spawning and its prevention. Examples: spawning/monsters"
+    ));
+
     /** Registers a new FlagTag in the central registry. */
     public static FlagTag register(FlagTag tag) {
         REGISTRY.put(tag.tagRl(), tag);

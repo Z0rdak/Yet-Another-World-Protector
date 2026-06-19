@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.platform.Services;
@@ -13,8 +14,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.DRAGON_BLOCK_PROT;
-import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
 import static de.z0rdak.yawp.handler.HandlerUtil.getDimKey;
 import static de.z0rdak.yawp.api.FlagEvaluator.processCheck;
 
@@ -25,13 +24,13 @@ public abstract class EnderDragonMixin {
     @Inject(method = "checkWalls", locals = LocalCapture.CAPTURE_FAILSOFT, at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;removeBlock(Lnet/minecraft/core/BlockPos;Z)Z"), allow = 1)
     public void onDragonDestroyBlocks(ServerLevel level, AABB box, CallbackInfoReturnable<Boolean> cir, int i, int j, int k, int l, int m, int n, boolean bl, boolean bl2, int o, int p, int q, BlockPos blockPos) {
         EnderDragon self = (EnderDragon) (Object) this;
-        FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, DRAGON_BLOCK_PROT, getDimKey(self));
+        FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, FlagRegister.DRAGON_BLOCK_PROT, getDimKey(self));
         if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
             return;
         }
         FlagState flagStateDragonProt = processCheck(checkEvent);
 
-        checkEvent = new FlagCheckRequest(blockPos, MOB_GRIEFING, getDimKey(self));
+        checkEvent = new FlagCheckRequest(blockPos, FlagRegister.MOB_GRIEFING, getDimKey(self));
         if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
             return;
         }

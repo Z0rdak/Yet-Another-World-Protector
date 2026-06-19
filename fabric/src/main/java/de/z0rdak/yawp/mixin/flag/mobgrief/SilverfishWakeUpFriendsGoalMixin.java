@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.platform.Services;
@@ -20,7 +21,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
 import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
 import static de.z0rdak.yawp.api.FlagEvaluator.processCheck;
 
@@ -45,7 +45,7 @@ public abstract class SilverfishWakeUpFriendsGoalMixin {
                         BlockState blockState = level.getBlockState(blockPos2);
                         Block block = blockState.getBlock();
                         if (block instanceof InfestedBlock) {
-                            FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos2, MOB_GRIEFING, level.dimension());
+                            FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos2, FlagRegister.MOB_GRIEFING, level.dimension());
                             boolean isCanceled = Services.FLAG_EVENT_DISPATCHER.post(checkEvent);
                             FlagState flagState = processCheck(checkEvent);
                             boolean isDenied = flagState == FlagState.DENIED;

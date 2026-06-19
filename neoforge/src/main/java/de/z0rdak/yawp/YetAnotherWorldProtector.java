@@ -1,9 +1,10 @@
 package de.z0rdak.yawp;
 
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.commands.CommandRegistry;
 import de.z0rdak.yawp.constants.Constants;
-import de.z0rdak.yawp.core.flag.RegionFlag;
+
 import de.z0rdak.yawp.data.PlayerManager;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.handler.YawpEventHandler;
@@ -48,8 +49,9 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
 
     @SubscribeEvent
     public static void onAddFlag(NeoForgeFlagEvent.Add event) {
+        // TODO isSpawnFlag by tag
         if (event.getFlag().getName().contains("spawning") && Services.FLAG_CONFIG.removeEntitiesEnabled()) {
-            removeInvolvedEntities(event.getRegion(), RegionFlag.fromId(event.getFlag().getName()));
+            removeInvolvedEntities(event.getRegion(), FlagRegister.byId(event.getFlag().getName()));
         }
     }
 

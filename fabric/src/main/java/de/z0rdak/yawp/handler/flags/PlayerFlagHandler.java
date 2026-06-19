@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.handler.flags;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.core.flag.FlagState;
@@ -32,11 +33,11 @@ import net.minecraft.world.level.block.entity.EnderChestBlockEntity;
 import net.minecraft.world.level.block.entity.LecternBlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 
 /**
@@ -75,7 +76,7 @@ public final class PlayerFlagHandler {
         /* Vanilla code - END */
         if (isServerSide(world)) {
             //FLAG_LOGGER.info("[onUseItem] Player={} ({}), at=[{}], Hand={}, Item={}", player.getName().getString(), player.getUuidAsString(), player.getBlockPos().toShortString(), hand, player.getStackInHand(hand));
-            FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), USE_ITEMS, getDimKey(player), player);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), FlagRegister.PLAYER_USE_ITEMS, getDimKey(player), player);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return InteractionResult.PASS;
             }
@@ -118,7 +119,7 @@ public final class PlayerFlagHandler {
 
             // allow player to place blocks when shift clicking usable bock
             if ((isSneakingWithEmptyHands || !player.isShiftKeyDown())) {
-                FlagCheckRequest checkEvent = new FlagCheckRequest(targetPos, USE_BLOCKS, getDimKey(player), player);
+                FlagCheckRequest checkEvent = new FlagCheckRequest(targetPos, FlagRegister.PLAYER_USE_BLOCKS, getDimKey(player), player);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                     return InteractionResult.PASS;
                 FlagState flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
@@ -129,7 +130,7 @@ public final class PlayerFlagHandler {
                 if (isEnderChest) {
                     // check allows player to place blocks when shift clicking container
                     if (player.isShiftKeyDown() && hasEmptyHand || !player.isShiftKeyDown()) {
-                        checkEvent = new FlagCheckRequest(targetPos, ENDER_CHEST_ACCESS, getDimKey(player), player);
+                        checkEvent = new FlagCheckRequest(targetPos, FlagRegister.PLAYER_OPEN_ENDER_CHEST, getDimKey(player), player);
                         if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                             return InteractionResult.PASS;
                         flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
@@ -140,7 +141,7 @@ public final class PlayerFlagHandler {
                 if (isContainer) {
                     // check allows player to place blocks when shift clicking container
                     if (player.isShiftKeyDown() && hasEmptyHand || !player.isShiftKeyDown()) {
-                        checkEvent = new FlagCheckRequest(targetPos, CONTAINER_ACCESS, getDimKey(player), player);
+                        checkEvent = new FlagCheckRequest(targetPos, FlagRegister.PLAYER_OPEN_CONTAINER, getDimKey(player), player);
                         if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                             return InteractionResult.PASS;
                         flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
@@ -168,7 +169,7 @@ public final class PlayerFlagHandler {
                     return itemRl.equals(entityRl);
                 });
                 if (isBlockCovered || isCoveredByTag) {
-                    FlagCheckRequest checkEvent = new FlagCheckRequest(placeBlockTarget, PLACE_BLOCKS, getDimKey(player), player);
+                    FlagCheckRequest checkEvent = new FlagCheckRequest(placeBlockTarget, FlagRegister.PLAYER_PLACE_BLOCKS, getDimKey(player), player);
                     if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                         return InteractionResult.PASS;
                     }
@@ -182,7 +183,7 @@ public final class PlayerFlagHandler {
                 boolean isBerry = ItemStack.isSameItem(stackInHand, Items.GLOW_BERRIES.getDefaultInstance()) || ItemStack.isSameItem(stackInHand, Items.GLOW_BERRIES.getDefaultInstance());
                 ItemUseAnimation useAction = stackInHand.getUseAnimation();
                 if (isBlock || (isBerry && useAction == ItemUseAnimation.EAT)) {
-                    FlagCheckRequest checkEvent = new FlagCheckRequest(placeBlockTarget, PLACE_BLOCKS, getDimKey(player), player);
+                    FlagCheckRequest checkEvent = new FlagCheckRequest(placeBlockTarget, FlagRegister.PLAYER_PLACE_BLOCKS, getDimKey(player), player);
                     if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                         return InteractionResult.PASS;
                     FlagState flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
@@ -190,7 +191,7 @@ public final class PlayerFlagHandler {
                         return InteractionResult.FAIL;
                 }
 
-                FlagCheckRequest checkEvent = new FlagCheckRequest(targetPos, USE_ITEMS, getDimKey(player), player);
+                FlagCheckRequest checkEvent = new FlagCheckRequest(targetPos, FlagRegister.PLAYER_USE_ITEMS, getDimKey(player), player);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                     return InteractionResult.PASS;
                 FlagState flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
@@ -205,9 +206,9 @@ public final class PlayerFlagHandler {
     /**
      * This event is fired on both sides when the player right-clicks an entity.
      * It is responsible for all general entity interactions.
-     * This event's state affects whether {@link Entity#interact(Player, InteractionHand)} and
+     * This event's state affects whether {@link Entity#interact(Player, InteractionHand, Vec3)} and
      * {@link Item#interactLivingEntity(ItemStack, Player, LivingEntity, InteractionHand)} are called.
-     * Let result be {@link InteractionResult#SUCCESS} if {@link Entity#interact(Player, InteractionHand)} or
+     * Let result be {@link InteractionResult#SUCCESS} if {@link Entity#interact(Player, InteractionHand, Vec3)} or
      * {@link Item#interactLivingEntity(ItemStack, Player, LivingEntity, InteractionHand)} return true,
      * or FAIL if the event is cancelled.
      */
@@ -233,7 +234,7 @@ public final class PlayerFlagHandler {
         if (isServerSide(world)) {
             //FLAG_LOGGER.info("[onUseEntity] Player={} ({}), Target={} ({}), at=[{}], Hand={}, Item={}", player.getName().getString(), player.getUuidAsString(), entity.getName().getString(), entity.getScoreboardName(), entity.getBlockPos().toShortString(), hand, player.getStackInHand(hand));
 
-            FlagCheckRequest checkEvent = new FlagCheckRequest(entity.blockPosition(), USE_ENTITIES, getDimKey(player), player);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(entity.blockPosition(), FlagRegister.PLAYER_INTERACT, getDimKey(player), player);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return InteractionResult.PASS;
             FlagState flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
@@ -241,7 +242,7 @@ public final class PlayerFlagHandler {
                 return InteractionResult.FAIL;
 
             if (!hasEmptyHand(player, hand)) {
-                checkEvent = new FlagCheckRequest(entity.blockPosition(), USE_ITEMS, getDimKey(player), player);
+                checkEvent = new FlagCheckRequest(entity.blockPosition(), FlagRegister.PLAYER_USE_ITEMS, getDimKey(player), player);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                     return InteractionResult.PASS;
                 flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
@@ -249,7 +250,7 @@ public final class PlayerFlagHandler {
                     return InteractionResult.FAIL;
             }
             if (entity instanceof ContainerEntity || entity instanceof HasCustomInventoryScreen) {
-                checkEvent = new FlagCheckRequest(player.blockPosition(), CONTAINER_ACCESS, getDimKey(player), player);
+                checkEvent = new FlagCheckRequest(player.blockPosition(), FlagRegister.PLAYER_OPEN_CONTAINER, getDimKey(player), player);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                     return InteractionResult.PASS;
                 flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
@@ -266,7 +267,7 @@ public final class PlayerFlagHandler {
 
     private static InteractionResult onAttackBlock(Player player, Level world, InteractionHand hand, BlockPos blockPos, Direction direction) {
         if (isServerSide(world)) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, BREAK_BLOCKS, getDimKey(player), player);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, FlagRegister.PLAYER_BREAK_BLOCKS, getDimKey(player), player);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return InteractionResult.PASS;
             }
@@ -278,7 +279,7 @@ public final class PlayerFlagHandler {
 
     private static boolean onSettingSpawn(Player player, BlockPos blockPos) {
         if (isServerSide(player)) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, SET_SPAWN, getDimKey(player), player);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, FlagRegister.PLAYER_SET_SPAWN, getDimKey(player), player);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return ALLOW;
             }
@@ -290,7 +291,7 @@ public final class PlayerFlagHandler {
 
     private static Player.BedSleepingProblem onAllowSleeping(Player player, BlockPos blockPos) {
         if (isServerSide(player)) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, SLEEP, getDimKey(player), player);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, FlagRegister.PLAYER_SLEEP, getDimKey(player), player);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return null;
             }
@@ -305,7 +306,7 @@ public final class PlayerFlagHandler {
     private static boolean onElytraFlight(LivingEntity livingEntity) {
         if (isServerSide(livingEntity.level())) {
             if (livingEntity instanceof Player player) {
-                FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), USE_ELYTRA, getDimKey(player), player);
+                FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), FlagRegister.PLAYER_USE_ELYTRA, getDimKey(player), player);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return ALLOW;
                 }

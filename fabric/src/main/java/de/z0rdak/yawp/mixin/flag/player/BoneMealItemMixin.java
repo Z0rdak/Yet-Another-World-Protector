@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
@@ -14,7 +15,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.USE_BONEMEAL;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 
@@ -27,7 +27,7 @@ public abstract class BoneMealItemMixin {
         BlockPos pos = context.getClickedPos();
         Player player = context.getPlayer();
         if (isServerSide(world) && player != null) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(pos, USE_BONEMEAL, getDimKey(world), player);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(pos, FlagRegister.PLAYER_USE_BONEMEAL, getDimKey(world), player);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }

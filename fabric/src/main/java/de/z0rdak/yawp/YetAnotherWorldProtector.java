@@ -1,10 +1,11 @@
 package de.z0rdak.yawp;
 
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagEvent;
 import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.commands.CommandRegistry;
 import de.z0rdak.yawp.config.ConfigRegistry;
-import de.z0rdak.yawp.core.flag.RegionFlag;
+
 import de.z0rdak.yawp.data.PlayerManager;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.handler.YawpEventHandler;
@@ -38,7 +39,7 @@ public class YetAnotherWorldProtector implements ModInitializer, YAWPModInitiali
 
     private static void onAddFlag(FlagEvent.Add event) {
         if (event.getFlag().getName().contains("spawning") && Services.FLAG_CONFIG.removeEntitiesEnabled()) {
-            removeInvolvedEntities(event.getRegion(), RegionFlag.fromId(event.getFlag().getName()));
+            removeInvolvedEntities(event.getRegion(), FlagRegister.byId(event.getFlag().getName()));
         }
     }
 

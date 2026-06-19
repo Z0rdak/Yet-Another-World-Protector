@@ -28,8 +28,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
-
 public record FlagEvaluator(FlagCheckResult result) {
 
     public FlagState state() {
@@ -47,7 +45,7 @@ public record FlagEvaluator(FlagCheckResult result) {
     }
 
     public FlagEvaluator onDenyWithMsg(Consumer<FlagCheckResult> action) {
-        var isPlayerFlag = this.result.getFlagCheck().getRegionFlag().isPlayerFlag();
+        var isPlayerFlag = FlagRegister.hasPlayerTag(this.result.getFlagCheck().getRegionFlag());
         if (state() == FlagState.DENIED && isPlayerFlag && action != null)
             action.andThen(MessageSender::sendFlagMsg).accept(result);
         return this;
@@ -149,7 +147,7 @@ public record FlagEvaluator(FlagCheckResult result) {
             return FlagCheckResult.Undefined(checkEvent);
         }
         var regionFlag = checkEvent.getRegionFlag();
-        var flagContext = new FlagContext(targetRegion, regionFlag, targetRegion.getFlag(regionFlag.name), checkEvent.getPlayer());
+        ;var flagContext = new FlagContext(targetRegion, regionFlag, targetRegion.getFlag(regionFlag.name()), checkEvent.getPlayer());
         var resultingContext = resolveFlag(targetRegion, flagContext);
         return new FlagCheckResult(checkEvent, resultingContext);
     }
@@ -271,7 +269,7 @@ public record FlagEvaluator(FlagCheckResult result) {
 
     public static void checkMobGrief(Level world, BlockPos pos, CallbackInfo ci) {
         if (HandlerUtil.isServerSide(world)) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(pos, MOB_GRIEFING, world.dimension());
+            FlagCheckRequest checkEvent = new FlagCheckRequest(pos, FlagRegister.MOB_GRIEFING, world.dimension());
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;
             processCheck(checkEvent, deny -> ci.cancel());
@@ -280,7 +278,7 @@ public record FlagEvaluator(FlagCheckResult result) {
 
     public static void checkMobGrief(Level world, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         if (HandlerUtil.isServerSide(world)) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(pos, MOB_GRIEFING, world.dimension());
+            FlagCheckRequest checkEvent = new FlagCheckRequest(pos, FlagRegister.MOB_GRIEFING, world.dimension());
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;
 

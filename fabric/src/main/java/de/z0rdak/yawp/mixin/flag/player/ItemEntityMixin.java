@@ -1,8 +1,9 @@
 package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
-import de.z0rdak.yawp.core.flag.RegionFlag;
+
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -12,7 +13,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.ITEM_PICKUP;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 
@@ -27,7 +27,7 @@ public abstract class ItemEntityMixin {
     public void onPickUpItem(Player player, CallbackInfo ci) {
         ItemEntity itemToPickup = (ItemEntity) (Object) this;
         if (isServerSide(itemToPickup.level())) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(itemToPickup.blockPosition(), ITEM_PICKUP, getDimKey(player), player);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(itemToPickup.blockPosition(), FlagRegister.PLAYER_PICKUP_ITEM, getDimKey(player), player);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
@@ -42,7 +42,7 @@ public abstract class ItemEntityMixin {
     @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;discard()V", ordinal = 1), cancellable = true)
     public void onTick(CallbackInfo ci) {
         ItemEntity itemToPickup = (ItemEntity) (Object) this;
-        FlagCheckRequest checkEvent = new FlagCheckRequest(itemToPickup.blockPosition(), RegionFlag.NO_ITEM_DESPAWN, getDimKey(itemToPickup.level()), null);
+        FlagCheckRequest checkEvent = new FlagCheckRequest(itemToPickup.blockPosition(), FlagRegister.NO_ITEM_DESPAWN, getDimKey(itemToPickup.level()), null);
         if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
             return;
         }

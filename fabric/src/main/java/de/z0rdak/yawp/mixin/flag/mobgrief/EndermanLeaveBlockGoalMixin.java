@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.mixin.flag.mobgrief;
 
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.world.entity.monster.EnderMan;
@@ -10,8 +11,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.ENDERMAN_GRIEFING;
-import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
 import static de.z0rdak.yawp.handler.HandlerUtil.getDimKey;
 import static de.z0rdak.yawp.api.FlagEvaluator.processCheck;
 
@@ -25,7 +24,7 @@ public abstract class EndermanLeaveBlockGoalMixin {
     public void onCanStart(CallbackInfoReturnable<Boolean> cir) {
         EnderMan self = enderman;
         // TODO: Hook into tick method to get the position of the block, not the entity
-        FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), ENDERMAN_GRIEFING, getDimKey(self));
+        FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), FlagRegister.ENDERMAN_GRIEFING, getDimKey(self));
         if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
             return;
         }
@@ -33,7 +32,7 @@ public abstract class EndermanLeaveBlockGoalMixin {
             cir.setReturnValue(false);
         });
 
-        checkEvent = new FlagCheckRequest(self.blockPosition(), MOB_GRIEFING, getDimKey(self));
+        checkEvent = new FlagCheckRequest(self.blockPosition(), FlagRegister.MOB_GRIEFING, getDimKey(self));
         if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
             return;
         }

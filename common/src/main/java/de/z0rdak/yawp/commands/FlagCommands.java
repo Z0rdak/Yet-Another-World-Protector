@@ -23,6 +23,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.DimensionArgument;
+import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
@@ -67,8 +68,8 @@ final class FlagCommands {
                 );
     }
 
-    private static RequiredArgumentBuilder<CommandSourceStack, String> flagSubCmd(Function<CommandContext<CommandSourceStack>, IProtectedRegion> regionSupplier) {
-        return Commands.argument(FLAG.toString(), StringArgumentType.word())
+    private static RequiredArgumentBuilder<CommandSourceStack, Identifier> flagSubCmd(Function<CommandContext<CommandSourceStack>, IProtectedRegion> regionSupplier) {
+        return Commands.argument(FLAG.toString(), IdentifierArgument.id())
                 .suggests((ctx, builder) -> IFlagArgumentType.flag().listSuggestions(ctx, builder))
                 .executes(ctx -> promptFlagInfo(ctx, regionSupplier.apply(ctx), getIFlagArgument(ctx)))
                 .then(literal(INFO)

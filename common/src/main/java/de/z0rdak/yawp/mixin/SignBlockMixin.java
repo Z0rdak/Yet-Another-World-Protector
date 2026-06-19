@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.mixin;
 
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
@@ -14,7 +15,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.NO_SIGN_EDIT;
 import static de.z0rdak.yawp.api.FlagEvaluator.processCheck;
 import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 
@@ -22,8 +22,8 @@ import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 public class SignBlockMixin {
 
     @Inject(method = "useWithoutItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/SignBlock;openTextEdit(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/block/entity/SignBlockEntity;Z)V"), cancellable = true)
-    public void use(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult, CallbackInfoReturnable<InteractionResult> cir) {
-        FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, NO_SIGN_EDIT, level.dimension(), player);
+    public void use(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult, CallbackInfoReturnable<InteractionResult> cir) {
+        FlagCheckRequest checkEvent = new FlagCheckRequest(pos, FlagRegister.PLAYER_EDIT_SIGNS, level.dimension(), player);
         if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
             return;
         }

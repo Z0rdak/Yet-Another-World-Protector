@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.*;
+import de.z0rdak.yawp.api.FlagRegister;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 
@@ -30,7 +30,7 @@ public abstract class EntityMixin {
         Entity rider = (Entity) (Object) this;
         if (isServerSide(rider)) {
             if (rider instanceof Player player) {
-                FlagCheckRequest checkEvent = new FlagCheckRequest(vehicle.blockPosition(), ANIMAL_MOUNTING, getDimKey(vehicle), player);
+                FlagCheckRequest checkEvent = new FlagCheckRequest(vehicle.blockPosition(), FlagRegister.PLAYER_MOUNT, getDimKey(vehicle), player);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
@@ -46,7 +46,7 @@ public abstract class EntityMixin {
     public void onHitByLightning(ServerLevel world, LightningBolt lightning, CallbackInfo ci) {
         Entity poorSoul = (Entity) (Object) this;
         if (isServerSide(poorSoul)) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(poorSoul.blockPosition(), LIGHTNING_PROT, getDimKey(poorSoul), null);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(poorSoul.blockPosition(), FlagRegister.LIGHTNING_PROT, getDimKey(poorSoul), null);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
@@ -61,7 +61,7 @@ public abstract class EntityMixin {
         Entity rider = (Entity) (Object) this;
         if (isServerSide(rider)) {
             if (rider instanceof Player player) {
-                FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), ANIMAL_UNMOUNTING, getDimKey(player), player);
+                FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), FlagRegister.PLAYER_UNMOUNTING, getDimKey(player), player);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
@@ -81,7 +81,7 @@ public abstract class EntityMixin {
     public void onChangeDimension(ServerLevel from, ServerLevel to, TeleportTransition teleportTransition, CallbackInfoReturnable<Entity> cir) {
         Entity self = (Entity) (Object) this;
         if (isServerSide(from)) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), USE_PORTAL, getDimKey(from));
+            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), FlagRegister.USE_PORTAL, getDimKey(from));
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
@@ -89,7 +89,7 @@ public abstract class EntityMixin {
                 cir.setReturnValue(null);
             });
             if (self instanceof Player player) {
-                checkEvent = new FlagCheckRequest(self.blockPosition(), USE_PORTAL_PLAYERS, getDimKey(from), player);
+                checkEvent = new FlagCheckRequest(self.blockPosition(), FlagRegister.PLAYER_ENTER_PORTAL, getDimKey(from), player);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
@@ -99,7 +99,7 @@ public abstract class EntityMixin {
                 });
             }
             if (self instanceof ItemEntity) {
-                checkEvent = new FlagCheckRequest(self.blockPosition(), USE_PORTAL_ITEMS, getDimKey(from));
+                checkEvent = new FlagCheckRequest(self.blockPosition(), FlagRegister.USE_PORTAL_ITEMS, getDimKey(from));
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
@@ -108,7 +108,7 @@ public abstract class EntityMixin {
                 });
             }
             if (isAnimal(self)) {
-                checkEvent = new FlagCheckRequest(self.blockPosition(), USE_PORTAL_ANIMALS, getDimKey(from));
+                checkEvent = new FlagCheckRequest(self.blockPosition(), FlagRegister.USE_PORTAL_ANIMALS, getDimKey(from));
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
@@ -117,7 +117,7 @@ public abstract class EntityMixin {
                 });
             }
             if (isMonster(self) || hasMonsterJockey(self)) {
-                checkEvent = new FlagCheckRequest(self.blockPosition(), USE_PORTAL_MONSTERS, getDimKey(from));
+                checkEvent = new FlagCheckRequest(self.blockPosition(), FlagRegister.USE_PORTAL_MONSTERS, getDimKey(from));
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
@@ -126,7 +126,7 @@ public abstract class EntityMixin {
                 });
             }
             if (self instanceof Merchant) {
-                checkEvent = new FlagCheckRequest(self.blockPosition(), USE_PORTAL_VILLAGERS, getDimKey(from));
+                checkEvent = new FlagCheckRequest(self.blockPosition(), FlagRegister.USE_PORTAL_VILLAGERS, getDimKey(from));
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
@@ -135,7 +135,7 @@ public abstract class EntityMixin {
                 });
             }
             if (self instanceof AbstractMinecart) {
-                checkEvent = new FlagCheckRequest(self.blockPosition(), USE_PORTAL_MINECARTS, getDimKey(from));
+                checkEvent = new FlagCheckRequest(self.blockPosition(), FlagRegister.USE_PORTAL_MINECARTS, getDimKey(from));
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }

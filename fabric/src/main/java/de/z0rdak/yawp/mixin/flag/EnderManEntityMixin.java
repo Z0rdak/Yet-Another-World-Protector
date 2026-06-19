@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.ENDERMAN_TELEPORT_FROM_REGION;
+import de.z0rdak.yawp.api.FlagRegister;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 
@@ -19,7 +19,7 @@ public abstract class EnderManEntityMixin {
     public void onEndermanTeleport(double x, double y, double z, CallbackInfoReturnable<Boolean> cir) {
         EnderMan self = (EnderMan) (Object) this;
         if (isServerSide(self.level())) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), ENDERMAN_TELEPORT_FROM_REGION, getDimKey(self));
+            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), FlagRegister.ENDERMAN_TELEPORT, getDimKey(self));
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }

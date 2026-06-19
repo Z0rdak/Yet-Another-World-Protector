@@ -1,7 +1,8 @@
 package de.z0rdak.yawp.platform.event;
 
+import de.z0rdak.yawp.api.Flag;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
-import de.z0rdak.yawp.core.flag.RegionFlag;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
@@ -35,7 +36,7 @@ public class NeoForgeFlagCheckRequest extends Event implements ICancellableEvent
     /**
      * The flag that is checked.
      */
-    private final RegionFlag regionFlag;
+    private final Flag regionFlag;
 
     /**
      * Internal Identifier to relate a flag check to its result.
@@ -43,7 +44,7 @@ public class NeoForgeFlagCheckRequest extends Event implements ICancellableEvent
     private final String id;
 
 
-    public NeoForgeFlagCheckRequest(BlockPos target, RegionFlag regionFlag, ResourceKey<Level> dimension, @Nullable Player player) {
+    public NeoForgeFlagCheckRequest(BlockPos target, Flag regionFlag, ResourceKey<Level> dimension, @Nullable Player player) {
         this.player = player;
         this.target = target;
         this.dimension = dimension;
@@ -59,7 +60,7 @@ public class NeoForgeFlagCheckRequest extends Event implements ICancellableEvent
         this.id = event.getId();
     }
 
-    public NeoForgeFlagCheckRequest(BlockPos target, RegionFlag regionFlag, ResourceKey<Level> dimension, @Nullable Player player, String id) {
+    public NeoForgeFlagCheckRequest(BlockPos target, Flag regionFlag, ResourceKey<Level> dimension, @Nullable Player player, String id) {
         this.player = player;
         this.target = target;
         this.dimension = dimension;
@@ -67,7 +68,7 @@ public class NeoForgeFlagCheckRequest extends Event implements ICancellableEvent
         this.id = id;
     }
 
-    public NeoForgeFlagCheckRequest(BlockPos target, RegionFlag regionFlag, ResourceKey<Level> dimension) {
+    public NeoForgeFlagCheckRequest(BlockPos target, Flag regionFlag, ResourceKey<Level> dimension) {
         this(target, regionFlag, dimension, null);
     }
 
@@ -83,7 +84,7 @@ public class NeoForgeFlagCheckRequest extends Event implements ICancellableEvent
         return this.target;
     }
 
-    public RegionFlag getRegionFlag() {
+    public Flag getRegionFlag() {
         return regionFlag;
     }
 

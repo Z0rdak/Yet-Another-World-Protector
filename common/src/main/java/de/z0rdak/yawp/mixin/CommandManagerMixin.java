@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.mixin;
 
 import com.mojang.brigadier.ParseResults;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.commands.CommandSourceStack;
@@ -11,7 +12,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.EXECUTE_COMMAND;
 import static de.z0rdak.yawp.handler.HandlerUtil.getDimKey;
 import static de.z0rdak.yawp.api.FlagEvaluator.processCheck;
 import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
@@ -26,7 +26,7 @@ public abstract class CommandManagerMixin {
         if (cmdSource.isPlayer()) {
             ServerPlayer player = cmdSource.getPlayer();
             if (player != null) {
-                FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), EXECUTE_COMMAND, getDimKey(player), player);
+                FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), FlagRegister.PLAYER_USE_COMMANDS, getDimKey(player), player);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }

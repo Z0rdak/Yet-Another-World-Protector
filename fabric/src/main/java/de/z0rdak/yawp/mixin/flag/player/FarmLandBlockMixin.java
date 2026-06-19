@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
@@ -15,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.*;
+import static de.z0rdak.yawp.api.FlagRegister.TRAMPLE_FARMLAND;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 
@@ -31,7 +32,7 @@ public abstract class FarmLandBlockMixin extends Block {
     @Inject(method = "fallOn", at = @At(value = "HEAD"), cancellable = true)
     private void onTrampleFarmland(Level world, BlockState state, BlockPos pos, Entity trampler, double fallDistance, CallbackInfo ci) {
         if (isServerSide(world)) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(pos, TRAMPLE_FARMLAND, getDimKey(world));
+            FlagCheckRequest checkEvent = new FlagCheckRequest(pos, FlagRegister.TRAMPLE_FARMLAND, getDimKey(world));
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
@@ -44,7 +45,7 @@ public abstract class FarmLandBlockMixin extends Block {
             });
 
             if (trampler instanceof Player player) {
-                checkEvent = new FlagCheckRequest(pos, TRAMPLE_FARMLAND_PLAYER, getDimKey(world), player);
+                checkEvent = new FlagCheckRequest(pos, FlagRegister.PLAYER_TRAMPLE_FARMLAND, getDimKey(world), player);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
@@ -54,7 +55,7 @@ public abstract class FarmLandBlockMixin extends Block {
                     ci.cancel();
                 });
             } else {
-                checkEvent = new FlagCheckRequest(pos, MOB_GRIEFING, getDimKey(world));
+                checkEvent = new FlagCheckRequest(pos,FlagRegister.MOB_GRIEFING, getDimKey(world));
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }

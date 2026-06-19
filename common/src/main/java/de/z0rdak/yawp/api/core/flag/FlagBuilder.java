@@ -1,19 +1,20 @@
 package de.z0rdak.yawp.api.core.flag;
 
+import de.z0rdak.yawp.api.Flag;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.core.flag.*;
 import org.jetbrains.annotations.NotNull;
 
 import static de.z0rdak.yawp.core.flag.FlagMessage.DEFAULT_FLAG_MSG;
-import static de.z0rdak.yawp.core.flag.RegionFlag.fromId;
 
 public class FlagBuilder {
 
-    private final RegionFlag flag;
+    private final Flag flag;
     private FlagState state;
     private boolean override;
     private FlagMessage msg;
 
-    public FlagBuilder(RegionFlag flag) {
+    public FlagBuilder(Flag flag) {
         this.flag = flag;
         this.state = FlagState.DENIED;
         this.override = false;
@@ -21,7 +22,7 @@ public class FlagBuilder {
     }
 
     public FlagBuilder(String flagName) throws IllegalArgumentException {
-        this(fromId(flagName));
+        this(FlagRegister.byId(flagName));
     }
 
     public IFlag build() {

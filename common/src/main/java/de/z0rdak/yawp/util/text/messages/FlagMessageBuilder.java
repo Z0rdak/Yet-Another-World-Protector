@@ -1,7 +1,8 @@
 package de.z0rdak.yawp.util.text.messages;
 
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckResult;
-import de.z0rdak.yawp.core.flag.RegionFlag;
+
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.Nullable;
@@ -44,11 +45,11 @@ public class FlagMessageBuilder {
      */
     public static Map<String, String> defaultSubstitutesFor(FlagCheckResult result) {
         Map<String, String> substituteMap = new HashMap<>();
-        substituteMap.put(FLAG_TEMPLATE, result.getFlagCheck().getRegionFlag().name);
+        substituteMap.put(FLAG_TEMPLATE, result.getFlagCheck().getRegionFlag().name());
         substituteMap.put(POS_TEMPLATE, tinyBlockPos(result.getFlagCheck().getTarget()));
         substituteMap.put(REGION_TEMPLATE, result.getResponsible().getName());
         substituteMap.put(DIM_TEMPLATE, result.getResponsible().getDim().identifier().toString());
-        if (result.getFlagCheck().getPlayer() != null && RegionFlag.hasPlayerCategory(result.getFlagCheck().getRegionFlag())) {
+        if (result.getFlagCheck().getPlayer() != null && FlagRegister.hasPlayerTag(result.getFlagCheck().getRegionFlag())) {
             substituteMap.put(PLAYER_TEMPLATE, result.getFlagCheck().getPlayer().getScoreboardName());
         }
         return substituteMap;
@@ -78,7 +79,7 @@ public class FlagMessageBuilder {
     }
 
     private static Object[] populateArgs(Map<String, String> substitutes) {
-        var args = new Object[9];
+        var args = new Object[TOKEN_INDEX.size()];
         for (var entry : TOKEN_INDEX.entrySet()) {
             int idx = entry.getValue() - 1; // zero-based for array
             args[idx] = substitutes.getOrDefault(entry.getKey(), "");

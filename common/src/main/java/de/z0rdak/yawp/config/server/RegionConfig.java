@@ -1,7 +1,8 @@
 package de.z0rdak.yawp.config.server;
 
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.constants.Constants;
-import de.z0rdak.yawp.core.flag.RegionFlag;
+
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -82,7 +83,7 @@ public class RegionConfig {
 
     private static boolean isValidDimFlag(Object flag) {
         if (flag instanceof String) {
-            boolean contains = RegionFlag.contains((String) flag);
+            boolean contains = FlagRegister.isRegistered((String) flag);
             if (!contains) {
                 REGION_CONFIG_LOGGER.warn("Invalid default flag supplied for 'dim_default_flags': {}", flag);
             }
@@ -94,7 +95,7 @@ public class RegionConfig {
 
     private static boolean isValidLocalFlag(Object flag) {
         if (flag instanceof String) {
-            boolean contains = RegionFlag.contains((String) flag);
+            boolean contains = FlagRegister.isRegistered((String) flag);
             if (!contains) {
                 REGION_CONFIG_LOGGER.warn("Invalid default flag supplied for 'default_flags': {}", flag);
             }

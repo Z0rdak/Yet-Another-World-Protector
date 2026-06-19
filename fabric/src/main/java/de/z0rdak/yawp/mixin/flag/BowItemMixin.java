@@ -15,8 +15,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
-import static de.z0rdak.yawp.core.flag.RegionFlag.FIRE_BOW;
+import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;import de.z0rdak.yawp.api.FlagRegister;
 import static de.z0rdak.yawp.handler.HandlerUtil.getDimKey;
 import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
 
@@ -27,7 +26,7 @@ public abstract class BowItemMixin {
     void onLooseArrow(ItemStack stack, Level level, LivingEntity entityLiving, int timeLeft, CallbackInfoReturnable<Boolean> cir) {
         Player player = (Player) entityLiving;
         if (isServerSide(player.level())) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), FIRE_BOW, getDimKey(player), player);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), FlagRegister.PLAYER_FIRE_BOW, getDimKey(player), player);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }

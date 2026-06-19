@@ -1,7 +1,8 @@
 package de.z0rdak.yawp.util.text.messages.multiline;
 
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.core.flag.IFlag;
-import de.z0rdak.yawp.core.flag.RegionFlag;
+
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.util.text.Messages;
 import net.minecraft.network.chat.Component;
@@ -54,7 +55,7 @@ public class FlagDetailMessage implements MultiLineMessage<IFlag> {
         MutableComponent override = buildInfoComponent("cli.flag.override", "Override", buildFlagOverrideToggleLink(region, flag, false));
         regionInfoLines.add(state);
         regionInfoLines.add(override);
-        if (RegionFlag.hasPlayerCategory(flag)) {
+        if (FlagRegister.hasPlayerTag(flag)) {
             MutableComponent alert = buildInfoComponent("cli.flag.msg.mute", "Alert", buildFlagMuteToggleLink(region, flag, false));
             MutableComponent message = buildInfoComponent("cli.flag.msg.text", "Message", buildFlagMessageComponent(region, flag));
             regionInfoLines.add(alert);

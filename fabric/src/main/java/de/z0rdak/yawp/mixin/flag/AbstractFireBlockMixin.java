@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.SPAWN_PORTAL;
+import de.z0rdak.yawp.api.FlagRegister;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 
 @Mixin(BaseFireBlock.class)
@@ -22,7 +22,7 @@ public abstract class AbstractFireBlockMixin {
             target = "Lnet/minecraft/world/level/portal/PortalShape;createPortalBlocks(Lnet/minecraft/world/level/LevelAccessor;)V"), cancellable = true)
     private void onSpawnPortal(BlockState state, Level world, BlockPos pos, BlockState oldState, boolean notify, CallbackInfo info) {
         if (isServerSide(world)) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(pos, SPAWN_PORTAL, getDimKey(world));
+            FlagCheckRequest checkEvent = new FlagCheckRequest(pos, FlagRegister.CREATE_PORTAL, getDimKey(world));
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }

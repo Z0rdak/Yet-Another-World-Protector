@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.mixin;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.platform.Services;
@@ -26,7 +27,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 
 @Mixin(ServerLevel.class)
@@ -38,7 +38,7 @@ public class ServerWorldMixin {
     @Inject(method = "tickThunder", locals = LocalCapture.CAPTURE_FAILSOFT, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LightningBolt;setVisualOnly(Z)V"), cancellable = false, allow = 1)
     public void onSpawnLightning(LevelChunk chunk, CallbackInfo ci, ChunkPos chunkPos, boolean bl, int i, int j, ProfilerFiller profiler, BlockPos blockPos, DifficultyInstance localDifficulty, boolean b, LightningBolt lightningEntity) {
         if (isServerSide(chunk.getLevel())) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, LIGHTNING_PROT, getDimKey(chunk.getLevel()));
+            FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, FlagRegister.LIGHTNING_PROT, getDimKey(chunk.getLevel()));
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
@@ -68,14 +68,14 @@ public class ServerWorldMixin {
         ServerLevel world = (ServerLevel) (Object) this;
         if (isServerSide(world)) {
             if (explosionMode == Level.ExplosionInteraction.TNT || explosionMode == Level.ExplosionInteraction.BLOCK) {
-                FlagCheckRequest checkEvent = new FlagCheckRequest(new BlockPos((int) x, (int) y, (int) z), IGNITE_EXPLOSIVES, world.dimension());
+                FlagCheckRequest checkEvent = new FlagCheckRequest(new BlockPos((int) x, (int) y, (int) z), FlagRegister.PLAYER_IGNITE_EXPLOSIVES, world.dimension());
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, denyResult -> ci.cancel());
             }
             if (explosionMode == Level.ExplosionInteraction.MOB) {
-                FlagCheckRequest checkEvent = new FlagCheckRequest(new BlockPos((int) x, (int) y, (int) z), MOB_GRIEFING, world.dimension());
+                FlagCheckRequest checkEvent = new FlagCheckRequest(new BlockPos((int) x, (int) y, (int) z), FlagRegister.MOB_GRIEFING, world.dimension());
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }

@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
@@ -13,8 +14,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.HOE_TILL;
-import static de.z0rdak.yawp.core.flag.RegionFlag.TOOL_SECONDARY_USE;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 
@@ -27,7 +26,7 @@ public abstract class HoeItemMixin {
         Player player = context.getPlayer();
         if (isServerSide(context.getLevel())) {
             if (player != null) {
-                FlagCheckRequest checkEvent = new FlagCheckRequest(pos, TOOL_SECONDARY_USE, getDimKey(player), player);
+                FlagCheckRequest checkEvent = new FlagCheckRequest(pos, FlagRegister.PLAYER_USE_TOOL_SECONDARY, getDimKey(player), player);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
@@ -35,7 +34,7 @@ public abstract class HoeItemMixin {
                     sendFlagMsg(deny);
                     cir.setReturnValue(InteractionResult.PASS);
                 });
-                checkEvent = new FlagCheckRequest(pos, HOE_TILL, getDimKey(player), player);
+                checkEvent = new FlagCheckRequest(pos, FlagRegister.PLAYER_TILL, getDimKey(player), player);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }

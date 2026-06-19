@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.platform.Services;
@@ -20,8 +21,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Set;
-
-import static de.z0rdak.yawp.core.flag.RegionFlag.*;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 
@@ -33,7 +32,7 @@ public abstract class PlayerMixin {
     private void onDropItem(ItemStack stack, boolean includeThrowerName, CallbackInfoReturnable<ItemStack> cir) {
         Player player = (Player) (Object) this;
         if (isServerSide(player)) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), ITEM_DROP, getDimKey(player), player);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), FlagRegister.PLAYER_DROP_ITEM, getDimKey(player), player);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;
             FlagEvaluator.processCheck(checkEvent, deny -> {
@@ -48,7 +47,7 @@ public abstract class PlayerMixin {
     public void onGainLevels(int levels, CallbackInfo ci) {
         Player player = (Player) (Object) this;
         if (isServerSide(player)) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), LEVEL_FREEZE, getDimKey(player), player);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), FlagRegister.PLAYER_GAIN_LEVEL, getDimKey(player), player);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;
             FlagEvaluator.processCheck(checkEvent, deny -> {
@@ -62,7 +61,7 @@ public abstract class PlayerMixin {
     public void onGainExperience(int experience, CallbackInfo ci) {
         Player player = (Player) (Object) this;
         if (isServerSide(player)) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), XP_FREEZE, getDimKey(player), player);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), FlagRegister.PLAYER_GAIN_XP, getDimKey(player), player);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;
             FlagEvaluator.processCheck(checkEvent, deny -> {
@@ -77,7 +76,7 @@ public abstract class PlayerMixin {
         Player self = (Player) (Object) this;
         if (isServerSide(self)) {
             if (source.getEntity() instanceof Player attackingPlayer) {
-                FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), NO_PVP, getDimKey(self), attackingPlayer);
+                FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), FlagRegister.PLAYER_PVP, getDimKey(self), attackingPlayer);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                     return;
                 FlagEvaluator.processCheck(checkEvent, deny -> {
@@ -85,7 +84,7 @@ public abstract class PlayerMixin {
                     ci.cancel();
                 });
             }
-            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), INVINCIBLE, getDimKey(self), self);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), FlagRegister.PLAYER_INVINCIBLE, getDimKey(self), self);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;
             FlagEvaluator.process(checkEvent)
@@ -108,7 +107,7 @@ public abstract class PlayerMixin {
             Player player = (Player) (Object) this;
             if (target == null) return;
             if (target instanceof Player) {
-                FlagCheckRequest checkEvent = new FlagCheckRequest(target.blockPosition(), MELEE_PLAYERS, getDimKey(player), player);
+                FlagCheckRequest checkEvent = new FlagCheckRequest(target.blockPosition(), FlagRegister.PLAYER_MELEE_PLAYERS, getDimKey(player), player);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                     return;
                 FlagEvaluator.processCheck(checkEvent, deny -> {
@@ -117,7 +116,7 @@ public abstract class PlayerMixin {
                 });
             } else {
                 if (isAnimal(target)) {
-                    FlagCheckRequest checkEvent = new FlagCheckRequest(target.blockPosition(), MELEE_ANIMALS, getDimKey(player), player);
+                    FlagCheckRequest checkEvent = new FlagCheckRequest(target.blockPosition(), FlagRegister.PLAYER_MELEE_ANIMALS, getDimKey(player), player);
                     if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                         return;
                     FlagEvaluator.processCheck(checkEvent, deny -> {
@@ -126,7 +125,7 @@ public abstract class PlayerMixin {
                     });
                 }
                 if (isMonster(target)) {
-                    FlagCheckRequest checkEvent = new FlagCheckRequest(target.blockPosition(), MELEE_MONSTERS, getDimKey(player), player);
+                    FlagCheckRequest checkEvent = new FlagCheckRequest(target.blockPosition(), FlagRegister.PLAYER_MELEE_MONSTERS, getDimKey(player), player);
                     if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                         return;
                     FlagEvaluator.processCheck(checkEvent, deny -> {
@@ -135,7 +134,7 @@ public abstract class PlayerMixin {
                     });
                 }
                 if (target instanceof Villager) {
-                    FlagCheckRequest checkEvent = new FlagCheckRequest(target.blockPosition(), MELEE_VILLAGERS, getDimKey(player), player);
+                    FlagCheckRequest checkEvent = new FlagCheckRequest(target.blockPosition(), FlagRegister.PLAYER_MELEE_VILLAGERS, getDimKey(player), player);
                     if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                         return;
                     FlagEvaluator.processCheck(checkEvent, deny -> {
@@ -144,7 +143,7 @@ public abstract class PlayerMixin {
                     });
                 }
                 if (target instanceof WanderingTrader) {
-                    FlagCheckRequest checkEvent = new FlagCheckRequest(target.blockPosition(), MELEE_WANDERING_TRADER, getDimKey(player), player);
+                    FlagCheckRequest checkEvent = new FlagCheckRequest(target.blockPosition(), FlagRegister.PLAYER_MELEE_WANDERING_TRADER, getDimKey(player), player);
                     if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                         return;
                     FlagEvaluator.processCheck(checkEvent, deny -> {
@@ -167,7 +166,7 @@ public abstract class PlayerMixin {
                     return targetRl != null && targetRl.equals(entityRl);
                 });
                 if (isBlockEntityCovered || isCoveredByTag) {
-                    FlagCheckRequest checkEvent = new FlagCheckRequest(target.blockPosition(), BREAK_BLOCKS, getDimKey(player), player);
+                    FlagCheckRequest checkEvent = new FlagCheckRequest(target.blockPosition(), FlagRegister.PLAYER_BREAK_BLOCKS, getDimKey(player), player);
                     if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                         return;
                     FlagEvaluator.processCheck(checkEvent, null, onDeny -> {
@@ -184,7 +183,7 @@ public abstract class PlayerMixin {
         Player player = (Player) (Object) this;
         if (isServerSide(player)) {
             if (player.isFallFlying()) {
-                FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), NO_FLIGHT, getDimKey(player), player);
+                FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), FlagRegister.PLAYER_FLIGHT, getDimKey(player), player);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                     return;
                 FlagEvaluator.processCheck(checkEvent, deny -> {

@@ -8,11 +8,12 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.commands.CommandConstants;
 import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.IFlag;
-import de.z0rdak.yawp.core.flag.RegionFlag;
+
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.util.ChatLinkBuilder;
@@ -20,6 +21,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -39,7 +41,7 @@ import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 public class IFlagArgumentType implements ArgumentType<String> {
 
     public static final Pattern VALID_FLAG_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z\\-][A-Za-z]$");
-    private static final Collection<String> EXAMPLES = RegionFlag.getFlagNames();
+    private static final Collection<String> EXAMPLES = FlagRegister.getFlagNames();
     private static final SimpleCommandExceptionType ERROR_AREA_INVALID = new SimpleCommandExceptionType(Component.translatableWithFallback("cli.arg.flag.parse.invalid", "Unable to parse flag identifier!"));
     private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
             flag -> Component.translatableWithFallback("cli.arg.flag.invalid", "Invalid flag identifier: '%s'", flag)
@@ -51,18 +53,22 @@ public class IFlagArgumentType implements ArgumentType<String> {
     @Nullable
     public static IFlag getFlag(CommandContext<CommandSourceStack> context, String argName) throws CommandSyntaxException {
         RegionType regionType = RegionArgumentType.getRegionType(context);
-        String flagIdentifier = context.getArgument(argName, String.class);
-        if (RegionFlag.contains(flagIdentifier) && regionType != null) {
-            IProtectedRegion region = RegionArgumentType.getRegion(context, regionType);
-            if (region.containsFlag(flagIdentifier)) {
-                return region.getFlag(flagIdentifier);
-            } else {
-                MutableComponent flagAddHint = Component.translatableWithFallback("cli.msg.info.region.flag.add-hint", "Add flag by clicking: %s", ChatLinkBuilder.buildAddFlagLink(region, flagIdentifier));
-                MutableComponent flagNotPresentInfo = Component.translatableWithFallback("cli.msg.info.region.flag.not-present", "Region %s does not contain flag '%s'. %s", buildRegionInfoLink(region), flagIdentifier, flagAddHint);
-                sendCmdFeedback(context.getSource(), flagNotPresentInfo);
-                return null;
+        var flagIdentifier = context.getArgument(argName, Identifier.class);
+        try {
+            var flag = FlagRegister.byId(flagIdentifier);
+            if (regionType != null) {
+                IProtectedRegion region = RegionArgumentType.getRegion(context, regionType);
+                if (region.containsFlag(flag)) {
+                    return region.getFlag(flag.name());
+                } else {
+                    MutableComponent flagAddHint = Component.translatableWithFallback("cli.msg.info.region.flag.add-hint", "Add flag by clicking: %s", ChatLinkBuilder.buildAddFlagLink(region, flag.name()));
+                    MutableComponent flagNotPresentInfo = Component.translatableWithFallback("cli.msg.info.region.flag.not-present", "Region %s does not contain flag '%s'. %s", buildRegionInfoLink(region), flagIdentifier, flagAddHint);
+                    sendCmdFeedback(context.getSource(), flagNotPresentInfo);
+                    return null;
+                }
             }
-        } else {
+            return null;
+        }catch (IllegalArgumentException e) {
             sendCmdFeedback(context.getSource(), Component.literal("Invalid flag identifier: '" + flagIdentifier + "'!"));
             throw ERROR_INVALID_VALUE.create(flagIdentifier);
         }
@@ -129,7 +135,7 @@ public class IFlagArgumentType implements ArgumentType<String> {
                 .collect(Collectors.toList());
         switch (flagEditType) {
             case ADD: // show flags not in region
-                List<String> flags = RegionFlag.getFlagNames();
+                List<String> flags = FlagRegister.getFlagNames();
                 flags.removeAll(flagsInRegion);
                 return flags;
             case REMOVE: // Only show existing flags

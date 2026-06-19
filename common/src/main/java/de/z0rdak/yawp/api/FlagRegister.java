@@ -144,8 +144,12 @@ public class FlagRegister {
      * @throws IllegalArgumentException If the flag is not registered.
      */
     public static Flag byId(String flagIdentifier) throws IllegalArgumentException {
-        if (isRegistered(flagIdentifier)) {
-            return flagRegister.get(Identifier.parse(flagIdentifier));
+        return byId(Identifier.parse(flagIdentifier));
+    }
+
+    public static Flag byId(Identifier flagIdentifier) throws IllegalArgumentException {
+        if (isRegistered(flagIdentifier.toString())) {
+            return flagRegister.get(flagIdentifier);
         }
         throw new IllegalArgumentException("Invalid region flag identifier supplied");
     }
@@ -239,6 +243,14 @@ public class FlagRegister {
         return tags.stream().anyMatch(flagTags::contains);
     }
 
+    public static boolean isSpawningFlag(Flag flag) {
+        return flag.flagInfo().tags().contains(FlagTagRegister.SPAWNING);
+    }
+
+    public static boolean isBeneficial(Flag flag) {
+        return flag.flagInfo().tags().contains(FlagTagRegister.BENEFICIAL);
+    }
+
     public static final Flag PLAYER_BREED_ANIMAL = new Flag(flagId("player/breed_animals"),
             new FlagMetaInfo(Set.of(FlagTagRegister.ENTITY, FlagTagRegister.PLAYER), FlagFrequency.LOW));
     public static final Flag PLAYER_MOUNT = new Flag(flagId("player/mount"),
@@ -251,11 +263,11 @@ public class FlagRegister {
             new FlagMetaInfo(Set.of(FlagTagRegister.PLAYER, FlagTagRegister.BLOCK), FlagFrequency.LOW));
     public static final Flag PLAYER_BREAK_BLOCKS = new Flag(flagId("player/break_blocks"),
             new FlagMetaInfo(Set.of(FlagTagRegister.BLOCK, FlagTagRegister.PLAYER), FlagFrequency.NORMAL));
-    public static final Flag PLAYER_USE_CONTAINER = new Flag(flagId("player/use_container"),
+    public static final Flag PLAYER_OPEN_CONTAINER = new Flag(flagId("player/open_container"),
             new FlagMetaInfo(Set.of(FlagTagRegister.BLOCK, FlagTagRegister.PLAYER), FlagFrequency.NORMAL));
     public static final Flag PLAYER_GAIN_LOOT = new Flag(flagId("player/gain_loot"),
             new FlagMetaInfo(Set.of(), FlagFrequency.LOW));
-    public static final Flag PLAYER_USE_CHEST_ACCESS = new Flag(flagId("player/use_enderchest"),
+    public static final Flag PLAYER_OPEN_ENDER_CHEST = new Flag(flagId("player/open_enderchest"),
             new FlagMetaInfo(Set.of(FlagTagRegister.PLAYER, FlagTagRegister.BLOCK), FlagFrequency.LOW));
     public static final Flag PLAYER_ENTER_LEVEL = new Flag(flagId("player/enter_level"),
             new FlagMetaInfo(Set.of(FlagTagRegister.PLAYER), FlagFrequency.LOW));
@@ -267,19 +279,25 @@ public class FlagRegister {
             new FlagMetaInfo(Set.of(FlagTagRegister.BLOCK, FlagTagRegister.PLAYER), FlagFrequency.LOW));
     public static final Flag PLAYER_HURT = new Flag(flagId("player/hurt"),
             new FlagMetaInfo(Set.of(FlagTagRegister.PROTECTION), FlagFrequency.NORMAL));
+    /**
+     * ???
+     */
     public static final Flag PLAYER_DROP_ITEM = new Flag(flagId("player/drop_item"),
             new FlagMetaInfo(Set.of(FlagTagRegister.PLAYER), FlagFrequency.NORMAL));
     public static final Flag PLAYER_PICKUP_ITEM = new Flag(flagId("player/item_pickup"),
             new FlagMetaInfo(Set.of(FlagTagRegister.PLAYER), FlagFrequency.NORMAL));
     public static final Flag PLAYER_APPLY_KNOCKBACK = new Flag(flagId("player/apply_knockback"),
             new FlagMetaInfo(Set.of(FlagTagRegister.PLAYER, FlagTagRegister.ENTITY), FlagFrequency.NORMAL));
+    //
     public static final Flag PLAYER_KNOCKBACK = new Flag(flagId("player/knockback"),
             new FlagMetaInfo(Set.of(FlagTagRegister.PLAYER, FlagTagRegister.ENTITY), FlagFrequency.NORMAL));
     public static final Flag PLAYER_GAIN_LEVEL = new Flag(flagId("player/gain_level"),
             new FlagMetaInfo(Set.of(FlagTagRegister.PLAYER), FlagFrequency.NORMAL));
     public static final Flag PLAYER_WALKER_FREEZE = new Flag(flagId("player/walker_freeze"),
             new FlagMetaInfo(Set.of(FlagTagRegister.PLAYER, FlagTagRegister.BLOCK), FlagFrequency.NORMAL));
-    public static final Flag PLAYER_FALL_DAMAGE = new Flag(flagId("player/fall_damage"),
+    public static final Flag PLAYER_TAKE_FALL_DAMAGE = new Flag(flagId("player/fall_damage"),
+            new FlagMetaInfo(Set.of(FlagTagRegister.PROTECTION, FlagTagRegister.PLAYER), FlagFrequency.NORMAL));
+    public static final Flag PLAYER_INVINCIBLE = new Flag(flagId("player/invincible"),
             new FlagMetaInfo(Set.of(FlagTagRegister.PROTECTION, FlagTagRegister.PLAYER), FlagFrequency.NORMAL));
     public static final Flag PLAYER_FIRE_BOW = new Flag(flagId("player/fire_bow"),
             new FlagMetaInfo(Set.of(FlagTagRegister.PLAYER, FlagTagRegister.ENTITY), FlagFrequency.NORMAL));
@@ -311,9 +329,9 @@ public class FlagRegister {
             new FlagMetaInfo(Set.of(FlagTagRegister.PLAYER, FlagTagRegister.BLOCK), FlagFrequency.LOW));
     public static final Flag PLAYER_SHOVEL_PATH = new Flag(flagId("player/shovel_path"),
             new FlagMetaInfo(Set.of(FlagTagRegister.PLAYER, FlagTagRegister.BLOCK), FlagFrequency.LOW));
-    public static final Flag PLAYER_CREATE_PORTAL = new Flag(flagId("player/create_portal"),
-            new FlagMetaInfo(Set.of(FlagTagRegister.PLAYER, FlagTagRegister.BLOCK), FlagFrequency.LOW));
-    public static final Flag PLAYER_TOOL_SECONDARY = new Flag(flagId("player/tools_secondary"),
+    public static final Flag CREATE_PORTAL = new Flag(flagId("env/create_portal"),
+            new FlagMetaInfo(Set.of(FlagTagRegister.ENVIRONMENT, FlagTagRegister.BLOCK), FlagFrequency.LOW));
+    public static final Flag PLAYER_USE_TOOL_SECONDARY = new Flag(flagId("player/tools_secondary"),
             new FlagMetaInfo(Set.of(FlagTagRegister.PLAYER, FlagTagRegister.ITEM), FlagFrequency.NORMAL));
     public static final Flag PLAYER_TRAMPLE_FARMLAND = new Flag(flagId("player/trample_farmland"),
             new FlagMetaInfo(Set.of(FlagTagRegister.PLAYER, FlagTagRegister.BLOCK), FlagFrequency.LOW));
@@ -395,21 +413,21 @@ public class FlagRegister {
     public static final Flag SNOW_MELTING = new Flag(flagId("env/snow_melting"),
             new FlagMetaInfo(Set.of(FlagTagRegister.BLOCK, FlagTagRegister.ENVIRONMENT), FlagFrequency.TICK));
     public static final Flag SPAWNING_ALL = new Flag(flagId("spawning/all"),
-            new FlagMetaInfo(Set.of(FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY), FlagFrequency.TICK));
+            new FlagMetaInfo(Set.of(FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY, FlagTagRegister.SPAWNING), FlagFrequency.TICK));
     public static final Flag SPAWNING_ANIMAL = new Flag(flagId("spawning/animals"),
-            new FlagMetaInfo(Set.of(FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY), FlagFrequency.NORMAL));
+            new FlagMetaInfo(Set.of(FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY, FlagTagRegister.SPAWNING), FlagFrequency.NORMAL));
     public static final Flag SPAWNING_GOLEM = new Flag(flagId("spawning/golems"),
-            new FlagMetaInfo(Set.of(FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY), FlagFrequency.LOW));
+            new FlagMetaInfo(Set.of(FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY, FlagTagRegister.SPAWNING), FlagFrequency.LOW));
     public static final Flag SPAWNING_MONSTER = new Flag(flagId("spawning/monsters"),
-            new FlagMetaInfo(Set.of(FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY), FlagFrequency.NORMAL));
+            new FlagMetaInfo(Set.of(FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY, FlagTagRegister.SPAWNING), FlagFrequency.NORMAL));
     public static final Flag SPAWNING_SLIME = new Flag(flagId("spawning/slimes"),
-            new FlagMetaInfo(Set.of(FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY), FlagFrequency.NORMAL));
+            new FlagMetaInfo(Set.of(FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY, FlagTagRegister.SPAWNING), FlagFrequency.NORMAL));
     public static final Flag SPAWNING_TRADER = new Flag(flagId("spawning/traders"),
-            new FlagMetaInfo(Set.of(FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY), FlagFrequency.LOW));
+            new FlagMetaInfo(Set.of(FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY, FlagTagRegister.SPAWNING), FlagFrequency.LOW));
     public static final Flag SPAWNING_VILLAGER = new Flag(flagId("spawning/villagers"),
-            new FlagMetaInfo(Set.of(FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY), FlagFrequency.LOW));
+            new FlagMetaInfo(Set.of(FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY, FlagTagRegister.SPAWNING), FlagFrequency.LOW));
     public static final Flag SPAWNING_XP = new Flag(flagId("spawning/xp"),
-            new FlagMetaInfo(Set.of(FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY), FlagFrequency.NORMAL));
+            new FlagMetaInfo(Set.of(FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY, FlagTagRegister.SPAWNING), FlagFrequency.NORMAL));
     public static final Flag USE_PORTAL = new Flag(flagId("env/enter_portal"),
             new FlagMetaInfo(Set.of(FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY), FlagFrequency.NORMAL));
     public static final Flag USE_PORTAL_ANIMALS = new Flag(flagId("env/enter_portal_animals"),
@@ -440,9 +458,9 @@ public class FlagRegister {
         registerFlag(PLAYER_UNMOUNTING);
         registerFlag(PLAYER_STRIP_WOOD);
         registerFlag(PLAYER_BREAK_BLOCKS);
-        registerFlag(PLAYER_USE_CONTAINER);
         registerFlag(PLAYER_GAIN_LOOT);
-        registerFlag(PLAYER_USE_CHEST_ACCESS);
+        registerFlag(PLAYER_OPEN_CONTAINER);
+        registerFlag(PLAYER_OPEN_ENDER_CHEST);
         registerFlag(PLAYER_ENTER_LEVEL);
         registerFlag(PLAYER_USE_COMMANDS);
         registerFlag(PLAYER_TILL);
@@ -454,7 +472,8 @@ public class FlagRegister {
         registerFlag(PLAYER_KNOCKBACK);
         registerFlag(PLAYER_GAIN_LEVEL);
         registerFlag(PLAYER_WALKER_FREEZE);
-        registerFlag(PLAYER_FALL_DAMAGE);
+        registerFlag(PLAYER_TAKE_FALL_DAMAGE);
+        registerFlag(PLAYER_INVINCIBLE);
         registerFlag(PLAYER_FIRE_BOW);
         registerFlag(PLAYER_MELEE_ANIMALS);
         registerFlag(PLAYER_MELEE_MONSTERS);
@@ -470,8 +489,8 @@ public class FlagRegister {
         registerFlag(PLAYER_CHAT);
         registerFlag(PLAYER_SET_SPAWN);
         registerFlag(PLAYER_SHOVEL_PATH);
-        registerFlag(PLAYER_CREATE_PORTAL);
-        registerFlag(PLAYER_TOOL_SECONDARY);
+        registerFlag(CREATE_PORTAL);
+        registerFlag(PLAYER_USE_TOOL_SECONDARY);
         registerFlag(PLAYER_TRAMPLE_FARMLAND);
         registerFlag(PLAYER_USE_BLOCKS);
         registerFlag(PLAYER_USE_BONEMEAL);

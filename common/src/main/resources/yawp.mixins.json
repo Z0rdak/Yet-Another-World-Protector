@@ -15,7 +15,7 @@
     "ServerWorldMixin",
     "SignBlockMixin",
     "SnowLayerBlockMixin",
-    "flag.player.PlayerEntityMixin",
+    "flag.player.PlayerEntityMixin"
   ],
   "client": [
   ],

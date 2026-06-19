@@ -2,6 +2,7 @@ package de.z0rdak.yawp.mixin.flag.mobgrief;
 
 
 import de.z0rdak.yawp.api.FlagEvaluator;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.world.entity.Mob;
@@ -11,8 +12,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.MOB_GRIEFING;
-import static de.z0rdak.yawp.core.flag.RegionFlag.ZOMBIE_DOOR_PROT;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 
 
@@ -25,7 +24,7 @@ public abstract class BreakDoorGoal extends DoorInteractGoal {
     @Inject(method = "canUse", at = @At(value = "HEAD"), cancellable = true, allow = 1)
     public void onCanStart(CallbackInfoReturnable<Boolean> cir) {
         if (isServerSide(mob.level())) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(mob.blockPosition(), ZOMBIE_DOOR_PROT, getDimKey(mob));
+            FlagCheckRequest checkEvent = new FlagCheckRequest(mob.blockPosition(), FlagRegister.ZOMBIE_DOOR_PROT, getDimKey(mob));
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
@@ -33,7 +32,7 @@ public abstract class BreakDoorGoal extends DoorInteractGoal {
                 cir.setReturnValue(false);
             });
 
-            checkEvent = new FlagCheckRequest(mob.blockPosition(), MOB_GRIEFING, getDimKey(mob));
+            checkEvent = new FlagCheckRequest(mob.blockPosition(), FlagRegister.MOB_GRIEFING, getDimKey(mob));
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }

@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.mixin;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
@@ -14,8 +15,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.*;
-
 @Mixin(FlowingFluid.class)
 public class FlowingFluidMixin {
 
@@ -25,8 +24,8 @@ public class FlowingFluidMixin {
             // Should never happen, but skip check if it does
             return;
         }
-        if (!Services.FLAG_CONFIG.isDisabledByConfig(FLUID_FLOW.name)) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(pos, FLUID_FLOW, level.dimension());
+        if (!Services.FLAG_CONFIG.isDisabledByConfig(FlagRegister.FLUID_FLOW.name())) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(pos, FlagRegister.FLUID_FLOW, level.dimension());
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
@@ -38,9 +37,9 @@ public class FlowingFluidMixin {
             }
         }
 
-        if (!Services.FLAG_CONFIG.isDisabledByConfig(WATER_FLOW.name)) {
+        if (!Services.FLAG_CONFIG.isDisabledByConfig(FlagRegister.WATER_FLOW.name())) {
             if ( fluidState.getType() instanceof WaterFluid) {
-                FlagCheckRequest specificFluidCheckEvent = new FlagCheckRequest(pos, WATER_FLOW, level.dimension());
+                FlagCheckRequest specificFluidCheckEvent = new FlagCheckRequest(pos, FlagRegister.WATER_FLOW, level.dimension());
                 if (Services.FLAG_EVENT_DISPATCHER.post(specificFluidCheckEvent)) {
                     return;
                 }
@@ -50,9 +49,9 @@ public class FlowingFluidMixin {
             }
         }
 
-        if (!Services.FLAG_CONFIG.isDisabledByConfig(LAVA_FLOW.name)) {
+        if (!Services.FLAG_CONFIG.isDisabledByConfig(FlagRegister.LAVA_FLOW.name())) {
             if ( fluidState.getType() instanceof LavaFluid) {
-                FlagCheckRequest specificFluidCheckEvent = new FlagCheckRequest(pos, LAVA_FLOW, level.dimension());
+                FlagCheckRequest specificFluidCheckEvent = new FlagCheckRequest(pos, FlagRegister.LAVA_FLOW, level.dimension());
                 if (Services.FLAG_EVENT_DISPATCHER.post(specificFluidCheckEvent)) {
                     return;
                 }

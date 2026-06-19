@@ -1,5 +1,7 @@
 package de.z0rdak.yawp.core.flag;
 
+import de.z0rdak.yawp.api.Flag;
+
 public interface IFlag extends Comparable<IFlag> {
 
     /**
@@ -8,17 +10,9 @@ public interface IFlag extends Comparable<IFlag> {
      * Mod:Name -> Identifier in the future.
      *
      * @return unique name for flag.
-     * @see RegionFlag
+     * @see Flag
      */
     String getName();
-
-    /**
-     * Returns the flag type of the flag.     *
-     *
-     * @return the flag type enum value of the flag.
-     * @see FlagType
-     */
-    FlagType getType();
 
     /**
      * Returns whether the flag does override the same flag defined in child regions. <br>

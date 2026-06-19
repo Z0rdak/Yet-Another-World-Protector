@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.world.entity.TamableAnimal;
@@ -10,7 +11,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.ANIMAL_TAMING;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 
@@ -20,7 +20,7 @@ public abstract class TameableEntityMixin {
     public void onAnimalTame(Player player, CallbackInfo ci) {
         TamableAnimal self = (TamableAnimal) (Object) this;
         if (isServerSide(self.level())) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), ANIMAL_TAMING, getDimKey(self), player);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), FlagRegister.PLAYER_TAME_ANIMAL, getDimKey(self), player);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;
             FlagEvaluator.processCheck(checkEvent, deny -> {

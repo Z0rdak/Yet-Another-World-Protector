@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.world.entity.ExperienceOrb;
@@ -10,19 +11,17 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.XP_PICKUP;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 
 @Mixin(ExperienceOrb.class)
 public abstract class ExperienceOrbEntityMixin {
 
-    @Inject(method = "playerTouch", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;take(Lnet/minecraft/world/entity/Entity;I)V"),
-            cancellable = true, allow = 1)
+    @Inject(method = "playerTouch", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;take(Lnet/minecraft/world/entity/Entity;I)V"), cancellable = true, allow = 1)
     public void onPickUpExperience(Player player, CallbackInfo ci) {
         ExperienceOrb xpOrb = (ExperienceOrb) (Object) this;
         if (isServerSide(xpOrb.level())) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(xpOrb.blockPosition(), XP_PICKUP, getDimKey(player), player);
+            FlagCheckRequest checkEvent = new FlagCheckRequest(xpOrb.blockPosition(), FlagRegister.PLAYER_PICKUP_XP, getDimKey(player), player);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }

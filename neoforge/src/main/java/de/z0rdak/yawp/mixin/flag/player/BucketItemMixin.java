@@ -1,6 +1,7 @@
 package de.z0rdak.yawp.mixin.flag.player;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
+import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
@@ -19,8 +20,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.PLACE_FLUIDS;
-import static de.z0rdak.yawp.core.flag.RegionFlag.SCOOP_FLUIDS;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 import static de.z0rdak.yawp.api.MessageSender.sendFlagMsg;
 
@@ -32,7 +31,7 @@ public abstract class BucketItemMixin {
     public void onFillBucket(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir, ItemStack itemStack, BlockHitResult blockHitResult, BlockPos blockPos, Direction direction, BlockPos blockPos2) {
         if (isServerSide(world)) {
             if (user != null) {
-                FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, SCOOP_FLUIDS, getDimKey(world), user);
+                FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, FlagRegister.PLAYER_SCOOP_FLUIDS, getDimKey(world), user);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
@@ -49,7 +48,7 @@ public abstract class BucketItemMixin {
     public void onEmptyBucket(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir, ItemStack itemStack, BlockHitResult blockHitResult, BlockPos blockPos, Direction direction, BlockPos blockPos2, BlockState blockState, BlockPos blockPos3) {
         if (isServerSide(world)) {
             if (user != null) {
-                FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos3, PLACE_FLUIDS, getDimKey(world), user);
+                FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos3, FlagRegister.PLAYER_PLACE_FLUIDS, getDimKey(world), user);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }

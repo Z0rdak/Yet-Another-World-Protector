@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static de.z0rdak.yawp.core.flag.RegionFlag.*;
+import de.z0rdak.yawp.api.FlagRegister;
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
 
 @Mixin(ServerLevel.class)
@@ -28,56 +28,56 @@ public class ServerWorldMixin {
         if (isServerSide(entity.level())) {
             FlagCheckRequest checkEvent;
             if (entity instanceof Mob) { // should not cover paintings, armor stands, item entities, players
-                checkEvent = new FlagCheckRequest(entity.blockPosition(), SPAWNING_ALL, getDimKey(entity));
+                checkEvent = new FlagCheckRequest(entity.blockPosition(), FlagRegister.SPAWNING_ALL, getDimKey(entity));
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, deny -> cir.setReturnValue(false));
             }
             if (isMonster(entity) || hasMonsterJockey(entity)) {
-                checkEvent = new FlagCheckRequest(entity.blockPosition(), SPAWNING_MONSTER, getDimKey(entity));
+                checkEvent = new FlagCheckRequest(entity.blockPosition(), FlagRegister.SPAWNING_MONSTER, getDimKey(entity));
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, deny -> cir.setReturnValue(false));
             }
             if (isAnimal(entity)) {
-                checkEvent = new FlagCheckRequest(entity.blockPosition(), SPAWNING_ANIMAL, getDimKey(entity));
+                checkEvent = new FlagCheckRequest(entity.blockPosition(), FlagRegister.SPAWNING_ANIMAL, getDimKey(entity));
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, deny -> cir.setReturnValue(false));
             }
             if (isVillager(entity)) {
-                checkEvent = new FlagCheckRequest(entity.blockPosition(), SPAWNING_VILLAGER, getDimKey(entity));
+                checkEvent = new FlagCheckRequest(entity.blockPosition(), FlagRegister.SPAWNING_VILLAGER, getDimKey(entity));
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, deny -> cir.setReturnValue(false));
             }
             if (entity instanceof WanderingTrader || entity instanceof TraderLlama) {
-                checkEvent = new FlagCheckRequest(entity.blockPosition(), SPAWNING_TRADER, getDimKey(entity));
+                checkEvent = new FlagCheckRequest(entity.blockPosition(), FlagRegister.SPAWNING_TRADER, getDimKey(entity));
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, deny -> cir.setReturnValue(false));
             }
             if (entity instanceof SnowGolem || entity instanceof IronGolem) {
-                checkEvent = new FlagCheckRequest(entity.blockPosition(), SPAWNING_GOLEM, getDimKey(entity));
+                checkEvent = new FlagCheckRequest(entity.blockPosition(), FlagRegister.SPAWNING_GOLEM, getDimKey(entity));
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, deny -> cir.setReturnValue(false));
             }
             if (entity instanceof Slime) {
-                checkEvent = new FlagCheckRequest(entity.blockPosition(), SPAWNING_SLIME, getDimKey(entity));
+                checkEvent = new FlagCheckRequest(entity.blockPosition(), FlagRegister.SPAWNING_SLIME, getDimKey(entity));
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
                 FlagEvaluator.processCheck(checkEvent, deny -> cir.setReturnValue(false));
             }
             if (entity instanceof ExperienceOrb) {
-                checkEvent = new FlagCheckRequest(entity.blockPosition(), SPAWNING_XP, getDimKey(entity));
+                checkEvent = new FlagCheckRequest(entity.blockPosition(), FlagRegister.SPAWNING_XP, getDimKey(entity));
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }

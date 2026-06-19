@@ -1,7 +1,8 @@
 package de.z0rdak.yawp.api.events.flag;
 
+import de.z0rdak.yawp.api.Flag;
 import de.z0rdak.yawp.api.events.Cancelable;
-import de.z0rdak.yawp.core.flag.RegionFlag;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
@@ -33,7 +34,7 @@ public final class FlagCheckRequest implements Cancelable {
     /**
      * The flag that is checked.
      */
-    private final RegionFlag regionFlag;
+    private final Flag regionFlag;
 
     /**
      * Internal Identifier to relate a flag check to its result.
@@ -48,7 +49,7 @@ public final class FlagCheckRequest implements Cancelable {
      * @param dimension dimension where to look for regions at the target pos
      * @param player the player to consider permissions for during check
      */
-    public FlagCheckRequest(BlockPos target, RegionFlag regionFlag, ResourceKey<Level> dimension, @Nullable Player player) {
+    public FlagCheckRequest(BlockPos target, Flag regionFlag, ResourceKey<Level> dimension, @Nullable Player player) {
         this.player = player;
         this.target = target;
         this.dimension = dimension;
@@ -63,7 +64,7 @@ public final class FlagCheckRequest implements Cancelable {
      * @param dimension dimension where to look for regions at the target pos
      * @param player to consider permissions for during check
      */
-    public FlagCheckRequest(BlockPos target, RegionFlag regionFlag, ResourceKey<Level> dimension, @Nullable Player player, String id) {
+    public FlagCheckRequest(BlockPos target, Flag regionFlag, ResourceKey<Level> dimension, @Nullable Player player, String id) {
         this.player = player;
         this.target = target;
         this.dimension = dimension;
@@ -71,7 +72,7 @@ public final class FlagCheckRequest implements Cancelable {
         this.id = id;
     }
 
-    public FlagCheckRequest(BlockPos target, RegionFlag regionFlag, ResourceKey<Level> dimension) {
+    public FlagCheckRequest(BlockPos target, Flag regionFlag, ResourceKey<Level> dimension) {
         this(target, regionFlag, dimension, null);
     }
 
@@ -83,7 +84,7 @@ public final class FlagCheckRequest implements Cancelable {
         return this.target;
     }
 
-    public RegionFlag getRegionFlag() {
+    public Flag getRegionFlag() {
         return regionFlag;
     }
 
