@@ -29,7 +29,7 @@ public class ChildRegionSuggestionProvider implements SuggestionProvider<Command
         var children = parent.getChildren().values();
         if (children.isEmpty()) {
             if (ctx.getSource().getPlayer() instanceof ServerPlayer player) {
-                overLayMessage(player, Component.translatableWithFallback("cli.arg.region.add.child.no-children", "Region %s has no child regions.", buildRegionInfoLink(region)));
+                overLayMessage(player, Component.translatableWithFallback("cli.arg.region.add.child.no-children", "Region %s has no child regions.", buildRegionInfoLink(parent)));
             }
             return Suggestions.empty();
         }
