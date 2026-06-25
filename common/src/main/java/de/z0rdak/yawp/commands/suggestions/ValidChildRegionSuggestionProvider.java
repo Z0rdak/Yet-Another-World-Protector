@@ -10,14 +10,20 @@ import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.RegionType;
 import de.z0rdak.yawp.data.region.LevelRegionData;
+import de.z0rdak.yawp.util.ChatLinkBuilder;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+
+import static de.z0rdak.yawp.api.MessageSender.overLayMessage;
+import static de.z0rdak.yawp.util.ChatLinkBuilder.buildRegionInfoLink;
 
 /**
  * Suggests regions that can be assigned as children of the region supplied
@@ -43,18 +49,25 @@ import java.util.concurrent.CompletableFuture;
 public class ValidChildRegionSuggestionProvider implements SuggestionProvider<CommandSourceStack> {
 
     @Override
-    public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) {
-        IMarkableRegion parent = ArgumentUtil.getLocalRegionArgument(context);
+    public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder) {
+        IMarkableRegion parent = ArgumentUtil.getLocalRegionArgument(ctx);
         var maybeLevelData = RegionManager.get().getLevelRegionData(parent.getDim());
         if (maybeLevelData.isEmpty()) {
             return Suggestions.empty();
         }
         LevelRegionData levelData = maybeLevelData.get();
-        levelData.getLocalList().stream()
+        var validChildren = levelData.getLocalList().stream()
                 .filter(candidate -> isValidChild(parent, candidate))
-                .forEach(candidate -> builder.suggest(candidate.getName()));
+                .map(IMarkableRegion::getName)
+                .toList();
+        if (validChildren.isEmpty()) {
+            if (ctx.getSource().getPlayer() instanceof ServerPlayer player) {
+                overLayMessage(player ,Component.translatableWithFallback("cli.arg.region.add.child.no-valid", "There are no valid child regions for region %s.", ChatLinkBuilder.buildRegionInfoLink(parent)));
+            }
+            return Suggestions.empty();
+        }
         // TODO: permission check here?
-        return builder.buildFuture();
+        return SharedSuggestionProvider.suggest(validChildren, builder);
     }
 
     private static boolean isValidChild(IMarkableRegion parent, IMarkableRegion candidate) {

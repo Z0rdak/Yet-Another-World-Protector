@@ -9,8 +9,14 @@ import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.data.region.LevelRegionData;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.concurrent.CompletableFuture;
+
+import static de.z0rdak.yawp.api.MessageSender.overLayMessage;
+import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
+import static de.z0rdak.yawp.util.ChatLinkBuilder.buildRegionInfoLink;
 
 /**
 
@@ -18,8 +24,15 @@ import java.util.concurrent.CompletableFuture;
 public class ChildRegionSuggestionProvider implements SuggestionProvider<CommandSourceStack> {
 
     @Override
-    public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) {
-        IMarkableRegion parent = ArgumentUtil.getLocalRegionArgument(context);
+    public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder) {
+        IMarkableRegion parent = ArgumentUtil.getLocalRegionArgument(ctx);
+        var children = parent.getChildren().values();
+        if (children.isEmpty()) {
+            if (ctx.getSource().getPlayer() instanceof ServerPlayer player) {
+                overLayMessage(player, Component.translatableWithFallback("cli.arg.region.add.child.no-children", "Region %s has no child regions.", buildRegionInfoLink(region)));
+            }
+            return Suggestions.empty();
+        }
         parent.getChildren().values()
                 .stream()
                 .map(IMarkableRegion.class::cast)
