@@ -7,18 +7,17 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import de.z0rdak.yawp.api.Flag;
 import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.commands.CommandConstants;
 import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.constants.Constants;
-import de.z0rdak.yawp.core.area.DisplayType;
+import de.z0rdak.yawp.core.area.visuals.DisplayType;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
 
 import de.z0rdak.yawp.core.region.*;
-import de.z0rdak.yawp.data.region.LevelRegionData;
+import de.z0rdak.yawp.data.region.LevelData;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.ChatLinkBuilder;
 import net.minecraft.commands.CommandSourceStack;
@@ -183,10 +182,10 @@ public class ArgumentUtil {
             return RegionManager.get().getGlobalRegion();
         }
         return RegionManager.get().getLevelRegionData(id)
-                .map(LevelRegionData::getDim)
+                .map(LevelData::getDim)
                 .orElse(null);
     }
-    public static LevelRegionData getLevelDataFor(CommandContext<CommandSourceStack> context, String argName) throws CommandSyntaxException {
+    public static LevelData getLevelDataFor(CommandContext<CommandSourceStack> context, String argName) throws CommandSyntaxException {
         var regionIdRl = IdentifierArgument.getId(context, argName);
         var regionIdentifier = regionIdRl.toString();
         var region = resolveRootRegion(regionIdRl);
@@ -251,7 +250,7 @@ public class ArgumentUtil {
         }
     }
 
-    public static LevelRegionData getLevelDataArgument(CommandContext<CommandSourceStack> ctx) {
+    public static LevelData getLevelDataArgument(CommandContext<CommandSourceStack> ctx) {
         try {
             return getLevelDataFor(ctx, REGION.toString());
         } catch (CommandSyntaxException e) {
@@ -291,11 +290,11 @@ public class ArgumentUtil {
             case GLOBAL:
                 return RegionManager.get().getGlobalRegion();
             case DIMENSION: {
-                LevelRegionData dimCache = ArgumentUtil.getLevelDataArgument(ctx);
+                LevelData dimCache = ArgumentUtil.getLevelDataArgument(ctx);
                 return dimCache.getDim();
             }
             case LOCAL: {
-                LevelRegionData dimCache = ArgumentUtil.getLevelDataArgument(ctx);
+                LevelData dimCache = ArgumentUtil.getLevelDataArgument(ctx);
                 String regionName = ctx.getArgument(CommandConstants.LOCAL.toString(), String.class);
                 if (!dimCache.hasLocal(regionName)) {
                     sendCmdFeedback(ctx.getSource(), Component.literal("No region with name '" + regionName + "' defined in dim '" + dimCache.getDim().getName() + "'"));
@@ -316,7 +315,7 @@ public class ArgumentUtil {
 
     public static IProtectedRegion getTargetLocalRegionArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         String regionName = ctx.getArgument(TARGET_REGION.toString(), String.class);
-        LevelRegionData dimCache = ArgumentUtil.getTargetDimRegionArgument(ctx);
+        LevelData dimCache = ArgumentUtil.getTargetDimRegionArgument(ctx);
         if (!dimCache.hasLocal(regionName)) {
             sendCmdFeedback(ctx.getSource(), Component.literal("No region with name '" + regionName + "' defined in dim '" + dimCache.getDim().getName() + "'"));
             throw ERROR_INVALID_VALUE.create(regionName);
@@ -330,10 +329,10 @@ public class ArgumentUtil {
         }
     }
 
-    public static LevelRegionData getTargetDimRegionArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+    public static LevelData getTargetDimRegionArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         return getDimRegion(ctx, TARGET_DIM.toString());
     }
-    public static LevelRegionData getDimRegion(CommandContext<CommandSourceStack> context, String dim) throws CommandSyntaxException {
+    public static LevelData getDimRegion(CommandContext<CommandSourceStack> context, String dim) throws CommandSyntaxException {
         Identifier levelRl = context.getArgument(dim, Identifier.class);
         boolean isValidDimIdentifier = context.getSource().levels().stream()
                 .map(ResourceKey::identifier)

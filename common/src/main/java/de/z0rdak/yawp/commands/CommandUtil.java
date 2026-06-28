@@ -1,9 +1,11 @@
 package de.z0rdak.yawp.commands;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.api.Flag;
@@ -12,8 +14,8 @@ import de.z0rdak.yawp.api.commands.CommandConstants;
 import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.events.flag.FlagEvent;
 import de.z0rdak.yawp.api.permission.Permissions;
-import de.z0rdak.yawp.commands.arguments.flag.IFlagArgumentType;
-import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
+import de.z0rdak.yawp.commands.suggestions.ExistingFlagsSuggestionProvider;
+import de.z0rdak.yawp.commands.suggestions.MissingFlagsSuggestionProvider;
 import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
@@ -31,12 +33,12 @@ import de.z0rdak.yawp.util.text.messages.pagination.*;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.apache.commons.lang3.StringUtils;
@@ -51,6 +53,7 @@ import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
 import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 import static de.z0rdak.yawp.api.MessageSender.sendError;
+import static de.z0rdak.yawp.util.ChatLinkBuilder.buildRegionInfoLink;
 import static net.minecraft.ChatFormatting.RED;
 
 public class CommandUtil {
@@ -92,13 +95,13 @@ public class CommandUtil {
                 )
                 .then(literal(FLAG)
                         .then(Commands.argument(FLAG.toString(), IdentifierArgument.id())
-                                .suggests((ctx, builder) -> IFlagArgumentType.flag().listSuggestions(ctx, builder))
+                                .suggests(new ExistingFlagsSuggestionProvider())
                                 .executes(ctx -> removeRegionFlag(ctx, regionSupplier.apply(ctx), getFlagArgument(ctx)))
                         )
                 )
                 .then(literal(FLAGS)
                         .then(Commands.argument(FLAGS.toString(), StringArgumentType.greedyString())
-                                .suggests((ctx, builder) -> IFlagArgumentType.flag().listSuggestions(ctx, builder))
+                                .suggests(new ExistingFlagsSuggestionProvider())
                                 .executes(ctx -> removeFlags(ctx, regionSupplier.apply(ctx), getFlagArguments(ctx))))
                 );
     }
@@ -120,7 +123,7 @@ public class CommandUtil {
                 )
                 .then(literal(FLAG)
                         .then(Commands.argument(FLAG.toString(), IdentifierArgument.id())
-                                .suggests((ctx, builder) -> IFlagArgumentType.flag().listSuggestions(ctx, builder))
+                                .suggests(new MissingFlagsSuggestionProvider())
                                 .executes(ctx -> addFlag(ctx, regionSupplier.apply(ctx), getFlagArgument(ctx)))
                                 .then(Commands.argument(STATE.toString(), StringArgumentType.word())
                                         .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(FlagState.ValidFlagStates(), builder))
@@ -130,7 +133,7 @@ public class CommandUtil {
                 )
                 .then(literal(FLAGS)
                         .then(Commands.argument(FLAGS.toString(), StringArgumentType.greedyString())
-                                .suggests((ctx, builder) -> IFlagArgumentType.flag().listSuggestions(ctx, builder))
+                                .suggests(new MissingFlagsSuggestionProvider())
                                 .executes(ctx -> addFlags(ctx, regionSupplier.apply(ctx), getFlagArguments(ctx))))
                 )
                 .then(literal(ALL_FLAGS)
@@ -144,6 +147,12 @@ public class CommandUtil {
                         .executes(ctx -> promptRegionChildren(ctx, regionSupplier.apply(ctx), 0))
                         .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
                                 .executes(ctx -> promptRegionChildren(ctx, regionSupplier.apply(ctx), getPageNoArgument(ctx)))))
+               //    .then(literal(LIST)
+               //            .then(literal(LOCAL)
+               //                    .executes(ctx -> promptDimensionRegionList(ctx, getLevelDataArgument(ctx), 0))
+               //                    .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
+               //                            .executes(ctx -> promptDimensionRegionList(ctx, getLevelDataArgument(ctx), getPageNoArgument(ctx)))))
+               //    )
                 .then(literal(FLAG)
                         .executes(ctx -> promptFlagList(ctx, regionSupplier.apply(ctx), 0))
                         .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
@@ -165,41 +174,30 @@ public class CommandUtil {
                 );
     }
 
-    public static LiteralArgumentBuilder<CommandSourceStack> buildCopySubCommand(Function<CommandContext<CommandSourceStack>, IProtectedRegion> srcSupplier) {
+    private static RequiredArgumentBuilder<CommandSourceStack, Identifier> buildExecuteCopyCommand(Function<CommandContext<CommandSourceStack>, IProtectedRegion> srcSupplier, Command<CommandSourceStack> command) {
+        return Commands.argument(TARGET.toString(), IdentifierArgument.id())
+                // TODO suggest
+              //  .suggests((ctx, builder) -> RegionArgumentType.region().listRegionsInTargetDim(ctx, builder))
+                .executes(command);
+    }
+
+    public static LiteralArgumentBuilder<CommandSourceStack> buildCopyCommand(Function<CommandContext<CommandSourceStack>, IProtectedRegion> srcSupplier) {
         return literal(COPY)
                 .then(literal(FLAGS)
-                        .then(literal(TO_LOCAL)
-                                .then(Commands.argument(TARGET_DIM.toString(), DimensionArgument.dimension())
-                                        .then(Commands.argument(TARGET_REGION.toString(), StringArgumentType.word())
-                                                .suggests((ctx, builder) -> RegionArgumentType.region().listRegionsInTargetDim(ctx, builder))
-                                                .executes(ctx -> copyRegionFlags(ctx, srcSupplier.apply(ctx), getTargetLocalRegionArgument(ctx))))))
-                        .then(literal(TO_DIM)
-                                .then(Commands.argument(TARGET_DIM.toString(), DimensionArgument.dimension())
-                                        .executes(ctx -> copyRegionFlags(ctx, srcSupplier.apply(ctx), getTargetDimRegionArgument(ctx).getDim()))))
+                        .then(buildExecuteCopyCommand(srcSupplier, ctx -> copyRegionFlags(ctx, srcSupplier.apply(ctx), getTargetRegionArgument(ctx))))
+                )
+                .then(literal(STATE)
+                        .then(buildExecuteCopyCommand(srcSupplier, ctx -> copyRegionState(ctx, srcSupplier.apply(ctx), getTargetRegionArgument(ctx))))
                 )
                 .then(literal(PLAYERS)
-                        .then(literal(TO_LOCAL)
-                                .then(Commands.argument(TARGET_DIM.toString(), DimensionArgument.dimension())
-                                        .then(Commands.argument(TARGET_REGION.toString(), StringArgumentType.word())
-                                                .suggests((ctx, builder) -> RegionArgumentType.region().listRegionsInTargetDim(ctx, builder))
+                        .then(Commands.argument(TARGET.toString(), IdentifierArgument.id())
+                                        .then(Commands.argument(TARGET.toString(), StringArgumentType.word())
+                                          //      .suggests((ctx, builder) -> RegionArgumentType.region().listRegionsInTargetDim(ctx, builder))
                                                 .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
                                                         .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Permissions.GROUP_LIST, builder))
-                                                        .executes(ctx -> copyRegionPlayers(ctx, srcSupplier.apply(ctx), getTargetLocalRegionArgument(ctx), getGroupArgument(ctx)))))))
-                        .then(literal(TO_DIM)
-                                .then(Commands.argument(TARGET_DIM.toString(), DimensionArgument.dimension())
-                                        .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
-                                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(Permissions.GROUP_LIST, builder))
-                                                .executes(ctx -> copyRegionPlayers(ctx, srcSupplier.apply(ctx), getTargetDimRegionArgument(ctx).getDim(), getGroupArgument(ctx)))))))
-                .then(literal(STATE)
-                        .then(literal(TO_LOCAL)
-                                .then(Commands.argument(TARGET_DIM.toString(), DimensionArgument.dimension())
-                                        .then(Commands.argument(TARGET_REGION.toString(), StringArgumentType.word())
-                                                .suggests((ctx, builder) -> RegionArgumentType.region().listRegionsInTargetDim(ctx, builder))
-                                                .executes(ctx -> copyRegionState(ctx, srcSupplier.apply(ctx), getTargetLocalRegionArgument(ctx))))))
-                        .then(literal(TO_DIM)
-                                .then(Commands.argument(TARGET_DIM.toString(), DimensionArgument.dimension())
-                                        .executes(ctx -> copyRegionState(ctx, srcSupplier.apply(ctx), getTargetDimRegionArgument(ctx).getDim()))))
-                );
+                                                        .executes(ctx -> copyRegionPlayers(ctx, srcSupplier.apply(ctx), getTargetLocalRegionArgument(ctx), getGroupArgument(ctx))))))
+                )
+                ;
     }
 
     public static int promptRegionInfo(CommandContext<CommandSourceStack> ctx, IProtectedRegion region) {
