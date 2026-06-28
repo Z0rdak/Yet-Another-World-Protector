@@ -2,17 +2,19 @@ package de.z0rdak.yawp.core.region;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.core.flag.FlagValue;
 import de.z0rdak.yawp.core.flag.RegionFlags;
 import de.z0rdak.yawp.core.group.PlayerContainer;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * The DimensionalRegion represents the only direct implementation of an Abstract region.
@@ -22,81 +24,52 @@ public final class DimensionalRegion extends ProtectedRegion {
 
     public static final Codec<DimensionalRegion> CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
-                            Codec.STRING.fieldOf("name")
-                                    .forGetter(ProtectedRegion::getName),
                             ResourceKey.codec(Registries.DIMENSION)
-                                    .fieldOf("dimension")
+                                    .fieldOf("dim")
                                     .forGetter(ProtectedRegion::getDim),
-                            Codec.STRING.fieldOf("parentName")
-                                    .forGetter(ProtectedRegion::getParentName),
-                            Codec.STRING.fieldOf("type")
-                                    .forGetter(r -> r.getRegionType().type),
+                            UUIDUtil.STRING_CODEC.fieldOf("id")
+                                    .forGetter(ProtectedRegion::getUuid),
+                            UUIDUtil.STRING_CODEC.fieldOf("parentId")
+                                    .forGetter(ProtectedRegion::getParentId),
                             Codec.unboundedMap(Codec.STRING, FlagValue.CODEC)
                                     .fieldOf("flags")
                                     .forGetter(r -> r.getFlags().getFlagMap()),
-                            Codec.BOOL.fieldOf("isActive")
+                            Codec.BOOL.fieldOf("active")
                                     .forGetter(ProtectedRegion::isActive),
-                            Codec.BOOL.fieldOf("isMuted")
+                            Codec.BOOL.fieldOf("muted")
                                     .forGetter(ProtectedRegion::isMuted),
                             Codec.unboundedMap(Codec.STRING, PlayerContainer.CODEC).fieldOf("groups")
                                     .forGetter(ProtectedRegion::getGroups),
-                            Codec.list(Codec.STRING).fieldOf("childrenNames")
-                                    .forGetter(r -> new ArrayList<>(r.getChildrenNames()))
+                            Codec.list(UUIDUtil.STRING_CODEC).fieldOf("childrenIds")
+                                    .forGetter(r -> new ArrayList<>(r.getChildrenIds()))
                     )
-                    .apply(instance, (name, dim, parentName, regionType,
-                                      flags, isActive, isMuted, groups, childrenNames) ->
-                            new DimensionalRegion(dim, new RegionFlags(flags), isActive, isMuted, groups, childrenNames)
+                    .apply(instance, (dim, id, parentId, flags,
+                                      isActive, isMuted, groups, childrenIds) ->
+                            new DimensionalRegion(dim, id, parentId, new RegionFlags(flags), isActive, isMuted, groups, childrenIds)
                     )
     );
 
-    public DimensionalRegion(ResourceKey<Level> dimensionKey, IProtectedRegion parent) {
-        super(dimensionKey.identifier().toString(), dimensionKey, RegionType.DIMENSION);
-        this.dimension = dimensionKey;
-        if (!(parent instanceof GlobalRegion)) {
-            throw new IllegalArgumentException("Illegal parent region for dimensional region");
-        }
-        this.setParent(parent);
+    public DimensionalRegion(ResourceKey<Level> levelRk, UUID id, UUID parentId) {
+        super(levelRk.identifier().toString(), id, parentId, levelRk, RegionType.DIMENSION);
+        this.dimension = levelRk;
     }
 
-    private DimensionalRegion(ResourceKey<Level> dim, RegionFlags flags, boolean isActive, boolean isMuted, Map<String, PlayerContainer> groups, List<String> childrenNames) {
-        super(dim.identifier().toString(), dim, RegionType.DIMENSION);
-        this.dimension = dim;
-        var globalRegion = RegionManager.get().getGlobalRegion();
-        this.setParent(globalRegion);
+    private DimensionalRegion(ResourceKey<Level> levelRk, UUID id, UUID parentId, RegionFlags flags, boolean isActive,
+                              boolean isMuted, Map<String, PlayerContainer> groups, List<UUID> childrenNames) {
+        this(levelRk, id, parentId);
+        this.dimension = levelRk;
         this.setFlags(flags);
         this.setIsActive(isActive);
         this.setIsMuted(isMuted);
         this.setGroups(groups);
-        this.setChildrenNames(childrenNames);
+        this.setChildrenIds(childrenNames);
     }
 
     @Override
-    protected boolean setParent(IProtectedRegion parent) {
-        if (parent.getRegionType() == RegionType.GLOBAL) {
-            return super.setParent(parent);
-        }
-        return false;
+    public Identifier getId() {
+        return this.dimension.identifier();
     }
 
-    @Override
-    public boolean addChild(IProtectedRegion child) {
-        if (child.getRegionType() == RegionType.LOCAL && child.getParent() == null) {
-            String parentName = child.getParentName();
-            if (parentName != null && !parentName.equals(this.getName())) {
-                super.addChild(child);
-                ((ProtectedRegion) child).parentName = parentName;
-                return true;
-            }
-            return super.addChild(child);
-        }
-        if (child.getRegionType() == RegionType.LOCAL && child.getParent().getRegionType() == RegionType.DIMENSION) {
-            return super.addChild(child);
-        }
-        if (child.getRegionType() == RegionType.LOCAL && !child.getParent().hasChild(child)) {
-            return super.addChild(child);
-        }
-        return false;
-    }
     @Override
     public String getName() {
         return this.dimension.identifier().toString();

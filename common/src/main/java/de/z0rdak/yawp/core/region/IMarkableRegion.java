@@ -2,7 +2,7 @@ package de.z0rdak.yawp.core.region;
 
 import de.z0rdak.yawp.core.area.AreaType;
 import de.z0rdak.yawp.core.area.IMarkableArea;
-import de.z0rdak.yawp.core.area.RegionAnchors;
+import de.z0rdak.yawp.core.area.anchors.RegionAnchors;
 import net.minecraft.core.BlockPos;
 
 /**
@@ -21,6 +21,8 @@ public interface IMarkableRegion extends IProtectedRegion {
     void setArea(IMarkableArea area);
 
     boolean contains(BlockPos position);
+
+    boolean hasLocalParent();
 
     int getPriority();
 

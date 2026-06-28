@@ -6,19 +6,12 @@ import de.z0rdak.yawp.core.flag.RegionFlags;
 import de.z0rdak.yawp.core.flag.IFlag;
 
 import de.z0rdak.yawp.core.group.PlayerContainer;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 import java.util.*;
-import java.util.stream.Collectors;
-
-import static de.z0rdak.yawp.constants.serialization.RegionNbtKeys.*;
 
 /**
  * An abstract region represents the basic implementation of a IProtectedRegion.
@@ -29,7 +22,8 @@ public abstract class ProtectedRegion implements IProtectedRegion {
 
     protected ResourceKey<Level> dimension;
     protected IProtectedRegion parent;
-    protected String parentName;
+    protected UUID dataUUid;
+    protected UUID parentId;
     private String name;
     private final RegionType regionType;
     private RegionFlags flags;
@@ -37,10 +31,12 @@ public abstract class ProtectedRegion implements IProtectedRegion {
     private boolean isActive;
     private boolean isMuted;
     private final Map<String, IProtectedRegion> children;
-    private final Set<String> childrenNames;
+    private final Set<UUID> childrenIds;
 
-    protected ProtectedRegion(String name, ResourceKey<Level> dimension, RegionType type) {
+    protected ProtectedRegion(String name, UUID id, UUID parentId, ResourceKey<Level> dimension, RegionType type) {
         this.name = name;
+        this.dataUUid = id;
+        this.parentId = parentId;
         this.dimension = dimension;
         this.regionType = type;
         this.flags = new RegionFlags();
@@ -49,19 +45,24 @@ public abstract class ProtectedRegion implements IProtectedRegion {
         this.groups.put(Permissions.OWNER, new PlayerContainer(Permissions.OWNER));
         this.children = new HashMap<>();
         this.isActive = true;
-        this.childrenNames = new HashSet<>();
+        this.childrenIds = new HashSet<>();
     }
 
-    protected ProtectedRegion(String name, ResourceKey<Level> dimension, RegionType regionType, Player owner) {
-        this(name, dimension, regionType);
+    protected ProtectedRegion(String name, UUID id, UUID parentId, ResourceKey<Level> dimension, RegionType regionType, Player owner) {
+        this(name, id, parentId, dimension, regionType);
         if (owner != null) {
             this.groups.get(Permissions.OWNER).addPlayer(owner.getUUID(), owner.getScoreboardName());
         }
     }
 
     @Override
-    public String getParentName() {
-        return parentName;
+    public UUID getUuid() {
+        return this.dataUUid;
+    }
+
+    @Override
+    public UUID getParentId() {
+        return parentId;
     }
 
     @Override
@@ -208,24 +209,15 @@ public abstract class ProtectedRegion implements IProtectedRegion {
         return this.groups.get(group).hasPlayer(player.getUUID());
     }
 
-    /**
-     * Will always be called by IMarkableRegion to remove child of type IMarkableRegion
-     */
-    @Override
-    public void removeChild(IProtectedRegion child) {
-        this.children.remove(child.getName());
-        this.childrenNames.remove(child.getName());
-    }
-
     @Override
     public void clearChildren() {
         this.children.clear();
-        this.childrenNames.clear();
+        this.childrenIds.clear();
     }
 
-    public void setChildrenNames(List<String> childrenNames) {
-        this.childrenNames.clear();
-        this.childrenNames.addAll(childrenNames);
+    public void setChildrenIds(List<UUID> childrenNames) {
+        this.childrenIds.clear();
+        this.childrenIds.addAll(childrenNames);
     }
 
     @Override
@@ -234,8 +226,8 @@ public abstract class ProtectedRegion implements IProtectedRegion {
     }
 
     @Override
-    public Set<String> getChildrenNames() {
-        return this.childrenNames;
+    public Set<UUID> getChildrenIds() {
+        return this.childrenIds;
     }
 
     @Override
@@ -245,18 +237,35 @@ public abstract class ProtectedRegion implements IProtectedRegion {
 
     @Override
     public boolean addChild(IProtectedRegion child) {
-        this.children.put(child.getName(), child);
-        this.childrenNames.add(child.getName());
-        ((ProtectedRegion) child).setParent(this);
+        if (child == null) {
+            return false;
+        }
+        var name = child.getName();
+        var uuid = child.getUuid();
+        if (children.containsKey(name)) {
+            return false;
+        }
+        children.put(name, child);
+        childrenIds.add(uuid);
         return true;
     }
 
-    protected boolean setParent(IProtectedRegion parent) {
+    @Override
+    public void removeChild(IProtectedRegion child) {
+        if (child == null) {
+            return;
+        }
+        String name = child.getName();
+        var uuid = child.getUuid();
+        children.remove(name);
+        childrenIds.remove(uuid);
+    }
+
+    @Override
+    public void setParent(IProtectedRegion parent) {
         this.parent = parent;
-        this.parentName = parent.getName();
-        return true;
+        this.parentId = parent.getUuid();
     }
-
 
     public IProtectedRegion getParent() {
         return parent;

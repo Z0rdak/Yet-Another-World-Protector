@@ -2,7 +2,7 @@ package de.z0rdak.yawp.api.core;
 
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.data.region.LevelRegionData;
+import de.z0rdak.yawp.data.region.LevelData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceKey;
@@ -21,7 +21,7 @@ public interface ILevelRegionApi {
 
     ResourceKey<Level> getDimKey();
 
-    LevelRegionData getCache();
+    LevelData getCache();
 
     /**
      * Test if a name is available for creating a local region

@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.core.flag.FlagValue;
 import de.z0rdak.yawp.core.flag.RegionFlags;
 import de.z0rdak.yawp.core.group.PlayerContainer;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
@@ -16,56 +17,43 @@ import java.util.stream.Collectors;
 public class GlobalRegion extends ProtectedRegion {
     public static final Codec<GlobalRegion> CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
-                            Codec.STRING.fieldOf("name")
-                                    .forGetter(ProtectedRegion::getName),
-                            ResourceKey.codec(Registries.DIMENSION)
-                                    .fieldOf("dimension")
-                                    .forGetter(ProtectedRegion::getDim),
-                            Codec.STRING.fieldOf("parentName")
-                                    .forGetter(ProtectedRegion::getParentName),
-                            Codec.STRING.fieldOf("type")
-                                    .forGetter(r -> r.getRegionType().type),
                             Codec.unboundedMap(Codec.STRING, FlagValue.CODEC)
                                     .fieldOf("flags")
                                     .forGetter(r -> r.getFlags().getFlagMap()),
-                            Codec.BOOL.fieldOf("isActive")
+                            Codec.BOOL.fieldOf("active")
                                     .forGetter(ProtectedRegion::isActive),
-                            Codec.BOOL.fieldOf("isMuted")
+                            Codec.BOOL.fieldOf("muted")
                                     .forGetter(ProtectedRegion::isMuted),
                             Codec.unboundedMap(Codec.STRING, PlayerContainer.CODEC).fieldOf("groups")
                                     .forGetter(ProtectedRegion::getGroups),
-                            Codec.list(Codec.STRING).fieldOf("childrenNames")
-                                    .forGetter(r -> new ArrayList<>(r.getChildrenNames()))
+                            Codec.list(UUIDUtil.STRING_CODEC).fieldOf("childrenIds")
+                                    .forGetter(r -> new ArrayList<>(r.getChildrenIds()))
                     )
-                    .apply(instance, (name, dim, parentName, regionType,
-                                      flags, isActive, isMuted, groups, childrenNames) ->
-                            new GlobalRegion(new RegionFlags(flags), isActive, isMuted, groups, childrenNames)
+                    .apply(instance, (flags, isActive, isMuted, groups, childrenIds) ->
+                            new GlobalRegion(new RegionFlags(flags), isActive, isMuted, groups, childrenIds)
                     )
     );
 
-
-
     public static final Identifier GLOBAL = Identifier.fromNamespaceAndPath("yawp", "global");
     public static final ResourceKey<Level> GLOBAL_DIMENSION = ResourceKey.create(Registries.DIMENSION, GLOBAL);
+    public static final UUID GLOBAL_REGION_UUID = UUID.nameUUIDFromBytes(GLOBAL.toString().getBytes());
 
     public GlobalRegion() {
-        this(GLOBAL.toString(), RegionType.GLOBAL);
-        this.setParent(this);
+        super(GLOBAL.toString(), GLOBAL_REGION_UUID, GLOBAL_REGION_UUID, GLOBAL_DIMENSION,  RegionType.GLOBAL);
     }
 
-    private GlobalRegion(RegionFlags flags, boolean isActive, boolean isMuted, Map<String, PlayerContainer> groups, List<String> childrenNames) {
-        this(GLOBAL.toString(), RegionType.GLOBAL);
-        this.setParent(this);
+    private GlobalRegion(RegionFlags flags, boolean isActive, boolean isMuted, Map<String, PlayerContainer> groups, List<UUID> childrenIds) {
+        this();
         this.setFlags(flags);
         this.setIsActive(isActive);
         this.setIsMuted(isMuted);
         this.setGroups(groups);
-        this.setChildrenNames(childrenNames);
+        this.setChildrenIds(childrenIds);
     }
 
-    protected GlobalRegion(String name, RegionType type) {
-        super(name, GLOBAL_DIMENSION, type);
-        super.setParent(this);
+    @Override
+    public Identifier getId() {
+        return GLOBAL;
     }
 
     @Override
@@ -77,27 +65,11 @@ public class GlobalRegion extends ProtectedRegion {
     }
 
     @Override
-    public Set<String> getChildrenNames() {
-        Set<String> childrenWithoutGlobal = super.getChildren().values().stream()
+    public Set<UUID> getChildrenIds() {
+        return super.getChildren().values().stream()
                 .filter(iProtectedRegion -> iProtectedRegion.getRegionType() != RegionType.GLOBAL)
-                .map(IProtectedRegion::getName)
-                .collect(Collectors.toSet());
-        return Collections.unmodifiableSet(childrenWithoutGlobal);
+                .map(IProtectedRegion::getUuid)
+                .collect(Collectors.toUnmodifiableSet());
     }
 
-    @Override
-    protected boolean setParent(IProtectedRegion parent) {
-        if (parent.getRegionType() == RegionType.GLOBAL) {
-            return super.setParent(parent);
-        }
-        return false;
-    }
-
-    @Override
-    public boolean addChild(IProtectedRegion child) {
-        if (child.getRegionType() == RegionType.DIMENSION) {
-            return super.addChild(child);
-        }
-        return false;
-    }
 }

@@ -1,12 +1,13 @@
 package de.z0rdak.yawp.api.core;
 
+import de.z0rdak.yawp.api.core.region.hierarchy.RegionHierarchy;
 import de.z0rdak.yawp.core.area.CuboidArea;
 import de.z0rdak.yawp.core.area.SphereArea;
 import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
-import de.z0rdak.yawp.data.region.LevelRegionData;
+import de.z0rdak.yawp.data.region.LevelData;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -29,6 +30,12 @@ public final class RegionManager implements IRegionManager {
         return new RegionManager();
     }
 
+    public static RegionType getRegionType(Identifier regionId){
+
+
+        throw new IllegalArgumentException();
+    }
+
     @Override
     public GlobalRegion getGlobalRegion() {
         return RegionDataManager.getGlobalRegion();
@@ -42,13 +49,36 @@ public final class RegionManager implements IRegionManager {
 
     @Override
     public Optional<IProtectedRegion> getDimensionalRegion(ResourceKey<Level> dim) {
-        Optional<LevelRegionData> cache = getLevelRegionData(dim);
-        return cache.map(LevelRegionData::getDim);
+        Optional<LevelData> cache = getLevelRegionData(dim);
+        return cache.map(LevelData::getDim);
     }
 
     @Override
-    public Optional<LevelRegionData> getLevelRegionData(ResourceKey<Level> dim) {
+    public Optional<LevelData> getLevelRegionData(Identifier levelRl) {
+        return RegionDataManager.getLevelRegionData(levelRl);
+    }
+
+
+    @Override
+    public Optional<IMarkableRegion> getLocalRegion(Identifier regionId) {
+        return Optional.empty();
+    }
+
+
+    @Override
+    public Optional<IProtectedRegion> getRegion(Identifier regionId) {
+
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<LevelData> getLevelRegionData(ResourceKey<Level> dim) {
         return RegionDataManager.getLevelRegionData(dim);
+    }
+
+    @Override
+    public List<LevelData> getLevelRegionData() {
+        return RegionDataManager.getAllLevelRegionData();
     }
 
     @Override
@@ -109,12 +139,16 @@ public final class RegionManager implements IRegionManager {
     }
 
     @Override
+    public boolean hasLevelData(Identifier levelRl) {
+        return RegionDataManager.hasLevel(levelRl);
+    }
+    @Override
     public boolean hasLevelData(ResourceKey<Level> dim) {
         return RegionDataManager.hasLevel(dim.identifier());
     }
 
     @Override
-    public LevelRegionData trackLevel(ResourceKey<Level> dim) {
+    public LevelData trackLevel(ResourceKey<Level> dim) {
         return RegionDataManager.addTrackingFor(dim.identifier());
     }
 
@@ -139,9 +173,9 @@ public final class RegionManager implements IRegionManager {
     }
 
     public static class DimensionRegionApi implements ILevelRegionApi {
-        private final LevelRegionData levelData;
+        private final LevelData levelData;
 
-        private DimensionRegionApi(LevelRegionData levelData) {
+        private DimensionRegionApi(LevelData levelData) {
             this.levelData = levelData;
         }
 
@@ -162,7 +196,7 @@ public final class RegionManager implements IRegionManager {
         }
 
         @Override
-        public LevelRegionData getCache() {
+        public LevelData getCache() {
             return levelData;
         }
 
@@ -174,6 +208,7 @@ public final class RegionManager implements IRegionManager {
         @Override
         public boolean addLocalRegion(IMarkableRegion region) {
             if (hasLocal(region.getName())) return false;
+            RegionHierarchy.setParent(region, levelData.getDim());
             levelData.addLocal(region);
             return true;
         }

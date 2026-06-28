@@ -5,6 +5,7 @@ import de.z0rdak.yawp.core.flag.RegionFlags;
 import de.z0rdak.yawp.core.flag.IFlag;
 
 import de.z0rdak.yawp.core.group.PlayerContainer;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -30,6 +31,8 @@ import java.util.UUID;
 public interface IProtectedRegion{
 
     String getName();
+    UUID getUuid();
+    Identifier getId();
 
     ResourceKey<Level> getDim();
 
@@ -78,15 +81,17 @@ public interface IProtectedRegion{
 
     IProtectedRegion getParent();
 
-    String getParentName();
+    UUID getParentId();
 
     Map<String, IProtectedRegion> getChildren();
 
-    Set<String> getChildrenNames();
+    Set<UUID> getChildrenIds();
 
     boolean addChild(IProtectedRegion child);
 
     void removeChild(IProtectedRegion child);
+
+    void setParent(IProtectedRegion parent);
 
     void clearChildren();
 

@@ -1,13 +1,15 @@
 package de.z0rdak.yawp.api.core;
 
 import de.z0rdak.yawp.core.region.GlobalRegion;
+import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.data.region.LevelRegionData;
+import de.z0rdak.yawp.data.region.LevelData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -33,7 +35,12 @@ public interface IRegionManager {
      * @param dim the resource key of the dimension/level
      * @return the LevelRegionData corresponding to dim
      */
-    Optional<LevelRegionData> getLevelRegionData(ResourceKey<Level> dim);
+    Optional<LevelData> getLevelRegionData(ResourceKey<Level> dim);
+    List<LevelData> getLevelRegionData();
+    Optional<LevelData> getLevelRegionData(Identifier levelRl);
+
+    Optional<IMarkableRegion> getLocalRegion(Identifier regionId);
+    Optional<IProtectedRegion> getRegion(Identifier regionId);
 
     /**
      * Flag the scheduler to save the region data. This usually happens either 
@@ -81,6 +88,7 @@ public interface IRegionManager {
      * @return true if a DimensionalRegion exists, false otherwise
      */
     boolean hasLevelData(ResourceKey<Level> dim);
+    boolean hasLevelData(Identifier levelRl);
 
     /**
      * Creates a DimensionalRegion for the specified dimension key
@@ -88,7 +96,7 @@ public interface IRegionManager {
      * @param dim the dimension identifier of the dimension
      * @return the LevelRegionData for the specified dimension, newly created or the already existing
      */
-    LevelRegionData trackLevel(ResourceKey<Level> dim);
+    LevelData trackLevel(ResourceKey<Level> dim);
 
     void untrackLevel(ResourceKey<Level> dim);
 
