@@ -8,10 +8,7 @@ import java.util.stream.Collectors;
 public enum AreaType {
 
     CUBOID("Cuboid", 2),
-    CYLINDER("Cylinder", 3),
-    SPHERE("Sphere", 2),
-    POLYGON_3D("Polygon", 3, 20),
-    PRISM("Prism", 3, 10);
+    SPHERE("Sphere", 2);
 
     public final String areaType;
     public final int neededBlocks;
@@ -21,12 +18,6 @@ public enum AreaType {
         this.areaType = name;
         this.neededBlocks = neededBlocks;
         this.maxBlocks = maxBlocks;
-    }
-
-    AreaType(String name) {
-        this.areaType = name;
-        this.neededBlocks = 0;
-        this.maxBlocks = 0;
     }
 
     AreaType(String name, int neededBlocks) {
@@ -49,14 +40,8 @@ public enum AreaType {
         switch (name.toLowerCase(Locale.ROOT)) {
             case "cuboid":
                 return CUBOID;
-            case "cylinder":
-                return CYLINDER;
             case "sphere":
                 return SPHERE;
-            case "polygon":
-                return POLYGON_3D;
-            case "prism":
-                return PRISM;
             default:
                 throw new IllegalArgumentException("Unknown area type: " + name);
         }
@@ -64,6 +49,6 @@ public enum AreaType {
 
     @Override
     public String toString() {
-        return areaType;
+        return areaType.toLowerCase(Locale.ROOT);
     }
 }

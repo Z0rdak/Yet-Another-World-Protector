@@ -3,11 +3,10 @@ package de.z0rdak.yawp.core.area;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
+import de.z0rdak.yawp.core.area.visuals.BlockDisplayProperties;
 import de.z0rdak.yawp.util.AreaUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.apache.commons.lang3.NotImplementedException;
 

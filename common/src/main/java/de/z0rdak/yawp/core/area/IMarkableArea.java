@@ -1,8 +1,8 @@
 package de.z0rdak.yawp.core.area;
 
+import de.z0rdak.yawp.core.area.visuals.BlockDisplayProperties;
 import net.minecraft.core.BlockPos;
 
-import java.util.List;
 import java.util.Set;
 
 /**

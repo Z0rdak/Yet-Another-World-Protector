@@ -1,13 +1,8 @@
-package de.z0rdak.yawp.core.area;
+package de.z0rdak.yawp.core.area.anchors;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.z0rdak.yawp.util.NbtCompatHelper;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.resources.Identifier;
 
 public class TeleportAnchor {
 

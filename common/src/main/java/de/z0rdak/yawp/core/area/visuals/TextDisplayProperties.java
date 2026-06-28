@@ -1,11 +1,7 @@
-package de.z0rdak.yawp.core.area;
+package de.z0rdak.yawp.core.area.visuals;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.Identifier;
 
 import java.util.Locale;
 

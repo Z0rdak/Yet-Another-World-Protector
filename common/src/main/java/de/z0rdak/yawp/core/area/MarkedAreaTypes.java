@@ -21,8 +21,8 @@ public class MarkedAreaTypes {
     public static Registry<MarkedAreaType<?>> REGISTRY = new MappedRegistry<>(
             ResourceKey.createRegistryKey(Identifier.fromNamespaceAndPath(Constants.MOD_ID, "marked_area_types")), Lifecycle.stable());
 
-    public static final MarkedAreaType<CuboidArea> CUBOID_AREA = register("cuboid", new MarkedAreaType<>(CuboidArea.CODEC));
-    public static final MarkedAreaType<SphereArea> SPHERE_AREA = register("sphere", new MarkedAreaType<>(SphereArea.CODEC));
+    public static final MarkedAreaType<CuboidArea> CUBOID_AREA = register(AreaType.CUBOID.toString(), new MarkedAreaType<>(CuboidArea.CODEC));
+    public static final MarkedAreaType<SphereArea> SPHERE_AREA = register(AreaType.SPHERE.toString(), new MarkedAreaType<>(SphereArea.CODEC));
 
     public static Codec<IMarkableArea> MARKED_AREA_CODEC = REGISTRY.byNameCodec()
             .dispatch("areaType", IMarkableArea::getType, MarkedAreaType::codec);

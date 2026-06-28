@@ -11,10 +11,6 @@ public abstract class CenteredArea extends MarkedArea {
 
     protected BlockPos center;
 
-    public CenteredArea(AreaType areaType) {
-        super(areaType);
-    }
-
     public CenteredArea(BlockPos center, AreaType areaType) {
         super(areaType);
         this.center = center;

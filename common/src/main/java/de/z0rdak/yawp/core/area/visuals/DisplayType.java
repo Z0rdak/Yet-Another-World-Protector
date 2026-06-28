@@ -1,4 +1,4 @@
-package de.z0rdak.yawp.core.area;
+package de.z0rdak.yawp.core.area.visuals;
 
 import java.util.Arrays;
 import java.util.Set;

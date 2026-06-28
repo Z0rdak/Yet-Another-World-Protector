@@ -1,5 +1,7 @@
 package de.z0rdak.yawp.core.area;
 
+import de.z0rdak.yawp.core.area.visuals.BlockDisplayProperties;
+
 public abstract class MarkedArea implements IMarkableArea {
 
     private final AreaType areaType;
