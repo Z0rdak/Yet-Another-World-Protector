@@ -6,20 +6,14 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
-import de.z0rdak.yawp.core.region.GlobalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
-import de.z0rdak.yawp.core.region.RegionType;
-import de.z0rdak.yawp.data.region.LevelRegionData;
+import de.z0rdak.yawp.data.region.LevelData;
 import de.z0rdak.yawp.util.ChatLinkBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import static de.z0rdak.yawp.api.MessageSender.overLayMessage;
@@ -55,7 +49,7 @@ public class ValidChildRegionSuggestionProvider implements SuggestionProvider<Co
         if (maybeLevelData.isEmpty()) {
             return Suggestions.empty();
         }
-        LevelRegionData levelData = maybeLevelData.get();
+        LevelData levelData = maybeLevelData.get();
         var validChildren = levelData.getLocalList().stream()
                 .filter(candidate -> isValidChild(parent, candidate))
                 .map(IMarkableRegion::getName)
