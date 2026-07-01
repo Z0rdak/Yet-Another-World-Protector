@@ -54,6 +54,9 @@ public class ArgumentUtil {
                     "cli.arg.region.local.expected",
                     "Invalid region supplied (%s). Expected Local Region.", region));
 
+    public static final DynamicCommandExceptionType ERROR_GLOBAL_NOT_ALLOWED = new DynamicCommandExceptionType(
+            region -> Component.translatableWithFallback("cli.arg.region.global.not-allowed", "Invalid region supplied. Only Dimensional and Local Region allowed here.", region));
+
     public static final DynamicCommandExceptionType ERROR_LEVEL_REGION_EXPECTED = new DynamicCommandExceptionType(
             region -> Component.translatableWithFallback(
                     "cli.arg.region.dim.expected",
@@ -168,6 +171,16 @@ public class ArgumentUtil {
     }
 
 
+    public static IMarkableRegion getLocalChildRegion(CommandContext<CommandSourceStack> context, String argName, IProtectedRegion parent) throws CommandSyntaxException {
+        var childName = StringArgumentType.getString(context, argName);
+        var parentLevel = parent.getDim().identifier();
+        var childId = Identifier.parse(parentLevel + "/" + childName);
+        if (resolveRootRegion(childId) instanceof GlobalRegion) {
+            throw ERROR_GLOBAL_NOT_ALLOWED.create(parent.getId().toString());
+        }
+        return resolveLocalRegion(childId.toString());
+    }
+
     public static IMarkableRegion getLocalRegion(CommandContext<CommandSourceStack> context, String argName) throws CommandSyntaxException {
         var id = IdentifierArgument.getId(context, argName);
         if (resolveRootRegion(id) != null) {
@@ -225,6 +238,15 @@ public class ArgumentUtil {
     public static IProtectedRegion getRegionArgument(CommandContext<CommandSourceStack> ctx) {
         try {
             return getRegion(ctx, REGION.toString());
+        } catch (CommandSyntaxException e) {
+            Constants.LOGGER.error(e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static IProtectedRegion getParentRegionArgument(CommandContext<CommandSourceStack> ctx) {
+        try {
+            return getRegion(ctx, PARENT.toString());
         } catch (CommandSyntaxException e) {
             Constants.LOGGER.error(e.getMessage());
             throw new RuntimeException(e);
@@ -351,10 +373,8 @@ public class ArgumentUtil {
         }
     }
 
-
-
-    public static IMarkableRegion getChildRegionArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        return getLocalRegion(ctx, CHILD.toString());
+    public static IMarkableRegion getChildRegionArgument(CommandContext<CommandSourceStack> ctx, IProtectedRegion parent) throws CommandSyntaxException {
+        return getLocalChildRegion(ctx, CHILD.toString(), parent);
     }
 
     public static ServerPlayer getPlayerArgument(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
