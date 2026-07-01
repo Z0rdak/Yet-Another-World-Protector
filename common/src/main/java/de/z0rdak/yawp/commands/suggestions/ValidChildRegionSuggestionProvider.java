@@ -65,6 +65,6 @@ public class ValidChildRegionSuggestionProvider implements SuggestionProvider<Co
     }
 
     private static boolean isValidChild(IMarkableRegion parent, IMarkableRegion candidate) {
-        return parent.getArea().containsOther(candidate.getArea()) && !candidate.hasLocalParent();
+        return parent.getArea().containsOther(candidate.getArea()) && !candidate.hasLocalParent() && !parent.getId().equals(candidate.getId());
     }
 }

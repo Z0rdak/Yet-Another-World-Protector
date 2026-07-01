@@ -52,11 +52,11 @@ public final class RegionHierarchy {
                 return HierarchyValidationResult.containmentFailed();
             }
         }
-        if (child instanceof IMarkableRegion markedChild) {
-            if (!hasValidPriority(markedChild)) {
-                return HierarchyValidationResult.invalidPriority();
-            }
-        }
+        //if (child instanceof IMarkableRegion markedChild) {
+        //    if (!hasValidPriority(markedChild, parent)) {
+        //        return HierarchyValidationResult.invalidPriority();
+        //    }
+        //}
         return HierarchyValidationResult.validResult();
     }
 
@@ -238,11 +238,46 @@ public final class RegionHierarchy {
         if (oldParent != null) {
             oldParent.removeChild(child);
         }
+        // TODO check cycle
         parent.addChild(child);
         child.setParent(parent);
         if (child instanceof IMarkableRegion marked) {
             normalizePriority(marked);
         }
+    }
+
+    /**
+     * Attaches a region to a new parent.
+     *
+     * Performs validation, updates both hierarchy links and
+     * restores priority invariants.
+     */
+    public static HierarchyValidationResult attach(IProtectedRegion child, IProtectedRegion parent) {
+        HierarchyValidationResult result = RegionHierarchy.validateParent(child, parent);
+        if (!result.valid()) {
+            return result;
+        }
+        RegionHierarchy.setParent(child, parent);
+        if (child instanceof IMarkableRegion marked) {
+            RegionHierarchy.normalizePriorityTree(marked);
+        }
+        return HierarchyValidationResult.validResult();
+    }
+
+    public static HierarchyValidationResult detach(IProtectedRegion child) {
+        IProtectedRegion fallback = RegionHierarchy.resolveFallbackParent(child);
+        return attach(child, fallback);
+    }
+
+    public static HierarchyValidationResult attachChild(IProtectedRegion parent, IProtectedRegion child) {
+        return attach(child, parent);
+    }
+
+    public static HierarchyValidationResult detachChild(IProtectedRegion parent, IProtectedRegion child) {
+        if (child.getParent() != parent) {
+            return HierarchyValidationResult.invalidParentType();
+        }
+        return detach(child);
     }
 
     /**
@@ -311,19 +346,17 @@ public final class RegionHierarchy {
         }
     }
 
-    private static boolean wouldCreateCycle(
-            IProtectedRegion child,
-            IProtectedRegion parent
-    ) {
+    private static boolean wouldCreateCycle(IProtectedRegion child, IProtectedRegion parent)  {
         IProtectedRegion current = parent;
-
         while (current != null) {
-            if (current.equals(child)) {
+            if (current == child) {
                 return true;
+            }
+            if (current == current.getParent()) {
+                break; // reached Global
             }
             current = current.getParent();
         }
-
         return false;
     }
 
@@ -369,11 +402,25 @@ public final class RegionHierarchy {
         return true;
     }
 
+    private static boolean hasValidPriority(
+            IMarkableRegion child,
+            IProtectedRegion parent
+    ) {
+        if (!(parent instanceof IMarkableRegion markedParent)) {
+            // Dimensional parent is always valid.
+            return true;
+        }
+
+        return child.getPriority() > markedParent.getPriority();
+    }
+
     public static List<IProtectedRegion> pathToRoot(IProtectedRegion region) {
         List<IProtectedRegion> path = new ArrayList<>();
         IProtectedRegion current = region;
         while (current != null) {
             path.add(current);
+            if (current instanceof GlobalRegion)
+                break;
             current = current.getParent();
         }
         return path;
@@ -382,7 +429,7 @@ public final class RegionHierarchy {
     public static List<IProtectedRegion> ancestorsOf(IProtectedRegion region) {
         List<IProtectedRegion> ancestors = new ArrayList<>();
         IProtectedRegion current = region.getParent();
-        while (current != null) {
+        while (current != null && !(current instanceof GlobalRegion)) {
             ancestors.add(current);
             current = current.getParent();
         }
@@ -405,7 +452,7 @@ public final class RegionHierarchy {
     }
 
     public static boolean isRoot(IProtectedRegion region) {
-        return region.getParent() == null;
+        return region.getParent() instanceof GlobalRegion;
     }
 
     public static boolean contains(IMarkableRegion parent, IMarkableRegion child) {

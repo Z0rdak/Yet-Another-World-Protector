@@ -6,6 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.core.ILevelRegionApi;
 import de.z0rdak.yawp.api.core.RegionManager;
+import de.z0rdak.yawp.api.core.region.hierarchy.HierarchyValidationResult;
 import de.z0rdak.yawp.api.core.region.hierarchy.RegionHierarchy;
 import de.z0rdak.yawp.api.events.flag.FlagEvent;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
@@ -43,10 +44,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.AirBlock;
 import net.minecraft.world.level.block.Block;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 import static de.z0rdak.yawp.api.MessageSender.sendError;
@@ -927,6 +925,161 @@ final class RegionCommandHelper {
         return 0;
     }
 
+    public static int showChildren(CommandContext<CommandSourceStack> ctx, IProtectedRegion region) {
+        var children = region.getChildren().values();
+        if (children.isEmpty()) {
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("", "%s has no child regions.", buildRegionInfoLink(region)));
+            return Command.SINGLE_SUCCESS;
+        }
+
+        MutableComponent msg = Component.literal("Children of ")
+                .append(buildRegionInfoLink(region))
+                .append(": ");
+        boolean first = true;
+        for (IProtectedRegion child : children) {
+            if (!first) {
+                msg.append(", ");
+            }
+            msg.append(buildRegionInfoLink(child));
+            first = false;
+        }
+        sendCmdFeedback(ctx.getSource(), msg);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    public static int showParent(CommandContext<CommandSourceStack> ctx, IProtectedRegion region) {
+        IProtectedRegion parent = region.getParent();
+        if (parent == null || parent == region) {
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("", "%s has no parent.", buildRegionInfoLink(region)));
+            return Command.SINGLE_SUCCESS;
+        }
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("", "Parent of %s: %s", buildRegionInfoLink(region), buildRegionInfoLink(parent)));
+        return Command.SINGLE_SUCCESS;
+    }
+
+    public static int showHierarchy(CommandContext<CommandSourceStack> ctx, IProtectedRegion region) {
+        MutableComponent msg = Component.empty();
+        appendHierarchy(msg, region, "", true);
+        sendCmdFeedback(ctx.getSource(), msg);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static final String PIPE = "│  ";
+    private static final String TEE = "├─ ";
+    private static final String ELBOW = "└─ ";
+
+    public static int showHierarchyTest(CommandContext<CommandSourceStack> ctx, IProtectedRegion region) {
+        MutableComponent out = Component.literal("");
+        out.append(buildRegionInfoLink(region));
+        List<IProtectedRegion> children = new ArrayList<>(region.getChildren().values());
+        // optional: stable output
+        children.sort(Comparator.comparing(IProtectedRegion::getName));
+        for (int i = 0; i < children.size(); i++) {
+            boolean last = (i == children.size() - 1);
+            appendTree(out, children.get(i), "", last);
+        }
+        sendCmdFeedback(ctx.getSource(), out);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static void appendTree(MutableComponent out, IProtectedRegion node, String prefix, boolean isLast) {
+        out.append("\n")
+                .append(prefix)
+                .append(isLast ? ELBOW : TEE)
+                .append(buildRegionInfoLink(node));
+        List<IProtectedRegion> children = new ArrayList<>(node.getChildren().values());
+        children.sort(Comparator.comparing(IProtectedRegion::getName));
+        for (int i = 0; i < children.size(); i++) {
+            boolean last = (i == children.size() - 1);
+            appendTree(out, children.get(i), prefix + (isLast ? "   " : PIPE), last);
+        }
+    }
+
+    private static void appendHierarchy(MutableComponent out, IProtectedRegion region, String indent, boolean root) {
+        if (!root) {
+            out.append("\n");
+        }
+        out.append(indent).append(buildRegionInfoLink(region));
+        var children = new ArrayList<>(region.getChildren().values());
+        for (int i = 0; i < children.size(); i++) {
+            boolean last = i == children.size() - 1;
+            appendHierarchy(out, children.get(i), indent + (last ? "   " : "│  "), false);
+        }
+    }
 
 
+    public static int showPath(CommandContext<CommandSourceStack> ctx, IProtectedRegion region) {
+        List<IProtectedRegion> path = RegionHierarchy.pathToRoot(region);
+        Collections.reverse(path);
+        MutableComponent msg = Component.literal("Path: ");
+        for (int i = 0; i < path.size(); i++) {
+            if (i > 0) {
+                msg.append(" -> ");
+            }
+            msg.append(buildRegionInfoLink(path.get(i)));
+        }
+        sendCmdFeedback(ctx.getSource(), msg);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    public static int detachParent(CommandContext<CommandSourceStack> ctx, IProtectedRegion child) {
+        IProtectedRegion oldParent = child.getParent();
+        try {
+            RegionHierarchy.detach(child);
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("", "Detached %s from %s.", buildRegionInfoLink(child), buildRegionInfoLink(oldParent)));
+            RegionManager.get().save(child);
+            return Command.SINGLE_SUCCESS;
+        } catch (IllegalArgumentException ex) {
+            sendError(ctx.getSource(), Component.literal(ex.getMessage()));
+            return 0;
+        }
+    }
+
+    public static int attachChild(CommandContext<CommandSourceStack> ctx, IProtectedRegion parent, IProtectedRegion child) {
+        try {
+            RegionHierarchy.attachChild(parent, child);
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("", "Attached child %s to %s.", buildRegionInfoLink(child), buildRegionInfoLink(parent)));
+            RegionManager.get().save(child);
+            return Command.SINGLE_SUCCESS;
+        } catch (IllegalArgumentException ex) {
+            sendError(ctx.getSource(), Component.literal(ex.getMessage()));
+            return 0;
+        }
+    }
+
+    public static int detachChild(CommandContext<CommandSourceStack> ctx, IProtectedRegion parent, IProtectedRegion child) {
+        try {
+            RegionHierarchy.detachChild(parent, child);
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("", "Detached child %s from %s.", buildRegionInfoLink(child), buildRegionInfoLink(parent)));
+            RegionManager.get().save(child);
+            return Command.SINGLE_SUCCESS;
+        } catch (IllegalArgumentException ex) {
+            sendError(ctx.getSource(), Component.literal(ex.getMessage()));
+            return 0;
+        }
+    }
+
+
+    public static int attachParent(CommandContext<CommandSourceStack> ctx, IProtectedRegion child, IProtectedRegion parent) {
+        try {
+            RegionHierarchy.attach(child, parent);
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("", "Attached %s to parent %s.", buildRegionInfoLink(child), buildRegionInfoLink(parent)));
+            RegionManager.get().save(child);
+            return Command.SINGLE_SUCCESS;
+        } catch (IllegalArgumentException ex) {
+            sendError(ctx.getSource(), Component.literal(ex.getMessage()));
+            return 0;
+        }
+    }
+
+    public static int addSubRegion(CommandContext<CommandSourceStack> ctx, IProtectedRegion parent, IProtectedRegion child) {
+        HierarchyValidationResult result = RegionHierarchy.validateParent(child, parent);
+        if (!result.valid()) {
+            sendError(ctx.getSource(), Component.translatableWithFallback("","Cannot add region %s", result.reason()));
+            return 0;
+        }
+        RegionHierarchy.setParent(child, parent);
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("","Added region %s to %s", buildRegionInfoLink(child), buildRegionInfoLink(parent) ));
+        return Command.SINGLE_SUCCESS;
+    }
 }

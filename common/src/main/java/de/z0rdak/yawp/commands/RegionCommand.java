@@ -7,8 +7,6 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import de.z0rdak.yawp.api.commands.CommandConstants;
-import de.z0rdak.yawp.api.core.region.hierarchy.HierarchyValidationResult;
-import de.z0rdak.yawp.api.core.region.hierarchy.RegionHierarchy;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.commands.suggestions.*;
 import de.z0rdak.yawp.core.area.*;
@@ -22,12 +20,10 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
-import net.minecraft.network.chat.Component;
 
 import java.util.List;
 import java.util.function.Function;
 
-import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
 import static de.z0rdak.yawp.api.MessageSender.sendError;
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
 import static de.z0rdak.yawp.api.commands.CommandConstants.REGION;
@@ -52,7 +48,7 @@ class RegionCommand {
                         .suggests(new RegionSuggestionProvider())
                         .executes(ctx -> promptRegionInfo(ctx, getRegionArgument(ctx)))
                         .then(literal(INFO).executes(ctx -> promptRegionInfo(ctx, getRegionArgument(ctx))))
-                        .then(buildAddSubCommand(ArgumentUtil::getRegionArgument))
+                        .then(addSubCommand(ArgumentUtil::getRegionArgument))
                         .then(literal(ADD)
                                 .then(literal(SUBREGION) // need containment check
                                         .then(buildCreateCuboid()) // validate region is not global
@@ -65,11 +61,12 @@ class RegionCommand {
                                         )
                                 )
                         )
-                        .then(buildRemoveSubCommand(ArgumentUtil::getRegionArgument))
-                        .then(buildClearSubCommand(ArgumentUtil::getRegionArgument))
-                        .then(buildListSubCommand(ArgumentUtil::getRegionArgument))
-                        .then(buildCopyCommand(ArgumentUtil::getRegionArgument))
-                        .then(flagSubCmd(ArgumentUtil::getRegionArgument))
+                        .then(hierarchySubCommand(ArgumentUtil::getRegionArgument))
+                        .then(removeSubCommand(ArgumentUtil::getRegionArgument))
+                        .then(clearSubCommand(ArgumentUtil::getRegionArgument))
+                        .then(listSubCommand(ArgumentUtil::getRegionArgument))
+                        .then(copySubCommand(ArgumentUtil::getRegionArgument))
+                        .then(flagSubCommand(ArgumentUtil::getRegionArgument))
 
                         .then(literal(STATE)
                                 .executes(ctx -> CommandUtil.promptRegionState(ctx, getRegionArgument(ctx)))
@@ -106,18 +103,12 @@ class RegionCommand {
                         .then(buildAreaSubCmd(ArgumentUtil::getLocalRegionArgument))
                         .then(buildTpAnchorSubCmd(ArgumentUtil::getLocalRegionArgument))
                         .then(buildShowSubCmd(ArgumentUtil::getLocalRegionArgument))
+                        .then(literal(RENAME)
+                                .then(Commands.argument(NAME.toString(), StringArgumentType.word())
+                                        .executes(ctx -> renameRegion(ctx, getLocalRegionArgument(ctx), getRegionNameArgument(ctx), getLevelDataArgument(ctx)))
+                                )
+                        )
                 );
-    }
-
-    private static int addSubRegion(CommandContext<CommandSourceStack> ctx, IProtectedRegion parent, IProtectedRegion child) {
-        HierarchyValidationResult result = RegionHierarchy.validateParent(child, parent);
-        if (!result.valid()) {
-            sendError(ctx.getSource(), Component.translatableWithFallback("","Cannot add region %s", result.reason()));
-            return 0;
-        }
-        RegionHierarchy.setParent(child, parent);
-        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("","Added region %s to %s", buildRegionInfoLink(child), buildRegionInfoLink(parent) ));
-        return Command.SINGLE_SUCCESS;
     }
 
     public static LiteralArgumentBuilder<CommandSourceStack> buildCreateCuboid() {
@@ -255,8 +246,74 @@ class RegionCommand {
                 );
     }
 
+    private static LiteralArgumentBuilder<CommandSourceStack> hierarchySubCommand(Function<CommandContext<CommandSourceStack>, IProtectedRegion> regionSupplier) {
+        return literal(HIERARCHY)
+                .executes(ctx -> showHierarchyTest(ctx, regionSupplier.apply(ctx)))
+                .then(literal(PARENT)
+                        .executes(ctx -> showParent(ctx, regionSupplier.apply(ctx)))
+                )
+                .then(literal(CHILDREN)
+                        .executes(ctx -> showChildren(ctx, regionSupplier.apply(ctx)))
+                )
+                .then(literal(PATH)
+                        .executes(ctx -> showPath(ctx, regionSupplier.apply(ctx)))
+                )
+                .then(literal(ATTACH)
+                        // attach parent <parent>
+                        .then(literal(PARENT)
+                                .then(Commands.argument(PARENT.toString(), IdentifierArgument.id())
+                                        .suggests(new ValidParentSuggestionProvider())
+                                        .executes(ctx -> attachParent(ctx, regionSupplier.apply(ctx), getParentRegionArgument(ctx)))
+                                )
+                        )
 
-    private static LiteralArgumentBuilder<CommandSourceStack> flagSubCmd(Function<CommandContext<CommandSourceStack>, IProtectedRegion> regionSupplier) {
+                        // attach child <child>
+                        .then(literal(CHILD)
+                                .then(Commands.argument(CHILD.toString(), StringArgumentType.word())
+                                        .suggests(new ValidChildRegionSuggestionProvider())
+                                        .executes(ctx -> attachChild(ctx, regionSupplier.apply(ctx), getChildRegionArgument(ctx, regionSupplier.apply(ctx))))
+                                )
+                        )
+                )
+                .then(literal(DETACH)
+                        // detach this region from its parent
+                        .executes(ctx -> detachParent(ctx, regionSupplier.apply(ctx)))
+                        // detach one child
+                        .then(literal(CHILD)
+                                .then(Commands.argument(CHILD.toString(),  StringArgumentType.word())
+                                        .suggests(new ChildRegionSuggestionProvider())
+                                        .executes(ctx -> detachChild(ctx, regionSupplier.apply(ctx), getChildRegionArgument(ctx, regionSupplier.apply(ctx))))
+                                )
+                        )
+                );
+    }
+
+
+
+    private static LiteralArgumentBuilder<CommandSourceStack> displaySubCommand(Function<CommandContext<CommandSourceStack>, IProtectedRegion> regionSupplier) {
+        return literal(DISPLAY)
+                .executes(ctx -> promptDisplaySettings(ctx, getLocalRegionArgument(ctx)))
+                .then(literal(BLOCK)
+                        .then(Commands.argument(BLOCK.toString(), IdentifierArgument.id())
+                                .executes(ctx -> setDisplayBlock(ctx, getLocalRegionArgument(ctx), getDisplayBlockArgument(ctx)))
+                        )
+                )
+                .then(literal(GLOW)
+                        .then(Commands.argument(GLOW.toString(), BoolArgumentType.bool())
+                                .executes(ctx -> setDisplayGlow(ctx, getLocalRegionArgument(ctx), getDisplayGlowArgument(ctx)))
+                        )
+                )
+                .then(literal(LIGHT_LEVEL)
+                        .then(Commands.argument(LIGHT_LEVEL.toString(), IntegerArgumentType.integer(0, 15))
+                                .executes(ctx -> setDisplayLightLevel(ctx, getLocalRegionArgument(ctx), IntegerArgumentType.getInteger(ctx, LIGHT_LEVEL.toString())))
+                        )
+                )
+                .then(literal(RESET)
+                        .executes(ctx -> resetDisplaySettings(ctx, getLocalRegionArgument(ctx)))
+                );
+    }
+
+    private static LiteralArgumentBuilder<CommandSourceStack> flagSubCommand(Function<CommandContext<CommandSourceStack>, IProtectedRegion> regionSupplier) {
         return literal(FLAG)
                 .executes(ctx -> CommandUtil.promptRegionFlagList(ctx, regionSupplier.apply(ctx), 0))
                 .then(Commands.argument(FLAG.toString(), StringArgumentType.word())
@@ -297,49 +354,6 @@ class RegionCommand {
 
     static LiteralArgumentBuilder<CommandSourceStack> buildOld() {
         return literal(LOCAL)
-                .then(literal(DELETE)
-                        .executes(ctx -> attemptDeleteRegion(ctx, getLevelDataArgument(ctx), getLocalRegionArgument(ctx)))
-                        .then(literal(FOR_SURE)
-                                .executes(ctx -> deleteRegion(ctx, getLevelDataArgument(ctx), getLocalRegionArgument(ctx)))))
-                .then(literal(ADD).then(literal(CHILD)
-                        .then(Commands.argument(CHILD.toString(), StringArgumentType.word())
-                                .suggests(new ValidChildRegionSuggestionProvider())
-                                .executes(ctx -> addChildren(ctx, getLocalRegionArgument(ctx), getChildRegionArgument(ctx))))))
-                .then(literal(REMOVE).then(literal(CHILD)
-                        .then(Commands.argument(CHILD.toString(), StringArgumentType.word())
-                                .suggests(new ChildRegionSuggestionProvider())
-                                .executes(ctx -> removeChildren(ctx, getLevelDataArgument(ctx), getLocalRegionArgument(ctx), getChildRegionArgument(ctx))))))
-                .then(literal(LIST)
-                        .then(literal(TP_ANCHOR)
-                                .executes(ctx -> promptTeleportAnchorPagination(ctx, getLocalRegionArgument(ctx), 0))
-                                .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
-                                        .executes(ctx -> promptTeleportAnchorPagination(ctx, getLocalRegionArgument(ctx), getPageNoArgument(ctx)))
-                                )
-                        )
-                )
-                .then(literal(ADD)
-                        .then(literal(TP_ANCHOR)
-                                .then(Commands.argument(NAME.toString(), StringArgumentType.word())
-                                        .then(Commands.argument(TP_ANCHOR.toString(), BlockPosArgument.blockPos())
-                                                .executes(ctx -> updateTeleportAnchor(ctx, getLocalRegionArgument(ctx), getTeleportAnchorPosArgument(ctx), getTeleportAnchorNameArgument(ctx)))
-                                        )
-                                )
-                        )
-                )
-                .then(literal(REMOVE)
-                        .then(literal(TP_ANCHOR)
-                                .then(Commands.argument(NAME.toString(), StringArgumentType.word())
-                                        .suggests(new TeleportAnchorSuggestionProvider())
-                                        .executes(ctx -> removeTeleportAnchor(ctx, getLocalRegionArgument(ctx), getTeleportAnchorNameArgument(ctx)))
-                                )
-                        )
-                )
-
-                .then(literal(RENAME)
-                        .then(Commands.argument(NAME.toString(), StringArgumentType.word())
-                                .executes(ctx -> renameRegion(ctx, getLocalRegionArgument(ctx), getRegionNameArgument(ctx), getLevelDataArgument(ctx)))
-                        )
-                )
                 .then(literal(HIDE)
                         .then(literal(LOCAL)
                                 .executes(ctx -> hideRegion(ctx, getLocalRegionArgument(ctx), DisplayType.FRAME))
@@ -366,29 +380,7 @@ class RegionCommand {
                                 )
                         )
                 )
-                .then(literal(DISPLAY)
-                        .executes(ctx -> promptDisplaySettings(ctx, getLocalRegionArgument(ctx)))
-                        .then(literal(BLOCK)
-                                .then(Commands.argument(BLOCK.toString(), IdentifierArgument.id())
-                                        .executes(ctx -> setDisplayBlock(ctx, getLocalRegionArgument(ctx), getDisplayBlockArgument(ctx)))
-                                )
-                        )
-                        .then(literal(GLOW)
-                                .then(Commands.argument(GLOW.toString(), BoolArgumentType.bool())
-                                        .executes(ctx -> setDisplayGlow(ctx, getLocalRegionArgument(ctx), getDisplayGlowArgument(ctx)))
-                                )
-                        )
-                        .then(literal(LIGHT_LEVEL)
-                                .then(Commands.argument(LIGHT_LEVEL.toString(), IntegerArgumentType.integer(0, 15))
-                                        .executes(ctx -> setDisplayLightLevel(ctx, getLocalRegionArgument(ctx), IntegerArgumentType.getInteger(ctx, LIGHT_LEVEL.toString())))
-                                )
-                        )
-                        .then(literal(RESET)
-                                .executes(ctx -> resetDisplaySettings(ctx, getLocalRegionArgument(ctx)))
-                        )
-
-
-                );
+              ;
     }
 
 }

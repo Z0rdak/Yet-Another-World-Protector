@@ -1,10 +1,8 @@
 package de.z0rdak.yawp.api.commands;
 
-import de.z0rdak.yawp.api.Flag;
 import de.z0rdak.yawp.constants.Constants;
-import de.z0rdak.yawp.core.area.DisplayType;
+import de.z0rdak.yawp.core.area.visuals.DisplayType;
 import de.z0rdak.yawp.core.flag.FlagState;
-import de.z0rdak.yawp.core.flag.IFlag;
 
 import de.z0rdak.yawp.core.group.GroupType;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
@@ -27,43 +25,11 @@ public final class Commands {
     }
 
     public static String buildRegionBaseCmd(IProtectedRegion region) {
-        switch (region.getRegionType()) {
-            case GLOBAL: {
-                return buildCommandStr(GLOBAL.toString());
-            }
-            case DIMENSION: {
-                return buildCommandStr(DIM.toString(), region.getDim().identifier().toString());
-            }
-            case LOCAL: {
-                return buildCommandStr(LOCAL.toString(), region.getDim().identifier().toString(), region.getName());
-            }
-            default:
-                throw new IllegalArgumentException("Unexpected value: " + region.getRegionType());
-        }
+        return buildCommandStr(REGION.toString(), region.getId().toString());
     }
 
     public static String buildFlagBaseCmd(IProtectedRegion region, String flag) {
-        switch (region.getRegionType()) {
-            case GLOBAL: {
-                return buildCommandStr(FLAG.toString(), GLOBAL.toString(), flag);
-            }
-            case DIMENSION: {
-                return buildCommandStr(FLAG.toString(), DIM.toString(), region.getDim().identifier().toString(), flag);
-            }
-            case LOCAL: {
-                return buildCommandStr(FLAG.toString(), LOCAL.toString(), region.getDim().identifier().toString(), region.getName(), flag);
-            }
-            default:
-                throw new IllegalArgumentException("Unexpected value: " + region.getRegionType());
-        }
-    }
-
-    public static String buildFlagBaseCmd(IProtectedRegion region, Flag flag) {
-        return buildFlagBaseCmd(region, flag.name());
-    }
-
-    public static String buildFlagBaseCmd(IProtectedRegion region, IFlag flag) {
-        return buildFlagBaseCmd(region, flag.getName());
+        return appendSubCommand(buildRegionBaseCmd(region), FLAG.toString(), flag);
     }
 
     public static String buildRegionCmd(IProtectedRegion region, String subCmd) {
@@ -71,32 +37,32 @@ public final class Commands {
         return appendSubCommand(baseCmd, subCmd);
     }
 
-    public static String buildFlagCmd(IProtectedRegion region, String flag, String subCmd) {
+    public static String buildFlagSubCmd(IProtectedRegion region, String flag, String subCmd) {
         String baseCmd = buildFlagBaseCmd(region, flag);
         return appendSubCommand(baseCmd, subCmd);
     }
 
     public static String buildFlagInfoCmd(IProtectedRegion region, String flag) {
-        return buildFlagCmd(region, flag, INFO.toString());
+        return buildFlagSubCmd(region, flag, INFO.toString());
     }
 
     public static String buildFlagSuggestStateCmd(IProtectedRegion region, String flag) {
         String subCmd = buildSubCmdStr(STATE.toString(), "");
-        return buildFlagCmd(region, flag, subCmd);
+        return buildFlagSubCmd(region, flag, subCmd);
     }
 
     public static String buildFlagSetStateCmd(IProtectedRegion region, String flag, FlagState state) {
         String subCmd = buildSubCmdStr(STATE.toString(), state.name);
-        return buildFlagCmd(region, flag, subCmd);
+        return buildFlagSubCmd(region, flag, subCmd);
     }
 
     public static String buildFlagOverrideToggleCmd(IProtectedRegion region, String flag) {
         String subCmd = buildSubCmdStr(OVERRIDE.toString());
-        return buildFlagCmd(region, flag, subCmd);
+        return buildFlagSubCmd(region, flag, subCmd);
     }
 
     public static String buildFlagMsgCmd(IProtectedRegion region, String flag, String msgSubCmd) {
-        String msgCmd = buildFlagCmd(region, flag, MSG.toString());
+        String msgCmd = buildFlagSubCmd(region, flag, MSG.toString());
         return appendSubCommand(msgCmd, msgSubCmd);
     }
 

@@ -1,7 +1,22 @@
 package de.z0rdak.yawp.api.commands;
 
+import com.sun.jna.WString;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public enum CommandConstants {
     ADD("add"),
+    ASSIGN("assign"),
+    REVOKE("revoke"),
+    MY("my"),
+    REQUEST("request"),
+    REQUESTS("requests"),
+    RETURN("return"),
+    APPROVE("approve"),
+    REQUEST_ID("request-id"),
+    DENY("deny"),
     GROUP("group"),
     ALERT("alert"),
     ALERT_LOCAL("alert-local"),
@@ -10,17 +25,22 @@ public enum CommandConstants {
     AREA("area"),
     POS1("pos1"),
     POS2("pos2"),
-    RADIUS_POS("radius-pos"), // TODO: REMOVE
     RADIUS("radius"),
     CENTER_POS("center-pos"),
 
     CHILD("child"),
+    SUBREGION("subregion"),
+    EXISTING("Existing"),
     CHILDREN("children"),
+    PATH("path"),
+    ATTACH("attach"),
+    DETACH("detach"),
     RECURSIVE("recursive"),
     STYLE("style"),
     INTERSECTING("intersecting"),
     CLEAR("clear"),
     CREATE("create"),
+    CREATE_IN("create-in"),
     DEC("-"),
     DELETE("delete"),
     FOR_SURE("-y"),
@@ -28,11 +48,13 @@ public enum CommandConstants {
     FOREVER("forever"),
     SERIOUSLY("seriously"),
     DIM("dim"),
+    TARGET("target"),
     TARGET_DIM("target-dim"),
     TARGET_REGION("target-region"),
     LOCAL("local"),
-    TO_LOCAL("to-local"),
-    TO_DIM("to-dim"),
+    CLAIM("claim"),
+    REGION("region"),
+    ADMIN("admin"),
     GLOBAL("global"),
     ENABLE("enable"),
     ENABLE_LOCAL("enable-local"),
@@ -47,12 +69,13 @@ public enum CommandConstants {
     INFO("info"),
     COPY("copy"),
     LIST("list"),
+    CUBOID("Cuboid"),
+    SPHERE("Sphere"),
     NUKE_DISPLAY_ENTITIES("nuke-display-entities"),
     MEMBER("member"),
     RENAME("rename"),
     NAME("name"),
-    MARKER("marker"),
-    GIVE("give"),
+    MARKED("Marked"),
     OWNER("owner"),
     PARENT("parent"),
     PLAYER("player"),
@@ -67,22 +90,14 @@ public enum CommandConstants {
     REMOVE("remove"),
     RESET("reset"),
     TRACK("track"),
-    UNTRACK("untrack"),
-    SELECT("select"),
-    DESELECT("deselect"),
     SET("set"),
     STATE("state"),
     MSG("msg"),
-    TARGET("target"),
     TELEPORT("tp"),
     TP_ANCHOR("tp-anchor"),
     SHOW("show"),
-    HULL("hull"),
-    FRAME("frame"),
-    SHOW_NEAR("show-near"),
     DISPLAY("display"),
     BLOCK("block"),
-    BLOCK_ID("block-id"),
     GLOW("glow"),
     LIGHT_LEVEL("light-level"),
     LEVEL("level"),
@@ -93,7 +108,6 @@ public enum CommandConstants {
     ALL("all"),
     UNTRACKED("untracked"),
     HIERARCHY("hierarchy"),
-    TYPE("type"),
     EXPANSION("expansion"),
     Y_MIN("y-min"),
     Y_MAX("y-max");
@@ -107,5 +121,13 @@ public enum CommandConstants {
     @Override
     public String toString() {
         return cmdString;
+    }
+
+    public static List<String> getCommandStrings() {
+        return Arrays.stream(CommandConstants.values()).map(CommandConstants::toString).collect(Collectors.toList());
+    }
+
+    public static boolean isCommandStr(String cmdString) {
+        return getCommandStrings().contains(cmdString.toLowerCase());
     }
 }
