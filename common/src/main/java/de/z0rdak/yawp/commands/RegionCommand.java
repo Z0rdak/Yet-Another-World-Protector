@@ -49,18 +49,6 @@ class RegionCommand {
                         .executes(ctx -> promptRegionInfo(ctx, getRegionArgument(ctx)))
                         .then(literal(INFO).executes(ctx -> promptRegionInfo(ctx, getRegionArgument(ctx))))
                         .then(addSubCommand(ArgumentUtil::getRegionArgument))
-                        .then(literal(ADD)
-                                .then(literal(SUBREGION) // need containment check
-                                        .then(buildCreateCuboid()) // validate region is not global
-                                        .then(buildCreateSphere()) // validate region is not global
-                                        .then(literal(EXISTING)
-                                                .then(Commands.argument(SUBREGION.toString(), IdentifierArgument.id())
-                                                        .suggests(new ValidChildRegionSuggestionProvider())
-                                                        .executes(ctx -> addSubRegion(ctx, getRegionArgument(ctx), getSubRegionArgument(ctx)))
-                                                )
-                                        )
-                                )
-                        )
                         .then(hierarchySubCommand(ArgumentUtil::getRegionArgument))
                         .then(removeSubCommand(ArgumentUtil::getRegionArgument))
                         .then(clearSubCommand(ArgumentUtil::getRegionArgument))
@@ -112,11 +100,12 @@ class RegionCommand {
     }
 
     public static LiteralArgumentBuilder<CommandSourceStack> buildCreateCuboid() {
-        Command<CommandSourceStack> command =
-                ctx -> createCuboidRegion(ctx, getRegionNameArgument(ctx),
-                BlockPosArgument.getSpawnablePos(ctx, POS1.toString()),
-                BlockPosArgument.getSpawnablePos(ctx, POS2.toString()));
-
+        Command<CommandSourceStack> command = ctx -> createRegion(ctx,
+                getRegionNameArgument(ctx),
+                new CuboidArea(
+                        BlockPosArgument.getSpawnablePos(ctx, POS1.toString()),
+                        BlockPosArgument.getSpawnablePos(ctx, POS2.toString()))
+                );
         return Commands.literal(AreaType.CUBOID.areaType)
                 .then(Commands.argument(CommandConstants.NAME.toString(), StringArgumentType.word())
                         .then(Commands.argument(POS1.toString(), BlockPosArgument.blockPos())
@@ -125,10 +114,41 @@ class RegionCommand {
     }
 
     public static LiteralArgumentBuilder<CommandSourceStack> buildCreateSphere() {
-        Command<CommandSourceStack> command = ctx ->
-                createSphereRegion(ctx, getRegionNameArgument(ctx),
+        Command<CommandSourceStack> command = ctx -> createRegion(ctx,
+                getRegionNameArgument(ctx),
+                new SphereArea(
                         BlockPosArgument.getSpawnablePos(ctx, CENTER_POS.toString()),
-                        IntegerArgumentType.getInteger(ctx, RADIUS.toString()));
+                        IntegerArgumentType.getInteger(ctx, RADIUS.toString()))
+                );
+        return Commands.literal(AreaType.SPHERE.areaType)
+                .then(Commands.argument(CommandConstants.NAME.toString(), StringArgumentType.word())
+                        .then(Commands.argument(CENTER_POS.toString(), BlockPosArgument.blockPos())
+                                .then(Commands.argument(RADIUS.toString(), IntegerArgumentType.integer(0))
+                                        .executes(command))));
+    }
+
+    public static LiteralArgumentBuilder<CommandSourceStack> buildCreateCuboid(Function<CommandContext<CommandSourceStack>, IProtectedRegion> parentSupplier) {
+        Command<CommandSourceStack> command = ctx -> {
+            var regionName = getRegionNameArgument(ctx);
+            var area = new CuboidArea(   BlockPosArgument.getSpawnablePos(ctx, POS1.toString()), BlockPosArgument.getSpawnablePos(ctx, POS2.toString()));
+            var parent = parentSupplier.apply(ctx);
+            return createRegion(ctx, regionName, area, parent);
+        };
+
+        return Commands.literal(AreaType.CUBOID.areaType)
+                .then(Commands.argument(CommandConstants.NAME.toString(), StringArgumentType.word())
+                        .then(Commands.argument(POS1.toString(), BlockPosArgument.blockPos())
+                                .then(Commands.argument(POS2.toString(), BlockPosArgument.blockPos())
+                                        .executes(command))));
+    }
+
+    public static LiteralArgumentBuilder<CommandSourceStack> buildCreateSphere(Function<CommandContext<CommandSourceStack>, IProtectedRegion> parentSupplier) {
+        Command<CommandSourceStack> command = ctx -> {
+            var regionName = getRegionNameArgument(ctx);
+            var area = new SphereArea(BlockPosArgument.getSpawnablePos(ctx, CENTER_POS.toString()), IntegerArgumentType.getInteger(ctx, RADIUS.toString()));
+            var parent = parentSupplier.apply(ctx);
+            return createRegion(ctx, regionName ,area ,parent);
+        };
 
         return Commands.literal(AreaType.SPHERE.areaType)
                 .then(Commands.argument(CommandConstants.NAME.toString(), StringArgumentType.word())
@@ -250,24 +270,22 @@ class RegionCommand {
         return literal(HIERARCHY)
                 .executes(ctx -> showHierarchyTest(ctx, regionSupplier.apply(ctx)))
                 .then(literal(PARENT)
-                        .executes(ctx -> showParent(ctx, regionSupplier.apply(ctx)))
-                )
+                        .executes(ctx -> showParent(ctx, regionSupplier.apply(ctx))))
                 .then(literal(CHILDREN)
-                        .executes(ctx -> showChildren(ctx, regionSupplier.apply(ctx)))
-                )
+                        .executes(ctx -> showChildren(ctx, regionSupplier.apply(ctx))))
                 .then(literal(PATH)
-                        .executes(ctx -> showPath(ctx, regionSupplier.apply(ctx)))
+                        .executes(ctx -> showPath(ctx, regionSupplier.apply(ctx))))
+                .then(literal(ADD)
+                        .then(buildCreateCuboid(regionSupplier)) // validate region is not global
+                        .then(buildCreateSphere(regionSupplier)) // validate region is not global
                 )
                 .then(literal(ATTACH)
-                        // attach parent <parent>
                         .then(literal(PARENT)
                                 .then(Commands.argument(PARENT.toString(), IdentifierArgument.id())
                                         .suggests(new ValidParentSuggestionProvider())
                                         .executes(ctx -> attachParent(ctx, regionSupplier.apply(ctx), getParentRegionArgument(ctx)))
                                 )
                         )
-
-                        // attach child <child>
                         .then(literal(CHILD)
                                 .then(Commands.argument(CHILD.toString(), StringArgumentType.word())
                                         .suggests(new ValidChildRegionSuggestionProvider())
@@ -287,8 +305,6 @@ class RegionCommand {
                         )
                 );
     }
-
-
 
     private static LiteralArgumentBuilder<CommandSourceStack> displaySubCommand(Function<CommandContext<CommandSourceStack>, IProtectedRegion> regionSupplier) {
         return literal(DISPLAY)

@@ -3,7 +3,6 @@ package de.z0rdak.yawp.commands;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.core.ILevelRegionApi;
 import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.core.region.hierarchy.HierarchyValidationResult;
@@ -17,7 +16,6 @@ import de.z0rdak.yawp.core.area.anchors.RegionAnchors;
 import de.z0rdak.yawp.core.area.anchors.TeleportAnchor;
 import de.z0rdak.yawp.core.area.visuals.BlockDisplayProperties;
 import de.z0rdak.yawp.core.area.visuals.DisplayType;
-import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.FlagMessage;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
@@ -105,16 +103,10 @@ final class RegionCommandHelper {
         }
     }
 
-
-    public static int createRegion(CommandContext<CommandSourceStack> ctx, String regionName, LevelData levelData, IMarkableRegion region, IProtectedRegion parent) {
-        int res = levelData.isValidRegionName(regionName);
-        if (res == -1) {
+    public static int createRegion(CommandContext<CommandSourceStack> ctx, String regionName, IMarkableArea area, IProtectedRegion parent) {
+        if (LevelData.isValidRegionName(regionName)) {
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.invalid", "Invalid region name supplied: '%s'", regionName));
-            return res;
-        }
-        if (res == 1) {
-            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.exists", "Dimension %s already contains region with name %s", levelData.getDim().getName(), ChatLinkBuilder.buildRegionInfoLink(levelData.getLocal(regionName))));
-            return res;
+            return -1;
         }
         ServerPlayer player;
         try {
@@ -122,51 +114,42 @@ final class RegionCommandHelper {
         } catch (CommandSyntaxException e) {
             player = null;
         }
-
+        var uuid = UUID.randomUUID();
+        var region = new MarkedRegion(regionName, uuid, parent.getUuid(), area, parent.getDim());
         var regionCreated = new RegionEvent.Create(region, player);
         if (Services.REGION_EVENT_DISPATCHER.post(regionCreated)) {
-            return 1;
+            return -2;
         }
-
-        Services.REGION_CONFIG.getDefaultFlags().stream()
-                .map(FlagRegister::byId)
-                .forEach(flag -> region.addFlag(new BooleanFlag(flag)));
         Optional<ILevelRegionApi> dimRegionApi = RegionManager.get().getDimRegionApi(parent.getDim());
         if (dimRegionApi.isPresent()) {
             var api = dimRegionApi.get();
-            boolean added = api.addLocalRegion(region);
+            boolean added = api.addLocalRegion(region, parent);
             if (added) {
-                // LocalRegions.ensureHigherRegionPriorityFor(region, Services.REGION_CONFIG.getDefaultPriority());
-                RegionManager.get().save(levelData.getDim());
+                RegionManager.get().save(api.getDimKey());
                 sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.success", "Successfully created region %s (parent: %s)", ChatLinkBuilder.buildRegionInfoLink(region), ChatLinkBuilder.buildRegionInfoLink(parent)));
                 return Command.SINGLE_SUCCESS;
+            } else {
+                sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.exists", "Dimension %s already contains region with name %s", api.getDimKey().identifier(), ChatLinkBuilder.buildRegionInfoLink(region)));
+                return -3;
             }
         }
-        // TODO error
-        return -1;
+        return 0;
     }
 
-    public static int createCuboidRegion(CommandContext<CommandSourceStack> ctx, Identifier levelId, String regionName, BlockPos pos1, BlockPos pos2) {
-        // TODO Validate levelId
+    public static int createRegionIn(CommandContext<CommandSourceStack> ctx, Identifier levelId, String regionName, IMarkableArea area) {
+        if (!RegionManager.get().hasLevelData(levelId)){
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("","No tracked level found for %s", levelId.toString()));
+            return -1;
+        }
         var dimCache = RegionManager.get().getLevelRegionData(levelId);
         if (dimCache.isPresent()) {
-            return createCuboidRegion(ctx, regionName, dimCache.get(), pos1, pos2);
+            return createRegion(ctx, regionName, area, dimCache.get().getDim());
         }
         Constants.LOGGER.error("Error getting dimension cache for {}", ctx.getSource().getLevel().dimension().identifier().toString());
         return -1;
     }
 
-    public static int createSphereRegion(CommandContext<CommandSourceStack> ctx, Identifier levelId, String regionName, BlockPos centerPos, int radius) {
-        // TODO validate levelId
-        var dimCache = RegionManager.get().getLevelRegionData(levelId);
-        if (dimCache.isPresent()) {
-            return createSphereRegion(ctx, regionName, dimCache.get(), centerPos, radius);
-        }
-        Constants.LOGGER.error("Error getting dimension cache for {}", ctx.getSource().getLevel().dimension().identifier().toString());
-        return -1;
-    }
-
-    public static int createCuboidRegion(CommandContext<CommandSourceStack> ctx, String regionName, BlockPos pos1, BlockPos pos2) {
+    public static int createRegion(CommandContext<CommandSourceStack> ctx, String regionName, IMarkableArea area) {
         Player player = null;
         try {
             player = ctx.getSource().getPlayerOrException();
@@ -176,44 +159,11 @@ final class RegionCommandHelper {
         }
         var dimCache = RegionManager.get().getLevelRegionData(player.level().dimension());
         if (dimCache.isPresent()) {
-            return createCuboidRegion(ctx, regionName, dimCache.get(), pos1, pos2);
+            return createRegion(ctx, regionName, area, dimCache.get().getDim());
         }
         Constants.LOGGER.error("Error getting dimension cache for {}", ctx.getSource().getLevel().dimension().identifier().toString());
         return -1;
     }
-
-    public static int createSphereRegion(CommandContext<CommandSourceStack> ctx, String regionName, BlockPos centerPos, int radius) {
-        Player player = null;
-        try {
-            player = ctx.getSource().getPlayerOrException();
-        } catch (CommandSyntaxException e) {
-            sendError(ctx.getSource(), Component.translatableWithFallback("", ""));
-            return 1;
-        }
-        var dimCache = RegionManager.get().getLevelRegionData(player.level().dimension());
-        if (dimCache.isPresent()) {
-            return createSphereRegion(ctx, regionName, dimCache.get(), centerPos, radius);
-        }
-        Constants.LOGGER.error("Error getting dimension cache for {}", ctx.getSource().getLevel().dimension().identifier().toString());
-        return -1;
-    }
-
-    public static int createCuboidRegion(CommandContext<CommandSourceStack> ctx, String regionName, LevelData levelData, BlockPos pos1, BlockPos pos2) {
-        var uuid = UUID.randomUUID();
-        var parentUuid = LevelData.levelUuid(levelData.getDimKey().identifier());
-        IMarkableRegion region = new MarkedRegion(regionName, uuid, parentUuid, new CuboidArea(pos1, pos2), levelData.getDimKey());
-        IProtectedRegion parent = levelData.getDim();
-        return createRegion(ctx, regionName, levelData, region, parent);
-    }
-
-    public static int createSphereRegion(CommandContext<CommandSourceStack> ctx, String regionName, LevelData levelData, BlockPos centerPos, int radius) {
-        var uuid = UUID.randomUUID();
-        var parentUuid = LevelData.levelUuid(levelData.getDimKey().identifier());
-        var region = new MarkedRegion(regionName, uuid, parentUuid, new SphereArea(centerPos, radius), levelData.getDimKey());
-        IProtectedRegion parent = levelData.getDim();
-        return createRegion(ctx, regionName, levelData, region, parent);
-    }
-
 
     public static int attemptDeleteRegions(CommandContext<CommandSourceStack> ctx, LevelData dimCache) {
         int amount = dimCache.getLocalNames().size();
@@ -456,16 +406,11 @@ final class RegionCommandHelper {
     public static int renameRegion(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, String regionName, LevelData levelData) {
         if (region.getName().equals(regionName)) {
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.no-change", regionName));
-            return 1;
+            return -1;
         }
-        int res = levelData.isValidRegionName(regionName);
-        if (res == -1) {
+        if (!LevelData.isValidRegionName(regionName)) {
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.invalid", regionName));
-            return res;
-        }
-        if (res == 1) {
-            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.exists", "Dimension %s already contains region with name %s", levelData.getDim().getName(), buildRegionInfoLink(levelData.getLocal(regionName))));
-            return res;
+            return -2;
         }
         try {
             ServerPlayer player;
@@ -477,23 +422,19 @@ final class RegionCommandHelper {
             
             RegionEvent.Rename renameRegion = new RegionEvent.Rename(region, region.getName(), regionName, player);
             if (Services.REGION_EVENT_DISPATCHER.post(renameRegion)) {
-                return 1;
+                return -3;
             }
-            //if (RegionEvents.RENAME_REGION.invoker().renameRegion(renameRegion)) {
-            //    return 0;
-            //}
             String oldName = region.getName();
             levelData.renameLocal(region, regionName);
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.success", "Changed name of region %s from '%s' to '%s'", buildRegionInfoLink(region), oldName, regionName));
             RegionManager.get().save(region);
-            return 0;
+            return Command.SINGLE_SUCCESS;
         } catch (IllegalArgumentException ex) {
             sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.dim.info.region.create.name.exists", "Dimension %s already contains region with name %s", levelData.getDim().getName(), buildRegionInfoLink(levelData.getLocal(regionName))));
-            return 1;
+            return 0;
         }
     }
 
-    // TODO: Test removing child does not set priority correct with overlapping regions
     public static int removeChildren(CommandContext<CommandSourceStack> ctx, LevelData dimCache, IProtectedRegion parent, IMarkableRegion child) {
         if (parent.hasChild(child)) {
             RegionHierarchy.removeParent(child);

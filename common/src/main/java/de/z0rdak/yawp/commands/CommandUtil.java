@@ -16,6 +16,7 @@ import de.z0rdak.yawp.api.events.flag.FlagEvent;
 import de.z0rdak.yawp.api.permission.Permissions;
 import de.z0rdak.yawp.commands.suggestions.ExistingFlagsSuggestionProvider;
 import de.z0rdak.yawp.commands.suggestions.MissingFlagsSuggestionProvider;
+import de.z0rdak.yawp.commands.suggestions.TeleportAnchorSuggestionProvider;
 import de.z0rdak.yawp.core.flag.BooleanFlag;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.core.flag.IFlag;
@@ -36,6 +37,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.commands.arguments.UuidArgument;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
@@ -49,6 +51,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.api.commands.CommandConstants.*;
+import static de.z0rdak.yawp.commands.RegionCommandHelper.*;
 import static de.z0rdak.yawp.commands.arguments.ArgumentUtil.*;
 import static de.z0rdak.yawp.util.ChatComponentBuilder.*;
 import static de.z0rdak.yawp.api.MessageSender.sendCmdFeedback;
@@ -58,7 +61,8 @@ import static net.minecraft.ChatFormatting.RED;
 
 public class CommandUtil {
 
-    public static LiteralArgumentBuilder<CommandSourceStack> buildClearSubCommand(Function<CommandContext<CommandSourceStack>, IProtectedRegion> regionSupplier) {
+    // todo clear children
+    public static LiteralArgumentBuilder<CommandSourceStack> clearSubCommand(Function<CommandContext<CommandSourceStack>, IProtectedRegion> regionSupplier) {
         return literal(CLEAR)
                 .then(literal(FLAGS)
                         .executes(ctx -> CommandUtil.clearFlags(ctx, regionSupplier.apply(ctx)))
@@ -76,7 +80,7 @@ public class CommandUtil {
                 );
     }
 
-    public static LiteralArgumentBuilder<CommandSourceStack> buildRemoveSubCommand(Function<CommandContext<CommandSourceStack>, IProtectedRegion> regionSupplier) {
+    public static LiteralArgumentBuilder<CommandSourceStack> removeSubCommand(Function<CommandContext<CommandSourceStack>, IProtectedRegion> regionSupplier) {
         return literal(REMOVE)
                 .then(literal(PLAYER)
                         .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
@@ -99,6 +103,16 @@ public class CommandUtil {
                                 .executes(ctx -> removeRegionFlag(ctx, regionSupplier.apply(ctx), getFlagArgument(ctx)))
                         )
                 )
+
+
+                .then(literal(REMOVE)
+                        .then(literal(TP_ANCHOR)
+                                .then(Commands.argument(NAME.toString(), StringArgumentType.word())
+                                        .suggests(new TeleportAnchorSuggestionProvider())
+                                        .executes(ctx -> removeTeleportAnchor(ctx, getLocalRegionArgument(ctx), getTeleportAnchorNameArgument(ctx)))
+                                )
+                        )
+                )
                 .then(literal(FLAGS)
                         .then(Commands.argument(FLAGS.toString(), StringArgumentType.greedyString())
                                 .suggests(new ExistingFlagsSuggestionProvider())
@@ -106,7 +120,7 @@ public class CommandUtil {
                 );
     }
 
-    public static LiteralArgumentBuilder<CommandSourceStack> buildAddSubCommand(Function<CommandContext<CommandSourceStack>, IProtectedRegion> regionSupplier) {
+    public static LiteralArgumentBuilder<CommandSourceStack> addSubCommand(Function<CommandContext<CommandSourceStack>, IProtectedRegion> regionSupplier) {
         return literal(ADD)
                 .then(literal(PLAYER)
                         .then(Commands.argument(GROUP.toString(), StringArgumentType.word())
@@ -136,12 +150,21 @@ public class CommandUtil {
                                 .suggests(new MissingFlagsSuggestionProvider())
                                 .executes(ctx -> addFlags(ctx, regionSupplier.apply(ctx), getFlagArguments(ctx))))
                 )
+                .then(literal(ADD)
+                        .then(literal(TP_ANCHOR)
+                                .then(Commands.argument(NAME.toString(), StringArgumentType.word())
+                                        .then(Commands.argument(TP_ANCHOR.toString(), BlockPosArgument.blockPos())
+                                                .executes(ctx -> updateTeleportAnchor(ctx, getLocalRegionArgument(ctx), getTeleportAnchorPosArgument(ctx), getTeleportAnchorNameArgument(ctx)))
+                                        )
+                                )
+                        )
+                )
                 .then(literal(ALL_FLAGS)
                         .executes(ctx -> addAllFlags(ctx, regionSupplier.apply(ctx)))
                 );
     }
 
-    public static LiteralArgumentBuilder<CommandSourceStack> buildListSubCommand(Function<CommandContext<CommandSourceStack>, IProtectedRegion> regionSupplier) {
+    public static LiteralArgumentBuilder<CommandSourceStack> listSubCommand(Function<CommandContext<CommandSourceStack>, IProtectedRegion> regionSupplier) {
         return literal(LIST)
                 .then(literal(CHILDREN)
                         .executes(ctx -> promptRegionChildren(ctx, regionSupplier.apply(ctx), 0))
@@ -171,7 +194,16 @@ public class CommandUtil {
                                                 .executes(ctx -> CommandUtil.promptGroupList(ctx, regionSupplier.apply(ctx), getGroupArgument(ctx), GroupType.PLAYER, getPageNoArgument(ctx))))
                                 )
                         )
-                );
+                )
+                .then(literal(LIST)
+                        .then(literal(TP_ANCHOR)
+                                .executes(ctx -> promptTeleportAnchorPagination(ctx, getLocalRegionArgument(ctx), 0))
+                                .then(Commands.argument(PAGE.toString(), IntegerArgumentType.integer(0))
+                                        .executes(ctx -> promptTeleportAnchorPagination(ctx, getLocalRegionArgument(ctx), getPageNoArgument(ctx)))
+                                )
+                        )
+                )
+                ;
     }
 
     private static RequiredArgumentBuilder<CommandSourceStack, Identifier> buildExecuteCopyCommand(Function<CommandContext<CommandSourceStack>, IProtectedRegion> srcSupplier, Command<CommandSourceStack> command) {
@@ -181,7 +213,7 @@ public class CommandUtil {
                 .executes(command);
     }
 
-    public static LiteralArgumentBuilder<CommandSourceStack> buildCopyCommand(Function<CommandContext<CommandSourceStack>, IProtectedRegion> srcSupplier) {
+    public static LiteralArgumentBuilder<CommandSourceStack> copySubCommand(Function<CommandContext<CommandSourceStack>, IProtectedRegion> srcSupplier) {
         return literal(COPY)
                 .then(literal(FLAGS)
                         .then(buildExecuteCopyCommand(srcSupplier, ctx -> copyRegionFlags(ctx, srcSupplier.apply(ctx), getTargetRegionArgument(ctx))))

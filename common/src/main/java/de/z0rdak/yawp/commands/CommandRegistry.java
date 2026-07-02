@@ -13,6 +13,8 @@ import de.z0rdak.yawp.commands.suggestions.TrackedLevelSuggestionProvider;
 import de.z0rdak.yawp.commands.suggestions.UntrackedLevelSuggestionProvider;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.area.AreaType;
+import de.z0rdak.yawp.core.area.CuboidArea;
+import de.z0rdak.yawp.core.area.SphereArea;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.data.region.LevelData;
 import de.z0rdak.yawp.platform.Services;
@@ -93,7 +95,12 @@ public final class CommandRegistry {
                 .then(Commands.argument(LOCAL.toString(), StringArgumentType.word())
                        // .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestionsIn(ctx, builder, ctx.getSource().getLevel()))
                         .executes(ctx -> deleteRegion(ctx, getRegionIn(ctx, ctx.getSource().getLevel())))
-                );
+                )
+                .then(literal(DELETE)
+                        .executes(ctx -> attemptDeleteRegion(ctx, getLevelDataArgument(ctx), getLocalRegionArgument(ctx)))
+                        .then(literal(FOR_SURE)
+                                .executes(ctx -> deleteRegion(ctx, getLevelDataArgument(ctx), getLocalRegionArgument(ctx)))))
+                ;
     }
 
     static LiteralArgumentBuilder<CommandSourceStack> buildCreateLocal() {
@@ -106,13 +113,13 @@ public final class CommandRegistry {
             return createBuilder
                     .then(literal(MARKED)
                             .then(Commands.argument(CommandConstants.NAME.toString(), StringArgumentType.word())
-                                    .executes(ctx -> createRegion(ctx, getRegionNameArgument(ctx)))));
+                                    .executes(ctx -> createMarkedRegion(ctx, getRegionNameArgument(ctx)))));
         }
         return createBuilder;
     }
 
 
-    private static int createRegion(CommandContext<CommandSourceStack> ctx, String regionName){
+    private static int createMarkedRegion(CommandContext<CommandSourceStack> ctx, String regionName){
         // WE SELECTION
         // TODO Only enable if WE is loaded
         sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("", "Dummy WE not yet supported"));
@@ -127,17 +134,23 @@ public final class CommandRegistry {
                                 .then(Commands.literal(AreaType.CUBOID.areaType)
                                         .then(Commands.argument(POS1.toString(), BlockPosArgument.blockPos())
                                                 .then(Commands.argument(POS2.toString(), BlockPosArgument.blockPos())
-                                                        .executes(ctx -> createCuboidRegion(ctx, IdentifierArgument.getId(ctx, LEVEL.toString()), getRegionNameArgument(ctx),
-                                                                BlockPosArgument.getSpawnablePos(ctx, POS1.toString()),
-                                                                BlockPosArgument.getSpawnablePos(ctx, POS2.toString())))
+                                                        .executes(ctx -> {
+                                                            var levelId = IdentifierArgument.getId(ctx, LEVEL.toString());
+                                                            var name = getRegionNameArgument(ctx);
+                                                            var area = new CuboidArea(BlockPosArgument.getSpawnablePos(ctx, POS1.toString()), BlockPosArgument.getSpawnablePos(ctx, POS2.toString()));
+                                                            return createRegionIn(ctx, levelId, name, area);
+                                                        })
                                                 ))
                                 )
                                 .then(Commands.literal(AreaType.SPHERE.areaType)
                                         .then(Commands.argument(CENTER_POS.toString(), BlockPosArgument.blockPos())
                                                 .then(Commands.argument(RADIUS.toString(), IntegerArgumentType.integer(0))
-                                                        .executes(ctx -> createSphereRegion(ctx, getRegionNameArgument(ctx),
-                                                                BlockPosArgument.getSpawnablePos(ctx, CENTER_POS.toString()),
-                                                                IntegerArgumentType.getInteger(ctx, RADIUS.toString())))
+                                                        .executes(ctx -> {
+                                                            var levelId = IdentifierArgument.getId(ctx, LEVEL.toString());
+                                                            var name = getRegionNameArgument(ctx);
+                                                            var area = new SphereArea(BlockPosArgument.getSpawnablePos(ctx, CENTER_POS.toString()), IntegerArgumentType.getInteger(ctx, RADIUS.toString()));
+                                                            return createRegionIn(ctx, levelId, name, area);
+                                                        })
                                                 ))
                                 )
                         ))
