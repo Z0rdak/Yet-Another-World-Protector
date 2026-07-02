@@ -207,8 +207,15 @@ public final class RegionManager implements IRegionManager {
 
         @Override
         public boolean addLocalRegion(IMarkableRegion region) {
+            return addLocalRegion(region, levelData.getDim());
+        }
+
+        @Override
+        public boolean addLocalRegion(IMarkableRegion region, IProtectedRegion parent) {
             if (hasLocal(region.getName())) return false;
-            RegionHierarchy.setParent(region, levelData.getDim());
+            var res = RegionHierarchy.validateParent(region, parent);
+            if (!res.valid()) return false;
+            RegionHierarchy.setParent(region, parent);
             levelData.addLocal(region);
             return true;
         }

@@ -115,6 +115,7 @@ public interface ILevelRegionApi {
      * @return true if the Local Region was added successfully, false otherwise
      */
     boolean addLocalRegion(IMarkableRegion region);
+    boolean addLocalRegion(IMarkableRegion region, IProtectedRegion parent);
 
     /**
      * Remove the provided region from the dimension
