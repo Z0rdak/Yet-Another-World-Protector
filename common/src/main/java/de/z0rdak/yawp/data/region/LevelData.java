@@ -118,16 +118,10 @@ public class LevelData extends SavedData {
      * @param regionName the name of the region to be checked.
      * @return -1 if the region name is invalid, 0 if the region name is valid, 1 if the region name is already used in the dimension.
      */
-    public int isValidRegionName(String regionName) {
+    public static boolean isValidRegionName(String regionName) {
         var valid = Identifier.isValidPath(regionName);
         var validAndMinLength = valid && regionName.length() > 2;
-        if (!validAndMinLength || CommandConstants.isCommandStr(regionName)) {
-            return -1;
-        }
-        if (this.locals.containsKey(regionName)) {
-            return 1;
-        }
-        return 0;
+        return validAndMinLength && !CommandConstants.isCommandStr(regionName);
     }
 
     public void addLocal(IMarkableRegion region) {
