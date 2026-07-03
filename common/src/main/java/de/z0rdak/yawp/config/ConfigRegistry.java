@@ -12,7 +12,6 @@ import static de.z0rdak.yawp.config.server.FlagConfig.FLAG_CONFIG_LOGGER;
 import static de.z0rdak.yawp.config.server.LoggingConfig.LOGGING_CONFIG_LOGGER;
 import static de.z0rdak.yawp.config.server.LoggingConfig.shouldLogEvents;
 import static de.z0rdak.yawp.config.server.PermissionConfig.PERMISSION_CONFIG_LOGGER;
-import static de.z0rdak.yawp.config.server.RegionConfig.REGION_CONFIG_LOGGER;
 import static de.z0rdak.yawp.constants.Constants.MOD_ID;
 
 public final class ConfigRegistry {
@@ -47,21 +46,6 @@ public final class ConfigRegistry {
                 PERMISSION_CONFIG_LOGGER.info("OP bypassing flags: {}", PermissionConfig.byPassFlagAllowed() ? "enabled" : "disabled");
                 PERMISSION_CONFIG_LOGGER.info("Commands for non OPs: {}", PermissionConfig.isCmdEnabledForNonOp() ? "enabled" : "disabled");
                 PERMISSION_CONFIG_LOGGER.info("Region teleportation: {}", PermissionConfig.allowRegionTp() ? "enabled" : "disabled");
-            }
-            break;
-            case RegionConfig.CONFIG_NAME: {
-                int numLocalDefaultFlags = RegionConfig.getDefaultFlags().size();
-                String loadedLocalFlags = (numLocalDefaultFlags > 0
-                        ? ": " + String.join(", ", RegionConfig.getDefaultFlags())
-                        : "");
-                REGION_CONFIG_LOGGER.info("{} default flag(s) for Local Regions read from config{}", numLocalDefaultFlags, loadedLocalFlags);
-
-                int numDimDefaultFlags = RegionConfig.getDefaultDimFlags().size();
-                String loadedDimFlags = (numDimDefaultFlags > 0
-                        ? ": " + String.join(", ", RegionConfig.getDefaultDimFlags())
-                        : "");
-                REGION_CONFIG_LOGGER.info("{} default flag(s) for Dimensional Regions read from config{}", numDimDefaultFlags, loadedDimFlags);
-                REGION_CONFIG_LOGGER.info("Enabling newly created Dimensional Regions: {}", RegionConfig.shouldActivateNewDimRegion() ? "enabled" : "disabled");
             }
             break;
             case FlagConfig.CONFIG_NAME: {

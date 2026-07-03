@@ -36,7 +36,6 @@ public class FabricConfigHelper implements IConfigHelper {
         // registering configuration
         Services.CONFIG_REGISTRY.registerServerConfig(PermissionConfig.CONFIG_SPEC, PermissionConfig.CONFIG_NAME);
         Services.CONFIG_REGISTRY.registerServerConfig(FlagConfig.CONFIG_SPEC, FlagConfig.CONFIG_NAME);
-        Services.CONFIG_REGISTRY.registerServerConfig(RegionConfig.CONFIG_SPEC, RegionConfig.CONFIG_NAME);
         Services.CONFIG_REGISTRY.registerServerConfig(LoggingConfig.CONFIG_SPEC, LoggingConfig.CONFIG_NAME);
         Services.CONFIG_REGISTRY.registerServerConfig(FeatureConfig.CONFIG_SPEC, FeatureConfig.CONFIG_NAME);
     }
