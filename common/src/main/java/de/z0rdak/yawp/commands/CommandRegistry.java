@@ -9,6 +9,8 @@ import de.z0rdak.yawp.api.commands.CommandConstants;
 import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.permission.Permissions;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
+import de.z0rdak.yawp.commands.suggestions.CurrentLevelRegionSuggestionProvider;
+import de.z0rdak.yawp.commands.suggestions.LevelRegionSuggestionProvider;
 import de.z0rdak.yawp.commands.suggestions.TrackedLevelSuggestionProvider;
 import de.z0rdak.yawp.commands.suggestions.UntrackedLevelSuggestionProvider;
 import de.z0rdak.yawp.constants.Constants;
@@ -80,6 +82,7 @@ public final class CommandRegistry {
 
                 .then(buildCreateInLocal())
                 .then(buildCreateLocal())
+                .then(buildDeleteLocalFrom())
                 .then(buildDeleteLocal())
 
                 .then(literal(TRACK)
@@ -90,17 +93,17 @@ public final class CommandRegistry {
                 ;
     }
 
+
+
     static LiteralArgumentBuilder<CommandSourceStack> buildDeleteLocal() {
         return literal(DELETE)
-                .then(Commands.argument(LOCAL.toString(), StringArgumentType.word())
-                       // .suggests((ctx, builder) -> RegionArgumentType.region().listSuggestionsIn(ctx, builder, ctx.getSource().getLevel()))
-                        .executes(ctx -> deleteRegion(ctx, getRegionIn(ctx, ctx.getSource().getLevel())))
-                )
-                .then(literal(DELETE)
-                        .executes(ctx -> attemptDeleteRegion(ctx, getLevelDataArgument(ctx), getLocalRegionArgument(ctx)))
+                .then(Commands.argument(REGION.toString(), StringArgumentType.word())
+                        .suggests(CurrentLevelRegionSuggestionProvider::suggest)
+                        .executes(ctx -> deleteRegion(ctx, getLevelDataFromPlayer(ctx), getLocalRegionArgument(ctx)))
                         .then(literal(FOR_SURE)
-                                .executes(ctx -> deleteRegion(ctx, getLevelDataArgument(ctx), getLocalRegionArgument(ctx)))))
-                ;
+                                .executes(ctx -> deleteRegion(ctx, getLevelDataFromPlayer(ctx), getLocalRegionArgument(ctx)))
+                        )
+                );
     }
 
     static LiteralArgumentBuilder<CommandSourceStack> buildCreateLocal() {
@@ -157,6 +160,20 @@ public final class CommandRegistry {
                 ;
     }
 
+    static LiteralArgumentBuilder<CommandSourceStack> buildDeleteLocalFrom() {
+        return literal(DELETE_FROM)
+                .then(Commands.argument(LEVEL.toString(), IdentifierArgument.id())
+                        .suggests(new TrackedLevelSuggestionProvider())
+                        .then(Commands.argument(REGION.toString(), StringArgumentType.word())
+                                .suggests(LevelRegionSuggestionProvider::suggest)
+                                .executes(ctx -> deleteRegion(ctx, getLevelDataArgument(ctx), getLocalRegionArgument(ctx)))
+                                .then(literal(FOR_SURE)
+                                        .executes(ctx -> deleteRegion(ctx, getLevelDataArgument(ctx), getLocalRegionArgument(ctx)))
+                                )
+                        )
+                );
+    }
+
     // TODO figure out how to handle this properly
     private static int untrackLevel(CommandContext<CommandSourceStack> ctx, ServerLevel level) {
         var maybeLrd = RegionManager.get().getLevelRegionData(level.dimension());
@@ -187,7 +204,7 @@ public final class CommandRegistry {
                 .sorted(Comparator.comparing(IProtectedRegion::getName))
                 .toList();
         try {
-            int paginationSize = Services.REGION_CONFIG.getPaginationSize();
+            int paginationSize = 5;
             RegionsInDimensionPagination childRegionPagination = new RegionsInDimensionPagination(levelData, regionsForDim, pageNo, paginationSize);
             MultiLineMessage.send(ctx.getSource(), childRegionPagination);
         } catch (InvalidPageNumberException e) {

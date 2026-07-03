@@ -193,33 +193,36 @@ final class RegionCommandHelper {
         return -1;
     }
     public static int deleteRegion(CommandContext<CommandSourceStack> ctx, LevelData levelData, IMarkableRegion region) {
-        ServerPlayer player;
+        ServerPlayer player = null;
         try {
             player = ctx.getSource().getPlayerOrException();
-        } catch (CommandSyntaxException e) {
-            player = null;
-        }
+        } catch (CommandSyntaxException ignored) {}
         if (Services.REGION_EVENT_DISPATCHER.post(new RegionEvent.Remove(region, player))) {
-            return 1;
+            return -1;
         }
-        if (levelData.hasLocal(region.getName())) {
-            if (!region.getChildren().isEmpty()) {
-                sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.dim.region.remove.fail.hasChildren", "Region %s can't be deleted because it has child regions.", ChatLinkBuilder.buildRegionInfoLink(region)));
-                return -1;
-            }
-            RegionType parentType = region.getParent().getRegionType();
-            if (parentType == RegionType.DIMENSION) {
-                levelData.removeLocal(region);
-                RegionManager.get().save(levelData.getDim());
-                sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.dim.region.remove.confirm", "Removed region '%s' from %s", region.getName(), ChatLinkBuilder.buildRegionInfoLink(levelData.getDim())));
-                return 0;
-            }
-            if (parentType == RegionType.LOCAL) {
-                sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.dim.region.remove.fail.hasParent", "Region %s can't be deleted because it has a Local Regions as parent.", ChatLinkBuilder.buildRegionInfoLink(region)));
-                return 1;
-            }
+        if (!levelData.hasLocal(region.getName())) {
+            sendError(ctx.getSource(), Component.literal("Region does not exist in this dimension."));
+            return -1;
         }
-        return 1;
+        HierarchyValidationResult result = RegionHierarchy.canDelete(region);
+        if (!result.valid()) {
+            sendError(ctx.getSource(), Component.literal(result.reason().name()));
+            return -1;
+        }
+        if (!region.getChildren().isEmpty()) {
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.dim.region.remove.fail.hasChildren", "Region %s can't be deleted because it has child regions.", ChatLinkBuilder.buildRegionInfoLink(region)));
+            return 0;
+        }
+        IProtectedRegion parent = region.getParent();
+        if (parent instanceof IMarkableRegion) {
+            sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.dim.region.remove.fail.hasParent", "Region %s can't be deleted because it has a parent region.", ChatLinkBuilder.buildRegionInfoLink(region)));
+            return 0;
+        }
+        RegionHierarchy.detach(region);
+        levelData.removeLocal(region);
+        RegionManager.get().save(levelData.getDim());
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("cli.msg.info.dim.region.remove.confirm", "Removed region '%s' from %s", region.getName(), ChatLinkBuilder.buildRegionInfoLink(levelData.getDim())));
+        return Command.SINGLE_SUCCESS;
     }
 
     public static int deleteRegions(CommandContext<CommandSourceStack> ctx, LevelData levelData) {
@@ -363,7 +366,7 @@ final class RegionCommandHelper {
                 case CUBOID:
                 case SPHERE:
                     if (parent.getRegionType() == RegionType.DIMENSION) {
-                        int newPriority = LocalRegions.ensureHigherRegionPriorityFor(region, Services.REGION_CONFIG.getDefaultPriority());
+                        int newPriority = LocalRegions.ensureHigherRegionPriorityFor(region, 10);
                         Constants.LOGGER.info("New priority {} for region {}", newPriority, region.getName());
                     }
                     if (parent.getRegionType() == RegionType.LOCAL) {
@@ -575,7 +578,7 @@ final class RegionCommandHelper {
 
     public static int promptTeleportAnchorPagination(CommandContext<CommandSourceStack> ctx, IMarkableRegion region, int pageNo) {
         try {
-            int paginationSize = Services.REGION_CONFIG.getPaginationSize();
+            int paginationSize = 5;
             TeleportAnchorPagination tpAnchorPagination = new TeleportAnchorPagination(region, pageNo, paginationSize);
             MultiLineMessage.send(ctx.getSource(), tpAnchorPagination);
         } catch (InvalidPageNumberException e) {
@@ -1000,6 +1003,12 @@ final class RegionCommandHelper {
         }
     }
 
+    public static int detachChildren(CommandContext<CommandSourceStack> ctx, IProtectedRegion parent) {
+        int detached = RegionHierarchy.detachChildren(parent);
+        sendCmdFeedback(ctx.getSource(), Component.translatableWithFallback("", "Detached %s child region(s) from %s.", detached, buildRegionInfoLink(parent)));
+        RegionManager.get().save(parent);
+        return Command.SINGLE_SUCCESS;
+    }
 
     public static int attachParent(CommandContext<CommandSourceStack> ctx, IProtectedRegion child, IProtectedRegion parent) {
         try {

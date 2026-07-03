@@ -303,6 +303,9 @@ class RegionCommand {
                                         .executes(ctx -> detachChild(ctx, regionSupplier.apply(ctx), getChildRegionArgument(ctx, regionSupplier.apply(ctx))))
                                 )
                         )
+                        .then(literal(CHILDREN)
+                                .executes(ctx -> detachChildren(ctx, regionSupplier.apply(ctx)))
+                        )
                 );
     }
 

@@ -31,6 +31,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
@@ -225,6 +226,13 @@ public class ArgumentUtil {
         return resolveLocalRegion(id.toString());
     }
 
+    public static LevelData getLevelDataFromPlayer(CommandContext<CommandSourceStack> ctx) {
+        ServerLevel level = ctx.getSource().getLevel();
+        ResourceKey<Level> key = level.dimension();
+        return RegionManager.get()
+                .getLevelRegionData(key)
+                .orElseThrow(() -> new IllegalStateException("No region data registered for level: " + key.identifier()));
+    }
 
     public static IMarkableRegion getLocalRegionArgument(CommandContext<CommandSourceStack> ctx) {
         try {
