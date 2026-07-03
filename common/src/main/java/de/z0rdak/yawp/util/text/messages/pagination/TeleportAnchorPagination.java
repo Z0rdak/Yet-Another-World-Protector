@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.util.text.messages.pagination;
 
 import de.z0rdak.yawp.api.commands.Commands;
-import de.z0rdak.yawp.core.area.TeleportAnchor;
+import de.z0rdak.yawp.core.area.anchors.TeleportAnchor;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.util.text.Messages;

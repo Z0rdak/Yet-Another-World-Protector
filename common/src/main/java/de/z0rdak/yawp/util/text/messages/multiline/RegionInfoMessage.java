@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import de.z0rdak.yawp.core.region.*;
-import de.z0rdak.yawp.data.region.LevelRegionData;
+import de.z0rdak.yawp.data.region.LevelData;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.text.Messages;
 import net.minecraft.network.chat.ClickEvent;
@@ -138,7 +138,7 @@ public class RegionInfoMessage implements MultiLineMessage<IProtectedRegion> {
                 // Parent: [global], [n children], [n regions] [+]
                 MutableComponent globalRegionLink = buildRegionInfoLink(region.getParent(), Component.translatableWithFallback("cli.msg.info.region.global.link.hover", "Show global region info"));
                 // Note: optional.get is fine here since we already got a valid region
-                LevelRegionData levelData = RegionDataManager.getLevelRegionData(region.getDim()).get();
+                LevelData levelData = RegionDataManager.getLevelRegionData(region.getDim()).get();
                 MutableComponent hierarchyLinks = Messages.substitutable("%s, %s, %s", globalRegionLink, buildDimRegionsLink(levelData), listChildrenLink);
                 return buildInfoComponent("cli.msg.info.region.hierarchy", "Hierarchy", hierarchyLinks);
             }

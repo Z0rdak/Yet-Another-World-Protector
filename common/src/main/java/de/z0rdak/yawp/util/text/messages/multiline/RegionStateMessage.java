@@ -51,7 +51,7 @@ public class RegionStateMessage implements MultiLineMessage<IProtectedRegion> {
     }
 
     public static MutableComponent buildRegionPriorityComponent(IMarkableRegion region) {
-        int defaultPriorityInc = Services.REGION_CONFIG.getDefaultPriorityInc();
+        int defaultPriorityInc = 5;
         String incPriorityCmd = buildCommandStr(CommandConstants.LOCAL.toString(), region.getDim().identifier().toString(), region.getName(), STATE.toString(), PRIORITY.toString(), INC.toString(), String.valueOf(defaultPriorityInc));
         MutableComponent incLinkText = Component.translatableWithFallback("cli.msg.info.region.state.priority.increase.link.text", "+%s", defaultPriorityInc);
         MutableComponent incHoverText = Component.translatableWithFallback("cli.msg.info.region.state.priority.increase.link.hover", "Increase region priority by %s", defaultPriorityInc);

@@ -2,9 +2,9 @@ package de.z0rdak.yawp.api.visualization;
 
 import de.z0rdak.yawp.api.core.ILevelRegionApi;
 import de.z0rdak.yawp.api.core.RegionManager;
-import de.z0rdak.yawp.core.area.BlockDisplayProperties;
-import de.z0rdak.yawp.core.area.DisplayType;
-import de.z0rdak.yawp.core.area.TeleportAnchor;
+import de.z0rdak.yawp.core.area.visuals.BlockDisplayProperties;
+import de.z0rdak.yawp.core.area.visuals.DisplayType;
+import de.z0rdak.yawp.core.area.anchors.TeleportAnchor;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import net.minecraft.core.BlockPos;

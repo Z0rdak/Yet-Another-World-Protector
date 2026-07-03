@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.config.server;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.z0rdak.yawp.commands.CommandSourceType;
+import de.z0rdak.yawp.api.commands.CommandSourceType;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.commands.CommandSourceStack;

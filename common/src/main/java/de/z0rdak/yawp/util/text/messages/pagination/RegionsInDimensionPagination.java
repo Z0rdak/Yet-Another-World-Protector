@@ -2,7 +2,7 @@ package de.z0rdak.yawp.util.text.messages.pagination;
 
 import de.z0rdak.yawp.api.commands.Commands;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.data.region.LevelRegionData;
+import de.z0rdak.yawp.data.region.LevelData;
 import de.z0rdak.yawp.util.ChatLinkBuilder;
 import de.z0rdak.yawp.util.text.Messages;
 import net.minecraft.network.chat.Component;
@@ -15,9 +15,9 @@ import static de.z0rdak.yawp.util.ChatComponentBuilder.buildRemoveRegionEntries;
 public class RegionsInDimensionPagination extends BasePaginationMessage<IProtectedRegion> {
 
     private final IProtectedRegion region;
-    private final LevelRegionData levelData;
+    private final LevelData levelData;
 
-    public RegionsInDimensionPagination(LevelRegionData levelData, List<IProtectedRegion> entries, int pageNumber, int pageSize) throws InvalidPageNumberException {
+    public RegionsInDimensionPagination(LevelData levelData, List<IProtectedRegion> entries, int pageNumber, int pageSize) throws InvalidPageNumberException {
         super(entries, Commands.buildListLocalRegionCommand(levelData.getId()), pageNumber, pageSize);
         this.region = levelData.getDim();
         this.levelData = levelData;

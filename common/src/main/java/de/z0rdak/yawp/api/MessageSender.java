@@ -37,6 +37,10 @@ public class MessageSender {
         src.sendFailure(text);
     }
 
+    public static void sendError(CommandSourceStack src, String text) {
+        sendError(src, Component.literal(text));
+    }
+
     public static void sendNotification(Player player, MutableComponent msg) {
         player.sendOverlayMessage(msg);
     }

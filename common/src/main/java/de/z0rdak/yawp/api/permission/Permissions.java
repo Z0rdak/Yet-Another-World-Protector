@@ -1,10 +1,9 @@
 package de.z0rdak.yawp.api.permission;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.z0rdak.yawp.commands.CommandSourceType;
+import de.z0rdak.yawp.api.commands.CommandSourceType;
 import de.z0rdak.yawp.config.server.PermissionConfig;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.platform.Services;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;

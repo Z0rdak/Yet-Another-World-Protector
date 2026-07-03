@@ -1,13 +1,12 @@
 package de.z0rdak.yawp.platform.services;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.z0rdak.yawp.commands.CommandSourceType;
+import de.z0rdak.yawp.api.commands.CommandSourceType;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.List;
-import java.util.Set;
 
 public interface IPermissionHelper {
     

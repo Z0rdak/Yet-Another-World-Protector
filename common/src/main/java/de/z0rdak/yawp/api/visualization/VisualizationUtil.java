@@ -2,18 +2,15 @@ package de.z0rdak.yawp.api.visualization;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.constants.Constants;
-import de.z0rdak.yawp.core.area.BlockDisplayProperties;
-import de.z0rdak.yawp.core.area.TextDisplayProperties;
+import de.z0rdak.yawp.core.area.visuals.BlockDisplayProperties;
+import de.z0rdak.yawp.core.area.visuals.TextDisplayProperties;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.commands.data.EntityDataAccessor;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTypes;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Optional;

@@ -3,7 +3,7 @@ package de.z0rdak.yawp.platform.event;
 import de.z0rdak.yawp.api.events.region.RegionEvent;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
-import net.minecraft.world.entity.player.Player;
+import de.z0rdak.yawp.data.region.LevelData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.Event;
@@ -86,7 +86,7 @@ public abstract class NeoForgeRegionEvent extends Event implements ICancellableE
          * Otherwise, you may cause inconsistencies and break your whole region definition.
          *
          * @param newName The new name of the region - be sure to validate it before
-         * @see de.z0rdak.yawp.data.region.LevelRegionData#isValidRegionName(String)
+         * @see LevelData#isValidRegionName(String)
          */
         public void setNewName(String newName) {
             this.newName = newName;

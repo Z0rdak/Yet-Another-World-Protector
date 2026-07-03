@@ -1,13 +1,11 @@
 package de.z0rdak.yawp.util.text.messages.multiline;
 
-import de.z0rdak.yawp.core.area.BlockDisplayProperties;
+import de.z0rdak.yawp.core.area.visuals.BlockDisplayProperties;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.util.text.Messages;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.level.block.Block;
 

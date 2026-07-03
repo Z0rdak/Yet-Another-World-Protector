@@ -1,17 +1,18 @@
 package de.z0rdak.yawp.api.visualization;
 
 import de.z0rdak.yawp.core.area.*;
+import de.z0rdak.yawp.core.area.anchors.TeleportAnchor;
+import de.z0rdak.yawp.core.area.visuals.BlockDisplayProperties;
+import de.z0rdak.yawp.core.area.visuals.DisplayType;
+import de.z0rdak.yawp.core.area.visuals.TextDisplayProperties;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.api.visualization.VisualizationUtil.*;
 

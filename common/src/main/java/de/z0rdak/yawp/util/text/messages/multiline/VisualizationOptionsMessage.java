@@ -1,6 +1,6 @@
 package de.z0rdak.yawp.util.text.messages.multiline;
 
-import de.z0rdak.yawp.core.area.DisplayType;
+import de.z0rdak.yawp.core.area.visuals.DisplayType;
 import de.z0rdak.yawp.core.area.IMarkableArea;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.util.text.Messages;

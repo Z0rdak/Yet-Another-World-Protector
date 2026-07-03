@@ -2,7 +2,6 @@ package de.z0rdak.yawp.util;
 
 import de.z0rdak.yawp.api.commands.CommandConstants;
 import de.z0rdak.yawp.api.commands.Commands;
-import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.commands.arguments.ArgumentUtil;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.area.CuboidArea;
@@ -13,7 +12,7 @@ import de.z0rdak.yawp.core.group.PlayerContainer;
 import de.z0rdak.yawp.core.region.DimensionalRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
-import de.z0rdak.yawp.data.region.LevelRegionData;
+import de.z0rdak.yawp.data.region.LevelData;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.util.text.Messages;
 import net.minecraft.ChatFormatting;
@@ -23,7 +22,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
-import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.List;
 import java.util.Map;
@@ -75,16 +73,10 @@ public class ChatLinkBuilder {
                 MutableComponent maxExpandLink = buildExecuteCmdLinkWithBrackets(maxExpandLinkText, maxExpandLinkHover, maxExpandCmd, RUN_COMMAND, LINK_COLOR);
                 return Messages.substitutable("%s %s", expandLink, maxExpandLink);
             }
-            case CYLINDER:
-                throw new NotImplementedException("cylinder");
             case SPHERE:
                 // [<=expand=>]
                 String expandCmdSuggestion = appendSubCommand(expandCmd, String.valueOf(1));
                 return buildExecuteCmdLinkWithBrackets(linkText, linkHover, expandCmdSuggestion, SUGGEST_COMMAND, LINK_COLOR);
-            case POLYGON_3D:
-                throw new NotImplementedException("polygon");
-            case PRISM:
-                throw new NotImplementedException("prism");
             default:
                 throw new IllegalArgumentException("Invalid area type");
         }
@@ -273,16 +265,16 @@ public class ChatLinkBuilder {
      * Builds a TextComponent for the given flag and region. <br>
      * Currently not used in the CLI for obvious reasons. <br>
      */
-    public static MutableComponent buildRemoveAllRegionsAttemptLink(LevelRegionData levelRegionData) {
-        String cmd = buildCommandStr(DIM.toString(), levelRegionData.getDim().getName(), DELETE_ALL.toString(), REGIONS.toString());
-        MutableComponent hover = Component.translatableWithFallback("cli.msg.info.dim.region.remove.all.link.hover", "Remove all regions from %s", levelRegionData.getDim().getName());
+    public static MutableComponent buildRemoveAllRegionsAttemptLink(LevelData levelData) {
+        String cmd = buildCommandStr(DIM.toString(), levelData.getDim().getName(), DELETE_ALL.toString(), REGIONS.toString());
+        MutableComponent hover = Component.translatableWithFallback("cli.msg.info.dim.region.remove.all.link.hover", "Remove all regions from %s", levelData.getDim().getName());
         MutableComponent text = Component.translatableWithFallback("cli.link.remove", "x");
         return buildExecuteCmdComponent(text, hover, cmd, RUN_COMMAND, REMOVE_CMD_COLOR);
     }
 
-    public static MutableComponent buildRemoveAllRegionsLink(LevelRegionData levelRegionData) {
-        String cmd = buildCommandStr(DIM.toString(), levelRegionData.getDim().getName(), DELETE_ALL.toString(), REGIONS.toString(), FOREVER.toString(), SERIOUSLY.toString());
-        MutableComponent hover = Component.translatableWithFallback("cli.msg.info.dim.region.remove.all.link.hover", "Remove all regions from %s", levelRegionData.getDim().getName());
+    public static MutableComponent buildRemoveAllRegionsLink(LevelData levelData) {
+        String cmd = buildCommandStr(DIM.toString(), levelData.getDim().getName(), DELETE_ALL.toString(), REGIONS.toString(), FOREVER.toString(), SERIOUSLY.toString());
+        MutableComponent hover = Component.translatableWithFallback("cli.msg.info.dim.region.remove.all.link.hover", "Remove all regions from %s", levelData.getDim().getName());
         MutableComponent text = Component.translatableWithFallback("cli.link.remove", "x");
         return buildExecuteCmdComponent(text, hover, cmd, RUN_COMMAND, REMOVE_CMD_COLOR);
     }
@@ -311,10 +303,10 @@ public class ChatLinkBuilder {
     }
 
     // [n regions] [+]
-    public static MutableComponent buildDimRegionsLink(LevelRegionData levelRegionData) {
-        DimensionalRegion dimRegion = levelRegionData.getDim();
+    public static MutableComponent buildDimRegionsLink(LevelData levelData) {
+        DimensionalRegion dimRegion = levelData.getDim();
         String command = buildCommandStr(DIM.toString(), dimRegion.getDim().identifier().toString(), LIST.toString(), CommandConstants.LOCAL.toString());
-        MutableComponent text = Component.translatableWithFallback("cli.msg.dim.info.region.list.link.text", "%s region(s)", levelRegionData.regionCount());
+        MutableComponent text = Component.translatableWithFallback("cli.msg.dim.info.region.list.link.text", "%s region(s)", levelData.regionCount());
         MutableComponent hover = Component.translatableWithFallback("cli.msg.dim.info.region.list.link.hover", "List regions in %s", dimRegion.getName());
         MutableComponent listLocalRegionsLink = buildExecuteCmdComponent(text, hover, command, RUN_COMMAND, LINK_COLOR);
         MutableComponent createRegionLink = buildDimCreateRegionLink(dimRegion);

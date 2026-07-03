@@ -2,7 +2,7 @@ package de.z0rdak.yawp.platform;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import de.z0rdak.yawp.api.permission.Permissions;
-import de.z0rdak.yawp.commands.CommandSourceType;
+import de.z0rdak.yawp.api.commands.CommandSourceType;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.platform.services.IPermissionHelper;
 import net.minecraft.commands.CommandSourceStack;
