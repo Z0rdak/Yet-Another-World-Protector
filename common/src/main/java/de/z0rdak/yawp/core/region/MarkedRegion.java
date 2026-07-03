@@ -1,7 +1,6 @@
 package de.z0rdak.yawp.core.region;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.z0rdak.yawp.core.area.*;
 import de.z0rdak.yawp.core.area.anchors.RegionAnchors;
@@ -10,7 +9,6 @@ import de.z0rdak.yawp.core.flag.FlagValue;
 import de.z0rdak.yawp.core.flag.IFlag;
 import de.z0rdak.yawp.core.flag.RegionFlags;
 import de.z0rdak.yawp.core.group.PlayerContainer;
-import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.Registries;
@@ -87,13 +85,8 @@ public class MarkedRegion extends ProtectedRegion implements IMarkableRegion {
     public MarkedRegion(String name, UUID id, UUID parentId, IMarkableArea area, ResourceKey<Level> dim) {
         super(name, id, parentId, dim, RegionType.LOCAL);
         this.area = area;
-        this.priority = Services.REGION_CONFIG.getDefaultPriority();
+        this.priority = 10;
         this.anchors = new RegionAnchors();
-    }
-
-    public MarkedRegion(String name, UUID id, UUID parentId, IMarkableArea area, RegionAnchors anchors, ResourceKey<Level> dimension) {
-        this(name, id, parentId, area, dimension);
-        this.anchors = anchors;
     }
 
     @Override
