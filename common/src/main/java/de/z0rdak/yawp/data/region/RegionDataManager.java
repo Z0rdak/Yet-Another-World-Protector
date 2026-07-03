@@ -285,14 +285,7 @@ public class RegionDataManager {
         trackedLevelData.addTrackingFor(rl);
         levelRegionData.put(rl, newLevelRegion);
         var dimensionalRegion = newLevelRegion.getDim();
-        // add default flags from config
-        Set<String> defaultDimFlags = Services.REGION_CONFIG.getDefaultDimFlags();
-        defaultDimFlags.stream()
-                .map(FlagRegister::byId)
-                .forEach(flag -> dimensionalRegion.addFlag(new BooleanFlag(flag)));
-        // set state from config
-        dimensionalRegion.setIsActive(Services.REGION_CONFIG.shouldActivateNewDimRegion());
-        // add as child of global
+        dimensionalRegion.setIsActive(true);
         RegionHierarchy.setParent(dimensionalRegion, RegionManager.get().getGlobalRegion());
         LOGGER.info(Component.translatableWithFallback("data.region.levels.init", "Initializing region data for level '%s'", rl.toString()).getString());
         saveLevel(rl);
