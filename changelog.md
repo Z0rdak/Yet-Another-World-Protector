@@ -1,3 +1,8 @@
+# [0.6.3-beta4] - 2026-10-08
+
+## Fixed
+- NPE when trying to add `spawning-*` flag to region (NeoForge).
+
 # [0.6.3-beta3] - 2026-27-04
 
 ## Changed
