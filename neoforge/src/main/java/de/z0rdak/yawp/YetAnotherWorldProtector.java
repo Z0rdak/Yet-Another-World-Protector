@@ -1,5 +1,6 @@
 package de.z0rdak.yawp;
 
+import de.z0rdak.yawp.handler.YawpEventHandler;
 import de.z0rdak.yawp.platform.event.NeoForgeFlagEvent;
 import de.z0rdak.yawp.api.visualization.VisualizationManager;
 import de.z0rdak.yawp.commands.CommandRegistry;
@@ -39,6 +40,8 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
         registerCommands();
 
         NeoForge.EVENT_BUS.register(YetAnotherWorldProtector.class);
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
+                (ServerAboutToStartEvent startEvent) -> YawpEventHandler.storeRef(startEvent.getServer()));
     }
 
     @Override
@@ -70,7 +73,7 @@ public class YetAnotherWorldProtector implements YAWPModInitializer {
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true,
                 (LevelEvent.Load event) -> {
                     if (event.getLevel() instanceof ServerLevel serverLevel) {
-                        if (serverLevel.dimension().equals(ServerLevel.OVERWORLD)) {
+                        if (serverLevel.dimension().equals(Level.OVERWORLD)) {
                             RegionDataManager.loadLevelListData(serverLevel.getServer());
                         }
                         RegionDataManager.worldLoad(serverLevel.getServer(), serverLevel);
