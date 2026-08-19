@@ -1,17 +1,3 @@
-# [0.6.4-beta1] - 2025-23-12
-
-## Added
-
-- [ ] Visualizations are now only shown to owners / members
-- 
-
-## Changed
-
-- [ ] Visualizations are now removed when starting the server
-- [ ] Cuboid visualizations now use a reduced amount of entities to show the area which should improve performance
-- [ ] Sphere visualizations now use a reduced amount of entities to show the area which should improve performance
-
-
 # [0.6.3-beta1] - 2025-21-12
 
 ## Added
