@@ -36,14 +36,13 @@ import net.minecraft.world.entity.monster.cubemob.Slime;
 import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.entity.EntityTypeTest;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static de.z0rdak.yawp.api.FlagEvaluator.processCheck;
-import static de.z0rdak.yawp.api.FlagRegister.SPAWNING_ALL;
-import static de.z0rdak.yawp.api.FlagRegister.SPAWNING_MONSTER;
 
 public final class YawpEventHandler {
 
@@ -66,13 +65,13 @@ public final class YawpEventHandler {
         return true;
     }
 
-    public static boolean onRemoveRegion(RegionEvent.Remove regionRemove) {
+    public static boolean onRemoveRegion(@NotNull RegionEvent.Remove regionRemove) {
         VisualizationManager.hide(regionRemove.getRegion());
         return true;
     }
 
     public static void enableRegionSpatialCache(){
-        YawpEvents.ON_REGION_DATA_LOADED.register(RegionSpatialCache::initRegions);
+        YawpEvents.ON_REGION_DATA_LOADED.register(RegionIndex::initRegions);
     }
 
     public static void enablePlayerRegionMessages(){

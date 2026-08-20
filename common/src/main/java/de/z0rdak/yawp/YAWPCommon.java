@@ -2,7 +2,7 @@ package de.z0rdak.yawp;
 
 import de.z0rdak.yawp.api.events.flag.FlagEvents;
 import de.z0rdak.yawp.api.events.region.RegionEvents;
-import de.z0rdak.yawp.handler.RegionSpatialCache;
+import de.z0rdak.yawp.handler.RegionIndex;
 import de.z0rdak.yawp.handler.YawpEventHandler;
 
 public class YAWPCommon {
@@ -17,8 +17,8 @@ public class YAWPCommon {
         RegionEvents.ON_UPDATE_AREA.register(YawpEventHandler::onUpdateRegion);
         RegionEvents.ON_REMOVE.register(YawpEventHandler::onRemoveRegion);
 
-        RegionEvents.ON_CREATE.register(RegionSpatialCache::onCreateRegion);
-        RegionEvents.ON_REMOVE.register(RegionSpatialCache::onRemoveRegion);
-        RegionEvents.ON_UPDATE_AREA.register(RegionSpatialCache::onUpdateRegion);
+        RegionEvents.ON_CREATE.register(RegionIndex::onCreateRegion);
+        RegionEvents.ON_REMOVE.register(RegionIndex::onRemoveRegion);
+        RegionEvents.ON_UPDATE_AREA.register(RegionIndex::onUpdateRegionArea);
     }
 }
