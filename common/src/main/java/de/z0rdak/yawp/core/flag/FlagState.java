@@ -72,7 +72,7 @@ public enum FlagState {
     }
 
     public static boolean validLoggingStates(String flagState) {
-        return Stream.of(ALLOWED, DENIED).anyMatch(state -> state.name.equalsIgnoreCase(flagState));
+        return Stream.of(ALLOWED, DENIED, UNDEFINED).anyMatch(state -> state.name.equalsIgnoreCase(flagState));
     }
 
     public static FlagState invert(FlagState state) {
