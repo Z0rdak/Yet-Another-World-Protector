@@ -11,7 +11,7 @@ import net.minecraft.server.level.ServerPlayer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Contract;
-import org.jspecify.annotations.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.Objects;
@@ -39,14 +39,14 @@ public final class PlayerPosTracker {
     }
 
     /** Clears cached state for a player when they disconnect */
-    public static void onPlayerDisc(@NonNull ServerPlayer player) {
+    public static void onPlayerDisc(@NotNull ServerPlayer player) {
         UUID playerId = player.getUUID();
         PlayerPosTracker.playerStates.remove(playerId);
         LOGGER.info("Player {} ({}) disconnected. Removing player from cache.", player.getScoreboardName(), playerId);
     }
 
 
-    private static void updatePlayerPositions(@NonNull ServerLevel level, RegionSpatialIndex cache) {
+    private static void updatePlayerPositions(@NotNull ServerLevel level, RegionSpatialIndex cache) {
         var players = level.players();
         for (ServerPlayer player : players) {
             if (excludedPlayers.contains(player.getUUID())) continue;
@@ -54,7 +54,7 @@ public final class PlayerPosTracker {
         }
     }
 
-    private static void handlePlayerMovement(@NonNull ServerPlayer player, RegionSpatialIndex cache) {
+    private static void handlePlayerMovement(@NotNull ServerPlayer player, RegionSpatialIndex cache) {
         BlockPos currentPos = player.blockPosition();
         PlayerState state = playerStates.computeIfAbsent(player.getUUID(), _ -> new PlayerState());
         BlockPos previousPos = state.lastBlockPos;

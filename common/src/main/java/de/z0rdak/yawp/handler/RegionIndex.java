@@ -16,8 +16,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jspecify.annotations.NonNull;
-
 import java.util.Map;
 import java.util.Set;
 
@@ -32,7 +30,7 @@ public final class RegionIndex {
 
     private static final Logger LOGGER = LogManager.getLogger(MOD_ID.toUpperCase()+ "-Spatial-Region-Index");
 
-    public static RegionSpatialIndex getIndexFor(@NonNull ResourceKey<Level> levelRl) {
+    public static RegionSpatialIndex getIndexFor(@NotNull ResourceKey<Level> levelRl) {
         return levelPlayerCaches.computeIfAbsent(levelRl.identifier(), _ -> new RegionSpatialIndex(levelRl));
     }
 
@@ -40,15 +38,15 @@ public final class RegionIndex {
 
     private static final Set<Identifier> excludedLevels = new ObjectOpenHashSet<>();
 
-    public static void excludeLevel(@NonNull Identifier id) {
+    public static void excludeLevel(@NotNull Identifier id) {
         excludedLevels.add(id);
     }
 
-    public static boolean excludes(@NonNull ServerLevel level) {
+    public static boolean excludes(@NotNull ServerLevel level) {
         return excludedLevels.contains(level.dimension().identifier());
     }
 
-    public static void initRegions(@NonNull ServerLevel level) {
+    public static void initRegions(@NotNull ServerLevel level) {
         var maybeLevelRegionData = RegionDataManager.getLevelRegionData(level.dimension());
         if (maybeLevelRegionData.isEmpty()) {
             return;
@@ -58,21 +56,21 @@ public final class RegionIndex {
         levelRegionData.getLocals().forEach((_, region) -> cache.addRegion(region));
     }
 
-    public static boolean onCreateRegion(RegionEvent.@NonNull Create create) {
+    public static boolean onCreateRegion(@NotNull RegionEvent.Create create) {
         RegionSpatialIndex cache = getIndexFor(create.getRegion().getDim());
         cache.addRegion(create.getRegion());
         LOGGER.info("Added region {} to region cache.", create.getRegion().getName());
         return true;
     }
 
-    public static boolean onRemoveRegion(RegionEvent.@NonNull Remove remove) {
+    public static boolean onRemoveRegion(@NotNull RegionEvent.Remove remove) {
         RegionSpatialIndex cache = getIndexFor(remove.getRegion().getDim());
         cache.removeRegion(remove.getRegion());
         LOGGER.info("Removed region {} from region cache.", remove.getRegion().getName());
         return true;
     }
 
-    public static boolean onUpdateRegionArea(RegionEvent.@NonNull UpdateArea updateArea) {
+    public static boolean onUpdateRegionArea(@NotNull RegionEvent.UpdateArea updateArea) {
         RegionSpatialIndex cache = getIndexFor(updateArea.getRegion().getDim());
         cache.updateRegionArea(updateArea.getRegion());
         LOGGER.info("Updated region {} in region cache.", updateArea.getRegion().getName());

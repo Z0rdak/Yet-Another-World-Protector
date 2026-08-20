@@ -13,7 +13,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jspecify.annotations.NonNull;
 
 import java.util.UUID;
 
@@ -81,7 +80,7 @@ public final class RegionSpatialIndex {
     }
 
 
-    public void removeRegion(@NonNull IMarkableRegion region) {
+    public void removeRegion(@NotNull IMarkableRegion region) {
         LongOpenHashSet sections = regionToSections.remove(region.getUuid());
         if (sections == null) {
             return;
