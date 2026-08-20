@@ -1,19 +1,15 @@
 package de.z0rdak.yawp.api;
 
-import de.z0rdak.yawp.api.core.RegionManager;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.api.events.flag.FlagCheckResult;
 import de.z0rdak.yawp.core.flag.FlagContext;
 import de.z0rdak.yawp.core.flag.FlagState;
-import de.z0rdak.yawp.core.flag.IFlag;
-import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;
-import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.handler.HandlerUtil;
+import de.z0rdak.yawp.handler.RegionIndex;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
@@ -21,12 +17,8 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public record FlagEvaluator(FlagCheckResult result) {
 
@@ -142,7 +134,7 @@ public record FlagEvaluator(FlagCheckResult result) {
      * @return a {@link FlagCheckResult} representing the evaluated flag state and context.
      */
     public static FlagCheckResult evaluate(FlagCheckRequest checkEvent) {
-        var targetRegion = findResponsibleRegion(checkEvent.getTarget(), checkEvent.getDimension());
+        var targetRegion = RegionIndex.findResponsibleRegion(checkEvent.getTarget(), checkEvent.getDimension());
         if (targetRegion == null) {
             return FlagCheckResult.Undefined(checkEvent);
         }
@@ -186,77 +178,6 @@ public record FlagEvaluator(FlagCheckResult result) {
      */
     public static boolean isRootRegion(@NotNull IProtectedRegion region) {
         return region.equals(region.getParent()) && region.getRegionType() == RegionType.GLOBAL;
-    }
-
-    /**
-     * Determines the region responsible for the given position and dimension.  
-     * The responsible region is the one with the highest priority among all regions that cover the specified location.
-     * <p>
-     * If no specific region is found, this method falls back to the dimensional region.
-     * If the dimensional region is inactive, it further falls back to the global region if it is active.
-     * </p>
-     *
-     * @param pos the position for which to find the responsible region, must not be {@code null}
-     * @param dim the dimension in which to search for the responsible region, must not be {@code null}
-     * @return the highest-priority active region covering the given position and dimension,  
-     *         or {@code null} if no active region is found
-     */
-    @Nullable
-    public static IProtectedRegion findResponsibleRegion(@NotNull BlockPos pos, @NotNull ResourceKey<Level> dim) {
-        // since levels are no longer automatically tracked,
-        // it needs to be considered when resolving responsible regions
-        // level not tracked -> global
-        if (!RegionDataManager.getTrackedLevelData().doesTrack(dim.identifier())){
-            var globalRegion = RegionManager.get().getGlobalRegion();
-            return globalRegion.isActive() ? globalRegion : null;
-        }
-        var localRegion = getInvolvedRegionFor(pos, dim);
-        if (localRegion == null) {
-            var maybeLrd = RegionDataManager.getLevelRegionData(dim);
-            if (maybeLrd.isEmpty()) {
-                return null;
-            }
-            var dimRegion = maybeLrd.get().getDim();
-            if (dimRegion.isActive()) {
-                return dimRegion;
-            } else {
-                var globalRegion = RegionManager.get().getGlobalRegion();
-                return globalRegion.isActive() ? globalRegion : null;
-            }
-        }
-        return localRegion;
-    }
-
-    /**
-     * Gets all active regions which contain the provided position in the given dimension. <br>
-     *
-     * @param position the position to check for involved regions
-     * @param dim      the dimension to check for involved regions
-     * @return all active regions which contain the given location and dimension
-     */
-    private static List<IMarkableRegion> getInvolvedRegionsFor(BlockPos position, ResourceKey<Level> dim) {
-        return RegionDataManager.getLocalsFor(dim).stream()
-                .filter(IMarkableRegion::isActive)
-                .filter(region -> region.contains(position))
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Gets the region with the highest priority among all involved regions at the given location and dimension. <br>
-     * This considers the active state of the region as well. <br>
-     *
-     * @param position the position to check for involved regions
-     * @param dim      the dimension to check for involved regions
-     * @return the region with the highest priority among all involved regions which contain the given location
-     */
-    @Nullable
-    private static IMarkableRegion getInvolvedRegionFor(BlockPos position, ResourceKey<Level> dim) {
-        List<IMarkableRegion> regionsForPos = getInvolvedRegionsFor(position, dim);
-        if (regionsForPos.isEmpty()) {
-            return null;
-        } else {
-            return Collections.max(regionsForPos, Comparator.comparing(IMarkableRegion::getPriority));
-        }
     }
 
     public static void checkMobGrief(Entity entity, CallbackInfo ci) {
