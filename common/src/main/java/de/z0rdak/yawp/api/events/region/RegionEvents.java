@@ -42,6 +42,16 @@ public final class RegionEvents {
         boolean update(RegionEvent.UpdateArea event);
     }
 
+    @FunctionalInterface public interface UpdatePriorityListener {
+
+        /**
+         *
+         * @param event
+         * @return false to cancel the region priority update, true otherwise
+         */
+        boolean update(RegionEvent.UpdatePriority event);
+    }
+
     @FunctionalInterface
     public interface PlayerRegionLeaveListener {
         /**
@@ -66,6 +76,7 @@ public final class RegionEvents {
     public static final EventBus<RemoveRegionListener> ON_REMOVE = new EventBus<>();
     public static final EventBus<RenameRegionListener> ON_RENAME = new EventBus<>();
     public static final EventBus<UpdateAreaListener> ON_UPDATE_AREA = new EventBus<>();
+    public static final EventBus<UpdatePriorityListener> ON_UPDATE_PRIORITY = new EventBus<>();
 
     public static final EventBus<PlayerRegionLeaveListener> ON_PLAYER_LEAVE_REGION = new EventBus<>();
     public static final EventBus<PlayerRegionEnterListener> ON_PLAYER_ENTER_REGION = new EventBus<>();

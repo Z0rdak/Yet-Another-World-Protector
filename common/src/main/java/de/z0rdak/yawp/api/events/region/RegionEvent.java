@@ -20,7 +20,7 @@ public abstract class RegionEvent {
     public IMarkableRegion getRegion() { return region; }
     public ServerPlayer getPlayer() { return player; }
 
-    public final static class Create extends RegionEvent implements Cancelable {
+    public static final class Create extends RegionEvent implements Cancelable {
         private boolean canceled;
 
         public Create(final IMarkableRegion region, final ServerPlayer player) { super(region, player); }
@@ -35,7 +35,7 @@ public abstract class RegionEvent {
         public void setCanceled(boolean canceled) { this.canceled = canceled; }
     }
 
-    public final static class Rename extends RegionEvent implements Cancelable {
+    public static final class Rename extends RegionEvent implements Cancelable {
         private final String oldName;
         private String newName;
         private boolean canceled;
@@ -60,7 +60,7 @@ public abstract class RegionEvent {
         public void setCanceled(boolean canceled) { this.canceled = canceled; }
     }
 
-    public final static class UpdateArea extends RegionEvent implements Cancelable {
+    public static final class UpdateArea extends RegionEvent implements Cancelable {
         private IMarkableArea markedArea;
         private boolean canceled;
 
@@ -82,7 +82,40 @@ public abstract class RegionEvent {
         public void setCanceled(boolean canceled) { this.canceled = canceled; }
     }
 
-    public final static class Remove extends RegionEvent implements Cancelable {
+    public static final class UpdatePriority extends RegionEvent implements Cancelable {
+        private int newPriority;
+        private final int currentPriority;
+        private boolean canceled;
+
+        public UpdatePriority(final IMarkableRegion region, final int newPriority, final ServerPlayer player) {
+            super(region, player);
+            this.newPriority = newPriority;
+            this.currentPriority = region.getPriority();
+        }
+
+        @Override
+        @Nullable
+        public ServerPlayer getPlayer() { return super.getPlayer(); }
+
+        @Override
+        public boolean isCanceled() { return canceled; }
+        @Override
+        public void setCanceled(boolean canceled) { this.canceled = canceled; }
+
+        public int getCurrentPriority() {
+            return currentPriority;
+        }
+
+        public int getNewPriority() {
+            return newPriority;
+        }
+
+        public void setNewPriority(int newPriority) {
+            this.newPriority = newPriority;
+        }
+    }
+
+    public static final class Remove extends RegionEvent implements Cancelable {
         private boolean canceled;
 
         public Remove(final IMarkableRegion region, final ServerPlayer player) { super(region, player); }
@@ -97,11 +130,11 @@ public abstract class RegionEvent {
         public void setCanceled(boolean canceled) { this.canceled = canceled; }
     }
 
-    public static abstract class PlayerMove extends RegionEvent {
+    public abstract static class PlayerMove extends RegionEvent {
         private final BlockPos previousPos;
         private final BlockPos currentPos;
 
-        public PlayerMove(final IMarkableRegion region, final ServerPlayer player, final BlockPos previousPos, final BlockPos currentPos) {
+        protected PlayerMove(final IMarkableRegion region, final ServerPlayer player, final BlockPos previousPos, final BlockPos currentPos) {
             super(region, player);
             this.previousPos = previousPos;
             this.currentPos = currentPos;
@@ -112,7 +145,7 @@ public abstract class RegionEvent {
 
     }
 
-    public final static class PlayerEnter extends PlayerMove implements Cancelable {
+    public static final class PlayerEnter extends PlayerMove implements Cancelable {
         public PlayerEnter(final IMarkableRegion region, final ServerPlayer player, final BlockPos oldPos, final BlockPos newPos) {
             super(region, player, oldPos, newPos);
         }
@@ -122,7 +155,7 @@ public abstract class RegionEvent {
         @Override public void setCanceled(boolean canceled) { this.canceled = canceled; }
     }
 
-    public final static class PlayerLeave extends PlayerMove implements Cancelable {
+    public static final class PlayerLeave extends PlayerMove implements Cancelable {
         public PlayerLeave(final IMarkableRegion region, final ServerPlayer player, final BlockPos oldPos, final BlockPos newPos) {
             super(region, player, oldPos, newPos);
         }
