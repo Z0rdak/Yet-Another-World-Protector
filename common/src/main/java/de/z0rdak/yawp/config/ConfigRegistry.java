@@ -78,6 +78,12 @@ public final class ConfigRegistry {
                         ? ": " + String.join(", ", FlagConfig.getCoveredBlockEntityTags())
                         : "");
                 FLAG_CONFIG_LOGGER.info("{} Block Entity tag entries read from config{}", numBreakEntityTagEntries, loadedBreakEntityTags);
+
+                int numExcludedUseBlocksEntries = FlagConfig.getExcludedUseBlocks().size();
+                String loadedExcludedUseBlocks = (numExcludedUseBlocksEntries > 0
+                        ? ": " + String.join(", ", FlagConfig.getExcludedUseBlocks())
+                        : "");
+                FLAG_CONFIG_LOGGER.info("{} Block entries read from config{}", numExcludedUseBlocksEntries, loadedExcludedUseBlocks);
                 FLAG_CONFIG_LOGGER.info("Remove entities when enabling spawning flags: {}", FlagConfig.removeEntitiesEnabled() ? "enabled" : "disabled");
                 break;
             }

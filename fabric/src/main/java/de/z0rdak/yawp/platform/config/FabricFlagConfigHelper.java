@@ -18,6 +18,11 @@ public class FabricFlagConfigHelper implements IFlagConfigHelper {
     }
 
     @Override
+    public Set<String> getExcludedUseBlocks() {
+        return FlagConfig.getExcludedUseBlocks();
+    }
+
+    @Override
     public boolean removeEntitiesEnabled() {
         return FlagConfig.removeEntitiesEnabled();
     }

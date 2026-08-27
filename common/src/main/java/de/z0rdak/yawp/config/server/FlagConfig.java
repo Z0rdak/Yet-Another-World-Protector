@@ -22,6 +22,7 @@ public class FlagConfig {
     private static final ModConfigSpec.ConfigValue<Boolean> REMOVE_ENTITIES_FOR_SPAWNING_FLAGS;
     private static final ModConfigSpec.ConfigValue<List<? extends String>> COVERED_BLOCK_ENTITIES;
     private static final ModConfigSpec.ConfigValue<List<? extends String>> COVERED_BLOCK_ENTITY_TAGS;
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> EXCLUDED_USE_BLOCKS;
     private static final ModConfigSpec.ConfigValue<List<? extends String>> DISABLED_FLAGS;
 
     static {
@@ -36,6 +37,10 @@ public class FlagConfig {
         COVERED_BLOCK_ENTITY_TAGS = BUILDER
                 .comment("Entity tags included/protected by the break-block and place-blocks flags.")
                 .defineListAllowEmpty(List.of("covered_block_entity_tags"), ArrayList::new, null, FlagConfig::isValidTagEntry);
+
+        EXCLUDED_USE_BLOCKS = BUILDER
+                .comment("Blocks excluded from the use-blocks flag.")
+                .defineListAllowEmpty(List.of("excluded_use_blocks"), FlagConfig::defaultExcludedUseBlocksEntries, null, FlagConfig::isValidBlockEntry);
 
         REMOVE_ENTITIES_FOR_SPAWNING_FLAGS = BUILDER
                 .comment("Toggle to remove entities when adding spawning-* flags.\nEntities with the PersistenceRequired tag will not be removed.\n true -> remove entities related to this flag\n false -> don't remove entities")
@@ -54,6 +59,10 @@ public class FlagConfig {
         return Arrays.asList("minecraft:armor_stand", "minecraft:painting", "minecraft:item_frame", "minecraft:glow_item_frame", "minecraft:leash_knot");
     }
 
+    private static List<String> defaultExcludedUseBlocksEntries() {
+        return List.of("universal_graves:grave");
+    }
+
     public static Set<String> getCoveredBlockEntities() {
         return COVERED_BLOCK_ENTITIES.get().stream()
                 .filter(Objects::nonNull)
@@ -62,6 +71,12 @@ public class FlagConfig {
 
     public static Set<String> getCoveredBlockEntityTags() {
         return COVERED_BLOCK_ENTITY_TAGS.get().stream()
+                .filter(Objects::nonNull)
+                .map(String::toString).collect(Collectors.toSet());
+    }
+
+    public static Set<String> getExcludedUseBlocks() {
+        return EXCLUDED_USE_BLOCKS.get().stream()
                 .filter(Objects::nonNull)
                 .map(String::toString).collect(Collectors.toSet());
     }
@@ -90,19 +105,29 @@ public class FlagConfig {
 
     private static boolean isValidEntityEntry(Object entity) {
         if (entity instanceof String str) {
-            boolean isNotEmptyAndContainsColon = !str.isEmpty() && !str.isBlank() && str.contains(":");
+            boolean isNotEmptyAndContainsColon = !str.isBlank() && str.contains(":");
             if (!isNotEmptyAndContainsColon) {
-                FLAG_CONFIG_LOGGER.warn("Invalid block tile resource key supplied for 'break_flag_entities': {}", entity);
-                return false;
+                FLAG_CONFIG_LOGGER.warn("Invalid block tile resource key supplied for 'covered_block_entities': {}", entity);
             }
-            return true;
+            return isNotEmptyAndContainsColon;
+        }
+        return false;
+    }
+
+    private static boolean isValidBlockEntry(Object entity) {
+        if (entity instanceof String str) {
+            boolean isNotEmptyAndContainsColon = !str.isBlank() && str.contains(":");
+            if (!isNotEmptyAndContainsColon) {
+                FLAG_CONFIG_LOGGER.warn("Invalid block tile resource key supplied for 'excluded_use_blocks': {}", entity);
+            }
+            return isNotEmptyAndContainsColon;
         }
         return false;
     }
 
     private static boolean isValidFlagEntry(Object entity) {
         if (entity instanceof String str) {
-            boolean isNotEmptyAndContainsColon = !str.isEmpty() && !str.isBlank() && str.contains(":");
+            boolean isNotEmptyAndContainsColon = !str.isBlank() && str.contains(":");
             if (!isNotEmptyAndContainsColon) {
                 FLAG_CONFIG_LOGGER.warn("Invalid flag supplied for 'disabled_flags': {}", entity);
                 return false;
@@ -116,9 +141,9 @@ public class FlagConfig {
 
     private static boolean isValidTagEntry(Object entity) {
         if (entity instanceof String str) {
-            boolean isNotEmptyAndContainsColon = !str.isEmpty() && !str.isBlank() && str.contains(":");
+            boolean isNotEmptyAndContainsColon = !str.isBlank() && str.contains(":");
             if (!isNotEmptyAndContainsColon) {
-                FLAG_CONFIG_LOGGER.warn("Invalid block tile resource key supplied for 'break_flag_entity_tags': {}", entity);
+                FLAG_CONFIG_LOGGER.warn("Invalid block tile resource key supplied for 'covered_block_entity_tags': {}", entity);
             }
             return isNotEmptyAndContainsColon;
         }

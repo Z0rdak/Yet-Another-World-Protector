@@ -10,6 +10,7 @@ public interface IFlagConfigHelper {
 
     Set<String> getCoveredBlockEntities();
     Set<String> getCoveredBlockEntityTags();
+    Set<String> getExcludedUseBlocks();
     boolean removeEntitiesEnabled();
     boolean isDisabledByConfig(String flag);
 }
