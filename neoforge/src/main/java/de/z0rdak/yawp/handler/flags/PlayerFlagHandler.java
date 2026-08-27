@@ -5,6 +5,7 @@ import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.MessageSender;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.api.events.flag.FlagCheckResult;
+import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.handler.HandlerUtil;
@@ -579,15 +580,19 @@ public final class PlayerFlagHandler {
 
         // used to allow player to place blocks when shift clicking container on usable bock
         if (isSneakingWithEmptyHand || !player.isShiftKeyDown()) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(pos.getBlockPos(), USE_BLOCKS, getDimKey(player), player);
-            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
-                return;
+            FlagCheckRequest checkEvent;
+            Set<String> excludedUseBlocks = FlagConfig.getExcludedUseBlocks();
+            if(excludedUseBlocks.stream().noneMatch(excludedBlock -> BuiltInRegistries.BLOCK.getKey(event.getLevel().getBlockState(targetPos).getBlock()).equals(Identifier.parse(excludedBlock)))) {
+                checkEvent = new FlagCheckRequest(pos.getBlockPos(), USE_BLOCKS, getDimKey(player), player);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
+                    return;
+                }
+                FlagEvaluator.processCheck(checkEvent, onDeny -> {
+                    event.setCanceled(true);
+                    sendFlagMsg(onDeny);
+                    event.getLevel().updateNeighborsAt(pos.getBlockPos(), event.getLevel().getBlockState(pos.getBlockPos()).getBlock());
+                });
             }
-            FlagEvaluator.processCheck(checkEvent, onDeny -> {
-                event.setCanceled(true);
-                sendFlagMsg(onDeny);
-                event.getLevel().updateNeighborsAt(pos.getBlockPos(), event.getLevel().getBlockState(pos.getBlockPos()).getBlock());
-            });
 
             // Note: following flags are already covered with use_blocks
             // check for ender chest access
@@ -761,6 +766,10 @@ public final class PlayerFlagHandler {
     public static void onSteppedOnActivator(BlockEvent.NeighborNotifyEvent event) {
         if (NeoForgeHandlerUtil.isServerSide(event)) {
             Block block = event.getLevel().getBlockState(event.getPos()).getBlock();
+            Set<String> excludedUseBlocks = FlagConfig.getExcludedUseBlocks();
+            if(excludedUseBlocks.stream().anyMatch(excludedBlock -> BuiltInRegistries.BLOCK.getKey(block).equals(Identifier.parse(excludedBlock))))
+                return;
+
             BlockPos pos = event.getPos();
             if (block instanceof BasePressurePlateBlock) {
                 AABB areaAbovePressurePlate = new AABB(pos.getX() - 1, pos.getY(), pos.getZ() - 1, pos.getX() + 1, pos.getY() + 2, pos.getZ() + 1);

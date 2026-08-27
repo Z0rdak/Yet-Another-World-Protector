@@ -118,12 +118,17 @@ public final class PlayerFlagHandler {
 
             // allow player to place blocks when shift clicking usable bock
             if ((isSneakingWithEmptyHands || !player.isShiftKeyDown())) {
-                FlagCheckRequest checkEvent = new FlagCheckRequest(targetPos, USE_BLOCKS, getDimKey(player), player);
-                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
-                    return InteractionResult.PASS;
-                FlagState flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
-                if (flagState == FlagState.DENIED)
-                    return InteractionResult.FAIL;
+                FlagCheckRequest checkEvent;
+                FlagState flagState;
+                Set<String> excludedUseBlocks = FlagConfig.getExcludedUseBlocks();
+                if(excludedUseBlocks.stream().noneMatch(excludedBlock -> BuiltInRegistries.BLOCK.getKey(world.getBlockState(targetPos).getBlock()).equals(Identifier.parse(excludedBlock)))) {
+                    checkEvent = new FlagCheckRequest(targetPos, USE_BLOCKS, getDimKey(player), player);
+                    if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
+                        return InteractionResult.PASS;
+                    flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
+                    if (flagState == FlagState.DENIED)
+                        return InteractionResult.FAIL;
+                }
 
 
                 if (isEnderChest) {
