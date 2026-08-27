@@ -12,6 +12,7 @@
     "FrostWalkerEnchantmentMixin",
     "LeavesBlockMixin",
     "LightningEntityMixin",
+    "LilypadBlockMixin",
     "ServerWorldMixin",
     "SignBlockMixin",
     "SnowLayerBlockMixin",
