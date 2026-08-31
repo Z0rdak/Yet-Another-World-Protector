@@ -1,3 +1,14 @@
+# [0.6.4-beta1] - unreleased
+
+## Fixed
+
+- TODO Fix block data desync issue (breaking signs makes text seem to disappear) #210
+- (Fabric) Fix wrong event check preventing regions from being deleted 
+- TODO (Fabric) Fix issues with `place_blocks` flag not covering all blocks correctly.
+- TODO (Fabric) Fix issue with inventory desync when placing blocks with `place_blocks` denied flag
+- TODO Fix wrong default language keys for flag messages #206
+- TODO Fix flag use-portal-player preventing /tp over dimensions #209
+
 # [0.6.3-beta4] - 2026-10-08
 
 ## Fixed
