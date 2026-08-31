@@ -1,5 +1,6 @@
 package de.z0rdak.yawp.platform.event;
 
+import de.z0rdak.yawp.api.events.Cancelable;
 import de.z0rdak.yawp.api.events.flag.*;
 import de.z0rdak.yawp.platform.services.event.FlagEventDispatcher;
 
@@ -13,11 +14,11 @@ public final class FabricFlagEventDispatcher implements FlagEventDispatcher {
     public <T extends FlagEvent> boolean post(T event) {
         boolean canceled = false;
         if (event instanceof FlagEvent.Add e) {
-            canceled = FabricFlagEvents.ADD_FLAG.invoker().add(e);
+            canceled = FabricFlagEvents.ADD_FLAG.invoker().add(e) != Cancelable.CONTINUE;
             e.setCanceled(canceled);
             FlagEvents.ON_ADD_FLAG.invoke(cb -> cb.add(e));
         } else if (event instanceof FlagEvent.Remove e) {
-            canceled = FabricFlagEvents.REMOVE_FLAG.invoker().remove(e);
+            canceled = FabricFlagEvents.REMOVE_FLAG.invoker().remove(e) != Cancelable.CONTINUE;;
             e.setCanceled(canceled);
             FlagEvents.ON_REMOVE_FLAG.invoke(cb -> cb.remove(e));
         } else if (event instanceof FlagEvent.UpdateFlagMessage e) {
