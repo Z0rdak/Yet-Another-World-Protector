@@ -1,4 +1,4 @@
-package de.z0rdak.yawp.mixin;
+package de.z0rdak.yawp.mixin.flag.environment;
 
 import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
