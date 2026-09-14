@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.platform;
 
 import de.z0rdak.yawp.config.server.FeatureConfig;
-import de.z0rdak.yawp.handler.PlayerPosTracker;
+import de.z0rdak.yawp.data.player.PlayerPosTracker;
 import de.z0rdak.yawp.platform.services.FeatureManager;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;

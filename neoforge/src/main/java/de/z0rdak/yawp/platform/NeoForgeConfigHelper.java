@@ -2,7 +2,7 @@ package de.z0rdak.yawp.platform;
 
 import de.z0rdak.yawp.config.ConfigRegistry;
 import de.z0rdak.yawp.config.server.*;
-import de.z0rdak.yawp.constants.Constants;
+import de.z0rdak.yawp.util.Constants;
 import de.z0rdak.yawp.platform.services.IConfigHelper;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;

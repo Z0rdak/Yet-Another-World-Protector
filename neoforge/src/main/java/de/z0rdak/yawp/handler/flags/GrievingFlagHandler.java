@@ -4,7 +4,7 @@ import de.z0rdak.yawp.api.Flag;
 import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.FlagRegister;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
-import de.z0rdak.yawp.constants.Constants;
+import de.z0rdak.yawp.util.Constants;
 import de.z0rdak.yawp.core.flag.FlagState;
 
 import de.z0rdak.yawp.platform.Services;
