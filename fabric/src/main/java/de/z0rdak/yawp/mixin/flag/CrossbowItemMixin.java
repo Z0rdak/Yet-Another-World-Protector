@@ -26,16 +26,18 @@ import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
 public abstract class CrossbowItemMixin {
     
     @Inject(method = "performShooting", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;set(Lnet/minecraft/core/component/DataComponentType;Ljava/lang/Object;)Ljava/lang/Object;"), allow = 1, cancellable = true)
-    void onLooseArrow(Level level, LivingEntity shooter, InteractionHand hand, ItemStack weapon, float velocity, float inaccuracy, @Nullable LivingEntity target, CallbackInfo ci) {
+    void onLooseArrow(Level level, LivingEntity shooter, InteractionHand hand, ItemStack weapon, float power, float uncertainty, @Nullable LivingEntity targetOverride, CallbackInfo ci) {
         if (shooter instanceof Player player) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), FlagRegister.PLAYER_FIRE_BOW, getDimKey(player), player);
-            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
-                return;
+            if (isServerSide(player.level())) {
+                FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), FlagRegister.PLAYER_FIRE_BOW, getDimKey(player), player);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
+                    return;
+                }
+                FlagEvaluator.processCheck(checkEvent, denyResult -> {
+                    ci.cancel();
+                    sendFlagMsg(denyResult);
+                });
             }
-            FlagEvaluator.processCheck(checkEvent, denyResult -> {
-                ci.cancel();
-                sendFlagMsg(denyResult);
-            });
         }
     }
 }

@@ -55,7 +55,8 @@
     "flag.player.ThrownEnderPearlMixin",
     "flag.player.breeding.AnimalMixin",
     "flag.player.breeding.FrogMixin",
-    "flag.player.breeding.SnifferMixin"
+    "flag.player.breeding.SnifferMixin",
+    "flag.player.BlockItemMixin"
   ],
   "client": [
   ],

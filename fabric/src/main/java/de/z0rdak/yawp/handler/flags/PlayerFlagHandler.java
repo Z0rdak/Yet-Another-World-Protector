@@ -15,6 +15,8 @@ import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.references.BlockItemId;
+import net.minecraft.references.BlockItemIds;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -25,17 +27,21 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.ContainerEntity;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.EnderChestBlockEntity;
 import net.minecraft.world.level.block.entity.LecternBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import static de.z0rdak.yawp.handler.HandlerUtil.*;
@@ -53,12 +59,9 @@ public final class PlayerFlagHandler {
     public static void register() {
         EntitySleepEvents.ALLOW_SLEEPING.register(PlayerFlagHandler::onAllowSleeping);
         EntitySleepEvents.ALLOW_SETTING_SPAWN.register(PlayerFlagHandler::onSettingSpawn);
-        // EntityElytraEvents.ALLOW.register(PlayerFlagHandler::onElytraFlight);
-
         UseItemCallback.EVENT.register(PlayerFlagHandler::onUseItem);
         UseBlockCallback.EVENT.register(PlayerFlagHandler::onUseBlock);
         UseEntityCallback.EVENT.register(PlayerFlagHandler::onUseEntity);
-
         AttackBlockCallback.EVENT.register(PlayerFlagHandler::onAttackBlock);
     }
 
@@ -68,14 +71,13 @@ public final class PlayerFlagHandler {
      */
     private static InteractionResult onUseItem(Player player, Level world, InteractionHand hand) {
         /* Vanilla code - START
-        This is in place to ensure same behaviour of flags across fabric and forge - check this on each update! */
+        This is in place to ensure same behavior of flags across fabric and forge - check this on each update! */
         ItemStack stackInHand = player.getItemInHand(hand);
         if (player.isSpectator() || player.getCooldowns().isOnCooldown(stackInHand)) {
             return InteractionResult.PASS;
         }
         /* Vanilla code - END */
         if (isServerSide(world)) {
-            //FLAG_LOGGER.info("[onUseItem] Player={} ({}), at=[{}], Hand={}, Item={}", player.getName().getString(), player.getUuidAsString(), player.getBlockPos().toShortString(), hand, player.getStackInHand(hand));
             FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), FlagRegister.PLAYER_USE_ITEMS, getDimKey(player), player);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return InteractionResult.PASS;
@@ -104,20 +106,19 @@ public final class PlayerFlagHandler {
         if (isServerSide(world)) {
             UseOnContext useOnContext = new UseOnContext(player, hand, blockHitResult);
             BlockPos targetPos = useOnContext.getClickedPos();
-            BlockPos placeBlockTarget = targetPos.relative(useOnContext.getClickedFace());
             BlockEntity targetEntity = world.getBlockEntity(targetPos);
             boolean hasEmptyHand = hasEmptyHand(player, hand);
-            ItemStack stackInHand = useOnContext.getItemInHand();
-            boolean isBlock = stackInHand.getItem() instanceof BlockItem;
+
             boolean isSneakingWithEmptyHands = player.isShiftKeyDown() && hasEmptyHand;
-            boolean isBlockEntity = targetEntity instanceof BlockEntity;
             boolean isLockableTileEntity = targetEntity instanceof BaseContainerBlockEntity;
             boolean isEnderChest = targetEntity instanceof EnderChestBlockEntity;
             boolean isContainer = targetEntity instanceof LecternBlockEntity || isLockableTileEntity;
 
-            //FLAG_LOGGER.info("[onUseBlock] Player={} ({}), Target=[{}], PLaceOn=[{}], BlockEntity={}, Hand={}, Item={} (isBlock={})", player.getName().getString(), player.getUuidAsString(), targetPos.toShortString(), placeBlockTarget.toShortString(), isBlockEntity, useOnConComponent.getHand(), player.getStackInHand(useOnConComponent.getHand()), isBlock);
+        
+            Identifier targetBlockId = BuiltInRegistries.BLOCK.getKey(targetEntity.getBlockState().getBlock());
+            // TODO check if player ia allowed to use this specific block
 
-            // allow player to place blocks when shift clicking usable bock
+            // allow player to place blocks when shift clicking usable block
             if ((isSneakingWithEmptyHands || !player.isShiftKeyDown())) {
                 FlagCheckRequest checkEvent = new FlagCheckRequest(targetPos, FlagRegister.PLAYER_USE_BLOCKS, getDimKey(player), player);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
@@ -126,8 +127,11 @@ public final class PlayerFlagHandler {
                 if (flagState == FlagState.DENIED)
                     return InteractionResult.FAIL;
 
-
+                var protectedEntrySet = new HashSet<Identifier>();
                 if (isEnderChest) {
+                    Identifier protectedEntry = BlockItemIds.ENDER_CHEST.block().identifier();
+                    protectedEntrySet.add(protectedEntry);
+
                     // check allows player to place blocks when shift clicking container
                     if (player.isShiftKeyDown() && hasEmptyHand || !player.isShiftKeyDown()) {
                         checkEvent = new FlagCheckRequest(targetPos, FlagRegister.PLAYER_OPEN_ENDER_CHEST, getDimKey(player), player);
@@ -138,7 +142,22 @@ public final class PlayerFlagHandler {
                             return InteractionResult.FAIL;
                     }
                 }
-                if (isContainer) {
+
+                // TODO: default protected sets register
+                //  FLAG -> { name: string, set: Set<Identifier> }
+                //  player/use_blocks -> { name: container, ["minecraft:chest", ...] }
+                var containerEntrySet = new HashSet<Identifier>();
+                Identifier lectern = BlockItemIds.LECTERN.block().identifier();
+                Identifier chest = BlockItemIds.CHEST.block().identifier();
+                Identifier barrel = BlockItemIds.BARREL.block().identifier();
+                Identifier brewingStand = BlockItemIds.BREWING_STAND.block().identifier();
+
+                containerEntrySet.add(lectern);
+                containerEntrySet.add(chest);
+                containerEntrySet.add(barrel);
+                containerEntrySet.add(brewingStand);
+
+                if (isContainer || containerEntrySet.contains(targetBlockId)) {
                     // check allows player to place blocks when shift clicking container
                     if (player.isShiftKeyDown() && hasEmptyHand || !player.isShiftKeyDown()) {
                         checkEvent = new FlagCheckRequest(targetPos, FlagRegister.PLAYER_OPEN_CONTAINER, getDimKey(player), player);
@@ -152,45 +171,8 @@ public final class PlayerFlagHandler {
             }
 
             if (!hasEmptyHand) {
-                boolean targetsContainerWhileNotSneaking = (isContainer || isEnderChest) && !player.isShiftKeyDown();
-                if (targetsContainerWhileNotSneaking) { // should be allowed to access container in this case
-                    // FLAG_LOGGER.info("### targetsContainerWhileNotSneaking ###");
-                }
-
-                Identifier itemRl = BuiltInRegistries.ITEM.getKey(stackInHand.getItem());
-                Set<String> entities = FlagConfig.getCoveredBlockEntities();
-                Set<String> entityTags = FlagConfig.getCoveredBlockEntityTags();
-                boolean isCoveredByTag = entityTags.stream().anyMatch(tag -> {
-                    Identifier tagRl = Identifier.parse(tag);
-                    return stackInHand.tags().anyMatch(itemTagKey -> itemTagKey.location().equals(tagRl));
-                });
-                boolean isBlockCovered = entities.stream().anyMatch(entity -> {
-                    Identifier entityRl = Identifier.parse(entity);
-                    return itemRl.equals(entityRl);
-                });
-                if (isBlockCovered || isCoveredByTag) {
-                    FlagCheckRequest checkEvent = new FlagCheckRequest(placeBlockTarget, FlagRegister.PLAYER_PLACE_BLOCKS, getDimKey(player), player);
-                    if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
-                        return InteractionResult.PASS;
-                    }
-                    FlagState flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
-                    if (flagState == FlagState.DENIED) {
-                        return InteractionResult.FAIL;
-                    }
-                }
-
-
-                boolean isBerry = ItemStack.isSameItem(stackInHand, Items.GLOW_BERRIES.getDefaultInstance()) || ItemStack.isSameItem(stackInHand, Items.GLOW_BERRIES.getDefaultInstance());
-                ItemUseAnimation useAction = stackInHand.getUseAnimation();
-                if (isBlock || (isBerry && useAction == ItemUseAnimation.EAT)) {
-                    FlagCheckRequest checkEvent = new FlagCheckRequest(placeBlockTarget, FlagRegister.PLAYER_PLACE_BLOCKS, getDimKey(player), player);
-                    if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
-                        return InteractionResult.PASS;
-                    FlagState flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
-                    if (flagState == FlagState.DENIED)
-                        return InteractionResult.FAIL;
-                }
-
+                Identifier id = BuiltInRegistries.ITEM.getKey(useOnContext.getItemInHand().getItem());
+                // TODO check if item in hand is allowed to be used
                 FlagCheckRequest checkEvent = new FlagCheckRequest(targetPos, FlagRegister.PLAYER_USE_ITEMS, getDimKey(player), player);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                     return InteractionResult.PASS;
@@ -214,7 +196,7 @@ public final class PlayerFlagHandler {
      */
     private static InteractionResult onUseEntity(Player player, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult entityHitResult) {
         /* Vanilla code - START
-        This is in place to ensure same behaviour of flags across fabric and forge - check this on each update! */
+        This is in place to ensure same behavior of flags across fabric and forge - check this on each update! */
         if (player.isSpectator()) {
             if (entity instanceof MenuProvider) {
                 player.openMenu((MenuProvider) entity);
@@ -232,8 +214,6 @@ public final class PlayerFlagHandler {
         }
 
         if (isServerSide(world)) {
-            //FLAG_LOGGER.info("[onUseEntity] Player={} ({}), Target={} ({}), at=[{}], Hand={}, Item={}", player.getName().getString(), player.getUuidAsString(), entity.getName().getString(), entity.getScoreboardName(), entity.getBlockPos().toShortString(), hand, player.getStackInHand(hand));
-
             FlagCheckRequest checkEvent = new FlagCheckRequest(entity.blockPosition(), FlagRegister.PLAYER_INTERACT, getDimKey(player), player);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return InteractionResult.PASS;
@@ -301,25 +281,6 @@ public final class PlayerFlagHandler {
             }
         }
         return null;
-    }
-
-    private static boolean onElytraFlight(LivingEntity livingEntity) {
-        if (isServerSide(livingEntity.level())) {
-            if (livingEntity instanceof Player player) {
-                FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), FlagRegister.PLAYER_USE_ELYTRA, getDimKey(player), player);
-                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
-                    return ALLOW;
-                }
-                FlagState flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
-                return flagState != FlagState.DENIED;
-            }
-        }
-        return ALLOW;
-    }
-
-    private static boolean hasEmptyHands(Player player) {
-        return player.getItemInHand(InteractionHand.MAIN_HAND).getItem().equals(Items.AIR)
-                && player.getItemInHand(InteractionHand.OFF_HAND).getItem().equals(Items.AIR);
     }
 
     private static boolean hasEmptyHand(Player player, InteractionHand hand) {

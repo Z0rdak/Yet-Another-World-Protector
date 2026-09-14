@@ -7,7 +7,7 @@ import fuzs.forgeconfigapiport.fabric.api.v5.ModConfigEvents;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
-import static de.z0rdak.yawp.constants.Constants.MOD_ID;
+import static de.z0rdak.yawp.util.Constants.MOD_ID;
 
 public class FabricConfigHelper implements IConfigHelper {
     

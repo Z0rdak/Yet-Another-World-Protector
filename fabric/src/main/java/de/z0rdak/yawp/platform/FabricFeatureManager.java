@@ -1,7 +1,7 @@
 package de.z0rdak.yawp.platform;
 
 import de.z0rdak.yawp.config.server.FeatureConfig;
-import de.z0rdak.yawp.handler.PlayerPosTracker;
+import de.z0rdak.yawp.data.player.PlayerPosTracker;
 import de.z0rdak.yawp.platform.services.FeatureManager;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
