@@ -17,6 +17,7 @@ import de.z0rdak.yawp.commands.arguments.region.RegionArgumentType;
 import de.z0rdak.yawp.commands.arguments.region.RemoveRegionChildArgumentType;
 import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.area.*;
+import de.z0rdak.yawp.core.region.CuboidRegion;
 import de.z0rdak.yawp.core.region.IMarkableRegion;
 import de.z0rdak.yawp.core.region.IProtectedRegion;
 import de.z0rdak.yawp.core.region.RegionType;

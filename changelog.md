@@ -1,3 +1,9 @@
+# [0.6.2-beta2] - 2026-09-23
+
+## Fixes
+- Fix cuboid area normalization
+- Fix gradle build
+
 # [0.6.2-beta1] - 2025-10-30
 
 ## Added
