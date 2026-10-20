@@ -88,7 +88,7 @@ public enum RegionFlag {
     USE_ENDERPEARL_FROM_REGION("enderpearl-from", FlagTagRegister.PLAYER, FlagTagRegister.BLOCK),
     USE_ENDERPEARL_TO_REGION("enderpearl-to", FlagTagRegister.PLAYER, FlagTagRegister.BLOCK),
     USE_ENTITIES("use-entities", FlagTagRegister.PLAYER, FlagTagRegister.ENTITY),
-    USE_ITEMS("use-items", FlagTagRegister.PLAYER_PREVENTION),
+    USE_ITEMS("use-items", FlagTagRegister.PLAYER_PREVENTION, FlagTagRegister.PLAYER),
     USE_PORTAL("use-portal", FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY),
     USE_PORTAL_ANIMALS("use-portal-animals", FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY),
     USE_PORTAL_ITEMS("use-portal-items", FlagTagRegister.ENVIRONMENT, FlagTagRegister.ENTITY),
@@ -209,6 +209,6 @@ public enum RegionFlag {
     }
 
     public boolean isPlayerFlag() {
-        return this.is(FlagTagRegister.PLAYER);
+        return this.is(FlagTagRegister.PLAYER) || this.is(FlagTagRegister.PLAYER_PREVENTION);
     }
 }
