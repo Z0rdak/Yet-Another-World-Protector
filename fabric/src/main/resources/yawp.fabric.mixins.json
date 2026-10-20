@@ -48,7 +48,6 @@
     "flag.player.FarmLandBlockMixin",
     "flag.player.HoeItemMixin",
     "flag.player.ItemEntityMixin",
-    "flag.player.PlayerMixin",
     "flag.player.ServerPlayerMixin",
     "flag.player.ShovelItemMixin",
     "flag.player.TameableEntityMixin",
