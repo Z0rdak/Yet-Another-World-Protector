@@ -1,3 +1,6 @@
+- Fix `enderman-griefing` flag for take and leave block goal not working as intended. Fixes #212 
+- Fix `item-drop` flag causing duplicate items when using `/give` command. Fixes #213
+- Fix `use-items` flag not being considered a player flag and thus not considering player permissions to bypass flags. Fixes #215
 # [0.6.3-beta4] - 2026-06-17
 
 ## Fixed
