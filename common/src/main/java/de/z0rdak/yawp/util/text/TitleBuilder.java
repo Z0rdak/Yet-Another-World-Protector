@@ -90,7 +90,7 @@ public final class TitleBuilder {
     }
 
     public TitleBuilder subtitleBye() {
-        this.subtitle = Component.translatable("No leaving %s, bye %s!", region.getName(), player.getScoreboardName())
+        this.subtitle = Component.translatable("Now leaving %s, bye %s!", region.getName(), player.getScoreboardName())
                 .withStyle(ChatFormatting.GOLD);
         return this;
     }
