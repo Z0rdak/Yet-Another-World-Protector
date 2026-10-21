@@ -1,20 +1,24 @@
 package de.z0rdak.yawp.handler.flags;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
+import de.z0rdak.yawp.api.MessageSender;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.config.server.FlagConfig;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.platform.Services;
-import de.z0rdak.yawp.api.MessageSender;
 import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
-import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
@@ -30,6 +34,7 @@ import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.EnderChestBlockEntity;
 import net.minecraft.world.level.block.entity.LecternBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import org.jetbrains.annotations.Nullable;
@@ -37,7 +42,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Set;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
-import static de.z0rdak.yawp.handler.HandlerUtil.*;
+import static de.z0rdak.yawp.handler.HandlerUtil.getDimKey;
+import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
 
 /**
  * Contains flag handler for events directly related/cause to/by players.
@@ -58,7 +64,63 @@ public final class PlayerFlagHandler {
         UseBlockCallback.EVENT.register(PlayerFlagHandler::onUseBlock);
         UseEntityCallback.EVENT.register(PlayerFlagHandler::onUseEntity);
 
-        AttackBlockCallback.EVENT.register(PlayerFlagHandler::onAttackBlock);
+        PlayerBlockBreakEvents.BEFORE.register(PlayerFlagHandler::onAttemptBreakBlock);
+        PlayerBlockBreakEvents.CANCELED.register(PlayerFlagHandler::onBreakBlockCanceled);
+    }
+
+    /**
+     * Corrects the client's predicted block break after server-side protection
+     * cancels it.
+     *
+     * <p>The block state is resent immediately to correct the client's predicted
+     * removal. The block-entity update is delayed by one server tick because the
+     * client may discard an immediate block-entity packet while its predicted
+     * block removal is still being reconciled.
+     *
+     * <p>This delay is a workaround for vanilla client prediction behavior. The
+     * server retains the authoritative block and block-entity state throughout;
+     * the delayed update only helps restore the correct client-side display.
+     */
+    private static void onBreakBlockCanceled(Level level, Player player, BlockPos pos, BlockState oldState, @Nullable BlockEntity oldBlockEntity) {
+        if (!(level instanceof ServerLevel serverLevel) || !(player instanceof ServerPlayer serverPlayer)) {
+            return;
+        }
+        BlockPos immutablePos = pos.immutable();
+        // Correct the block state immediately.
+        serverPlayer.connection.send(new ClientboundBlockUpdatePacket(immutablePos, serverLevel.getBlockState(immutablePos)));
+        // Send the current block-entity data one tick later.
+        DelayedServerTasks.schedule(1, () -> {
+            if (!serverPlayer.hasDisconnected() || serverPlayer.isRemoved() || !serverPlayer.isAlive() || !serverLevel.hasChunkAt(immutablePos)) {
+                return;
+            }
+            BlockEntity currentBlockEntity = serverLevel.getBlockEntity(immutablePos);
+            if (currentBlockEntity == null) {
+                return;
+            }
+            Packet<ClientGamePacketListener> packet = currentBlockEntity.getUpdatePacket();
+            if (packet != null) {
+                serverPlayer.connection.send(packet);
+            }
+        });
+    }
+
+    /**
+     * Enforces block-break protection on the server.
+     *
+     * <p>Returning false prevents the block from being broken. This server-side
+     * decision is authoritative; client-side block updates are only visual
+     * corrections and are not relied upon to enforce protection.
+     */
+    private static boolean onAttemptBreakBlock(Level level, Player player, BlockPos blockPos, BlockState blockState, @Nullable BlockEntity blockEntity) {
+        if (isServerSide(level)) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, BREAK_BLOCKS, getDimKey(player), player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
+                return true;
+            }
+            FlagState flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
+            return flagState != FlagState.DENIED;
+        }
+        return true;
     }
 
     /**
@@ -261,18 +323,6 @@ public final class PlayerFlagHandler {
     }
 
     private static InteractionResult onUseEntitySpecific(Player player, Level world, InteractionHand hand, Entity entity, EntityHitResult entityHitResult) {
-        return InteractionResult.PASS;
-    }
-
-    private static InteractionResult onAttackBlock(Player player, Level world, InteractionHand hand, BlockPos blockPos, Direction direction) {
-        if (isServerSide(world)) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, BREAK_BLOCKS, getDimKey(player), player);
-            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
-                return InteractionResult.PASS;
-            }
-            FlagState flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
-            return flagState == FlagState.DENIED ? InteractionResult.FAIL : InteractionResult.PASS;
-        }
         return InteractionResult.PASS;
     }
 

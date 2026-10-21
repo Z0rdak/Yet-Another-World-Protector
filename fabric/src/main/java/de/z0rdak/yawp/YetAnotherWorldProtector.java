@@ -7,6 +7,7 @@ import de.z0rdak.yawp.core.flag.RegionFlag;
 import de.z0rdak.yawp.data.PlayerManager;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.handler.YawpEventHandler;
+import de.z0rdak.yawp.handler.flags.DelayedServerTasks;
 import de.z0rdak.yawp.handler.flags.PlayerFlagHandler;
 import de.z0rdak.yawp.platform.Services;
 import net.fabricmc.api.ModInitializer;
@@ -32,6 +33,8 @@ public class YetAnotherWorldProtector implements ModInitializer, YAWPModInitiali
         // register flag handlers
         PlayerFlagHandler.register();
         ServerLifecycleEvents.SERVER_STARTING.register(YawpEventHandler::storeRef);
+
+        DelayedServerTasks.initialize();
     }
 
     private static void onAddFlag(FlagEvent.Add event) {
