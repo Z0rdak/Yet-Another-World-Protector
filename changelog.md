@@ -1,6 +1,19 @@
-- Fix `enderman-griefing` flag for take and leave block goal not working as intended. Fixes #212 
-- Fix `item-drop` flag causing duplicate items when using `/give` command. Fixes #213
-- Fix `use-items` flag not being considered a player flag and thus not considering player permissions to bypass flags. Fixes #215
+# [0.6.4-beta1] - unreleased
+
+## Fixed
+
+- [x] (Fabric) Fix wrong event check preventing regions from being deleted
+- [ ] (Fabric) Fix issues with `place_blocks` flag not covering all blocks correctly.
+- [ ] Fix #202 (Fabric) Fix issue with inventory desync when placing blocks with `place_blocks` denied flag
+- [ ] Fix #206 Fix wrong default language keys for flag messages
+- [x] Fix typo in region message. PR#217
+- [ ] Fix #209 Fix flag use-portal-player preventing /tp over dimensions
+- [x] (Fabric) Fix block entity data desync issue with `break-blocks` flag (breaking signs makes text seem to disappear). Fixes #210
+- [ ] Fix #211 Attempting to edit a sign with no-sign-edit causes item placement
+- [x] Fix `enderman-griefing` flag for take and leave block goal not working as intended. Fixes #212 
+- [x] Fix `item-drop` flag causing duplicate items when using `/give` command. Fixes #213
+- [x] Fix `use-items` flag not being considered a player flag and thus not considering player permissions to bypass flags. Fixes #215
+
 # [0.6.3-beta4] - 2026-06-17
 
 ## Fixed
