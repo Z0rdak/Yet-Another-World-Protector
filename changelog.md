@@ -5,7 +5,7 @@
 - [x] (Fabric) Fix wrong event check preventing regions from being deleted
 - [ ] (Fabric) Fix issues with `place_blocks` flag not covering all blocks correctly.
 - [ ] Fix #202 (Fabric) Fix issue with inventory desync when placing blocks with `place_blocks` denied flag
-- [ ] Fix #206 Fix wrong default language keys for flag messages
+- [x] Fix missing fallback I18n value for default flag messages. Fixes #206
 - [x] Fix typo in region message. PR#217
 - [ ] Fix #209 Fix flag use-portal-player preventing /tp over dimensions
 - [x] (Fabric) Fix block entity data desync issue with `break-blocks` flag (breaking signs makes text seem to disappear). Fixes #210

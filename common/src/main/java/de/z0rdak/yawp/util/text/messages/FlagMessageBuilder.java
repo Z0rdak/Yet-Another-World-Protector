@@ -72,11 +72,18 @@ public class FlagMessageBuilder {
         if (substitutes != null) {
             msgSubstitutes.putAll(substitutes);
         }
+        var regionType = result.getResponsible().getRegionType();
         var key = result.getFlag().getFlagMsg().isDefault()
-                ? "flag.msg.deny." + result.getResponsible().getRegionType().type + ".default"
+                ? "flag.msg.deny." + regionType.type + ".default"
                 : result.getFlag().getFlagMsg().msg();
+         String fallback = switch (regionType) {
+             case GLOBAL ->  "This action is globally §cdenied§r by the §b%1$s§r flag!";
+             case DIMENSION -> "This action is §cdenied§r in this by the §b%1$s§r flag!";
+             case LOCAL -> "[%3$s]: The §b%1$s§r flag §cdenies§r this action in this area!";
+             case TEMPLATE -> "flag.msg.deny." + regionType.type + ".default";
+         };
         var args = populateArgs(msgSubstitutes);
-        return Component.translatable(key, args);
+        return Component.translatableWithFallback(key, fallback, args);
     }
 
     private static Object[] populateArgs(Map<String, String> substitutes) {
