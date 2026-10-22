@@ -23,13 +23,15 @@ public class SignBlockMixin {
 
     @Inject(method = "useWithoutItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/SignBlock;openTextEdit(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/block/entity/SignBlockEntity;Z)V"), cancellable = true)
     public void use(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult, CallbackInfoReturnable<InteractionResult> cir) {
-        FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, NO_SIGN_EDIT, level.dimension(), player);
-        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
-            return;
+        if (!level.isClientSide()) {
+            FlagCheckRequest checkEvent = new FlagCheckRequest(blockPos, NO_SIGN_EDIT, level.dimension(), player);
+            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
+                return;
+            }
+            processCheck(checkEvent, deny -> {
+                cir.setReturnValue(InteractionResult.CONSUME);
+                sendFlagMsg(deny);
+            });
         }
-        processCheck(checkEvent, deny -> {
-            cir.setReturnValue(InteractionResult.FAIL);
-            sendFlagMsg(deny);
-        });
     }
 }

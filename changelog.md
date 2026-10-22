@@ -9,7 +9,7 @@
 - [x] Fix typo in region message. PR#217
 - [ ] Fix #209 Fix flag use-portal-player preventing /tp over dimensions
 - [x] (Fabric) Fix block entity data desync issue with `break-blocks` flag (breaking signs makes text seem to disappear). Fixes #210
-- [ ] Fix #211 Attempting to edit a sign with no-sign-edit causes item placement
+- [x] Fix attempting to edit a sign with `no-sign-edit` flag set to denied causing item placement. Fixes #211
 - [x] Fix `enderman-griefing` flag for take and leave block goal not working as intended. Fixes #212 
 - [x] Fix `item-drop` flag causing duplicate items when using `/give` command. Fixes #213
 - [x] Fix `use-items` flag not being considered a player flag and thus not considering player permissions to bypass flags. Fixes #215
