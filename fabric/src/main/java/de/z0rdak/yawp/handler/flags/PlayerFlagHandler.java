@@ -236,7 +236,11 @@ public final class PlayerFlagHandler {
                     }
                     FlagState flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
                     if (flagState == FlagState.DENIED) {
-                        return InteractionResult.FAIL;
+                        ServerPlayer serverPlayer = (ServerPlayer) player;
+                        // The server's stack should still be authoritative.
+                        // Force the current menu, including its hotbar slots, to resync.
+                        DelayedServerTasks.schedule(1, serverPlayer.containerMenu::sendAllDataToRemote);
+                        return InteractionResult.CONSUME;
                     }
                 }
 
@@ -248,8 +252,13 @@ public final class PlayerFlagHandler {
                     if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                         return InteractionResult.PASS;
                     FlagState flagState = FlagEvaluator.processCheck(checkEvent, MessageSender::sendFlagMsg);
-                    if (flagState == FlagState.DENIED)
-                        return InteractionResult.FAIL;
+                    if (flagState == FlagState.DENIED) {
+                        ServerPlayer serverPlayer = (ServerPlayer) player;
+                        // The server's stack should still be authoritative.
+                        // Force the current menu, including its hotbar slots, to resync.
+                        DelayedServerTasks.schedule(1, serverPlayer.containerMenu::sendAllDataToRemote);
+                        return InteractionResult.CONSUME;
+                    }
                 }
 
                 FlagCheckRequest checkEvent = new FlagCheckRequest(targetPos, USE_ITEMS, getDimKey(player), player);
