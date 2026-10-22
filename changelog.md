@@ -2,6 +2,7 @@
 
 ## Fixed
 
+- [x] Fix `log_empty_results` in yawp-logging.toml not working as intended since `log_result_values` did not accept all flag states. Fixes #194
 - [x] (Fabric) Fix wrong event check preventing regions from being deleted
 - [ ] (Fabric) Fix issues with `place_blocks` flag not covering all blocks correctly.
 - [x] (Fabric) Fix issue with inventory desync when placing blocks with `place_blocks` denied flag. Fixes #202
