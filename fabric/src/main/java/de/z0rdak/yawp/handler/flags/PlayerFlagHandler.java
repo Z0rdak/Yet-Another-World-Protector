@@ -88,10 +88,10 @@ public final class PlayerFlagHandler {
         BlockPos immutablePos = pos.immutable();
         // Correct the block state immediately.
         serverPlayer.connection.send(new ClientboundBlockUpdatePacket(immutablePos, serverLevel.getBlockState(immutablePos)));
-        // Send the current block-entity data one tick later.
-        DelayedServerTasks.schedule(1, () -> {
-            if (!serverPlayer.hasDisconnected() || serverPlayer.isRemoved() || !serverPlayer.isAlive() || !serverLevel.hasChunkAt(immutablePos)) {
-                return;
+        // Send the current block-entity data two tick later.
+        DelayedServerTasks.schedule(2, () -> {
+            if (serverPlayer.isRemoved() || !serverPlayer.isAlive() || !serverLevel.hasChunkAt(immutablePos)) {
+                return; // quite defensive but we leave it for now
             }
             BlockEntity currentBlockEntity = serverLevel.getBlockEntity(immutablePos);
             if (currentBlockEntity == null) {
