@@ -19,7 +19,6 @@ import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.npc.villager.Villager;
@@ -79,9 +78,9 @@ import static de.z0rdak.yawp.handler.HandlerUtil.*;
  * Contains flag handler for events directly related/cause to/by players.
  */
 @EventBusSubscriber(modid = Constants.MOD_ID)
-public final class PlayerFlagHandler {
+public final class NeoForgePlayerFlagHandler {
 
-    private PlayerFlagHandler() {
+    private NeoForgePlayerFlagHandler() {
     }
 
     @SubscribeEvent
@@ -666,32 +665,6 @@ public final class PlayerFlagHandler {
         }
     }
 
-    @SubscribeEvent
-    public static void onEntityInteraction(PlayerInteractEvent.EntityInteractSpecific event) {
-        if (notServerSideOrPlayerNull(event.getEntity())) return;
-        Player player = event.getEntity();
-        FlagCheckRequest checkEvent = new FlagCheckRequest(event.getTarget().blockPosition(), USE_ENTITIES, getDimKey(player), player);
-        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
-            return;
-        }
-        FlagEvaluator.processCheck(checkEvent, onDeny -> {
-            event.setCanceled(true);
-            sendFlagMsg(onDeny);
-        });
-        if (!hasEmptyHand(player, event.getHand())) {
-
-            checkEvent = new FlagCheckRequest(event.getPos(), USE_ITEMS, getDimKey(player), player);
-            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
-                return;
-            }
-            FlagEvaluator.processCheck(checkEvent, onDeny -> {
-                event.setCanceled(true);
-                sendFlagMsg(onDeny);
-            });
-        }
-
-    }
-
     private static boolean hasEmptyHands(Player player) {
         return player.getItemInHand(InteractionHand.MAIN_HAND).getItem().equals(Items.AIR) && player.getItemInHand(InteractionHand.OFF_HAND).getItem().equals(Items.AIR);
     }
@@ -868,9 +841,15 @@ public final class PlayerFlagHandler {
                 return;
             }
             FlagEvaluator.processCheck(checkEvent, onDeny -> {
+                var owner = event.getEntity().getOwner();
+                // if the owner is null if the item is given by the give command
+                // if the owner is the player it was tossed out by the player -> refund it
+                // chain is give command -> drop -> item toss event
+                if (owner instanceof ServerPlayer) {
+                    player.addItem(event.getEntity().getItem());
+                    player.getInventory().setChanged();
+                }
                 event.setCanceled(true);
-                player.addItem(event.getEntity().getItem());
-                player.getInventory().setChanged();
                 sendFlagMsg(onDeny);
             });
         }

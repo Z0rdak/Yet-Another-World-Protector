@@ -29,7 +29,6 @@ import static de.z0rdak.yawp.handler.HandlerUtil.isServerSide;
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin {
 
-    // This is preferred to forge ItemTossEvent, because the forge event does delete the stack
     @Inject(method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;", at = @At(value = "HEAD"), allow = 1, cancellable = true)
     private void onDropItem(ItemStack stack, boolean b1, boolean b2, CallbackInfoReturnable<ItemEntity> cir) {
         ServerPlayer player = (ServerPlayer) (Object) this;
