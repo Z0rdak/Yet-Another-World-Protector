@@ -13,7 +13,7 @@
         "issues": "https://github.com/Z0rdak/Yet-Another-World-Protector/issues"
     },
     "license": "${license}",
-    "icon": "logo.png",
+    "icon": "logo-shield.png",
     "environment": "*",
     "entrypoints": {
         "main": [

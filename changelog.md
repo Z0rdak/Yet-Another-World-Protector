@@ -1,5 +1,11 @@
 # [0.6.4-beta1] - unreleased
 
+## Changed
+
+- Update dependency versions to latest
+- Update Fabric API to 0.161.0+26.2
+- Update NeoForge to 26.2.0.93
+
 ## Fixed
 
 - [x] Fix `log_empty_results` in yawp-logging.toml not working as intended since `log_result_values` did not accept all flag states. Fixes #194
