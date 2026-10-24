@@ -8,7 +8,7 @@
 - [x] (Fabric) Fix issue with inventory desync when placing blocks with `place_blocks` denied flag. Fixes #202
 - [x] Fix missing fallback I18n value for default flag messages. Fixes #206
 - [x] Fix typo in region message. PR#217
-- [ ] Fix #209 Fix flag use-portal-player preventing /tp over dimensions
+- [x] Fix `use-portal-player` and `use-portal` flag preventing `/tp` and `/execute in <dim> run tp` command for players. Fixes #209
 - [x] (Fabric) Fix block entity data desync issue with `break-blocks` flag (breaking signs makes text seem to disappear). Fixes #210
 - [x] Fix attempting to edit a sign with `no-sign-edit` flag set to denied causing item placement. Fixes #211
 - [x] Fix `enderman-griefing` flag for take and leave block goal not working as intended. Fixes #212 

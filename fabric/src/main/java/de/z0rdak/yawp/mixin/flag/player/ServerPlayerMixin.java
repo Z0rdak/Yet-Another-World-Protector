@@ -3,7 +3,9 @@ package de.z0rdak.yawp.mixin.flag.player;
 import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.data.region.RegionDataManager;
+import de.z0rdak.yawp.core.flag.PortalTransferFlags;
 import de.z0rdak.yawp.platform.Services;
+import de.z0rdak.yawp.platform.services.event.Events;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -49,27 +51,30 @@ public abstract class ServerPlayerMixin {
         Player player = (Player) (Object) this;
         if (isServerSide(player)) {
             RegionDataManager.initLevelDataOnChangeWorld(player, player.level(), teleportTransition.newLevel());
+            // should not trigger on using the teleport command
+            if (PortalTransferFlags.isPortalTransfer((ServerPlayer) player)) {
+                FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), USE_PORTAL_PLAYERS, getDimKey(player), player);
+                Events.post(checkEvent);
+                if (checkEvent.isCanceled())
+                    return;
+                FlagEvaluator.processCheck(checkEvent, deny -> {
+                    sendFlagMsg(deny);
+                    cir.setReturnValue(null);
+                });
 
-            FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), USE_PORTAL_PLAYERS, getDimKey(player), player);
-            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
-                return;
-            FlagEvaluator.processCheck(checkEvent, deny -> {
-                sendFlagMsg(deny);
-                cir.setReturnValue(null);
-            });
-
-            checkEvent = new FlagCheckRequest(player.blockPosition(), ENTER_DIM, getDimKey(teleportTransition.newLevel()), player);
-            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
-                return;
-            FlagEvaluator.process(checkEvent)
-                    .onDenyWithMsg(result -> cir.setReturnValue(null));
+                checkEvent = new FlagCheckRequest(player.blockPosition(), ENTER_DIM, getDimKey(teleportTransition.newLevel()), player);
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
+                    return;
+                FlagEvaluator.process(checkEvent)
+                        .onDenyWithMsg(result -> cir.setReturnValue(null));
+            }
         }
     }
 
     @Inject(method = "teleportTo(Lnet/minecraft/server/level/ServerLevel;DDDLjava/util/Set;FFZ)Z", at = @At(value = "HEAD"), allow = 1, cancellable = true)
     private void onTeleportToDimension(ServerLevel level, double x, double y, double z, Set<Relative> relativeMovements, float yaw, float pitch, boolean setCamera, CallbackInfoReturnable<Boolean> cir) {
         Player player = (Player) (Object) this;
-        if (isServerSide(player)) {
+        if (isServerSide(player) && PortalTransferFlags.isPortalTransfer((ServerPlayer) player)) {
             FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), USE_PORTAL_PLAYERS, player.level().dimension(), player);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                 return;

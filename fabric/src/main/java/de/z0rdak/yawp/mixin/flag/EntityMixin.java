@@ -2,9 +2,11 @@ package de.z0rdak.yawp.mixin.flag;
 
 import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
+import de.z0rdak.yawp.core.flag.PortalTransferFlags;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -81,15 +83,20 @@ public abstract class EntityMixin {
     public void onChangeDimension(ServerLevel from, ServerLevel to, TeleportTransition teleportTransition, CallbackInfoReturnable<Entity> cir) {
         Entity self = (Entity) (Object) this;
         if (isServerSide(from)) {
-            FlagCheckRequest checkEvent = new FlagCheckRequest(self.blockPosition(), USE_PORTAL, getDimKey(from));
-            if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
-                return;
+            var isPlayer = self instanceof ServerPlayer;
+            var isPortalTransfer = isPlayer && PortalTransferFlags.isPortalTransfer((ServerPlayer) self);
+            FlagCheckRequest checkEvent;
+            if (isPortalTransfer || !(self instanceof ServerPlayer)) {
+                checkEvent = new FlagCheckRequest(self.blockPosition(), USE_PORTAL, getDimKey(from));
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
+                    return;
+                }
+                FlagEvaluator.processCheck(checkEvent, deny -> {
+                    cir.setReturnValue(null);
+                });
             }
-            FlagEvaluator.processCheck(checkEvent, deny -> {
-                cir.setReturnValue(null);
-            });
-            if (self instanceof Player player) {
-                checkEvent = new FlagCheckRequest(self.blockPosition(), USE_PORTAL_PLAYERS, getDimKey(from), player);
+            if (isPortalTransfer) {
+                checkEvent = new FlagCheckRequest(self.blockPosition(), USE_PORTAL_PLAYERS, getDimKey(from), (ServerPlayer) self);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }

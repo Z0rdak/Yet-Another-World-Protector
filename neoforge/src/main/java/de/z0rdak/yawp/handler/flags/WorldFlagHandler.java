@@ -3,10 +3,12 @@ package de.z0rdak.yawp.handler.flags;
 import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.constants.Constants;
+import de.z0rdak.yawp.core.flag.PortalTransferFlags;
 import de.z0rdak.yawp.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.npc.villager.AbstractVillager;
@@ -97,43 +99,51 @@ public class WorldFlagHandler {
      */
     @SubscribeEvent
     public static void onUsePortal(EntityTravelToDimensionEvent event) {
-        if (isServerSide(event.getEntity())) {
-            Entity entity = event.getEntity();
-            ResourceKey<Level> dimension = event.getEntity().level().dimension();
-            BlockPos target = entity.blockPosition();
-            Player player = entity instanceof Player ? (Player) entity : null;
-            FlagCheckRequest checkEvent = new FlagCheckRequest(target, USE_PORTAL, dimension, player);
+        Entity entity = event.getEntity();
+        if (!isServerSide(entity)) {
+            return;
+        }
+        BlockPos target = entity.blockPosition();
+        ResourceKey<Level> dimension = entity.level().dimension();
+        boolean isPlayer = entity instanceof ServerPlayer;
+        boolean isPortalTransfer = isPlayer && PortalTransferFlags.isPortalTransfer((ServerPlayer) entity);
+        // Skip all YAWP checks for players who are not transferring through a portal.
+        if (isPlayer && !isPortalTransfer) {
+            return;
+        }
+        // Check the general portal flag.
+        FlagCheckRequest checkEvent = new FlagCheckRequest(target, USE_PORTAL, dimension, entity instanceof Player player ? player : null);
+        if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
+            return;
+        }
+        FlagEvaluator.processCheck(checkEvent, denyResult -> event.setCanceled(true));
+        if (event.isCanceled()) {
+            return;
+        }
+        if (isPortalTransfer) {
+            // Additional check for players using portals.
+            checkEvent = new FlagCheckRequest(target, USE_PORTAL_PLAYERS, dimension, (ServerPlayer) entity);
             if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                 return;
             }
-            FlagEvaluator.processCheck(checkEvent, denyResult -> {
-                event.setCanceled(true);
-            });
-
-            if (entity instanceof Player) {
-                checkEvent = new FlagCheckRequest(target, USE_PORTAL_PLAYERS, dimension, player);
+            FlagEvaluator.processCheck(checkEvent, denyResult -> event.setCanceled(true));
+            if (event.isCanceled()) {
+                return;
+            }
+        } else {
+            // Entity-specific check for non-player entities.
+            checkEvent = getNonPlayerCheckEventFor(entity, target, dimension);
+            if (checkEvent != null) {
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
                 }
-                FlagEvaluator.processCheck(checkEvent, denyResult -> {
-                    event.setCanceled(true);
-                });
-            } else {
-                checkEvent = getNonPlayerCheckEventFor(entity, target, dimension);
-                if (checkEvent != null) {
-                    if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
-                        return;
-                    }
-                    FlagEvaluator.processCheck(checkEvent, denyResult -> {
-                        event.setCanceled(true);
-                    });
-                }
+                FlagEvaluator.processCheck(checkEvent, denyResult -> event.setCanceled(true));
             }
         }
     }
 
     @Nullable
-    @Deprecated
+    @Deprecated(forRemoval = true)
     // this will be replaced with resource key matching in the next updates, so all these flags will disappear, too.
     private static FlagCheckRequest getNonPlayerCheckEventFor(Entity entity, BlockPos target, ResourceKey<Level> dimension) {
         FlagCheckRequest nonPlayerCheckEvent = null;
