@@ -54,8 +54,7 @@ public abstract class ServerPlayerMixin {
             // should not trigger on using the teleport command
             if (PortalTransferFlags.isPortalTransfer((ServerPlayer) player)) {
                 FlagCheckRequest checkEvent = new FlagCheckRequest(player.blockPosition(), USE_PORTAL_PLAYERS, getDimKey(player), player);
-                Events.post(checkEvent);
-                if (checkEvent.isCanceled())
+                if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent))
                     return;
                 FlagEvaluator.processCheck(checkEvent, deny -> {
                     sendFlagMsg(deny);
