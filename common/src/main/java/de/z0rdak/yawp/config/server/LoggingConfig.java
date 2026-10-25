@@ -137,21 +137,20 @@ public class LoggingConfig {
         return FLAG_RESULT_LOG.get();
     }
 
-    /*
-    public static boolean shouldLogDetailedPlayerFlags() {
-        return DETAILED_PLAYER_FLAG_LOG.get();
-    }
-    */
 
     public static boolean logCheck(FlagCheckRequest check) {
         boolean matchesFlagOrCategory = (flagMatchesCategory(check) || matchesFlag(check));
         if (matchesFlagOrCategory) {
-            LOGGING_CONFIG_LOGGER.info("[Check] {}, at {}, in '{}', Player={}, Id={}",
-                    check.getRegionFlag().name,
-                    AreaUtil.blockPosStr(check.getTarget()),
-                    check.getDimension().identifier().toString(),
-                    check.getPlayer() == null ? "n/a" : check.getPlayer().getDisplayName().getString(),
-                    check.getId());
+            var targetPos = check.getTarget();
+            var playerName = check.getPlayer() == null ? "n/a" : check.getPlayer().getDisplayName().getString();
+            if (LOGGING_CONFIG_LOGGER.isInfoEnabled()) {
+                LOGGING_CONFIG_LOGGER.info("[Check] flag='{}' pos='{}' level='{}' player='{}' checkId='{}'",
+                        check.getRegionFlag().name,
+                        AreaUtil.blockPosStr(targetPos),
+                        check.getDimension().identifier(),
+                        playerName,
+                        check.getId());
+            }
         }
         return true;
     }
@@ -159,29 +158,39 @@ public class LoggingConfig {
     public static FlagCheckResult logResult(FlagCheckResult result) {
         FlagCheckRequest check = result.getFlagCheck();
         boolean matchesFlagOrCategory = (flagMatchesCategory(check) || matchesFlag(check));
+        if (!LOGGING_CONFIG_LOGGER.isInfoEnabled())
+            return result;
         if (matchesFlagOrCategory && matchesResult(result)) {
-            if (result.getResponsible() == null || result.getFlag() == null) {
-                // semantically equals to result.getFlagState() == FlagState.UNDEFINED
-                if (shouldLogEmptyResults()) {
-                    LOGGING_CONFIG_LOGGER.info("[Result] No region for check with Id={}", check.getId());
-                }
-            } else {
-                if (result.getResponsible().getRegionType() != RegionType.LOCAL) {
-                    IFlag flag = result.getFlag();
-                    LOGGING_CONFIG_LOGGER.info("[Result] {} ({}), Region='{}', Id={}",
+            if (result.getFlagState() == FlagState.UNDEFINED) {
+                RegionFlag regionFlag = check.getRegionFlag();
+                LOGGING_CONFIG_LOGGER.info("[Check] Checked for flag '{}' at='{}' in='{}' with no result.",
+                        regionFlag.name,
+                        check.getTarget(),
+                        check.getDimension().identifier());
+            }
+            Objects.requireNonNull(result.getResponsible());
+            Objects.requireNonNull(result.getFlag());
+            IFlag flag = result.getFlag();
+            switch (result.getResponsible().getRegionType()) {
+                case LOCAL ->
+                    LOGGING_CONFIG_LOGGER.info("[Result] flag='{}' state='{}' region='{}' level='{}' checkId='{}'",
+                            flag.getName(),
+                            result.getFlagState().name,
+                            result.getResponsible().getName(),
+                            result.getResponsible().getDim().identifier(),
+                            result.getFlagCheck().getId());
+                case GLOBAL ->
+                    LOGGING_CONFIG_LOGGER.info("[Result] flag='{}' state='{}' region='{}' checkId='{}'",
                             flag.getName(),
                             result.getFlagState().name,
                             result.getResponsible().getName(),
                             result.getFlagCheck().getId());
-                } else {
-                    IFlag flag = result.getFlag();
-                    LOGGING_CONFIG_LOGGER.info("[Result] {} ({}), Region='{}', in '{}', Id={}",
+                case DIMENSION ->
+                    LOGGING_CONFIG_LOGGER.info("[Result] flag='{}' state='{}' level='{}' checkId='{}'",
                             flag.getName(),
                             result.getFlagState().name,
                             result.getResponsible().getName(),
-                            result.getResponsible().getDim().identifier().toString(),
                             result.getFlagCheck().getId());
-                }
             }
         }
         return result;
