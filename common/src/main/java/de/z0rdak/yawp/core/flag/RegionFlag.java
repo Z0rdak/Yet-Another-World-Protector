@@ -3,6 +3,7 @@ package de.z0rdak.yawp.core.flag;
 import de.z0rdak.yawp.api.FlagTagRegister;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public enum RegionFlag {
@@ -164,8 +165,14 @@ public enum RegionFlag {
                 .collect(Collectors.toSet());
     }
 
+    public static Set<RegionFlag> getFlagsMatching(Predicate<RegionFlag> categoryFilter) {
+        return getFlags().stream()
+                .filter(categoryFilter)
+                .collect(Collectors.toSet());
+    }
+
     public static boolean hasPlayerCategory(IFlag flag) {
-        Set<RegionFlag> flagsMatchingCategory = getFlagsMatchingCategory(FlagTagRegister.PLAYER);
+        Set<RegionFlag> flagsMatchingCategory = getFlagsMatching(RegionFlag::isPlayerFlag);
         RegionFlag regionFlag = RegionFlag.fromId(flag.getName());
         return flagsMatchingCategory.contains(regionFlag);
     }
