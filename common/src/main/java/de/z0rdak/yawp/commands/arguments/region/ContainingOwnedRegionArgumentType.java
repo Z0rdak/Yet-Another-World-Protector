@@ -34,6 +34,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
@@ -140,6 +141,7 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
         if (ctx.getInput().contains(AreaType.SPHERE.areaType)) {
             areaType = AreaType.SPHERE;
         }
+        Objects.requireNonNull(areaType);
         switch (areaType) {
             case CUBOID:
                 BlockPos p1 = BlockPosArgument.getSpawnablePos(ctx, POS1.toString());
@@ -147,16 +149,9 @@ public class ContainingOwnedRegionArgumentType implements ArgumentType<String> {
                 markedArea = new CuboidArea(p1, p2);
                 break;
             case SPHERE:
-                try {
-                    BlockPos centerPos = BlockPosArgument.getSpawnablePos(ctx, CENTER_POS.toString());
-                    int radius = IntegerArgumentType.getInteger(ctx, RADIUS.toString());
-                    markedArea = new SphereArea(centerPos, radius);
-
-                } catch (CommandSyntaxException cse) {
-                    BlockPos centerPos = BlockPosArgument.getSpawnablePos(ctx, CENTER_POS.toString());
-                    BlockPos radiusPos = BlockPosArgument.getSpawnablePos(ctx, RADIUS_POS.toString());
-                    markedArea = new SphereArea(centerPos, radiusPos);
-                }
+                BlockPos centerPos = BlockPosArgument.getSpawnablePos(ctx, CENTER_POS.toString());
+                int radius = IntegerArgumentType.getInteger(ctx, RADIUS.toString());
+                markedArea = new SphereArea(centerPos, radius);
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + areaType);

@@ -10,7 +10,6 @@ public enum CommandConstants {
     AREA("area"),
     POS1("pos1"),
     POS2("pos2"),
-    RADIUS_POS("radius-pos"), // TODO: REMOVE
     RADIUS("radius"),
     CENTER_POS("center-pos"),
 
