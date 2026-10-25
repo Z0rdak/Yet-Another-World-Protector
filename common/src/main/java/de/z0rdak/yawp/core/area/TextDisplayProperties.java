@@ -1,74 +1,58 @@
 package de.z0rdak.yawp.core.area;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import de.z0rdak.yawp.core.area.display.TextAlignment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.Identifier;
-
-import java.util.Locale;
-
 
 public final class TextDisplayProperties {
 
-    public static int BG_TRANSPARENT = 0x10_00_00_00;
+    public static final int BG_TRANSPARENT = 0x10_00_00_00;
+    public static final int DEFAULT_BACKGROUND = 0x1A_00_00_00;
+    public static final TextAlignment DEFAULT_ALIGNMENT = TextAlignment.CENTER;
+    public static final ChatFormatting DEFAULT_COLOR = ChatFormatting.WHITE;
+    public static final int DEFAULT_LIGHT_LEVEL = 15;
+
+    public static final Codec<TextDisplayProperties> CODEC =
+            RecordCodecBuilder.create(instance -> instance.group(
+                    Codec.STRING.fieldOf("text")
+                            .forGetter(TextDisplayProperties::getText),
+                    TextAlignment.CODEC.fieldOf("alignment")
+                            .forGetter(TextDisplayProperties::getAlignment),
+                    Codec.INT.fieldOf("backgroundColor")
+                            .forGetter(TextDisplayProperties::getBackgroundColor),
+                    TextAlignment.FORMATTING_CODEC.fieldOf("color")
+                            .forGetter(TextDisplayProperties::getColor),
+                    Codec.intRange(0, 15).fieldOf("lightLevel")
+                            .forGetter(TextDisplayProperties::getLightLevel)
+            ).apply(instance, TextDisplayProperties::new));
 
     private String text;
+    private final TextAlignment alignment;
     /**
-     * TODO: Enum?
-     * {center, left, right} are valid values
+     * Background color in ARGB format.
+     * Values with alpha below 0x14 are rendered transparent.
      */
-    private String alignment;
+    private final int backgroundColor;
     /**
-     * See: https://minecraft.wiki/w/Display#Data_values
-     *  The background color, arranged by ARGB. E.g.: 0x10_00_00_00.
-     *  Values of A < 0x14 will be rendered transparent
+     * Chat formatting used for the displayed text.
      */
-    private int backgroundColor;
+    private final ChatFormatting color;
     /**
-     * See {@link ChatFormatting} for valid values
+     * Display light level, between 0 and 15.
      */
-    private String color;
-    private int lightLevel;
+    private final int lightLevel;
 
-    public TextDisplayProperties(String text,  String alignment, int backgroundColor, String color, int lightLevel) {
+    public TextDisplayProperties(String text, TextAlignment alignment, int backgroundColor, ChatFormatting formatting, int lightLevel) {
         this.text = text;
         this.alignment = alignment;
         this.backgroundColor = backgroundColor;
-        // TODO ChatFormatting Changed in 26.2
-  //      var colorFormat = ChatFormatting.getByName(color);
-        this.color = ChatFormatting.WHITE.name().toLowerCase(Locale.ROOT);
+        this.color = formatting;
         this.lightLevel = lightLevel;
     }
 
     public TextDisplayProperties(String text) {
-        this.text = text;
-        this.alignment = "center";
-        this.backgroundColor = BG_TRANSPARENT;
-        this.color = ChatFormatting.WHITE.toString();
-        this.lightLevel = 15;
-    }
-
-    public CompoundTag serializeNBT() {
-        CompoundTag tag = new CompoundTag();
-        tag.putString("text", this.text);
-        tag.putString("alignment", this.alignment);
-        tag.putInt("backgroundColor", this.backgroundColor);
-        tag.putString("color", this.color);
-        tag.putInt("lightLevel", this.lightLevel);
-        return tag;
-    }
-
-    public static final int DEFAULT_BACKGROUND = 0x1A_00_00_00;
-
-    public void deserializeNBT(CompoundTag nbt) {
-        this.text = nbt.getString("text").get();
-        this.alignment = nbt.getString("alignment").get();
-        this.backgroundColor = nbt.getInt("backgroundColor").get();
-      //  var colorFormat = ChatFormatting.getByName(color);
-        this.color =  ChatFormatting.WHITE.name().toLowerCase(Locale.ROOT);
-        this.lightLevel = nbt.getInt("lightLevel").get();
+        this(text, DEFAULT_ALIGNMENT, BG_TRANSPARENT, DEFAULT_COLOR, DEFAULT_LIGHT_LEVEL);
     }
 
     public String getText() {
@@ -79,7 +63,7 @@ public final class TextDisplayProperties {
         this.text = text;
     }
 
-    public String getAlignment() {
+    public TextAlignment getAlignment() {
         return alignment;
     }
 
@@ -87,7 +71,7 @@ public final class TextDisplayProperties {
         return backgroundColor;
     }
 
-    public String getColor() {
+    public ChatFormatting getColor() {
         return color;
     }
 
