@@ -3,16 +3,9 @@ package de.z0rdak.yawp.core.area;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import de.z0rdak.yawp.constants.Constants;
-import de.z0rdak.yawp.constants.Constants;
-import de.z0rdak.yawp.constants.serialization.RegionNbtKeys;
 import de.z0rdak.yawp.util.AreaUtil;
-import de.z0rdak.yawp.util.NbtCompatHelper;
-import it.unimi.dsi.fastutil.Hash;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -29,7 +22,7 @@ import static de.z0rdak.yawp.util.AreaUtil.distanceManhattan;
  */
 public class CuboidArea extends MarkedArea {
 
-    public static MapCodec<CuboidArea> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+    public static final MapCodec<CuboidArea> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             BlockPos.CODEC.fieldOf("p1")
                     .forGetter(CuboidArea::getAreaP1),
             BlockPos.CODEC.fieldOf("p2")
@@ -134,8 +127,6 @@ public class CuboidArea extends MarkedArea {
 
     @Override
     public boolean contains(BlockPos pos) {
-        // INFO: this.area.contains(x,y,z); does not work, because the max checks are exclusive by default.
-        // TODO: Maybe replace with net.minecraft.util.math.MutableBoundingBox::intersectsWith which has inclusive checks
         return pos.getX() >= area.minX() && pos.getX() <= area.maxX()
                 && pos.getY() >= this.area.minY() && pos.getY() <= this.area.maxY()
                 && pos.getZ() >= this.area.minZ() && pos.getZ() <= this.area.maxZ();

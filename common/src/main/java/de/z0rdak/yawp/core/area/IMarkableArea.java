@@ -2,7 +2,6 @@ package de.z0rdak.yawp.core.area;
 
 import net.minecraft.core.BlockPos;
 
-import java.util.List;
 import java.util.Set;
 
 /**

@@ -84,28 +84,6 @@ public final class LocalRegions {
         return markableRegion.getPriority();
     }
 
-    // TODO: FIXME
-    // TODO: recursive check for ensuring region priorities
-    @Deprecated
-    public static void rectifyRegionPriorities(IMarkableRegion parent, int defaultPriority) {
-        List<IMarkableRegion> children = getIntersectingRegionsFor(parent);
-        if (children.isEmpty()) {
-            return;
-        }
-        for (IMarkableRegion child : children) {
-
-            rectifyRegionPriorities(child, parent.getPriority());
-        }
-        List<IMarkableRegion> intersectingRegions = getIntersectingRegionsFor(parent);
-        boolean hasRegionWithSamePriority = intersectingRegions.stream().anyMatch(r -> r.getPriority() == parent.getPriority());
-        if (hasRegionWithSamePriority) {
-            int minPriority = intersectingRegions.stream().mapToInt(IMarkableRegion::getPriority).min().getAsInt();
-            parent.setPriority(minPriority - 1);
-        } else {
-            parent.setPriority(defaultPriority);
-        }
-    }
-
     public static int ensureLowerRegionPriorityFor(IMarkableRegion markableRegion, int defaultPriority) {
         List<IMarkableRegion> intersectingRegions = getIntersectingRegionsFor(markableRegion);
         boolean hasRegionWithSamePriority = intersectingRegions.stream().anyMatch(r -> r.getPriority() == markableRegion.getPriority());

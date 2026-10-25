@@ -132,7 +132,7 @@ public class ResponsibleFlagPagination extends BasePaginationMessage<FlagCorrela
         flagsByState.sort(Comparator.comparing(flagCorrelation -> flagCorrelation.flag().getName()));
         return flagsByState.stream()
                 .map(flagCorrelation -> buildRemoveFlagEntry(flagCorrelation.region(), flagCorrelation.flag(), colorForState(state)))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public static Map<FlagState, List<IFlag>> sortFlagsByState(IProtectedRegion region) {
@@ -157,15 +157,15 @@ public class ResponsibleFlagPagination extends BasePaginationMessage<FlagCorrela
                 .filter(c -> c.flag() != null)
                 .sorted(Comparator.comparing(c -> c.flag().getState()))
                 .sorted(Comparator.comparing(c -> c.flag().getName()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private static List<FlagCorrelation> getCorrelationByState(Map<String, FlagCorrelation> flagMap, FlagState state) {
         return flagMap.values().stream()
-                .filter(c -> c.flag() != null) // TODO: ??
+                .filter(c -> c.flag() != null)
                 .filter(c -> c.flag().getState() == state)
                 .sorted(Comparator.comparing(c -> c.flag().getName()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
