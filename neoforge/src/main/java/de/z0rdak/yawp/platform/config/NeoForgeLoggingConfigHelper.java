@@ -43,9 +43,4 @@ public class NeoForgeLoggingConfigHelper implements ILoggingConfigHelper {
     public boolean shouldLogFlagCheckResults() {
         return LoggingConfig.shouldLogFlagCheckResults();
     }
-
-    @Override
-    public boolean shouldLogEmptyResults() {
-        return LoggingConfig.shouldLogEmptyResults();
-    }
 }

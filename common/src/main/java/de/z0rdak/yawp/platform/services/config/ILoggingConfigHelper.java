@@ -13,5 +13,4 @@ public interface ILoggingConfigHelper {
     FlagCheckResult logResult(FlagCheckResult result);
     boolean shouldLogFlagChecks();
     boolean shouldLogFlagCheckResults();
-    boolean shouldLogEmptyResults();
 }

@@ -19,13 +19,14 @@ import static de.z0rdak.yawp.constants.Constants.MOD_ID;
 
 public class LoggingConfig {
 
+    private LoggingConfig() { }
+
     public static final ModConfigSpec CONFIG_SPEC;
     public static final String CONFIG_NAME = Constants.MOD_ID + "-logging.toml";
     public static final Logger LOGGING_CONFIG_LOGGER = LogManager.getLogger(MOD_ID.toUpperCase() + "-Logging-Config");
 
     private static final ModConfigSpec.ConfigValue<Boolean> FLAG_CHECK_LOG;
     private static final ModConfigSpec.ConfigValue<Boolean> FLAG_RESULT_LOG;
-    private static final ModConfigSpec.ConfigValue<Boolean> LOG_EMPTY_RESULTS;
     private static final ModConfigSpec.ConfigValue<Boolean> LOG_EVENTS_DETAIL;
     // private static final ModConfigSpec.ConfigValue<Boolean> DETAILED_PLAYER_FLAG_LOG;
     private static final ModConfigSpec.ConfigValue<List<? extends String>> LOG_RESULT_VALUES;
@@ -42,9 +43,6 @@ public class LoggingConfig {
 
         FLAG_RESULT_LOG = BUILDER.comment("Enable logging of flag check results.")
                 .define("log_flag_result", false);
-
-        LOG_EMPTY_RESULTS = BUILDER.comment("Enable logging of empty (without responsible region) flag check results.")
-                .define("log_empty_results", false);
 
         LOG_RESULT_VALUES = BUILDER.comment("List of flags result states which shall be logged. By default only denied results will be logged.\n Valid FlagStates are: allowed and denied")
                 .defineListAllowEmpty(List.of("log_result_values"), () -> Collections.singletonList(FlagState.DENIED.name), null, LoggingConfig::isValidFlagState);
@@ -137,10 +135,6 @@ public class LoggingConfig {
 
     public static boolean shouldLogFlagCheckResults() {
         return FLAG_RESULT_LOG.get();
-    }
-
-    public static boolean shouldLogEmptyResults() {
-        return LOG_EMPTY_RESULTS.get();
     }
 
     /*

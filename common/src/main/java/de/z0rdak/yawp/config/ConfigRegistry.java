@@ -1,16 +1,18 @@
 package de.z0rdak.yawp.config;
 
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
+import de.z0rdak.yawp.api.events.flag.FlagCheckResult;
 import de.z0rdak.yawp.api.events.flag.FlagEvents;
 import de.z0rdak.yawp.config.server.*;
 import de.z0rdak.yawp.handler.YawpEventHandler;
 import de.z0rdak.yawp.platform.Services;
+import de.z0rdak.yawp.platform.services.event.Events;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import static de.z0rdak.yawp.config.server.FeatureConfig.FEATURE_CONFIG_LOGGER;
 import static de.z0rdak.yawp.config.server.FlagConfig.FLAG_CONFIG_LOGGER;
-import static de.z0rdak.yawp.config.server.LoggingConfig.LOGGING_CONFIG_LOGGER;
-import static de.z0rdak.yawp.config.server.LoggingConfig.shouldLogEvents;
+import static de.z0rdak.yawp.config.server.LoggingConfig.*;
 import static de.z0rdak.yawp.config.server.PermissionConfig.PERMISSION_CONFIG_LOGGER;
 import static de.z0rdak.yawp.config.server.RegionConfig.REGION_CONFIG_LOGGER;
 import static de.z0rdak.yawp.constants.Constants.MOD_ID;
@@ -84,7 +86,6 @@ public final class ConfigRegistry {
             case LoggingConfig.CONFIG_NAME: {
                 LOGGING_CONFIG_LOGGER.info("Logging flag checks: {}", LoggingConfig.shouldLogFlagChecks());
                 LOGGING_CONFIG_LOGGER.info("Logging flag check results: {}", LoggingConfig.shouldLogFlagCheckResults());
-                LOGGING_CONFIG_LOGGER.info("Logging empty flag results: {}", LoggingConfig.shouldLogEmptyResults());
                 LOGGING_CONFIG_LOGGER.info("Logging flag categories: [{}]", String.join(",", LoggingConfig.getFlagTags()));
                 LOGGING_CONFIG_LOGGER.info("Logging flag results: [{}]", String.join(",", LoggingConfig.getResultValuesToLog()));
                 LOGGING_CONFIG_LOGGER.info("Logging flags: [{}]", String.join(",", LoggingConfig.getFlagsToLog()));
@@ -95,10 +96,10 @@ public final class ConfigRegistry {
                     YawpEventHandler.enableDetailedEventLogger();
                 }
                 if (LoggingConfig.shouldLogFlagChecks()) {
-                    FlagEvents.ON_FLAG_CHECK.register(LoggingConfig::logCheck);
+                    Events.register(FlagCheckRequest.class,LoggingConfig::logCheck);
                 }
                 if (LoggingConfig.shouldLogFlagCheckResults()) {
-                    FlagEvents.ON_FLAG_RESULT.register(LoggingConfig::logResult);
+                    Events.registerTransformer(FlagCheckResult.class, LoggingConfig::logResult);
                 }
 
                 registerHandler.run();
