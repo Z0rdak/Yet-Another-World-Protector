@@ -8,10 +8,10 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.AgeableWaterCreature;
+import net.minecraft.world.entity.animal.camel.CamelHusk;
 import net.minecraft.world.entity.animal.equine.SkeletonHorse;
 import net.minecraft.world.entity.animal.equine.ZombieHorse;
 import net.minecraft.world.entity.monster.*;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.trading.Merchant;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -33,11 +33,9 @@ public final class HandlerUtil {
     }
 
     public static boolean isAnimal(Entity entity) {
-        boolean isMonsterHorse = entity instanceof ZombieHorse || entity instanceof SkeletonHorse;
+        boolean isMonsterHorse = entity instanceof ZombieHorse || entity instanceof SkeletonHorse || entity instanceof CamelHusk;
         // Note: because monster horses are still horses and horses are animals? what the frick mojang
-        return entity instanceof Animal && !isMonsterHorse 
-                || entity instanceof AgeableWaterCreature;
-        // TODO:
+        return entity instanceof Animal && !isMonsterHorse || entity instanceof AgeableWaterCreature;
     }
 
     public static boolean isServerSide(Entity entity) {
@@ -68,14 +66,9 @@ public final class HandlerUtil {
         return entity == null || !isServerSide(entity);
     }
 
-    public static void syncPlayerInventory(Level world, Player player) {
-        // TODO:
-    }
-
     public static void updateBlockState(Level world, BlockPos pos) {
         world.updateNeighborsAt(pos, world.getBlockState(pos).getBlock());
     }
-
 
     public static Map<String, FlagCorrelation> getFlagMapRecursive(IProtectedRegion region, Map<String, FlagCorrelation> carry) {
         if (carry == null) {
