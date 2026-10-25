@@ -6,7 +6,6 @@ import de.z0rdak.yawp.api.events.flag.FlagEvents;
 import de.z0rdak.yawp.config.server.*;
 import de.z0rdak.yawp.handler.YawpEventHandler;
 import de.z0rdak.yawp.platform.Services;
-import de.z0rdak.yawp.platform.services.event.Events;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -96,10 +95,10 @@ public final class ConfigRegistry {
                     YawpEventHandler.enableDetailedEventLogger();
                 }
                 if (LoggingConfig.shouldLogFlagChecks()) {
-                    Events.register(FlagCheckRequest.class,LoggingConfig::logCheck);
+                    FlagEvents.ON_FLAG_CHECK.register(LoggingConfig::logCheck);
                 }
                 if (LoggingConfig.shouldLogFlagCheckResults()) {
-                    Events.registerTransformer(FlagCheckResult.class, LoggingConfig::logResult);
+                    FlagEvents.ON_FLAG_RESULT.register(LoggingConfig::logResult);
                 }
 
                 registerHandler.run();

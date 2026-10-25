@@ -5,7 +5,6 @@ import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.data.region.RegionDataManager;
 import de.z0rdak.yawp.core.flag.PortalTransferFlags;
 import de.z0rdak.yawp.platform.Services;
-import de.z0rdak.yawp.platform.services.event.Events;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;

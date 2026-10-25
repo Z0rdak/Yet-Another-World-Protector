@@ -9,8 +9,6 @@ public interface FlagEventDispatcher {
     boolean post(FlagCheckRequest event);
 
     FlagCheckResult post(FlagCheckResult result);
-
-    FlagEvent.UpdateFlagMessage post(FlagEvent.UpdateFlagMessage event);
 }
 
 
