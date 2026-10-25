@@ -1,4 +1,4 @@
-# [0.6.4-beta1] - unreleased
+# [0.6.4-beta1] - 2026-10-25
 
 ## Changed
 
@@ -8,7 +8,7 @@
 
 ## Fixed
 
-- [] Fix `log_empty_results` in yawp-logging.toml not working as intended since `log_result_values` did not accept all flag states. Fixes #194
+- Fix `log_empty_results` in yawp-logging.toml not working as intended since `log_result_values` did not accept all flag states. Fixes #194
 - (Fabric) Fix wrong event check preventing regions from being deleted
 - (Fabric) Fix issue with inventory desync when placing blocks with `place_blocks` denied flag. Fixes #202
 - Fix missing fallback I18n value for default flag messages. Fixes #206
