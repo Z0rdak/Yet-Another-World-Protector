@@ -207,7 +207,7 @@ public final class YawpEventHandler {
 
     private static boolean logRenameRegion(RegionEvent.Rename rename) {
         if (rename.isCanceled()) {
-            Constants.LOGGER.debug("onRenameRegion was canceled.");
+            Constants.LOGGER.info("onRenameRegion was canceled.");
             return false;
         }
         ServerPlayer player = rename.getPlayer();
@@ -216,9 +216,9 @@ public final class YawpEventHandler {
         var newName = region.getName();
         var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().identifier() + ")" : "";
         if (player == null) {
-            Constants.LOGGER.debug("Region '{}'{} was renamed to '{}'.", oldName, regionLoc, newName);
+            Constants.LOGGER.info("Region '{}'{} was renamed to '{}'.", oldName, regionLoc, newName);
         } else {
-            Constants.LOGGER.debug("Region '{}'{} was renamed to '{}' by '{}'.", oldName, regionLoc, newName, player.getScoreboardName());
+            Constants.LOGGER.info("Region '{}'{} was renamed to '{}' by '{}'.", oldName, regionLoc, newName, player.getScoreboardName());
         }
         return true;
     }
@@ -231,9 +231,9 @@ public final class YawpEventHandler {
         var flagName = updateFlagMessage.getFlag().getName();
         var newMsg = updateFlagMessage.getNewMsg();
         if (player == null) {
-            Constants.LOGGER.debug("Flag '{}' in region '{}'{} updated message to '{}'.", flagName, regionName, regionLoc, newMsg);
+            Constants.LOGGER.info("Flag '{}' in region '{}'{} updated message to '{}'.", flagName, regionName, regionLoc, newMsg);
         } else {
-            Constants.LOGGER.debug("Player '{}' updated flag '{}' in region '{}'{} message to '{}'.",
+            Constants.LOGGER.info("Player '{}' updated flag '{}' in region '{}'{} message to '{}'.",
                     player.getScoreboardName(), flagName, regionName, regionLoc, newMsg);
         }
         return updateFlagMessage;
@@ -241,7 +241,7 @@ public final class YawpEventHandler {
 
     private static boolean logRemoveFlag(FlagEvent.Remove remove) {
         if (remove.isCanceled()) {
-            Constants.LOGGER.debug("onRemoveFlag was canceled.");
+            Constants.LOGGER.info("onRemoveFlag was canceled.");
             return false;
         }
         ServerPlayer player = remove.getPlayer();
@@ -250,9 +250,9 @@ public final class YawpEventHandler {
         var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().identifier() + ")" : "";
         var flagName = remove.getFlag().getName();
         if (player == null) {
-            Constants.LOGGER.debug("Flag '{}' removed from region '{}'{}.", flagName, regionName, regionLoc);
+            Constants.LOGGER.info("Flag '{}' removed from region '{}'{}.", flagName, regionName, regionLoc);
         } else {
-            Constants.LOGGER.debug("Player '{}' removed flag '{}' from region '{}'{}.",
+            Constants.LOGGER.info("Player '{}' removed flag '{}' from region '{}'{}.",
                     player.getScoreboardName(), flagName, regionName, regionLoc);
         }
         return true;
@@ -260,7 +260,7 @@ public final class YawpEventHandler {
 
     private static boolean logAddFlag(FlagEvent.Add add) {
         if (add.isCanceled()) {
-            Constants.LOGGER.debug("onAddFlag was canceled.");
+            Constants.LOGGER.info("onAddFlag was canceled.");
             return false;
         }
         ServerPlayer player = add.getPlayer();
@@ -269,9 +269,9 @@ public final class YawpEventHandler {
         var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().identifier() + ")" : "";
         var flagName = add.getFlag().getName();
         if (player == null) {
-            Constants.LOGGER.debug("Flag '{}' added to region '{}'{}.", flagName, regionName, regionLoc);
+            Constants.LOGGER.info("Flag '{}' added to region '{}'{}.", flagName, regionName, regionLoc);
         } else {
-            Constants.LOGGER.debug("Player '{}' added flag '{}' to region '{}'{}.",
+            Constants.LOGGER.info("Player '{}' added flag '{}' to region '{}'{}.",
                     player.getScoreboardName(), flagName, regionName, regionLoc);
         }
         return true;
@@ -279,34 +279,34 @@ public final class YawpEventHandler {
 
     private static boolean logEnterRegion(RegionEvent.PlayerEnter onEnter) {
         if (onEnter.isCanceled()) {
-            Constants.LOGGER.debug("onEnterRegion was canceled.");
+            Constants.LOGGER.info("onEnterRegion was canceled.");
             return false;
         }
         var player = onEnter.getPlayer();
         var region = onEnter.getRegion();
         var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().identifier() + ")" : "";
-        Constants.LOGGER.debug("Player {} entered region '{}'{} at {}",
+        Constants.LOGGER.info("Player {} entered region '{}'{} at {}",
                 player.getScoreboardName(), region.getName(), regionLoc, ChatComponentBuilder.tinyBlockPos(player.blockPosition()));
         return true;
     }
 
     private static boolean logLeaveRegion(RegionEvent.PlayerLeave onLeave) {
         if (onLeave.isCanceled()) {
-            Constants.LOGGER.debug("onLeaveRegion was canceled.");
+            Constants.LOGGER.info("onLeaveRegion was canceled.");
             return false;
         }
         var player = onLeave.getPlayer();
         var region = onLeave.getRegion();
         var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().identifier() + ")" : "";
 
-        Constants.LOGGER.debug("Player {} left region '{}'{} at {}",
+        Constants.LOGGER.info("Player {} left region '{}'{} at {}",
                 player.getScoreboardName(), region.getName(), regionLoc, ChatComponentBuilder.tinyBlockPos(player.blockPosition()));
         return true;
     }
 
     private static boolean logCreateRegion(RegionEvent.Create create) {
         if (create.isCanceled()) {
-            Constants.LOGGER.debug("Region creation was canceled.");
+            Constants.LOGGER.info("Region creation was canceled.");
             return false;
         }
         ServerPlayer player = create.getPlayer();
@@ -314,16 +314,16 @@ public final class YawpEventHandler {
         var regionName = region.getName();
         var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().identifier() + ")" : "";
         if (player == null) {
-            Constants.LOGGER.debug("Region '{}'{} was created.", regionName, regionLoc);
+            Constants.LOGGER.info("Region '{}'{} was created.", regionName, regionLoc);
         } else {
-            Constants.LOGGER.debug("Region '{}'{} was created by '{}'.", regionName, regionLoc, player.getScoreboardName());
+            Constants.LOGGER.info("Region '{}'{} was created by '{}'.", regionName, regionLoc, player.getScoreboardName());
         }
         return true;
     }
 
     private static boolean logRemoveRegion(RegionEvent.Remove remove) {
         if (remove.isCanceled()) {
-            Constants.LOGGER.debug("onRemoveRegion was canceled.");
+            Constants.LOGGER.info("onRemoveRegion was canceled.");
             return false;
         }
         ServerPlayer player = remove.getPlayer();
@@ -331,16 +331,16 @@ public final class YawpEventHandler {
         var regionName = region.getName();
         var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().identifier() + ")" : "";
         if (player == null) {
-            Constants.LOGGER.debug("Region '{}'{} was deleted.", regionName, regionLoc);
+            Constants.LOGGER.info("Region '{}'{} was deleted.", regionName, regionLoc);
         } else {
-            Constants.LOGGER.debug("Region '{}'{} was deleted by '{}'.", regionName, regionLoc, player.getScoreboardName());
+            Constants.LOGGER.info("Region '{}'{} was deleted by '{}'.", regionName, regionLoc, player.getScoreboardName());
         }
         return true;
     }
 
     private static boolean logUpdateRegion(RegionEvent.UpdateArea update) {
         if (update.isCanceled()) {
-            Constants.LOGGER.debug("onUpdateRegion was canceled.");
+            Constants.LOGGER.info("onUpdateRegion was canceled.");
             return false;
         }
         ServerPlayer player = update.getPlayer();
@@ -349,9 +349,9 @@ public final class YawpEventHandler {
         var regionLoc = region.getRegionType() == RegionType.LOCAL ? " (" + region.getDim().identifier() + ")" : "";
 
         if (player == null) {
-            Constants.LOGGER.debug("Region area of '{}'{} was updated.", regionName, regionLoc);
+            Constants.LOGGER.info("Region area of '{}'{} was updated.", regionName, regionLoc);
         } else {
-            Constants.LOGGER.debug("Region area of '{}'{} was updated by '{}'.", regionName, regionLoc, player.getScoreboardName());
+            Constants.LOGGER.info("Region area of '{}'{} was updated by '{}'.", regionName, regionLoc, player.getScoreboardName());
         }
         return true;
     }
