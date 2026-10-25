@@ -1,13 +1,13 @@
 package de.z0rdak.yawp.util.text.messages;
 
 import de.z0rdak.yawp.api.events.flag.FlagCheckResult;
-import de.z0rdak.yawp.core.flag.RegionFlag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static de.z0rdak.yawp.util.ChatComponentBuilder.tinyBlockPos;
 
@@ -36,6 +36,8 @@ public class FlagMessageBuilder {
                 TEAM_TEMPLATE, 9);
     }
 
+    private FlagMessageBuilder() {}
+
     /**
      * Returns a map with default substitutes for the given flag check result. <br>
      * The substitutes are built from the flag, responsible region, position and player in the result. <br>
@@ -57,33 +59,51 @@ public class FlagMessageBuilder {
     }
 
     /**
-     * Builds a flag message from the given flag check result and substitutes. <br>
-     * The flag message is built from the flag message template of the flag in the result. <br>
-     * The matches in the flag message template are replaced with the substitutes. <br>
-     * The flag message is then returned as a {@link MutableComponent}. <br>
-     * Contract: Flag must not be null. Responsible region must not be null. <br>
+     * Builds a flag denial message from the given flag check result and substitutes.
+     * <p>
+     * The message is selected according to the following priority:
+     * <ol>
+     *     <li>If the flag has a custom message (not default), its configured message key is used.</li>
+     *     <li>If the flag message is default, the translation key associated with the flag itself is used.</li>
+     *     <li>If the selected translation key is missing on the client, the default translation key for the responsible region type is used.</li>
+     *     <li>If the region-type default translation key is also missing, a hardcoded fallback message is displayed.</li>
+     * </ol>
+     * <p>
+     * Translation keys are resolved on the client using the client's language resources. The server cannot guarantee that a
+     * translation key exists on the client.
+     * <p>
+     * Default substitutes are generated from the flag check result. Additional substitutes provided by the caller override
+     * the defaults when keys overlap. These substitutes are applied to the selected message and its fallbacks.
+     * <p>
+     * Contract: The flag and responsible region in the result must not be null.
      *
      * @param result      the flag check result to build the message for
-     * @param substitutes the substitutes to replace the matches in the flag message template with
-     * @return the flag message for the given flag check result and substitutes
+     * @param substitutes optional additional substitutes for the message
+     * @return the flag denial message as a {@link MutableComponent}
      */
     public static MutableComponent buildFrom(FlagCheckResult result, @Nullable Map<String, String> substitutes) {
+        Objects.requireNonNull(result.getResponsible());
+        Objects.requireNonNull(result.getFlag());
         Map<String, String> msgSubstitutes = FlagMessageBuilder.defaultSubstitutesFor(result);
         if (substitutes != null) {
             msgSubstitutes.putAll(substitutes);
         }
         var regionType = result.getResponsible().getRegionType();
-        var key = result.getFlag().getFlagMsg().isDefault()
-                ? "flag.msg.deny." + regionType.type + ".default"
-                : result.getFlag().getFlagMsg().msg();
-         String fallback = switch (regionType) {
-             case GLOBAL ->  "This action is globally §cdenied§r by the §b%1$s§r flag!";
-             case DIMENSION -> "This action is §cdenied§r in this by the §b%1$s§r flag!";
-             case LOCAL -> "[%3$s]: The §b%1$s§r flag §cdenies§r this action in this area!";
-             case TEMPLATE -> "flag.msg.deny." + regionType.type + ".default";
-         };
-        var args = populateArgs(msgSubstitutes);
-        return Component.translatableWithFallback(key, fallback, args);
+        final String defaultRegionTypeFlagKey = "flag.msg.deny." + regionType.type + ".default";
+        final String playerFlagKey = "flag.msg.deny." + result.getFlag().getName();
+        final String flagMessage = result.getFlag().getFlagMsg().msg();
+        final String i18nFlagKey = result.getFlag().getFlagMsg().isDefault()
+                ? playerFlagKey
+                : flagMessage;
+        final String fallback = switch (regionType) {
+            case GLOBAL -> "This action is globally §cdenied§r by the §b%1$s§r flag!";
+            case DIMENSION -> "This action is §cdenied§r in this dimension by the §b%1$s§r flag!";
+            case LOCAL -> "[%3$s]: The §b%1$s§r flag §cdenies§r this action in this area!";
+            default -> "[%3$s]: The §b%1$s§r flag §cdenies§r this action here!";
+        };
+        Object[] args = populateArgs(msgSubstitutes);
+        var fallbackKeyAndMsg = Component.translatableWithFallback(defaultRegionTypeFlagKey, fallback, args);
+        return Component.translatableWithFallback(i18nFlagKey, fallbackKeyAndMsg.getString(), args);
     }
 
     private static Object[] populateArgs(Map<String, String> substitutes) {
