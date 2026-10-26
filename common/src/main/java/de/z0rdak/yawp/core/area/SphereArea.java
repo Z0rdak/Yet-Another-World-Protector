@@ -45,7 +45,7 @@ public class SphereArea extends CenteredArea {
     }
 
     public SphereArea(BlockPos middlePos, int radius) {
-        this(middlePos, new BlockPos(middlePos).offset(0, radius, 0));
+        this(middlePos, middlePos.offset(0, radius, 0));
     }
 
     public static SphereArea expand(SphereArea area, int expansion) {
@@ -71,7 +71,7 @@ public class SphereArea extends CenteredArea {
     @Override
     public Set<BlockPos> getHull() {
         BlockPos p1 = this.center.offset(-this.radius, -this.radius, -this.radius);
-        BlockPos p2 = new BlockPos(this.center).offset(this.radius, this.radius, this.radius);
+        BlockPos p2 = this.center.offset(this.radius, this.radius, this.radius);
         BoundingBox cube = BoundingBox.fromCorners(p1, p2);
         Set<BlockPos> cubeBlocks = AreaUtil.blocksIn(cube);
         return cubeBlocks.stream().filter(this::isHullBlock).collect(Collectors.toSet());
