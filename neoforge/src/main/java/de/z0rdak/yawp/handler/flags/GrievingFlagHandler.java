@@ -13,7 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.Creeper;
-import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Enderman;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -177,7 +177,7 @@ public class GrievingFlagHandler {
             });
             if (flagState == FlagState.DENIED)
                 return;
-            if (event.getEntity() instanceof EnderMan) {
+            if (event.getEntity() instanceof Enderman) {
                 checkEvent = new FlagCheckRequest(event.getEntity().blockPosition(), RegionFlag.ENDERMAN_GRIEFING, getDimKey(event.getEntity()));
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
