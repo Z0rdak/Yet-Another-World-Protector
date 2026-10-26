@@ -4,6 +4,7 @@ import de.z0rdak.yawp.api.FlagEvaluator;
 import de.z0rdak.yawp.api.MessageSender;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.config.server.FlagConfig;
+import de.z0rdak.yawp.constants.Constants;
 import de.z0rdak.yawp.core.flag.FlagState;
 import de.z0rdak.yawp.platform.Services;
 import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
@@ -11,12 +12,17 @@ import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.fabricmc.fabric.api.item.v1.BlockTransformerEvents;
+import net.fabricmc.fabric.api.item.v1.ResourceSource;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.BlockTransformer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -39,6 +45,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Set;
 
 import static de.z0rdak.yawp.core.flag.RegionFlag.*;
@@ -64,8 +71,19 @@ public final class PlayerFlagHandler {
         UseBlockCallback.EVENT.register(PlayerFlagHandler::onUseBlock);
         UseEntityCallback.EVENT.register(PlayerFlagHandler::onUseEntity);
 
+        BlockTransformerEvents.MODIFY.register(PlayerFlagHandler::onToolSecondary);
+
         PlayerBlockBreakEvents.BEFORE.register(PlayerFlagHandler::onAttemptBreakBlock);
         PlayerBlockBreakEvents.CANCELED.register(PlayerFlagHandler::onBreakBlockCanceled);
+    }
+
+    private static void onToolSecondary(
+            ResourceKey<BlockTransformer> btKey,
+            List<BlockTransformer.BlockTransformData> blockTransformData,
+            ResourceSource resourceSource,
+            RegistryOps.RegistryInfoLookup registryInfoLookup) {
+        // TODO: implement flag tool-secondary and it sub flags
+        Constants.LOGGER.info(resourceSource.name());
     }
 
     /**

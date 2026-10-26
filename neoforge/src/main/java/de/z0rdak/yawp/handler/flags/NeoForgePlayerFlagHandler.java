@@ -84,6 +84,11 @@ public final class NeoForgePlayerFlagHandler {
     }
 
     @SubscribeEvent
+    public static void onToolSecondary(BlockEvent.BlockToolModificationEvent event) {
+        // TODO: implement flag tool-secondary and its sub-flags
+    }
+
+    @SubscribeEvent
     public static void onElytraFlying(PlayerTickEvent.Post event) {
         if (isServerSide(event.getEntity())) {
             Player player = event.getEntity();
