@@ -4,7 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.exceptions.MinecraftClientException;
 import com.mojang.authlib.exceptions.MinecraftClientHttpException;
 import com.mojang.authlib.minecraft.client.ObjectMapper;
-import com.mojang.authlib.yggdrasil.response.ErrorResponse;
+import com.mojang.authlib.services.response.ErrorResponse;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.players.ProfileResolver;
@@ -50,7 +50,7 @@ public class MojangApiHelper {
     }
 
     /**
-     * Referenced: {@link com.mojang.authlib.minecraft.client.MinecraftClient#readInputStream(URL, Class, HttpURLConnection)}
+     * Referenced: {@link com.mojang.authlib.minecraft.client.MinecraftClient#readServiceResponse(URL, Class, HttpURLConnection, String)}
      */
     private static GameProfile fetchGameProfileInfo(String uri) {
         try {
