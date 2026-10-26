@@ -13,17 +13,7 @@ public class FabricConfigHelper implements IConfigHelper {
     
     @Override
     public void registerServerConfig(ModConfigSpec spec, String configName) {
-        registerModConfig(spec, ModConfig.Type.SERVER, configName);
-    }
-
-    @Override
-    public void registerClientConfig(ModConfigSpec spec, String configName) {
-        registerModConfig(spec, ModConfig.Type.CLIENT, configName);
-    }
-
-    @Override
-    public void registerCommonConfig(ModConfigSpec spec, String configName) {
-        registerModConfig(spec, ModConfig.Type.COMMON, configName);
+        registerModConfig(spec, ModConfig.Type.STARTUP, configName);
     }
     
     private void registerModConfig(ModConfigSpec spec, ModConfig.Type type, String configName) {

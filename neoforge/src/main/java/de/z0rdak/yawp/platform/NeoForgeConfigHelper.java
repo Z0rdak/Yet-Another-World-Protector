@@ -22,20 +22,10 @@ public class NeoForgeConfigHelper implements IConfigHelper {
     
     @Override
     public void registerServerConfig(ModConfigSpec spec, String configName) {
-        registerModConfig(spec, ModConfig.Type.SERVER, configName);
+        registerModConfig(spec, ModConfig.Type.STARTUP, configName);
     }
 
-    @Override
-    public void registerClientConfig(ModConfigSpec spec, String configName) {
-        registerModConfig(spec, ModConfig.Type.CLIENT, configName);
-    }
-
-    @Override
-    public void registerCommonConfig(ModConfigSpec spec, String configName) {
-        registerModConfig(spec, ModConfig.Type.COMMON, configName);
-    }
-    
-    private void registerModConfig(ModConfigSpec spec, ModConfig.Type type, String configName) {
+    public void registerModConfig(ModConfigSpec spec, ModConfig.Type type, String configName) {
         modContainer.registerConfig(type, spec, configName);
     }
 
