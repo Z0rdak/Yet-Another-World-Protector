@@ -6,10 +6,7 @@
   "compatibilityLevel": "JAVA_25",
   "mixins": [
     "TntBlockMixin",
-    "flag.player.AxeItemMixin",
     "flag.player.BucketItemMixin",
-    "flag.player.HoeItemMixin",
-    "flag.player.ShovelItemMixin"
   ],
   "client": [
   ],

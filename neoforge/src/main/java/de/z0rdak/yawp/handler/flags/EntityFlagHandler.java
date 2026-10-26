@@ -17,7 +17,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.animal.golem.SnowGolem;
 import net.minecraft.world.entity.animal.equine.TraderLlama;
-import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Enderman;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.monster.cubemob.Slime;
 import net.minecraft.world.entity.npc.villager.Villager;
@@ -46,7 +46,7 @@ public class EntityFlagHandler {
             ResourceKey<Level> dim = HandlerUtil.getDimKey(event.getEntity());
             // handle enderman teleportation
             BlockPos target = new BlockPos((int) event.getPrev().x, (int) event.getPrev().y, (int) event.getPrev().z);
-            if (event.getEntityLiving() instanceof EnderMan) {
+            if (event.getEntityLiving() instanceof Enderman) {
                 FlagCheckRequest checkEvent = new FlagCheckRequest(target, RegionFlag.ENDERMAN_TELEPORT_FROM_REGION, dim);
                 if (Services.FLAG_EVENT_DISPATCHER.post(checkEvent)) {
                     return;
