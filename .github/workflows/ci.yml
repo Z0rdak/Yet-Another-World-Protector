@@ -1,0 +1,43 @@
+name: PR CI
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  game-test:
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { loader: fabric,   task: fabric:runGameTest, logs_dir: fabric/build/run/gameTest/logs }
+          - { loader: neoforge, task: neoforge:runGameTestServer, logs_dir: neoforge/runs/gametest/logs }
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
+        with:
+          distribution: 'temurin'
+          java-version: 25
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Run ${{matrix.loader}} game test
+        run: ./gradlew ${{matrix.task }}
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{matrix.loader}}-game-test-results
+          path: ${{matrix.logs_dir}}

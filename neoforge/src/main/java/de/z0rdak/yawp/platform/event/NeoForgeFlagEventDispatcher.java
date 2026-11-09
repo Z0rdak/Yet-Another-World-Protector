@@ -3,6 +3,7 @@ package de.z0rdak.yawp.platform.event;
 import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
 import de.z0rdak.yawp.api.events.flag.FlagCheckResult;
 import de.z0rdak.yawp.api.events.flag.FlagEvent;
+import de.z0rdak.yawp.api.events.flag.FlagEvents;
 import de.z0rdak.yawp.platform.services.event.FlagEventDispatcher;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -33,6 +34,7 @@ public final class NeoForgeFlagEventDispatcher implements FlagEventDispatcher {
     public boolean post(FlagCheckRequest event) {
         var forgeFlagCheck = new NeoForgeFlagCheckRequest(event);
         NeoForge.EVENT_BUS.post(forgeFlagCheck);
+        FlagEvents.ON_FLAG_CHECK.invoke(cb -> cb.checkFlag(NeoForgeFlagCheckRequest.asNonEvent(forgeFlagCheck)));
         return forgeFlagCheck.isCanceled() || event.isCanceled();
     }
 
@@ -40,6 +42,7 @@ public final class NeoForgeFlagEventDispatcher implements FlagEventDispatcher {
     public FlagCheckResult post(FlagCheckResult result) {
         var forgeFlagResult = NeoForgeFlagCheckResult.asEvent(result);
         NeoForge.EVENT_BUS.post(forgeFlagResult);
+        FlagEvents.ON_FLAG_RESULT.invoke(cb -> cb.getResult(NeoForgeFlagCheckResult.asNonEvent(forgeFlagResult)));
         return NeoForgeFlagCheckResult.asNonEvent(forgeFlagResult);
     }
 }
