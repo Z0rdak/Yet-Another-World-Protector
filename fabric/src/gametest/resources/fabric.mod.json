@@ -1,0 +1,15 @@
+{
+    "schemaVersion": 1,
+    "id": "yawp_gametest",
+    "version": "1.0.0",
+    "name": "YAWP Game Tests",
+    "environment": "*",
+    "entrypoints": {
+        "fabric-gametest": [
+            "de.z0rdak.yawp.gametest.FabricGameTests"
+        ]
+    },
+    "depends": {
+        "yawp": "*"
+    }
+}

@@ -1,7 +1,10 @@
 package de.z0rdak.yawp.platform.event;
 
 import de.z0rdak.yawp.api.events.Cancelable;
-import de.z0rdak.yawp.api.events.flag.*;
+import de.z0rdak.yawp.api.events.flag.FlagCheckRequest;
+import de.z0rdak.yawp.api.events.flag.FlagCheckResult;
+import de.z0rdak.yawp.api.events.flag.FlagEvent;
+import de.z0rdak.yawp.api.events.flag.FlagEvents;
 import de.z0rdak.yawp.platform.services.event.FlagEventDispatcher;
 
 /**
@@ -29,11 +32,15 @@ public final class FabricFlagEventDispatcher implements FlagEventDispatcher {
     }
 
     public boolean post(FlagCheckRequest event) {
-        return FabricFlagEvents.CHECK_FLAG.invoker().checkFlag(event);
+        boolean cancelled = FabricFlagEvents.CHECK_FLAG.invoker().checkFlag(event);
+        FlagEvents.ON_FLAG_CHECK.invoke(cb -> cb.checkFlag(event));
+        return cancelled;
     }
 
     @Override
     public FlagCheckResult post(FlagCheckResult result) {
-        return FabricFlagEvents.FLAG_RESULT.invoker().getResult(result);
+        var eventResult = FabricFlagEvents.FLAG_RESULT.invoker().getResult(result);
+        FlagEvents.ON_FLAG_RESULT.invoke(cb -> cb.getResult(eventResult));
+        return eventResult;
     }
 }

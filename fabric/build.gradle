@@ -12,6 +12,18 @@ dependencies {
     api "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${fcap_version}"
 }
 
+fabricApi {
+    configureTests {
+        createSourceSet = true
+        modId = "${mod_id}_gametest"
+        enableGameTests = true
+        enableClientGameTests = false
+        eula = true
+    }
+}
+
+sourceSets.gametest.java.srcDir(project(':common').file('src/gametest/java'))
+
 loom {
     def aw = project(':common').file("src/main/resources/${mod_id}.accesswidener")
     if (aw.exists()) {

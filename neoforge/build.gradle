@@ -7,6 +7,14 @@ dependencies {
     api "fuzs.forgeconfigapiport:forgeconfigapiport-neoforge:${fcap_version}"
 }
 
+sourceSets {
+    gametest {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output
+        java.srcDir(project(':common').file('src/gametest/java'))
+    }
+}
+
 neoForge {
     version = neoforge_version
     // Automatically enable neoforge AccessTransformers if the file exists
@@ -25,6 +33,11 @@ neoForge {
         data {
             clientData()
         }
+        gameTestServer {
+            type = 'gameTestServer'
+            gameDirectory = project.file('runs/gametest')
+            systemProperty('neoforge.enabledGameTestNamespaces', mod_id)
+        }
         server {
             server()
         }
@@ -32,8 +45,11 @@ neoForge {
     mods {
         "${mod_id}" {
             sourceSet sourceSets.main
+            sourceSet sourceSets.gametest
         }
     }
 }
+
+neoForge.addModdingDependenciesTo(sourceSets.gametest)
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
