@@ -2,6 +2,8 @@ name: PR CI
 
 on:
   pull_request:
+  push:
+    branches: ['multi/**']
 
 permissions:
   contents: read
@@ -30,6 +32,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
         with:
           cache-provider: basic
+          cache-read-only: ${{ !(github.ref_name == github.event.repository.default_branch || startsWith(github.ref_name, 'multi/')) }}
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
