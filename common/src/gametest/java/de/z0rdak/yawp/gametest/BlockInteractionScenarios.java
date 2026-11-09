@@ -39,4 +39,19 @@ public final class BlockInteractionScenarios {
         }
         helper.succeed();
     }
+
+    public static void blockInHand_placeBlocksAllowed_placesBlock(GameTestHelper helper) {
+        var target = new BlockPos(3, 2, 3);
+        helper.setBlock(target, Blocks.STONE);
+        try (TestArea _ = TestArea.around(helper).allow(RegionFlag.PLACE_BLOCKS).create()) {
+            var player = GameTestUtils.makeMockServerPlayer(helper);
+            FlagRecorder.FlagLog log = FlagRecorder.watch(player);
+
+            GameTestUtils.click(helper, player, Items.STONE, false, target, Direction.UP);
+
+            helper.assertTrue(log.wasAllowed(RegionFlag.PLACE_BLOCKS), "place-blocks should be allowed, was " + log.describe());
+            helper.assertBlockPresent(Blocks.STONE, target.above());
+        }
+        helper.succeed();
+    }
 }

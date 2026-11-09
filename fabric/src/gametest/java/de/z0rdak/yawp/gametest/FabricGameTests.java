@@ -13,4 +13,9 @@ public class FabricGameTests {
     public void blockInHand_placeBlocksDenied_doesNotPlaceBlock(GameTestHelper helper) {
         BlockInteractionScenarios.blockInHand_placeBlocksDenied_doesNotPlaceBlock(helper);
     }
+
+    @GameTest
+    public void blockInHand_placeBlocksAllowed_placesBlock(GameTestHelper helper) {
+        BlockInteractionScenarios.blockInHand_placeBlocksAllowed_placesBlock(helper);
+    }
 }

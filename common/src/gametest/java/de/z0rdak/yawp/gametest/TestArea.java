@@ -56,6 +56,13 @@ public class TestArea implements AutoCloseable {
         return this;
     }
 
+    public TestArea allow(RegionFlag... flags) {
+        for (RegionFlag flag : flags) {
+            this.region.addFlag(new BooleanFlag(flag, FlagState.ALLOWED, false));
+        }
+        return this;
+    }
+
     /**
      * Creates the region in the level.
      * If a region with the same name already exists, it will be removed first.

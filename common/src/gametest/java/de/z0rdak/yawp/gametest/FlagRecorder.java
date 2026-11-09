@@ -94,6 +94,10 @@ final class FlagRecorder {
             return resultFor(flag).map(r -> r.getFlagState() == FlagState.DENIED).orElse(false);
         }
 
+        boolean wasAllowed(RegionFlag flag) {
+            return resultFor(flag).map(r -> r.getFlagState() == FlagState.ALLOWED).orElse(false);
+        }
+
         /** Readable summary for assertion messages, e.g. "[use-blocks=ALLOWED, place-blocks=DENIED]" */
         String describe() {
             return results().stream()
